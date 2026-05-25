@@ -16,12 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from config.views import health_check
+from config.views import health_check, db_debug
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('health/', health_check, name='health_check'),
     path('api/health/', health_check, name='api_health_check'),
+    path('api/db-debug/', db_debug, name='db_debug'),
     
     # API App Routes
     path('api/', include('users.urls')),

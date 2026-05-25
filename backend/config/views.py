@@ -1,5 +1,8 @@
+import os
 from django.http import JsonResponse
 from django.utils import timezone
+from django.db import connection
+from django.conf import settings
 
 def health_check(request):
     """
@@ -12,3 +15,31 @@ def health_check(request):
             'timestamp': timezone.now().isoformat()
         }
     })
+
+def db_debug(request):
+    """
+    Diagnostic endpoint to verify database engine and connectivity.
+    """
+    try:
+        engine = settings.DATABASES['default']['ENGINE']
+        db_url = os.environ.get('DATABASE_URL')
+        
+        # Test connection by executing a simple query
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            row = cursor.fetchone()
+            
+        return JsonResponse({
+            'success': True,
+            'engine': engine,
+            'connection_test': 'SUCCESS' if row else 'FAILED',
+            'database_url_configured': bool(db_url)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'engine': settings.DATABASES['default']['ENGINE'],
+            'connection_test': 'FAILED',
+            'error': str(e),
+            'database_url_configured': bool(os.environ.get('DATABASE_URL'))
+        })
