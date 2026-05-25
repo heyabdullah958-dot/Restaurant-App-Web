@@ -3,3 +3,18 @@
 .netlify_root_backup/
 .wrangler/
 
+# Python Virtual Environments
+venv/
+**/venv/
+__pycache__/
+*.pyc
+
+# Node Dependency Directory
+node_modules/
+**/node_modules/
+
+# Logs and environment variables
+*.log
+.env
+.env.*
+.env.local
