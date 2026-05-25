@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SEEN — Kiya س Hain? | Authentic Desi BBQ & Handi, Johar Town Lahore</title>
+  <meta name="description" content="SEEN restaurant — Lahore's authentic Desi BBQ & Handi. Flame-grilled seekh kabab, handi, tikka. Open 1PM–2AM daily. Allah Ho Chowk, Johar Town, Lahore. Order COD."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #6B2D8B;
+      --purple-deep: #3D1259;
+      --purple-light: #9B4DC0;
+      --maroon: #2A0A3D;
+      --gold: #D4A853;
+      --white: #FFFFFF;
+      --off-white: #F5F0FF;
+      --text-muted: rgba(255,255,255,0.62);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', sans-serif; background: #0D0415; color: var(--white); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(13,4,21,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(107,45,139,0.25);
+      transition: all 0.3s;
+    }
+    .nav-logo {
+      font-size: 26px; font-weight: 900; color: var(--white);
+      letter-spacing: 4px; text-transform: uppercase;
+    }
+    .nav-logo .seen-letter {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--purple-light); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple), var(--purple-deep));
+      color: white; padding: 10px 24px; border-radius: 6px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      border: 1px solid rgba(155,77,192,0.4);
+      box-shadow: 0 6px 20px rgba(107,45,139,0.4);
+      transition: all 0.3s;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(107,45,139,0.6); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #0D0415 0%, #1A0830 35%, #2A0A3D 60%, #3D1259 100%);
+      display: flex; align-items: center;
+      padding: 130px 5% 90px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Orbs */
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(107,45,139,0.25); top: -100px; right: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: rgba(155,77,192,0.15); bottom: 50px; left: -50px; }
+    .orb-3 { width: 200px; height: 200px; background: rgba(212,168,83,0.1); top: 40%; right: 20%; }
+
+    .hero-content { max-width: 580px; z-index: 2; position: relative; }
+
+    /* Big Urdu letter */
+    .hero-urdu {
+      font-size: clamp(80px, 14vw, 160px);
+      line-height: 1;
+      background: linear-gradient(135deg, var(--purple-light) 0%, var(--gold) 50%, var(--purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+      display: block;
+      filter: drop-shadow(0 0 40px rgba(107,45,139,0.5));
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(107,45,139,0.2); border: 1px solid rgba(107,45,139,0.4);
+      color: var(--purple-light); font-size: 11px; font-weight: 700;
+      padding: 6px 16px; border-radius: 4px;
+      margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .hero-title {
+      font-size: clamp(36px, 5.5vw, 64px);
+      font-weight: 900; line-height: 1.08;
+      margin-bottom: 18px; letter-spacing: -0.5px;
+    }
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--purple-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 16px; color: var(--text-muted);
+      line-height: 1.75; margin-bottom: 36px; font-weight: 300;
+    }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-purple {
+      background: linear-gradient(135deg, var(--purple), #8B35B8);
+      color: white; padding: 15px 34px; border-radius: 6px;
+      font-size: 14px; font-weight: 700; text-decoration: none;
+      box-shadow: 0 10px 30px rgba(107,45,139,0.4);
+      transition: all 0.3s;
+    }
+    .btn-purple:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(107,45,139,0.6); }
+    .btn-ghost {
+      border: 1.5px solid rgba(255,255,255,0.25); color: white;
+      padding: 13px 30px; border-radius: 6px;
+      font-size: 14px; font-weight: 600; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-ghost:hover { border-color: var(--purple-light); color: var(--purple-light); }
+
+    .open-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 30px; padding: 10px 20px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .open-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE80; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    .open-pill strong { color: var(--white); }
+
+    /* ── TAGLINE MARQUEE ── */
+    .marquee-wrap {
+      background: linear-gradient(135deg, var(--purple-deep), var(--purple));
+      padding: 14px 0; overflow: hidden;
+      border-top: 1px solid rgba(107,45,139,0.3);
+      border-bottom: 1px solid rgba(107,45,139,0.3);
+    }
+    .marquee-track {
+      display: flex; gap: 0; white-space: nowrap;
+      animation: scroll-marquee 18s linear infinite;
+    }
+    .marquee-item {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 0 32px; font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.75); letter-spacing: 1px;
+    }
+    .marquee-dot { color: var(--gold); font-size: 20px; }
+    @keyframes scroll-marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── MENU ── */
+    .section { padding: 90px 5%; }
+    .section-dark { background: #0D0415; }
+    .section-deeper { background: #080010; }
+
+    /* Menu Tabs */
+    .menu-tabs {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px;
+      justify-content: center;
+    }
+    .menu-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(107, 45, 139, 0.25);
+      padding: 10px 24px; border-radius: 30px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.3s;
+    }
+    .menu-tab:hover, .menu-tab.active {
+      background: var(--purple-light); color: white;
+      border-color: var(--purple-light);
+      box-shadow: 0 4px 15px rgba(155, 77, 192, 0.4);
+    }
+
+    .section-eye {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--purple-light); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px;
+    }
+    .section-eye::before { content: ''; display: block; width: 24px; height: 1.5px; background: var(--purple-light); }
+
+    .section-h {
+      font-size: clamp(26px, 4vw, 44px); font-weight: 800;
+      line-height: 1.1; margin-bottom: 14px;
+    }
+    .section-h .glow {
+      background: linear-gradient(135deg, var(--purple-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section-p { font-size: 15px; color: var(--text-muted); line-height: 1.75; max-width: 520px; margin-bottom: 52px; font-weight: 300; }
+
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
+    .menu-card {
+      background: linear-gradient(145deg, rgba(107,45,139,0.12), rgba(61,18,89,0.08));
+      border: 1px solid rgba(107,45,139,0.2); border-radius: 16px;
+      overflow: hidden; transition: all 0.35s;
+    }
+    .menu-card:hover { transform: translateY(-7px); border-color: rgba(107,45,139,0.5); box-shadow: 0 24px 60px rgba(107,45,139,0.2); }
+    .menu-img {
+      height: 180px; display: flex; align-items: center; justify-content: center;
+      font-size: 64px; position: relative;
+    }
+    .mi-1 { background: linear-gradient(135deg, #1A0830, #3D1259); }
+    .mi-2 { background: linear-gradient(135deg, #0D0415, #2A0A3D); }
+    .mi-3 { background: linear-gradient(135deg, #150520, #4A1870); }
+    .menu-body { padding: 20px; }
+    .menu-name { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .menu-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6; }
+    .menu-foot { display: flex; justify-content: space-between; align-items: center; }
+    .menu-price { font-size: 19px; font-weight: 800; color: var(--gold); }
+    .order-chip {
+      background: rgba(107,45,139,0.25); border: 1px solid rgba(107,45,139,0.4);
+      color: var(--purple-light); padding: 7px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: 'Poppins', sans-serif; transition: all 0.3s;
+    }
+    .order-chip:hover { background: var(--purple); color: white; }
+
+    /* ── LOCATION + HOURS ── */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .info-card {
+      background: rgba(107,45,139,0.08); border: 1px solid rgba(107,45,139,0.2);
+      border-radius: 16px; padding: 32px;
+    }
+    .info-card h4 {
+      font-size: 18px; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px; color: var(--white);
+    }
+    .info-card p { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+    .info-card strong { color: var(--white); }
+    .hours-badge {
+      display: inline-block; margin-top: 12px;
+      background: rgba(107,45,139,0.3); border: 1px solid rgba(107,45,139,0.4);
+      color: var(--purple-light); padding: 8px 16px; border-radius: 6px;
+      font-size: 13px; font-weight: 700;
+    }
+    .phone-link {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white; padding: 10px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .phone-link:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(37,211,102,0.3); }
+
+    /* ── COD ORDER FORM ── */
+    .order-wrap { max-width: 580px; margin: 0 auto; }
+    .order-card {
+      background: linear-gradient(145deg, rgba(107,45,139,0.15), rgba(61,18,89,0.1));
+      border: 1px solid rgba(107,45,139,0.25); border-radius: 20px; padding: 48px;
+    }
+    .order-title { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+    .order-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; font-weight: 300; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row-full { margin-top: 14px; }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--purple-light); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .form-input, .form-textarea {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(107,45,139,0.25);
+      color: white; padding: 12px 16px; border-radius: 8px;
+      font-family: 'Poppins', sans-serif; font-size: 14px; outline: none;
+      transition: all 0.3s;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--purple-light); background: rgba(107,45,139,0.12); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .cod-note {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(212,168,83,0.08); border: 1px solid rgba(212,168,83,0.2);
+      border-radius: 8px; padding: 12px 16px; margin: 16px 0;
+      font-size: 13px; color: rgba(255,255,255,0.7);
+    }
+    .cod-note strong { color: var(--gold); }
+    .submit-btn {
+      width: 100%; padding: 17px;
+      background: linear-gradient(135deg, var(--purple), #8B35B8);
+      color: white; border: none; border-radius: 8px;
+      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 10px 30px rgba(107,45,139,0.4);
+      transition: all 0.3s;
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(107,45,139,0.6); }
+
+    /* ── INSTAGRAM LINK ── */
+    .ig-bar {
+      background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+      padding: 1px;
+      border-radius: 12px;
+      margin-top: 40px;
+      display: inline-block;
+    }
+    .ig-inner {
+      background: #0D0415; border-radius: 11px;
+      padding: 16px 28px;
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: white;
+      font-size: 14px; font-weight: 600;
+      transition: all 0.3s;
+    }
+    .ig-inner:hover { background: rgba(13,4,21,0.8); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #050010; border-top: 1px solid rgba(107,45,139,0.15);
+      padding: 36px 5%;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    }
+    .footer-brand { font-size: 22px; font-weight: 900; letter-spacing: 4px; }
+    .footer-brand span {
+      background: linear-gradient(135deg, var(--purple-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: rgba(255,255,255,0.35); text-decoration: none; font-size: 13px; transition: color 0.3s; }
+    .footer-links a:hover { color: white; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); }
+
+    @media(max-width:768px){
+      nav { padding: 12px 16px; }
+      .nav-logo { font-size: 20px; letter-spacing: 2px; }
+      .nav-links { display: none; }
+      .nav-cta { padding: 8px 16px; font-size: 11px; }
+      
+      .hero { padding: 100px 16px 60px; min-height: auto; }
+      .hero-content { text-align: center; }
+      .hero-urdu { font-size: 56px; line-height: 1; margin: 0 auto 12px; }
+      .hero-title { font-size: 28px; line-height: 1.15; }
+      .hero-btns { justify-content: center; }
+      
+      .section { padding: 50px 16px; }
+      .info-grid { grid-template-columns: 1fr; gap: 16px; }
+      .info-card { padding: 20px; }
+      
+      .form-row { grid-template-columns: 1fr; }
+      .order-card { padding: 28px 20px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-logo"><span class="seen-letter">SEEN</span></div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#order">Order</a></li>
+    </ul>
+    <a href="#order" class="nav-cta">Order Now — COD</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-content">
+      <span class="hero-urdu">س</span>
+      <div class="hero-tag">📍 Allah Ho Chowk · Johar Town, Lahore</div>
+      <h1 class="hero-title">
+        Kiya <span class="highlight">س</span> Hain?<br/>
+        Authentic Desi<br/>BBQ & Handi
+      </h1>
+      <p class="hero-sub">
+        Lahore ki asli BBQ ka maza — charcoal par seekh kabab, juicy tikka aur slow-cooked handi. 
+        Woh flavor jo sirf SEEN pe milta hai.
+      </p>
+      <div class="hero-btns">
+        <a href="#order" class="btn-purple">🛵 Order Now — COD</a>
+        <a href="#menu" class="btn-ghost">📋 View Menu</a>
+      </div>
+      <div class="open-pill">
+        <div class="open-dot"></div>
+        <span>Open Now &nbsp;·&nbsp; <strong>1:00 PM — 2:00 AM</strong> &nbsp;·&nbsp; 7 Days a Week</span>
+      </div>
+
+      <div style="margin-top:24px">
+        <div class="ig-bar">
+          <a href="https://instagram.com/seenbanao" target="_blank" class="ig-inner">
+            📸 Follow on Instagram &nbsp;<strong>@seenbanao</strong>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Seekh Kabab</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Chicken Tikka</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Beef Boti</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Desi Handi</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Malai Boti</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Karahi</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Cash on Delivery</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Johar Town Lahore</span>
+      <!-- duplicate for loop -->
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Seekh Kabab</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Chicken Tikka</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Beef Boti</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Desi Handi</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Malai Boti</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Karahi</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Cash on Delivery</span>
+      <span class="marquee-item"><span class="marquee-dot">✦</span> Johar Town Lahore</span>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <section class="section section-dark" id="menu">
+    <div class="section-eye">Menu</div>
+    <h2 class="section-h">Hamara <span class="glow">Mukammal Menu</span></h2>
+    <p class="section-p">Apni pasand ki category select karein aur hamare lazeez aur authentic items ka maza lein.</p>
+    
+    <div class="menu-tabs">
+      <div class="menu-tab active" onclick="filterMenu('all', this)">All</div>
+      <div class="menu-tab" onclick="filterMenu('starters', this)">Starters</div>
+      <div class="menu-tab" onclick="filterMenu('k-rolls', this)">K Rolls</div>
+      <div class="menu-tab" onclick="filterMenu('p-rolls', this)">P Rolls</div>
+      <div class="menu-tab" onclick="filterMenu('p-slices', this)">P Slices</div>
+      <div class="menu-tab" onclick="filterMenu('seen-bowls', this)">Seen Bowls</div>
+      <div class="menu-tab" onclick="filterMenu('bbq-special', this)">BBQ Special</div>
+      <div class="menu-tab" onclick="filterMenu('drinks', this)">Drinks</div>
+      <div class="menu-tab" onclick="filterMenu('add-ons', this)">Add Ons</div>
+    </div>
+
+    <div class="menu-grid" id="menu-grid-container">
+       <!-- STARTERS -->
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-1">🍟</div>
+         <div class="menu-body">
+           <div class="menu-name">Fries</div>
+           <div class="menu-desc">Classic crispy golden french fries</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 250</div>
+             <button class="order-chip" onclick="selectItemForOrder('Fries')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-2">🍟</div>
+         <div class="menu-body">
+           <div class="menu-name">Bucket Fries</div>
+           <div class="menu-desc">Mega bucket of crispy golden french fries for the family</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 450</div>
+             <button class="order-chip" onclick="selectItemForOrder('Bucket Fries')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-3">🍟</div>
+         <div class="menu-body">
+           <div class="menu-name">BBQ Loaded Fries</div>
+           <div class="menu-desc">Fries smothered with melted cheese and smoky grilled BBQ chicken</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 750</div>
+             <button class="order-chip" onclick="selectItemForOrder('BBQ Loaded Fries')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-1">🍗</div>
+         <div class="menu-body">
+           <div class="menu-name">BBQ Grill Tenders (4pcs)</div>
+           <div class="menu-desc">Soft chicken tenders flame-grilled on charcoal skewers</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 450</div>
+             <button class="order-chip" onclick="selectItemForOrder('BBQ Grill Tenders (4pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-2">🍗</div>
+         <div class="menu-body">
+           <div class="menu-name">Nablets (6pcs)</div>
+           <div class="menu-desc">Deep fried breaded chicken nuggets with a crispy bite</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 520</div>
+             <button class="order-chip" onclick="selectItemForOrder('Nablets (6pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-3">🍗</div>
+         <div class="menu-body">
+           <div class="menu-name">Butter Nablets (6pcs)</div>
+           <div class="menu-desc">Crispy nuggets tossed in rich, creamy butter coating</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 650</div>
+             <button class="order-chip" onclick="selectItemForOrder('Butter Nablets (6pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-1">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Butter Kabab (4pcs)</div>
+           <div class="menu-desc">Flame grilled kababs tossed in dynamic melted butter sauce</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 999</div>
+             <button class="order-chip" onclick="selectItemForOrder('Butter Kabab (4pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="starters">
+         <div class="menu-img mi-2">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Butter Malai Boti (5pcs)</div>
+           <div class="menu-desc">Creamy malai boti pieces drenched in hot melted butter</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 650</div>
+             <button class="order-chip" onclick="selectItemForOrder('Butter Malai Boti (5pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- K ROLLS -->
+       <div class="menu-card" data-category="k-rolls">
+         <div class="menu-img mi-3">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Brotien Kabab Roll Beef</div>
+           <div class="menu-desc">High-protein beef kabab rolled in thin soft flatbread</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 650</div>
+             <button class="order-chip" onclick="selectItemForOrder('Brotien Kabab Roll Beef')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- P ROLLS -->
+       <div class="menu-card" data-category="p-rolls">
+         <div class="menu-img mi-1">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Chicken Paratha Roll</div>
+           <div class="menu-desc">Juicy chicken tikka botis rolled inside a crispy golden paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 450</div>
+             <button class="order-chip" onclick="selectItemForOrder('Chicken Paratha Roll')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="p-rolls">
+         <div class="menu-img mi-2">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Malai Boti Paratha Roll</div>
+           <div class="menu-desc">Creamy, melt-in-mouth chicken malai boti rolled in paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 520</div>
+             <button class="order-chip" onclick="selectItemForOrder('Malai Boti Paratha Roll')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="p-rolls">
+         <div class="menu-img mi-3">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Shish Taouk Paratha Roll</div>
+           <div class="menu-desc">Turkish shish taouk grilled chicken skewers in fresh paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 990</div>
+             <button class="order-chip" onclick="selectItemForOrder('Shish Taouk Paratha Roll')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="p-rolls">
+         <div class="menu-img mi-1">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Chicken Kabab Roll</div>
+           <div class="menu-desc">Grilled chicken seekh kabab rolled inside hot paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 400</div>
+             <button class="order-chip" onclick="selectItemForOrder('Chicken Kabab Roll')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="p-rolls">
+         <div class="menu-img mi-2">🌯</div>
+         <div class="menu-body">
+           <div class="menu-name">Adana Kabab Roll</div>
+           <div class="menu-desc">Spiced Turkish Adana kabab rolled inside crispy paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 990</div>
+             <button class="order-chip" onclick="selectItemForOrder('Adana Kabab Roll')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- P SLICES -->
+       <div class="menu-card" data-category="p-slices">
+         <div class="menu-img mi-3">🌮</div>
+         <div class="menu-body">
+           <div class="menu-name">Chicken Slices</div>
+           <div class="menu-desc">Succulent chicken slices served with signature spicy dips</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 590</div>
+             <button class="order-chip" onclick="selectItemForOrder('Chicken Slices')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="p-slices">
+         <div class="menu-img mi-1">🌮</div>
+         <div class="menu-body">
+           <div class="menu-name">Malai Boti Slices</div>
+           <div class="menu-desc">Creamy malai boti chicken sliced inside premium soft bread</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 690</div>
+             <button class="order-chip" onclick="selectItemForOrder('Malai Boti Slices')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- SEEN BOWLS -->
+       <div class="menu-card" data-category="seen-bowls">
+         <div class="menu-img mi-2">🍚</div>
+         <div class="menu-body">
+           <div class="menu-name">Rice with Adana Kabab (Solo)</div>
+           <div class="menu-desc">Savory butter rice topped with 1pc spiced Adana kabab</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 550</div>
+             <button class="order-chip" onclick="selectItemForOrder('Rice with Adana Kabab (1pc)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="seen-bowls">
+         <div class="menu-img mi-3">🍚</div>
+         <div class="menu-body">
+           <div class="menu-name">Rice with Shish Taouk (Solo)</div>
+           <div class="menu-desc">Butter rice bowl served with 2pcs Turkish Shish Taouk chicken</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 600</div>
+             <button class="order-chip" onclick="selectItemForOrder('Rice with Shish Taouk (2pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="seen-bowls">
+         <div class="menu-img mi-1">🍚</div>
+         <div class="menu-body">
+           <div class="menu-name">Rice with Adana Kabab (Combo)</div>
+           <div class="menu-desc">Butter rice platter served with 2pcs authentic Adana kabab</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 900</div>
+             <button class="order-chip" onclick="selectItemForOrder('Rice with Adana Kabab (2pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="seen-bowls">
+         <div class="menu-img mi-2">🍚</div>
+         <div class="menu-body">
+           <div class="menu-name">Rice with Shish Taouk (Combo)</div>
+           <div class="menu-desc">Butter rice platter served with 4pcs Shish Taouk grilled chicken</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 950</div>
+             <button class="order-chip" onclick="selectItemForOrder('Rice with Shish Taouk (4pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- BBQ SPECIAL -->
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-3">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Kabab (4pcs)</div>
+           <div class="menu-desc">Classic chicken seekh kababs charcoal grilled to perfection</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 650</div>
+             <button class="order-chip" onclick="selectItemForOrder('Kabab (4pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-1">🍗</div>
+         <div class="menu-body">
+           <div class="menu-name">Tikka (5pcs)</div>
+           <div class="menu-desc">Juicy traditional chicken tikka botis grilled on hot coals</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 490</div>
+             <button class="order-chip" onclick="selectItemForOrder('Tikka (5pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-2">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Malai Boti (5pcs)</div>
+           <div class="menu-desc">Creamy and melt-in-mouth chicken malai boti pieces</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 550</div>
+             <button class="order-chip" onclick="selectItemForOrder('Malai Boti (5pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-3">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Shish Taouk (5pcs)</div>
+           <div class="menu-desc">Spicy marinated Turkish style grilled chicken skewers</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 800</div>
+             <button class="order-chip" onclick="selectItemForOrder('Shish Taouk (5pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-1">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Shish Taouk Abiad (5pcs)</div>
+           <div class="menu-desc">White spice marinade shish taouk for a unique creamy flavor</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 900</div>
+             <button class="order-chip" onclick="selectItemForOrder('Shish Taouk Abiad (5pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="bbq-special">
+         <div class="menu-img mi-2">🍢</div>
+         <div class="menu-body">
+           <div class="menu-name">Beef Adana Kabab (4pcs)</div>
+           <div class="menu-desc">Spiced, hand-minced beef Adana kabab prepared Turkish style</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 1,050</div>
+             <button class="order-chip" onclick="selectItemForOrder('Beef Adana Kabab (4pcs)')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- DRINKS -->
+       <div class="menu-card" data-category="drinks">
+         <div class="menu-img mi-3">🥤</div>
+         <div class="menu-body">
+           <div class="menu-name">Water</div>
+           <div class="menu-desc">Chilled mineral water</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 80</div>
+             <button class="order-chip" onclick="selectItemForOrder('Water')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="drinks">
+         <div class="menu-img mi-1">🥤</div>
+         <div class="menu-body">
+           <div class="menu-name">Soft Drinks</div>
+           <div class="menu-desc">Coke, Sprite, Fanta or Dew</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 120</div>
+             <button class="order-chip" onclick="selectItemForOrder('Soft Drinks')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="drinks">
+         <div class="menu-img mi-2">🥤</div>
+         <div class="menu-body">
+           <div class="menu-name">Seen Special Flavor Drink</div>
+           <div class="menu-desc">Refreshing house-blend flavored special mocktail</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 250</div>
+             <button class="order-chip" onclick="selectItemForOrder('Seen Special Flavor Drink')">Order</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- ADD ONS -->
+       <div class="menu-card" data-category="add-ons">
+         <div class="menu-img mi-3">🫓</div>
+         <div class="menu-body">
+           <div class="menu-name">Puri Paratha</div>
+           <div class="menu-desc">Flaky and crispy deep fried puri paratha</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 150</div>
+             <button class="order-chip" onclick="selectItemForOrder('Puri Paratha')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="add-ons">
+         <div class="menu-img mi-1">🏺</div>
+         <div class="menu-body">
+           <div class="menu-name">Dips</div>
+           <div class="menu-desc">Signature garlic sauce or raita cup</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 80</div>
+             <button class="order-chip" onclick="selectItemForOrder('Dips')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="add-ons">
+         <div class="menu-img mi-2">🍚</div>
+         <div class="menu-body">
+           <div class="menu-name">Rice</div>
+           <div class="menu-desc">Extra portion of aromatic butter rice</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 200</div>
+             <button class="order-chip" onclick="selectItemForOrder('Rice')">Order</button>
+           </div>
+         </div>
+       </div>
+       <div class="menu-card" data-category="add-ons">
+         <div class="menu-img mi-3">🧀</div>
+         <div class="menu-body">
+           <div class="menu-name">Cheese Slice</div>
+           <div class="menu-desc">Melted cheddar cheese slice add-on</div>
+           <div class="menu-foot">
+             <div class="menu-price">Rs. 100</div>
+             <button class="order-chip" onclick="selectItemForOrder('Cheese Slice')">Order</button>
+           </div>
+         </div>
+       </div>
+    </div>
+  </section>
+
+  <!-- LOCATION & HOURS -->
+  <section class="section section-deeper" id="location">
+    <div class="section-eye">Find Us</div>
+    <h2 class="section-h" style="margin-bottom:40px">Location & <span class="glow">Hours</span></h2>
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>📍 Our Location</h4>
+        <p>
+          <strong>Allah Ho Chowk, near Sweet Cream</strong><br/>
+          Johar Town, Lahore, Pakistan
+        </p>
+        <a href="https://maps.google.com/?q=Allah+Ho+Chowk+Johar+Town+Lahore" target="_blank" class="phone-link" style="background:linear-gradient(135deg,var(--purple),#8B35B8);margin-top:14px">
+          🗺️ Open in Google Maps
+        </a>
+      </div>
+      <div class="info-card">
+        <h4>⏰ Opening Hours</h4>
+        <p><strong>Monday – Sunday</strong><br/>Open 7 days a week</p>
+        <div class="hours-badge">🕐 1:00 PM — 2:00 AM</div>
+        <br/><br/>
+        <a href="tel:+923019899619" class="phone-link">
+          📞 +92 301 9899619
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER FORM -->
+  <section class="section section-dark" id="order">
+    <div class="order-wrap">
+      <div class="order-card">
+        <h2 class="order-title">Order Karo 🛵</h2>
+        <p class="order-sub">Form fill karo — hum 5 minute mein WhatsApp pe confirm karenge.</p>
+        <form action="https://formspree.io/f/seenbanao" method="POST">
+          <div class="form-row">
+            <div>
+              <label class="form-label">Apna Naam</label>
+              <input type="text" name="name" class="form-input" placeholder="Ali Khan" required/>
+            </div>
+            <div>
+              <label class="form-label">Phone (WhatsApp)</label>
+              <input type="tel" name="phone" class="form-input" placeholder="03XX-XXXXXXX" required/>
+            </div>
+          </div>
+          <div class="form-row-full">
+            <label class="form-label">Delivery Address</label>
+            <input type="text" name="address" class="form-input" placeholder="Ghar ka address, Lahore" required/>
+          </div>
+          <div class="form-row-full" style="margin-top:14px">
+            <label class="form-label">Apna Order</label>
+            <textarea name="order" class="form-textarea" placeholder="e.g. 1x Mix BBQ Platter, 2x Chicken Handi, 4x Naan..." required></textarea>
+          </div>
+          <div class="form-row-full" style="margin-top:14px">
+            <label class="form-label">Special Instructions (Optional)</label>
+            <textarea name="note" class="form-textarea" placeholder="Extra raita, kam masala..." style="min-height:60px"></textarea>
+          </div>
+          <div class="cod-note">
+            💵 <span>Payment: <strong>Cash on Delivery (COD)</strong> — Order milne par pay karo</span>
+          </div>
+          <button type="submit" class="submit-btn">✅ Order Confirm Karo</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand"><span>SEEN</span></div>
+    <div class="footer-links">
+      <a href="#home">Home</a>
+      <a href="#menu">Menu</a>
+      <a href="#location">Location</a>
+      <a href="#order">Order</a>
+      <a href="https://instagram.com/seenbanao" target="_blank">Instagram</a>
+    </div>
+    <div class="footer-copy">© 2025 SEEN. Allah Ho Chowk, Johar Town, Lahore.</div>
+  </footer>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').style.borderBottomColor =
+        window.scrollY > 60 ? 'rgba(107,45,139,0.4)' : 'rgba(107,45,139,0.25)';
+    });
+
+    function filterMenu(category, element) {
+      // Toggle active class on tabs
+      document.querySelectorAll('.menu-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      element.classList.add('active');
+
+      // Filter cards
+      const cards = document.querySelectorAll('.menu-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function selectItemForOrder(name) {
+      const textarea = document.querySelector('textarea[name="order"]');
+      if (textarea) {
+        if (textarea.value.trim() === "") {
+          textarea.value = `1x ${name}`;
+        } else if (!textarea.value.includes(name)) {
+          textarea.value += `, 1x ${name}`;
+        }
+      }
+      document.getElementById('order').scrollIntoView({behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>

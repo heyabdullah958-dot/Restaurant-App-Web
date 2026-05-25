@@ -1,0 +1,8 @@
+{
+  "name": "foodsphere-prototypes",
+  "version": "1.0.0",
+  "description": "FoodSphere unified app prototype and brand websites",
+  "scripts": {
+    "dev": "npx http-server -p 8000"
+  }
+}

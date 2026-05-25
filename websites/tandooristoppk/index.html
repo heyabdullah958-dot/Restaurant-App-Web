@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TANDOORI STOP — Last Stop 📍 | Lahore's Finest Tandoori | PIA Road & Lake City</title>
+  <meta name="description" content="Tandoori Stop — Lahore's premium tandoori restaurant. Fresh naan, tandoori chicken, BBQ platters. 3 branches: Johar Town, Lake City & Pindi. 12.5K+ followers."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --fire1: #FF4500;
+      --fire2: #FF8C00;
+      --fire3: #FFC300;
+      --dark: #0A0500;
+      --dark2: #120800;
+      --charcoal: #1A1000;
+      --white: #FFFFFF;
+      --muted: rgba(255,255,255,0.6);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 14px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10,5,0,0.93); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,69,0,0.2);
+    }
+    .logo-wrap { display: flex; flex-direction: column; }
+    .logo-main { font-size: 18px; font-weight: 900; letter-spacing: 2px; }
+    .logo-main span {
+      background: linear-gradient(90deg, var(--fire1), var(--fire2), var(--fire3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .logo-sub { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 26px; list-style: none; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--fire2); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--fire1), var(--fire2));
+      color: white; padding: 10px 22px; border-radius: 6px;
+      font-size: 13px; font-weight: 800; text-decoration: none;
+      box-shadow: 0 6px 20px rgba(255,69,0,0.35);
+      transition: all 0.3s; letter-spacing: 0.3px;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,69,0,0.5); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 60% 50%, rgba(255,69,0,0.18) 0%, transparent 60%),
+                  linear-gradient(160deg, var(--dark) 0%, var(--dark2) 50%, #1F0A00 100%);
+      display: flex; align-items: center;
+      padding: 120px 5% 80px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Fire particles */
+    .fire-orb {
+      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px);
+      animation: fire-drift 6s ease-in-out infinite;
+    }
+    .fo-1 { width: 400px; height: 400px; background: rgba(255,69,0,0.15); top: 0; right: 0; }
+    .fo-2 { width: 250px; height: 250px; background: rgba(255,140,0,0.12); top: 30%; right: 20%; animation-delay: 2s; }
+    .fo-3 { width: 150px; height: 150px; background: rgba(255,195,0,0.08); bottom: 20%; left: 10%; animation-delay: 4s; }
+    @keyframes fire-drift { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.05)} }
+
+    /* Flame emoji hero */
+    .hero-flame {
+      position: absolute; right: 6%; top: 50%; transform: translateY(-50%);
+      font-size: clamp(120px, 18vw, 200px);
+      filter: drop-shadow(0 0 60px rgba(255,69,0,0.5));
+      animation: flame-flicker 3s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes flame-flicker {
+      0%,100%{transform:translateY(-50%) scale(1) rotate(-3deg)}
+      33%{transform:translateY(-52%) scale(1.03) rotate(2deg)}
+      66%{transform:translateY(-48%) scale(0.98) rotate(-1deg)}
+    }
+
+    .hero-content { max-width: 580px; z-index: 3; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.35);
+      color: var(--fire2); font-size: 11px; font-weight: 800;
+      padding: 6px 16px; border-radius: 4px; margin-bottom: 22px;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .hero-title {
+      font-size: clamp(38px, 6vw, 72px); font-weight: 900;
+      line-height: 1.0; letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .fire-text {
+      background: linear-gradient(135deg, var(--fire1) 0%, var(--fire2) 40%, var(--fire3) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: inline;
+    }
+    .hero-sub { font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 36px; font-weight: 300; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+    .btn-fire {
+      background: linear-gradient(135deg, var(--fire1), var(--fire2));
+      color: white; padding: 15px 34px; border-radius: 6px;
+      font-size: 14px; font-weight: 800; text-decoration: none;
+      box-shadow: 0 10px 30px rgba(255,69,0,0.4); transition: all 0.3s;
+    }
+    .btn-fire:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(255,69,0,0.6); }
+    .btn-ghost {
+      border: 1.5px solid rgba(255,255,255,0.2); color: white;
+      padding: 13px 28px; border-radius: 6px;
+      font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-ghost:hover { border-color: var(--fire2); color: var(--fire2); }
+
+    /* Branches strip */
+    .branches-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .branch-tag {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,69,0,0.2);
+      border-radius: 8px; padding: 10px 16px;
+      font-size: 12px; color: var(--muted);
+    }
+    .branch-tag strong { color: var(--white); font-size: 13px; display: block; }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      background: linear-gradient(90deg, #1F0A00, #2A1000, #1F0A00);
+      padding: 12px 0; overflow: hidden;
+      border-top: 1px solid rgba(255,69,0,0.2);
+      border-bottom: 1px solid rgba(255,69,0,0.2);
+    }
+    .marquee-track { display: flex; animation: marquee 20s linear infinite; white-space: nowrap; }
+    .marquee-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 28px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.65); }
+    .m-dot { color: var(--fire2); }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── MENU SECTION ── */
+    .section { padding: 80px 5%; }
+    .section-dk { background: var(--dark); }
+    .section-dk2 { background: var(--dark2); }
+
+    .eyebrow { color: var(--fire2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px; }
+    .sec-title { font-size: clamp(26px, 4vw, 44px); font-weight: 900; line-height: 1.1; margin-bottom: 12px; }
+    .sec-desc { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 520px; margin-bottom: 48px; font-weight: 300; }
+
+    /* Menu category tabs */
+    .menu-tabs { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; }
+    .menu-tab {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6); padding: 8px 20px; border-radius: 30px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Poppins', sans-serif; transition: all 0.3s;
+    }
+    .menu-tab.active, .menu-tab:hover { background: rgba(255,69,0,0.2); border-color: rgba(255,69,0,0.4); color: var(--fire2); }
+
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .menu-card {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,69,0,0.1);
+      border-radius: 14px; overflow: hidden; transition: all 0.35s;
+    }
+    .menu-card:hover { transform: translateY(-6px); border-color: rgba(255,69,0,0.35); box-shadow: 0 20px 50px rgba(255,69,0,0.12); }
+    .card-img { height: 170px; display: flex; align-items: center; justify-content: center; font-size: 60px; }
+    .ci-1 { background: linear-gradient(135deg, #1F0A00, #3D1500); }
+    .ci-2 { background: linear-gradient(135deg, #120800, #2A0F00); }
+    .ci-3 { background: linear-gradient(135deg, #0A0500, #1F0800); }
+    .ci-4 { background: linear-gradient(135deg, #1A0C00, #321500); }
+    .card-body { padding: 18px; }
+    .card-name { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+    .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; }
+    .card-price { font-size: 18px; font-weight: 800; color: var(--fire2); }
+    .order-btn {
+      background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.3);
+      color: var(--fire1); padding: 7px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: 'Poppins', sans-serif; transition: all 0.3s;
+    }
+    .order-btn:hover { background: var(--fire1); color: white; }
+
+    /* ── NAAN COUNTER ── */
+    .naan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .naan-card {
+      background: linear-gradient(145deg, rgba(255,69,0,0.08), rgba(255,140,0,0.04));
+      border: 1px solid rgba(255,69,0,0.15); border-radius: 12px;
+      padding: 20px; text-align: center; transition: all 0.3s;
+    }
+    .naan-card:hover { border-color: rgba(255,69,0,0.35); transform: translateY(-4px); }
+    .naan-emoji { font-size: 40px; margin-bottom: 10px; }
+    .naan-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .naan-price { font-size: 14px; color: var(--fire2); font-weight: 600; }
+
+    /* ── BRANCHES ── */
+    .branches-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .branch-card {
+      background: rgba(255,69,0,0.06); border: 1px solid rgba(255,69,0,0.18);
+      border-radius: 16px; padding: 28px; transition: all 0.3s;
+    }
+    .branch-card:hover { border-color: rgba(255,69,0,0.4); background: rgba(255,69,0,0.1); }
+    .branch-num {
+      font-size: 36px; font-weight: 900; color: rgba(255,69,0,0.3);
+      margin-bottom: 8px;
+    }
+    .branch-name { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .branch-info { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .call-btn {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white; padding: 9px 18px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s;
+    }
+    .call-btn:hover { transform: translateY(-2px); }
+
+    /* ── ORDER FORM ── */
+    .order-wrap { max-width: 580px; margin: 0 auto; }
+    .order-box {
+      background: rgba(255,69,0,0.06); border: 1px solid rgba(255,69,0,0.2);
+      border-radius: 20px; padding: 48px;
+    }
+    .form-title { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
+    .form-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+    .f-label { font-size: 11px; font-weight: 700; color: var(--fire2); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .f-input, .f-textarea, .f-select {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,69,0,0.2);
+      color: white; padding: 12px 16px; border-radius: 8px;
+      font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; transition: all 0.3s;
+    }
+    .f-input:focus, .f-textarea:focus { border-color: var(--fire1); background: rgba(255,69,0,0.08); }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .f-full { margin-bottom: 14px; }
+    .f-textarea { resize: vertical; min-height: 80px; }
+    .f-select option { background: #1A0800; }
+    .cod-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,195,0,0.08); border: 1px solid rgba(255,195,0,0.2);
+      border-radius: 8px; padding: 12px 16px; margin: 14px 0;
+      font-size: 13px; color: var(--muted);
+    }
+    .cod-row strong { color: var(--fire3); }
+    .submit {
+      width: 100%; padding: 17px;
+      background: linear-gradient(135deg, var(--fire1), var(--fire2));
+      color: white; border: none; border-radius: 8px;
+      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 10px 30px rgba(255,69,0,0.4); transition: all 0.3s;
+    }
+    .submit:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(255,69,0,0.6); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #060300; border-top: 1px solid rgba(255,69,0,0.12);
+      padding: 36px 5%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    }
+    .f-logo { font-size: 16px; font-weight: 900; letter-spacing: 1.5px; }
+    .f-logo span { background: linear-gradient(90deg,var(--fire1),var(--fire3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .f-links { display: flex; gap: 20px; }
+    .f-links a { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 13px; transition: color 0.3s; }
+    .f-links a:hover { color: var(--fire2); }
+    .f-copy { font-size: 12px; color: rgba(255,255,255,0.2); }
+
+    @media(max-width:768px){
+      nav { padding: 14px 16px; }
+      .nav-links { display: none; }
+      
+      .hero { padding: 100px 16px 60px; min-height: auto; }
+      .hero-title { font-size: 28px; line-height: 1.15; }
+      .hero-flame { opacity: 0.2; font-size: 100px; }
+      
+      .section { padding: 50px 16px; }
+      .menu-grid { grid-template-columns: 1fr; }
+      .naan-grid { grid-template-columns: 1fr; }
+      
+      .f-row { grid-template-columns: 1fr; }
+      .order-box { padding: 28px 20px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo-wrap">
+      <div class="logo-main"><span>TANDOORI STOP</span></div>
+      <div class="logo-sub">Last Stop 📍</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#branches">Branches</a></li>
+      <li><a href="#order">Order</a></li>
+    </ul>
+    <a href="#order" class="nav-cta">Order Now</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="fire-orb fo-1"></div>
+    <div class="fire-orb fo-2"></div>
+    <div class="fire-orb fo-3"></div>
+    <div class="hero-flame">🔥</div>
+
+    <div class="hero-content">
+      <div class="hero-badge">🏆 12.5K Followers · 3 Branches</div>
+      <h1 class="hero-title">
+        Lahore Ki<br/>
+        <span class="fire-text">Asli Tandoori</span><br/>
+        — Last Stop 📍
+      </h1>
+      <p class="hero-sub">
+        Fresh tandoor se seedha aapke plate mein — naan, tikka, seekh, karahi. 
+        Woh taste jo baaki jagah nahi milta. Yehi hai TANDOORI STOP.
+      </p>
+      <div class="hero-btns">
+        <a href="#order" class="btn-fire">🔥 Order Now — COD</a>
+        <a href="#branches" class="btn-ghost">📍 Find a Branch</a>
+      </div>
+      <div class="branches-row">
+        <div class="branch-tag">📍 <div><strong>PIA Road, Johar Town</strong>Lahore</div></div>
+        <div class="branch-tag">📍 <div><strong>Lake City</strong>Lahore</div></div>
+        <div class="branch-tag">📍 <div><strong>Pindi Branch</strong>Coming Soon</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-item"><span class="m-dot">🔥</span>Fresh Naan</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Tandoori Chicken</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Seekh Kabab</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Roghni Naan</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Karahi</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>3 Branches</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>12.5K Fans</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Last Stop Lahore</span>
+      <!-- duplicate -->
+      <span class="marquee-item"><span class="m-dot">🔥</span>Fresh Naan</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Tandoori Chicken</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Seekh Kabab</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Roghni Naan</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Karahi</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>3 Branches</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>12.5K Fans</span>
+      <span class="marquee-item"><span class="m-dot">🔥</span>Last Stop Lahore</span>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <section class="section section-dk2" id="menu">
+    <div class="eyebrow">🍽️ Our Menu</div>
+    <h2 class="sec-title">Asli <span style="color:var(--fire2)">Tandoori</span> Items</h2>
+    <p class="sec-desc">Har cheez fresh tandoor mein pakti hai — subah se raat tak. Click on items to add them to your order form below.</p>
+
+    <div class="menu-tabs">
+      <button class="menu-tab active" onclick="filterMenu(this, 'all')">All Items</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'tandoori')">Tandoori & Sajji</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'tawa')">Tawa & Karahi</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'bbq')">BBQ & Rolls</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'platters')">Platters & Addons</button>
+    </div>
+
+    <div class="menu-grid" id="menu-grid-container">
+      <!-- Dynamically populated -->
+    </div>
+
+    <!-- Naan Counter -->
+    <div style="margin-top:60px">
+      <div class="eyebrow" style="margin-bottom:12px">🫓 Naan Counter</div>
+      <h3 style="font-size:26px;font-weight:800;margin-bottom:32px">Fresh from the <span style="color:var(--fire2)">Tandoor</span></h3>
+      <div class="naan-grid">
+        <div class="naan-card" onclick="addToOrderForm('Plain Naan', 40)" style="cursor:pointer">
+          <div class="naan-emoji">🫓</div>
+          <div class="naan-name">Plain Naan</div>
+          <div class="naan-price">Rs. 40</div>
+        </div>
+        <div class="naan-card" onclick="addToOrderForm('Roghni Naan', 200)" style="cursor:pointer">
+          <div class="naan-emoji">🌾</div>
+          <div class="naan-name">Roghni Naan</div>
+          <div class="naan-price">Rs. 200</div>
+        </div>
+        <div class="naan-card" onclick="addToOrderForm('Butter Naan', 350)" style="cursor:pointer">
+          <div class="naan-emoji">🧈</div>
+          <div class="naan-name">Butter Naan</div>
+          <div class="naan-price">Rs. 350</div>
+        </div>
+        <div class="naan-card" onclick="addToOrderForm('Cheese Naan', 500)" style="cursor:pointer">
+          <div class="naan-emoji">🧀</div>
+          <div class="naan-name">Cheese Naan</div>
+          <div class="naan-price">Rs. 500</div>
+        </div>
+        <div class="naan-card" onclick="addToOrderForm('Puri Paratha', 270)" style="cursor:pointer">
+          <div class="naan-emoji">🫓</div>
+          <div class="naan-name">Puri Paratha</div>
+          <div class="naan-price">Rs. 270</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRANCHES -->
+  <section class="section section-dk" id="branches">
+    <div class="eyebrow">📍 Find Us</div>
+    <h2 class="sec-title">Hamare <span style="color:var(--fire2)">3 Branches</span></h2>
+    <p class="sec-desc">Lahore ke har corner mein — aur Rawalpindi mein bhi aa rede hain!</p>
+    <div class="branches-grid">
+      <div class="branch-card">
+        <div class="branch-num">01</div>
+        <div class="branch-name">PIA Road, Johar Town</div>
+        <div class="branch-info">📍 PIA Road, Johar Town, Lahore<br/>📞 Available on WhatsApp<br/>⏰ Open Daily</div>
+        <a href="https://wa.me/923001234567" class="call-btn">💬 WhatsApp Order</a>
+      </div>
+      <div class="branch-card">
+        <div class="branch-num">02</div>
+        <div class="branch-name">Lake City, Lahore</div>
+        <div class="branch-info">📍 Lake City, Lahore<br/>📞 Available on WhatsApp<br/>⏰ Open Daily</div>
+        <a href="https://wa.me/923001234567" class="call-btn">💬 WhatsApp Order</a>
+      </div>
+      <div class="branch-card" style="border-color:rgba(255,195,0,0.25);background:rgba(255,195,0,0.05)">
+        <div class="branch-num" style="color:rgba(255,195,0,0.3)">03</div>
+        <div class="branch-name">Rawalpindi 🆕</div>
+        <div class="branch-info">📍 Rawalpindi — Coming Soon!<br/>🎉 Follow @tandooristoppk<br/>for launch updates</div>
+        <a href="https://instagram.com/tandooristoppk" target="_blank" class="call-btn" style="background:linear-gradient(135deg,#833AB4,#FCAF45)">
+          📸 Follow for Update
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER FORM -->
+  <section class="section section-dk2" id="order">
+    <div class="order-wrap">
+      <div class="order-box">
+        <h2 class="form-title">🔥 Order Karo</h2>
+        <p class="form-sub">Form fill karo — 5 minute mein confirmation aayegi.</p>
+        <form action="https://formspree.io/f/tandooristopp" method="POST">
+          <div class="f-row">
+            <div><label class="f-label">Naam</label><input type="text" name="name" class="f-input" placeholder="Aapka naam" required/></div>
+            <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
+          </div>
+          <div class="f-row">
+            <div>
+              <label class="f-label">Branch Choose Karo</label>
+              <select name="branch" class="f-input f-select">
+                <option>PIA Road, Johar Town</option>
+                <option>Lake City</option>
+              </select>
+            </div>
+            <div>
+              <label class="f-label">Payment Method</label>
+              <select name="payment" class="f-input f-select" readonly>
+                <option>Cash on Delivery (COD)</option>
+              </select>
+            </div>
+          </div>
+          <div class="f-full">
+            <label class="f-label">Delivery Address</label>
+            <input type="text" name="address" class="f-input" placeholder="Ghar ka pura address" required/>
+          </div>
+          <div class="f-full">
+            <label class="f-label">Apna Order</label>
+            <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Tandoori Chicken, 2x Seekh Kabab, 4x Naan..." required></textarea>
+          </div>
+          <div class="cod-row">🪙 <span>Payment: <strong>Cash on Delivery (COD)</strong> — Delivery par pay karo</span></div>
+          <button type="submit" class="submit">🔥 Order Place Karo</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="f-logo"><span>TANDOORI STOP</span> &nbsp;— Last Stop 📍</div>
+    <div class="f-links">
+      <a href="#home">Home</a>
+      <a href="#menu">Menu</a>
+      <a href="#branches">Branches</a>
+      <a href="#order">Order</a>
+      <a href="https://instagram.com/tandooristoppk" target="_blank">Instagram</a>
+    </div>
+    <div class="f-copy">© 2025 Tandoori Stop. Lahore, Pakistan.</div>
+  </footer>
+
+  <script>
+    const menuData = {
+      tandoori: [
+        { name: "Tandoori Chicken Bone (Cheese Naan Single)", price: 1150, desc: "Tandoori chicken (with bone) served with 1 cheese naan", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless (Cheese Naan Single)", price: 1350, desc: "Boneless tandoori chicken served with 1 cheese naan", emoji: "🍗" },
+        { name: "Tandoori Chicken Bone (Cheese Naan Double)", price: 1950, desc: "Tandoori chicken (with bone) served with 2 cheese naans", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless (Cheese Naan Double)", price: 2299, desc: "Boneless tandoori chicken served with 2 cheese naans", emoji: "🍗" },
+        { name: "Tandoori Chicken Bone (With Rice)", price: 780, desc: "Tandoori chicken (with bone) served with aromatic rice", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless (With Rice)", price: 980, desc: "Boneless tandoori chicken served with aromatic rice", emoji: "🍗" },
+        { name: "Tandoori Chicken Bone", price: 750, desc: "Traditional flame-grilled tandoori chicken (with bone)", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless", price: 899, desc: "Traditional flame-grilled boneless tandoori chicken", emoji: "🍗" },
+        { name: "Quarter Sajji", price: 799, desc: "Slow-roasted quarter chicken sajji", emoji: "🍗" },
+        { name: "Half Sajji", price: 1400, desc: "Slow-roasted half chicken sajji", emoji: "🍗" },
+        { name: "Full Sajji", price: 2500, desc: "Slow-roasted full chicken sajji", emoji: "🍗" },
+        { name: "Peri Peri Quarter Sajji", price: 900, desc: "Spiced peri peri quarter chicken sajji", emoji: "🍗" },
+        { name: "Peri Peri Half Sajji", price: 1600, desc: "Spiced peri peri half chicken sajji", emoji: "🍗" },
+        { name: "Peri Peri Full Sajji", price: 2900, desc: "Spiced peri peri full chicken sajji", emoji: "🍗" }
+      ],
+      tawa: [
+        { name: "Tawa Chicken", price: 750, desc: "Spicy stir-fried tawa chicken piece", emoji: "🍳" },
+        { name: "Tawa Chicken Platter (Single Serving)", price: 800, desc: "Single serving of stir-fried tawa chicken platter", emoji: "🍳" },
+        { name: "Tawa Chicken Platter (Double Serving)", price: 1400, desc: "Double serving of stir-fried tawa chicken platter", emoji: "🍳" },
+        { name: "Nawabi Handi Boneless (2-Person)", price: 2200, desc: "Rich royal Nawabi handi boneless serving", emoji: "🍲" },
+        { name: "Shahi Kabab Masala Handi Boneless (2-Person)", price: 1999, desc: "Spiced shahi kabab masala handi boneless", emoji: "🍲" },
+        { name: "Mughlai Cheese Handi Boneless (2-Person)", price: 1999, desc: "Creamy Mughlai cheese handi boneless", emoji: "🍲" },
+        { name: "Reshmi Handi Boneless (2-Person)", price: 1999, desc: "Velvety reshmi handi boneless", emoji: "🍲" },
+        { name: "Sha Jahani Handi Boneless (2-Person)", price: 1999, desc: "Royal spice mix Sha Jahani handi boneless", emoji: "🍲" },
+        { name: "Chicken Karahi (Half)", price: 1300, desc: "Traditional wok chicken karahi half portion", emoji: "🥘" },
+        { name: "Chicken Karahi (Full)", price: 2500, desc: "Traditional wok chicken karahi full portion", emoji: "🥘" },
+        { name: "Chicken White Karahi (Half)", price: 1500, desc: "Creamy white chicken karahi half portion", emoji: "🥘" },
+        { name: "Chicken White Karahi (Full)", price: 2700, desc: "Creamy white chicken karahi full portion", emoji: "🥘" },
+        { name: "Chicken Kabab Masala (Half)", price: 1350, desc: "Chicken kabab masala half portion", emoji: "🥘" },
+        { name: "Chicken Kabab Masala (Full)", price: 2600, desc: "Chicken kabab masala full portion", emoji: "🥘" }
+      ],
+      bbq: [
+        { name: "Full Stop Roll", price: 650, desc: "TandooriStopp signature giant roll", emoji: "🌯" },
+        { name: "Tandoori Chicken Roll", price: 520, desc: "Tandoori chicken chunks wrapped in paratha", emoji: "🌯" },
+        { name: "Malai Boti Roll", price: 550, desc: "Creamy malai boti wrapped in paratha", emoji: "🌯" },
+        { name: "Chicken Paratha Roll", price: 499, desc: "Classic chicken paratha roll", emoji: "🌯" },
+        { name: "Malai Boti (Per Seekh)", price: 450, desc: "Single seekh of creamy grilled malai boti", emoji: "🍢" },
+        { name: "Malai Boti (Per KG)", price: 2200, desc: "One KG of creamy grilled malai boti", emoji: "🍢" },
+        { name: "Tikka Boti (Per Seekh)", price: 400, desc: "Single seekh of classic tikka boti", emoji: "🍢" },
+        { name: "Tikka Boti (Per KG)", price: 1999, desc: "One KG of classic tikka boti", emoji: "🍢" },
+        { name: "Seekh Kabab (Per Seekh)", price: 250, desc: "Single seekh of spiced chicken seekh kabab", emoji: "🍢" },
+        { name: "Seekh Kabab (Per KG)", price: 1999, desc: "One KG of spiced chicken seekh kabab", emoji: "🍢" }
+      ],
+      platters: [
+        { name: "Family Tandoori Platter", price: 7000, desc: "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos", emoji: "👪" },
+        { name: "Roghni Naan", price: 200, desc: "Fluffy sesame roghni naan", emoji: "🫓" },
+        { name: "Butter Naan", price: 350, desc: "Buttery flatbread naan", emoji: "🫓" },
+        { name: "Cheese Naan", price: 500, desc: "Naan stuffed with melted cheese", emoji: "🫓" },
+        { name: "Rice", price: 350, desc: "Extra serving of aromatic rice", emoji: "🍚" },
+        { name: "Salad", price: 350, desc: "Fresh seasonal salad", emoji: "🥗" },
+        { name: "Raita", price: 70, desc: "Yogurt herb raita dip", emoji: "🏺" },
+        { name: "Puri Paratha", price: 270, desc: "Flaky deep-fried puri paratha", emoji: "🫓" },
+        { name: "Blueberry Mojito", price: 300, desc: "Blueberry refreshing mocktail", emoji: "🍹" },
+        { name: "Strawberry Mojito", price: 300, desc: "Strawberry refreshing mocktail", emoji: "🍹" },
+        { name: "Peach Mojito", price: 300, desc: "Peach refreshing mocktail", emoji: "🍹" },
+        { name: "Apple Mojito", price: 300, desc: "Apple refreshing mocktail", emoji: "🍹" },
+        { name: "Water (Small)", price: 80, desc: "Chilled mineral water", emoji: "🥤" },
+        { name: "Soft Drink (300ml)", price: 120, desc: "Carbonated soft drink regular", emoji: "🥤" },
+        { name: "Soft Drink (Tin)", price: 150, desc: "Carbonated soft drink tin can", emoji: "🥤" },
+        { name: "Fresh Lime", price: 350, desc: "Zesty fresh lime soda", emoji: "🥤" },
+        { name: "Mint Margarita", price: 300, desc: "Minty blended ice margarita", emoji: "🥤" }
+      ]
+    };
+
+    let cart = {};
+
+    function renderMenu(category = 'all') {
+      const container = document.getElementById('menu-grid-container');
+      if (!container) return;
+
+      container.innerHTML = '';
+      
+      let items = [];
+      if (category === 'all') {
+        items = [...menuData.tandoori, ...menuData.tawa, ...menuData.bbq, ...menuData.platters];
+      } else {
+        items = menuData[category] || [];
+      }
+
+      // Unique items just in case
+      const seen = new Set();
+      const uniqueItems = items.filter(el => {
+        const duplicate = seen.has(el.name);
+        seen.add(el.name);
+        return !duplicate;
+      });
+
+      uniqueItems.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'menu-card';
+        
+        // Dynamic image backgrounds
+        const bgs = ['ci-1', 'ci-2', 'ci-3', 'ci-4'];
+        const bgClass = bgs[idx % bgs.length];
+
+        card.innerHTML = `
+          <div class="card-img ${bgClass}">${item.emoji}</div>
+          <div class="card-body">
+            <div class="card-name">${item.name}</div>
+            <div class="card-desc">${item.desc}</div>
+            <div class="card-foot">
+              <div class="card-price">Rs. ${item.price.toLocaleString()}</div>
+              <button class="order-btn" onclick="addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price})">Order</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterMenu(btn, category) {
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderMenu(category);
+    }
+
+    function addToOrderForm(itemName, price) {
+      if (cart[itemName]) {
+        cart[itemName]++;
+      } else {
+        cart[itemName] = 1;
+      }
+
+      updateTextArea();
+      
+      // Highlight form boundary or feedback
+      const orderSec = document.getElementById('order');
+      if (orderSec) {
+        orderSec.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function updateTextArea() {
+      const ta = document.getElementById('order-textarea');
+      if (!ta) return;
+
+      let list = [];
+      let total = 0;
+      for (const name in cart) {
+        const qty = cart[name];
+        list.push(`${qty}x ${name}`);
+      }
+
+      ta.value = list.join(', ');
+    }
+
+    // Initialize Menu
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMenu('all');
+    });
+  </script>
+</body>
+</html>

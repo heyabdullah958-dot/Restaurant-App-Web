@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FOMO — Fear of Missing Out | Cafe · Desserts · Coffee | Lahore</title>
+  <meta name="description" content="FOMO — Fear of Missing Out. Lahore's trendiest café. Specialty coffee, desserts, and experiences you don't want to miss. Open 12 PM – 1 AM."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FBF5E9;
+      --cream2: #F5EDD8;
+      --tan: #E8D5B7;
+      --brown: #2C1810;
+      --brown2: #4A2C1A;
+      --coffee: #6B3F25;
+      --sage: #87A878;
+      --blush: #E8A598;
+      --lavender: #B8A0C8;
+      --gold: #C9A84C;
+      --white: #FFFFFF;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', sans-serif; background: var(--cream); color: var(--brown); overflow-x: hidden; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 14px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(251,245,233,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(44,24,16,0.08);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; color: var(--brown);
+      letter-spacing: -0.5px;
+    }
+    .nav-logo .logo-em { color: var(--coffee); font-style: italic; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { color: rgba(44,24,16,0.65); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--coffee); }
+    .nav-cta {
+      background: var(--brown); color: var(--cream);
+      padding: 10px 22px; border-radius: 4px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .nav-cta:hover { background: var(--coffee); transform: translateY(-2px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--cream) 0%, var(--cream2) 40%, var(--tan) 100%);
+      display: flex; align-items: center;
+      padding: 120px 5% 80px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Gradient circles */
+    .hero-circle {
+      position: absolute; border-radius: 50%; pointer-events: none; opacity: 0.4;
+    }
+    .hc1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(135,168,120,0.3), transparent); top: -100px; right: -100px; }
+    .hc2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(232,165,152,0.3), transparent); bottom: -50px; left: -50px; }
+    .hc3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(184,160,200,0.25), transparent); top: 30%; right: 30%; }
+
+    /* Big FOMO text */
+    .hero-fomo-bg {
+      position: absolute; right: -2%; top: 50%; transform: translateY(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(100px, 16vw, 180px); font-weight: 800; font-style: italic;
+      color: rgba(44,24,16,0.06); letter-spacing: -4px;
+      z-index: 1; white-space: nowrap;
+    }
+
+    .hero-content { max-width: 560px; z-index: 2; position: relative; }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(44,24,16,0.06); border: 1px solid rgba(44,24,16,0.12);
+      color: var(--coffee); font-size: 11px; font-weight: 700;
+      padding: 6px 16px; border-radius: 30px; margin-bottom: 20px;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 6vw, 72px); font-weight: 800;
+      line-height: 1.05; letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .hero-title .italic { font-style: italic; color: var(--coffee); }
+    .hero-sub { font-size: 16px; color: rgba(44,24,16,0.65); line-height: 1.8; margin-bottom: 36px; font-weight: 300; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+    .btn-dark {
+      background: var(--brown); color: var(--cream);
+      padding: 15px 34px; border-radius: 4px;
+      font-size: 14px; font-weight: 700; text-decoration: none;
+      box-shadow: 0 10px 30px rgba(44,24,16,0.2); transition: all 0.3s;
+    }
+    .btn-dark:hover { background: var(--coffee); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(44,24,16,0.3); }
+    .btn-outline-dk {
+      border: 1.5px solid rgba(44,24,16,0.25); color: var(--brown);
+      padding: 13px 28px; border-radius: 4px;
+      font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-outline-dk:hover { border-color: var(--coffee); color: var(--coffee); }
+
+    .open-bar {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(44,24,16,0.06); border: 1px solid rgba(44,24,16,0.1);
+      border-radius: 30px; padding: 10px 20px;
+      font-size: 13px; color: rgba(44,24,16,0.7);
+    }
+    .open-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 8px #4ADE80; animation: opn 2s infinite; }
+    @keyframes opn { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .open-bar strong { color: var(--brown); }
+
+    /* ── VIBE STRIP ── */
+    .vibe-strip {
+      background: var(--brown); padding: 12px 0; overflow: hidden;
+    }
+    .vibe-track { display: flex; animation: vibe-mq 20s linear infinite; white-space: nowrap; }
+    .vibe-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(251,245,233,0.7); }
+    .vibe-dot { color: var(--gold); }
+    @keyframes vibe-mq { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── SECTIONS ── */
+    .section { padding: 80px 5%; }
+    .sec-cream { background: var(--cream); }
+    .sec-cream2 { background: var(--cream2); }
+
+    .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: var(--coffee); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .eyebrow::after { content: ''; display: block; width: 30px; height: 1.5px; background: var(--coffee); opacity: 0.4; }
+    .sec-h { font-family: 'Playfair Display', serif; font-size: clamp(26px, 4vw, 44px); font-weight: 800; line-height: 1.1; margin-bottom: 12px; color: var(--brown); }
+    .sec-h .ital { font-style: italic; color: var(--coffee); }
+    .sec-p { font-size: 15px; color: rgba(44,24,16,0.65); line-height: 1.75; max-width: 520px; margin-bottom: 48px; font-weight: 300; }
+
+    /* Cafe menu */
+    .menu-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+    .menu-col h4 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--coffee); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1.5px solid rgba(44,24,16,0.1); }
+    .menu-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(44,24,16,0.06); }
+    .menu-row:last-child { border-bottom: none; }
+    .mr-info { }
+    .mr-name { font-size: 14px; font-weight: 700; color: var(--brown); margin-bottom: 2px; }
+    .mr-desc { font-size: 12px; color: rgba(44,24,16,0.55); }
+    .mr-price { font-size: 14px; font-weight: 800; color: var(--coffee); flex-shrink: 0; margin-left: 12px; }
+
+    /* ── INSTAGRAM SECTION ── */
+    .ig-section { }
+    .ig-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+    .ig-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; }
+    .ig-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+      color: white; padding: 10px 20px; border-radius: 30px;
+      font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.3s;
+    }
+    .ig-link:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(131,58,180,0.3); }
+    .ig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ig-tile {
+      aspect-ratio: 1; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; cursor: pointer; transition: all 0.3s;
+      overflow: hidden; position: relative;
+    }
+    .ig-tile:hover { transform: scale(1.04); }
+    .igt1 { background: linear-gradient(135deg, #E8D5B7, #D4B896); }
+    .igt2 { background: linear-gradient(135deg, #B8D4A8, #87A878); }
+    .igt3 { background: linear-gradient(135deg, #D4B8C8, #B8A0C8); }
+    .igt4 { background: linear-gradient(135deg, #E8C4B8, #D4A090); }
+    .igt5 { background: linear-gradient(135deg, #C8D8E8, #A0B8D0); }
+    .igt6 { background: linear-gradient(135deg, #E8D8B8, #D0BC90); }
+    .ig-overlay { position: absolute; inset: 0; background: rgba(44,24,16,0); display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 18px; color: white; font-weight: 700; }
+    .ig-tile:hover .ig-overlay { background: rgba(44,24,16,0.5); }
+
+    /* Events */
+    .events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .event-card {
+      background: var(--white); border: 1px solid rgba(44,24,16,0.1);
+      border-radius: 16px; overflow: hidden; transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(44,24,16,0.06);
+    }
+    .event-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(44,24,16,0.12); border-color: rgba(44,24,16,0.2); }
+    .event-top { padding: 20px; background: linear-gradient(135deg, var(--cream2), var(--tan)); }
+    .event-date { font-size: 11px; font-weight: 700; color: var(--coffee); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+    .event-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 800; color: var(--brown); }
+    .event-body { padding: 18px; }
+    .event-desc { font-size: 13px; color: rgba(44,24,16,0.65); line-height: 1.6; margin-bottom: 16px; }
+    .event-btn {
+      display: block; text-align: center;
+      background: var(--brown); color: var(--cream);
+      padding: 10px; border-radius: 6px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .event-btn:hover { background: var(--coffee); }
+
+    /* Booking form */
+    .booking-wrap { max-width: 560px; margin: 0 auto; }
+    .booking-card {
+      background: var(--white); border: 1px solid rgba(44,24,16,0.1);
+      border-radius: 20px; padding: 48px;
+      box-shadow: 0 8px 40px rgba(44,24,16,0.08);
+    }
+    .f-label { font-size: 11px; font-weight: 700; color: var(--coffee); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .f-input, .f-textarea, .f-select {
+      width: 100%; background: var(--cream); border: 1.5px solid rgba(44,24,16,0.12);
+      color: var(--brown); padding: 12px 16px; border-radius: 6px;
+      font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; transition: all 0.3s;
+    }
+    .f-input:focus, .f-textarea:focus, .f-select:focus { border-color: var(--coffee); background: var(--cream2); }
+    .f-select option { background: var(--cream); }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .f-full { margin-bottom: 14px; }
+    .f-textarea { resize: vertical; min-height: 70px; }
+    .submit {
+      width: 100%; padding: 16px;
+      background: var(--brown); color: var(--cream);
+      border: none; border-radius: 6px;
+      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 8px 24px rgba(44,24,16,0.2); transition: all 0.3s;
+    }
+    .submit:hover { background: var(--coffee); transform: translateY(-2px); box-shadow: 0 14px 35px rgba(44,24,16,0.3); }
+
+    /* Footer */
+    footer {
+      background: var(--brown); padding: 40px 5%;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    }
+    .f-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; font-style: italic; color: var(--cream); }
+    .f-links { display: flex; gap: 20px; }
+    .f-links a { color: rgba(251,245,233,0.5); text-decoration: none; font-size: 13px; transition: color 0.3s; }
+    .f-links a:hover { color: var(--cream); }
+    .f-copy { font-size: 12px; color: rgba(251,245,233,0.3); }
+
+    @media(max-width:768px){
+      nav { padding: 12px 16px; }
+      .nav-logo { font-size: 18px; }
+      .nav-links { display: none; }
+      .nav-cta { padding: 8px 18px; font-size: 12px; }
+
+      .hero { padding: 100px 16px 60px; min-height: auto; text-align: center; }
+      .hero-content { margin: 0 auto; }
+      .hero-btns { justify-content: center; }
+      .hero-fomo-bg { display: none; }
+      .hero-circle { display: none; }
+      .hero-title { font-size: 32px; }
+
+      .section { padding: 50px 16px; }
+      .ig-grid { grid-template-columns: repeat(2, 1fr); }
+      .f-row { grid-template-columns: 1fr; }
+      .booking-card { padding: 24px 16px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+    /* Menu tabs */
+    .menu-tabs { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; justify-content: center; }
+    .menu-tab {
+      background: rgba(44,24,16,0.04); border: 1.5px solid rgba(44,24,16,0.1);
+      color: rgba(44,24,16,0.6); padding: 8px 20px; border-radius: 30px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Poppins', sans-serif; transition: all 0.3s;
+    }
+    .menu-tab.active, .menu-tab:hover { background: var(--brown); border-color: var(--brown); color: var(--cream); }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo"><span class="logo-em">FOMO</span></div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#book">Book</a></li>
+    </ul>
+    <a href="#book" class="nav-cta">Visit Us ✨</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-circle hc1"></div>
+    <div class="hero-circle hc2"></div>
+    <div class="hero-circle hc3"></div>
+    <div class="hero-fomo-bg">FOMO</div>
+
+    <div class="hero-content">
+      <div class="hero-tag">☕ Café · Desserts · Coffee · Lahore</div>
+      <h1 class="hero-title">
+        Fear of<br/>
+        <span class="italic">Missing Out</span><br/>
+        is Real.
+      </h1>
+      <p class="hero-sub">
+        Lahore's most aesthetic café experience — specialty coffee, artisan desserts, 
+        and memories you'll want to post. Don't just visit. Experience FOMO.
+      </p>
+      <div class="hero-btns">
+        <a href="#book" class="btn-dark">☕ Book Your Table</a>
+        <a href="#menu" class="btn-outline-dk">📋 View Menu</a>
+      </div>
+      <div class="open-bar">
+        <div class="open-dot"></div>
+        <span>Open Now &nbsp;·&nbsp; <strong>12:00 PM — 1:00 AM</strong> &nbsp;·&nbsp; Daily</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIBE STRIP -->
+  <div class="vibe-strip">
+    <div class="vibe-track">
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Specialty Coffee</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Artisan Desserts</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Aesthetic Vibes</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Lahore Café</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Matcha & More</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Open 12PM–1AM</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Instagram Worthy</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Don't Miss Out</span>
+      <!-- dup -->
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Specialty Coffee</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Artisan Desserts</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Aesthetic Vibes</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Lahore Café</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Matcha & More</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Open 12PM–1AM</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Instagram Worthy</span>
+      <span class="vibe-item"><span class="vibe-dot">✦</span>Don't Miss Out</span>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <section class="section sec-cream" id="menu">
+    <div class="eyebrow">Our Menu</div>
+    <h2 class="sec-h">Curated for the <span class="ital">Experience</span></h2>
+    <p class="sec-p">Every item on our menu is crafted to be as beautiful as it is delicious. Click items to add them as a pre-order request for your visit!</p>
+
+    <div class="menu-tabs">
+      <button class="menu-tab active" onclick="filterMenu(this, 'all')">All Items</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'coldCoffee')">Cold Coffees & Frappes</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'smoothies')">Smoothies, Shakes & Teas</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'hotCoffee')">Hot Coffees</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'sandwiches')">Sandwiches & Sides</button>
+      <button class="menu-tab" onclick="filterMenu(this, 'desserts')">Desserts & Mojitos</button>
+    </div>
+
+    <div class="menu-cols" id="menu-grid-container">
+      <!-- Dynamically populated -->
+    </div>
+  </section>
+
+  <!-- INSTAGRAM -->
+  <section class="section sec-cream2">
+    <div class="ig-section">
+      <div class="ig-header">
+        <div>
+          <div class="eyebrow">Instagram</div>
+          <h3 class="ig-title">FOMO on Instagram 📸</h3>
+        </div>
+        <a href="https://instagram.com/getafomo" target="_blank" class="ig-link">
+          📸 Follow @getafomo
+        </a>
+      </div>
+      <div class="ig-grid">
+        <div class="ig-tile igt1">☕<div class="ig-overlay">View Post</div></div>
+        <div class="ig-tile igt2">🍰<div class="ig-overlay">View Post</div></div>
+        <div class="ig-tile igt3">🌿<div class="ig-overlay">View Post</div></div>
+        <div class="ig-tile igt4">🎂<div class="ig-overlay">View Post</div></div>
+        <div class="ig-tile igt5">✨<div class="ig-overlay">View Post</div></div>
+        <div class="ig-tile igt6">🥐<div class="ig-overlay">View Post</div></div>
+      </div>
+      <p style="font-size:13px;color:rgba(44,24,16,0.5);margin-top:14px;text-align:center">
+        *Representative preview tiles. Click any post to view on our Instagram @getafomo · 4,721 followers & growing 🌿
+      </p>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="section sec-cream" id="events">
+    <div class="eyebrow">Events</div>
+    <h2 class="sec-h">Things You <span class="ital">Don't Want to Miss</span></h2>
+    <p class="sec-p">We host special events, pop-ups, and themed nights — follow us to stay updated.</p>
+    <div class="events-grid">
+      <div class="event-card">
+        <div class="event-top">
+          <div class="event-date">🎤 Every Friday</div>
+          <div class="event-name">Open Mic Night</div>
+        </div>
+        <div class="event-body">
+          <div class="event-desc">Poetry, music, and stories — in the coziest café setting. All artists welcome.</div>
+          <a href="#book" class="event-btn" onclick="selectBookingType('Open Mic Night')">Book My Spot</a>
+        </div>
+      </div>
+      <div class="event-card">
+        <div class="event-top">
+          <div class="event-date">☕ Bi-weekly</div>
+          <div class="event-name">Latte Art Workshop</div>
+        </div>
+        <div class="event-body">
+          <div class="event-desc">Learn to pour beautiful latte art from our baristas. Limited seats — book early!</div>
+          <a href="#book" class="event-btn" onclick="selectBookingType('Latte Art Workshop')">Book My Spot</a>
+        </div>
+      </div>
+      <div class="event-card">
+        <div class="event-top">
+          <div class="event-date">🌙 Monthly</div>
+          <div class="event-name">Dessert Tasting Night</div>
+        </div>
+        <div class="event-body">
+          <div class="event-desc">New seasonal desserts launch — first taste, special pricing, and good vibes.</div>
+          <a href="#book" class="event-btn" onclick="selectBookingType('Dessert Tasting Night')">Book My Spot</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOKING FORM -->
+  <section class="section sec-cream2" id="book">
+    <div class="booking-wrap">
+      <div style="text-align:center;margin-bottom:36px">
+        <div class="eyebrow" style="justify-content:center">Reserve</div>
+        <h2 class="sec-h" style="text-align:center">Book Your <span class="ital">FOMO Spot</span></h2>
+        <p style="font-size:14px;color:rgba(44,24,16,0.6);font-weight:300">Table reservation, event booking, or walk-in info — we've got you.</p>
+      </div>
+      <div class="booking-card">
+        <form action="https://formspree.io/f/getafomo" method="POST">
+          <div class="f-row">
+            <div><label class="f-label">Your Name</label><input type="text" name="name" class="f-input" placeholder="Your name" required/></div>
+            <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
+          </div>
+          <div class="f-full">
+            <label class="f-label">Booking Type</label>
+            <select name="type" id="booking-type-select" class="f-input f-select">
+              <option>Table Reservation</option>
+              <option>Open Mic Night</option>
+              <option>Latte Art Workshop</option>
+              <option>Dessert Tasting Night</option>
+              <option>Private Event / Birthday</option>
+            </select>
+          </div>
+          <div class="f-row">
+            <div><label class="f-label">Date</label><input type="date" name="date" class="f-input" required/></div>
+            <div><label class="f-label">Time</label><input type="time" name="time" class="f-input" required/></div>
+          </div>
+          <div class="f-full">
+            <label class="f-label">Guests</label>
+            <select name="guests" class="f-input f-select">
+              <option>1 Person</option>
+              <option selected>2 People</option>
+              <option>3-4 People</option>
+              <option>5+ People</option>
+            </select>
+          </div>
+          <div class="f-full">
+            <label class="f-label">Special Requests & Pre-orders</label>
+            <textarea name="requests" id="requests-textarea" class="f-textarea" placeholder="Birthday surprise, pre-ordered items, dietary needs, etc."></textarea>
+          </div>
+          <button type="submit" class="submit">✨ Confirm My Booking</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="f-logo">FOMO</div>
+    <div class="f-links">
+      <a href="#home">Home</a>
+      <a href="#menu">Menu</a>
+      <a href="#events">Events</a>
+      <a href="#book">Book</a>
+      <a href="https://instagram.com/getafomo" target="_blank">Instagram</a>
+    </div>
+    <div class="f-copy">© 2025 FOMO. Fear of Missing Out. Lahore, Pakistan.</div>
+  </footer>
+
+  <script>
+    const menuData = {
+      coldCoffee: [
+        { name: "Iced Americano", price: 400, desc: "Espresso shots over cold water and ice", emoji: "☕" },
+        { name: "Iced Latte", price: 450, desc: "Espresso combined with milk and ice", emoji: "☕" },
+        { name: "Iced Spanish Latte", price: 580, desc: "Espresso with condensed milk, milk and ice", emoji: "☕" },
+        { name: "Iced Vanilla Latte", price: 650, desc: "Espresso with vanilla syrup, milk and ice", emoji: "☕" },
+        { name: "Iced Caramel Latte", price: 650, desc: "Espresso with caramel syrup, milk and ice", emoji: "☕" },
+        { name: "Iced Hazelnut Latte", price: 650, desc: "Espresso with hazelnut syrup, milk and ice", emoji: "☕" },
+        { name: "Iced Coconut Latte", price: 650, desc: "Espresso with coconut syrup, milk and ice", emoji: "☕" },
+        { name: "Iced Mocha", price: 800, desc: "Espresso with chocolate sauce, milk and ice", emoji: "☕" },
+        { name: "Iced Chocolate", price: 700, desc: "Rich chocolate blend with milk and ice", emoji: "🥤" },
+        { name: "Cookies n Cream Frappe", price: 1000, desc: "Blended cookies and cream frappe with whipped cream", emoji: "🥤" },
+        { name: "Mocha Frappe", price: 900, desc: "Blended chocolate and coffee frappe", emoji: "🥤" },
+        { name: "Lotus Frappe", price: 1000, desc: "Blended Lotus Biscoff biscuit frappe", emoji: "🥤" },
+        { name: "Hazelnut Frappe", price: 950, desc: "Blended hazelnut flavor coffee frappe", emoji: "🥤" },
+        { name: "Caramel Frappe", price: 800, desc: "Blended sweet caramel coffee frappe", emoji: "🥤" },
+        { name: "Brownie Frappe", price: 800, desc: "Blended chocolate brownie coffee frappe", emoji: "🥤" }
+      ],
+      smoothies: [
+        { name: "Strawberry Smoothie", price: 850, desc: "Thick strawberry fruit smoothie", emoji: "🥤" },
+        { name: "Blueberry Smoothie", price: 900, desc: "Thick blueberry fruit smoothie", emoji: "🥤" },
+        { name: "Peach Smoothie", price: 850, desc: "Thick peach fruit smoothie", emoji: "🥤" },
+        { name: "Pina Colada Smoothie", price: 700, desc: "Classic pineapple and coconut blend", emoji: "🥤" },
+        { name: "Lotus Cookie Butter Shake", price: 950, desc: "Premium Lotus Biscoff milkshake", emoji: "🥤" },
+        { name: "Nutella Shake", price: 900, desc: "Thick Nutella chocolate milkshake", emoji: "🥤" },
+        { name: "Brownie Shake", price: 800, desc: "Rich chocolate brownie milkshake", emoji: "🥤" },
+        { name: "Cookies n Cream Shake", price: 850, desc: "Oreo cookies and cream milkshake", emoji: "🥤" },
+        { name: "Peach Ice Tea", price: 650, desc: "Chilled peach tea infusion", emoji: "🥤" },
+        { name: "Blueberry Ice Tea", price: 650, desc: "Chilled blueberry tea infusion", emoji: "🥤" },
+        { name: "Passion Fruit Ice Tea", price: 500, desc: "Chilled passion fruit tea infusion", emoji: "🥤" }
+      ],
+      hotCoffee: [
+        { name: "Espresso", price: 300, desc: "Single rich shot of pure espresso", emoji: "☕" },
+        { name: "Cortado", price: 400, desc: "Equal parts espresso and warm milk", emoji: "☕" },
+        { name: "Hot Americano", price: 350, desc: "Espresso shots diluted with hot water", emoji: "☕" },
+        { name: "Cappuccino", price: 400, desc: "Espresso with equal parts steamed milk and foam", emoji: "☕" },
+        { name: "Hot Latte", price: 400, desc: "Espresso with steamed milk and a thin layer of foam", emoji: "☕" },
+        { name: "Hot Spanish Latte", price: 490, desc: "Espresso with condensed milk and steamed milk", emoji: "☕" },
+        { name: "Hot Vanilla Latte", price: 550, desc: "Espresso with vanilla syrup and steamed milk", emoji: "☕" },
+        { name: "Hot Caramel Latte", price: 550, desc: "Espresso with caramel syrup and steamed milk", emoji: "☕" },
+        { name: "Hot Hazelnut Latte", price: 550, desc: "Espresso with hazelnut syrup and steamed milk", emoji: "☕" },
+        { name: "Hot Mocha", price: 700, desc: "Espresso with chocolate and steamed milk", emoji: "☕" },
+        { name: "Hot Chocolate", price: 600, desc: "Rich steamed chocolate milk", emoji: "☕" }
+      ],
+      sandwiches: [
+        { name: "Herb n Chicken Sandwich (Non-spicy)", price: 900, desc: "Non-spicy herb chicken sandwich", emoji: "🥪" },
+        { name: "Jalapeno Sandwich (Tangy)", price: 670, desc: "Tangy jalapeno chicken sandwich", emoji: "🥪" },
+        { name: "Cravtail Sandwich (Mild)", price: 570, desc: "Mild spicy cravtail chicken sandwich", emoji: "🥪" },
+        { name: "Chipotle Sandwich (Spicy)", price: 600, desc: "Spicy chipotle chicken sandwich", emoji: "🥪" },
+        { name: "Fries", price: 350, desc: "Crispy salted side fries", emoji: "🍟" }
+      ],
+      desserts: [
+        { name: "Jiggly Cake (Tall)", price: 900, desc: "Japanese tall cheesecake with chocolate sauce", emoji: "🍰" },
+        { name: "Jiggly Cake (Flat)", price: 1700, desc: "Japanese flat cheesecake with chocolate sauce", emoji: "🍰" },
+        { name: "San Sebastian Cheesecake Slice", price: 950, desc: "Classic basque burnt cheesecake slice", emoji: "🍰" },
+        { name: "New York Cheesecake Slice", price: 950, desc: "Rich baked New York style cheesecake slice", emoji: "🍰" },
+        { name: "Lotus Cheesecake Slice", price: 1000, desc: "Cheesecake slice topped with Lotus biscoff", emoji: "🍰" },
+        { name: "Nutella Bento Cake", price: 950, desc: "Mini Nutella chocolate cake", emoji: "🍰" },
+        { name: "Chocolate Fudge Bento Cake", price: 900, desc: "Mini rich chocolate fudge cake", emoji: "🍰" },
+        { name: "Lotus Bento Cake", price: 1000, desc: "Mini Lotus Biscoff cake", emoji: "🍰" },
+        { name: "Red Velvet Bento Cake", price: 1000, desc: "Mini red velvet cake with cream cheese", emoji: "🍰" },
+        { name: "Nutella Sundae", price: 370, desc: "Ice cream sundae topped with Nutella", emoji: "🍨" },
+        { name: "Oreo Sundae", price: 370, desc: "Ice cream sundae topped with crushed Oreos", emoji: "🍨" },
+        { name: "Lotus Three Milk Sundae", price: 400, desc: "Lotus biscoff infused tres leches sundae", emoji: "🍨" },
+        { name: "Salted Caramel Sundae", price: 370, desc: "Ice cream sundae with salted caramel sauce", emoji: "🍨" },
+        { name: "Nutella Eclair", price: 320, desc: "Cream-filled pastry topped with Nutella", emoji: "🥖" },
+        { name: "Lotus Eclair", price: 340, desc: "Cream-filled pastry topped with Lotus cream", emoji: "🥖" },
+        { name: "Nutella Cookie", price: 370, desc: "Soft baked cookie stuffed with Nutella", emoji: "🍪" },
+        { name: "Lotus Cookie", price: 390, desc: "Soft baked cookie stuffed with Lotus cream", emoji: "🍪" },
+        { name: "Chocolate Chip Cookie", price: 420, desc: "Giant classic chocolate chip cookie", emoji: "🍪" },
+        { name: "Tiramisu French Toast", price: 1000, desc: "Brioche french toast with espresso and mascarpone", emoji: "🍞" },
+        { name: "Lotus French Toast", price: 1000, desc: "Brioche french toast topped with Lotus sauce", emoji: "🍞" },
+        { name: "Nutella Brownie", price: 420, desc: "Fudgy brownie topped with Nutella", emoji: "🥮" },
+        { name: "Double Chocolate Fudge Brownie", price: 450, desc: "Extremely rich double chocolate brownie", emoji: "🥮" },
+        { name: "Green Apple Mojito", price: 300, desc: "Refreshing green apple mint mocktail", emoji: "🍹" },
+        { name: "Blueberry Mojito", price: 300, desc: "Refreshing blueberry mint mocktail", emoji: "🍹" },
+        { name: "Lychee Mojito", price: 300, desc: "Refreshing lychee mint mocktail", emoji: "🍹" },
+        { name: "Peach Mojito", price: 300, desc: "Refreshing peach mint mocktail", emoji: "🍹" },
+        { name: "Sauce Add-on", price: 100, desc: "Extra sauce dressing", emoji: "🏺" },
+        { name: "Syrup Add-on", price: 150, desc: "Extra coffee syrup flavoring", emoji: "🏺" },
+        { name: "Espresso Shot", price: 150, desc: "Additional single shot of espresso", emoji: "☕" },
+        { name: "Chocolate/Strawberry/Lotus Topping", price: 100, desc: "Additional sweet flavor drizzle", emoji: "🏺" }
+      ]
+    };
+
+    let preorderCart = {};
+
+    function renderMenu(category = 'all') {
+      const container = document.getElementById('menu-grid-container');
+      if (!container) return;
+
+      if (category === 'all') {
+        container.style.display = 'grid';
+      } else {
+        container.style.display = 'block';
+      }
+
+      container.innerHTML = '';
+      
+      let items = [];
+      if (category === 'all') {
+        items = [...menuData.coldCoffee, ...menuData.smoothies, ...menuData.hotCoffee, ...menuData.sandwiches, ...menuData.desserts];
+      } else {
+        items = menuData[category] || [];
+      }
+
+      // Unique items filter
+      const seen = new Set();
+      const uniqueItems = items.filter(el => {
+        const duplicate = seen.has(el.name);
+        seen.add(el.name);
+        return !duplicate;
+      });
+
+      uniqueItems.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'menu-row';
+        row.style.width = '100%';
+        row.style.cursor = 'pointer';
+        row.onclick = () => addToPreorderForm(item.name, item.price);
+
+        row.innerHTML = `
+          <div class="mr-info">
+            <div class="mr-name">${item.emoji} ${item.name}</div>
+            <div class="mr-desc">${item.desc}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="mr-price">Rs. ${item.price}</span>
+            <button style="background: var(--brown); color: var(--cream); border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;">Pre-order</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function filterMenu(btn, category) {
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderMenu(category);
+    }
+
+    function addToPreorderForm(itemName, price) {
+      if (preorderCart[itemName]) {
+        preorderCart[itemName]++;
+      } else {
+        preorderCart[itemName] = 1;
+      }
+
+      updateRequestsTextArea();
+      
+      const bookSec = document.getElementById('book');
+      if (bookSec) {
+        bookSec.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function updateRequestsTextArea() {
+      const ta = document.getElementById('requests-textarea');
+      if (!ta) return;
+
+      let list = [];
+      for (const name in preorderCart) {
+        list.push(`${preorderCart[name]}x ${name}`);
+      }
+
+      ta.value = "Pre-order items: " + list.join(', ');
+    }
+
+    function selectBookingType(typeName) {
+      const select = document.getElementById('booking-type-select');
+      if (select) {
+        select.value = typeName;
+      }
+    }
+
+    document.querySelectorAll('.ig-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        window.open('https://instagram.com/getafomo', '_blank');
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMenu('all');
+    });
+  </script>
+</body>
+</html>

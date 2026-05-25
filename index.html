@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodSphere — One App · Seven Unique Dining Experiences</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Desktop wrapper -->
+  <div class="desktop-bg">
+    <div class="app-info-left">
+      <div class="brand-logo-big">🍽️</div>
+      <h1 class="brand-title">FoodSphere</h1>
+      <p class="brand-sub">One App · Seven Unique Dining Experiences</p>
+      <div class="feature-pills">
+        <span class="pill">🍖 7 Restaurants</span>
+        <span class="pill">🛵 Fast Delivery</span>
+        <span class="pill">🏅 Loyalty Points</span>
+        <span class="pill">💳 COD + Card</span>
+      </div>
+      <p class="brand-desc">A unified food delivery platform bringing Pakistan's top restaurant brands under one premium app.</p>
+    </div>
+
+    <!-- Phone Frame -->
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen" id="app">
+
+        <!-- ===== SCREEN 1: SPLASH ===== -->
+        <div class="screen active" id="screen-splash">
+          <div class="splash-bg">
+            <div class="splash-particles">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="splash-content">
+              <div class="splash-logo">
+                <div class="logo-ring">
+                  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="30" r="28" stroke="#FF5722" stroke-width="2.5"/>
+                    <circle cx="30" cy="30" r="22" stroke="#FF5722" stroke-width="1.5" opacity="0.5"/>
+                    <line x1="30" y1="8" x2="30" y2="52" stroke="#FF5722" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="8" y1="30" x2="52" y2="30" stroke="#FF5722" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M22 20 Q30 14 38 20" stroke="#FF5722" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <path d="M22 40 Q30 46 38 40" stroke="#FF5722" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="logo-glow"></div>
+              </div>
+              <h1 class="splash-title">FoodSphere</h1>
+              <p class="splash-tagline">One App · Seven Unique Dining Experiences</p>
+              <div class="splash-loader">
+                <div class="loader-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 2: ONBOARDING ===== -->
+        <div class="screen" id="screen-onboarding">
+          <div class="onboard-wrap">
+            <div class="onboard-header">
+              <div class="brand-mark">
+                <span class="brand-x">✕</span>
+                <span class="brand-name-sm">FoodSphere</span>
+              </div>
+              <button class="skip-btn" onclick="goTo('screen-home')">Skip</button>
+            </div>
+
+            <div class="onboard-slides">
+              <!-- Slide 1 -->
+              <div class="onboard-slide active" id="slide-1">
+                <div class="slide-visual slide-1-visual">
+                  <div class="food-grid">
+                    <div class="food-tile tile-1">🍖<span>Desi BBQ</span></div>
+                    <div class="food-tile tile-2">🍔<span>Burgers</span></div>
+                    <div class="food-tile tile-3">🐟<span>Seafood</span></div>
+                    <div class="food-tile tile-4">🍗<span>Tandoori</span></div>
+                    <div class="food-tile tile-5">🥪<span>Melts</span></div>
+                    <div class="food-tile tile-6">☕<span>Café</span></div>
+                  </div>
+                  <div class="slide1-star">⭐</div>
+                </div>
+                <h2 class="slide-title">7 Restaurants, One App</h2>
+                <p class="slide-desc">From Desi BBQ to Trendy Café — all your favorites in one place</p>
+              </div>
+              <!-- Slide 2 -->
+              <div class="onboard-slide" id="slide-2">
+                <div class="slide-visual slide-2-visual">
+                  <div class="payment-illustration">
+                    <div class="pay-phone">
+                      <div class="pay-screen">
+                        <div class="pay-row"><span class="pay-icon">💵</span><span>Cash on Delivery</span></div>
+                        <div class="pay-row active-pay"><span class="pay-icon">💳</span><span>Credit Card</span></div>
+                        <div class="pay-row"><span class="pay-icon">🔒</span><span>Stripe Secure</span></div>
+                      </div>
+                    </div>
+                    <div class="pay-badges">
+                      <div class="pay-badge cod">COD</div>
+                      <div class="pay-badge card">CARD</div>
+                      <div class="pay-badge secure">🔒 SECURE</div>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="slide-title">Pay How You Like</h2>
+                <p class="slide-desc">Cash on Delivery, Credit Card, or Debit — your choice, always</p>
+              </div>
+              <!-- Slide 3 -->
+              <div class="onboard-slide" id="slide-3">
+                <div class="slide-visual slide-3-visual">
+                  <div class="rewards-illustration">
+                    <div class="rewards-plate">🍗</div>
+                    <div class="coin coin-1">🪙</div>
+                    <div class="coin coin-2">🪙</div>
+                    <div class="coin coin-3">🪙</div>
+                    <div class="coin coin-4">🪙</div>
+                    <div class="coin coin-5">🪙</div>
+                    <div class="rewards-label">FoodSphere Rewards</div>
+                  </div>
+                </div>
+                <h2 class="slide-title">Eat More, Save More</h2>
+                <p class="slide-desc">Earn loyalty points on every order and redeem them for exclusive discounts</p>
+              </div>
+            </div>
+
+            <div class="onboard-footer">
+              <div class="dots">
+                <span class="dot active" id="dot-1"></span>
+                <span class="dot" id="dot-2"></span>
+                <span class="dot" id="dot-3"></span>
+              </div>
+              <button class="next-btn" id="nextBtn" onclick="nextSlide()">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 3: HOME ===== -->
+        <div class="screen" id="screen-home">
+          <div class="home-wrap">
+            <!-- Header -->
+            <div class="home-header">
+              <div class="location-pick">
+                <span class="loc-icon">📍</span>
+                <span class="loc-text">Gulberg, Lahore</span>
+                <span class="loc-arrow">▾</span>
+              </div>
+              <div class="header-actions">
+                <button class="icon-btn notif-btn">🔔<span class="notif-badge">2</span></button>
+                <div class="avatar-sm" onclick="goTo('screen-profile')">H</div>
+              </div>
+            </div>
+            <!-- Search -->
+            <div class="search-bar">
+              <span class="search-icon">🔍</span>
+              <input type="text" placeholder="Search restaurants, dishes..." class="search-input" readonly />
+              <button class="filter-btn">⚙️</button>
+            </div>
+            <!-- Banner -->
+            <div class="banner-carousel">
+              <div class="banner">
+                <div class="banner-content">
+                  <span class="banner-badge">New Users Only</span>
+                  <h3 class="banner-title">Free Delivery<br/>on First Order</h3>
+                  <p class="banner-code">Use code: <strong>FIRSTBITE</strong></p>
+                </div>
+                <div class="banner-img">🍽️</div>
+              </div>
+              <div class="banner-dots"><span class="bdot active"></span><span class="bdot"></span><span class="bdot"></span></div>
+            </div>
+            <!-- Categories -->
+            <div class="categories">
+              <div class="cat-chip active"><span>🍽️</span><p>All</p></div>
+              <div class="cat-chip"><span>🍖</span><p>BBQ</p></div>
+              <div class="cat-chip"><span>🐟</span><p>Seafood</p></div>
+              <div class="cat-chip"><span>🍔</span><p>Burgers</p></div>
+              <div class="cat-chip"><span>🍗</span><p>Tandoori</p></div>
+              <div class="cat-chip"><span>🥪</span><p>Melts</p></div>
+            </div>
+            <!-- Restaurants -->
+            <div class="section-header">
+              <h3 class="section-title">Featured Near You</h3>
+              <span class="see-all">See All</span>
+            </div>
+            <div class="restaurants-list">
+              <!-- Card 1 -->
+              <div class="rest-card" onclick="openRestaurant('seenbanao')">
+                <div class="rest-img rest-img-1">
+                  <span class="rest-heart">♡</span>
+                  <div class="rest-time-badge">25-35 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">SeenBanao <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.7</div>
+                  </div>
+                  <p class="rest-cuisine">Desi BBQ · Handi</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Free Delivery</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 2 -->
+              <div class="rest-card" onclick="openRestaurant('jushhpk')">
+                <div class="rest-img rest-img-2">
+                  <span class="rest-heart">♡</span>
+                  <div class="rest-time-badge">20-30 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">JushhPK <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.5</div>
+                  </div>
+                  <p class="rest-cuisine">Fast Food · Burgers</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Rs. 50 Delivery</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 3 -->
+              <div class="rest-card" onclick="openRestaurant('dineatblue')">
+                <div class="rest-img rest-img-3">
+                  <span class="rest-heart">♡</span>
+                  <div class="rest-time-badge">30-40 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">DineAtBlue <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.8</div>
+                  </div>
+                  <p class="rest-cuisine">Seafood Specialty</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Rs. 80 Delivery</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 4 (SandMelts) -->
+              <div class="rest-card" onclick="openRestaurant('sandmelts')">
+                <div class="rest-img rest-img-4" style="background: linear-gradient(135deg, #FF6B00, #FF3CAC); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative;">
+                  🥪🧀
+                  <span class="rest-heart" style="position: absolute; top: 12px; right: 12px; font-size: 18px; color: white; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">♡</span>
+                  <div class="rest-time-badge" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">15-25 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">SandMelts <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.6</div>
+                  </div>
+                  <p class="rest-cuisine">Steaks · Loaded Fries · Rice</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Free Delivery</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 5 (TandooriStoppPK) -->
+              <div class="rest-card" onclick="openRestaurant('tandooristoppk')">
+                <div class="rest-img rest-img-5" style="background: linear-gradient(135deg, #FF9900, #E65100); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative;">
+                  🍗🔥
+                  <span class="rest-heart" style="position: absolute; top: 12px; right: 12px; font-size: 18px; color: white; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">♡</span>
+                  <div class="rest-time-badge" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">20-30 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">TandooriStoppPK <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.6</div>
+                  </div>
+                  <p class="rest-cuisine">Tandoori Chicken · Sajji · Karahi</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Free Delivery</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Card 6 (GetAFomo) -->
+              <div class="rest-card" onclick="openRestaurant('getafomo')">
+                <div class="rest-img rest-img-6" style="background: linear-gradient(135deg, #E0C3FC, #8EC5FC); display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative;">
+                  ☕🍰
+                  <span class="rest-heart" style="position: absolute; top: 12px; right: 12px; font-size: 18px; color: white; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">♡</span>
+                  <div class="rest-time-badge" style="position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">15-25 min</div>
+                </div>
+                <div class="rest-info">
+                  <div class="rest-name-row">
+                    <h4 class="rest-name">GetAFomo <span class="verified">✓</span></h4>
+                    <div class="rest-rating">⭐ 4.8</div>
+                  </div>
+                  <p class="rest-cuisine">Cold Brew · Frappes · Pancakes · Toast</p>
+                  <div class="rest-meta">
+                    <span class="free-delivery">🛵 Free Delivery</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Bottom Nav -->
+          <div class="bottom-nav">
+            <div class="nav-item active" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 4: RESTAURANT ===== -->
+        <div class="screen" id="screen-restaurant">
+          <div class="rest-detail-wrap">
+            <div class="rest-cover">
+              <div class="rest-cover-img">
+                <div class="cover-overlay"></div>
+                <div class="cover-emoji" id="rest-cover-emoji">🍖🔥</div>
+              </div>
+              <div class="cover-actions">
+                <button class="cover-btn" onclick="goTo('screen-home')">← Back</button>
+                <div class="cover-right-btns">
+                  <button class="cover-btn">↗</button>
+                  <button class="cover-btn">♡</button>
+                </div>
+              </div>
+            </div>
+            <div class="rest-detail-body">
+              <div class="rest-detail-header">
+                <div class="rest-detail-name-row">
+                  <h2 class="rest-detail-name" id="rest-detail-name">SeenBanao</h2>
+                  <span class="open-badge">● Open Now</span>
+                </div>
+                <p class="rest-detail-sub" id="rest-detail-sub">Desi BBQ &amp; Handi Specialists</p>
+                <div class="rest-detail-rating" id="rest-detail-rating">⭐ 4.8 · <span>200+ reviews</span></div>
+                <div class="rest-detail-chips" id="rest-detail-chips">
+                  <span class="info-chip">🕐 30-40 min</span>
+                  <span class="info-chip">🛵 Rs. 60</span>
+                  <span class="info-chip">📍 2.1 km</span>
+                </div>
+              </div>
+              <div class="menu-tabs">
+                <div class="menu-tab active">BBQ</div>
+                <div class="menu-tab">Handi</div>
+                <div class="menu-tab">Rice</div>
+                <div class="menu-tab">Drinks</div>
+                <div class="menu-tab">Deals</div>
+              </div>
+              <h4 class="menu-section-title">BBQ Items</h4>
+              <div class="menu-list">
+                <div class="menu-item" onclick="goTo('screen-cart')">
+                  <div class="menu-item-info">
+                    <h5>Mix BBQ Platter</h5>
+                    <p>Seekh kabab, tikka, boti with naan.</p>
+                    <span class="menu-price">Rs. 850</span>
+                  </div>
+                  <div class="menu-item-right">
+                    <div class="menu-img menu-img-1">🍢</div>
+                    <button class="add-btn">+</button>
+                  </div>
+                </div>
+                <div class="menu-item" onclick="goTo('screen-cart')">
+                  <div class="menu-item-info">
+                    <h5>Chicken Handi (Half)</h5>
+                    <p>Creamy tomato-based gravy with boneless chicken.</p>
+                    <span class="menu-price">Rs. 650</span>
+                  </div>
+                  <div class="menu-item-right">
+                    <div class="menu-img menu-img-2">🍲</div>
+                    <button class="add-btn">+</button>
+                  </div>
+                </div>
+                <div class="menu-item" onclick="goTo('screen-cart')">
+                  <div class="menu-item-info">
+                    <h5>Seekh Kabab (6pcs)</h5>
+                    <p>Charcoal-grilled minced beef kabab with raita.</p>
+                    <span class="menu-price">Rs. 450</span>
+                  </div>
+                  <div class="menu-item-right">
+                    <div class="menu-img menu-img-3">🥩</div>
+                    <button class="add-btn">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Sticky Cart Bar -->
+          <div class="sticky-cart" onclick="goTo('screen-cart')">
+            <span class="cart-count">2</span>
+            <span>View Cart</span>
+            <span class="cart-total">Rs. 1,200</span>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 5: CART ===== -->
+        <div class="screen" id="screen-cart">
+          <div class="cart-wrap">
+            <div class="cart-header">
+              <button class="back-arrow" onclick="goTo('screen-restaurant')">←</button>
+              <div>
+                <h3 class="cart-title">Your Cart</h3>
+                <p class="cart-sub" id="cart-restaurant-name">SeenBanao</p>
+              </div>
+            </div>
+            <div class="cart-items" id="cart-items-container">
+              <!-- Dynamically populated by app.js -->
+            </div>
+            <p class="add-more-link" id="cart-add-more-link" onclick="goTo('screen-restaurant')">← Add more from SeenBanao</p>
+            <div class="delivery-address-card">
+              <span class="address-icon">📍</span>
+              <div class="address-content">
+                <span class="address-label">DELIVERY ADDRESS</span>
+                <p>House 45, Gulberg III, Lahore</p>
+              </div>
+              <button class="change-btn">Change</button>
+            </div>
+            <div class="loyalty-banner">
+              <span class="loyalty-icon">🏅</span>
+              <p>You have <strong>120 points</strong> — Apply for Rs. 50 off?</p>
+              <div class="toggle-switch active"></div>
+            </div>
+            <div class="order-summary">
+              <div class="summary-row"><span>Subtotal</span><span>Rs. 1,620</span></div>
+              <div class="summary-row"><span>Delivery Fee</span><span>Rs. 60</span></div>
+              <div class="summary-row discount"><span>Loyalty Discount</span><span>− Rs. 50</span></div>
+              <div class="summary-divider"></div>
+              <div class="summary-row total"><span>Total</span><span>Rs. 1,630</span></div>
+            </div>
+            <div class="payment-select">
+              <div class="pay-option selected">
+                <div class="radio-dot active"></div>
+                <span>💵 Cash on Delivery</span>
+              </div>
+              <div class="pay-option">
+                <div class="radio-dot"></div>
+                <span>💳 Credit / Debit Card</span>
+              </div>
+            </div>
+          </div>
+          <div class="place-order-btn" onclick="goTo('screen-checkout')">
+            <span>Place Order</span>
+            <span>Rs. 1,630</span>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN: CHECKOUT ===== -->
+        <div class="screen" id="screen-checkout">
+          <div class="checkout-wrap">
+            <!-- Header -->
+            <div class="checkout-header">
+              <button class="back-arrow" onclick="goTo('screen-cart')">←</button>
+              <h3 class="checkout-title">Checkout</h3>
+              <span class="checkout-step">Step 2/3</span>
+            </div>
+            <!-- Delivery Address -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">📍 Delivery Address</div>
+              <div class="checkout-address-card">
+                <div class="checkout-address-icon">🏠</div>
+                <div class="checkout-address-info">
+                  <span class="checkout-address-tag">Home</span>
+                  <p class="checkout-address-text">House 45, Gulberg III, Lahore</p>
+                  <p class="checkout-address-sub">Near Al-Fatah Store, Main Boulevard</p>
+                </div>
+                <button class="checkout-change-btn">Change</button>
+              </div>
+            </div>
+            <!-- Delivery Time -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">🕐 Delivery Time</div>
+              <div class="checkout-time-options">
+                <div class="checkout-time-card selected" onclick="selectDeliveryTime(this)">
+                  <div class="checkout-time-icon">🛵</div>
+                  <div class="checkout-time-info">
+                    <span class="checkout-time-name">Standard</span>
+                    <span class="checkout-time-eta">30-40 min</span>
+                  </div>
+                  <span class="checkout-time-price">Free</span>
+                  <div class="checkout-radio active"></div>
+                </div>
+                <div class="checkout-time-card" onclick="selectDeliveryTime(this)">
+                  <div class="checkout-time-icon">⚡</div>
+                  <div class="checkout-time-info">
+                    <span class="checkout-time-name">Express</span>
+                    <span class="checkout-time-eta">15-20 min</span>
+                  </div>
+                  <span class="checkout-time-price">+Rs. 50</span>
+                  <div class="checkout-radio"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Order Summary -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">📋 Order Summary</div>
+              <div class="checkout-order-card">
+                <div class="checkout-rest-row">
+                  <span class="checkout-rest-emoji" id="checkout-rest-emoji">🍖</span>
+                  <span class="checkout-rest-name" id="checkout-rest-name">SeenBanao</span>
+                  <span class="checkout-rest-badge">✓</span>
+                </div>
+                <div class="checkout-items" id="checkout-items-container">
+                  <div class="checkout-item">
+                    <div class="checkout-item-qty">1×</div>
+                    <div class="checkout-item-name">Mix BBQ Platter</div>
+                    <div class="checkout-item-price">Rs. 850</div>
+                  </div>
+                  <div class="checkout-item">
+                    <div class="checkout-item-qty">1×</div>
+                    <div class="checkout-item-name">Chicken Handi (Half)</div>
+                    <div class="checkout-item-price">Rs. 650</div>
+                  </div>
+                  <div class="checkout-item">
+                    <div class="checkout-item-qty">1×</div>
+                    <div class="checkout-item-name">Seekh Kabab (6pcs)</div>
+                    <div class="checkout-item-price">Rs. 120</div>
+                  </div>
+                </div>
+                <p class="checkout-edit-link" onclick="goTo('screen-cart')">✏️ Edit Order</p>
+              </div>
+            </div>
+            <!-- Promo Code -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">🏷️ Promo Code</div>
+              <div class="checkout-promo-row">
+                <input type="text" class="checkout-promo-input" placeholder="Enter promo code" />
+                <button class="checkout-promo-btn">Apply</button>
+              </div>
+            </div>
+            <!-- Payment Method -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">💳 Payment Method</div>
+              <div class="checkout-payment-options">
+                <div class="checkout-pay-card selected" onclick="selectPayment(this)">
+                  <span class="checkout-pay-icon">💵</span>
+                  <div class="checkout-pay-info">
+                    <span class="checkout-pay-name">Cash on Delivery</span>
+                    <span class="checkout-pay-desc">Pay when food arrives</span>
+                  </div>
+                  <div class="checkout-radio active"></div>
+                </div>
+                <div class="checkout-pay-card" onclick="selectPayment(this)">
+                  <span class="checkout-pay-icon">💳</span>
+                  <div class="checkout-pay-info">
+                    <span class="checkout-pay-name">Credit / Debit Card</span>
+                    <span class="checkout-pay-desc">Visa, Mastercard accepted</span>
+                  </div>
+                  <div class="checkout-radio"></div>
+                </div>
+                <div class="checkout-pay-card" onclick="selectPayment(this)">
+                  <span class="checkout-pay-icon">🏦</span>
+                  <div class="checkout-pay-info">
+                    <span class="checkout-pay-name">PayFast</span>
+                    <span class="checkout-pay-desc">Local bank transfer</span>
+                  </div>
+                  <div class="checkout-radio"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Bill Summary -->
+            <div class="checkout-section">
+              <div class="checkout-section-label">🧾 Bill Summary</div>
+              <div class="checkout-bill-card">
+                <div class="checkout-bill-row">
+                  <span>Subtotal</span>
+                  <span id="checkout-subtotal">Rs. 1,620</span>
+                </div>
+                <div class="checkout-bill-row">
+                  <span>Delivery Fee</span>
+                  <span id="checkout-delivery">Rs. 60</span>
+                </div>
+                <div class="checkout-bill-row discount" id="checkout-discount-row">
+                  <span>🏅 Loyalty Discount</span>
+                  <span id="checkout-discount">− Rs. 50</span>
+                </div>
+                <div class="checkout-bill-divider"></div>
+                <div class="checkout-bill-row total">
+                  <span>Total</span>
+                  <span id="checkout-total">Rs. 1,630</span>
+                </div>
+              </div>
+            </div>
+            <!-- Spacer for bottom button -->
+            <div style="height: 80px;"></div>
+          </div>
+          <!-- Place Order Button -->
+          <div class="checkout-place-btn" onclick="goTo('screen-tracking')">
+            <div class="checkout-btn-left">
+              <span class="checkout-btn-icon">🛒</span>
+              <span class="checkout-btn-text">Place Order</span>
+            </div>
+            <span class="checkout-btn-price" id="checkout-place-btn-price">Rs. 1,630</span>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 6: ORDER TRACKING ===== -->
+        <div class="screen" id="screen-tracking">
+          <div class="tracking-wrap">
+            <div class="tracking-header">
+              <button class="back-arrow" onclick="goTo('screen-home')">←</button>
+              <h3>Track Order <span class="order-id">#FS-2041</span></h3>
+            </div>
+            <div class="map-view">
+              <div class="map-bg">
+                <div class="map-grid"></div>
+                <div class="map-route"></div>
+                <div class="map-marker restaurant-marker">🍖</div>
+                <div class="map-marker rider-marker">🛵</div>
+                <div class="map-marker home-marker">🏠</div>
+                <div class="eta-bubble">🕐 15 mins</div>
+              </div>
+            </div>
+            <div class="tracking-card">
+              <h3 class="on-way-text">Your order is on the way! 🛵</h3>
+              <p class="arriving-text">Arriving at 4:45 PM</p>
+              <div class="progress-track">
+                <div class="progress-step done">
+                  <div class="step-circle done">✓</div>
+                  <span>Received</span>
+                </div>
+                <div class="progress-line done"></div>
+                <div class="progress-step done">
+                  <div class="step-circle done">✓</div>
+                  <span>Preparing</span>
+                </div>
+                <div class="progress-line active"></div>
+                <div class="progress-step active">
+                  <div class="step-circle active">●</div>
+                  <span>On the way</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                  <div class="step-circle">○</div>
+                  <span>Delivered</span>
+                </div>
+              </div>
+              <div class="rider-card">
+                <div class="rider-avatar">AK</div>
+                <div class="rider-info">
+                  <h5>Ahmed Khan</h5>
+                  <span>⭐ 4.9 · Delivery Partner</span>
+                </div>
+                <div class="rider-actions">
+                  <button class="rider-btn">📞</button>
+                  <button class="rider-btn">💬</button>
+                </div>
+              </div>
+              <div class="order-summary-mini" onclick="goTo('screen-cart')">
+                <span>SeenBanao · 3 items · Rs. 1,630</span>
+                <span>▾</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 7: REWARDS ===== -->
+        <div class="screen" id="screen-rewards">
+          <div class="rewards-wrap">
+            <div class="rewards-header">
+              <h3>FoodSphere</h3>
+              <button class="icon-btn">🔔</button>
+            </div>
+            <div class="rewards-title-row">
+              <span class="crown-icon">👑</span>
+              <h4>My Rewards</h4>
+            </div>
+            <div class="points-card">
+              <div class="tier-badge">🥈 Silver Member</div>
+              <div class="points-big">🏅 1,240 Points</div>
+              <p class="points-value">= Rs. 124 in savings</p>
+              <div class="tier-progress-wrap">
+                <div class="tier-labels"><span>Silver</span><span>Gold</span></div>
+                <div class="tier-bar"><div class="tier-fill"></div></div>
+                <p class="tier-note">760 more points to reach Gold tier</p>
+              </div>
+            </div>
+            <div class="earn-section">
+              <h5>How to Earn</h5>
+              <p class="earn-rule">Earn 1 point for every Rs. 10 spent</p>
+              <div class="earn-steps">
+                <div class="earn-step"><div class="earn-icon">🛒</div><span>Order Food</span></div>
+                <div class="earn-arrow">→</div>
+                <div class="earn-step"><div class="earn-icon">⭐</div><span>Earn Points</span></div>
+                <div class="earn-arrow">→</div>
+                <div class="earn-step"><div class="earn-icon">🎁</div><span>Get Discounts</span></div>
+              </div>
+            </div>
+            <div class="rewards-history">
+              <h5>Recent Activity</h5>
+              <div class="history-item"><span class="hist-rest">SeenBanao</span><span class="hist-pts earned">+85 pts</span><span class="hist-time">2h ago</span></div>
+              <div class="history-item"><span class="hist-rest">JushhPK</span><span class="hist-pts earned">+120 pts</span><span class="hist-time">Yesterday</span></div>
+              <div class="history-item"><span class="hist-rest">Redeemed</span><span class="hist-pts redeemed">−100 pts</span><span class="hist-time">2 days ago</span></div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
+            <div class="nav-item active" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 8: ORDERS ===== -->
+        <div class="screen" id="screen-orders">
+          <div class="orders-wrap">
+            <div class="orders-header">
+              <h3>My Orders</h3>
+            </div>
+            <div class="order-tabs">
+              <div class="order-tab active">Active</div>
+              <div class="order-tab">Past</div>
+            </div>
+            <div class="order-card active-order" onclick="goTo('screen-tracking')">
+              <div class="order-card-header">
+                <span class="order-status-badge live">🔴 Live</span>
+                <span class="order-num">#FS-2041</span>
+              </div>
+              <div class="order-card-body">
+                <div class="order-rest-info">
+                  <div class="order-rest-emoji">🍖</div>
+                  <div>
+                    <h5>SeenBanao</h5>
+                    <p>Mix BBQ Platter, Handi, Naan</p>
+                  </div>
+                </div>
+                <div class="order-track-row">
+                  <div class="mini-track done">✓</div>
+                  <div class="mini-line done"></div>
+                  <div class="mini-track done">✓</div>
+                  <div class="mini-line active"></div>
+                  <div class="mini-track active-dot">●</div>
+                  <div class="mini-line"></div>
+                  <div class="mini-track">○</div>
+                </div>
+                <div class="track-labels"><span>Received</span><span>Preparing</span><span>On way</span><span>Done</span></div>
+              </div>
+              <div class="order-card-footer">
+                <span>Rs. 1,630 · COD</span>
+                <button class="track-btn" onclick="goTo('screen-tracking')">Track Order →</button>
+              </div>
+            </div>
+            <h5 class="past-title">Past Orders</h5>
+            <div class="order-card past-order">
+              <div class="order-card-header">
+                <span class="order-status-badge done-badge">✅ Delivered</span>
+                <span class="order-num">#FS-2039</span>
+              </div>
+              <div class="order-card-body">
+                <div class="order-rest-info">
+                  <div class="order-rest-emoji">🍔</div>
+                  <div>
+                    <h5>JushhPK</h5>
+                    <p>Smash Burger Combo, Fries</p>
+                  </div>
+                </div>
+              </div>
+              <div class="order-card-footer">
+                <span>Rs. 850 · COD</span>
+                <button class="reorder-btn">Reorder</button>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
+            <div class="nav-item active" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 9: PROFILE ===== -->
+        <div class="screen" id="screen-profile">
+          <div class="profile-wrap">
+            <div class="profile-header">
+              <h3>FoodSphere</h3>
+              <button class="icon-btn">🔔</button>
+            </div>
+            <div class="profile-hero">
+              <div class="profile-avatar">HM</div>
+              <h4 class="profile-name">Hamza Malik</h4>
+              <p class="profile-email">hamza@email.com</p>
+              <button class="edit-profile-btn">Edit Profile</button>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-card"><div class="stat-num">28</div><div class="stat-label">Total Orders</div></div>
+              <div class="stat-card gold"><div class="stat-num">⭐ 1,240</div><div class="stat-label">Loyalty Points</div></div>
+              <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">Favorites</div></div>
+            </div>
+            <div class="profile-menu">
+              <div class="profile-menu-item" onclick="goTo('screen-orders')"><span>📋</span><span>My Orders</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item"><span>📍</span><span>Saved Addresses</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item"><span>💳</span><span>Payment Methods</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item" onclick="goTo('screen-rewards')"><span>🏅</span><span>Loyalty Points &amp; Rewards</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item"><span>🔔</span><span>Notifications</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item"><span>❓</span><span>Help &amp; Support</span><span class="arrow">›</span></div>
+              <div class="profile-menu-item"><span>⚙️</span><span>Settings</span><span class="arrow">›</span></div>
+              <div class="profile-divider"></div>
+              <div class="profile-menu-item logout"><span>🚪</span><span>Logout</span></div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item active" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 10: SEARCH ===== -->
+        <div class="screen" id="screen-search">
+          <div class="search-screen-wrap">
+            <div class="search-screen-header">
+              <div class="search-bar-container">
+                <span>🔍</span>
+                <input type="text" class="search-input" placeholder="Search cuisines, dishes, restaurants..." />
+              </div>
+            </div>
+            
+            <div class="search-section">
+              <h4>Recent Searches</h4>
+              <div class="search-tags-flex">
+                <span class="search-tag-chip" onclick="fillSearch('Biryani')">Biryani</span>
+                <span class="search-tag-chip" onclick="fillSearch('Burgers')">Burgers</span>
+                <span class="search-tag-chip" onclick="fillSearch('Pizza')">Pizza</span>
+                <span class="search-tag-chip" onclick="fillSearch('BBQ')">BBQ</span>
+                <span class="search-tag-chip" onclick="fillSearch('Seafood')">Seafood</span>
+              </div>
+            </div>
+
+            <div class="search-section">
+              <h4>Popular Items</h4>
+              <div class="search-popular-list">
+                <div class="search-popular-item" onclick="openRestaurant('seenbanao')">
+                  <div class="search-popular-emoji">🔥 BBQ</div>
+                  <div class="search-popular-details">
+                    <h5>Chicken Tikka Handi</h5>
+                    <p>SeenBanao · Desi BBQ &amp; Handi</p>
+                  </div>
+                  <div class="search-popular-price">Rs. 950</div>
+                </div>
+                <div class="search-popular-item" onclick="openRestaurant('jushhpk')">
+                  <div class="search-popular-emoji">🍔 Burgers</div>
+                  <div class="search-popular-details">
+                    <h5>Smash Combo</h5>
+                    <p>JushhPK · Burgers &amp; Fast Food</p>
+                  </div>
+                  <div class="search-popular-price">Rs. 850</div>
+                </div>
+                <div class="search-popular-item" onclick="openRestaurant('dineatblue')">
+                  <div class="search-popular-emoji">🐟 Seafood</div>
+                  <div class="search-popular-details">
+                    <h5>Grilled Red Snapper</h5>
+                    <p>DineAtBlue · Seafood Specialty</p>
+                  </div>
+                  <div class="search-popular-price">Rs. 2,400</div>
+                </div>
+                <div class="search-popular-item" onclick="openRestaurant('sandmelts')">
+                  <div class="search-popular-emoji">🥪 Melts</div>
+                  <div class="search-popular-details">
+                    <h5>Spicy Beef Melt</h5>
+                    <p>SandMelts · Sandwiches &amp; Shakes</p>
+                  </div>
+                  <div class="search-popular-price">Rs. 650</div>
+                </div>
+                <div class="search-popular-item" onclick="openRestaurant('tandooristoppk')">
+                  <div class="search-popular-emoji">🫓 Naan</div>
+                  <div class="search-popular-details">
+                    <h5>Cheese Garlic Naan</h5>
+                    <p>TandooriStopPK · Tandoor &amp; Naan</p>
+                  </div>
+                  <div class="search-popular-price">Rs. 220</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item active" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+          </div>
+        </div>
+
+      </div><!-- /phone-screen -->
+    </div><!-- /phone-frame -->
+
+    <div class="app-info-right">
+      <h3>App Screens</h3>
+      <div class="screen-nav-list">
+        <button class="screen-nav-btn active" onclick="goTo('screen-splash')">💫 Splash</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-onboarding')">📖 Onboarding</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-home')">🏠 Home</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-restaurant')">🍖 Restaurant</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-cart')">🛒 Cart</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-checkout')">✅ Checkout</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-tracking')">📍 Tracking</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-rewards')">🏅 Rewards</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-orders')">📦 Orders</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-profile')">👤 Profile</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-search')">🔍 Search</button>
+      </div>
+      <div class="tech-stack-info">
+        <h4>Tech Stack</h4>
+        <div class="stack-item">📱 React Native</div>
+        <div class="stack-item">🐍 Django REST API</div>
+        <div class="stack-item">🗄️ PostgreSQL</div>
+        <div class="stack-item">💳 Stripe + PayFast</div>
+        <div class="stack-item">🔔 Firebase FCM</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
