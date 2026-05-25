@@ -18,3 +18,7 @@ node_modules/
 .env
 .env.*
 .env.local
+
+# Databases
+*.sqlite3
+
