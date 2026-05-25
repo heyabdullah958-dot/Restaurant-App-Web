@@ -22,3 +22,8 @@ node_modules/
 # Databases
 *.sqlite3
 
+# Django Static Files
+staticfiles/
+backend/staticfiles/
+
+

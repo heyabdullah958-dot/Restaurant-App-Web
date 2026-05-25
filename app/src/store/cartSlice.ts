@@ -1,8 +1,25 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
-  items: [], // Array of { id, name, price, quantity, selectedOptions, ... }
-  restaurantId: null, // The restaurant ID the cart belongs to (to enforce ordering from one restaurant at a time)
+export interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  selectedOptions?: any;
+  image?: string;
+  [key: string]: any; // Allow other optional fields
+}
+
+export interface CartState {
+  items: CartItem[];
+  restaurantId: number | null;
+  totalQuantity: number;
+  totalAmount: number;
+}
+
+const initialState: CartState = {
+  items: [],
+  restaurantId: null,
   totalQuantity: 0,
   totalAmount: 0,
 };
@@ -11,7 +28,7 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addItemToCart(state, action) {
+    addItemToCart(state, action: PayloadAction<{ item: CartItem; restaurantId: number }>) {
       const { item, restaurantId } = action.payload;
       
       // If adding an item from a different restaurant, reset cart for the new restaurant
@@ -27,19 +44,21 @@ const cartSlice = createSlice({
         (i) => i.id === item.id && JSON.stringify(i.selectedOptions) === JSON.stringify(item.selectedOptions)
       );
 
+      const addedQty = item.quantity || 1;
+
       if (!existingItem) {
         state.items.push({
           ...item,
-          quantity: item.quantity || 1,
+          quantity: addedQty,
         });
       } else {
-        existingItem.quantity += item.quantity || 1;
+        existingItem.quantity += addedQty;
       }
 
-      state.totalQuantity += item.quantity || 1;
-      state.totalAmount += (item.price * (item.quantity || 1));
+      state.totalQuantity += addedQty;
+      state.totalAmount += (item.price * addedQty);
     },
-    removeItemFromCart(state, action) {
+    removeItemFromCart(state, action: PayloadAction<{ id: number; selectedOptions?: any }>) {
       const { id, selectedOptions } = action.payload;
       const existingItem = state.items.find(
         (i) => i.id === id && JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions)
@@ -57,7 +76,7 @@ const cartSlice = createSlice({
         state.restaurantId = null;
       }
     },
-    updateQuantity(state, action) {
+    updateQuantity(state, action: PayloadAction<{ id: number; selectedOptions?: any; quantity: number }>) {
       const { id, selectedOptions, quantity } = action.payload;
       const existingItem = state.items.find(
         (i) => i.id === id && JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions)
