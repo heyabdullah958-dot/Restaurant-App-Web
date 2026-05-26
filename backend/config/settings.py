@@ -108,6 +108,8 @@ if DATABASE_URL:
     except Exception:
         pass
 
+    os.environ['DATABASE_URL'] = DATABASE_URL
+
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
