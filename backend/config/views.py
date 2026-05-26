@@ -44,6 +44,34 @@ def db_debug(request):
             'database_url_configured': bool(os.environ.get('DATABASE_URL'))
         })
 
+def create_admin(request):
+    """
+    Temporary endpoint to create a superuser on platforms where shell access is restricted.
+    """
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    username = "admin"
+    email = "admin@foodsphere.com"
+    password = "FoodSphereAdmin2026!"  # Temporary secure password
+    
+    try:
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                'success': False,
+                'message': f"Superuser '{username}' already exists."
+            })
+            
+        User.objects.create_superuser(username=username, email=email, password=password)
+        return JsonResponse({
+            'success': True,
+            'message': f"Superuser '{username}' created successfully. Password is '{password}'. Please change it immediately in the admin panel!"
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
 def root_view(request):
     """
     Root API endpoint welcome message.

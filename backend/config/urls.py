@@ -16,14 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from config.views import health_check, db_debug, root_view
+from config.views import health_check, db_debug, create_admin
 
 urlpatterns = [
-    path('', root_view, name='root'),
     path('admin/', admin.site.urls),
     path('health/', health_check, name='health_check'),
     path('api/health/', health_check, name='api_health_check'),
     path('api/db-debug/', db_debug, name='db_debug'),
+    path('api/create-admin/', create_admin, name='create_admin'),
     
     # API App Routes
     path('api/', include('users.urls')),
