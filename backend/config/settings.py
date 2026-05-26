@@ -33,6 +33,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -236,4 +237,66 @@ X_FRAME_OPTIONS = 'DENY'
 # Secure Cookies in Production
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+# Jazzmin Admin Panel Configuration
+JAZZMIN_SETTINGS = {
+    "site_title": "FoodSphere Admin",
+    "site_header": "FoodSphere",
+    "site_brand": "FoodSphere Admin",
+    "welcome_sign": "Welcome to the FoodSphere Restaurant Aggregator Portal",
+    "copyright": "FoodSphere Ltd",
+    "search_model": ["users.User", "restaurants.Restaurant"],
+    "user_avatar": None,
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Live Site", "url": "https://restaurant-app-web.onrender.com/", "new_window": True},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "users.user": "fas fa-user-circle",
+        "auth.Group": "fas fa-users",
+        "restaurants.restaurant": "fas fa-store",
+        "restaurants.menuitem": "fas fa-hamburger",
+        "orders.order": "fas fa-shopping-basket",
+        "orders.orderitem": "fas fa-box-open",
+        "payments.payment": "fas fa-credit-card",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-dot-circle",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-danger",
+    "accent": "accent-danger",
+    "navbar": "navbar-dark navbar-danger",
+    "no_navbar_border": True,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-danger",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-danger",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
 
