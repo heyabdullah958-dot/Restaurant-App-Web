@@ -29,27 +29,17 @@ type RootStackParamList = {
   Search: undefined;
   Restaurant: { slug: string };
   Cart: undefined;
-  OrderConfirmation: { orderId: number };
+  Checkout: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Cart'>;
 
 export default function CartScreen() {
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<any>();
   const dispatch = useDispatch<AppDispatch>();
 
   const cart = useSelector((state: RootState) => state.cart);
-  const { user } = useSelector((state: RootState) => state.user);
-  const { loading: orderLoading } = useSelector((state: RootState) => state.order);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
-
-  // Form states for delivery
-  const [name, setName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [address, setAddress] = useState(
-    user?.addresses && user.addresses.length > 0 ? user.addresses[0] : ''
-  );
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // cod / stripe / payfast
 
   React.useEffect(() => {
     dispatch(fetchRestaurants());
@@ -95,55 +85,8 @@ export default function CartScreen() {
     );
   };
 
-  const handleCheckout = async () => {
-    if (!address.trim()) {
-      Alert.alert('Missing Address', 'Please provide a delivery address.');
-      return;
-    }
-    if (!name.trim() || !phone.trim()) {
-      Alert.alert('Contact Details Required', 'Please enter your name and phone number for delivery.');
-      return;
-    }
-
-    const orderData = {
-      restaurant: cart.restaurantId!,
-      guest_name: !user ? name : undefined,
-      guest_phone: !user ? phone : undefined,
-      items: cart.items.map((item: any) => ({
-        menu_item: item.id,
-        quantity: item.quantity,
-        special_notes: '',
-      })),
-      payment_method: paymentMethod,
-      delivery_address: address,
-    };
-
-    try {
-      const resultAction = await dispatch(placeOrder(orderData));
-      if (placeOrder.fulfilled.match(resultAction)) {
-        const createdOrder = resultAction.payload;
-        const orderId = createdOrder?.data?.id || createdOrder?.id;
-        
-        Alert.alert(
-          'Order Placed!',
-          `Your order has been received. Order ID: #${orderId || 'N/A'}.`,
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                dispatch(clearCart());
-                navigation.navigate('Home');
-              },
-            },
-          ]
-        );
-      } else {
-        const errorMsg = resultAction.payload as string;
-        Alert.alert('Checkout Failed', errorMsg || 'Something went wrong while placing your order.');
-      }
-    } catch (err) {
-      Alert.alert('Checkout Error', 'Unable to reach servers. Please check your network.');
-    }
+  const handleProceedToCheckout = () => {
+    navigation.navigate('Checkout');
   };
 
   if (cart.items.length === 0) {
@@ -232,76 +175,6 @@ export default function CartScreen() {
           ))}
         </View>
 
-        {/* Delivery Details Form */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Delivery Information</Text>
-          
-          <Text style={styles.inputLabel}>Recipient Name</Text>
-          <TextInput
-            placeholder="Enter your name"
-            value={name}
-            onChangeText={setName}
-            style={styles.textInput}
-            placeholderTextColor={COLORS.gray}
-          />
-
-          <Text style={styles.inputLabel}>Mobile Phone</Text>
-          <TextInput
-            placeholder="e.g. +92 300 1234567"
-            value={phone}
-            onChangeText={setPhone}
-            style={styles.textInput}
-            keyboardType="phone-pad"
-            placeholderTextColor={COLORS.gray}
-          />
-
-          <Text style={styles.inputLabel}>Delivery Address</Text>
-          <TextInput
-            placeholder="Street Address, Block, Area, City"
-            value={address}
-            onChangeText={setAddress}
-            style={[styles.textInput, { height: 60, textAlignVertical: 'top' }]}
-            multiline
-            numberOfLines={3}
-            placeholderTextColor={COLORS.gray}
-          />
-        </View>
-
-        {/* Payment Methods */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Payment Method</Text>
-          
-          <TouchableOpacity
-            style={[styles.paymentOption, paymentMethod === 'cod' && styles.paymentOptionSelected]}
-            onPress={() => setPaymentMethod('cod')}
-          >
-            <Ionicons
-              name={paymentMethod === 'cod' ? 'radio-button-on' : 'radio-button-off'}
-              size={18}
-              color={paymentMethod === 'cod' ? COLORS.primary : COLORS.gray}
-            />
-            <View style={styles.paymentTextCol}>
-              <Text style={styles.paymentName}>Cash on Delivery (COD)</Text>
-              <Text style={styles.paymentDesc}>Pay cash when order is delivered (Primary)</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.paymentOption, paymentMethod === 'stripe' && styles.paymentOptionSelected, { marginTop: SPACING.sm }]}
-            onPress={() => setPaymentMethod('stripe')}
-          >
-            <Ionicons
-              name={paymentMethod === 'stripe' ? 'radio-button-on' : 'radio-button-off'}
-              size={18}
-              color={paymentMethod === 'stripe' ? COLORS.primary : COLORS.gray}
-            />
-            <View style={styles.paymentTextCol}>
-              <Text style={styles.paymentName}>Pay with Credit Card (Stripe)</Text>
-              <Text style={styles.paymentDesc}>Secure online checkout via Stripe</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
         {/* Bill Summary */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Bill Summary</Text>
@@ -324,24 +197,17 @@ export default function CartScreen() {
         </View>
       </ScrollView>
 
-      {/* Place Order Button */}
+      {/* Proceed to Checkout Button */}
       <View style={styles.checkoutFooter}>
         <TouchableOpacity
           style={styles.checkoutButton}
           activeOpacity={0.9}
-          onPress={handleCheckout}
-          disabled={orderLoading}
+          onPress={handleProceedToCheckout}
         >
-          {orderLoading ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <>
-              <Text style={styles.checkoutBtnText}>Place Delivery Order</Text>
-              <Text style={styles.checkoutBtnAmount}>
-                Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
-              </Text>
-            </>
-          )}
+          <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
+          <Text style={styles.checkoutBtnAmount}>
+            Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BIRDMAN — Grilled & Crispy Fried Chicken | Lahore</title>
+  <meta name="description" content="Birdman Foods offers the ultimate flame-grilled and crispy fried chicken in Lahore. Pressure-fried tenders, spicy wings, and premium family platters. Book your catering today."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dark-bg: #0A0A0C;
+      --card-bg: #141418;
+      --card-border: rgba(255, 110, 64, 0.15);
+      --primary: #FF5722;
+      --primary-hover: #F4511E;
+      --primary-light: #FF8A65;
+      --accent: #FFB300;
+      --white: #FFFFFF;
+      --text-muted: rgba(255, 255, 255, 0.65);
+      --gray-light: #1A1A22;
+      --success: #4CAF50;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--dark-bg);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 6%;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 87, 34, 0.15);
+      transition: all 0.3s;
+    }
+    .nav-logo {
+      font-size: 26px; font-weight: 900; color: var(--white);
+      letter-spacing: 2px; text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.75); text-decoration: none;
+      font-size: 15px; font-weight: 500; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--primary-light); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--primary), #D84315);
+      color: white; padding: 10px 24px; border-radius: 8px;
+      font-size: 14px; font-weight: 700; text-decoration: none;
+      border: 1px solid rgba(255, 87, 34, 0.3);
+      box-shadow: 0 6px 20px rgba(255, 87, 34, 0.25);
+      transition: all 0.3s;
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 87, 34, 0.45);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: radial-gradient(circle at 80% 20%, rgba(255, 87, 34, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 10% 80%, rgba(255, 179, 0, 0.05) 0%, transparent 40%),
+                  #0A0A0C;
+      display: flex; align-items: center;
+      padding: 140px 6% 90px;
+      position: relative; overflow: hidden;
+    }
+    .hero-content { max-width: 650px; z-index: 2; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255, 87, 34, 0.1); border: 1px solid rgba(255, 87, 34, 0.25);
+      color: var(--primary-light); font-size: 12px; font-weight: 700;
+      padding: 6px 16px; border-radius: 6px;
+      margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px;
+    }
+    .hero-title {
+      font-size: clamp(38px, 5.5vw, 68px);
+      font-weight: 900; line-height: 1.08;
+      margin-bottom: 20px; letter-spacing: -0.5px;
+    }
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 17px; color: var(--text-muted);
+      line-height: 1.7; margin-bottom: 38px; font-weight: 300;
+    }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #E64A19);
+      color: white; padding: 16px 36px; border-radius: 8px;
+      font-size: 15px; font-weight: 700; text-decoration: none;
+      box-shadow: 0 10px 30px rgba(255, 87, 34, 0.3);
+      transition: all 0.3s;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(255, 87, 34, 0.5); }
+    .btn-outline {
+      border: 1.5px solid rgba(255,255,255,0.2); color: white;
+      padding: 14px 32px; border-radius: 8px;
+      font-size: 15px; font-weight: 600; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-outline:hover { border-color: var(--primary-light); color: var(--primary-light); }
+
+    .open-banner {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 30px; padding: 10px 22px;
+      font-size: 14px; color: var(--text-muted);
+    }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 12px #4ADE80; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+    /* ── MARQUEE ── */
+    .marquee {
+      background: linear-gradient(135deg, #180C08, #281005);
+      padding: 15px 0; overflow: hidden;
+      border-top: 1px solid rgba(255, 87, 34, 0.2);
+      border-bottom: 1px solid rgba(255, 87, 34, 0.2);
+    }
+    .marquee-track {
+      display: flex; white-space: nowrap;
+      animation: marquee-scroll 25s linear infinite;
+    }
+    .marquee-item {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 0 40px; font-size: 14px; font-weight: 700;
+      color: rgba(255,255,255,0.8); letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .marquee-dot { color: var(--accent); font-size: 20px; }
+    @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── GENERAL SECTIONS ── */
+    .section { padding: 100px 6%; }
+    .section-dark { background: var(--dark-bg); }
+    .section-grey { background: #0E0E12; }
+
+    .section-header { margin-bottom: 60px; }
+    .eyebrow {
+      color: var(--primary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .eyebrow::after { content: ''; display: block; width: 40px; height: 1.5px; background: var(--primary); }
+    .section-title { font-size: clamp(28px, 4vw, 48px); font-weight: 800; line-height: 1.1; margin-bottom: 16px; }
+    .section-title .glow {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section-desc { font-size: 16px; color: var(--text-muted); line-height: 1.7; max-width: 580px; font-weight: 300; }
+
+    /* ── MENU ── */
+    .menu-tabs {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 44px;
+      justify-content: flex-start;
+    }
+    .menu-tab {
+      background: var(--gray-light);
+      border: 1px solid rgba(255, 87, 34, 0.15);
+      padding: 10px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.3s;
+    }
+    .menu-tab:hover, .menu-tab.active {
+      background: var(--primary); color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .menu-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px; overflow: hidden;
+      transition: all 0.35s ease;
+      display: flex; flex-direction: column;
+    }
+    .menu-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255, 87, 34, 0.45);
+      box-shadow: 0 20px 40px rgba(255, 87, 34, 0.15);
+    }
+    .menu-img {
+      height: 200px; background-size: cover; background-position: center;
+      position: relative; background-color: var(--gray-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+    }
+    .menu-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--accent); color: var(--dark-bg);
+      padding: 4px 10px; border-radius: 4px;
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+    }
+    .menu-body { padding: 24px; flex-grow: 1; display: flex; flex-direction: column; }
+    .menu-name { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+    .menu-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; font-weight: 300; flex-grow: 1; }
+    .menu-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+    .menu-price { font-size: 18px; font-weight: 800; color: var(--accent); }
+    .menu-btn {
+      background: transparent; border: 1.5px solid var(--primary);
+      color: var(--primary); padding: 8px 18px; border-radius: 6px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: all 0.3s;
+    }
+    .menu-btn:hover { background: var(--primary); color: white; }
+
+    /* ── CATERING SECTION ── */
+    .catering-grid {
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 50px;
+      align-items: center;
+    }
+    .catering-info h3 { font-size: 26px; font-weight: 700; margin-bottom: 18px; }
+    .catering-info p { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 30px; }
+    
+    .feature-list { display: flex; flex-direction: column; gap: 18px; margin-bottom: 40px; }
+    .feature-item { display: flex; gap: 14px; align-items: flex-start; }
+    .feature-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255, 87, 34, 0.15); color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; flex-shrink: 0; margin-top: 2px;
+    }
+    .feature-text h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .feature-text p { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+    .catering-form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .form-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .form-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; color: var(--primary-light); }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; background: var(--gray-light);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px; padding: 12px 16px;
+      color: white; font-family: inherit; font-size: 14px;
+      transition: all 0.3s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(255, 87, 34, 0.2);
+    }
+    .form-textarea { min-height: 90px; resize: vertical; }
+    .submit-btn {
+      width: 100%; background: linear-gradient(135deg, var(--primary), #D84315);
+      border: none; color: white; padding: 14px; border-radius: 8px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 8px 24px rgba(255, 87, 34, 0.25);
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(255, 87, 34, 0.45);
+    }
+
+    /* ── LOCATION & HOURS ── */
+    .location-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+    }
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 36px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .info-card h4 { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .info-card p { font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+    .info-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--gray-light); border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white; padding: 12px 24px; border-radius: 8px;
+      font-size: 14px; font-weight: 600; text-decoration: none;
+      transition: all 0.3s;
+    }
+    .info-btn:hover { border-color: var(--primary); background: rgba(255, 87, 34, 0.05); }
+    .hours-badge {
+      display: inline-block; background: rgba(255, 179, 0, 0.1);
+      color: var(--accent); border: 1px solid rgba(255, 179, 0, 0.2);
+      padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 14px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 60px 6%; background: #060608;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    .footer-brand {
+      font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 24px;
+    }
+    .footer-brand span {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .footer-links { display: flex; gap: 30px; justify-content: center; list-style: none; margin-bottom: 30px; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.3s; }
+    .footer-links a:hover { color: var(--primary-light); }
+    .footer-copy { font-size: 13px; color: rgba(255, 255, 255, 0.3); font-weight: 300; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 991px) {
+      .catering-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: 16px 5%; }
+      .nav-links { display: none; }
+      .section { padding: 70px 5%; }
+      .location-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .hero { padding: 120px 5% 70px; text-align: center; justify-content: center; }
+      .hero-badge, .open-banner { margin-left: auto; margin-right: auto; }
+      .hero-btns { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <a href="#home" class="nav-logo">🍗 <span>BIRDMAN</span></a>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#catering">Catering</a></li>
+      <li><a href="#location">Find Us</a></li>
+    </ul>
+    <a href="#catering" class="nav-cta">Catering Inquiry</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-badge">🔥 Spicy, Crispy & Fresh</div>
+      <h1 class="hero-title">Where Big Crunch Meets <span class="highlight">Bold Flavor</span></h1>
+      <p class="hero-sub">Get ready for Lahore's finest flame-grilled chicken, loaded crispy burgers, and hand-breaded pressure-fried tenders. Perfected with our secret Birdman dry rub.</p>
+      
+      <div class="hero-btns">
+        <a href="#menu" class="btn-primary">Explore Menu</a>
+        <a href="#catering" class="btn-outline">Book Catering</a>
+      </div>
+
+      <div class="open-banner">
+        <div class="pulse-dot"></div>
+        <span>Serving Daily from <strong>12:00 PM — 1:00 AM</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE RUNNING TEXT -->
+  <div class="marquee">
+    <div class="marquee-track">
+      <div class="marquee-item"><span class="marquee-dot">★</span> FLAME GRILLED CHICKEN</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> HAND-BREADED CRISPY TENDERS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> SIGNATURE BIRDMAN BURGERS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> SPICY WINGS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> COD ORDER ON UNIFIED APP</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> FLAME GRILLED CHICKEN</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> HAND-BREADED CRISPY TENDERS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> SIGNATURE BIRDMAN BURGERS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> SPICY WINGS</div>
+      <div class="marquee-item"><span class="marquee-dot">★</span> COD ORDER ON UNIFIED APP</div>
+    </div>
+  </div>
+
+  <!-- MENU SECTION -->
+  <section class="section section-grey" id="menu">
+    <div class="section-header">
+      <div class="eyebrow">Fresh & Hot</div>
+      <h2 class="section-title">Our Signature <span class="glow">Menu</span></h2>
+      <p class="section-desc">Handcrafted items using premium chicken, fresh spices, and custom house-made dressings.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="menu-tabs">
+      <div class="menu-tab active" onclick="filterMenu('all', this)">All Items</div>
+      <div class="menu-tab" onclick="filterMenu('grilled', this)">Flame Grilled</div>
+      <div class="menu-tab" onclick="filterMenu('fried', this)">Crispy Fried</div>
+      <div class="menu-tab" onclick="filterMenu('combos', this)">Catering Combos</div>
+    </div>
+
+    <!-- Grid -->
+    <div class="menu-grid">
+      <!-- Item 1 -->
+      <div class="menu-card" data-category="grilled">
+        <div class="menu-img">🔥🍗</div>
+        <div class="menu-body">
+          <span class="menu-badge">Best Seller</span>
+          <div class="menu-name">Quarter Flame Grilled Chicken</div>
+          <div class="menu-desc">Birdman's signature quarter chicken leg or breast, marinated in hot peri spice and grilled over live charcoal. Served with garlic sauce.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 580</div>
+            <button class="menu-btn" onclick="selectPackage('Quarter Flame Grilled Chicken')">Inquire</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="menu-card" data-category="grilled">
+        <div class="menu-img">🔥🍢</div>
+        <div class="menu-body">
+          <div class="menu-name">Half Charcoal BBQ Chicken</div>
+          <div class="menu-desc">Slow-grilled half chicken basted with lemon-herb or extra hot glaze. Crispy outer skin, super juicy inside.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 1,050</div>
+            <button class="menu-btn" onclick="selectPackage('Half Charcoal BBQ Chicken')">Inquire</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="menu-card" data-category="fried">
+        <div class="menu-img">🍔🍟</div>
+        <div class="menu-body">
+          <span class="menu-badge">Spicy</span>
+          <div class="menu-name">Birdman Crispy Burger</div>
+          <div class="menu-desc">Crispy golden chicken breast fillet dipped in spicy nashville oil, topped with coleslaw, pickles, and our signature Birdman spread.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 620</div>
+            <button class="menu-btn" onclick="selectPackage('Birdman Crispy Burger')">Inquire</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 4 -->
+      <div class="menu-card" data-category="fried">
+        <div class="menu-img">🍗⚡</div>
+        <div class="menu-body">
+          <div class="menu-name">Premium Crispy Tenders (4pcs)</div>
+          <div class="menu-desc">Hand-breaded premium chicken breast strips, golden pressure fried. Served with honey mustard or honey BBQ dipping sauce.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 520</div>
+            <button class="menu-btn" onclick="selectPackage('Premium Crispy Tenders (4pcs)')">Inquire</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 5 -->
+      <div class="menu-card" data-category="combos">
+        <div class="menu-img">📦🎉</div>
+        <div class="menu-body">
+          <span class="menu-badge">Catering Pack</span>
+          <div class="menu-name">Birdman Party Box (10 Guests)</div>
+          <div class="menu-desc">Massive box with 2x Full Grilled Chicken (divided), 15x Crispy Chicken Tenders, 3x Large Crinkle Fries, Coleslaw, and 4x Assorted Dips.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 9,500</div>
+            <button class="menu-btn" onclick="selectPackage('Birdman Party Box (10 Guests)')">Select</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 6 -->
+      <div class="menu-card" data-category="combos">
+        <div class="menu-img">🍽️🎈</div>
+        <div class="menu-body">
+          <span class="menu-badge">Mega Deal</span>
+          <div class="menu-name">Grand Feast Platter (20 Guests)</div>
+          <div class="menu-desc">The ultimate catering option. 4x Full Charcoal BBQ Chicken, 30x Wings (Spicy Buffalo), 25x Tenders, 6x Garlic Breads, Fries, and Dipping Cups.</div>
+          <div class="menu-foot">
+            <div class="menu-price">Rs. 18,900</div>
+            <button class="menu-btn" onclick="selectPackage('Grand Feast Platter (20 Guests)')">Select</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATERING SECTION -->
+  <section class="section section-dark" id="catering">
+    <div class="catering-grid">
+      <div class="catering-info">
+        <div class="eyebrow">Events & Gathering</div>
+        <h2 class="section-title">Host a <span class="glow">Birdman Feast</span></h2>
+        <p>From birthday parties and family gatherings to corporate events, we provide premium grilled and crispy chicken packages tailored to your guest size. All cooked fresh, packed in heat-retaining containers, and delivered on-site.</p>
+        
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">
+              <h4>Tailored Packages</h4>
+              <p>Choose from flame-grilled, crispy-fried, or hybrid mix boxes.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">
+              <h4>Heat-Retained Delivery</h4>
+              <p>We deliver in heavy duty insulated thermal bags so everything arrives piping hot.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✓</div>
+            <div class="feature-text">
+              <h4>Live Counters Available</h4>
+              <p>For gatherings of 50+ guests, we can set up live charcoal grilling at your venue.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catering Form -->
+      <div class="catering-form-card">
+        <h3 class="form-title">Catering Inquiry</h3>
+        <p class="form-sub">Plan your feast with us. We'll contact you within 1 hour to finalize.</p>
+        
+        <form action="https://formspree.io/f/birdmanfoodspk" method="POST">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-input" placeholder="e.g. Bilal Ahmed" required/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone (WhatsApp)</label>
+              <input type="tel" name="phone" class="form-input" placeholder="03XX-XXXXXXX" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Guest Count</label>
+              <input type="number" name="guests" class="form-input" placeholder="e.g. 15" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Event Date</label>
+              <input type="date" name="event_date" class="form-input" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preferred Package</label>
+              <select name="package" class="form-select" id="package-select">
+                <option value="none">Choose a Package</option>
+                <option value="Quarter Flame Grilled Chicken">Quarter Flame Grilled Chicken</option>
+                <option value="Half Charcoal BBQ Chicken">Half Charcoal BBQ Chicken</option>
+                <option value="Birdman Crispy Burger">Birdman Crispy Burger</option>
+                <option value="Premium Crispy Tenders">Premium Crispy Tenders</option>
+                <option value="Birdman Party Box (10 Guests)">Birdman Party Box (10 Guests)</option>
+                <option value="Grand Feast Platter (20 Guests)">Grand Feast Platter (20 Guests)</option>
+                <option value="custom">Custom Hybrid Menu</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Special requests / notes</label>
+            <textarea name="notes" class="form-textarea" placeholder="e.g. Live grilling setup required, low spicy, extra fries..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Send Booking Inquiry</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATION & HOURS -->
+  <section class="section section-grey" id="location">
+    <div class="section-header">
+      <div class="eyebrow">Find Us</div>
+      <h2 class="section-title">Location & <span class="glow">Hours</span></h2>
+    </div>
+    <div class="location-grid">
+      <div class="info-card">
+        <div>
+          <h4>📍 Our Location</h4>
+          <p><strong>M.M. Alam Road, near Xinhua Mall</strong><br/>Gulberg III, Lahore, Pakistan</p>
+        </div>
+        <a href="https://maps.google.com/?q=Xinhua+Mall+Gulberg+Lahore" target="_blank" class="info-btn">🗺️ Open in Google Maps</a>
+      </div>
+      <div class="info-card">
+        <div>
+          <h4>⏰ Opening Hours</h4>
+          <p>We serve fresh, hot meals 7 days a week.</p>
+          <span class="hours-badge">🕐 12:00 PM — 1:00 AM</span>
+        </div>
+        <a href="tel:+923000000000" class="info-btn" style="margin-top: 20px;">📞 Call: +92 300 0000000</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">🍗 <span>BIRDMAN</span></div>
+    <ul class="footer-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#catering">Catering</a></li>
+      <li><a href="#location">Location</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 BIRDMAN Foods. All Rights Reserved. Gulberg, Lahore.</div>
+  </footer>
+
+  <script>
+    // Border accent on scroll
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').style.borderBottomColor =
+        window.scrollY > 60 ? 'rgba(255, 87, 34, 0.35)' : 'rgba(255, 87, 34, 0.15)';
+    });
+
+    // Tab filtering function
+    function filterMenu(category, element) {
+      document.querySelectorAll('.menu-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      element.classList.add('active');
+
+      const cards = document.querySelectorAll('.menu-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Auto-select package in form and scroll
+    function selectPackage(packageName) {
+      const select = document.getElementById('package-select');
+      if (select) {
+        select.value = packageName;
+      }
+      document.getElementById('catering').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

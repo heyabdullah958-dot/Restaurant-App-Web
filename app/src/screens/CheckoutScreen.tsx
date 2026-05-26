@@ -132,10 +132,10 @@ export default function CheckoutScreen() {
           Alert.alert('PayFast Payment', 'Redirecting to local payment gateway simulator...');
         }
 
-        // 6. Clear cart & redirect to tracking
+        // 6. Clear cart & redirect to order confirmation success page
         dispatch(clearCart());
         setIsSubmitting(false);
-        navigation.replace('Tracking', { orderId });
+        navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned });
       } else {
         setIsSubmitting(false);
         const errMsg = resultAction.payload || 'Failed to place order';

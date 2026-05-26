@@ -47,16 +47,24 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
     }
 
     try {
-      const response = await api.get('/users/loyalty/');
-      const data = response.data || response;
+      const response = await api.get('/users/loyalty/') as any;
       
-      if (data && data.transactions) {
-        setTransactions(data.transactions);
+      // Handle different levels of response unwrapping robustly
+      let loyaltyData = response;
+      if (response && response.data) {
+        loyaltyData = response.data;
       }
-      if (data && typeof data.loyalty_points === 'number') {
-        setPoints(data.loyalty_points);
+      if (loyaltyData && loyaltyData.data) {
+        loyaltyData = loyaltyData.data;
+      }
+      
+      if (loyaltyData && Array.isArray(loyaltyData.transactions)) {
+        setTransactions(loyaltyData.transactions);
+      }
+      if (loyaltyData && typeof loyaltyData.loyalty_points === 'number') {
+        setPoints(loyaltyData.loyalty_points);
         // Sync with Redux user state
-        dispatch(updateUserProfile({ loyalty_points: data.loyalty_points }));
+        dispatch(updateUserProfile({ loyalty_points: loyaltyData.loyalty_points }));
       }
     } catch (error) {
       console.error('Failed to fetch loyalty history:', error);

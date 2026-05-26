@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface UserProfile {
   id: number;
@@ -32,6 +33,37 @@ const initialState: UserState = {
 };
 
 // Async Thunks with explicit types
+export const loadSavedToken = createAsyncThunk<
+  { user: UserProfile; token: string; refreshToken: string } | null,
+  void,
+  { rejectValue: string }
+>(
+  'user/loadSavedToken',
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const refreshToken = await AsyncStorage.getItem('refresh_token');
+      
+      if (!token) return null;
+      
+      // Set default auth header
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Fetch user profile info to verify token works
+      const profileResponse = await api.get('/users/profile/') as any;
+      const user = profileResponse.data || profileResponse;
+      
+      return { user, token, refreshToken: refreshToken || '' };
+    } catch (error: any) {
+      // If profile fails, clean up token
+      delete api.defaults.headers.common['Authorization'];
+      await AsyncStorage.removeItem('auth_token').catch(() => {});
+      await AsyncStorage.removeItem('refresh_token').catch(() => {});
+      return rejectWithValue(error.message || 'Session expired');
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk<
   { user: UserProfile; token: string; refreshToken: string },
   { username: string; password: string },
@@ -47,6 +79,14 @@ export const loginUser = createAsyncThunk<
       
       // Set the default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Save token locally
+      try {
+        await AsyncStorage.setItem('auth_token', token);
+        await AsyncStorage.setItem('refresh_token', refreshToken);
+      } catch (err) {
+        console.error('Failed to save token to AsyncStorage:', err);
+      }
       
       // Fetch user profile info
       const profileResponse = await api.get('/users/profile/') as any;
@@ -76,6 +116,14 @@ export const registerUser = createAsyncThunk<
       // Set default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
+      // Save token locally
+      try {
+        await AsyncStorage.setItem('auth_token', token);
+        await AsyncStorage.setItem('refresh_token', tokens.refresh);
+      } catch (err) {
+        console.error('Failed to save token to AsyncStorage:', err);
+      }
+      
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Registration failed';
@@ -99,6 +147,14 @@ export const guestLogin = createAsyncThunk<
       
       // Set default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Save token locally
+      try {
+        await AsyncStorage.setItem('auth_token', token);
+        await AsyncStorage.setItem('refresh_token', tokens.refresh);
+      } catch (err) {
+        console.error('Failed to save token to AsyncStorage:', err);
+      }
       
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
@@ -149,6 +205,12 @@ export const logoutUser = createAsyncThunk<
   'user/logout',
   async (_, { dispatch }) => {
     delete api.defaults.headers.common['Authorization'];
+    try {
+      await AsyncStorage.removeItem('auth_token');
+      await AsyncStorage.removeItem('refresh_token');
+    } catch (err) {
+      console.error('Failed to remove token from AsyncStorage:', err);
+    }
     dispatch(logout());
   }
 );
@@ -176,6 +238,25 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Load Saved Token
+      .addCase(loadSavedToken.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loadSavedToken.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload) {
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.refreshToken = action.payload.refreshToken;
+          state.isAuthenticated = true;
+        }
+      })
+      .addCase(loadSavedToken.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to load token';
+        state.isAuthenticated = false;
+      })
       // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
