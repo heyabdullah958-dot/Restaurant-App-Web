@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
+import urllib.parse
 from .models import Order, OrderItem
 from config.admin_utils import get_managed_restaurant
 
@@ -38,11 +40,11 @@ class OrderItemInline(admin.StackedInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'total', 'created_at')
+    list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'total', 'created_at', 'send_to_rider_whatsapp')
     list_filter = ('status', 'payment_method', 'restaurant', 'created_at')
     search_fields = ('id', 'guest_name', 'guest_phone', 'user__username')
     list_editable = ('status',)
-    readonly_fields = ('subtotal', 'delivery_fee', 'discount', 'total', 'created_at', 'updated_at')
+    readonly_fields = ('subtotal', 'delivery_fee', 'discount', 'total', 'created_at', 'updated_at', 'send_to_rider_whatsapp')
     date_hierarchy = 'created_at'
     inlines = [OrderItemInline]
 
@@ -54,7 +56,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('user', 'guest_name', 'guest_phone')
         }),
         ('Delivery', {
-            'fields': ('delivery_address', 'special_instructions')
+            'fields': ('delivery_address', 'special_instructions', 'send_to_rider_whatsapp')
         }),
         ('Pricing', {
             'fields': ('subtotal', 'delivery_fee', 'discount', 'total')
@@ -66,6 +68,44 @@ class OrderAdmin(admin.ModelAdmin):
             return obj.user.username
         return f"{obj.guest_name or 'Guest'} (Guest)"
     user_or_guest.short_description = 'Customer'
+
+    def send_to_rider_whatsapp(self, obj):
+        if not obj.pk:
+            return ""
+        name = obj.guest_name
+        if not name and obj.user:
+            name = f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
+        if not name:
+            name = "Guest"
+        
+        phone = obj.guest_phone
+        if not phone and obj.user:
+            phone = obj.user.phone
+        if not phone:
+            phone = "N/A"
+            
+        if obj.delivery_lat and obj.delivery_lng:
+            location_link = f"https://maps.google.com/?q={obj.delivery_lat},{obj.delivery_lng}"
+        else:
+            location_link = f"https://maps.google.com/?q={urllib.parse.quote(obj.delivery_address)}"
+            
+        message = (
+            f"Rider Bhai, ye order deliver karna hai:\n"
+            f"Naam: {name}\n"
+            f"Phone: {phone}\n"
+            f"Address: {obj.delivery_address}\n"
+            f"Location Link: {location_link}"
+        )
+        encoded_message = urllib.parse.quote(message)
+        whatsapp_url = f"https://wa.me/?text={encoded_message}"
+        return mark_safe(
+            f'<a href="{whatsapp_url}" target="_blank" '
+            f'style="background-color: #25D366; color: white; padding: 4px 8px; border-radius: 4px; '
+            f'text-decoration: none; font-weight: bold; font-size: 11px; display: inline-block;">'
+            f'Send to Rider'
+            f'</a>'
+        )
+    send_to_rider_whatsapp.short_description = 'WhatsApp Dispatch'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
