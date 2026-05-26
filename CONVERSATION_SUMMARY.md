@@ -61,3 +61,38 @@ This session focused on completing Phase 5 (React Native App 12 Screens and Redu
 * **Production Live Hosting Completed**: Deployed Django REST backend to Render's free tier at [https://restaurant-app-web.onrender.com](https://restaurant-app-web.onrender.com).
 * **Database Integration Completed**: Configured and connected a free hosted Supabase PostgreSQL database on port `6543` (Transaction Pooler).
 * **Verification**: Created a `/api/db-debug/` diagnostic endpoint to verify database connection success dynamically without SSH/Shell access. All checks pass successfully!
+
+---
+
+## 🚀 Session 4 Update (May 27, 2026 — Midnight)
+
+### 1. EAS Android Build Fix (Internal Distribution APK)
+* **Problem Identified**: EAS Build was getting stuck/failing at `Task :app:buildCMakeRelWithDebInfo` — caused by EAS build server running out of memory while compiling C++ native code for **all 4 CPU architectures** (`armeabi-v7a`, `arm64-v8a`, `x86`, `x86_64`) in parallel.
+* **Root Cause**: Expo SDK 56 uses New Architecture by default which requires heavy CMake/C++ compilation. Building 4 ABIs simultaneously exceeded EAS free/medium server RAM limits.
+* **Fix Applied**:
+  - Installed `expo-build-properties` plugin via `npx expo install expo-build-properties`
+  - Configured `app/app.json` to limit Android build architectures to **`arm64-v8a` only** (covers all modern Android phones)
+  - Ran `npx expo prebuild --clean` to regenerate `android/gradle.properties` with `reactNativeArchitectures=arm64-v8a`
+* **Result**: Build **successfully completed** ✅ — APK generated in 12m 2s (Gradlew step: 11m 25s). All green ticks on EAS Dashboard.
+* **Commits & Push**: Changes committed (`a52b338`) and pushed to `https://github.com/heyabdullah958-dot/Restaurant-App-Web`
+
+### 2. "App not installed" & App Name = "app" Bug Found
+* **Problem 1 — App Name**: Phone was showing **"app"** instead of **"FoodSphere"** on homescreen after APK install.
+  - **Root Cause**: `app/app.json` had `"name": "app"` and `"slug": "app"` — never properly set.
+  - **Fix**: Changed to `"name": "FoodSphere"` and `"slug": "foodsphere"`
+* **Problem 2 — App not installed**: Signature/version mismatch between old APK and new APK causing install failure.
+  - **Fix**: Added `"versionCode": 2` in android config — user must **uninstall old APK first**, then install new build.
+* **Status**: Fix applied to `app/app.json` — **pending commit & push + new EAS build needed**
+
+---
+
+## 📋 What is Remaining to Build?
+
+### 🔴 Immediate Next Steps (Must Do):
+1. **Commit & Push app.json name fix** → then trigger new EAS `preview` build
+2. **Uninstall old APK** from test phone before installing new build
+
+### 🟡 Upcoming Features:
+3. **Phase 6 Online Payments**: Implement live Stripe elements gateway and PayFast local redirect payment loops.
+4. **Phase 2 (Part 2) Website**: Build the 7th brand website (`birdmanfoodspk` grilled chicken catering).
+
