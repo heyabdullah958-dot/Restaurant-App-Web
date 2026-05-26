@@ -20,7 +20,7 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurantDetail, clearCurrentRestaurant } from '../store/restaurantSlice';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
-import { getImageUrl, Restaurant, MenuItem, MenuCategory } from '../services/fallbackData';
+import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 
 type RootStackParamList = {
   Home: undefined;
