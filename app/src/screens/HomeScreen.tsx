@@ -8,103 +8,29 @@ import {
   Dimensions,
   SafeAreaView,
   FlatList,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+import { fetchRestaurants } from '../store/restaurantSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
+import { getImageUrl } from '../services/fallbackData';
 
 const { width } = Dimensions.get('window');
-
-interface RestaurantBrand {
-  id: string;
-  name: string;
-  cuisine: string;
-  image: string;
-  rating: number;
-  deliveryTime: string;
-  tagline: string;
-  accentColor: string;
-}
-
-const brands: RestaurantBrand[] = [
-  {
-    id: '1',
-    name: 'SeenBanao',
-    cuisine: 'Desi BBQ & Handi',
-    image: 'flame',
-    rating: 4.8,
-    deliveryTime: '30-40 min',
-    tagline: 'Authentic coal BBQ & traditional handi items',
-    accentColor: '#FF5722',
-  },
-  {
-    id: '2',
-    name: 'DineAtBlue',
-    cuisine: 'Seafood Specialty',
-    image: 'boat',
-    rating: 4.7,
-    deliveryTime: '40-50 min',
-    tagline: 'Premium fresh catch & specialized seafood',
-    accentColor: '#2196F3',
-  },
-  {
-    id: '3',
-    name: 'JushhPK',
-    cuisine: 'Burgers & Fast Food',
-    image: 'fast-food',
-    rating: 4.6,
-    deliveryTime: '20-30 min',
-    tagline: 'Gourmet smashed burgers & crispy fries',
-    accentColor: '#E91E63',
-  },
-  {
-    id: '4',
-    name: 'TandooriStopPK',
-    cuisine: 'Tandoori & Naan',
-    image: 'leaf',
-    rating: 4.5,
-    deliveryTime: '25-35 min',
-    tagline: 'Traditional clay-oven rotis & tandoori platters',
-    accentColor: '#FF9800',
-  },
-  {
-    id: '5',
-    name: 'SandMelts',
-    cuisine: 'Sandwiches & Shakes',
-    image: 'beer',
-    rating: 4.4,
-    deliveryTime: '15-25 min',
-    tagline: 'Hot toasted melts & nutritious milkshakes',
-    accentColor: '#4CAF50',
-  },
-  {
-    id: '6',
-    name: 'BirdmanFoodsPK',
-    cuisine: 'Grilled Chicken & Catering',
-    image: 'egg',
-    rating: 4.8,
-    deliveryTime: '35-45 min',
-    tagline: 'Golden crispy tenders & flame-grilled chicken',
-    accentColor: '#9C27B0',
-  },
-  {
-    id: '7',
-    name: 'GetAFomo',
-    cuisine: 'Café & Bakery',
-    image: 'cafe',
-    rating: 4.9,
-    deliveryTime: '15-20 min',
-    tagline: 'Artisanal coffee, croissants, and aesthetics',
-    accentColor: '#795548',
-  },
-];
 
 const categories = ['All', 'BBQ', 'Seafood', 'Burgers', 'Tandoori', 'Sandwiches', 'Desserts'];
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
+  const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
+
+  React.useEffect(() => {
+    dispatch(fetchRestaurants());
+  }, [dispatch]);
 
   const renderCategoryChip = ({ item }: { item: string }) => (
     <TouchableOpacity
@@ -190,34 +116,58 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <Text style={styles.sectionLink}>View All</Text>
         </View>
 
-        {brands.map((brand) => (
-          <TouchableOpacity
-            key={brand.id}
-            style={[styles.brandCard, SHADOWS.medium]}
-            activeOpacity={0.95}
-          >
-            {/* Top styled color band representing brand theme */}
-            <View style={[styles.brandBand, { backgroundColor: brand.accentColor }]}>
-              <Ionicons name={brand.image as any} size={32} color={COLORS.white} />
-              <View style={styles.ratingBadge}>
-                <Ionicons name="star" size={14} color="#FFC107" />
-                <Text style={styles.ratingText}>{brand.rating}</Text>
-              </View>
-            </View>
-
-            <View style={styles.brandDetails}>
-              <View style={styles.brandTitleRow}>
-                <Text style={styles.brandName}>{brand.name}</Text>
-                <View style={styles.deliveryBadge}>
-                  <Ionicons name="time-outline" size={12} color={COLORS.gray} />
-                  <Text style={styles.deliveryText}>{brand.deliveryTime}</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: SPACING.xl }} />
+        ) : (
+          restaurants.map((brand: any, index: number) => {
+            // Cycle through some default colors and icons if not provided
+            const colors = ['#FF5722', '#2196F3', '#E91E63', '#FF9800', '#4CAF50', '#9C27B0', '#795548'];
+            const icons = ['flame', 'boat', 'fast-food', 'leaf', 'beer', 'egg', 'cafe'];
+            const color = colors[index % colors.length];
+            const icon = icons[index % icons.length];
+            
+            return (
+              <TouchableOpacity
+                key={brand.id}
+                style={[styles.brandCard, SHADOWS.medium]}
+                activeOpacity={0.95}
+                onPress={() => navigation.navigate('Restaurant', { slug: brand.slug })}
+              >
+                {/* Top styled color band representing brand theme */}
+                <View style={[styles.brandBand, { backgroundColor: color }]}>
+                  {brand.cover_image ? (
+                    <Image 
+                      source={getImageUrl(brand.cover_image)} 
+                      style={[StyleSheet.absoluteFill, { opacity: 0.8 }]} 
+                    />
+                  ) : (
+                    <Ionicons name={icon as any} size={32} color={COLORS.white} />
+                  )}
+                  <View style={styles.ratingBadge}>
+                    <Ionicons name="star" size={14} color="#FFC107" />
+                    <Text style={styles.ratingText}>{Number(brand.rating).toFixed(1)}</Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={styles.brandCuisine}>{brand.cuisine}</Text>
-              <Text style={styles.brandTagline}>{brand.tagline}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+
+                <View style={styles.brandDetails}>
+                  <View style={styles.brandTitleRow}>
+                    <Text style={styles.brandName}>{brand.name}</Text>
+                    <View style={styles.deliveryBadge}>
+                      <Ionicons name="time-outline" size={12} color={COLORS.gray} />
+                      <Text style={styles.deliveryText}>
+                        {brand.delivery_time_min}-{brand.delivery_time_max} min
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
+                  <Text style={styles.brandTagline} numberOfLines={2}>
+                    {brand.description || brand.address}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        )}
       </ScrollView>
     </SafeAreaView>
   );

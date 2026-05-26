@@ -20,7 +20,7 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurantDetail, clearCurrentRestaurant } from '../store/restaurantSlice';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
-import { FALLBACK_RESTAURANTS, getImageUrl, Restaurant, MenuItem, MenuCategory } from '../services/fallbackData';
+import { getImageUrl, Restaurant, MenuItem, MenuCategory } from '../services/fallbackData';
 
 type RootStackParamList = {
   Home: undefined;
@@ -51,13 +51,12 @@ export default function RestaurantScreen() {
     };
   }, [dispatch, slug]);
 
-  // Determine active restaurant data (fetched detail or fallback)
+  // Determine active restaurant data from Redux
   const restaurant: Restaurant | null = useMemo(() => {
     if (currentRestaurant && currentRestaurant.slug === slug) {
       return currentRestaurant;
     }
-    // Search in fallback data
-    return FALLBACK_RESTAURANTS.find((r) => r.slug === slug) || null;
+    return null;
   }, [currentRestaurant, slug]);
 
   // Set default category to 'All' or first available when restaurant loads
@@ -91,7 +90,7 @@ export default function RestaurantScreen() {
     return matchedCategory ? matchedCategory.items.map(item => ({ ...item, categoryName: matchedCategory.name })) : [];
   }, [restaurant, selectedCategory]);
 
-  if (loading && !restaurant) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -356,7 +355,7 @@ export default function RestaurantScreen() {
 
                 <View style={styles.menuItemImageContainer}>
                   {item.image ? (
-                    <Image source={{ uri: item.image }} style={styles.itemImage} />
+                    <Image source={getImageUrl(item.image)} style={styles.itemImage} />
                   ) : (
                     <View style={styles.itemImagePlaceholder}>
                       <Ionicons name="pizza-outline" size={24} color={COLORS.gray} />

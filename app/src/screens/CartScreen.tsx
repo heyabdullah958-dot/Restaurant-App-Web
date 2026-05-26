@@ -21,7 +21,8 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlice';
 import { placeOrder } from '../store/orderSlice';
-import { FALLBACK_RESTAURANTS, getImageUrl } from '../services/fallbackData';
+import { fetchRestaurants } from '../store/restaurantSlice';
+import { getImageUrl } from '../services/fallbackData';
 
 type RootStackParamList = {
   Home: undefined;
@@ -40,6 +41,7 @@ export default function CartScreen() {
   const cart = useSelector((state: RootState) => state.cart);
   const { user } = useSelector((state: RootState) => state.user);
   const { loading: orderLoading } = useSelector((state: RootState) => state.order);
+  const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
   // Form states for delivery
   const [name, setName] = useState(user?.name || '');
@@ -49,7 +51,11 @@ export default function CartScreen() {
   );
   const [paymentMethod, setPaymentMethod] = useState('cod'); // cod / stripe / payfast
 
-  const activeRestaurant = FALLBACK_RESTAURANTS.find((r) => r.id === cart.restaurantId);
+  React.useEffect(() => {
+    dispatch(fetchRestaurants());
+  }, [dispatch]);
+
+  const activeRestaurant = restaurants.find((r) => r.id === cart.restaurantId);
 
   const handleIncrement = (itemId: number, currentQty: number) => {
     dispatch(

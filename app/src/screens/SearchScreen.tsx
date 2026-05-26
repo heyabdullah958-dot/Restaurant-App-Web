@@ -48,10 +48,8 @@ export default function SearchScreen() {
 
   // Ensure restaurants list is populated
   useEffect(() => {
-    if (!restaurants || restaurants.length === 0) {
-      dispatch(fetchRestaurants());
-    }
-  }, [dispatch, restaurants]);
+    dispatch(fetchRestaurants());
+  }, [dispatch]);
 
   // Simulate API search latency or real-time query fetching
   useEffect(() => {
@@ -258,7 +256,7 @@ export default function SearchScreen() {
                         <Text style={styles.dishPrice}>Rs. {item.price}</Text>
                       </View>
                       {item.image && (
-                        <Image source={{ uri: item.image }} style={styles.dishImage} />
+                        <Image source={getImageUrl(item.image)} style={styles.dishImage} />
                       )}
                     </TouchableOpacity>
                   ))}

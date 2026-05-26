@@ -58,3 +58,21 @@ def root_view(request):
         'message': 'Welcome to the FoodSphere API. Use the above endpoints to interact with the backend.'
     })
 
+
+def trigger_seed(request):
+    """
+    Temporary endpoint to seed the live database programmatically.
+    """
+    from django.core.management import call_command
+    try:
+        call_command('seed_restaurants')
+        return JsonResponse({
+            'success': True,
+            'message': 'Database seeded successfully with 7 restaurant brands!'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
