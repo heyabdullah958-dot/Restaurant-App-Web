@@ -109,6 +109,10 @@ if DATABASE_URL:
     except Exception:
         pass
 
+# Safe fallback: Ensure Supabase pooler username includes the tenant reference
+if DB_USER and '.' not in DB_USER and DB_HOST and 'supabase.com' in DB_HOST:
+    DB_USER = f"{DB_USER}.ndvazawbvyeasmsxlbrz"
+
 if DB_HOST and DB_USER and DB_PASSWORD:
     # Production: Supabase PostgreSQL
     DATABASES = {
