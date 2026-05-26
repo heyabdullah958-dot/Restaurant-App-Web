@@ -88,15 +88,29 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import os
+from urllib.parse import urlparse
 
+DATABASE_URL = os.environ.get('DATABASE_URL')
 DB_HOST = os.environ.get('DB_HOST')
 DB_PORT = os.environ.get('DB_PORT', '6543')
 DB_NAME = os.environ.get('DB_NAME', 'postgres')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
+# Parse DATABASE_URL if available
+if DATABASE_URL:
+    try:
+        parsed = urlparse(DATABASE_URL)
+        DB_HOST = parsed.hostname or DB_HOST
+        DB_PORT = str(parsed.port) if parsed.port else DB_PORT
+        DB_NAME = parsed.path.lstrip('/') if parsed.path else DB_NAME
+        DB_USER = parsed.username or DB_USER
+        DB_PASSWORD = parsed.password or DB_PASSWORD
+    except Exception:
+        pass
+
 if DB_HOST and DB_USER and DB_PASSWORD:
-    # Production: Supabase PostgreSQL via individual env vars
+    # Production: Supabase PostgreSQL
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -112,7 +126,7 @@ if DB_HOST and DB_USER and DB_PASSWORD:
         }
     }
 else:
-    # Local development: SQLite
+    # Local development: SQLite fallback
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
