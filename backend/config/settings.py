@@ -227,7 +227,7 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://localhost:8081,https://foodsphere-app.pages.dev,http://foodsphere-app.netlify.app,https://foodsphere-app.netlify.app').split(',')
+CORS_ALLOW_ALL_ORIGINS = True
 
 # OWASP 2025 Security Headers
 SECURE_BROWSER_XSS_FILTER = True
