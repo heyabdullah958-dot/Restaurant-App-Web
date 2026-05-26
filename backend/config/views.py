@@ -43,3 +43,17 @@ def db_debug(request):
             'error': str(e),
             'database_url_configured': bool(os.environ.get('DATABASE_URL'))
         })
+
+def root_view(request):
+    """
+    Root API endpoint welcome message.
+    """
+    return JsonResponse({
+        'name': 'FoodSphere REST API Backend',
+        'status': 'Online',
+        'health_check': '/health/',
+        'admin_panel': '/admin/',
+        'api_root': '/api/',
+        'message': 'Welcome to the FoodSphere API. Use the above endpoints to interact with the backend.'
+    })
+
