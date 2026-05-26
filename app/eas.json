@@ -11,6 +11,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.parallel=false -Dorg.gradle.daemon=false"
       }
     },
     "production": {}
