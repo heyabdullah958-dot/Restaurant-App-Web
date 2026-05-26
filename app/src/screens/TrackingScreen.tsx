@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -84,6 +84,63 @@ export default function TrackingScreen() {
     return 0;
   }, [currentOrder]);
 
+  // Rider animation state (progress along the route from 0 to 1)
+  const [riderProgress, setRiderProgress] = useState(0);
+
+  useEffect(() => {
+    if (activeStep === 0 || activeStep === 1) {
+      setRiderProgress(0); // Rider at restaurant
+    } else if (activeStep === 3) {
+      setRiderProgress(1); // Rider at customer home
+    } else if (activeStep === 2) {
+      // Loop rider movement from 10% to 90% to simulate transit
+      let current = 0.1;
+      setRiderProgress(current);
+      const interval = setInterval(() => {
+        current += 0.025;
+        if (current > 0.9) current = 0.1;
+        setRiderProgress(current);
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [activeStep]);
+
+  // Calculate coordinates for L-shaped path
+  const riderPosition = useMemo(() => {
+    // Restaurant marker: left: 15%, top: 25%
+    // Customer marker: left: 80%, top: 75%
+    if (riderProgress <= 0.5) {
+      // First leg: Horizontal movement from 15% to 80%
+      const segProgress = riderProgress / 0.5;
+      const left = 15 + (80 - 15) * segProgress;
+      const top = 25;
+      return { left: `${left}%`, top: `${top}%` };
+    } else {
+      // Second leg: Vertical movement from 25% to 75%
+      const segProgress = (riderProgress - 0.5) / 0.5;
+      const left = 80;
+      const top = 25 + (75 - 25) * segProgress;
+      return { left: `${left}%`, top: `${top}%` };
+    }
+  }, [riderProgress]);
+
+  // Calculate dynamic ETA based on status
+  const etaText = useMemo(() => {
+    switch (currentOrder?.status?.toLowerCase()) {
+      case 'received':
+        return '35 - 45 mins';
+      case 'preparing':
+        return '25 - 35 mins';
+      case 'out_for_delivery':
+      case 'out for delivery':
+        return '10 - 15 mins';
+      case 'delivered':
+        return 'Delivered';
+      default:
+        return '30 - 45 mins';
+    }
+  }, [currentOrder]);
+
   // Format order date
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';
@@ -160,6 +217,56 @@ export default function TrackingScreen() {
             <Text style={styles.badgeText}>
               {currentOrder?.payment_method?.toUpperCase()}
             </Text>
+          </View>
+        </View>
+
+        {/* ETA & Live Map Card */}
+        <View style={styles.mapCard}>
+          <View style={styles.mapHeader}>
+            <View>
+              <Text style={styles.etaLabel}>ESTIMATED DELIVERY</Text>
+              <Text style={styles.etaTime}>{etaText}</Text>
+            </View>
+            <Ionicons name="time-outline" size={32} color={COLORS.primary} />
+          </View>
+
+          {/* Interactive Map Layout */}
+          <View style={styles.mapContainer}>
+            {/* Background grid representing city blocks */}
+            <View style={[styles.mapGridLineH, { top: '25%' }]} />
+            <View style={[styles.mapGridLineH, { top: '50%' }]} />
+            <View style={[styles.mapGridLineH, { top: '75%' }]} />
+            <View style={[styles.mapGridLineV, { left: '25%' }]} />
+            <View style={[styles.mapGridLineV, { left: '50%' }]} />
+            <View style={[styles.mapGridLineV, { left: '75%' }]} />
+
+            {/* Custom delivery roads path */}
+            <View style={[styles.roadOverlayH, { top: '25%', left: '15%', width: '67%' }]} />
+            <View style={[styles.roadOverlayV, { top: '25%', left: '80%', height: '53%' }]} />
+
+            {/* Restaurant Marker */}
+            <View style={[styles.mapMarker, styles.restaurantMarkerPos]}>
+              <Text style={styles.mapMarkerIcon}>🍔</Text>
+              <View style={styles.mapMarkerLabel}>
+                <Text style={styles.mapMarkerLabelText}>Kitchen</Text>
+              </View>
+            </View>
+
+            {/* Customer Marker */}
+            <View style={[styles.mapMarker, styles.homeMarkerPos]}>
+              <Text style={styles.mapMarkerIcon}>🏠</Text>
+              <View style={styles.mapMarkerLabel}>
+                <Text style={styles.mapMarkerLabelText}>Home</Text>
+              </View>
+            </View>
+
+            {/* Rider Marker (Animated position) */}
+            <View style={[styles.mapMarkerRider, { left: riderPosition.left, top: riderPosition.top }]}>
+              <Text style={styles.mapMarkerIconRider}>🛵</Text>
+              <View style={styles.riderMarkerLabel}>
+                <Text style={styles.riderMarkerLabelText}>Rider</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -295,6 +402,28 @@ export default function TrackingScreen() {
             <Text style={styles.totalSummaryLabel}>Total</Text>
             <Text style={styles.totalSummaryVal}>
               Rs. {parseFloat(currentOrder?.total || 0).toFixed(2)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Live Testing Guide */}
+        <View style={[styles.card, styles.testingGuideCard]}>
+          <Text style={styles.guideTitle}>💡 Live Testing Guide</Text>
+          <Text style={styles.guideText}>
+            This order is connected to the live backend. To test the status update flow:
+          </Text>
+          <View style={styles.guideSteps}>
+            <Text style={styles.guideStep}>
+              1. Open the Admin Panel at <Text style={styles.guideCode}>https://restaurant-app-web.onrender.com/admin/</Text> and log in.
+            </Text>
+            <Text style={styles.guideStep}>
+              2. Go to the <Text style={styles.guideBold}>Orders</Text> section and select Order <Text style={styles.guideBold}>#{orderId}</Text>.
+            </Text>
+            <Text style={styles.guideStep}>
+              3. Update the status field from <Text style={styles.guideBold}>Received</Text> to <Text style={styles.guideBold}>Preparing</Text> or <Text style={styles.guideBold}>Out for Delivery</Text> and save.
+            </Text>
+            <Text style={styles.guideStep}>
+              4. Watch the map in the app automatically update the rider's position and route in real-time!
             </Text>
           </View>
         </View>
@@ -591,5 +720,186 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  mapCard: {
+    backgroundColor: COLORS.cardBackground,
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
+  },
+  mapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  etaLabel: {
+    ...FONTS.caption,
+    color: COLORS.gray,
+    letterSpacing: 0.8,
+  },
+  etaTime: {
+    ...FONTS.title,
+    color: COLORS.primary,
+    fontSize: 20,
+    marginTop: 2,
+  },
+  mapContainer: {
+    height: 180,
+    backgroundColor: '#EAEDF1',
+    borderRadius: 8,
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    marginTop: SPACING.xs,
+  },
+  mapGridLineH: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#DCDFE4',
+  },
+  mapGridLineV: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: '#DCDFE4',
+  },
+  roadOverlayH: {
+    position: 'absolute',
+    height: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#BDC3C7',
+    borderRadius: 6,
+    opacity: 0.8,
+  },
+  roadOverlayV: {
+    position: 'absolute',
+    width: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#BDC3C7',
+    borderRadius: 6,
+    opacity: 0.8,
+  },
+  mapMarker: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.small,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    zIndex: 2,
+    marginLeft: -16,
+    marginTop: -16,
+  },
+  restaurantMarkerPos: {
+    left: '15%',
+    top: '25%',
+  },
+  homeMarkerPos: {
+    left: '80%',
+    top: '75%',
+  },
+  mapMarkerRider: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.medium,
+    zIndex: 3,
+    marginLeft: -16,
+    marginTop: -16,
+    borderWidth: 1.5,
+    borderColor: COLORS.white,
+  },
+  mapMarkerIcon: {
+    fontSize: 15,
+  },
+  mapMarkerIconRider: {
+    fontSize: 16,
+  },
+  mapMarkerLabel: {
+    position: 'absolute',
+    top: 34,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignItems: 'center',
+    minWidth: 45,
+  },
+  mapMarkerLabelText: {
+    color: COLORS.white,
+    fontSize: 8,
+    fontWeight: 'bold',
+  },
+  riderMarkerLabel: {
+    position: 'absolute',
+    bottom: 34,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignItems: 'center',
+    minWidth: 40,
+  },
+  riderMarkerLabelText: {
+    color: COLORS.white,
+    fontSize: 8,
+    fontWeight: 'bold',
+  },
+  testingGuideCard: {
+    backgroundColor: 'rgba(255, 87, 34, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 87, 34, 0.15)',
+    padding: SPACING.md,
+    borderRadius: 12,
+    marginBottom: SPACING.md,
+  },
+  guideTitle: {
+    ...FONTS.subtitle,
+    fontSize: 15,
+    color: COLORS.primary,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
+  },
+  guideText: {
+    ...FONTS.body,
+    fontSize: 13,
+    color: COLORS.dark,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  guideSteps: {
+    paddingLeft: 4,
+  },
+  guideStep: {
+    ...FONTS.caption,
+    fontSize: 11.5,
+    color: COLORS.gray,
+    lineHeight: 16,
+    marginBottom: 6,
+  },
+  guideCode: {
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  guideBold: {
+    fontWeight: 'bold',
+    color: COLORS.dark,
   },
 });
