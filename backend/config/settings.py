@@ -93,6 +93,21 @@ import dj_database_url
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
+    import urllib.parse
+    try:
+        # If password contains special characters, URL-encode them to prevent ParseError
+        if '://' in DATABASE_URL and '@' in DATABASE_URL:
+            protocol_part, rest = DATABASE_URL.split('://', 1)
+            auth_part, host_part = rest.rsplit('@', 1)
+            if ':' in auth_part:
+                username, password = auth_part.split(':', 1)
+                # Unquote first to prevent double-encoding, then quote_plus
+                unquoted_password = urllib.parse.unquote(password)
+                quoted_password = urllib.parse.quote_plus(unquoted_password)
+                DATABASE_URL = f"{protocol_part}://{username}:{quoted_password}@{host_part}"
+    except Exception:
+        pass
+
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
