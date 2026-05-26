@@ -33,7 +33,8 @@ def db_debug(request):
             'success': True,
             'engine': engine,
             'connection_test': 'SUCCESS' if row else 'FAILED',
-            'database_url_configured': bool(db_url)
+            'database_url_configured': bool(db_url),
+            'db_url': db_url
         })
     except Exception as e:
         return JsonResponse({
