@@ -5,7 +5,11 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
+      }
     },
     "preview": {
       "distribution": "internal",
@@ -13,10 +17,17 @@
         "buildType": "apk"
       },
       "env": {
-        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.parallel=false -Dorg.gradle.daemon=false"
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.parallel=false -Dorg.gradle.daemon=false",
+        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
+      }
+    }
   },
   "submit": {
     "production": {}
