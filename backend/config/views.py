@@ -55,16 +55,14 @@ def create_admin(request):
     password = "FoodSphereAdmin2026!"  # Temporary secure password
     
     try:
+        # Delete existing user to ensure a fresh, working password
         if User.objects.filter(username=username).exists():
-            return JsonResponse({
-                'success': False,
-                'message': f"Superuser '{username}' already exists."
-            })
+            User.objects.filter(username=username).delete()
             
         User.objects.create_superuser(username=username, email=email, password=password)
         return JsonResponse({
             'success': True,
-            'message': f"Superuser '{username}' created successfully. Password is '{password}'. Please change it immediately in the admin panel!"
+            'message': f"Superuser '{username}' recreated successfully. Password is '{password}'. Please change it immediately in the admin panel!"
         })
     except Exception as e:
         return JsonResponse({
