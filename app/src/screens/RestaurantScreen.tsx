@@ -51,12 +51,14 @@ export default function RestaurantScreen() {
     };
   }, [dispatch, slug]);
 
-  // Determine active restaurant data from Redux
+  // Determine active restaurant data from Redux with fallback to local mock data
   const restaurant: Restaurant | null = useMemo(() => {
     if (currentRestaurant && currentRestaurant.slug === slug) {
       return currentRestaurant;
     }
-    return null;
+    // Return local fallback data for robust offline & prototype testing
+    const localFallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
+    return localFallback || null;
   }, [currentRestaurant, slug]);
 
   // Set default category to 'All' or first available when restaurant loads
