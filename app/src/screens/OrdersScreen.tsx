@@ -30,6 +30,19 @@ export default function OrdersScreen() {
   // Re-ordering state to track specific order spinner
   const [reorderingId, setReorderingId] = useState<number | null>(null);
 
+  // APP-14: Selected filter and computed list
+  const [orderFilter, setOrderFilter] = React.useState<'all' | 'active' | 'delivered'>('all');
+  const filteredOrders = React.useMemo(() => {
+    if (!myOrders) return [];
+    if (orderFilter === 'active') {
+      return myOrders.filter((o: any) => o.status !== 'delivered');
+    }
+    if (orderFilter === 'delivered') {
+      return myOrders.filter((o: any) => o.status === 'delivered');
+    }
+    return myOrders;
+  }, [myOrders, orderFilter]);
+
   // Fetch orders on mount (if authenticated)
   useEffect(() => {
     if (isAuthenticated) {
@@ -185,7 +198,7 @@ export default function OrdersScreen() {
 
         {/* Action Buttons */}
         <View style={styles.cardActions}>
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.75}
             style={styles.detailBtn}
             onPress={() => navigation.navigate('Tracking', { orderId: item.id })}
           >
@@ -194,7 +207,7 @@ export default function OrdersScreen() {
           </TouchableOpacity>
 
           {item.status !== 'delivered' && (
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={[styles.trackBtn]}
               onPress={() => navigation.navigate('Tracking', { orderId: item.id })}
             >
@@ -203,7 +216,7 @@ export default function OrdersScreen() {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.75}
             style={[styles.reorderBtn, reorderingId === item.id && styles.reorderBtnDisabled]}
             onPress={() => handleReorder(item.id)}
             disabled={reorderingId === item.id}
@@ -222,21 +235,35 @@ export default function OrdersScreen() {
     );
   };
 
-  // If user is not authenticated, prompt to login
+  // If user is not authenticated, prompt to login (APP-15)
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.emptyContainer}>
+      <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>
-          <Ionicons name="lock-closed-outline" size={80} color={COLORS.gray} />
-          <Text style={styles.emptyTitle}>Access Denied</Text>
+          <View style={{
+            width: 100, height: 100, borderRadius: 50,
+            backgroundColor: 'rgba(255,87,34,0.08)',
+            alignItems: 'center', justifyContent: 'center',
+            marginBottom: SPACING.lg,
+          }}>
+            <Ionicons name="receipt-outline" size={52} color={COLORS.primary} />
+          </View>
+          <Text style={[styles.emptyTitle, { fontSize: 20 }]}>Track Your Orders</Text>
           <Text style={styles.emptySubtitle}>
-            Please log in or sign up to view your past orders, active tracking, and earn loyalty points!
+            Sign in to see your order history, track active deliveries, and earn loyalty points on every order!
           </Text>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => navigation.navigate('Profile')}
+          <TouchableOpacity activeOpacity={0.75}
+            style={[styles.loginButton, { flexDirection: 'row', gap: 8 }]}
+            onPress={() => navigation.navigate('Auth')}
           >
-            <Text style={styles.loginButtonText}>Go to Profile / Login</Text>
+            <Ionicons name="log-in-outline" size={18} color={COLORS.white} />
+            <Text style={styles.loginButtonText}>Sign In / Register</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.75}
+            style={{ marginTop: SPACING.md }}
+            onPress={() => navigation.navigate('Home')}
+          >
+            <Text style={{ color: COLORS.gray, fontSize: 13 }}>Continue as Guest</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -250,13 +277,29 @@ export default function OrdersScreen() {
         <Text style={FONTS.title}>My Orders</Text>
       </View>
 
+      {/* Filter Tabs (APP-14) */}
+      <View style={styles.filterTabs}>
+        {(['all', 'active', 'delivered'] as const).map(tab => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.filterTab, orderFilter === tab && styles.filterTabActive]}
+            onPress={() => setOrderFilter(tab)}
+            activeOpacity={0.75}
+          >
+            <Text style={[styles.filterTabText, orderFilter === tab && styles.filterTabTextActive]}>
+              {tab === 'all' ? 'All Orders' : tab === 'active' ? 'Active' : 'Delivered'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* Main orders list */}
-      {loading && myOrders.length === 0 ? (
+      {loading && filteredOrders.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading orders...</Text>
         </View>
-      ) : myOrders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <FlatList
           data={[]}
           renderItem={null}
@@ -266,11 +309,19 @@ export default function OrdersScreen() {
           ListEmptyComponent={
             <View style={styles.emptyContentContainer}>
               <Ionicons name="receipt-outline" size={96} color={COLORS.gray} style={{ opacity: 0.8 }} />
-              <Text style={styles.emptyTitle}>No Orders Yet</Text>
-              <Text style={styles.emptySubtitle}>
-                You haven't ordered anything yet. Explore our top restaurants and place your first order!
+              <Text style={styles.emptyTitle}>
+                {orderFilter === 'all'
+                  ? 'No Orders Yet'
+                  : orderFilter === 'active'
+                  ? 'No Active Orders'
+                  : 'No Delivered Orders'}
               </Text>
-              <TouchableOpacity
+              <Text style={styles.emptySubtitle}>
+                {orderFilter === 'all'
+                  ? "You haven't ordered anything yet. Explore our top restaurants and place your first order!"
+                  : `You don't have any ${orderFilter} orders at the moment.`}
+              </Text>
+              <TouchableOpacity activeOpacity={0.75}
                 style={styles.browseButton}
                 onPress={() => navigation.navigate('Home')}
               >
@@ -281,7 +332,7 @@ export default function OrdersScreen() {
         />
       ) : (
         <FlatList
-          data={myOrders}
+          data={filteredOrders}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}
           contentContainerStyle={styles.listContainer}
@@ -502,5 +553,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.white,
     marginLeft: 4,
+  },
+  filterTabs: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    gap: SPACING.sm,
+  },
+  filterTab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 20,
+    backgroundColor: COLORS.light,
+  },
+  filterTabActive: {
+    backgroundColor: COLORS.primary,
+  },
+  filterTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.gray,
+  },
+  filterTabTextActive: {
+    color: COLORS.white,
   },
 });

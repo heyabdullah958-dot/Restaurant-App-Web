@@ -27,7 +27,9 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
-  const [address, setAddress] = useState('Street 45, Blue Area, Islamabad'); // Default active address stub
+  const [address, setAddress] = useState(
+    user?.addresses?.[0] || ''
+  );
 
   // Validation Errors
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -112,6 +114,15 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitials()}</Text>
             </View>
+            {/* Camera icon overlay — for future photo upload */}
+            {!user?.is_guest && (
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.cameraOverlay}
+                onPress={() => Alert.alert('Coming Soon', 'Profile photo upload will be available soon!')}
+              >
+                <Ionicons name="camera" size={14} color={COLORS.white} />
+              </TouchableOpacity>
+            )}
             {user?.is_guest && (
               <View style={styles.guestBadge}>
                 <Text style={styles.guestBadgeText}>GUEST</Text>
@@ -147,7 +158,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 Sign up to save multiple delivery addresses, track your order history, and earn loyalty rewards.
               </Text>
             </View>
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={styles.promoCTA}
               onPress={() => navigation.navigate('Auth')}
             >
@@ -161,7 +172,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           <View style={[styles.sectionCard, SHADOWS.small]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Account Details</Text>
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={0.75}
                 style={styles.editButton}
                 onPress={() => setIsEditing(!isEditing)}
               >
@@ -203,7 +214,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 />
                 {errors.phone && <Text style={styles.errorMsg}>{errors.phone}</Text>}
 
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={0.9}
                   style={[styles.saveBtn, SHADOWS.small]}
                   onPress={handleSaveProfile}
                   disabled={loading}
@@ -247,7 +258,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 style={styles.addressInput}
                 value={address}
                 onChangeText={setAddress}
-                placeholder="Enter delivery address"
+                placeholder="Enter your delivery address (e.g. House 5, Block B, DHA Lahore)"
                 multiline
               />
             </View>
@@ -259,7 +270,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           <Text style={styles.sectionTitle}>Preferences & Settings</Text>
 
           {!user?.is_guest && (
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={styles.actionItem}
               onPress={() => navigation.navigate('Rewards')}
             >
@@ -271,7 +282,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.actionItem}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem}>
             <View style={styles.actionLeft}>
               <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
               <Text style={styles.actionLabel}>Notification Preferences</Text>
@@ -279,7 +290,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionItem}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem}>
             <View style={styles.actionLeft}>
               <Ionicons name="help-circle-outline" size={22} color={COLORS.dark} />
               <Text style={styles.actionLabel}>Customer Support</Text>
@@ -288,7 +299,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           </TouchableOpacity>
 
           {/* Logout Button */}
-          <TouchableOpacity style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
+          <TouchableOpacity activeOpacity={0.75} style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
             <View style={styles.actionLeft}>
               <Ionicons name="log-out-outline" size={22} color={COLORS.danger} />
               <Text style={[styles.actionLabel, { color: COLORS.danger }]}>Log Out</Text>
@@ -364,6 +375,19 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 9,
     fontWeight: 'bold',
+  },
+  cameraOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.dark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.white,
   },
   userName: {
     ...FONTS.title,

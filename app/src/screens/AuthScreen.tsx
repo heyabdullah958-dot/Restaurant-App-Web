@@ -23,6 +23,14 @@ const { width } = Dimensions.get('window');
 
 type TabType = 'login' | 'register';
 
+const getPasswordStrength = (pass: string): { level: number; label: string; color: string } => {
+  if (pass.length === 0) return { level: 0, label: '', color: COLORS.lightGray };
+  if (pass.length < 6) return { level: 1, label: 'Too Short', color: COLORS.danger };
+  if (pass.length < 8) return { level: 2, label: 'Weak', color: COLORS.warning };
+  if (/[A-Z]/.test(pass) && /[0-9]/.test(pass)) return { level: 4, label: 'Strong', color: COLORS.success };
+  return { level: 3, label: 'Medium', color: COLORS.secondary };
+};
+
 export default function AuthScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.user);
@@ -131,13 +139,13 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
         {/* Auth Tabs */}
         <View style={[styles.tabContainer, SHADOWS.small]}>
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.75}
             style={[styles.tab, activeTab === 'login' && styles.activeTab]}
             onPress={() => handleTabChange('login')}
           >
             <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>Login</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.75}
             style={[styles.tab, activeTab === 'register' && styles.activeTab]}
             onPress={() => handleTabChange('register')}
           >
@@ -245,7 +253,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
               }}
               autoCapitalize="none"
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <TouchableOpacity activeOpacity={0.75} onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={20}
@@ -257,16 +265,39 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             <Text style={styles.errorText}>{validationErrors.password}</Text>
           )}
 
+          {activeTab === 'register' && password.length > 0 && (() => {
+            const strength = getPasswordStrength(password);
+            return (
+              <View style={styles.strengthContainer}>
+                <View style={styles.strengthBars}>
+                  {[1, 2, 3, 4].map(i => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.strengthBar,
+                        { backgroundColor: i <= strength.level ? strength.color : COLORS.lightGray }
+                      ]}
+                    />
+                  ))}
+                </View>
+                <Text style={[styles.strengthLabel, { color: strength.color }]}>
+                  {strength.label}
+                </Text>
+              </View>
+            );
+          })()}
+
           {activeTab === 'login' && (
             <TouchableOpacity
               style={styles.forgotPasswordBtn}
-              onPress={() => {
+              activeOpacity={0.7}
+              onPress={() =>
                 Alert.alert(
-                  'Password Reset',
-                  'Apne registered email par reset link bheja jayega. Please contact support at: support@foodsphere.pk',
-                  [{ text: 'OK' }]
-                );
-              }}
+                  '🔐 Password Reset',
+                  'Apne account ke liye reset link bhijwane ke liye support se contact karein:\n\nsupport@foodsphere.pk',
+                  [{ text: 'OK', style: 'default' }]
+                )
+              }
             >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
@@ -489,12 +520,35 @@ const styles = StyleSheet.create({
   },
   forgotPasswordBtn: {
     alignSelf: 'flex-end',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
     marginTop: -SPACING.xs,
   },
   forgotPasswordText: {
     color: COLORS.primary,
     fontSize: 13,
     fontWeight: '600',
+  },
+  strengthContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: -SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  strengthBars: {
+    flexDirection: 'row',
+    gap: 4,
+    flex: 1,
+  },
+  strengthBar: {
+    height: 4,
+    flex: 1,
+    borderRadius: 2,
+  },
+  strengthLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: SPACING.sm,
+    width: 60,
+    textAlign: 'right',
   },
 });

@@ -29,14 +29,17 @@ export default function CheckoutScreen() {
   const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
+  // Determine if we are in guest checkout mode (either unauthenticated or logged in as a guest user)
+  const isGuestMode = !isAuthenticated || user?.is_guest;
+
   // Form states
   const [address, setAddress] = useState(user?.addresses?.[0] || '');
   const [instructions, setInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe' | 'payfast'>('cod');
   
   // Guest details state
-  const [guestName, setGuestName] = useState('');
-  const [guestPhone, setGuestPhone] = useState('');
+  const [guestName, setGuestName] = useState(user?.name || '');
+  const [guestPhone, setGuestPhone] = useState(user?.phone || '');
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +70,7 @@ export default function CheckoutScreen() {
       return;
     }
 
-    if (!isAuthenticated) {
+    if (isGuestMode) {
       if (!guestName.trim()) {
         Alert.alert('Required Field', 'Please enter your name.');
         return;
@@ -107,7 +110,7 @@ export default function CheckoutScreen() {
       special_instructions: instructions || undefined,
     };
 
-    if (!isAuthenticated) {
+    if (isGuestMode) {
       orderData.guest_name = guestName;
       orderData.guest_phone = guestPhone;
     }
@@ -155,7 +158,7 @@ export default function CheckoutScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Checkout</Text>
@@ -178,7 +181,7 @@ export default function CheckoutScreen() {
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Delivery Details</Text>
             
-            {isAuthenticated ? (
+            {!isGuestMode ? (
               <View style={styles.profileSummary}>
                 <Ionicons name="person-circle-outline" size={24} color={COLORS.gray} />
                 <View style={styles.profileTextContainer}>
@@ -208,21 +211,23 @@ export default function CheckoutScreen() {
             )}
 
             <Text style={styles.fieldLabel}>Delivery Address</Text>
-            <View style={styles.addressInputWrap}>
-              <Ionicons name="location-outline" size={20} color={COLORS.primary} style={{ marginRight: 8, marginTop: Platform.OS === 'ios' ? 0 : 3 }} />
-              <TextInput
-                style={[styles.textArea, { flex: 1, padding: 0, minHeight: 60, color: COLORS.dark }]}
-                placeholder="Street, Area, City — e.g. House 12, Street 4, G-11, Islamabad"
-                placeholderTextColor={COLORS.gray}
-                multiline
-                numberOfLines={3}
-                value={address}
-                onChangeText={setAddress}
-              />
+            <View style={styles.addressRow}>
+              <Ionicons name="location-outline" size={20} color={COLORS.primary} style={{ marginTop: 10 }} />
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  style={[styles.input, styles.textArea, { marginLeft: SPACING.sm }]}
+                  placeholder="Street No., Area, City — e.g. House 5, Block B, Gulberg, Lahore"
+                  placeholderTextColor={COLORS.gray}
+                  multiline
+                  numberOfLines={3}
+                  value={address}
+                  onChangeText={setAddress}
+                />
+                <Text style={styles.addressHintText}>
+                  💡 Exact address likho — rider ko dhundne mein asaani hogi
+                </Text>
+              </View>
             </View>
-            <Text style={styles.addressHint}>
-              💡 Exact address likho — delivery rider ko dhundne mein asaani hogi
-            </Text>
 
             <Text style={styles.fieldLabel}>Delivery Instructions (Optional)</Text>
             <TextInput
@@ -241,7 +246,7 @@ export default function CheckoutScreen() {
             <Text style={styles.sectionTitle}>Payment Method</Text>
 
             {/* COD option */}
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={[
                 styles.paymentOption,
                 paymentMethod === 'cod' && styles.paymentOptionSelected,
@@ -263,7 +268,7 @@ export default function CheckoutScreen() {
             </TouchableOpacity>
 
             {/* Stripe option */}
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={[
                 styles.paymentOption,
                 paymentMethod === 'stripe' && styles.paymentOptionSelected,
@@ -285,7 +290,7 @@ export default function CheckoutScreen() {
             </TouchableOpacity>
 
             {/* PayFast option */}
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.75}
               style={[
                 styles.paymentOption,
                 paymentMethod === 'payfast' && styles.paymentOptionSelected,
@@ -350,7 +355,7 @@ export default function CheckoutScreen() {
 
         {/* Footer sticky place order button */}
         <View style={styles.footer}>
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.9}
             style={[styles.placeOrderBtn, isSubmitting && styles.placeOrderBtnDisabled]}
             onPress={handlePlaceOrder}
             disabled={isSubmitting}
@@ -568,21 +573,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: SPACING.sm,
   },
-  addressInputWrap: {
+  addressRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: COLORS.light,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.lightGray,
-    marginBottom: SPACING.xs,
   },
-  addressHint: {
+  addressHintText: {
     fontSize: 11,
     color: COLORS.gray,
-    marginBottom: SPACING.md,
+    marginLeft: SPACING.sm,
     marginTop: 2,
+    marginBottom: SPACING.md,
     fontStyle: 'italic',
   },
 });

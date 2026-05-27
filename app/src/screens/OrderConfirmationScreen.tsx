@@ -138,6 +138,13 @@ export default function OrderConfirmationScreen() {
               <Ionicons name="card" size={16} color={COLORS.primary} style={styles.paymentIcon} />
               <Text style={styles.paymentMethodText}>Cash on Delivery (COD)</Text>
             </View>
+            <View style={styles.divider} />
+            <View style={styles.etaRow}>
+              <Ionicons name="time-outline" size={16} color={COLORS.secondary} />
+              <Text style={styles.etaText}>
+                Estimated Delivery: <Text style={{ fontWeight: 'bold', color: COLORS.dark }}>30–45 minutes</Text>
+              </Text>
+            </View>
           </View>
 
           {/* Rewards Card */}
@@ -157,12 +164,12 @@ export default function OrderConfirmationScreen() {
 
           {/* Action Buttons */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.trackButton} onPress={handleTrackOrder}>
+            <TouchableOpacity activeOpacity={0.75} style={styles.trackButton} onPress={handleTrackOrder}>
               <Text style={styles.trackButtonText}>Track Your Order</Text>
               <Ionicons name="arrow-forward" size={18} color={COLORS.white} style={styles.buttonIcon} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.homeButton} onPress={handleBackToHome}>
+            <TouchableOpacity activeOpacity={0.75} style={styles.homeButton} onPress={handleBackToHome}>
               <Text style={styles.homeButtonText}>Go back to Home</Text>
             </TouchableOpacity>
           </View>
@@ -327,5 +334,14 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  etaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  etaText: {
+    fontSize: 13,
+    color: COLORS.gray,
   },
 });

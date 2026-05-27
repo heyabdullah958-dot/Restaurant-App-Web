@@ -82,18 +82,18 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
   const renderSlide = ({ item }: { item: Slide }) => {
     return (
       <View style={styles.slideContainer}>
-        {/* Animated Graphic/Icon Area with decorative elements */}
+        {/* Graphic Area */}
         <View style={[styles.graphicContainer, { backgroundColor: item.iconBg }]}>
+          {/* Decorative bg circles */}
+          <View style={[styles.bgCircle1, { backgroundColor: `${item.color}18` }]} />
+          <View style={[styles.bgCircle2, { backgroundColor: `${item.color}10` }]} />
+          {/* Main icon */}
           <View style={[styles.outerCircle, { backgroundColor: `${item.color}20` }]}>
-            <View style={[styles.innerCircle, { backgroundColor: COLORS.white, shadowColor: item.color }]}>
-              <Ionicons name={item.icon} size={90} color={item.color} />
+            <View style={[styles.innerCircle, { backgroundColor: COLORS.white }]}>
+              <Ionicons name={item.icon} size={88} color={item.color} />
             </View>
           </View>
-          {/* Decorative circles */}
-          <View style={[styles.decorCircle1, { backgroundColor: `${item.color}15` }]} />
-          <View style={[styles.decorCircle2, { backgroundColor: `${item.color}10` }]} />
         </View>
-
         {/* Text Area */}
         <View style={styles.textContainer}>
           <Text style={[styles.subtitle, { color: item.color }]}>{item.subtitle.toUpperCase()}</Text>
@@ -111,7 +111,7 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
       {/* Top Header - Skip Button */}
       <View style={styles.header}>
         {currentSlideIndex < slides.length - 1 ? (
-          <TouchableOpacity onPress={handleSkip}>
+          <TouchableOpacity activeOpacity={0.75} onPress={handleSkip}>
             <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
         ) : (
@@ -287,22 +287,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
-  decorCircle1: {
+  bgCircle1: {
     position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    top: -80,
-    right: -80,
-    zIndex: -1,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    top: -100,
+    right: -100,
   },
-  decorCircle2: {
+  bgCircle2: {
     position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    bottom: -50,
-    left: -50,
-    zIndex: -1,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    bottom: -70,
+    left: -70,
   },
 });

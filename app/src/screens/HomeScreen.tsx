@@ -10,6 +10,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
@@ -23,33 +24,65 @@ const { width } = Dimensions.get('window');
 
 const categories = ['All', 'BBQ', 'Seafood', 'Burgers', 'Tandoori', 'Sandwiches', 'Desserts'];
 
+// APP-04: Loading Skeleton Card Component
+const SkeletonCard = () => (
+  <View style={styles.skeletonCard}>
+    <View style={styles.skeletonImage} />
+    <View style={styles.skeletonBody}>
+      <View style={styles.skeletonTitle} />
+      <View style={styles.skeletonSubtitle} />
+      <View style={styles.skeletonMeta} />
+    </View>
+  </View>
+);
+
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
   const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
 
-  // UI-01: selectedCategory state
-  const [selectedCategory, setSelectedCategory] = React.useState('All');
+  // APP-01: STEP 1 — State add karo
+  const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
 
-  // UI-01: filteredRestaurants computed value
+  // APP-28: Pull-to-refresh state
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  // APP-01: STEP 2 — Filtered list compute karo
   const filteredRestaurants = React.useMemo(() => {
     if (selectedCategory === 'All') return restaurants;
     return restaurants.filter((r: any) =>
-      r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase())
+      r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+      r.name?.toLowerCase().includes(selectedCategory.toLowerCase())
     );
   }, [restaurants, selectedCategory]);
 
-  // UI-02: rotating banner carousel state & effect
+  // APP-02: STEP 1 — State aur data add karo
   const [bannerIndex, setBannerIndex] = React.useState(0);
-  const banners = [
-    { title: '7 Brands, One Cart!', sub: 'Mix cuisines in a single order.' },
-    { title: 'Earn Loyalty Points!', sub: '1 point per Rs.100 spent — redeem anytime.' },
-    { title: 'Free Delivery on First Order!', sub: 'Use code FIRSTORDER at checkout.' },
+  const BANNERS = [
+    {
+      icon: 'fast-food' as const,
+      title: '7 Brands, One Cart!',
+      subtitle: 'Mix cuisines in a single order.',
+      bg: COLORS.primary,
+    },
+    {
+      icon: 'gift' as const,
+      title: 'Earn Loyalty Points!',
+      subtitle: '1 point per Rs.100 — redeem anytime.',
+      bg: COLORS.accent,
+    },
+    {
+      icon: 'bicycle' as const,
+      title: 'Fast Delivery!',
+      subtitle: 'Hot & fresh at your doorstep.',
+      bg: COLORS.secondary,
+    },
   ];
 
+  // APP-02: STEP 2 — Auto-rotate effect add karo
   React.useEffect(() => {
     const timer = setInterval(() => {
-      setBannerIndex((prev) => (prev + 1) % banners.length);
+      setBannerIndex(prev => (prev + 1) % BANNERS.length);
     }, 3500);
     return () => clearInterval(timer);
   }, []);
@@ -58,23 +91,28 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     dispatch(fetchRestaurants());
   }, [dispatch]);
 
-  // UI-01: renderCategoryChip uses selectedCategory and triggers filter on press
+  // APP-28: Pull-to-refresh handler
+  const handleRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await dispatch(fetchRestaurants());
+    setRefreshing(false);
+  }, [dispatch]);
+
+  // APP-01: STEP 3 — renderCategoryChip function REPLACE karo
   const renderCategoryChip = ({ item }: { item: string }) => (
     <TouchableOpacity
       style={[
         styles.categoryChip,
-        item === selectedCategory ? styles.activeCategoryChip : null,
+        item === selectedCategory && styles.activeCategoryChip,
         SHADOWS.small,
       ]}
       onPress={() => setSelectedCategory(item)}
       activeOpacity={0.75}
     >
-      <Text
-        style={[
-          styles.categoryText,
-          item === selectedCategory ? styles.activeCategoryText : null,
-        ]}
-      >
+      <Text style={[
+        styles.categoryText,
+        item === selectedCategory && styles.activeCategoryText,
+      ]}>
         {item}
       </Text>
     </TouchableOpacity>
@@ -99,20 +137,22 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
 
-        {/* UI-03: Rewards & Search buttons in Header */}
-        <View style={styles.headerRight}>
+        {/* APP-03: Header Search Icon Button */}
+        <View style={styles.headerActions}>
           <TouchableOpacity
-            style={styles.searchIconBtn}
+            style={styles.headerIconBtn}
             onPress={() => navigation.navigate('Search')}
+            activeOpacity={0.75}
           >
-            <Ionicons name="search" size={20} color={COLORS.dark} />
+            <Ionicons name="search-outline" size={22} color={COLORS.dark} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.rewardsButton}
             onPress={() => navigation.navigate('Rewards')}
+            activeOpacity={0.75}
           >
             <Ionicons name="ribbon-sharp" size={22} color={COLORS.primary} />
-            {!user?.is_guest && (
+            {!user?.is_guest && (user?.loyalty_points ?? 0) > 0 && (
               <View style={styles.pointsBadge}>
                 <Text style={styles.pointsText}>{user?.loyalty_points || 0}</Text>
               </View>
@@ -121,33 +161,45 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
+          />
+        }
+      >
         
-        {/* UI-02: Rotating Promo Banner */}
-        <View style={[styles.promoBanner, SHADOWS.medium]}>
-          <View style={styles.bannerInfo}>
-            <Text style={styles.bannerTitle}>{banners[bannerIndex].title}</Text>
-            <Text style={styles.bannerSubtitle}>{banners[bannerIndex].sub}</Text>
-            <TouchableOpacity style={styles.bannerCTA}>
-              <Text style={styles.bannerCTAText}>Order Now</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.bannerGraphic}>
-            <Ionicons name="fast-food" size={80} color="rgba(255,255,255,0.2)" />
+        {/* APP-02: STEP 3 — Banner JSX block REPLACE karo */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={[styles.promoBanner, { backgroundColor: BANNERS[bannerIndex].bg }, SHADOWS.medium]}
+          onPress={() => navigation.navigate('Search')}
+        >
+          <View style={styles.bannerContent}>
+            <View style={{ flex: 1, paddingRight: SPACING.xs }}>
+              <Text style={styles.bannerTitle}>{BANNERS[bannerIndex].title}</Text>
+              <Text style={styles.bannerSubtitle}>{BANNERS[bannerIndex].subtitle}</Text>
+              <View style={styles.bannerCTARow}>
+                <Text style={styles.bannerCTAText}>Order Now</Text>
+                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+              </View>
+            </View>
+            <View style={styles.bannerIconWrap}>
+              <Ionicons name={BANNERS[bannerIndex].icon} size={72} color="rgba(255,255,255,0.25)" />
+            </View>
           </View>
           {/* Dot Indicators */}
           <View style={styles.bannerDots}>
-            {banners.map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.bannerDot,
-                  i === bannerIndex ? styles.bannerDotActive : null,
-                ]}
-              />
+            {BANNERS.map((_, i) => (
+              <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
             ))}
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Categories Chips */}
         <FlatList
@@ -166,31 +218,30 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <Text style={styles.sectionLink}>View All</Text>
         </View>
 
-        {/* UI-15: Loading & Empty State management */}
+        {/* APP-04 & APP-05: Loading / Empty / Content block */}
         {loading ? (
-          <View style={{ alignItems: 'center', marginTop: SPACING.xl }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ color: COLORS.gray, marginTop: 8, fontSize: 13 }}>
-              Loading restaurants...
-            </Text>
+          <View style={{ paddingHorizontal: 0 }}>
+            {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
           </View>
         ) : filteredRestaurants.length === 0 ? (
-          <View style={styles.emptyStateContainer}>
-            <Ionicons name="restaurant-outline" size={64} color={COLORS.lightGray} />
+          <View style={styles.emptyStateBox}>
+            <Ionicons name="restaurant-outline" size={60} color={COLORS.lightGray} />
             <Text style={styles.emptyStateTitle}>
-              {selectedCategory === 'All' ? 'No Restaurants Found' : `No ${selectedCategory} Restaurants`}
+              {selectedCategory === 'All'
+                ? 'No Restaurants Available'
+                : `No ${selectedCategory} Restaurants`}
             </Text>
             <Text style={styles.emptyStateText}>
               {selectedCategory === 'All'
-                ? 'Check your internet connection and try again.'
-                : 'Try a different category or check back later.'}
+                ? 'Check your internet connection and pull down to refresh.'
+                : 'Try another cuisine category.'}
             </Text>
             {selectedCategory !== 'All' && (
-              <TouchableOpacity
-                style={styles.resetFilterBtn}
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.emptyStateBtn}
                 onPress={() => setSelectedCategory('All')}
               >
-                <Text style={styles.resetFilterText}>Show All Restaurants</Text>
+                <Text style={styles.emptyStateBtnText}>Show All</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -333,18 +384,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     lineHeight: 16,
   },
-  bannerCTA: {
-    backgroundColor: COLORS.white,
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  bannerCTAText: {
-    color: COLORS.primary,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
   bannerGraphic: {
     width: 80,
     alignItems: 'center',
@@ -455,12 +494,12 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
     lineHeight: 16,
   },
-  headerRight: {
+  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.xs,
   },
-  searchIconBtn: {
+  headerIconBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -468,11 +507,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bannerDots: {
-    position: 'absolute',
-    bottom: 10,
-    right: SPACING.md,
+  bannerContent: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bannerIconWrap: {
+    opacity: 0.9,
+  },
+  bannerCTARow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+    gap: 4,
+  },
+  bannerCTAText: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  bannerDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: SPACING.sm,
     gap: 4,
   },
   bannerDot: {
@@ -483,9 +540,43 @@ const styles = StyleSheet.create({
   },
   bannerDotActive: {
     backgroundColor: COLORS.white,
-    width: 16,
+    width: 18,
   },
-  emptyStateContainer: {
+  skeletonCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    marginBottom: SPACING.md,
+    overflow: 'hidden',
+    ...SHADOWS.small,
+  },
+  skeletonImage: {
+    height: 160,
+    backgroundColor: COLORS.lightGray,
+  },
+  skeletonBody: {
+    padding: SPACING.md,
+  },
+  skeletonTitle: {
+    height: 16,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 4,
+    marginBottom: 8,
+    width: '60%',
+  },
+  skeletonSubtitle: {
+    height: 12,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 4,
+    marginBottom: 8,
+    width: '40%',
+  },
+  skeletonMeta: {
+    height: 10,
+    backgroundColor: COLORS.lightGray,
+    borderRadius: 4,
+    width: '30%',
+  },
+  emptyStateBox: {
     alignItems: 'center',
     paddingVertical: SPACING.xl,
     paddingHorizontal: SPACING.xl,
@@ -504,14 +595,14 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
     lineHeight: 20,
   },
-  resetFilterBtn: {
+  emptyStateBtn: {
     marginTop: SPACING.md,
     backgroundColor: COLORS.primary,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
     borderRadius: 20,
   },
-  resetFilterText: {
+  emptyStateBtnText: {
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 13,

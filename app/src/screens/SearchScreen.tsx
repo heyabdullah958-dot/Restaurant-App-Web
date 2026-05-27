@@ -46,6 +46,9 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
+  // APP-19: Recent Searches state & logic
+  const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
+
   // Ensure restaurants list is populated
   useEffect(() => {
     dispatch(fetchRestaurants());
@@ -119,6 +122,15 @@ export default function SearchScreen() {
     };
   }, [searchQuery, activeSource]);
 
+  React.useEffect(() => {
+    if (searchQuery.trim().length > 2) {
+      setRecentSearches(prev => {
+        const updated = [searchQuery.trim(), ...prev.filter(s => s !== searchQuery.trim())].slice(0, 5);
+        return updated;
+      });
+    }
+  }, [matchingRestaurants, matchingDishes]);
+
   const handlePopularSearchPress = (keyword: string) => {
     setSearchQuery(keyword);
   };
@@ -129,7 +141,7 @@ export default function SearchScreen() {
 
       {/* Search Header */}
       <View style={styles.searchHeader}>
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={0.75}
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -149,7 +161,7 @@ export default function SearchScreen() {
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+            <TouchableOpacity activeOpacity={0.75} onPress={() => setSearchQuery('')} style={styles.clearButton}>
               <Ionicons name="close-circle" size={18} color={COLORS.gray} />
             </TouchableOpacity>
           )}
@@ -159,12 +171,35 @@ export default function SearchScreen() {
       {/* Main Content Area */}
       {searchQuery.trim().length === 0 ? (
         <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          {/* Recent Searches */}
+          {recentSearches.length > 0 && (
+            <View style={styles.recentContainer}>
+              <View style={styles.recentHeader}>
+                <Text style={styles.sectionTitle}>Recent Searches</Text>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => setRecentSearches([])}>
+                  <Text style={{ color: COLORS.gray, fontSize: 12 }}>Clear</Text>
+                </TouchableOpacity>
+              </View>
+              {recentSearches.map(term => (
+                <TouchableOpacity activeOpacity={0.75}
+                  key={term}
+                  style={styles.recentItem}
+                  onPress={() => handlePopularSearchPress(term)}
+                >
+                  <Ionicons name="time-outline" size={16} color={COLORS.gray} />
+                  <Text style={styles.recentItemText}>{term}</Text>
+                  <Ionicons name="arrow-up-outline" size={14} color={COLORS.lightGray} style={{ transform: [{ rotate: '45deg' }] }} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
           {/* Popular Searches */}
           <View style={styles.popularContainer}>
             <Text style={styles.sectionTitle}>Popular Searches</Text>
             <View style={styles.chipsContainer}>
               {POPULAR_SEARCHES.map((keyword) => (
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={0.75}
                   key={keyword}
                   style={styles.chip}
                   onPress={() => handlePopularSearchPress(keyword)}
@@ -185,11 +220,19 @@ export default function SearchScreen() {
             </View>
           ) : matchingRestaurants.length === 0 && matchingDishes.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="search-outline" size={64} color={COLORS.lightGray} />
+              <View style={styles.emptyIconRing}>
+                <Ionicons name="search-outline" size={40} color={COLORS.primary} />
+              </View>
               <Text style={styles.emptyStateTitle}>No results for "{searchQuery}"</Text>
               <Text style={styles.emptyStateDesc}>
                 Check spelling, try other keywords, or browse popular cuisines.
               </Text>
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.emptyStateBtn}
+                onPress={() => setSearchQuery('')}
+              >
+                <Text style={styles.emptyStateBtnText}>Clear Search</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <ScrollView
@@ -476,5 +519,50 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 8,
     alignSelf: 'center',
+  },
+  recentContainer: {
+    marginBottom: SPACING.lg,
+  },
+  recentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  recentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    gap: SPACING.sm,
+  },
+  recentItemText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.dark,
+  },
+  emptyIconRing: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255,87,34,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,87,34,0.15)',
+  },
+  emptyStateBtn: {
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+  },
+  emptyStateBtnText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 13,
   },
 });

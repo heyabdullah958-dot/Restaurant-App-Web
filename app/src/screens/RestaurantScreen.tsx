@@ -121,7 +121,7 @@ export default function RestaurantScreen() {
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color={COLORS.danger} />
           <Text style={styles.errorTitle}>Restaurant Not Found</Text>
-          <TouchableOpacity style={styles.errorButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.errorButton} onPress={() => navigation.goBack()}>
             <Text style={styles.errorButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -216,107 +216,109 @@ export default function RestaurantScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
-        stickyHeaderIndices={[2]}  // UI-04: Makes Category Selector Tabs sticky
+        stickyHeaderIndices={[1]}
       >
-        {/* Cover Image & Header Controls */}
-        <View style={styles.coverContainer}>
-          <Image source={getImageUrl(restaurant.cover_image)} style={styles.coverImage} />
-          <View style={styles.coverOverlay} />
+        <View>
+          {/* Cover Image & Header Controls */}
+          <View style={styles.coverContainer}>
+            <Image source={getImageUrl(restaurant.cover_image)} style={styles.coverImage} />
+            <View style={styles.coverOverlay} />
 
-          {/* Floating Header buttons */}
-          <View style={styles.headerButtonsRow}>
-            <TouchableOpacity style={styles.circleButton} onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
-            </TouchableOpacity>
-            
-            <View style={styles.headerRightButtons}>
-              <TouchableOpacity style={styles.circleButton}>
-                <Ionicons name="share-outline" size={20} color={COLORS.dark} />
+            {/* Floating Header buttons */}
+            <View style={styles.headerButtonsRow}>
+              <TouchableOpacity activeOpacity={0.75} style={styles.circleButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.circleButton, { marginLeft: SPACING.sm }]}>
-                <Ionicons name="heart-outline" size={20} color={COLORS.dark} />
-              </TouchableOpacity>
+              
+              <View style={styles.headerRightButtons}>
+                <TouchableOpacity activeOpacity={0.75} style={styles.circleButton}>
+                  <Ionicons name="share-outline" size={20} color={COLORS.dark} />
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.75} style={[styles.circleButton, { marginLeft: SPACING.sm }]}>
+                  <Ionicons name="heart-outline" size={20} color={COLORS.dark} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Restaurant Details Info Card */}
-        <View style={styles.infoCard}>
-          <View style={styles.logoContainer}>
-            <Image source={getImageUrl(restaurant.logo)} style={styles.logoImage} />
-          </View>
-          
-          <Text style={styles.restaurantName}>{restaurant.name}</Text>
-          <Text style={styles.cuisineText}>{restaurant.cuisine_type}</Text>
+          {/* Restaurant Details Info Card */}
+          <View style={styles.infoCard}>
+            <View style={styles.logoContainer}>
+              <Image source={getImageUrl(restaurant.logo)} style={styles.logoImage} />
+            </View>
+            
+            <Text style={styles.restaurantName}>{restaurant.name}</Text>
+            <Text style={styles.cuisineText}>{restaurant.cuisine_type}</Text>
 
-          {/* UI-16: Open/Closed status badge */}
-          {(() => {
-            const open = isRestaurantOpen(restaurant.opens_at, restaurant.closes_at);
-            return (
-              <View style={[styles.openBadge, { backgroundColor: open ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
-                <View style={[styles.openDot, { backgroundColor: open ? COLORS.success : COLORS.danger }]} />
-                <Text style={[styles.openText, { color: open ? COLORS.success : COLORS.danger }]}>
-                  {open ? 'Open Now' : 'Currently Closed'}
+            {/* UI-16: Open/Closed status badge */}
+            {(() => {
+              const open = isRestaurantOpen(restaurant.opens_at, restaurant.closes_at);
+              return (
+                <View style={[styles.openBadge, { backgroundColor: open ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
+                  <View style={[styles.openDot, { backgroundColor: open ? COLORS.success : COLORS.danger }]} />
+                  <Text style={[styles.openText, { color: open ? COLORS.success : COLORS.danger }]}>
+                    {open ? 'Open Now' : 'Currently Closed'}
+                  </Text>
+                </View>
+              );
+            })()}
+            
+            {restaurant.description ? (
+              <Text style={styles.descriptionText}>{restaurant.description}</Text>
+            ) : null}
+
+            {/* Ratings & Quick Specs Row */}
+            <View style={styles.specsContainer}>
+              <View style={styles.specItem}>
+                <Ionicons name="star" size={16} color={COLORS.warning} />
+                <Text style={styles.specValue}>{Number(restaurant.rating).toFixed(1)}</Text>
+                <Text style={styles.specLabel}>({restaurant.total_reviews}+ reviews)</Text>
+              </View>
+              <View style={styles.specDivider} />
+              <View style={styles.specItem}>
+                <Ionicons name="time" size={16} color={COLORS.primary} />
+                <Text style={styles.specValue}>
+                  {restaurant.delivery_time_min}-{restaurant.delivery_time_max}
+                </Text>
+                <Text style={styles.specLabel}>mins</Text>
+              </View>
+              <View style={styles.specDivider} />
+              <View style={styles.specItem}>
+                <Ionicons name="bicycle" size={16} color={COLORS.success} />
+                <Text style={styles.specValue}>
+                  {Number(restaurant.delivery_fee) === 0 ? 'Free' : `Rs. ${Number(restaurant.delivery_fee)}`}
+                </Text>
+                <Text style={styles.specLabel}>delivery</Text>
+              </View>
+            </View>
+
+            {/* Address & Hours Detail Info */}
+            <View style={styles.moreInfoSection}>
+              <View style={styles.infoRow}>
+                <Ionicons name="location-outline" size={14} color={COLORS.gray} />
+                <Text style={styles.moreInfoText} numberOfLines={1}>
+                  {restaurant.address}
                 </Text>
               </View>
-            );
-          })()}
-          
-          {restaurant.description ? (
-            <Text style={styles.descriptionText}>{restaurant.description}</Text>
-          ) : null}
-
-          {/* Ratings & Quick Specs Row */}
-          <View style={styles.specsContainer}>
-            <View style={styles.specItem}>
-              <Ionicons name="star" size={16} color={COLORS.warning} />
-              <Text style={styles.specValue}>{Number(restaurant.rating).toFixed(1)}</Text>
-              <Text style={styles.specLabel}>({restaurant.total_reviews}+ reviews)</Text>
-            </View>
-            <View style={styles.specDivider} />
-            <View style={styles.specItem}>
-              <Ionicons name="time" size={16} color={COLORS.primary} />
-              <Text style={styles.specValue}>
-                {restaurant.delivery_time_min}-{restaurant.delivery_time_max}
-              </Text>
-              <Text style={styles.specLabel}>mins</Text>
-            </View>
-            <View style={styles.specDivider} />
-            <View style={styles.specItem}>
-              <Ionicons name="bicycle" size={16} color={COLORS.success} />
-              <Text style={styles.specValue}>
-                {Number(restaurant.delivery_fee) === 0 ? 'Free' : `Rs. ${Number(restaurant.delivery_fee)}`}
-              </Text>
-              <Text style={styles.specLabel}>delivery</Text>
-            </View>
-          </View>
-
-          {/* Address & Hours Detail Info */}
-          <View style={styles.moreInfoSection}>
-            <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={14} color={COLORS.gray} />
-              <Text style={styles.moreInfoText} numberOfLines={1}>
-                {restaurant.address}
-              </Text>
-            </View>
-            <View style={[styles.infoRow, { marginTop: 6 }]}>
-              <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
-              <Text style={styles.moreInfoText}>
-                Working hours: {restaurant.opens_at.slice(0, 5)} - {restaurant.closes_at.slice(0, 5)}
-              </Text>
+              <View style={[styles.infoRow, { marginTop: 6 }]}>
+                <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
+                <Text style={styles.moreInfoText}>
+                  Working hours: {restaurant.opens_at.slice(0, 5)} - {restaurant.closes_at.slice(0, 5)}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* UI-04: Unconditional tabs wrapper to maintain sticky index 2 */}
-        <View style={[styles.tabsContainer, styles.tabsSticky, categoriesList.length === 0 && { height: 0, paddingVertical: 0, borderBottomWidth: 0 }]}>
+        {/* Category Tabs Selector (Sticky Index 1) */}
+        <View style={[styles.tabsContainer, styles.tabsSticky, styles.stickyTabs, categoriesList.length === 0 && { height: 0, paddingVertical: 0, borderBottomWidth: 0 }]}>
           {categoriesList.length > 0 && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.tabsScrollContent}
             >
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={0.75}
                 style={[
                   styles.tabButton,
                   selectedCategory === 'All' && styles.tabButtonActive,
@@ -334,7 +336,7 @@ export default function RestaurantScreen() {
               </TouchableOpacity>
 
               {categoriesList.map((cat) => (
-                <TouchableOpacity
+                <TouchableOpacity activeOpacity={0.75}
                   key={cat.id}
                   style={[
                     styles.tabButton,
@@ -399,14 +401,14 @@ export default function RestaurantScreen() {
                   <View style={styles.quantitySelectorContainer}>
                     {quantity > 0 ? (
                       <View style={styles.quantityRow}>
-                        <TouchableOpacity
+                        <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
                           onPress={() => handleDecrement(item, quantity)}
                         >
                           <Ionicons name="remove" size={16} color={COLORS.white} />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
-                        <TouchableOpacity
+                        <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
                           onPress={() => handleIncrement(item, quantity)}
                         >
@@ -832,6 +834,15 @@ const styles = StyleSheet.create({
   tabsSticky: {
     zIndex: 10,
     elevation: 4,
+  },
+  stickyTabs: {
+    backgroundColor: COLORS.white,
+    zIndex: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   openBadge: {
     flexDirection: 'row',

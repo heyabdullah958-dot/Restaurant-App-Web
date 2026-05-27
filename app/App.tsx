@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
-import { store, AppDispatch } from './src/store';
+import { store, AppDispatch, RootState } from './src/store';
 import { setupInterceptors } from './src/services/api';
 import { loadSavedToken } from './src/store/userSlice';
 import { COLORS } from './src/theme';
@@ -46,6 +47,7 @@ type RootStackParamList = {
 type MainTabParamList = {
   Home: undefined;
   Search: undefined;
+  Cart: undefined;
   Orders: undefined;
   Profile: undefined;
 };
@@ -54,6 +56,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function MainTabs() {
+  const cartItemCount = useSelector((state: RootState) => state.cart.items.length);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -64,12 +68,40 @@ function MainTabs() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Search') {
             iconName = focused ? 'search' : 'search-outline';
+          } else if (route.name === 'Cart') {
+            iconName = focused ? 'basket' : 'basket-outline';
           } else if (route.name === 'Orders') {
             iconName = focused ? 'receipt' : 'receipt-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           } else {
             iconName = 'help-circle-outline';
+          }
+
+          if (route.name === 'Cart') {
+            return (
+              <View>
+                <Ionicons name={iconName} size={size || 22} color={color} />
+                {cartItemCount > 0 && (
+                  <View style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -8,
+                    backgroundColor: COLORS.primary,
+                    borderRadius: 8,
+                    minWidth: 16,
+                    height: 16,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: 2,
+                  }}>
+                    <Text style={{ color: 'white', fontSize: 9, fontWeight: 'bold' }}>
+                      {cartItemCount > 9 ? '9+' : cartItemCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            );
           }
 
           return <Ionicons name={iconName} size={size || 22} color={color} />;
@@ -100,6 +132,11 @@ function MainTabs() {
         name="Search" 
         component={SearchScreen} 
         options={{ tabBarLabel: 'Search' }} 
+      />
+      <Tab.Screen 
+        name="Cart" 
+        component={CartScreen} 
+        options={{ tabBarLabel: 'Cart' }} 
       />
       <Tab.Screen 
         name="Orders" 

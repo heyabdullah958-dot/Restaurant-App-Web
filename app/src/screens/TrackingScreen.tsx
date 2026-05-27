@@ -48,7 +48,7 @@ export default function TrackingScreen() {
 
   // Set up polling (refreshes order status every 15 seconds while not delivered)
   useEffect(() => {
-    if (!orderId || (currentOrder && currentOrder.status === 'delivered')) {
+    if (!orderId || (currentOrder && currentOrder.status?.toLowerCase() === 'delivered')) {
       return;
     }
 
@@ -80,7 +80,7 @@ export default function TrackingScreen() {
     if (status === 'received') return 0;
     if (status === 'preparing') return 1;
     if (status === 'out_for_delivery' || status === 'out for delivery') return 2;
-    if (status === 'delivered') return 3;
+    if (status === 'delivered') return 4; // All 4 steps (0, 1, 2, 3) completed
     return 0;
   }, [currentOrder]);
 
@@ -171,7 +171,7 @@ export default function TrackingScreen() {
         <Text style={styles.errorSubtitle}>
           {error || "We couldn't find a valid active order to track."}
         </Text>
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={0.75}
           style={styles.actionBtn}
           onPress={() => navigation.navigate('Orders')}
         >
@@ -185,14 +185,14 @@ export default function TrackingScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Order Tracking</Text>
           <Text style={styles.headerSubtitle}>Order #{orderId}</Text>
         </View>
-        <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
+        <TouchableOpacity activeOpacity={0.75} onPress={onRefresh} style={styles.refreshButton}>
           <Ionicons name="refresh-outline" size={22} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
@@ -227,13 +227,20 @@ export default function TrackingScreen() {
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />
           </View>
 
-          {/* UI-12 Map Placeholder */}
+          {/* Map Placeholder */}
           <View style={styles.mapPlaceholder}>
             <View style={styles.mapPlaceholderInner}>
-              <Ionicons name="map-outline" size={48} color={COLORS.primary} />
+              <View style={styles.mapIconRing}>
+                <Ionicons name="map-outline" size={40} color={COLORS.primary} />
+              </View>
               <Text style={styles.mapPlaceholderTitle}>Live Tracking Map</Text>
-              <Text style={styles.mapPlaceholderSub}>Map integration coming soon</Text>
-              <View style={styles.mapPulseDot} />
+              <Text style={styles.mapPlaceholderSub}>Real-time map coming soon</Text>
+              {/* Simulated road/route visual */}
+              <View style={styles.mapRoute}>
+                <View style={styles.mapRouteDot} />
+                <View style={styles.mapRouteLine} />
+                <View style={[styles.mapRouteDot, { backgroundColor: COLORS.primary }]} />
+              </View>
             </View>
           </View>
         </View>
@@ -339,7 +346,7 @@ export default function TrackingScreen() {
                 ) : null}
               </View>
               <Text style={styles.itemPrice}>
-                Rs. {(item.total_price || item.unit_price * item.quantity).toFixed(2)}
+                Rs. {parseFloat(item.total_price || (parseFloat(item.unit_price || 0) * item.quantity) || 0).toFixed(2)}
               </Text>
             </View>
           ))}
@@ -397,7 +404,7 @@ export default function TrackingScreen() {
         </View>
 
         {/* Close Button / Go to History */}
-        <TouchableOpacity
+        <TouchableOpacity activeOpacity={0.75}
           style={styles.doneBtn}
           onPress={() => navigation.navigate('Home')}
         >
@@ -871,35 +878,53 @@ const styles = StyleSheet.create({
     color: COLORS.dark,
   },
   mapPlaceholder: {
-    height: 240,
+    height: 200,
     backgroundColor: 'rgba(255,87,34,0.04)',
     borderRadius: 16,
-    overflow: 'hidden',
+    margin: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,87,34,0.15)',
+    borderColor: 'rgba(255,87,34,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: SPACING.md,
+    borderStyle: 'dashed',
   },
   mapPlaceholderInner: {
     alignItems: 'center',
   },
+  mapIconRing: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,87,34,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
   mapPlaceholderTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 'bold',
     color: COLORS.dark,
-    marginTop: 8,
   },
   mapPlaceholderSub: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.gray,
-    marginTop: 4,
+    marginTop: 2,
   },
-  mapPulseDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.primary,
-    marginTop: 12,
+  mapRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    gap: 4,
+  },
+  mapRouteDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.success,
+  },
+  mapRouteLine: {
+    height: 2,
+    width: 60,
+    backgroundColor: COLORS.lightGray,
   },
 });

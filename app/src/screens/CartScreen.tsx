@@ -11,6 +11,9 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
+  PanResponder,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,6 +36,41 @@ type RootStackParamList = {
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Cart'>;
+
+const SwipeableRow = ({ children, onSwipeLeft }: { children: React.ReactNode; onSwipeLeft: () => void }) => {
+  const pan = React.useRef(new Animated.ValueXY()).current;
+  const panResponder = React.useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 8;
+      },
+      onPanResponderMove: Animated.event([null, { dx: pan.x }], { useNativeDriver: false }),
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx < -80) {
+          Animated.timing(pan, {
+            toValue: { x: -Dimensions.get('window').width, y: 0 },
+            duration: 200,
+            useNativeDriver: false,
+          }).start(onSwipeLeft);
+        } else {
+          Animated.spring(pan, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  return (
+    <Animated.View
+      style={{ transform: [{ translateX: pan.x }] }}
+      {...panResponder.panHandlers}
+    >
+      {children}
+    </Animated.View>
+  );
+};
 
 export default function CartScreen() {
   const navigation = useNavigation<any>();
@@ -93,29 +131,32 @@ export default function CartScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Basket</Text>
           <View style={{ width: 24 }} />
         </View>
         <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconWrap}>
+          <View style={styles.emptyIconRing}>
             <Ionicons name="basket-outline" size={64} color={COLORS.primary} />
           </View>
           <Text style={styles.emptyTitle}>Your Basket is Empty</Text>
           <Text style={styles.emptySubtitle}>
-            Explore 7 unique restaurant brands and add your favorite items!
+            Explore 7 unique restaurant brands and add your favorite items to get started!
           </Text>
-          <TouchableOpacity style={styles.browseButton} onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity activeOpacity={0.75}
+            style={styles.browseButton}
+            onPress={() => navigation.navigate('Home')}
+          >
             <Ionicons name="restaurant-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
             <Text style={styles.browseButtonText}>Browse Restaurants</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.75}
             style={styles.browseSecondary}
             onPress={() => navigation.navigate('Search')}
           >
-            <Text style={styles.browseSecondaryText}>Search for a dish</Text>
+            <Text style={styles.browseSecondaryText}>🔍 Search for a specific dish</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -128,11 +169,11 @@ export default function CartScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Basket</Text>
-        <TouchableOpacity onPress={() => dispatch(clearCart())}>
+        <TouchableOpacity activeOpacity={0.75} onPress={() => dispatch(clearCart())}>
           <Text style={styles.clearAllText}>Clear</Text>
         </TouchableOpacity>
       </View>
@@ -153,34 +194,36 @@ export default function CartScreen() {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Selected Items</Text>
           {cart.items.map((item: any) => (
-            <View key={item.id} style={styles.cartItemRow}>
-              <View style={styles.itemMeta}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemUnitPrice}>Rs. {item.price} each</Text>
-              </View>
-              
-              <View style={styles.qtyContainer}>
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => handleDecrement(item.id, item.quantity)}
-                >
-                  <Ionicons name="remove" size={14} color={COLORS.white} />
-                </TouchableOpacity>
-                <Text style={styles.qtyText}>{item.quantity}</Text>
-                <TouchableOpacity
-                  style={styles.qtyBtn}
-                  onPress={() => handleIncrement(item.id, item.quantity)}
-                >
-                  <Ionicons name="add" size={14} color={COLORS.white} />
-                </TouchableOpacity>
-              </View>
+            <SwipeableRow key={item.id} onSwipeLeft={() => handleRemove(item.id)}>
+              <View style={styles.cartItemRow}>
+                <View style={styles.itemMeta}>
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemUnitPrice}>Rs. {item.price} each</Text>
+                </View>
+                
+                <View style={styles.qtyContainer}>
+                  <TouchableOpacity activeOpacity={0.75}
+                    style={styles.qtyBtn}
+                    onPress={() => handleDecrement(item.id, item.quantity)}
+                  >
+                    <Ionicons name="remove" size={14} color={COLORS.white} />
+                  </TouchableOpacity>
+                  <Text style={styles.qtyText}>{item.quantity}</Text>
+                  <TouchableOpacity activeOpacity={0.75}
+                    style={styles.qtyBtn}
+                    onPress={() => handleIncrement(item.id, item.quantity)}
+                  >
+                    <Ionicons name="add" size={14} color={COLORS.white} />
+                  </TouchableOpacity>
+                </View>
 
-              <Text style={styles.itemTotalPrice}>Rs. {item.price * item.quantity}</Text>
-              
-              <TouchableOpacity onPress={() => handleRemove(item.id)} style={styles.deleteBtn}>
-                <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
-              </TouchableOpacity>
-            </View>
+                <Text style={styles.itemTotalPrice}>Rs. {item.price * item.quantity}</Text>
+                
+                <TouchableOpacity activeOpacity={0.75} onPress={() => handleRemove(item.id)} style={styles.deleteBtn}>
+                  <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
+                </TouchableOpacity>
+              </View>
+            </SwipeableRow>
           ))}
         </View>
 
@@ -199,7 +242,6 @@ export default function CartScreen() {
                 : `Rs. ${activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0}`}
             </Text>
           </View>
-          {/* Discount Row (shown when applicable) */}
           <View style={styles.billRow}>
             <Text style={[styles.billLabel, { color: COLORS.success }]}>Discount</Text>
             <Text style={[styles.billValue, { color: COLORS.success }]}>— Rs. 0</Text>
@@ -210,11 +252,15 @@ export default function CartScreen() {
               Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
             </Text>
           </View>
-          {/* Loyalty Points Earn Hint */}
+          {/* Loyalty Points Earn Preview */}
           <View style={styles.loyaltyHint}>
             <Ionicons name="gift-outline" size={14} color={COLORS.secondary} />
             <Text style={styles.loyaltyHintText}>
-              You'll earn {Math.floor((cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)) / 100)} loyalty points!
+              You'll earn{' '}
+              <Text style={{ fontWeight: 'bold' }}>
+                {Math.floor((cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)) / 100)}
+              </Text>{' '}
+              loyalty points on this order!
             </Text>
           </View>
         </View>
@@ -485,28 +531,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  emptyIconWrap: {
+  emptyIconRing: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255, 87, 34, 0.08)',
+    backgroundColor: 'rgba(255,87,34,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.lg,
+    borderWidth: 2,
+    borderColor: 'rgba(255,87,34,0.12)',
   },
   browseSecondary: {
     marginTop: SPACING.sm,
     paddingVertical: SPACING.sm,
   },
   browseSecondaryText: {
-    color: COLORS.primary,
-    fontWeight: '600',
+    color: COLORS.gray,
     fontSize: 14,
+    fontWeight: '500',
   },
   loyaltyHint: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,152,0,0.07)',
+    backgroundColor: 'rgba(255,152,0,0.08)',
     borderRadius: 8,
     padding: SPACING.sm,
     marginTop: SPACING.sm,
@@ -515,6 +563,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.secondary,
     marginLeft: 6,
-    fontWeight: '600',
+    flex: 1,
+    fontWeight: '500',
   },
 });

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING } from '../theme';
 import { RootState } from '../store';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -60,7 +61,12 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
   }, [isAuthenticated, navigation]);
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#FF5722', '#FF9800', '#E91E63']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <StatusBar style="light" />
       <View style={styles.contentContainer}>
         {/* Animated Brand Logo Icon */}
@@ -95,14 +101,13 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
       <View style={styles.footer}>
         <Text style={styles.footerText}>Premium Restaurant Aggregator</Text>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },

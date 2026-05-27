@@ -267,7 +267,7 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
       <StatusBar style="dark" />
       {/* Custom Navigation Header */}
       <View style={styles.navHeader}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity activeOpacity={0.75} style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
         </TouchableOpacity>
         <Text style={styles.navTitle}>Loyalty & Rewards</Text>

@@ -15,7 +15,22 @@ export const placeOrder = createAsyncThunk(
       const response = await api.post('/orders/', orderData);
       return response.data || response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to place order');
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to place order';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
@@ -27,7 +42,22 @@ export const fetchOrderDetails = createAsyncThunk(
       const response = await api.get(`/orders/${orderId}/`);
       return response.data || response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch order details');
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to fetch order details';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
@@ -39,7 +69,22 @@ export const fetchMyOrders = createAsyncThunk(
       const response = await api.get('/orders/my-orders/');
       return response.data || response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch order history');
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to fetch order history';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
@@ -51,7 +96,22 @@ export const confirmCODPayment = createAsyncThunk(
       const response = await api.post('/payments/cod/confirm/', { order_id: orderId });
       return response.data || response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to confirm COD payment');
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to confirm COD payment';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
@@ -63,7 +123,22 @@ export const createStripeIntent = createAsyncThunk(
       const response = await api.post('/payments/stripe/create/', { order_id: orderId });
       return response.data || response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create Stripe payment intent');
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to create Stripe payment intent';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
     }
   }
 );
