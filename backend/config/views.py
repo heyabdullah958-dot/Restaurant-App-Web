@@ -81,3 +81,35 @@ def trigger_seed(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+def init_db(request):
+    """
+    Emergency database initializer.
+    GET request secured by a simple query key.
+    """
+    if request.GET.get('key') != 'foodsphere123':
+        return JsonResponse({
+            'success': False,
+            'message': 'Unauthorized. Key required.'
+        }, status=403)
+        
+    from django.core.management import call_command
+    try:
+        # Run migrations
+        call_command('migrate', interactive=False)
+        # Create superuser
+        call_command('create_admin')
+        # Create restaurant managers
+        call_command('create_restaurant_managers')
+        # Seed restaurants
+        call_command('seed_restaurants')
+        return JsonResponse({
+            'success': True,
+            'message': 'Database initialized, admin and managers created, and restaurants seeded successfully!'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

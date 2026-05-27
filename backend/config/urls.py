@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from config.views import health_check, db_debug, root_view, trigger_seed
+from config.views import health_check, db_debug, root_view, trigger_seed, init_db
 
 urlpatterns = [
     path('', root_view, name='root'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/health/', health_check, name='api_health_check'),
     path('api/db-debug/', db_debug, name='db_debug'),
     path('api/seed/', trigger_seed, name='trigger_seed'),
+    path('api/init-db/', init_db, name='init_db'),
 
     # API App Routes
     path('api/', include('users.urls')),
