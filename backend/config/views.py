@@ -112,4 +112,4 @@ def init_db(request):
         return JsonResponse({
             'success': False,
             'error': str(e)
-        }, status=500)
+        })
