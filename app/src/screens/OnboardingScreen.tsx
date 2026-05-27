@@ -82,13 +82,16 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
   const renderSlide = ({ item }: { item: Slide }) => {
     return (
       <View style={styles.slideContainer}>
-        {/* Animated Graphic/Icon Area */}
-        <View style={styles.graphicContainer}>
-          <View style={[styles.outerCircle, { backgroundColor: item.iconBg }]}>
-            <View style={[styles.innerCircle, { backgroundColor: COLORS.white }]}>
-              <Ionicons name={item.icon} size={80} color={item.color} />
+        {/* Animated Graphic/Icon Area with decorative elements */}
+        <View style={[styles.graphicContainer, { backgroundColor: item.iconBg }]}>
+          <View style={[styles.outerCircle, { backgroundColor: `${item.color}20` }]}>
+            <View style={[styles.innerCircle, { backgroundColor: COLORS.white, shadowColor: item.color }]}>
+              <Ionicons name={item.icon} size={90} color={item.color} />
             </View>
           </View>
+          {/* Decorative circles */}
+          <View style={[styles.decorCircle1, { backgroundColor: `${item.color}15` }]} />
+          <View style={[styles.decorCircle2, { backgroundColor: `${item.color}10` }]} />
         </View>
 
         {/* Text Area */}
@@ -197,8 +200,12 @@ const styles = StyleSheet.create({
   },
   graphicContainer: {
     height: height * 0.35,
+    width: width - 40,
+    borderRadius: 24,
+    overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   outerCircle: {
     width: 200,
@@ -279,5 +286,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 0.5,
+  },
+  decorCircle1: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    top: -80,
+    right: -80,
+    zIndex: -1,
+  },
+  decorCircle2: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    bottom: -50,
+    left: -50,
+    zIndex: -1,
   },
 });

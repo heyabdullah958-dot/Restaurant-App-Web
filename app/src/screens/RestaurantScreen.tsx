@@ -32,6 +32,20 @@ type RootStackParamList = {
 type RestaurantScreenRouteProp = RouteProp<RootStackParamList, 'Restaurant'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Restaurant'>;
 
+const isRestaurantOpen = (opensAt: string, closesAt: string): boolean => {
+  try {
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const [openH, openM] = opensAt.split(':').map(Number);
+    const [closeH, closeM] = closesAt.split(':').map(Number);
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+    return nowMinutes >= openMinutes && nowMinutes <= closeMinutes;
+  } catch {
+    return true; // Default to open if error
+  }
+};
+
 export default function RestaurantScreen() {
   const route = useRoute<RestaurantScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
@@ -202,6 +216,7 @@ export default function RestaurantScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
+        stickyHeaderIndices={[2]}  // UI-04: Makes Category Selector Tabs sticky
       >
         {/* Cover Image & Header Controls */}
         <View style={styles.coverContainer}>
@@ -233,6 +248,19 @@ export default function RestaurantScreen() {
           
           <Text style={styles.restaurantName}>{restaurant.name}</Text>
           <Text style={styles.cuisineText}>{restaurant.cuisine_type}</Text>
+
+          {/* UI-16: Open/Closed status badge */}
+          {(() => {
+            const open = isRestaurantOpen(restaurant.opens_at, restaurant.closes_at);
+            return (
+              <View style={[styles.openBadge, { backgroundColor: open ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
+                <View style={[styles.openDot, { backgroundColor: open ? COLORS.success : COLORS.danger }]} />
+                <Text style={[styles.openText, { color: open ? COLORS.success : COLORS.danger }]}>
+                  {open ? 'Open Now' : 'Currently Closed'}
+                </Text>
+              </View>
+            );
+          })()}
           
           {restaurant.description ? (
             <Text style={styles.descriptionText}>{restaurant.description}</Text>
@@ -280,9 +308,9 @@ export default function RestaurantScreen() {
           </View>
         </View>
 
-        {/* Category Selector Tabs */}
-        {categoriesList.length > 0 && (
-          <View style={styles.tabsContainer}>
+        {/* UI-04: Unconditional tabs wrapper to maintain sticky index 2 */}
+        <View style={[styles.tabsContainer, styles.tabsSticky, categoriesList.length === 0 && { height: 0, paddingVertical: 0, borderBottomWidth: 0 }]}>
+          {categoriesList.length > 0 && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -325,8 +353,8 @@ export default function RestaurantScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* Menu Items List */}
         <View style={styles.menuContainer}>
@@ -360,7 +388,10 @@ export default function RestaurantScreen() {
                     <Image source={getImageUrl(item.image)} style={styles.itemImage} />
                   ) : (
                     <View style={styles.itemImagePlaceholder}>
-                      <Ionicons name="pizza-outline" size={24} color={COLORS.gray} />
+                      <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
+                      <Text style={{ fontSize: 9, color: COLORS.primary, marginTop: 2, opacity: 0.7 }}>
+                        No Image
+                      </Text>
                     </View>
                   )}
 
@@ -474,7 +505,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // Leave room for sticky cart bar
   },
   coverContainer: {
-    height: 200,
+    height: 260,
     width: '100%',
     position: 'relative',
   },
@@ -690,11 +721,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 12,
-    backgroundColor: COLORS.light,
+    backgroundColor: 'rgba(255, 87, 34, 0.06)',  // Light primary tint
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.lightGray,
+    borderColor: 'rgba(255, 87, 34, 0.15)',
   },
   quantitySelectorContainer: {
     position: 'absolute',
@@ -797,5 +828,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 6,
     fontSize: 16,
+  },
+  tabsSticky: {
+    zIndex: 10,
+    elevation: 4,
+  },
+  openBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginTop: 6,
+  },
+  openDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 5,
+  },
+  openText: {
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

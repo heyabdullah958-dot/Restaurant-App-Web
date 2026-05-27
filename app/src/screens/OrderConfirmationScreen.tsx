@@ -13,6 +13,40 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 
+const OrderSteps = () => {
+  const steps = [
+    { icon: 'checkmark-circle', label: 'Order Placed', done: true },
+    { icon: 'restaurant', label: 'Preparing', done: false },
+    { icon: 'bicycle', label: 'Out for Delivery', done: false },
+    { icon: 'home', label: 'Delivered', done: false },
+  ];
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16, paddingHorizontal: 12 }}>
+      {steps.map((step, i) => (
+        <React.Fragment key={i}>
+          <View style={{ alignItems: 'center', flex: 1 }}>
+            <View style={{
+              width: 40, height: 40, borderRadius: 20,
+              backgroundColor: step.done ? COLORS.primary : COLORS.lightGray,
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Ionicons name={step.icon as any} size={18}
+                color={step.done ? COLORS.white : COLORS.gray} />
+            </View>
+            <Text style={{ fontSize: 9, color: step.done ? COLORS.primary : COLORS.gray,
+              marginTop: 4, textAlign: 'center', fontWeight: '600' }}>
+              {step.label}
+            </Text>
+          </View>
+          {i < steps.length - 1 && (
+            <View style={{ height: 2, flex: 0.5, backgroundColor: COLORS.lightGray, marginBottom: 16 }} />
+          )}
+        </React.Fragment>
+      ))}
+    </View>
+  );
+};
+
 type RootStackParamList = {
   Home: undefined;
   Main: undefined;
@@ -86,7 +120,8 @@ export default function OrderConfirmationScreen() {
         </Animated.View>
 
         {/* Animated Content */}
-        <Animated.View style={[styles.textContainer, { opacity: contentOpacity }]}>
+        <Animated.View style={[styles.textContainer, { opacity: contentOpacity, width: '100%' }]}>
+          <OrderSteps />
           <Text style={styles.successTitle}>Order Placed!</Text>
           <Text style={styles.successSubtitle}>
             Your order has been sent to the restaurant.

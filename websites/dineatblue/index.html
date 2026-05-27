@@ -281,13 +281,210 @@
       .res-full { grid-column: span 1; }
       .reservation-form { padding: 28px 20px; }
       footer { flex-direction: column; text-align: center; }
+      
+      .hamburger { display: flex; }
+      .whatsapp-float { bottom: 16px; right: 16px; padding: 10px 16px; font-size: 13px; }
+      .back-top { bottom: 80px; right: 16px; }
+    }
+
+    /* Scroll Progress Bar */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold, #C9A84C), var(--gold-light, #E8C97A));
+      z-index: 9999;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Page Loader */
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: var(--blue-deep, #0A192F);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-ring {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--gold, #C9A84C);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hamburger Button */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+      z-index: 101;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: white;
+      transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* Mobile Nav Drawer */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 25, 47, 0.98);
+      backdrop-filter: blur(20px);
+      z-index: 99;
+      padding: 100px 30px 40px;
+      flex-direction: column;
+      gap: 20px;
+      border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: 600;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      width: 100%;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .mobile-nav a:hover {
+      color: var(--gold, #C9A84C);
+    }
+
+    /* WhatsApp Float Button */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      background: #25D366;
+      color: white;
+      border-radius: 50px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 8px 24px rgba(37,211,102,0.4);
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+    }
+    .whatsapp-float:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(37,211,102,0.6);
+    }
+    .wa-icon { font-size: 20px; }
+
+    /* Active Nav Link Highlight (Scroll-Spy) */
+    .nav-links a.active {
+      color: var(--gold, #C9A84C) !important;
+      font-weight: 700;
+    }
+    .nav-links a.active::after {
+      content: '';
+      display: block;
+      height: 2px;
+      background: var(--gold, #C9A84C);
+      border-radius: 2px;
+      margin-top: 2px;
+    }
+
+    /* Back to Top Button */
+    .back-top {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      z-index: 199;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .back-top.show { opacity: 1; pointer-events: all; }
+    .back-top:hover {
+      background: var(--gold, #C9A84C);
+      transform: translateY(-3px);
+    }
+
+    /* Footer Social Icons styles */
+    .footer-socials {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 20px 0 10px;
+    }
+    .social-icon {
+      color: var(--text-muted, rgba(255,255,255,0.6));
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .social-icon:hover {
+      color: var(--white);
+      background: var(--gold, #C9A84C);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Page Loader -->
+  <div id="page-loader">
+    <div class="loader-ring"></div>
+  </div>
 
   <!-- NAV -->
-  <nav>
+  <nav id="navbar">
     <div class="nav-logo">DineAt<span>Blue</span></div>
     <ul class="nav-links">
       <li><a href="#home">Home</a></li>
@@ -297,7 +494,22 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
     <a href="#reserve" class="nav-cta">Reserve a Table</a>
+    <!-- Hamburger Button -->
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </nav>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#home" onclick="closeMobileNav()">Home</a>
+    <a href="#menu" onclick="closeMobileNav()">Menu</a>
+    <a href="#about" onclick="closeMobileNav()">About</a>
+    <a href="#reserve" onclick="closeMobileNav()">Reserve</a>
+    <a href="#contact" onclick="closeMobileNav()">Contact</a>
+  </div>
 
   <!-- HERO -->
   <section class="hero" id="home">
@@ -406,7 +618,15 @@
       <div class="reservation-form">
         <h3 class="res-title">Table Reservation</h3>
         <p class="res-subtitle">Fill in the details below and our team will confirm your booking.</p>
-        <form action="https://formspree.io/f/your-form-id" method="POST">
+        <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
+          <div style="font-size:48px; margin-bottom:16px;">✅</div>
+          <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Reservation Request Sent!</h3>
+          <p style="color:var(--text-muted, rgba(255,255,255,0.6)); font-size:14px; line-height:1.6;">
+            Thank you! We have received your reservation request.<br/>
+            Our team will contact you shortly to confirm your booking.
+          </p>
+        </div>
+        <form id="order-form" action="https://formspree.io/f/your-form-id" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="res-grid">
             <div>
               <label class="res-label">Full Name</label>
@@ -464,8 +684,117 @@
       <a href="#about">About</a>
       <a href="#reserve">Reserve</a>
     </div>
+    
+    <div class="footer-socials">
+      <a href="https://instagram.com/dineatblue" target="_blank" class="social-icon" aria-label="Instagram">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://wa.me/923000000000" target="_blank" class="social-icon" aria-label="WhatsApp">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.198 1.455 4.814 1.456 5.587 0 10.132-4.547 10.136-10.136.002-2.707-1.05-5.253-2.962-7.166C16.714 1.396 14.167.34 11.47.34 5.882.34 1.339 4.887 1.335 10.478c-.001 1.702.447 3.366 1.3 4.811L1.455 20.71l5.192-1.556zM17.06 13.9c-.277-.139-1.642-.81-1.897-.903-.255-.093-.44-.139-.626.139-.186.278-.718.903-.88 1.088-.163.186-.325.208-.602.07-.277-.14-1.17-.43-2.23-1.376-.824-.735-1.38-1.644-1.542-1.921-.162-.278-.017-.427.122-.566.124-.125.277-.324.416-.486.139-.162.186-.278.278-.463.093-.185.046-.347-.023-.486-.069-.139-.626-1.505-.858-2.061-.226-.543-.454-.47-.626-.479-.162-.008-.348-.01-.534-.01-.186 0-.487.07-.742.347-.255.278-.974.95-.974 2.315 0 1.365.992 2.685 1.131 2.87.14.186 1.95 2.977 4.724 4.17 1.157.497 2.062.775 2.76.996.697.222 1.333.12 1.835.045.56-.084 1.643-.671 1.874-1.319.232-.648.232-1.204.163-1.319-.069-.116-.255-.209-.533-.348z"/></svg>
+      </a>
+    </div>
+    
     <div class="footer-copy">© 2025 DineAtBlue. All rights reserved.</div>
   </footer>
+
+  <!-- WhatsApp Float Button -->
+  <a href="https://wa.me/923000000000?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20DineAtBlue" 
+     class="whatsapp-float" target="_blank" rel="noopener">
+    <span class="wa-icon">💬</span>
+    Order on WhatsApp
+  </a>
+
+  <!-- Back to Top Button -->
+  <a href="#home" class="back-top" id="backTop" aria-label="Back to top">↑</a>
+
+  <script>
+    // Toggle Mobile Navigation
+    function toggleMobileNav() {
+      const nav = document.getElementById('mobile-nav');
+      const btn = document.getElementById('hamburger');
+      nav.classList.toggle('open');
+      btn.classList.toggle('open');
+    }
+    function closeMobileNav() {
+      document.getElementById('mobile-nav').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    }
+
+    // Scroll Spy & Progress Bar & Back to Top
+    const sections = document.querySelectorAll('section[id], footer[id]');
+    const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
+    
+    window.addEventListener('scroll', () => {
+      // Scroll Progress
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      const progressBar = document.getElementById('scroll-progress');
+      if (progressBar) progressBar.style.width = scrolled + "%";
+
+      // Back to Top Button
+      const btn = document.getElementById('backTop');
+      if (btn) {
+        btn.classList.toggle('show', window.scrollY > 400);
+      }
+
+      // Scroll Spy
+      let current = '';
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.scrollY >= top) {
+          current = section.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Hide loader when page loads
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(() => loader.remove(), 500);
+      }
+    });
+
+    // Handle AJAX Form Submission with Formspree
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      
+      btn.innerHTML = '⏳ Sending...';
+      btn.disabled = true;
+      
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (response.ok) {
+          form.style.display = 'none';
+          document.getElementById('form-success').style.display = 'block';
+        } else {
+          btn.innerHTML = '❌ Try Again';
+          btn.disabled = false;
+          setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+        }
+      } catch {
+        btn.innerHTML = '❌ Error — Try Again';
+        btn.disabled = false;
+        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+      }
+    }
+  </script>
 
 </body>
 </html>

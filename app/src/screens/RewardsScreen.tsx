@@ -203,13 +203,13 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
             <View style={styles.infoBullet}>
               <Ionicons name="pizza-outline" size={16} color={COLORS.primary} />
             </View>
-            <Text style={styles.infoText}>Earn 10 points for every $1 spent on any of our 7 brands.</Text>
+            <Text style={styles.infoText}>Earn 1 point for every Rs. 100 spent across all 7 restaurant brands.</Text>
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoBullet}>
               <Ionicons name="cash-outline" size={16} color={COLORS.primary} />
             </View>
-            <Text style={styles.infoText}>Redeem points at checkout: 100 points = $1 discount.</Text>
+            <Text style={styles.infoText}>Redeem at checkout: 100 points = Rs. 100 discount on your order!</Text>
           </View>
         </View>
 

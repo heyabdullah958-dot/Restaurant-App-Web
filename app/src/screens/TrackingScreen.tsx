@@ -84,7 +84,8 @@ export default function TrackingScreen() {
     return 0;
   }, [currentOrder]);
 
-  // Rider animation state (progress along the route from 0 to 1)
+  // Rider animation state and memo commented out to resolve UI-12 map placeholder change
+  /*
   const [riderProgress, setRiderProgress] = useState(0);
 
   useEffect(() => {
@@ -105,24 +106,20 @@ export default function TrackingScreen() {
     }
   }, [activeStep]);
 
-  // Calculate coordinates for L-shaped path
   const riderPosition = useMemo(() => {
-    // Restaurant marker: left: 15%, top: 25%
-    // Customer marker: left: 80%, top: 75%
     if (riderProgress <= 0.5) {
-      // First leg: Horizontal movement from 15% to 80%
       const segProgress = riderProgress / 0.5;
       const left = 15 + (80 - 15) * segProgress;
       const top = 25;
       return { left: `${left}%`, top: `${top}%` };
     } else {
-      // Second leg: Vertical movement from 25% to 75%
       const segProgress = (riderProgress - 0.5) / 0.5;
       const left = 80;
       const top = 25 + (75 - 25) * segProgress;
       return { left: `${left}%`, top: `${top}%` };
     }
   }, [riderProgress]);
+  */
 
   // Calculate dynamic ETA based on status
   const etaText = useMemo(() => {
@@ -230,42 +227,13 @@ export default function TrackingScreen() {
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />
           </View>
 
-          {/* Interactive Map Layout */}
-          <View style={styles.mapContainer}>
-            {/* Background grid representing city blocks */}
-            <View style={[styles.mapGridLineH, { top: '25%' }]} />
-            <View style={[styles.mapGridLineH, { top: '50%' }]} />
-            <View style={[styles.mapGridLineH, { top: '75%' }]} />
-            <View style={[styles.mapGridLineV, { left: '25%' }]} />
-            <View style={[styles.mapGridLineV, { left: '50%' }]} />
-            <View style={[styles.mapGridLineV, { left: '75%' }]} />
-
-            {/* Custom delivery roads path */}
-            <View style={[styles.roadOverlayH, { top: '25%', left: '15%', width: '67%' }]} />
-            <View style={[styles.roadOverlayV, { top: '25%', left: '80%', height: '53%' }]} />
-
-            {/* Restaurant Marker */}
-            <View style={[styles.mapMarker, styles.restaurantMarkerPos]}>
-              <Text style={styles.mapMarkerIcon}>🍔</Text>
-              <View style={styles.mapMarkerLabel}>
-                <Text style={styles.mapMarkerLabelText}>Kitchen</Text>
-              </View>
-            </View>
-
-            {/* Customer Marker */}
-            <View style={[styles.mapMarker, styles.homeMarkerPos]}>
-              <Text style={styles.mapMarkerIcon}>🏠</Text>
-              <View style={styles.mapMarkerLabel}>
-                <Text style={styles.mapMarkerLabelText}>Home</Text>
-              </View>
-            </View>
-
-            {/* Rider Marker (Animated position) */}
-            <View style={[styles.mapMarkerRider, { left: riderPosition.left, top: riderPosition.top }]}>
-              <Text style={styles.mapMarkerIconRider}>🛵</Text>
-              <View style={styles.riderMarkerLabel}>
-                <Text style={styles.riderMarkerLabelText}>Rider</Text>
-              </View>
+          {/* UI-12 Map Placeholder */}
+          <View style={styles.mapPlaceholder}>
+            <View style={styles.mapPlaceholderInner}>
+              <Ionicons name="map-outline" size={48} color={COLORS.primary} />
+              <Text style={styles.mapPlaceholderTitle}>Live Tracking Map</Text>
+              <Text style={styles.mapPlaceholderSub}>Map integration coming soon</Text>
+              <View style={styles.mapPulseDot} />
             </View>
           </View>
         </View>
@@ -901,5 +869,37 @@ const styles = StyleSheet.create({
   guideBold: {
     fontWeight: 'bold',
     color: COLORS.dark,
+  },
+  mapPlaceholder: {
+    height: 240,
+    backgroundColor: 'rgba(255,87,34,0.04)',
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,87,34,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: SPACING.md,
+  },
+  mapPlaceholderInner: {
+    alignItems: 'center',
+  },
+  mapPlaceholderTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+    marginTop: 8,
+  },
+  mapPlaceholderSub: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginTop: 4,
+  },
+  mapPulseDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.primary,
+    marginTop: 12,
   },
 });

@@ -6,8 +6,14 @@ services:
     plan: free
     runtime: python
     pythonVersion: "3.11.9"
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py seed_restaurants && python manage.py create_admin && python manage.py create_restaurant_managers
-    startCommand: gunicorn config.wsgi --log-file - --timeout 120 --workers 2
+    buildCommand: >-
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate --noinput &&
+      python manage.py seed_restaurants &&
+      python manage.py create_admin &&
+      python manage.py create_restaurant_managers
+    startCommand: gunicorn config.wsgi --log-file - --timeout 120 --workers 2 --worker-class sync
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -19,5 +25,15 @@ services:
         value: "*"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://foodsphere-app.pages.dev"
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "True"
+      - key: SUPABASE_TENANT_SUFFIX
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"

@@ -208,15 +208,21 @@ export default function CheckoutScreen() {
             )}
 
             <Text style={styles.fieldLabel}>Delivery Address</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter your complete home or office address"
-              placeholderTextColor={COLORS.gray}
-              multiline
-              numberOfLines={3}
-              value={address}
-              onChangeText={setAddress}
-            />
+            <View style={styles.addressInputWrap}>
+              <Ionicons name="location-outline" size={20} color={COLORS.primary} style={{ marginRight: 8, marginTop: Platform.OS === 'ios' ? 0 : 3 }} />
+              <TextInput
+                style={[styles.textArea, { flex: 1, padding: 0, minHeight: 60, color: COLORS.dark }]}
+                placeholder="Street, Area, City — e.g. House 12, Street 4, G-11, Islamabad"
+                placeholderTextColor={COLORS.gray}
+                multiline
+                numberOfLines={3}
+                value={address}
+                onChangeText={setAddress}
+              />
+            </View>
+            <Text style={styles.addressHint}>
+              💡 Exact address likho — delivery rider ko dhundne mein asaani hogi
+            </Text>
 
             <Text style={styles.fieldLabel}>Delivery Instructions (Optional)</Text>
             <TextInput
@@ -561,5 +567,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: SPACING.sm,
+  },
+  addressInputWrap: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.light,
+    borderRadius: 8,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    marginBottom: SPACING.xs,
+  },
+  addressHint: {
+    fontSize: 11,
+    color: COLORS.gray,
+    marginBottom: SPACING.md,
+    marginTop: 2,
+    fontStyle: 'italic',
   },
 });

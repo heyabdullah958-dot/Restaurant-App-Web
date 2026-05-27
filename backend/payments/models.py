@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Payment(models.Model):
     PAYMENT_METHODS = (
         ('cod', 'Cash on Delivery'),
@@ -21,5 +22,9 @@ class Payment(models.Model):
     gateway_response = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # BUG-22 FIX: Prevent duplicate payment records for same order+method
+        unique_together = ('order', 'method')
+
     def __str__(self):
-        return f"Payment #{self.id or self.pk or 'new'} for Order #{self.order.id or self.order.pk} - {self.method} ({self.status})"
+        return f"Payment #{self.pk} for Order #{self.order.pk} - {self.method} ({self.status})"

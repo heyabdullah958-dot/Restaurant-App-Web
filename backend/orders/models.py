@@ -29,7 +29,7 @@ class Order(models.Model):
     )
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received', db_index=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod')
     delivery_address = models.TextField()
     delivery_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -39,7 +39,7 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     special_instructions = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

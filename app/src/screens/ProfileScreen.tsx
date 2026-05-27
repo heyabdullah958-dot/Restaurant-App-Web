@@ -161,7 +161,10 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           <View style={[styles.sectionCard, SHADOWS.small]}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Account Details</Text>
-              <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => setIsEditing(!isEditing)}
+              >
                 <Text style={styles.editBtnText}>
                   {isEditing ? 'Cancel' : 'Edit'}
                 </Text>
@@ -444,10 +447,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
+  editButton: {
+    backgroundColor: 'rgba(255, 87, 34, 0.08)',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 87, 34, 0.15)',
+  },
   editBtnText: {
     color: COLORS.primary,
-    fontWeight: '600',
-    fontSize: 14,
+    fontWeight: '700',
+    fontSize: 12,
   },
   form: {
     marginTop: SPACING.xs,

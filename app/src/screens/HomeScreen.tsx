@@ -28,22 +28,51 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const { user } = useSelector((state: RootState) => state.user);
   const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
 
+  // UI-01: selectedCategory state
+  const [selectedCategory, setSelectedCategory] = React.useState('All');
+
+  // UI-01: filteredRestaurants computed value
+  const filteredRestaurants = React.useMemo(() => {
+    if (selectedCategory === 'All') return restaurants;
+    return restaurants.filter((r: any) =>
+      r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase())
+    );
+  }, [restaurants, selectedCategory]);
+
+  // UI-02: rotating banner carousel state & effect
+  const [bannerIndex, setBannerIndex] = React.useState(0);
+  const banners = [
+    { title: '7 Brands, One Cart!', sub: 'Mix cuisines in a single order.' },
+    { title: 'Earn Loyalty Points!', sub: '1 point per Rs.100 spent — redeem anytime.' },
+    { title: 'Free Delivery on First Order!', sub: 'Use code FIRSTORDER at checkout.' },
+  ];
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % banners.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
+
   React.useEffect(() => {
     dispatch(fetchRestaurants());
   }, [dispatch]);
 
+  // UI-01: renderCategoryChip uses selectedCategory and triggers filter on press
   const renderCategoryChip = ({ item }: { item: string }) => (
     <TouchableOpacity
       style={[
         styles.categoryChip,
-        item === 'All' ? styles.activeCategoryChip : null,
+        item === selectedCategory ? styles.activeCategoryChip : null,
         SHADOWS.small,
       ]}
+      onPress={() => setSelectedCategory(item)}
+      activeOpacity={0.75}
     >
       <Text
         style={[
           styles.categoryText,
-          item === 'All' ? styles.activeCategoryText : null,
+          item === selectedCategory ? styles.activeCategoryText : null,
         ]}
       >
         {item}
@@ -70,32 +99,53 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.rewardsButton}
-          onPress={() => navigation.navigate('Rewards')}
-        >
-          <Ionicons name="ribbon-sharp" size={22} color={COLORS.primary} />
-          {!user?.is_guest && (
-            <View style={styles.pointsBadge}>
-              <Text style={styles.pointsText}>{user?.loyalty_points || 0}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        {/* UI-03: Rewards & Search buttons in Header */}
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.searchIconBtn}
+            onPress={() => navigation.navigate('Search')}
+          >
+            <Ionicons name="search" size={20} color={COLORS.dark} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.rewardsButton}
+            onPress={() => navigation.navigate('Rewards')}
+          >
+            <Ionicons name="ribbon-sharp" size={22} color={COLORS.primary} />
+            {!user?.is_guest && (
+              <View style={styles.pointsBadge}>
+                <Text style={styles.pointsText}>{user?.loyalty_points || 0}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
-        {/* Banner Promotion */}
+        {/* UI-02: Rotating Promo Banner */}
         <View style={[styles.promoBanner, SHADOWS.medium]}>
           <View style={styles.bannerInfo}>
-            <Text style={styles.bannerTitle}>7 Brands, One Cart!</Text>
-            <Text style={styles.bannerSubtitle}>Mix and match cuisines from all restaurants in a single delivery order.</Text>
+            <Text style={styles.bannerTitle}>{banners[bannerIndex].title}</Text>
+            <Text style={styles.bannerSubtitle}>{banners[bannerIndex].sub}</Text>
             <TouchableOpacity style={styles.bannerCTA}>
               <Text style={styles.bannerCTAText}>Order Now</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.bannerGraphic}>
             <Ionicons name="fast-food" size={80} color="rgba(255,255,255,0.2)" />
+          </View>
+          {/* Dot Indicators */}
+          <View style={styles.bannerDots}>
+            {banners.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.bannerDot,
+                  i === bannerIndex ? styles.bannerDotActive : null,
+                ]}
+              />
+            ))}
           </View>
         </View>
 
@@ -116,11 +166,36 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           <Text style={styles.sectionLink}>View All</Text>
         </View>
 
+        {/* UI-15: Loading & Empty State management */}
         {loading ? (
-          <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: SPACING.xl }} />
+          <View style={{ alignItems: 'center', marginTop: SPACING.xl }}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ color: COLORS.gray, marginTop: 8, fontSize: 13 }}>
+              Loading restaurants...
+            </Text>
+          </View>
+        ) : filteredRestaurants.length === 0 ? (
+          <View style={styles.emptyStateContainer}>
+            <Ionicons name="restaurant-outline" size={64} color={COLORS.lightGray} />
+            <Text style={styles.emptyStateTitle}>
+              {selectedCategory === 'All' ? 'No Restaurants Found' : `No ${selectedCategory} Restaurants`}
+            </Text>
+            <Text style={styles.emptyStateText}>
+              {selectedCategory === 'All'
+                ? 'Check your internet connection and try again.'
+                : 'Try a different category or check back later.'}
+            </Text>
+            {selectedCategory !== 'All' && (
+              <TouchableOpacity
+                style={styles.resetFilterBtn}
+                onPress={() => setSelectedCategory('All')}
+              >
+                <Text style={styles.resetFilterText}>Show All Restaurants</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         ) : (
-          restaurants.map((brand: any, index: number) => {
-            // Cycle through some default colors and icons if not provided
+          filteredRestaurants.map((brand: any, index: number) => {
             const colors = ['#FF5722', '#2196F3', '#E91E63', '#FF9800', '#4CAF50', '#9C27B0', '#795548'];
             const icons = ['flame', 'boat', 'fast-food', 'leaf', 'beer', 'egg', 'cafe'];
             const color = colors[index % colors.length];
@@ -133,12 +208,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                 activeOpacity={0.95}
                 onPress={() => navigation.navigate('Restaurant', { slug: brand.slug })}
               >
-                {/* Top styled color band representing brand theme */}
                 <View style={[styles.brandBand, { backgroundColor: color }]}>
                   {brand.cover_image ? (
                     <Image 
                       source={getImageUrl(brand.cover_image)} 
                       style={[StyleSheet.absoluteFill, { opacity: 0.8 }]} 
+                      resizeMode="cover"
                     />
                   ) : (
                     <Ionicons name={icon as any} size={32} color={COLORS.white} />
@@ -202,13 +277,13 @@ const styles = StyleSheet.create({
     ...FONTS.body,
     fontSize: 14,
     fontWeight: '600',
-    maxWidth: width * 0.6,
+    maxWidth: width * 0.5,
     marginHorizontal: 4,
   },
   rewardsButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: COLORS.light,
     alignItems: 'center',
     justifyContent: 'center',
@@ -240,6 +315,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: SPACING.md,
+    position: 'relative',
   },
   bannerInfo: {
     flex: 1,
@@ -327,6 +403,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
+    position: 'relative',
   },
   ratingBadge: {
     flexDirection: 'row',
@@ -335,6 +412,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+    zIndex: 1,
   },
   ratingText: {
     fontSize: 12,
@@ -376,5 +454,66 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.gray,
     lineHeight: 16,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  searchIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannerDots: {
+    position: 'absolute',
+    bottom: 10,
+    right: SPACING.md,
+    flexDirection: 'row',
+    gap: 4,
+  },
+  bannerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  bannerDotActive: {
+    backgroundColor: COLORS.white,
+    width: 16,
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+  },
+  emptyStateTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+    marginTop: SPACING.md,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    fontSize: 13,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginTop: SPACING.xs,
+    lineHeight: 20,
+  },
+  resetFilterBtn: {
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+  },
+  resetFilterText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 13,
   },
 });

@@ -1,17 +1,21 @@
 export const COLORS = {
-  primary: '#FF5722',      // Food-themed deep orange
-  secondary: '#FF9800',    // Sunset orange
-  accent: '#E91E63',       // Coral pink
-  dark: '#1A1A2E',         // Dark theme/text primary
-  light: '#F8F9FA',        // Light background
-  gray: '#9E9E9E',         // Subtitles
-  lightGray: '#E0E0E0',    // Borders
+  primary: '#FF5722',
+  secondary: '#FF9800',
+  accent: '#E91E63',
+  dark: '#1A1A2E',
+  light: '#F8F9FA',
+  gray: '#9E9E9E',
+  lightGray: '#E0E0E0',
   white: '#FFFFFF',
   success: '#4CAF50',
   warning: '#FFC107',
   danger: '#F44336',
   cardBackground: '#FFFFFF',
   overlay: 'rgba(0, 0, 0, 0.4)',
+  // Additional tokens
+  primaryLight: 'rgba(255, 87, 34, 0.1)',
+  darkText: '#1A1A2E',
+  subtleText: '#6B7280',
 };
 
 export const SPACING = {
@@ -20,6 +24,7 @@ export const SPACING = {
   md: 16,
   lg: 24,
   xl: 32,
+  xxl: 48,
 };
 
 export const SHADOWS = {
@@ -44,6 +49,13 @@ export const SHADOWS = {
     shadowRadius: 10,
     elevation: 8,
   },
+  colored: {
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
 };
 
 export const FONTS = {
@@ -65,4 +77,19 @@ export const FONTS = {
     fontSize: 12,
     color: COLORS.gray,
   },
+  // New: Price text
+  price: {
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    color: COLORS.dark,
+  },
+};
+
+// Border radius tokens
+export const RADIUS = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  round: 999,
 };

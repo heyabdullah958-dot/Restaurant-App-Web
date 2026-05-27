@@ -257,6 +257,21 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             <Text style={styles.errorText}>{validationErrors.password}</Text>
           )}
 
+          {activeTab === 'login' && (
+            <TouchableOpacity
+              style={styles.forgotPasswordBtn}
+              onPress={() => {
+                Alert.alert(
+                  'Password Reset',
+                  'Apne registered email par reset link bheja jayega. Please contact support at: support@foodsphere.pk',
+                  [{ text: 'OK' }]
+                );
+              }}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Main Action Button */}
           <TouchableOpacity
             style={[styles.submitButton, SHADOWS.medium]}
@@ -471,5 +486,15 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  forgotPasswordBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: SPACING.sm,
+    marginTop: -SPACING.xs,
+  },
+  forgotPasswordText: {
+    color: COLORS.primary,
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

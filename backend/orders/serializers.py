@@ -1,7 +1,10 @@
 from rest_framework import serializers
+from django.db import transaction
+from django.db.models import F
 from .models import Order, OrderItem
 from restaurants.models import MenuItem, Restaurant
 from restaurants.serializers import RestaurantSerializer
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(source='menu_item.name', read_only=True)
@@ -11,14 +14,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ('id', 'menu_item', 'menu_item_name', 'quantity', 'unit_price', 'total_price', 'special_notes')
         read_only_fields = ('unit_price', 'total_price')
 
+
 class OrderCreateItemSerializer(serializers.Serializer):
     menu_item = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
     quantity = serializers.IntegerField(min_value=1)
     special_notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
+
 class OrderCreateSerializer(serializers.ModelSerializer):
     items = OrderCreateItemSerializer(many=True, write_only=True)
-    
+
     class Meta:
         model = Order
         fields = (
@@ -29,83 +34,138 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'subtotal', 'delivery_fee', 'discount', 'total')
 
     def validate(self, attrs):
+        """
+        BUG-04/09/10: Validate guest fields, item availability, and min order amount.
+        """
         request = self.context.get('request')
-        if not request or not request.user or request.user.is_anonymous or (hasattr(request.user, 'is_guest') and request.user.is_guest):
+
+        # Guest validation — require name/phone for unauthenticated or guest users
+        is_guest_or_anon = (
+            not request or
+            not request.user or
+            request.user.is_anonymous or
+            (hasattr(request.user, 'is_guest') and request.user.is_guest)
+        )
+        if is_guest_or_anon:
             if not attrs.get('guest_name') or not attrs.get('guest_phone'):
-                raise serializers.ValidationError("Guest name and phone are required for guest checkout.")
-        
+                raise serializers.ValidationError(
+                    "Guest name and phone are required for guest checkout."
+                )
+
+        # Must have at least one item
         if not attrs.get('items'):
             raise serializers.ValidationError("Order must have at least one menu item.")
+
+        # BUG-09: Validate each item is currently available
+        restaurant = attrs.get('restaurant')
+        items = attrs.get('items', [])
+        for item_data in items:
+            menu_item = item_data['menu_item']
+            if not menu_item.is_available:
+                raise serializers.ValidationError(
+                    f"'{menu_item.name}' is currently unavailable. "
+                    f"Please remove it from your cart and try again."
+                )
+
+        # BUG-10: Validate minimum order amount
+        if restaurant and restaurant.min_order_amount > 0:
+            subtotal = sum(
+                item['menu_item'].price * item['quantity']
+                for item in items
+            )
+            if subtotal < restaurant.min_order_amount:
+                raise serializers.ValidationError(
+                    f"Minimum order amount for {restaurant.name} is "
+                    f"Rs. {restaurant.min_order_amount:.0f}. "
+                    f"Your subtotal is Rs. {subtotal:.0f}."
+                )
 
         return attrs
 
     def create(self, validated_data):
-        items_data = validated_data.pop('items')
-        restaurant = validated_data['restaurant']
-        
-        request = self.context.get('request')
-        user = None
-        if request and request.user and request.user.is_authenticated:
-            user = request.user
-            if user.is_guest:
-                user.phone = validated_data.get('guest_phone', '')
-                user.save()
+        """
+        BUG-04: Wrapped in transaction.atomic() — if any step fails, entire order rolls back.
+        BUG-05: Loyalty points updated using atomic F() expression — no race condition.
+        BUG-11: Loyalty points only awarded to registered (non-guest) users.
+        """
+        with transaction.atomic():
+            items_data = validated_data.pop('items')
+            restaurant = validated_data['restaurant']
 
-        subtotal = 0
-        order_items_to_create = []
+            request = self.context.get('request')
+            user = None
+            if request and request.user and request.user.is_authenticated:
+                user = request.user
+                # Update guest phone if provided (inside atomic block)
+                if user.is_guest and validated_data.get('guest_phone'):
+                    user.phone = validated_data.get('guest_phone', '')
+                    user.save()
 
-        for item_data in items_data:
-            menu_item = item_data['menu_item']
-            quantity = item_data['quantity']
-            
-            if menu_item.category.restaurant != restaurant:
-                raise serializers.ValidationError(f"Menu item {menu_item.name} does not belong to restaurant {restaurant.name}.")
+            subtotal = 0
+            order_items_to_create = []
 
-            unit_price = menu_item.price
-            total_price = unit_price * quantity
-            subtotal += total_price
+            for item_data in items_data:
+                menu_item = item_data['menu_item']
+                quantity = item_data['quantity']
 
-            order_items_to_create.append({
-                'menu_item': menu_item,
-                'quantity': quantity,
-                'unit_price': unit_price,
-                'total_price': total_price,
-                'special_notes': item_data.get('special_notes', '')
-            })
+                # Validate item belongs to the correct restaurant
+                if menu_item.category.restaurant != restaurant:
+                    raise serializers.ValidationError(
+                        f"Menu item '{menu_item.name}' does not belong to restaurant '{restaurant.name}'."
+                    )
 
-        delivery_fee = restaurant.delivery_fee
-        discount = 0
-        total = subtotal + delivery_fee - discount
+                unit_price = menu_item.price
+                total_price = unit_price * quantity
+                subtotal += total_price
 
-        order = Order.objects.create(
-            user=user,
-            subtotal=subtotal,
-            delivery_fee=delivery_fee,
-            discount=discount,
-            total=total,
-            **validated_data
-        )
+                order_items_to_create.append({
+                    'menu_item': menu_item,
+                    'quantity': quantity,
+                    'unit_price': unit_price,
+                    'total_price': total_price,
+                    'special_notes': item_data.get('special_notes', '')
+                })
 
-        for item in order_items_to_create:
-            OrderItem.objects.create(order=order, **item)
+            delivery_fee = restaurant.delivery_fee
+            discount = 0
+            total = subtotal + delivery_fee - discount
 
-        # Loyalty points calculation logic: Earn 1 point per 100 of total
-        if user and not user.is_anonymous:
-            earned_points = int(total // 100)
-            if earned_points > 0:
-                user.loyalty_points += earned_points
-                user.save()
-                
-                from users.models import LoyaltyTransaction
-                LoyaltyTransaction.objects.create(
-                    user=user,
-                    order=order,
-                    points=earned_points,
-                    transaction_type='earned',
-                    description=f"Points earned on Order #{order.id}"
-                )
+            # Create the Order record
+            order = Order.objects.create(
+                user=user,
+                subtotal=subtotal,
+                delivery_fee=delivery_fee,
+                discount=discount,
+                total=total,
+                **validated_data
+            )
 
-        return order
+            # Create all OrderItem records
+            for item in order_items_to_create:
+                OrderItem.objects.create(order=order, **item)
+
+            # BUG-11 + BUG-05: Award loyalty points ONLY to registered (non-guest) users
+            # Using F() expression for atomic update — no race condition
+            if user and not user.is_guest:
+                earned_points = int(total // 100)  # 1 point per Rs. 100 spent
+                if earned_points > 0:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    # BUG-05: Atomic F() update — safe under concurrent load
+                    User.objects.filter(pk=user.pk).update(
+                        loyalty_points=F('loyalty_points') + earned_points
+                    )
+                    from users.models import LoyaltyTransaction
+                    LoyaltyTransaction.objects.create(
+                        user=user,
+                        order=order,
+                        points=earned_points,
+                        transaction_type='earned',
+                        description=f"Points earned on Order #{order.id}"
+                    )
+
+            return order
+
 
 class OrderListSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
@@ -114,6 +174,7 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)

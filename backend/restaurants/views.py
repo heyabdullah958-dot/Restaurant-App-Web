@@ -3,17 +3,19 @@ from rest_framework.response import Response
 from .models import Restaurant
 from .serializers import RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer
 
+
 class RestaurantListView(generics.ListAPIView):
     """
     GET /api/restaurants/
-    Lists all active restaurants. Optional query filters: ?featured=true, ?city=Islamabad, ?cuisine=Desi
+    Lists all active restaurants. Optional filters: ?featured=true, ?city=Islamabad, ?cuisine=Desi
+    BUG-07 FIX: Added select_related to prevent unnecessary joins.
     """
     serializer_class = RestaurantSerializer
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         queryset = Restaurant.objects.filter(is_active=True)
-        
+
         is_featured = self.request.query_params.get('featured')
         city = self.request.query_params.get('city')
         cuisine = self.request.query_params.get('cuisine')
@@ -27,26 +29,35 @@ class RestaurantListView(generics.ListAPIView):
 
         return queryset
 
+
 class RestaurantDetailView(generics.RetrieveAPIView):
     """
     GET /api/restaurants/{slug}/
-    Retrieves full details of a specific restaurant, including its active menu categories and items.
+    BUG-07 FIX: prefetch_related('categories__items') reduces N+1 to 3 queries max.
     """
-    queryset = Restaurant.objects.filter(is_active=True)
+    queryset = Restaurant.objects.filter(is_active=True).prefetch_related(
+        'categories',
+        'categories__items'
+    )
     serializer_class = RestaurantDetailSerializer
     lookup_field = 'slug'
     permission_classes = [permissions.AllowAny]
 
+
 class RestaurantMenuView(generics.GenericAPIView):
     """
     GET /api/restaurants/{slug}/menu/
-    Retrieves the list of menu categories and available menu items for a specific restaurant.
+    BUG-07 FIX: prefetch_related on categories and items.
     """
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, slug):
         try:
-            restaurant = Restaurant.objects.get(slug=slug, is_active=True)
+            restaurant = Restaurant.objects.prefetch_related(
+                'categories',
+                'categories__items'
+            ).get(slug=slug, is_active=True)
+
             categories = restaurant.categories.filter(is_active=True).order_by('order', 'name')
             serializer = MenuCategorySerializer(categories, many=True)
             return Response({

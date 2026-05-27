@@ -100,13 +100,22 @@ export default function CartScreen() {
           <View style={{ width: 24 }} />
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="basket-outline" size={80} color={COLORS.lightGray} />
-          <Text style={styles.emptyTitle}>Your basket is empty</Text>
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="basket-outline" size={64} color={COLORS.primary} />
+          </View>
+          <Text style={styles.emptyTitle}>Your Basket is Empty</Text>
           <Text style={styles.emptySubtitle}>
-            Add items from your favorite restaurants to place an order.
+            Explore 7 unique restaurant brands and add your favorite items!
           </Text>
           <TouchableOpacity style={styles.browseButton} onPress={() => navigation.navigate('Home')}>
+            <Ionicons name="restaurant-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
             <Text style={styles.browseButtonText}>Browse Restaurants</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.browseSecondary}
+            onPress={() => navigation.navigate('Search')}
+          >
+            <Text style={styles.browseSecondaryText}>Search for a dish</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -185,13 +194,27 @@ export default function CartScreen() {
           <View style={styles.billRow}>
             <Text style={styles.billLabel}>Delivery Fee</Text>
             <Text style={styles.billValue}>
-              Rs. {activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0}
+              {activeRestaurant && Number(activeRestaurant.delivery_fee) === 0
+                ? '🎉 Free!'
+                : `Rs. ${activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0}`}
             </Text>
+          </View>
+          {/* Discount Row (shown when applicable) */}
+          <View style={styles.billRow}>
+            <Text style={[styles.billLabel, { color: COLORS.success }]}>Discount</Text>
+            <Text style={[styles.billValue, { color: COLORS.success }]}>— Rs. 0</Text>
           </View>
           <View style={[styles.billRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total Amount</Text>
             <Text style={styles.totalValue}>
               Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
+            </Text>
+          </View>
+          {/* Loyalty Points Earn Hint */}
+          <View style={styles.loyaltyHint}>
+            <Ionicons name="gift-outline" size={14} color={COLORS.secondary} />
+            <Text style={styles.loyaltyHintText}>
+              You'll earn {Math.floor((cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)) / 100)} loyalty points!
             </Text>
           </View>
         </View>
@@ -461,5 +484,37 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  emptyIconWrap: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 87, 34, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.lg,
+  },
+  browseSecondary: {
+    marginTop: SPACING.sm,
+    paddingVertical: SPACING.sm,
+  },
+  browseSecondaryText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  loyaltyHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,152,0,0.07)',
+    borderRadius: 8,
+    padding: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  loyaltyHintText: {
+    fontSize: 11,
+    color: COLORS.secondary,
+    marginLeft: 6,
+    fontWeight: '600',
   },
 });

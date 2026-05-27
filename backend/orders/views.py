@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer
 
+
 class OrderCreateView(generics.CreateAPIView):
     """
     POST /api/orders/
-    Place a new order. Supports both authenticated checkouts and guest checkouts.
+    Place a new order. Supports authenticated and guest checkouts.
     """
     serializer_class = OrderCreateSerializer
     permission_classes = [permissions.AllowAny]
@@ -22,22 +23,28 @@ class OrderCreateView(generics.CreateAPIView):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class OrderDetailView(generics.RetrieveAPIView):
     """
     GET /api/orders/{id}/
-    Retrieve specific order details and tracking status.
+    Retrieve order details and tracking status.
+    BUG-08 FIX: select_related to avoid N+1 on restaurant.
     """
-    queryset = Order.objects.all()
+    queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
     serializer_class = OrderDetailSerializer
-    permission_classes = [permissions.AllowAny]  # Allowed for tracking guest orders easily
+    permission_classes = [permissions.AllowAny]  # Guest order tracking allowed
+
 
 class MyOrdersListView(generics.ListAPIView):
     """
     GET /api/orders/my-orders/
-    Retrieve order history for the authenticated user.
+    Order history for authenticated user.
+    BUG-08 FIX: select_related('restaurant') — no N+1 per order row.
     """
     serializer_class = OrderListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).order_by('-created_at')
+        return Order.objects.filter(
+            user=self.request.user
+        ).select_related('restaurant').order_by('-created_at')

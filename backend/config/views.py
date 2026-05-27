@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db import connection
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
 
 def health_check(request):
     """
@@ -16,24 +18,21 @@ def health_check(request):
         }
     })
 
+@staff_member_required
 def db_debug(request):
     """
-    Diagnostic endpoint to verify database engine and connectivity.
+    Database diagnostics endpoint.
+    RESTRICTED: Only accessible by staff/admin users.
     """
     try:
         engine = settings.DATABASES['default']['ENGINE']
-        db_url = os.environ.get('DATABASE_URL')
-        
-        # Test connection by executing a simple query
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1;")
             row = cursor.fetchone()
-            
         return JsonResponse({
             'success': True,
             'engine': engine,
             'connection_test': 'SUCCESS' if row else 'FAILED',
-            'database_url_configured': bool(db_url)
         })
     except Exception as e:
         return JsonResponse({
@@ -41,7 +40,6 @@ def db_debug(request):
             'engine': settings.DATABASES['default']['ENGINE'],
             'connection_test': 'FAILED',
             'error': str(e),
-            'database_url_configured': bool(os.environ.get('DATABASE_URL'))
         })
 
 
@@ -59,10 +57,18 @@ def root_view(request):
     })
 
 
+@require_POST
+@staff_member_required
 def trigger_seed(request):
     """
-    Temporary endpoint to seed the live database programmatically.
+    Emergency database seeding endpoint.
+    RESTRICTED: Only accessible by superuser staff via POST.
     """
+    if not request.user.is_superuser:
+        return JsonResponse({
+            'success': False,
+            'message': 'Superuser access required.'
+        }, status=403)
     from django.core.management import call_command
     try:
         call_command('seed_restaurants')
@@ -75,4 +81,3 @@ def trigger_seed(request):
             'success': False,
             'error': str(e)
         }, status=500)
-

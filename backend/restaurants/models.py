@@ -8,10 +8,10 @@ class Restaurant(models.Model):
     cover_image = models.ImageField(upload_to='restaurants/covers/', null=True, blank=True)
     description = models.TextField(blank=True)
     address = models.TextField()
-    city = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, db_index=True)
     phone = models.CharField(max_length=20)
-    is_active = models.BooleanField(default=True)
-    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True, db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
     opens_at = models.TimeField()
     closes_at = models.TimeField()
     delivery_time_min = models.IntegerField(default=30)
@@ -46,8 +46,8 @@ class MenuItem(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='menu_items/', null=True, blank=True)
-    is_available = models.BooleanField(default=True)
-    is_featured = models.BooleanField(default=False)
+    is_available = models.BooleanField(default=True, db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
     preparation_time = models.IntegerField(default=15) # in minutes
 
     def __str__(self):

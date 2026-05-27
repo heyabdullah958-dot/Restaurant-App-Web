@@ -110,9 +110,10 @@ if DATABASE_URL:
     except Exception:
         pass
 
-# Safe fallback: Ensure Supabase pooler username includes the tenant reference
-if DB_USER and '.' not in DB_USER and DB_HOST and 'supabase.com' in DB_HOST:
-    DB_USER = f"{DB_USER}.ndvazawbvyeasmsxlbrz"
+# BUG-18 FIX: Supabase tenant suffix from environment variable — not hardcoded
+SUPABASE_TENANT_SUFFIX = os.environ.get('SUPABASE_TENANT_SUFFIX', '')
+if DB_USER and SUPABASE_TENANT_SUFFIX and '.' not in DB_USER:
+    DB_USER = f"{DB_USER}.{SUPABASE_TENANT_SUFFIX}"
 
 if DB_HOST and DB_USER and DB_PASSWORD:
     # Production: Supabase PostgreSQL
@@ -206,7 +207,9 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
         'user': '1000/hour',
-    }
+    },
+    'DEFAULT_PAGINATION_CLASS': 'config.pagination.StandardResultsPagination',
+    'PAGE_SIZE': 20,
 }
 
 # Simple JWT Settings
@@ -226,8 +229,29 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS Settings — BUG-21 FIX
+# Allow all origins for API usage (JWT handles security, not CORS)
+CORS_ALLOW_ALL_ORIGINS = str(os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False')).lower() in ('true', '1', 'yes')
+
+# Explicit origins as fallback when CORS_ALLOW_ALL_ORIGINS=False
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,http://localhost:8081,http://localhost:19006,http://localhost:19000'
+).split(',')
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # OWASP 2025 Security Headers
 SECURE_BROWSER_XSS_FILTER = True
@@ -300,6 +324,61 @@ JAZZMIN_UI_TWEAKS = {
         "danger": "btn-danger",
         "success": "btn-success"
     }
+}
+
+# ═══════════════════════════════════════
+# LOGGING CONFIGURATION
+# ═══════════════════════════════════════
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} — {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO' if DEBUG else 'WARNING',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'orders': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'payments': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'config': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
 }
 
 

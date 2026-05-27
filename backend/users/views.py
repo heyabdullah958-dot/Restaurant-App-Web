@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, UserRegisterSerializer, LoyaltyTransactionSerializer
 from .models import LoyaltyTransaction
+from config.throttles import GuestAuthThrottle
 
 User = get_user_model()
 
@@ -38,6 +39,7 @@ class UserRegisterView(APIView):
 
 class GuestAuthView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [GuestAuthThrottle]
 
     def post(self, request):
         # Create a unique guest user
