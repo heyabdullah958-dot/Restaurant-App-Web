@@ -11,15 +11,23 @@ class Command(BaseCommand):
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@foodsphere.com')
 
-        if not User.objects.filter(username=username).exists():
-            User.objects.create(
-                username=username,
-                email=email,
-                is_superuser=True,
-                is_staff=True,
-                is_active=True,
-                password='pbkdf2_sha256$1200000$P1wI1Uvu2CjLa6wiNfpL3v$VKBtoJMpWSJthLp7haZpqZdXLalt3iM6uYkb9mgjCMs='
-            )
-            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
+        user, created = User.objects.get_or_create(
+            username=username,
+            defaults={
+                'email': email,
+                'is_superuser': True,
+                'is_staff': True,
+                'is_active': True,
+                'password': 'pbkdf2_sha256$1200000$P1wI1Uvu2CjLa6wiNfpL3v$VKBtoJMpWSJthLp7haZpqZdXLalt3iM6uYkb9mgjCMs='
+            }
+        )
+        
+        if not created:
+            user.password = 'pbkdf2_sha256$1200000$P1wI1Uvu2CjLa6wiNfpL3v$VKBtoJMpWSJthLp7haZpqZdXLalt3iM6uYkb9mgjCMs='
+            user.is_superuser = True
+            user.is_staff = True
+            user.is_active = True
+            user.save()
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" updated successfully.'))
         else:
-            self.stdout.write(self.style.WARNING(f'Superuser "{username}" already exists.'))
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
