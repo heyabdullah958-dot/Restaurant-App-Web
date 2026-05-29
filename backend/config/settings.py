@@ -24,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dkz@bb-(725)%acj&-o&1@u9@)!!i(=)5ig726yn3rd4!flj)*')
 
-DEBUG = True # Temporarily forced for debugging Render 500 error
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = str(config('DEBUG', default=False)).strip().lower() in ('true', '1', 't', 'y', 'yes')
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
