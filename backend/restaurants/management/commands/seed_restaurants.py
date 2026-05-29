@@ -364,44 +364,62 @@ class Command(BaseCommand):
             }
         ]
         
+        restaurants_to_create = []
+        menus_data = {}
+        
         for brand_data in brands:
             menu = brand_data.pop("menu")
             name = brand_data["name"]
+            slug = slugify(name)
             
-            # Create Restaurant
-            restaurant, created = Restaurant.objects.get_or_create(
-                slug=slugify(name),
-                defaults=brand_data
+            restaurant = Restaurant(
+                slug=slug,
+                **brand_data
             )
-            
-            if not created:
-                # Update attributes
-                for key, val in brand_data.items():
-                    setattr(restaurant, key, val)
-                restaurant.save()
-                self.stdout.write(f"Updated restaurant: {name}")
-            else:
-                self.stdout.write(f"Created restaurant: {name}")
-                
-            # Create categories and menu items
+            restaurants_to_create.append(restaurant)
+            menus_data[slug] = menu
+
+        # Bulk create restaurants
+        created_restaurants = Restaurant.objects.bulk_create(restaurants_to_create)
+        restaurant_map = {r.slug: r for r in created_restaurants}
+        self.stdout.write(f"Seeded {len(created_restaurants)} restaurants.")
+
+        categories_to_create = []
+        for slug, menu in menus_data.items():
+            restaurant = restaurant_map[slug]
             cat_order = 1
-            for cat_name, items in menu.items():
-                category, _ = MenuCategory.objects.get_or_create(
+            for cat_name in menu.keys():
+                category = MenuCategory(
                     restaurant=restaurant,
                     name=cat_name,
-                    defaults={"order": cat_order, "is_active": True}
+                    order=cat_order,
+                    is_active=True
                 )
+                categories_to_create.append(category)
                 cat_order += 1
-                
+
+        # Bulk create categories
+        created_categories = MenuCategory.objects.bulk_create(categories_to_create)
+        category_map = {(c.restaurant_id, c.name): c for c in created_categories}
+        self.stdout.write(f"Seeded {len(created_categories)} menu categories.")
+
+        items_to_create = []
+        for slug, menu in menus_data.items():
+            restaurant = restaurant_map[slug]
+            for cat_name, items in menu.items():
+                category = category_map[(restaurant.id, cat_name)]
                 for item_data in items:
-                    MenuItem.objects.get_or_create(
+                    item = MenuItem(
                         category=category,
                         name=item_data["name"],
-                        defaults={
-                            "price": item_data["price"],
-                            "description": item_data.get("desc", ""),
-                            "is_available": True
-                        }
+                        price=item_data["price"],
+                        description=item_data.get("desc", ""),
+                        is_available=True
                     )
-                    
+                    items_to_create.append(item)
+
+        # Bulk create menu items
+        created_items = MenuItem.objects.bulk_create(items_to_create)
+        self.stdout.write(f"Seeded {len(created_items)} menu items.")
+        
         self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands and menu items.'))
