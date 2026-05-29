@@ -74,8 +74,9 @@ class Command(BaseCommand):
                 }
             )
 
-            # Set password and assign group
-            user.set_password(password)
+            # Set password ONLY if user is newly created to prevent expensive rehashing timeouts
+            if created_user or not user.password:
+                user.set_password(password)
             user.is_staff = True  # Ensure staff is active
             user.is_active = True
             user.save()
