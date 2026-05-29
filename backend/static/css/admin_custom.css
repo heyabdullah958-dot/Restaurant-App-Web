@@ -1,0 +1,401 @@
+/* ═══════════════════════════════════════════════════════════
+   FoodSphere Admin — Premium Dark Theme Override
+   Design: Glassmorphism + Gradient Accents + Smooth Animations
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Google Font Import ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Root Variables ── */
+:root {
+    --fs-primary: #FF5722;
+    --fs-primary-light: #FF7A50;
+    --fs-primary-dark: #E64A19;
+    --fs-secondary: #FF9800;
+    --fs-accent: #00BCD4;
+    --fs-success: #4CAF50;
+    --fs-danger: #F44336;
+    --fs-warning: #FFC107;
+
+    --fs-bg-dark: #0F1923;
+    --fs-bg-card: #1A2332;
+    --fs-bg-card-hover: #1E2A3A;
+    --fs-bg-sidebar: #0C1520;
+    --fs-bg-navbar: rgba(15, 25, 35, 0.95);
+    --fs-bg-input: #162130;
+
+    --fs-text-primary: #E8EAED;
+    --fs-text-secondary: #9AA0A6;
+    --fs-text-muted: #5F6368;
+    --fs-border: rgba(255, 255, 255, 0.06);
+    --fs-border-light: rgba(255, 255, 255, 0.1);
+
+    --fs-gradient: linear-gradient(135deg, var(--fs-primary), var(--fs-secondary));
+    --fs-gradient-cool: linear-gradient(135deg, #667eea, #764ba2);
+    --fs-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --fs-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --fs-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.35);
+    --fs-radius: 12px;
+    --fs-radius-sm: 8px;
+    --fs-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Global Reset & Font ── */
+body, .wrapper, .content-wrapper, .main-header, .main-sidebar {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+body {
+    background-color: var(--fs-bg-dark) !important;
+    color: var(--fs-text-primary) !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Navbar ── */
+.main-header.navbar {
+    background: var(--fs-bg-navbar) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--fs-border) !important;
+    box-shadow: var(--fs-shadow-sm);
+    height: 60px;
+}
+.main-header .navbar-nav .nav-link {
+    color: var(--fs-text-secondary) !important;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 8px 16px !important;
+    border-radius: var(--fs-radius-sm);
+    transition: var(--fs-transition);
+}
+.main-header .navbar-nav .nav-link:hover {
+    color: var(--fs-primary-light) !important;
+    background: rgba(255, 87, 34, 0.08);
+}
+
+/* ── Sidebar ── */
+.main-sidebar {
+    background: var(--fs-bg-sidebar) !important;
+    border-right: 1px solid var(--fs-border) !important;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+}
+.main-sidebar .brand-link {
+    border-bottom: 1px solid var(--fs-border) !important;
+    padding: 16px 20px !important;
+    background: linear-gradient(180deg, rgba(255,87,34,0.08) 0%, transparent 100%) !important;
+}
+.main-sidebar .brand-text {
+    font-weight: 800 !important;
+    font-size: 18px !important;
+    letter-spacing: -0.5px;
+    background: var(--fs-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.sidebar .nav-sidebar .nav-item > .nav-link {
+    color: var(--fs-text-secondary) !important;
+    border-radius: var(--fs-radius-sm) !important;
+    margin: 2px 10px !important;
+    padding: 10px 14px !important;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--fs-transition);
+}
+.sidebar .nav-sidebar .nav-item > .nav-link:hover {
+    background: rgba(255, 87, 34, 0.1) !important;
+    color: var(--fs-primary-light) !important;
+    transform: translateX(3px);
+}
+.sidebar .nav-sidebar .nav-item > .nav-link.active {
+    background: linear-gradient(135deg, rgba(255,87,34,0.15), rgba(255,152,0,0.1)) !important;
+    color: var(--fs-primary) !important;
+    font-weight: 600;
+    border-left: 3px solid var(--fs-primary) !important;
+}
+.sidebar .nav-header {
+    color: var(--fs-text-muted) !important;
+    text-transform: uppercase;
+    font-size: 10px !important;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 16px 24px 6px !important;
+}
+.sidebar .nav-sidebar .nav-icon {
+    color: var(--fs-text-muted) !important;
+    font-size: 14px;
+    width: 24px;
+    transition: var(--fs-transition);
+}
+.sidebar .nav-sidebar .nav-link:hover .nav-icon,
+.sidebar .nav-sidebar .nav-link.active .nav-icon {
+    color: var(--fs-primary) !important;
+}
+
+/* ── Content Area ── */
+.content-wrapper {
+    background: var(--fs-bg-dark) !important;
+}
+.content-header h1 {
+    font-weight: 700 !important;
+    font-size: 22px !important;
+    letter-spacing: -0.3px;
+}
+
+/* ── Cards & Panels ── */
+.card {
+    background: var(--fs-bg-card) !important;
+    border: 1px solid var(--fs-border) !important;
+    border-radius: var(--fs-radius) !important;
+    box-shadow: var(--fs-shadow-sm) !important;
+    transition: var(--fs-transition);
+}
+.card:hover {
+    border-color: var(--fs-border-light) !important;
+    box-shadow: var(--fs-shadow-md) !important;
+}
+.card-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--fs-border) !important;
+    padding: 16px 20px !important;
+}
+.card-header .card-title {
+    font-weight: 600 !important;
+    font-size: 15px !important;
+}
+
+/* ── Tables ── */
+.table {
+    color: var(--fs-text-primary) !important;
+}
+.table thead th {
+    background: rgba(255, 87, 34, 0.06) !important;
+    border-bottom: 2px solid var(--fs-border-light) !important;
+    color: var(--fs-text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 14px 16px !important;
+}
+.table tbody tr {
+    transition: var(--fs-transition);
+    border-bottom: 1px solid var(--fs-border) !important;
+}
+.table tbody tr:hover {
+    background: var(--fs-bg-card-hover) !important;
+}
+.table tbody td {
+    padding: 12px 16px !important;
+    font-size: 13px;
+    vertical-align: middle !important;
+    border-top: none !important;
+}
+
+/* ── Buttons ── */
+.btn-primary, .btn-danger {
+    background: var(--fs-gradient) !important;
+    border: none !important;
+    border-radius: var(--fs-radius-sm) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 8px 20px !important;
+    transition: var(--fs-transition);
+    box-shadow: 0 2px 10px rgba(255, 87, 34, 0.3) !important;
+}
+.btn-primary:hover, .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(255, 87, 34, 0.45) !important;
+}
+.btn-success {
+    background: var(--fs-success) !important;
+    border: none !important;
+    border-radius: var(--fs-radius-sm) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3) !important;
+}
+.btn-outline-secondary {
+    border-color: var(--fs-border-light) !important;
+    color: var(--fs-text-secondary) !important;
+    border-radius: var(--fs-radius-sm) !important;
+}
+.btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--fs-text-primary) !important;
+}
+
+/* ── Forms & Inputs ── */
+.form-control, select, textarea, input[type="text"], input[type="password"],
+input[type="email"], input[type="number"], input[type="url"] {
+    background: var(--fs-bg-input) !important;
+    border: 1px solid var(--fs-border-light) !important;
+    border-radius: var(--fs-radius-sm) !important;
+    color: var(--fs-text-primary) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    transition: var(--fs-transition);
+}
+.form-control:focus, select:focus, textarea:focus {
+    border-color: var(--fs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15) !important;
+    outline: none !important;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+    background: transparent !important;
+}
+.breadcrumb-item a {
+    color: var(--fs-primary) !important;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+}
+.breadcrumb-item.active {
+    color: var(--fs-text-muted) !important;
+    font-size: 13px;
+}
+
+/* ── Dashboard Module Cards (Home page) ── */
+.module caption, .dashboard-module caption {
+    background: var(--fs-gradient) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 14px 20px !important;
+    border-radius: var(--fs-radius) var(--fs-radius) 0 0 !important;
+    letter-spacing: 0.3px;
+}
+.module table, .dashboard-module table {
+    background: var(--fs-bg-card) !important;
+    border-radius: 0 0 var(--fs-radius) var(--fs-radius) !important;
+}
+.module th, .module td {
+    border-color: var(--fs-border) !important;
+    padding: 10px 20px !important;
+}
+.module a, .dashboard-module a {
+    color: var(--fs-primary-light) !important;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--fs-transition);
+}
+.module a:hover {
+    color: var(--fs-secondary) !important;
+}
+
+/* ── Recent Actions Panel ── */
+.actionlist li {
+    background: var(--fs-bg-card) !important;
+    border: 1px solid var(--fs-border) !important;
+    border-radius: var(--fs-radius-sm) !important;
+    padding: 12px 16px !important;
+    margin-bottom: 8px !important;
+    transition: var(--fs-transition);
+}
+.actionlist li:hover {
+    border-color: var(--fs-primary) !important;
+    transform: translateX(3px);
+}
+
+/* ── Login Page ── */
+.login-page {
+    background: linear-gradient(135deg, #0F1923 0%, #1A2332 50%, #0F1923 100%) !important;
+}
+.login-box, .login-card-body {
+    background: var(--fs-bg-card) !important;
+    border: 1px solid var(--fs-border) !important;
+    border-radius: var(--fs-radius) !important;
+    box-shadow: var(--fs-shadow-lg) !important;
+}
+.login-card-body .btn-primary {
+    width: 100%;
+    padding: 12px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+}
+
+/* ── Pagination ── */
+.pagination .page-item .page-link {
+    background: var(--fs-bg-card) !important;
+    border-color: var(--fs-border) !important;
+    color: var(--fs-text-secondary) !important;
+    border-radius: var(--fs-radius-sm) !important;
+    margin: 0 2px;
+    font-weight: 500;
+    transition: var(--fs-transition);
+}
+.pagination .page-item.active .page-link {
+    background: var(--fs-gradient) !important;
+    border-color: var(--fs-primary) !important;
+    color: white !important;
+}
+
+/* ── Select2 Dropdowns ── */
+.select2-container--default .select2-selection--single {
+    background: var(--fs-bg-input) !important;
+    border-color: var(--fs-border-light) !important;
+    border-radius: var(--fs-radius-sm) !important;
+    height: 38px !important;
+}
+
+/* ── Fieldsets ── */
+fieldset {
+    border: 1px solid var(--fs-border) !important;
+    border-radius: var(--fs-radius) !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    background: rgba(255, 255, 255, 0.01);
+}
+fieldset legend, fieldset h2 {
+    color: var(--fs-primary-light) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* ── Footer ── */
+.main-footer {
+    background: var(--fs-bg-sidebar) !important;
+    border-top: 1px solid var(--fs-border) !important;
+    color: var(--fs-text-muted) !important;
+    font-size: 12px;
+}
+
+/* ── Smooth Transitions & Micro-Animations ── */
+a, .btn, .nav-link, .card, input, select, textarea {
+    transition: var(--fs-transition) !important;
+}
+
+/* ── Status Badge Styling for Order List ── */
+select option[value="received"] { color: #FFC107; }
+select option[value="preparing"] { color: #FF9800; }
+select option[value="out_for_delivery"] { color: #00BCD4; }
+select option[value="delivered"] { color: #4CAF50; }
+
+/* ── Scrollbar Styling ── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--fs-bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--fs-text-muted);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--fs-primary);
+}
+
+/* ── Responsive Tweaks ── */
+@media (max-width: 768px) {
+    .main-header.navbar {
+        height: auto;
+    }
+    .content-wrapper {
+        padding: 10px !important;
+    }
+}

@@ -177,6 +177,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
@@ -264,66 +265,114 @@ CSRF_COOKIE_SECURE = not DEBUG
 
 # Jazzmin Admin Panel Configuration
 JAZZMIN_SETTINGS = {
-    "site_title": "FoodSphere Admin",
+    # Window/Tab Title
+    "site_title": "FoodSphere HQ",
     "site_header": "FoodSphere",
-    "site_brand": "FoodSphere Admin",
-    "welcome_sign": "Welcome to the FoodSphere Restaurant Aggregator Portal",
-    "copyright": "FoodSphere Ltd",
-    "search_model": ["users.User", "restaurants.Restaurant"],
+    "site_brand": "FoodSphere",
+    "welcome_sign": "Welcome back, Commander 🚀",
+    "copyright": "© 2026 FoodSphere Ltd. All rights reserved.",
+
+    # Logo — uses site_brand text if no logo file exists
+    "site_logo": None,
+    "login_logo": None,
+    "site_logo_classes": "img-circle",
+
+    # Top-bar search models
+    "search_model": ["users.User", "restaurants.Restaurant", "orders.Order"],
+
+    # User avatar
     "user_avatar": None,
+
+    # Top menu links
     "topmenu_links": [
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Live Site", "url": "https://restaurant-app-web.onrender.com/", "new_window": True},
+        {"name": "🏠 Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "🌐 Live App", "url": "https://restaurant-app-web.onrender.com/", "new_window": True},
+        {"name": "📊 API Docs", "url": "/api/", "new_window": True},
     ],
+
+    # Sidebar config
     "show_sidebar": True,
     "navigation_expanded": True,
-    "order_with_respect_to": ["restaurants", "orders", "payments", "users", "auth"],
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "users.user": "fas fa-user-circle",
-        "users.loyaltytransaction": "fas fa-coins",
-        "auth.Group": "fas fa-users",
-        "restaurants.restaurant": "fas fa-store",
-        "restaurants.menucategory": "fas fa-list",
-        "restaurants.menuitem": "fas fa-hamburger",
-        "orders.order": "fas fa-shopping-basket",
-        "orders.orderitem": "fas fa-box-open",
-        "payments.payment": "fas fa-receipt",
+    "hide_apps": [],
+    "hide_models": [],
+
+    # Ordering of sidebar sections
+    "order_with_respect_to": [
+        "restaurants",
+        "orders",
+        "payments",
+        "users",
+        "auth",
+    ],
+
+    # Custom sidebar links (appear at bottom)
+    "custom_links": {
+        "orders": [{
+            "name": "📦 Platform Analytics",
+            "url": "admin:index",
+            "icon": "fas fa-chart-line",
+            "permissions": ["auth.view_user"],
+        }],
     },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-dot-circle",
+
+    # Premium FontAwesome 5 Icons
+    "icons": {
+        "auth": "fas fa-shield-alt",
+        "auth.user": "fas fa-user-secret",
+        "auth.Group": "fas fa-user-friends",
+        "users.user": "fas fa-user-astronaut",
+        "users.loyaltytransaction": "fas fa-gem",
+        "restaurants.restaurant": "fas fa-store-alt",
+        "restaurants.menucategory": "fas fa-layer-group",
+        "restaurants.menuitem": "fas fa-utensils",
+        "orders.order": "fas fa-shopping-bag",
+        "orders.orderitem": "fas fa-box-open",
+        "payments.payment": "fas fa-credit-card",
+    },
+    "default_icon_parents": "fas fa-folder-open",
+    "default_icon_children": "fas fa-circle",
+
+    # UI Behavior
+    "related_modal_active": True,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": False,
+
+    # Custom CSS/JS injection (CRITICAL for premium look)
+    "custom_css": "css/admin_custom.css",
+    "custom_js": None,
 }
 
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
-    "footer_small_text": False,
+    "footer_small_text": True,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-danger",
-    "accent": "accent-danger",
-    "navbar": "navbar-dark navbar-danger",
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
     "no_navbar_border": True,
     "navbar_fixed": True,
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-danger",
+    "sidebar": "sidebar-dark-primary",
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "flatly",
-    "dark_mode_theme": None,
+    "sidebar_nav_flat_style": True,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
     "button_classes": {
-        "primary": "btn-danger",
-        "secondary": "btn-secondary",
+        "primary": "btn-primary",
+        "secondary": "btn-outline-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
-        "success": "btn-success"
-    }
+        "success": "btn-success",
+    },
+    "actions_sticky_top": True,
 }
 
 # ═══════════════════════════════════════
