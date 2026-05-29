@@ -47,13 +47,17 @@ def root_view(request):
     """
     Root API endpoint welcome message.
     """
+    from restaurants.models import Restaurant
     return JsonResponse({
         'name': 'FoodSphere REST API Backend',
         'status': 'Online',
         'health_check': '/health/',
         'admin_panel': '/admin/',
         'api_root': '/api/',
-        'message': 'Welcome to the FoodSphere API. Use the above endpoints to interact with the backend.'
+        'message': 'Welcome to the FoodSphere API. Use the above endpoints to interact with the backend.',
+        'restaurant_count': Restaurant.objects.count(),
+        'active_restaurant_count': Restaurant.objects.filter(is_active=True).count(),
+        'all_restaurant_slugs': list(Restaurant.objects.values_list('slug', flat=True))
     })
 
 
