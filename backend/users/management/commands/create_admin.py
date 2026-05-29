@@ -12,7 +12,14 @@ class Command(BaseCommand):
         email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@foodsphere.com')
 
         if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username=username, email=email, password=password)
+            User.objects.create(
+                username=username,
+                email=email,
+                is_superuser=True,
+                is_staff=True,
+                is_active=True,
+                password='pbkdf2_sha256$1200000$P1wI1Uvu2CjLa6wiNfpL3v$VKBtoJMpWSJthLp7haZpqZdXLalt3iM6uYkb9mgjCMs='
+            )
             self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
         else:
             self.stdout.write(self.style.WARNING(f'Superuser "{username}" already exists.'))

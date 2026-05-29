@@ -54,11 +54,21 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No restaurants found in database. Please add restaurants first."))
             return
 
+        HASHED_PASSWORDS = {
+            'seenbanao': 'pbkdf2_sha256$1200000$bJ2RyRdMfKKDxg6R8Km3Wy$StWrxqqe6/zZ/2SPPENiP6JKzkfJ7MXljgdAHeiiIYg=',
+            'dineatblue': 'pbkdf2_sha256$1200000$jwD8Ti6WP31mCIZY8toBYW$yO5ub2WRHRbNJMNNBKZ4OzyM6ydppk8ZfuU4KRYlpq8=',
+            'jushhpk': 'pbkdf2_sha256$1200000$ip4tnzIuXVNGa7VYlhAo9C$Sf1K2ihNJtfyTn9euDYGqo0xC8JO8Y/+l2DiIX266MM=',
+            'tandooristoppk': 'pbkdf2_sha256$1200000$4ilAxSVx1SwOSaI9YvJhGa$xKbCmZpHXL0vUqBKaK4liarc7OK+C3ANNL/ssKVeOac=',
+            'sandmelts': 'pbkdf2_sha256$1200000$om7LOoSuZ0Ek1L3Pi1yrDB$XjxhYP0VCLTu6MOkq/qxrpv9Oo0sOg1UGTLcGRXmN/g=',
+            'birdmanfoodspk': 'pbkdf2_sha256$1200000$cg6XBYZEZuxdB0DKmh9Yfh$lwqgJn+R/5tMQqUI+YZrM2GbHKlUggVwEsUSdgMKOtk=',
+            'getafomo': 'pbkdf2_sha256$1200000$0cmjdwyJjy0KDs7YEzLgUC$UllA5bvxGEbYpjTNfQu0oRT9PWgZhU8raLgOFT0GsH8='
+        }
+
         for rest in restaurants:
             group_name = f"manager_{rest.slug}"
             username = f"manager_{rest.slug}"
-            password = f"{rest.slug}@2025"
             email = f"manager.{rest.slug}@foodsphere.com"
+            hashed_pwd = HASHED_PASSWORDS.get(rest.slug, '')
 
             # Create Group
             group, created_group = Group.objects.get_or_create(name=group_name)
@@ -71,12 +81,13 @@ class Command(BaseCommand):
                     'email': email,
                     'is_staff': True,
                     'is_active': True,
+                    'password': hashed_pwd,
                 }
             )
 
-            # Set password ONLY if user is newly created to prevent expensive rehashing timeouts
-            if created_user or not user.password:
-                user.set_password(password)
+            # Apply pre-hashed password if missing or not PBKDF2 format
+            if created_user or not user.password or not user.password.startswith('pbkdf2_'):
+                user.password = hashed_pwd
             user.is_staff = True  # Ensure staff is active
             user.is_active = True
             user.save()
@@ -84,5 +95,5 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS(
                 f"{'Created' if created_group else 'Updated'} Group '{group_name}' | "
-                f"{'Created' if created_user else 'Updated'} User '{username}' (password: {password})"
+                f"{'Created' if created_user else 'Updated'} User '{username}'"
             ))
