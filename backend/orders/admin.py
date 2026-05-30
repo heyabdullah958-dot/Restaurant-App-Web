@@ -109,9 +109,10 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
             f"Rider Bhai, ye order deliver karna hai:\n"
             f"Naam: {name}\n"
             f"Phone: {phone}\n"
-            f"Address: {obj.delivery_address}\n"
+            f"Address: {obj.delivery_address or ''}\n"
             f"Location Link: {location_link}"
         )
+        encoded_message = urllib.parse.quote(message)
         from django.conf import settings
         rider_phone = getattr(settings, 'RIDER_WHATSAPP', '923090349090')
         whatsapp_url = f"https://wa.me/{rider_phone}?text={encoded_message}"
