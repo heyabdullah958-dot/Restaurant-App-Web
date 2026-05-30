@@ -4,13 +4,23 @@ from .models import Order
 from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer
 
 
-class OrderCreateView(generics.CreateAPIView):
+class OrderListCreateView(generics.ListCreateAPIView):
     """
-    POST /api/orders/
-    Place a new order. Supports authenticated and guest checkouts.
+    POST /api/orders/ - Place a new order (AllowAny).
+    GET /api/orders/ - List all orders (IsAdminUser) for dashboard sales aggregates.
     """
-    serializer_class = OrderCreateSerializer
-    permission_classes = [permissions.AllowAny]
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return OrderCreateSerializer
+        return OrderListSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
+
+    def get_queryset(self):
+        return Order.objects.select_related('restaurant').prefetch_related('items__menu_item').order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
