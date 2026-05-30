@@ -243,13 +243,13 @@ export const deleteMenuCategory = (id: number) =>
 export const createMenuItem = (data: any) =>
   apiFetch<any>('/api/admin/menu-items/', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data instanceof FormData ? data : JSON.stringify(data),
   });
 
 export const updateMenuItem = (id: number, data: any) =>
   apiFetch<any>(`/api/admin/menu-items/${id}/`, {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: data instanceof FormData ? data : JSON.stringify(data),
   });
 
 export const deleteMenuItem = (id: number) =>
