@@ -48,7 +48,7 @@ interface AdminContextProps {
   refreshOrders: () => Promise<void>;
   addMenuCategory: (name: string) => Promise<void>;
   removeMenuCategory: (id: number) => Promise<void>;
-  addMenuItem: (categoryId: number, name: string, description: string, price: number) => Promise<void>;
+  addMenuItem: (categoryId: number, data: any) => Promise<void>;
   removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
   updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
@@ -416,16 +416,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Add menu item
-  const addMenuItem = async (categoryId: number, name: string, description: string, price: number) => {
+  // Add menu item with full configuration (specs, variants, prep time, etc.)
+  const addMenuItem = async (categoryId: number, data: any) => {
     setLoading(true);
     try {
       const created = await createMenuItem({
         category: categoryId,
-        name,
-        description,
-        price,
-        is_available: true,
+        ...data,
       });
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];
@@ -443,7 +440,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           [selectedBrandId]: updated,
         };
       });
-      showToast(`Item "${name}" added to menu!`, 'success');
+      showToast(`Item "${data.name}" added to menu! ✅`, 'success');
     } catch (err: any) {
       console.error(err);
       showToast(err.message || 'Failed to add item', 'error');

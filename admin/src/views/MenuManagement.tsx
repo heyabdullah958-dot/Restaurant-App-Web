@@ -42,7 +42,6 @@ export const MenuManagement: React.FC = () => {
     toggleMenuAvailability,
     addMenuCategory,
     removeMenuCategory,
-    addMenuItem,
     removeMenuItem,
     editMenuItem,
   } = useAdmin();
@@ -55,13 +54,8 @@ export const MenuManagement: React.FC = () => {
   const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   
-  const [addingItemToCategoryId, setAddingItemToCategoryId] = useState<number | null>(null);
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemDescription, setNewItemDescription] = useState('');
-  const [newItemPrice, setNewItemPrice] = useState('');
-
-  // Editing state
-  const [editingItem, setEditingItem] = useState<{ categoryId: number; categoryName: string; item: MenuItem } | null>(null);
+  // Editing & Adding state (null item indicates "Create Mode")
+  const [editingItem, setEditingItem] = useState<{ categoryId: number; categoryName: string; item: MenuItem | null } | null>(null);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,22 +63,6 @@ export const MenuManagement: React.FC = () => {
     await addMenuCategory(newCategoryName);
     setNewCategoryName('');
     setShowAddCategoryForm(false);
-  };
-
-  const handleAddItem = async (categoryId: number, e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItemName.trim() || !newItemPrice) return;
-    await addMenuItem(
-      categoryId,
-      newItemName,
-      newItemDescription,
-      parseFloat(newItemPrice)
-    );
-    // Reset form
-    setNewItemName('');
-    setNewItemDescription('');
-    setNewItemPrice('');
-    setAddingItemToCategoryId(null);
   };
 
   return (
@@ -146,7 +124,7 @@ export const MenuManagement: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setAddingItemToCategoryId(category.id)}
+                  onClick={() => setEditingItem({ categoryId: category.id, categoryName: category.name, item: null })}
                   className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 dark:text-blue-400 hover:text-zinc-900 dark:hover:text-blue-300 transition-colors"
                 >
                   <Plus size={12} /> Add Item
@@ -164,61 +142,6 @@ export const MenuManagement: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {/* Add Item Form inside Category */}
-            {addingItemToCategoryId === category.id && (
-              <form
-                onSubmit={(e) => handleAddItem(category.id, e)}
-                className="bg-white dark:bg-slate-800 border border-zinc-200 dark:border-slate-700/60 p-4 rounded-xl space-y-3 animate-slideDown"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-xs text-zinc-900 dark:text-white">Add New Item to {category.name}</h4>
-                  <button onClick={() => setAddingItemToCategoryId(null)} type="button">
-                    <X size={14} className="text-zinc-400" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Item Name"
-                    value={newItemName}
-                    onChange={(e) => setNewItemName(e.target.value)}
-                    className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-700 rounded-lg p-2 text-xs text-zinc-900 dark:text-white focus:outline-none"
-                    required
-                  />
-                  <input
-                    type="number"
-                    placeholder="Price (Rs.)"
-                    value={newItemPrice}
-                    onChange={(e) => setNewItemPrice(e.target.value)}
-                    className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-700 rounded-lg p-2 text-xs text-zinc-900 dark:text-white focus:outline-none"
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="Description / Ingredients"
-                    value={newItemDescription}
-                    onChange={(e) => setNewItemDescription(e.target.value)}
-                    className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-700 rounded-lg p-2 text-xs text-zinc-900 dark:text-white focus:outline-none"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setAddingItemToCategoryId(null)}
-                    className="px-3 py-1.5 border border-zinc-200 dark:border-slate-700 rounded-lg text-[10px] font-bold text-zinc-500 dark:text-slate-400 hover:bg-zinc-50 dark:hover:bg-slate-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[10px] font-bold shadow-md transition-all"
-                  >
-                    Add Dish
-                  </button>
-                </div>
-              </form>
-            )}
 
             {/* Menu Items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -329,7 +252,7 @@ export const MenuManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Edit Item Modal */}
+      {/* Unified Edit/Add Item Modal */}
       {editingItem && (
         <EditItemModal
           categoryId={editingItem.categoryId}
@@ -347,27 +270,33 @@ export const MenuManagement: React.FC = () => {
 interface EditModalProps {
   categoryId: number;
   categoryName: string;
-  item: MenuItem;
+  item: MenuItem | null;
   onClose: () => void;
   onSave: (categoryId: number, itemId: number, data: any) => Promise<void>;
 }
 
 const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, item, onClose, onSave }) => {
   const specFields = getSpecsForCategory(categoryName);
+  const { addMenuItem } = useAdmin();
 
   // General field states
-  const [name, setName] = useState(item.name);
-  const [price, setPrice] = useState(String(item.price));
-  const [description, setDescription] = useState(item.description || '');
-  const [prepTime, setPrepTime] = useState(String(item.preparation_time || 15));
-  const [isAvailable, setIsAvailable] = useState(item.is_available);
+  const [name, setName] = useState(item ? item.name : '');
+  const [price, setPrice] = useState(item ? String(item.price) : '');
+  const [description, setDescription] = useState(item ? item.description || '' : '');
+  const [prepTime, setPrepTime] = useState(item ? String(item.preparation_time || 15) : '15');
+  const [isAvailable, setIsAvailable] = useState(item ? item.is_available : true);
 
   // Variant States
-  const [hasVariants, setHasVariants] = useState(!!item.options?.has_variants);
-  const [variants, setVariants] = useState<any[]>(item.options?.variants || []);
-  const [specifications, setSpecifications] = useState<Record<string, string>>(
-    item.options?.specifications || {}
-  );
+  const [hasVariants, setHasVariants] = useState(item ? !!item.options?.has_variants : false);
+  const [variants, setVariants] = useState<any[]>(item ? item.options?.variants || [] : []);
+  const [specifications, setSpecifications] = useState<Record<string, string>>(() => {
+    if (item && item.options?.specifications) return item.options.specifications;
+    const blankSpecs: Record<string, string> = {};
+    specFields.forEach(f => {
+      blankSpecs[f.key] = f.type === 'select' && f.options ? f.options[0] : '';
+    });
+    return blankSpecs;
+  });
 
   const handleAddVariant = () => {
     // Build blank specs object
@@ -467,7 +396,11 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
       options: updatedOptions
     };
 
-    await onSave(categoryId, item.id, payload);
+    if (item) {
+      await onSave(categoryId, item.id, payload);
+    } else {
+      await addMenuItem(categoryId, payload);
+    }
     onClose();
   };
 
@@ -482,8 +415,12 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
               <Settings size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-black text-zinc-900 dark:text-white leading-tight">Configure Product System</h2>
-              <p className="text-xs text-zinc-500 dark:text-slate-400">Editing parameters for {item.name}</p>
+              <h2 className="text-lg font-black text-zinc-900 dark:text-white leading-tight">
+                {item ? 'Configure Product System' : 'Create New Menu Item'}
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-slate-400">
+                {item ? `Editing parameters for ${item.name}` : `Adding product to ${categoryName}`}
+              </p>
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg border border-zinc-200 dark:border-slate-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-350 transition-all">
@@ -631,7 +568,7 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
 
                 <div className="space-y-4">
                   {variants.map((v, index) => (
-                    <div key={v.id} className="relative bg-zinc-50/50 dark:bg-slate-950/20 border border-zinc-200/50 dark:border-slate-800/60 p-4.5 rounded-2xl space-y-3.5">
+                    <div key={v.id} className="relative bg-zinc-50/55 dark:bg-slate-950/20 border border-zinc-250 dark:border-slate-800/60 p-4.5 rounded-2xl space-y-3.5">
                       
                       {/* Remove Option Button */}
                       <button
@@ -725,7 +662,7 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
               type="submit"
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-[0.98]"
             >
-              Apply Configurations
+              {item ? 'Apply Configurations' : 'Create Product'}
             </button>
           </div>
         </form>
