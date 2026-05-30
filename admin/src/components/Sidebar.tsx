@@ -155,6 +155,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   Tenant Registry
                 </button>
                 <button
+                  onClick={() => { setView('menu_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'menu_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <ChefHat size={18} />
+                  Menu Engineering
+                </button>
+                <button
                   onClick={() => { setView('customer_management'); setIsOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
                     activeView === 'customer_management' ? activeLinkClass : inactiveLinkClass
