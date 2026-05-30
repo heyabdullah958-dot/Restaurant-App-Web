@@ -1,6 +1,6 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView, CustomTokenObtainPairView
 from .admin_views import AdminCustomerListView, AdminCustomerLoyaltyView, AdminCustomerDetailView
 from config.analytics_views import PlatformAnalyticsView, RestaurantAnalyticsView
 from config.notification_views import SendNotificationView
@@ -8,7 +8,7 @@ from config.notification_views import SendNotificationView
 urlpatterns = [
     # Auth endpoints
     path('auth/register/', UserRegisterView.as_view(), name='auth_register'),
-    path('auth/login/', TokenObtainPairView.as_view(), name='auth_login'),
+    path('auth/login/', CustomTokenObtainPairView.as_view(), name='auth_login'),
     path('auth/guest/', GuestAuthView.as_view(), name='auth_guest'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='auth_refresh'),
 

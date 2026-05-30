@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, UserRegisterSerializer, LoyaltyTransactionSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import UserSerializer, UserRegisterSerializer, LoyaltyTransactionSerializer, CustomTokenObtainPairSerializer
 from .models import LoyaltyTransaction
 from config.throttles import GuestAuthThrottle
 
@@ -13,10 +14,18 @@ User = get_user_model()
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
+    # Inject custom claims
+    refresh['username'] = user.username
+    refresh['is_staff'] = user.is_staff
+    refresh['is_superuser'] = user.is_superuser
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
