@@ -25,7 +25,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image',
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
-            'min_order_amount', 'delivery_fee', 'rating', 'total_reviews'
+            'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
+            'loyalty_points_ratio'
         )
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
@@ -38,7 +39,7 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
-            'categories'
+            'loyalty_points_ratio', 'categories'
         )
 
     def get_categories(self, obj):

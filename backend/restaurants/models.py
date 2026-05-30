@@ -20,6 +20,7 @@ class Restaurant(models.Model):
     delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     total_reviews = models.IntegerField(default=0)
+    loyalty_points_ratio = models.IntegerField(default=100, help_text="Amount in Rupees required to earn 1 loyalty point. Set to 0 to disable.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

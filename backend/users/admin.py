@@ -26,6 +26,35 @@ class UserAdmin(BaseUserAdmin):
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if not request.user.is_superuser:
+            if 'loyalty_points' not in readonly:
+                readonly.append('loyalty_points')
+        else:
+            if 'loyalty_points' in readonly:
+                readonly.remove('loyalty_points')
+        return tuple(readonly)
+
+    def save_model(self, request, obj, form, change):
+        if change and 'loyalty_points' in form.changed_data:
+            try:
+                old_points = User.objects.get(pk=obj.pk).loyalty_points
+                new_points = obj.loyalty_points
+                difference = new_points - old_points
+                if difference != 0:
+                    t_type = 'earned' if difference > 0 else 'redeemed'
+                    desc = f"Updated by Admin ({request.user.username}): {old_points} -> {new_points}"
+                    LoyaltyTransaction.objects.create(
+                        user=obj,
+                        points=abs(difference),
+                        transaction_type=t_type,
+                        description=desc
+                    )
+            except User.DoesNotExist:
+                pass
+        super().save_model(request, obj, form, change)
+
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if not request.user.is_superuser:
@@ -41,3 +70,4 @@ class UserAdmin(BaseUserAdmin):
                     new_fieldsets.append((title, fields_dict))
             return tuple(new_fieldsets)
         return fieldsets
+

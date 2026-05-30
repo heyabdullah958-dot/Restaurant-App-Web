@@ -9,7 +9,7 @@ class MenuCategoryInline(admin.TabularInline):
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city', 'cuisine_type', 'is_active', 'is_featured', 'rating', 'delivery_fee')
+    list_display = ('name', 'city', 'cuisine_type', 'loyalty_points_ratio', 'is_active', 'is_featured', 'rating', 'delivery_fee')
     list_filter = ('city', 'is_active', 'is_featured', 'cuisine_type')
     search_fields = ('name', 'city', 'address')
     list_editable = ('is_active', 'is_featured')
@@ -28,7 +28,7 @@ class RestaurantAdmin(admin.ModelAdmin):
             'fields': ('opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max')
         }),
         ('Business', {
-            'fields': ('min_order_amount', 'delivery_fee', 'is_active', 'is_featured')
+            'fields': ('min_order_amount', 'delivery_fee', 'loyalty_points_ratio', 'is_active', 'is_featured')
         }),
         ('Media', {
             'fields': ('logo', 'cover_image')

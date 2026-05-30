@@ -147,22 +147,24 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             # BUG-11 + BUG-05: Award loyalty points ONLY to registered (non-guest) users
             # Using F() expression for atomic update — no race condition
             if user and not user.is_guest:
-                earned_points = int(total // 100)  # 1 point per Rs. 100 spent
-                if earned_points > 0:
-                    from django.contrib.auth import get_user_model
-                    User = get_user_model()
-                    # BUG-05: Atomic F() update — safe under concurrent load
-                    User.objects.filter(pk=user.pk).update(
-                        loyalty_points=F('loyalty_points') + earned_points
-                    )
-                    from users.models import LoyaltyTransaction
-                    LoyaltyTransaction.objects.create(
-                        user=user,
-                        order=order,
-                        points=earned_points,
-                        transaction_type='earned',
-                        description=f"Points earned on Order #{order.id}"
-                    )
+                ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
+                if ratio > 0:
+                    earned_points = int(total // ratio)
+                    if earned_points > 0:
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        # BUG-05: Atomic F() update — safe under concurrent load
+                        User.objects.filter(pk=user.pk).update(
+                            loyalty_points=F('loyalty_points') + earned_points
+                        )
+                        from users.models import LoyaltyTransaction
+                        LoyaltyTransaction.objects.create(
+                            user=user,
+                            order=order,
+                            points=earned_points,
+                            transaction_type='earned',
+                            description=f"Points earned on Order #{order.id} (Ratio: 1 point per Rs. {ratio})"
+                        )
 
             return order
 
