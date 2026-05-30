@@ -176,7 +176,7 @@ export const MenuManagement: React.FC = () => {
                     {/* Item specs summaries */}
                     {!item.options?.has_variants && item.options?.specifications && Object.keys(item.options.specifications).length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {Object.entries(item.options.specifications).map(([key, val]) => (
+                        {Object.entries(item.options.specifications as Record<string, any>).map(([key, val]) => (
                           val && (
                             <span key={key} className="text-[9px] font-semibold text-zinc-500 bg-zinc-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">
                               {key.replace('_', ' ')}: {String(val)}
@@ -567,7 +567,7 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
                 </div>
 
                 <div className="space-y-4">
-                  {variants.map((v, index) => (
+                  {variants.map((v) => (
                     <div key={v.id} className="relative bg-zinc-50/55 dark:bg-slate-950/20 border border-zinc-250 dark:border-slate-800/60 p-4.5 rounded-2xl space-y-3.5">
                       
                       {/* Remove Option Button */}
