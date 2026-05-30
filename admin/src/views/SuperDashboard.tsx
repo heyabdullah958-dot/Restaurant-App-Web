@@ -1,41 +1,45 @@
 import React from 'react';
 import { useAdmin } from '../AdminContext';
-import { MOCK_GLOBAL_STATS, MOCK_BRAND_STATS } from '../mockData';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
 import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight } from 'lucide-react';
 
 export const SuperDashboard: React.FC = () => {
-  const { restaurants, setSelectedBrand, setView } = useAdmin();
+  const { restaurants, orders, setSelectedBrand, setView } = useAdmin();
+
+  // Calculate live statistics
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = orders.length;
+  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Metrics data
   const stats = [
     {
       title: 'Gross Platform Sales',
-      value: `Rs. ${MOCK_GLOBAL_STATS.totalRevenue.toLocaleString()}`,
+      value: `Rs. ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <DollarSign className="text-blue-500" size={20} />,
       bgColor: 'bg-blue-500/10',
-      change: '+18.4% this week',
+      change: 'Real-time sales summary',
     },
     {
       title: 'Active Restaurant Brands',
       value: `${restaurants.filter(r => r.is_active).length} / ${restaurants.length}`,
       icon: <Store className="text-emerald-500" size={20} />,
       bgColor: 'bg-emerald-500/10',
-      change: '1 Pending onboarding',
+      change: `${restaurants.filter(r => !r.is_active).length} disabled or pending`,
     },
     {
       title: 'Total Platform Orders',
-      value: MOCK_GLOBAL_STATS.totalOrders.toLocaleString(),
+      value: totalOrders.toLocaleString(),
       icon: <ClipboardCheck className="text-violet-500" size={20} />,
       bgColor: 'bg-violet-500/10',
-      change: '+12.5% vs last month',
+      change: 'All-time order count',
     },
     {
       title: 'Avg Order Value (AOV)',
-      value: `Rs. ${Math.round(MOCK_GLOBAL_STATS.averageOrderValue)}`,
+      value: `Rs. ${Math.round(averageOrderValue)}`,
       icon: <Percent className="text-amber-500" size={20} />,
       bgColor: 'bg-amber-500/10',
-      change: 'Stabilized pricing tier',
+      change: 'Calculated average basket',
     },
   ];
 
@@ -104,7 +108,9 @@ export const SuperDashboard: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-700/40 text-sm text-slate-300">
               {restaurants.map((restaurant) => {
-                const brandStats = MOCK_BRAND_STATS[restaurant.id] || { revenue: 0, orders: 0, aov: 0 };
+                const tenantOrders = orders.filter(o => o.restaurant_id === restaurant.id);
+                const tenantRevenue = tenantOrders.reduce((sum, o) => sum + o.total, 0);
+                const tenantAOV = tenantOrders.length > 0 ? tenantRevenue / tenantOrders.length : 0;
                 
                 return (
                   <tr key={restaurant.id} className="hover:bg-slate-700/20 transition-colors">
@@ -139,13 +145,13 @@ export const SuperDashboard: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4.5 px-6 text-right font-bold text-white">
-                      Rs. {brandStats.revenue.toLocaleString()}
+                      Rs. {tenantRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-4.5 px-6 text-right font-semibold">
-                      {brandStats.orders.toLocaleString()}
+                      {tenantOrders.length.toLocaleString()}
                     </td>
                     <td className="py-4.5 px-6 text-right font-semibold">
-                      Rs. {Math.round(brandStats.aov)}
+                      Rs. {Math.round(tenantAOV)}
                     </td>
                     <td className="py-4.5 px-6 text-center">
                       <button

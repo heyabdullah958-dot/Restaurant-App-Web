@@ -38,17 +38,20 @@ class PlatformAnalyticsView(APIView):
                 'revenue': float(day_orders.aggregate(Sum('total'))['total__sum'] or 0),
             })
 
-        # Per-restaurant breakdown (last 30 days)
+        # Per-restaurant breakdown (last 30 days & all-time)
         restaurant_breakdown = []
-        for r in Restaurant.objects.filter(is_active=True):
-            r_orders = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
+        for r in Restaurant.objects.all():
+            r_orders_30d = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
+            r_orders_all = Order.objects.filter(restaurant=r)
             restaurant_breakdown.append({
                 'id': r.id,
                 'name': r.name,
                 'slug': r.slug,
-                'orders_30d': r_orders.count(),
-                'revenue_30d': float(r_orders.aggregate(Sum('total'))['total__sum'] or 0),
-                'avg_order': float(r_orders.aggregate(Avg('total'))['total__avg'] or 0),
+                'orders_30d': r_orders_30d.count(),
+                'revenue_30d': float(r_orders_30d.aggregate(Sum('total'))['total__sum'] or 0),
+                'orders_all_time': r_orders_all.count(),
+                'revenue_all_time': float(r_orders_all.aggregate(Sum('total'))['total__sum'] or 0),
+                'avg_order': float(r_orders_all.aggregate(Avg('total'))['total__avg'] or 0),
             })
 
         # Order status breakdown (all time)
@@ -74,6 +77,8 @@ class PlatformAnalyticsView(APIView):
                     Order.objects.filter(created_at__date__gte=last_30)
                     .aggregate(Sum('total'))['total__sum'] or 0
                 ),
+                'orders_all_time': Order.objects.count(),
+                'revenue_all_time': float(Order.objects.aggregate(Sum('total'))['total__sum'] or 0),
                 'total_customers': User.objects.filter(is_guest=False, is_staff=False).count(),
                 'total_guests': User.objects.filter(is_guest=True).count(),
                 'total_loyalty_points': int(
