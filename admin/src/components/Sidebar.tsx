@@ -96,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 </div>
               ) : (
                 <div className={`w-9 h-9 rounded-lg ${getBrandBgColor()} flex items-center justify-center font-bold text-white shadow-lg`}>
-                  {activeRestaurant?.name[0]}
+                  {activeRestaurant?.name?.[0] || ''}
                 </div>
               )}
               <div>
