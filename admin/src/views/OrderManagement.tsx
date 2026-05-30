@@ -16,6 +16,17 @@ export const OrderManagement: React.FC = () => {
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
 
+  if (!restaurant) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-400">No Restaurant Data Available</h2>
+          <p className="text-sm text-slate-500 mt-2">Unable to load orders. Please check your connection or API status.</p>
+        </div>
+      </div>
+    );
+  }
+
   // Filter orders belonging to this brand
   const brandOrders = useMemo(() => {
     return orders.filter((o) => o.restaurant_id === restaurant.id);

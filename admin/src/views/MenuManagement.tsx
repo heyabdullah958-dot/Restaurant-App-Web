@@ -48,6 +48,18 @@ export const MenuManagement: React.FC = () => {
 
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+  
+  if (!restaurant) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-400">No Restaurant Data Available</h2>
+          <p className="text-sm text-slate-500 mt-2">Unable to load menu details. Please check your connection or API status.</p>
+        </div>
+      </div>
+    );
+  }
+
   const categories = menuItems[restaurant.id] || [];
 
   // Local UI States
