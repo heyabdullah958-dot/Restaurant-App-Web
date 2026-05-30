@@ -53,7 +53,6 @@ This session focused on completing Phase 5 (React Native App 12 Screens and Redu
 ## 📋 What is Remaining to Build?
 
 1. **Phase 6 Online Payments**: Implement live Stripe elements gateway and PayFast local redirect payment loops.
-2. **Phase 2 (Part 2) Website**: Build the 7th brand website (`birdmanfoodspk` grilled chicken catering).
 
 ---
 
@@ -94,5 +93,4 @@ This session focused on completing Phase 5 (React Native App 12 Screens and Redu
 
 ### 🟡 Upcoming Features:
 3. **Phase 6 Online Payments**: Implement live Stripe elements gateway and PayFast local redirect payment loops.
-4. **Phase 2 (Part 2) Website**: Build the 7th brand website (`birdmanfoodspk` grilled chicken catering).
 

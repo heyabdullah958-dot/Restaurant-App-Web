@@ -210,7 +210,7 @@ FoodSphere/
 | Milestone | Status | Target Date |
 |---|---|---|
 | App UI Design (Google Stitch mockups) | ✅ Completed (Live on Cloudflare) | Done |
-| 3 Website UIs (6 brand sites active) | ✅ Completed (Live on Cloudflare) | Done |
+| 7 Website UIs (7 brand sites active) | ✅ Completed (Live on Netlify/Cloudflare) | Done |
 | Backend setup & models | ✅ Completed (Live on Render) | Done |
 | App core screens (Home, Menu, Cart) | ⏳ Pending (Local Build Active) | TBD |
 | Payment integration | ⏳ Pending | TBD |

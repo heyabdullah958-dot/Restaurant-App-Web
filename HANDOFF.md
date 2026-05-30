@@ -21,15 +21,15 @@ FoodSphere is a **multi-brand food delivery aggregator** — like FoodPanda — 
 - `D:\sitesdata\Resturent App\app.js` — All JS logic
 - **Live:** https://foodsphere-app.pages.dev
 
-### Phase 2 — Individual Restaurant Websites ✅ (6 of 7 Live)
+### Phase 2 — Individual Restaurant Websites ✅ (7 of 7 Live)
 All in `D:\sitesdata\Resturent App\websites\`
-- SeenBanao (Desi BBQ): https://foodsphere-seenbanao.pages.dev
-- DineAtBlue (Seafood): https://foodsphere-dineatblue.pages.dev
-- JushhPK (Fast food): https://foodsphere-jushhpk.pages.dev
-- TandooriStopPK: https://foodsphere-tandooristoppk.pages.dev
-- SandMelts: https://foodsphere-sandmelts.pages.dev
-- GetAFomo (Café): https://foodsphere-getafomo.pages.dev
-- *BirdManFoodsPK is pending.*
+- SeenBanao (Desi BBQ): https://seenbanao-foodsphere-944.netlify.app
+- DineAtBlue (Seafood): https://dineatblue-foodsphere-922.netlify.app
+- JushhPK (Fast food): https://jushhpk-foodsphere-170.netlify.app
+- TandooriStopPK: https://tandooristoppk-foodsphere-287.netlify.app
+- SandMelts: https://sandmelts-foodsphere-246.netlify.app
+- GetAFomo (Café): https://getafomo-foodsphere-674.netlify.app
+- BirdManFoodsPK (Catering): https://birdmanfoodspk-foodsphere-663.netlify.app
 
 ### Phase 3 — Mobile Responsiveness ✅
 - All 6 websites have mobile responsive CSS.
@@ -56,9 +56,6 @@ All in `D:\sitesdata\Resturent App\websites\`
 ---
 
 ## ⏳ REMAINING PHASES TO BUILD
-
-### 🔴 Phase 2 (Part 2) — BirdManFoodsPK Website
-- Static grilled chicken website under `websites/birdmanfoodspk/`.
 
 ### 🔵 Phase 6 — Online Payments (Integration Setup)
 - COD is fully functional in frontend and backend.
