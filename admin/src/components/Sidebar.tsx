@@ -53,11 +53,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   const activeLinkClass = isSuper
     ? 'bg-slate-700/60 text-white border-l-4 border-blue-500'
-    : `bg-slate-100 text-slate-900 border-l-4 ${getBrandTextColor() === 'text-seenbanao' ? 'border-seenbanao' : getBrandTextColor() === 'text-dineatblue' ? 'border-dineatblue' : getBrandTextColor() === 'text-jushhpk' ? 'border-jushhpk' : getBrandTextColor() === 'text-tandooristoppk' ? 'border-tandooristoppk' : getBrandTextColor() === 'text-sandmelts' ? 'border-sandmelts' : getBrandTextColor() === 'text-birdmanfoodspk' ? 'border-birdmanfoodspk' : 'border-getafomo'}`;
+    : `bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-l-4 ${
+        getBrandTextColor() === 'text-seenbanao' ? 'border-seenbanao' :
+        getBrandTextColor() === 'text-dineatblue' ? 'border-dineatblue' :
+        getBrandTextColor() === 'text-jushhpk' ? 'border-jushhpk' :
+        getBrandTextColor() === 'text-tandooristoppk' ? 'border-tandooristoppk' :
+        getBrandTextColor() === 'text-sandmelts' ? 'border-sandmelts' :
+        getBrandTextColor() === 'text-birdmanfoodspk' ? 'border-birdmanfoodspk' : 'border-getafomo'
+      }`;
 
   const inactiveLinkClass = isSuper
     ? 'text-slate-400 hover:bg-slate-800/80 hover:text-white border-l-4 border-transparent'
-    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent';
+    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white border-l-4 border-transparent';
 
   return (
     <>
@@ -76,12 +83,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         } ${
           isSuper 
             ? 'bg-slate-950 border-slate-800 text-white' 
-            : 'bg-white border-zinc-200 text-zinc-800'
+            : 'bg-white dark:bg-slate-900 border-zinc-200 dark:border-slate-800 text-zinc-800 dark:text-slate-100'
         }`}
       >
         {/* Top Branding Section */}
         <div>
-          <div className={`p-6 border-b flex justify-between items-center ${isSuper ? 'border-slate-800' : 'border-zinc-100'}`}>
+          <div className={`p-6 border-b flex justify-between items-center ${isSuper ? 'border-slate-800' : 'border-zinc-100 dark:border-slate-800'}`}>
             <div className="flex items-center gap-2.5">
               {isSuper ? (
                 <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
@@ -218,26 +225,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* User Card & Logout Bottom */}
-        <div className={`p-4 border-t ${isSuper ? 'border-slate-800 bg-slate-900/40' : 'border-zinc-100 bg-zinc-50'}`}>
+        <div className={`p-4 border-t ${isSuper ? 'border-slate-800 bg-slate-900/40' : 'border-zinc-100 dark:border-slate-800 bg-zinc-50 dark:bg-slate-900/40'}`}>
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
-              isSuper ? 'bg-slate-700 text-slate-100' : 'bg-zinc-200 text-zinc-700'
+              isSuper ? 'bg-slate-700 text-slate-100' : 'bg-zinc-200 dark:bg-slate-800 text-zinc-700 dark:text-slate-350'
             }`}>
               {user.username.substring(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold truncate">{user.username}</h4>
-              <p className={`text-[10px] truncate ${isSuper ? 'text-slate-400' : 'text-zinc-500'}`}>
+              <p className={`text-[10px] truncate ${isSuper ? 'text-slate-400' : 'text-zinc-500 dark:text-slate-400'}`}>
                 {user.email}
               </p>
             </div>
           </div>
           <button
             onClick={logout}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold border transition-all ${
+            className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold border transition-all duration-200 ${
               isSuper
                 ? 'border-slate-700 hover:bg-slate-800 hover:text-rose-400 hover:border-rose-500/30 text-slate-300'
-                : 'border-zinc-200 hover:bg-zinc-100 hover:text-rose-600 hover:border-rose-200 text-zinc-600'
+                : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-100 dark:hover:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 hover:border-zinc-300 dark:hover:border-slate-700 text-zinc-600 dark:text-slate-400'
             }`}
           >
             <LogOut size={14} />

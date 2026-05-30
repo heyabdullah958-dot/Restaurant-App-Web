@@ -247,6 +247,12 @@ export const deleteMenuItem = (id: number) =>
     method: 'DELETE',
   });
 
+export const updateMenuItemOptions = (id: number, options: any[]) =>
+  apiFetch<any>(`/api/admin/menu-items/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify({ options }),
+  });
+
 // ─── TOKEN DECODE HELPER ──────────────────────────────────────────────────────
 
 export interface JWTPayload {

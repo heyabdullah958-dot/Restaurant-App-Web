@@ -11,12 +11,13 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
+  Linking,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
-import { placeOrder, confirmCODPayment, createStripeIntent } from '../store/orderSlice';
+import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart } from '../store/cartSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 
@@ -128,11 +129,43 @@ export default function CheckoutScreen() {
           await dispatch(confirmCODPayment(orderId));
           Alert.alert('Success', 'Order placed successfully! Cash on Delivery confirmed.');
         } else if (paymentMethod === 'stripe') {
-          // Simulation of payment intent
-          await dispatch(createStripeIntent(orderId));
-          Alert.alert('Stripe Payment', 'Simulating card payment via Stripe checkout flow.');
+          const stripeResult = await dispatch(createStripeIntent(orderId));
+          if (createStripeIntent.fulfilled.match(stripeResult)) {
+            const checkoutUrl = stripeResult.payload.checkout_url;
+            if (checkoutUrl) {
+              Alert.alert(
+                'Redirecting to Stripe',
+                'We are opening Stripe secure checkout to complete the payment.',
+                [{ text: 'OK', onPress: () => Linking.openURL(checkoutUrl) }]
+              );
+            } else {
+              Alert.alert('Payment Error', 'Failed to retrieve Stripe checkout URL.');
+            }
+          } else {
+            const errMsg = stripeResult.payload || 'Failed to initialize Stripe payment';
+            Alert.alert('Payment Error', String(errMsg));
+            setIsSubmitting(false);
+            return;
+          }
         } else if (paymentMethod === 'payfast') {
-          Alert.alert('PayFast Payment', 'Redirecting to local payment gateway simulator...');
+          const payFastResult = await dispatch(createPayFastPayment(orderId));
+          if (createPayFastPayment.fulfilled.match(payFastResult)) {
+            const redirectUrl = payFastResult.payload.redirect_url;
+            if (redirectUrl) {
+              Alert.alert(
+                'Redirecting to PayFast',
+                'Redirecting you to PayFast secure portal to complete your payment.',
+                [{ text: 'OK', onPress: () => Linking.openURL(redirectUrl) }]
+              );
+            } else {
+              Alert.alert('Payment Error', 'Failed to retrieve PayFast checkout URL.');
+            }
+          } else {
+            const errMsg = payFastResult.payload || 'Failed to initialize PayFast payment';
+            Alert.alert('Payment Error', String(errMsg));
+            setIsSubmitting(false);
+            return;
+          }
         }
 
         // 6. Clear cart & redirect to order confirmation success page

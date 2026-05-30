@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminProvider, useAdmin } from './AdminContext';
 import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
@@ -17,7 +17,19 @@ import './index.css';
 const MainLayout: React.FC = () => {
   const { user, activeView, loading, restaurants, selectedBrandId } = useAdmin();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('admin-theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('admin-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('admin-theme', 'light');
+    }
+  }, [darkMode]);
 
   if (!user) {
     return <Login />;
@@ -49,8 +61,8 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex ${darkMode ? 'dark' : ''} ${
-      isSuper ? 'bg-slate-900 text-slate-100' : 'bg-zinc-50 text-zinc-800'
+    <div className={`min-h-screen flex transition-colors duration-200 ${
+      isSuper ? 'bg-slate-900 text-slate-100 dark' : 'bg-zinc-50 dark:bg-slate-950 text-zinc-800 dark:text-slate-100'
     }`}>
       {/* Navigation Sidebar */}
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
@@ -58,19 +70,19 @@ const MainLayout: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* Top Navbar */}
-        <header className={`sticky top-0 z-20 flex h-16 items-center justify-between px-6 border-b transition-colors ${
+        <header className={`sticky top-0 z-20 flex h-16 items-center justify-between px-6 border-b transition-colors duration-200 ${
           isSuper 
-            ? 'bg-slate-900 border-slate-800' 
-            : 'bg-white/80 backdrop-blur-md border-zinc-200/50'
+            ? 'bg-slate-900 border-slate-800 text-slate-100' 
+            : 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-zinc-200/50 dark:border-slate-800/50 text-zinc-800 dark:text-slate-100'
         }`}>
           {/* Left section: Hamburger toggler for mobile */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className={`md:hidden p-2 rounded-xl border transition-colors ${
+              className={`md:hidden p-2 rounded-xl border transition-colors duration-200 ${
                 isSuper
-                  ? 'border-slate-800 hover:bg-slate-850 text-slate-400'
-                  : 'border-zinc-200 hover:bg-zinc-50 text-zinc-600'
+                  ? 'border-slate-800 hover:bg-slate-800 text-slate-400'
+                  : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-50 dark:hover:bg-slate-850 text-zinc-600 dark:text-slate-400'
               }`}
             >
               <Menu size={20} />
@@ -79,7 +91,7 @@ const MainLayout: React.FC = () => {
               <span className="h-2 w-2 rounded-full bg-emerald-500 relative flex">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               </span>
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${isSuper ? 'text-slate-400' : 'text-zinc-500'}`}>
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${isSuper ? 'text-slate-400' : 'text-zinc-500 dark:text-slate-400'}`}>
                 Operational Sync Live
               </span>
             </div>
@@ -97,10 +109,10 @@ const MainLayout: React.FC = () => {
             {/* Dark Mode toggle */}
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2.5 rounded-xl border transition-colors ${
+              className={`p-2.5 rounded-xl border transition-colors duration-200 ${
                 isSuper
                   ? 'border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white'
-                  : 'border-zinc-200/60 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900'
+                  : 'border-zinc-200/60 dark:border-slate-800 hover:bg-zinc-50 dark:hover:bg-slate-850 text-zinc-600 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               {darkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -108,10 +120,10 @@ const MainLayout: React.FC = () => {
 
             {/* Notifications */}
             <button
-              className={`p-2.5 rounded-xl border transition-colors relative ${
+              className={`p-2.5 rounded-xl border transition-colors duration-200 relative ${
                 isSuper
                   ? 'border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white'
-                  : 'border-zinc-200/60 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900'
+                  : 'border-zinc-200/60 dark:border-slate-800 hover:bg-zinc-50 dark:hover:bg-slate-850 text-zinc-600 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
               <Bell size={16} />

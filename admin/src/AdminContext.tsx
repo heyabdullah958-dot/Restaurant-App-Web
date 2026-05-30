@@ -16,6 +16,7 @@ import {
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
+  updateMenuItemOptions,
   type ApiRestaurant,
   type ApiOrder,
 } from './services/api';
@@ -49,6 +50,7 @@ interface AdminContextProps {
   removeMenuCategory: (id: number) => Promise<void>;
   addMenuItem: (categoryId: number, name: string, description: string, price: number) => Promise<void>;
   removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
+  updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -479,6 +481,32 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // Update item options/variants (sizes, spice levels, toppings…)
+  const updateItemOptions = async (categoryId: number, itemId: number, options: any[]) => {
+    try {
+      await updateMenuItemOptions(itemId, options);
+      setMenuItems((prev) => {
+        const existingCategories = prev[selectedBrandId] || [];
+        const updated = existingCategories.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              items: category.items.map((item) =>
+                item.id === itemId ? { ...item, options } : item
+              ),
+            };
+          }
+          return category;
+        });
+        return { ...prev, [selectedBrandId]: updated };
+      });
+      showToast('Item options saved! ✅', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to save options', 'error');
+    }
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -504,6 +532,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeMenuCategory,
         addMenuItem,
         removeMenuItem,
+        updateItemOptions,
       }}
     >
       {children}

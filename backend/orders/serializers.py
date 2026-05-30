@@ -11,7 +11,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ('id', 'menu_item', 'menu_item_name', 'quantity', 'unit_price', 'total_price', 'special_notes')
+        fields = ('id', 'menu_item', 'menu_item_name', 'quantity', 'unit_price', 'total_price', 'special_notes', 'selected_options')
         read_only_fields = ('unit_price', 'total_price')
 
 
@@ -19,6 +19,7 @@ class OrderCreateItemSerializer(serializers.Serializer):
     menu_item = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
     quantity = serializers.IntegerField(min_value=1)
     special_notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    selected_options = serializers.JSONField(required=False, default=list)
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -69,10 +70,21 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         # BUG-10: Validate minimum order amount
         if restaurant and restaurant.min_order_amount > 0:
-            subtotal = sum(
-                item['menu_item'].price * item['quantity']
-                for item in items
-            )
+            subtotal = 0
+            for item in items:
+                item_price = item['menu_item'].price
+                selected_opts = item.get('selected_options', [])
+                price_modifier_sum = 0
+                for opt in selected_opts:
+                    if isinstance(opt, dict):
+                        try:
+                            price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
+                        except (ValueError, TypeError):
+                            pass
+                from decimal import Decimal
+                item_price += Decimal(price_modifier_sum)
+                subtotal += item_price * item['quantity']
+
             if subtotal < restaurant.min_order_amount:
                 raise serializers.ValidationError(
                     f"Minimum order amount for {restaurant.name} is "
@@ -115,6 +127,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     )
 
                 unit_price = menu_item.price
+                selected_opts = item_data.get('selected_options', [])
+                price_modifier_sum = 0
+                for opt in selected_opts:
+                    if isinstance(opt, dict):
+                        try:
+                            price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
+                        except (ValueError, TypeError):
+                            pass
+                from decimal import Decimal
+                unit_price += Decimal(price_modifier_sum)
                 total_price = unit_price * quantity
                 subtotal += total_price
 
@@ -123,7 +145,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     'quantity': quantity,
                     'unit_price': unit_price,
                     'total_price': total_price,
-                    'special_notes': item_data.get('special_notes', '')
+                    'special_notes': item_data.get('special_notes', ''),
+                    'selected_options': selected_opts
                 })
 
             delivery_fee = restaurant.delivery_fee

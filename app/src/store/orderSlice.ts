@@ -143,6 +143,60 @@ export const createStripeIntent = createAsyncThunk(
   }
 );
 
+export const confirmStripePayment = createAsyncThunk(
+  'order/confirmStripePayment',
+  async (paymentIntentId: string, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/payments/stripe/confirm/', { payment_intent_id: paymentIntentId });
+      return response.data || response;
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to confirm Stripe payment';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
+    }
+  }
+);
+
+export const createPayFastPayment = createAsyncThunk(
+  'order/createPayFastPayment',
+  async (orderId: number, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/payments/payfast/create/', { order_id: orderId });
+      return response.data || response;
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to create PayFast payment';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
+    }
+  }
+);
+
 const initialState = {
   myOrders: [] as any[],
   currentOrder: null as any | null,

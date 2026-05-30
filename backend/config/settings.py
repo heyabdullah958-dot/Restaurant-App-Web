@@ -438,3 +438,14 @@ LOGGING = {
 }
 
 
+# Stripe and PayFast payment gateway configurations
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_mock_stripe_key_123')
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='pk_test_mock_stripe_key_123')
+
+PAYFAST_MERCHANT_ID = config('PAYFAST_MERCHANT_ID', default='10000100')  # Sandbox default merchant ID
+PAYFAST_MERCHANT_KEY = config('PAYFAST_MERCHANT_KEY', default='46f0z58cltpa2')  # Sandbox default merchant key
+PAYFAST_PASSPHRASE = config('PAYFAST_PASSPHRASE', default='jt776ha7zb0b7')  # Sandbox default passphrase
+PAYFAST_IS_SANDBOX = config('PAYFAST_IS_SANDBOX', cast=bool, default=True)
+PAYFAST_HOST = 'sandbox.payfast.co.za' if PAYFAST_IS_SANDBOX else 'www.payfast.co.za'
+
+

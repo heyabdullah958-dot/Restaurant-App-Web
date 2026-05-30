@@ -50,6 +50,7 @@ class MenuItem(models.Model):
     is_available = models.BooleanField(default=True, db_index=True)
     is_featured = models.BooleanField(default=False, db_index=True)
     preparation_time = models.IntegerField(default=15) # in minutes
+    options = models.JSONField(default=list, blank=True)
 
     def __str__(self):
         return f"{self.category.name} - {self.name}"
