@@ -103,12 +103,59 @@ function mapApiOrder(o: ApiOrder): Order {
 }
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [activeView, setActiveView] = useState<string>('login');
+  const [user, setUser] = useState<User | null>(() => {
+    const token = getToken();
+    if (token) {
+      const payload = decodeToken(token);
+      if (payload && payload.exp * 1000 > Date.now()) {
+        return {
+          id: payload.user_id,
+          username: payload.username || 'Admin',
+          email: '',
+          role: payload.is_staff ? 'super_admin' : 'branch_manager',
+          restaurantId: undefined,
+        };
+      }
+    }
+    const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
+    if (mockUserJson) {
+      try {
+        return JSON.parse(mockUserJson);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [activeView, setActiveView] = useState<string>(() => {
+    const savedView = localStorage.getItem('foodsphere_admin_view');
+    if (savedView) return savedView;
+
+    const token = getToken();
+    if (token) {
+      const payload = decodeToken(token);
+      if (payload && payload.exp * 1000 > Date.now()) {
+        return payload.is_staff ? 'super_dashboard' : 'branch_dashboard';
+      }
+    }
+    const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
+    if (mockUserJson) {
+      try {
+        const u = JSON.parse(mockUserJson);
+        return u.role === 'super_admin' ? 'super_dashboard' : 'branch_dashboard';
+      } catch {}
+    }
+    return 'login';
+  });
+
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<Record<number, MenuCategory[]>>(MOCK_MENU_ITEMS);
-  const [selectedBrandId, setSelectedBrandId] = useState<number>(1);
+  const [selectedBrandId, setSelectedBrandId] = useState<number>(() => {
+    const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
+    return savedBrandId ? Number(savedBrandId) : 1;
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -117,20 +164,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const token = getToken();
     if (token) {
       const payload = decodeToken(token);
-      if (payload && payload.exp * 1000 > Date.now()) {
-        const restoredUser: User = {
-          id: payload.user_id,
-          username: payload.username || 'Admin',
-          email: '',
-          role: payload.is_staff ? 'super_admin' : 'branch_manager',
-          restaurantId: undefined,
-        };
-        setUser(restoredUser);
-        setActiveView(payload.is_staff ? 'super_dashboard' : 'branch_dashboard');
-        // Reload data in background
-        loadAppData();
+      if (!payload || payload.exp * 1000 <= Date.now()) {
+        // Token expired
+        logout();
       } else {
-        clearTokens();
+        loadAppData();
+      }
+    } else {
+      const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
+      if (mockUserJson) {
+        loadAppData();
       }
     }
   }, []);
@@ -141,10 +184,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
       ]);
-      setRestaurants(restaurantData.results.map(mapApiRestaurant));
+      const mapped = restaurantData.results.map(mapApiRestaurant);
+      setRestaurants(mapped);
       setOrders(orderData.results.map(mapApiOrder));
-      if (restaurantData.results.length > 0) {
-        setSelectedBrandId(restaurantData.results[0].id);
+      
+      if (mapped.length > 0) {
+        const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
+        const exists = savedBrandId && mapped.some((r) => r.id === Number(savedBrandId));
+        setSelectedBrandId(exists ? Number(savedBrandId) : mapped[0].id);
       }
     } catch (err) {
       console.warn('[AdminContext] Failed to load app data:', err);
@@ -227,7 +274,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         restaurantId: isSuperAdmin ? undefined : mappedRestaurants[0]?.id,
       };
       setUser(loggedInUser);
-      setActiveView(isSuperAdmin ? 'super_dashboard' : 'branch_dashboard');
+      const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';
+      localStorage.setItem('foodsphere_admin_view', defaultView);
+      if (mappedRestaurants.length > 0) {
+        localStorage.setItem('foodsphere_admin_brand_id', String(mappedRestaurants[0].id));
+      }
+      setActiveView(defaultView);
       showToast(`Welcome back, ${username}! 🚀`, 'success');
       return true;
 
@@ -245,7 +297,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           restaurantId: isMockSuper ? undefined : 1,
         };
         setUser(mockUser);
-        setActiveView(isMockSuper ? 'super_dashboard' : 'branch_dashboard');
+        const mockView = isMockSuper ? 'super_dashboard' : 'branch_dashboard';
+        localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('foodsphere_admin_view', mockView);
+        localStorage.setItem('foodsphere_admin_brand_id', '1');
+        setActiveView(mockView);
         return true;
       }
       showToast('Invalid credentials. Please try again.', 'error');
@@ -257,6 +313,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const logout = () => {
     clearTokens();
+    localStorage.removeItem('foodsphere_admin_view');
+    localStorage.removeItem('foodsphere_admin_brand_id');
+    localStorage.removeItem('foodsphere_admin_mock_user');
     setUser(null);
     setOrders([]);
     setRestaurants([]);
@@ -266,6 +325,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setView = (view: string) => {
     setLoading(true);
+    localStorage.setItem('foodsphere_admin_view', view);
     setTimeout(() => {
       setActiveView(view);
       setLoading(false);
@@ -274,6 +334,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setSelectedBrand = (id: number) => {
     setSelectedBrandId(id);
+    localStorage.setItem('foodsphere_admin_brand_id', String(id));
     showToast(`Switched view to ${restaurants.find((r) => r.id === id)?.name}`, 'info');
   };
 
