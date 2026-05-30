@@ -239,8 +239,13 @@ CORS_ALLOW_ALL_ORIGINS = str(os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False')).
 # Explicit origins as fallback when CORS_ALLOW_ALL_ORIGINS=False
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:8081,http://localhost:19006,http://localhost:19000'
+    default='http://localhost:3000,http://localhost:8081,http://localhost:19006,http://localhost:19000,https://foodsphere-admin.pages.dev,https://foodsphere-app.pages.dev'
 ).split(',')
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.pages\.dev$",
+    r"^https://.*\.netlify\.app$",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
