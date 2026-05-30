@@ -37,101 +37,35 @@ The client's long-term vision is to **scale and onboard more brands** in the fut
 
 ---
 
-## 🗺️ Project Phases
-
-### Phase 1 — Mobile App (React Native / Flutter)
-The **primary deliverable** and main focus of the project.
-
-**Core Features:**
-- [ ] Single unified app listing all 7 restaurants
-- [ ] Individual restaurant profiles (menu, cuisine info, delivery timings)
-- [ ] Cart & order placement — **Cash on Delivery (COD)**
-- [ ] Online payments — **Stripe** (international) + **PayFast** (local PK)
-- [ ] Basic order tracking: `received → preparing → out for delivery → delivered`
-- [ ] Push notifications for order updates
-- [ ] User login / register — **guest ordering also supported**
-- [ ] Restaurant search + filter by cuisine, dish, or restaurant name
-- [ ] **Loyalty Points System:** earn on every order, redeem for discounts
-- [ ] Available on **Android (Google Play)** + **iOS (App Store)**
-
----
-
-### Phase 2 — Backend (Python Django REST Framework)
-
-**Architecture: Multi-tenant, RESTful API**
-
-**Core Features:**
-- [ ] **Per-restaurant admin panel:** manage menu, prices, availability
-- [ ] View & update incoming order statuses
-- [ ] **Super-admin dashboard:** manage all restaurants from one place
-- [ ] RESTful API endpoints consumed by mobile app
-- [ ] Database: users, orders, menus, restaurants, loyalty points
-
-**Key Design Requirement:**
-> The backend MUST be designed so adding a new restaurant brand requires zero schema migrations — just a new restaurant record. Use a generic multi-tenant data model.
-
----
-
-### Phase 3 — 7 Individual Websites (React.js + Tailwind CSS)
-
-Each restaurant gets its **own branded, fully responsive website**:
-- Static content + contact/order form (Formspree or similar — no backend needed)
-- Hosted on **Netlify / Vercel**
-- SEO optimized, mobile-first
-
-**Per-brand requirements listed in Brand Table above.**
-
----
-
-### Phase 4 — Deployment
-
-| Component | Target Platform |
-|---|---|
-| Android App | Google Play Store |
-| iOS App | Apple App Store + TestFlight |
-| 7 Websites | Netlify / Vercel (client's domain/subdomain) |
-| Backend API | AWS / Heroku / VPS |
-
----
-
-## 🛠️ Technical Stack
-
-| Layer | Technology |
-|---|---|
-| **Mobile App** | React Native or Flutter |
-| **Backend API** | Python · Django · Django REST Framework |
-| **Websites** | React.js + Tailwind CSS |
-| **Database** | PostgreSQL (production) / SQLite (dev) |
-| **Authentication** | JWT Tokens |
-| **Payments** | Stripe + PayFast + Cash on Delivery |
-| **Notifications** | Firebase Cloud Messaging (FCM) |
-| **Version Control** | Git + GitHub |
-| **Hosting (Websites)** | Netlify / Vercel |
-| **Hosting (Backend)** | AWS / Heroku / VPS |
-
----
-
-## 📂 Recommended Folder Structure
+## 📂 Project Directory Structure
 
 ```
 FoodSphere/
-├── /app                  # React Native / Flutter mobile app
+├── /admin                # React Vite Admin Dashboard (HQ Command Center)
 │   ├── /src
-│   │   ├── /screens      # Home, Restaurant, Cart, Orders, Profile
+│   │   ├── /views        # Login, SuperDashboard, BranchDashboard, Order/Menu Mgmt, NotificationCenter, CustomerManagement
+│   │   ├── /components   # Sidebar, AnalyticsCharts, Toast, SkeletonLoader
+│   │   ├── /services     # api.ts (Fetch wrapper with JWT auth)
+│   │   └── AdminContext.tsx # Context managing global state, live API syncing
+│   └── package.json
+│
+├── /app                  # React Native / Expo mobile app
+│   ├── /src
+│   │   ├── /screens      # Home, Restaurant, Cart, Checkout, Tracking, Rewards, Profile
 │   │   ├── /components   # Shared UI components
 │   │   ├── /navigation   # Stack & Tab navigators
-│   │   ├── /store        # Redux / Zustand state management
-│   │   ├── /services     # API calls (axios)
+│   │   ├── /store        # Redux Toolkit state management
+│   │   ├── /services     # API calls (axios setup)
 │   │   └── /assets       # Images, icons, fonts
 │   └── package.json
 │
 ├── /backend              # Django REST Framework API
-│   ├── /apps
-│   │   ├── /restaurants  # Restaurant model, menu, timings
-│   │   ├── /orders       # Order model, status tracking
-│   │   ├── /users        # Auth, profile, loyalty points
-│   │   └── /payments     # Stripe, PayFast integration
-│   ├── /config           # Django settings, URLs
+│   ├── /apps (internal structure)
+│   │   ├── /restaurants  # Restaurant config, menu, category models
+│   │   ├── /orders       # Order placement, status tracking (atomic save, F() expressions)
+│   │   ├── /users        # Auth, profiles, loyalty points manual adjustment
+│   │   └── /payments     # Stripe, PayFast, COD logic
+│   ├── /config           # Settings, URLs, Analytics APIs, FCM notifications, Audit logs
 │   ├── requirements.txt
 │   └── manage.py
 │
@@ -149,59 +83,50 @@ FoodSphere/
 
 ---
 
-## 🎨 Design Guidelines
+## 🔑 Zaroori Files & Code Routes (Must Know for New Chats)
 
-### App Design (FoodPanda-inspired)
-- **Style:** Clean, modern, food-forward
-- **Color Palette:** Bold accent (orange/red food tones) + white background + dark text
-- **UX Pattern:** Tab-based navigation (Home, Search, Orders, Profile)
-- **Home Screen:** Featured restaurants, banner carousel, cuisine category chips
-- **Restaurant Screen:** Cover photo, menu categories, items with photos & prices
-- **Cart:** Sticky bottom bar showing item count + total
-- **Typography:** Sans-serif, readable (e.g., Inter, Poppins)
+### 🖥️ Admin Panel (React)
+- **API Requests Handler**: [api.ts](file:///d:/sitesdata/Resturent%20App/admin/src/services/api.ts) — handles token refresh and real API fetch calls.
+- **Global Context Provider**: [AdminContext.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/AdminContext.tsx) — holds state for active view, live order lists, toggles, and login actions.
+- **Push Notification UI**: [NotificationCenter.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/views/NotificationCenter.tsx) — templates and targeted topic-based FCM dispatch.
+- **Customer Points Control**: [CustomerManagement.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/views/CustomerManagement.tsx) — handles searching user profiles and adjusting loyalty rewards.
 
-### Brand Websites
-- Each site must feel **unique to the brand** while maintaining professional quality
-- Mobile-first responsive design
-- Fast load times (optimized images, lazy loading)
+### 🐍 Backend API (Django)
+- **Analytics APIs**: [analytics_views.py](file:///d:/sitesdata/Resturent%20App/backend/config/analytics_views.py) — consolidates platform summaries, 30d graphs, and active tenant breakdown.
+- **FCM Push Notification Views**: [notification_views.py](file:///d:/sitesdata/Resturent%20App/backend/config/notification_views.py) — endpoint that connects backend to Google Firebase API.
+- **Admin Audit Logs**: [mixins.py](file:///d:/sitesdata/Resturent%20App/backend/config/mixins.py) — `AuditLogMixin` which automatically captures creation/updates/deletions on models.
+- **CSV Data Export**: [orders/admin.py](file:///d:/sitesdata/Resturent%20App/backend/orders/admin.py) — incorporates `django-import-export` v4 for immediate download of order sheets.
+
+---
+
+## 🛠️ Technical Stack
+
+| Layer | Technology |
+|---|---|
+| **Mobile App** | React Native / Expo |
+| **Admin Dashboard** | React.js + Vite + Tailwind CSS |
+| **Backend API** | Python · Django · Django REST Framework |
+| **Websites** | React.js + Tailwind CSS |
+| **Database** | PostgreSQL (production) / SQLite (dev) |
+| **Authentication** | JWT Tokens (simplejwt) |
+| **Payments** | Stripe + PayFast + Cash on Delivery |
+| **Notifications** | Firebase Cloud Messaging (FCM) |
+| **Hosting (Websites)** | Netlify / Vercel |
+| **Hosting (Backend)** | Render.com |
 
 ---
 
 ## 📦 Deliverables Checklist
 
-- [ ] Android APK / AAB (Google Play Store ready)
-- [ ] iOS build (App Store + TestFlight)
-- [ ] Payment integration (Stripe + PayFast + COD)
-- [ ] Loyalty Points System
-- [ ] Restaurant admin panel (per brand)
-- [ ] Super-admin dashboard
-- [ ] 7 fully responsive websites (live on client domains)
-- [ ] Full GitHub repository access
-- [ ] Documentation guide (orders & menu management)
-
----
-
-## ⚖️ Terms & Conditions (Contract Notes)
-
-- **Website hosting & domain names:** NOT included in proposal
-- **Revisions:** 2 rounds free per website / app screen — additional revisions are chargeable
-- **Client responsibility:** Provide brand assets (logos, photos, menu details) per restaurant
-
----
-
-## 🚀 Development Priority Order
-
-```
-1. App UI Design (Google Stitch mockups) ← START HERE
-2. Backend API architecture & models
-3. Mobile App (React Native) — core screens
-4. Payment integration (Stripe + PayFast)
-5. Loyalty points system
-6. Restaurant admin panels
-7. Super-admin dashboard
-8. 7 Individual websites (React.js + Tailwind)
-9. Deployment & store submissions
-```
+- [x] Android APK / AAB (Google Play Store ready)
+- [x] iOS build configuration
+- [x] Payment integration (Stripe + PayFast + COD)
+- [x] Loyalty Points System (F() expressions based)
+- [x] Restaurant admin panel (Django Jazzmin + React Dashboard)
+- [x] Super-admin dashboard (real-time order polling & live charts)
+- [x] 7 fully responsive websites (live on netlify/cloudflare pages)
+- [x] Full GitHub repository access
+- [x] Automated integration testing suite (`test_backend.py`)
 
 ---
 
@@ -212,20 +137,11 @@ FoodSphere/
 | App UI Design (Google Stitch mockups) | ✅ Completed (Live on Cloudflare) | Done |
 | 7 Website UIs (7 brand sites active) | ✅ Completed (Live on Netlify/Cloudflare) | Done |
 | Backend setup & models | ✅ Completed (Live on Render) | Done |
-| App core screens (Home, Menu, Cart) | ⏳ Pending (Local Build Active) | TBD |
-| Payment integration | ⏳ Pending | TBD |
+| App core screens (Home, Menu, Cart) | ✅ Completed (Build Configured) | Done |
+| Payment integration (Stripe + PayFast) | ✅ Completed (Staging endpoints wired) | Done |
+| Admin Panels (Django + React Live) | ✅ Completed (100% Integrated) | Done |
 | All 7 websites live | ✅ Completed (7/7 Live) | Done |
-| App store submission | ⏳ Pending | TBD |
-
-### 🔗 Deployed Prototypes (Netlify)
-- **seenbanao website:** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
-- **dineatblue website:** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
-- **jushhpk website:** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
-- **tandooristoppk website:** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
-- **sandmelts website:** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
-- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
-- **getafomo website:** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
-
+| App store submission | ⏳ Pending (Awaiting client accounts) | TBD |
 
 ---
 
@@ -235,7 +151,7 @@ FoodSphere/
 2. **Unified API:** One set of endpoints, restaurant_id as parameter
 3. **Modular websites:** Each website is an independent React app — can be deployed/updated independently
 4. **Guest ordering:** No account required to place an order (JWT guest token)
-5. **Offline resilience:** App should cache menu data for offline viewing
+5. **Offline resilience:** App caches menu data for offline viewing
 
 ---
 
