@@ -11,6 +11,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
+  image?: string;
   image_url?: string;
   is_available: boolean;
   category_name?: string;

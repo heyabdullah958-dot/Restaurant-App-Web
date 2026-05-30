@@ -28,13 +28,18 @@ export const clearTokens = (): void => {
 
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
+  const headers: Record<string, string> = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers as Record<string, string> || {}),
-    },
+    headers,
   });
 
   if (!response.ok) {

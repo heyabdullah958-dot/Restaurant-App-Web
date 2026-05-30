@@ -440,10 +440,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addMenuItem = async (categoryId: number, data: any) => {
     setLoading(true);
     try {
-      const created = await createMenuItem({
-        category: categoryId,
-        ...data,
-      });
+      let payload = data;
+      if (data instanceof FormData) {
+        data.append('category', String(categoryId));
+      } else {
+        payload = {
+          category: categoryId,
+          ...data,
+        };
+      }
+      const created = await createMenuItem(payload);
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];
         const updated = existingCategories.map((category) => {

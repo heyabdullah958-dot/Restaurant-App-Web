@@ -154,43 +154,56 @@ export const MenuManagement: React.FC = () => {
                       : 'border-zinc-100 dark:border-slate-800 bg-zinc-50/50 dark:bg-slate-900/20 opacity-70'
                   }`}
                 >
-                  {/* Left content detail */}
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-extrabold text-zinc-900 dark:text-white text-sm truncate">{item.name}</h4>
-                      {item.price > 1000 && (
-                        <span className="inline-flex text-[9px] font-bold text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 border border-amber-200/30 px-1.5 py-0.25 rounded-md">
-                          <Sparkles size={8} className="mt-0.5" /> Premium
-                        </span>
-                      )}
-                      {item.options?.has_variants && (
-                        <span className="inline-flex text-[9px] font-bold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20 border border-blue-200/30 px-1.5 py-0.25 rounded-md">
-                          Variants ({item.options?.variants?.length || 0})
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-zinc-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-                    
-                    {/* Item specs summaries */}
-                    {!item.options?.has_variants && item.options?.specifications && Object.keys(item.options.specifications).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {Object.entries(item.options.specifications as Record<string, any>).map(([key, val]) => (
-                          val && (
-                            <span key={key} className="text-[9px] font-semibold text-zinc-500 bg-zinc-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">
-                              {key.replace('_', ' ')}: {String(val)}
-                            </span>
-                          )
-                        ))}
+                  {/* Left content detail with Image Thumbnail */}
+                  <div className="flex items-start gap-4 flex-1 min-w-0 pr-4">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-14 h-14 rounded-xl object-cover border border-zinc-200/60 dark:border-slate-700/60 shadow-sm flex-shrink-0 bg-slate-900"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-zinc-400 dark:text-slate-600 border border-dashed border-zinc-200 dark:border-slate-800 flex-shrink-0 text-[10px] font-bold">
+                        DISH
                       </div>
                     )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-extrabold text-zinc-900 dark:text-white text-sm truncate">{item.name}</h4>
+                        {item.price > 1000 && (
+                          <span className="inline-flex text-[9px] font-bold text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 border border-amber-200/30 px-1.5 py-0.25 rounded-md">
+                            <Sparkles size={8} className="mt-0.5" /> Premium
+                          </span>
+                        )}
+                        {item.options?.has_variants && (
+                          <span className="inline-flex text-[9px] font-bold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20 border border-blue-200/30 px-1.5 py-0.25 rounded-md">
+                            Variants ({item.options?.variants?.length || 0})
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+                      
+                      {/* Item specs summaries */}
+                      {!item.options?.has_variants && item.options?.specifications && Object.keys(item.options.specifications).length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {Object.entries(item.options.specifications as Record<string, any>).map(([key, val]) => (
+                            val && (
+                              <span key={key} className="text-[9px] font-semibold text-zinc-500 bg-zinc-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">
+                                {key.replace('_', ' ')}: {String(val)}
+                              </span>
+                            )
+                          ))}
+                        </div>
+                      )}
 
-                    <span className="block text-sm font-extrabold text-zinc-950 dark:text-white mt-2">
-                      {item.options?.has_variants && item.options?.variants?.length > 0
-                        ? `From Rs. ${Math.min(...item.options.variants.map((v: any) => Number(v.price))).toLocaleString()}`
-                        : `Rs. ${Number(item.price).toLocaleString()}`}
-                    </span>
+                      <span className="block text-sm font-extrabold text-zinc-950 dark:text-white mt-2">
+                        {item.options?.has_variants && item.options?.variants?.length > 0
+                          ? `From Rs. ${Math.min(...item.options.variants.map((v: any) => Number(v.price))).toLocaleString()}`
+                          : `Rs. ${Number(item.price).toLocaleString()}`}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Right stock controller & actions */}
@@ -285,6 +298,10 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
   const [description, setDescription] = useState(item ? item.description || '' : '');
   const [prepTime, setPrepTime] = useState(item ? String(item.preparation_time || 15) : '15');
   const [isAvailable, setIsAvailable] = useState(item ? item.is_available : true);
+
+  // Image upload states
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(item && item.image ? item.image : '');
 
   // Variant States
   const [hasVariants, setHasVariants] = useState(item ? !!item.options?.has_variants : false);
@@ -385,21 +402,25 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
         : []
     };
 
-    const payload = {
-      name,
-      price: hasVariants && variants.length > 0 
-        ? Math.min(...variants.map(v => parseFloat(v.price) || 0))
-        : parseFloat(price) || 0,
-      description,
-      preparation_time: parseInt(prepTime) || 15,
-      is_available: isAvailable,
-      options: updatedOptions
-    };
+    // Construct FormData object to allow binary image upload
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', String(hasVariants && variants.length > 0 
+      ? Math.min(...variants.map(v => parseFloat(v.price) || 0))
+      : parseFloat(price) || 0));
+    formData.append('description', description);
+    formData.append('preparation_time', String(parseInt(prepTime) || 15));
+    formData.append('is_available', String(isAvailable));
+    formData.append('options', JSON.stringify(updatedOptions));
+    
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
 
     if (item) {
-      await onSave(categoryId, item.id, payload);
+      await onSave(categoryId, item.id, formData);
     } else {
-      await addMenuItem(categoryId, payload);
+      await addMenuItem(categoryId, formData);
     }
     onClose();
   };
@@ -478,6 +499,35 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
                 >
                   <Check size={14} className={isAvailable ? 'opacity-100' : 'opacity-0'} /> {isAvailable ? 'In Stock' : 'Out of Stock'}
                 </button>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 border-t border-zinc-100 dark:border-slate-800/80 pt-4">
+              <label className="block text-xs font-bold text-zinc-500 dark:text-slate-400 uppercase tracking-wider mb-2">Product Image</label>
+              <div className="flex items-center gap-4">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-16 h-16 rounded-2xl object-cover border border-zinc-250 dark:border-slate-800 shadow-sm bg-slate-950"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 flex items-center justify-center text-zinc-400 text-xs font-bold">
+                    No Pic
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="text-xs text-zinc-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 dark:file:bg-blue-950/40 file:text-blue-600 dark:file:text-blue-400 hover:file:bg-blue-100 cursor-pointer"
+                />
               </div>
             </div>
           </div>
