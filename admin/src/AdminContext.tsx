@@ -18,6 +18,7 @@ import {
   updateMenuItem,
   deleteMenuItem,
   updateMenuItemOptions,
+  getFullImageUrl,
   type ApiRestaurant,
   type ApiOrder,
 } from './services/api';
@@ -74,8 +75,8 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     delivery_time_min: r.delivery_time_min,
     delivery_time_max: r.delivery_time_max,
     min_order_amount: typeof r.min_order_amount === 'string' ? parseFloat(r.min_order_amount) : r.min_order_amount,
-    logo_url: r.logo || '',
-    cover_url: r.cover_image || '',
+    logo_url: getFullImageUrl(r.logo),
+    cover_url: getFullImageUrl(r.cover_image),
     opens_at: r.opens_at,
     closes_at: r.closes_at,
   };
@@ -206,9 +207,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         try {
           const res = await fetchRestaurantMenu(selectedRest.slug);
           if (res && res.success) {
+            const mappedCategories = (res.data || []).map((category: MenuCategory) => ({
+              ...category,
+              items: (category.items || []).map((item: any) => ({
+                ...item,
+                image: getFullImageUrl(item.image),
+              })),
+            }));
             setMenuItems((prev) => ({
               ...prev,
-              [selectedRest.id]: res.data,
+              [selectedRest.id]: mappedCategories,
             }));
           }
         } catch (err) {
@@ -511,13 +519,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
       }
       const created = await createMenuItem(payload);
+      const mappedCreated = {
+        ...created,
+        image: getFullImageUrl(created.image),
+      };
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];
         const updated = existingCategories.map((category) => {
           if (category.id === categoryId) {
             return {
               ...category,
-              items: [...category.items, created],
+              items: [...category.items, mappedCreated],
             };
           }
           return category;
@@ -597,6 +609,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLoading(true);
     try {
       const updatedItem = await updateMenuItem(itemId, data);
+      const mappedUpdated = {
+        ...updatedItem,
+        image: getFullImageUrl(updatedItem.image),
+      };
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];
         const updated = existingCategories.map((category) => {
@@ -604,7 +620,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return {
               ...category,
               items: category.items.map((item) =>
-                item.id === itemId ? updatedItem : item
+                item.id === itemId ? mappedUpdated : item
               ),
             };
           }

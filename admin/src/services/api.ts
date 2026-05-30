@@ -288,3 +288,17 @@ export const decodeToken = (token: string): JWTPayload | null => {
     return null;
   }
 };
+
+export const getFullImageUrl = (path: string | null | undefined): string => {
+  if (!path) return '';
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://') ||
+    path.startsWith('data:') ||
+    path.startsWith('blob:')
+  ) {
+    return path;
+  }
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BASE_URL}${cleanPath}`;
+};
