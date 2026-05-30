@@ -4,21 +4,44 @@ import { AnalyticsCharts } from '../components/AnalyticsCharts';
 import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight } from 'lucide-react';
 
 export const SuperDashboard: React.FC = () => {
-  const { restaurants, orders, setSelectedBrand, setView } = useAdmin();
+  const { restaurants, orders, setSelectedBrand, setView, selectedBrandId } = useAdmin();
+  const [scope, setScope] = React.useState<'all' | 'selected'>('all');
+  const [timeframe, setTimeframe] = React.useState<'all' | 'today' | 'week' | 'month'>('all');
 
-  // Calculate live statistics
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = orders.length;
+  const selectedBrand = restaurants.find(r => r.id === selectedBrandId) || restaurants[0];
+
+  // Calculate live statistics based on scope and timeframe
+  let filteredOrders = orders;
+  if (scope === 'selected' && selectedBrand) {
+    filteredOrders = orders.filter(o => o.restaurant_id === selectedBrand.id);
+  }
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  if (timeframe === 'today') {
+    filteredOrders = filteredOrders.filter(o => new Date(o.created_at) >= startOfToday);
+  } else if (timeframe === 'week') {
+    filteredOrders = filteredOrders.filter(o => new Date(o.created_at) >= startOfWeek);
+  } else if (timeframe === 'month') {
+    filteredOrders = filteredOrders.filter(o => new Date(o.created_at) >= startOfMonth);
+  }
+
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  const totalOrders = filteredOrders.length;
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Metrics data
   const stats = [
     {
-      title: 'Gross Platform Sales',
+      title: scope === 'all' ? 'Gross Platform Sales' : `${selectedBrand?.name} Sales`,
       value: `Rs. ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <DollarSign className="text-blue-500" size={20} />,
       bgColor: 'bg-blue-500/10',
-      change: 'Real-time sales summary',
+      change: `${timeframe === 'all' ? 'All-time' : timeframe === 'today' ? "Today's" : timeframe === 'week' ? "This week's" : "This month's"} sales summary`,
     },
     {
       title: 'Active Restaurant Brands',
@@ -28,11 +51,11 @@ export const SuperDashboard: React.FC = () => {
       change: `${restaurants.filter(r => !r.is_active).length} disabled or pending`,
     },
     {
-      title: 'Total Platform Orders',
+      title: scope === 'all' ? 'Total Platform Orders' : `${selectedBrand?.name} Orders`,
       value: totalOrders.toLocaleString(),
       icon: <ClipboardCheck className="text-violet-500" size={20} />,
       bgColor: 'bg-violet-500/10',
-      change: 'All-time order count',
+      change: `${timeframe === 'all' ? 'All-time' : timeframe === 'today' ? "Today's" : timeframe === 'week' ? "This week's" : "This month's"} order count`,
     },
     {
       title: 'Avg Order Value (AOV)',
@@ -50,6 +73,58 @@ export const SuperDashboard: React.FC = () => {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">HQ Command Center</h1>
           <p className="text-sm text-slate-400">Multi-tenant network health and consolidated sales aggregates</p>
+        </div>
+      </div>
+
+      {/* Interactive Command Filters */}
+      <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        {/* Scope Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Analysis Scope:</span>
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button
+              onClick={() => setScope('all')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                scope === 'all'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Consolidated (All Brands)
+            </button>
+            {selectedBrand && (
+              <button
+                onClick={() => setScope('selected')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  scope === 'selected'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {selectedBrand.name} Only
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Timeframe Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Timeframe:</span>
+          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+            {(['all', 'today', 'week', 'month'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTimeframe(t)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${
+                  timeframe === t
+                    ? 'bg-slate-700 text-white'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {t === 'all' ? 'All-Time' : t}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
