@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MOCK_REVENUE_CHART } from '../mockData';
+import { useAdmin } from '../AdminContext';
 
 interface ChartProps {
   brandSlug?: string;
@@ -7,24 +7,43 @@ interface ChartProps {
 }
 
 export const AnalyticsCharts: React.FC<ChartProps> = ({ brandSlug, brandColor }) => {
+  const { orders, restaurants } = useAdmin();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Extract date labels and values
-  const labels = MOCK_REVENUE_CHART.map((d) => d.date);
-  
-  // Decide dataset based on brand
-  const dataValues = MOCK_REVENUE_CHART.map((d) => {
-    if (brandSlug) {
-      if (brandSlug === 'seenbanao') return d.SeenBanao;
-      if (brandSlug === 'jushhpk') return d.JushhPK;
-      if (brandSlug === 'dineatblue') return d.DineAtBlue;
-      // Default fallback for other brands
-      return Math.round(d.total * 0.15);
-    }
-    return d.total;
+  // Generate date labels for the last 7 days
+  const now = new Date();
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(now.getDate() - (6 - i));
+    return d;
   });
 
-  const maxVal = Math.max(...dataValues) * 1.15; // Give headroom
+  const formatDateLabel = (d: Date) => {
+    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+  };
+  
+  const labels = last7Days.map(formatDateLabel);
+
+  // Calculate real revenue sums from database orders
+  const dataValues = last7Days.map((date) => {
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+    const dayOrders = orders.filter((o) => {
+      const orderDate = new Date(o.created_at);
+      const matchesDate = orderDate >= startOfDay && orderDate < endOfDay;
+
+      if (brandSlug) {
+        const matchedRest = restaurants.find(r => r.slug === brandSlug);
+        return matchesDate && matchedRest && o.restaurant_id === matchedRest.id;
+      }
+      return matchesDate;
+    });
+
+    return dayOrders.reduce((sum, o) => sum + o.total, 0);
+  });
+
+  const maxVal = Math.max(...dataValues, 1000) * 1.15; // Give headroom and prevent division by zero
   const minVal = 0;
 
   // Chart dimensions
