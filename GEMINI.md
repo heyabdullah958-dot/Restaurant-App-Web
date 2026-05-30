@@ -145,14 +145,26 @@ FoodSphere/
 | App store submission | ⏳ Pending (Awaiting client accounts) | TBD |
 
 ### 🔗 Deployed Prototypes
-- **seenbanao website (Netlify):** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
-- **dineatblue website (Netlify):** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
-- **jushhpk website (Netlify):** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
-- **tandooristoppk website (Netlify):** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
-- **sandmelts website (Netlify):** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
-- **birdmanfoodspk website (Netlify):** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
-- **getafomo website (Netlify):** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
-- **admin panel website (Netlify):** [https://foodsphere-admin.netlify.app](https://foodsphere-admin.netlify.app)
+
+#### ⛅️ Cloudflare Pages (Active)
+- **admin panel website:** [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev)
+- **seenbanao website:** [https://seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev)
+- **dineatblue website:** [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev)
+- **jushhpk website:** [https://jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev)
+- **tandooristoppk website:** [https://tandooristoppk-foodsphere.pages.dev](https://tandooristoppk-foodsphere.pages.dev)
+- **sandmelts website:** [https://sandmelts-foodsphere.pages.dev](https://sandmelts-foodsphere.pages.dev)
+- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev)
+- **getafomo website:** [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev)
+
+#### 🕸️ Netlify (Archived)
+- **seenbanao website:** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
+- **dineatblue website:** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
+- **jushhpk website:** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
+- **tandooristoppk website:** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
+- **sandmelts website:** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
+- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
+- **getafomo website:** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
+- **admin panel website:** [https://foodsphere-admin.netlify.app](https://foodsphere-admin.netlify.app)
 
 ---
 
