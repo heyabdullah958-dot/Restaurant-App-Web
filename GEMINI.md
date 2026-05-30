@@ -144,6 +144,16 @@ FoodSphere/
 | All 7 websites live | ✅ Completed (7/7 Live) | Done |
 | App store submission | ⏳ Pending (Awaiting client accounts) | TBD |
 
+### 🔗 Deployed Prototypes
+- **seenbanao website (Netlify):** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
+- **dineatblue website (Netlify):** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
+- **jushhpk website (Netlify):** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
+- **tandooristoppk website (Netlify):** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
+- **sandmelts website (Netlify):** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
+- **birdmanfoodspk website (Netlify):** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
+- **getafomo website (Netlify):** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
+- **admin panel website (Netlify):** [https://foodsphere-admin.netlify.app](https://foodsphere-admin.netlify.app)
+
 ---
 
 ## 🔑 Key Architecture Decisions

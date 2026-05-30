@@ -57,7 +57,7 @@ All in `D:\sitesdata\Resturent App\websites\`
 - Created TypeScript React.js admin interface inside `/admin`.
 - Connected to Django REST Backend with JWT Authentication and real-time dashboard data syncing.
 - Integrated Audit Logging, Custom Platform Analytics, Customer Loyalty Point editor, and target topic FCM Push Notification dispatch.
-- **Live Deployment:** https://foodsphere-admin.pages.dev
+- **Live Deployment:** https://foodsphere-admin.netlify.app
 
 ---
 
