@@ -72,12 +72,30 @@ export const TenantManagement: React.FC = () => {
         {restaurants.map((restaurant) => (
           <div key={restaurant.id} className="bg-slate-800 border border-slate-700/60 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between">
             {/* Cover Banner */}
-            <div className="h-28 relative">
-              <img
-                src={restaurant.cover_url}
-                alt={restaurant.name}
-                className="w-full h-full object-cover opacity-80"
-              />
+            <div className="h-28 relative overflow-hidden">
+              {restaurant.cover_url ? (
+                <img
+                  src={restaurant.cover_url}
+                  alt={restaurant.name}
+                  className="w-full h-full object-cover opacity-80"
+                  onError={(e) => {
+                    // If image fails to load, show gradient fallback
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              {/* Gradient fallback — shows when no image or image fails */}
+              <div
+                className={`absolute inset-0 ${
+                  restaurant.cover_url ? 'hidden' : 'flex'
+                } items-center justify-center`}
+                style={{
+                  background: `linear-gradient(135deg, hsl(${(restaurant.id * 47) % 360}, 50%, 20%), hsl(${(restaurant.id * 47 + 120) % 360}, 60%, 15%))`,
+                }}
+              >
+                <span className="text-3xl opacity-30">🍽️</span>
+              </div>
               <span className={`absolute top-3 right-3 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${
                 restaurant.is_active
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/35'
@@ -91,11 +109,30 @@ export const TenantManagement: React.FC = () => {
             <div className="p-5 flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2.5">
-                  <img
-                    src={restaurant.logo_url}
-                    alt={restaurant.name}
-                    className="w-10 h-10 rounded-xl object-cover border border-slate-700 -mt-10 relative z-10 shadow-md bg-slate-900"
-                  />
+                  {restaurant.logo_url ? (
+                    <img
+                      src={restaurant.logo_url}
+                      alt={restaurant.name}
+                      className="w-10 h-10 rounded-xl object-cover border border-slate-700 -mt-10 relative z-10 shadow-md bg-slate-900"
+                      onError={(e) => {
+                        // Replace broken img with initial letter fallback
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = 'none';
+                        el.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  {/* Letter avatar fallback */}
+                  <div
+                    className={`w-10 h-10 rounded-xl border border-slate-700 -mt-10 relative z-10 shadow-md flex items-center justify-center text-white font-black text-sm flex-shrink-0 ${
+                      restaurant.logo_url ? 'hidden' : 'flex'
+                    }`}
+                    style={{
+                      background: `linear-gradient(135deg, hsl(${(restaurant.id * 47) % 360}, 60%, 35%), hsl(${(restaurant.id * 47 + 60) % 360}, 70%, 25%))`,
+                    }}
+                  >
+                    {restaurant.name.charAt(0).toUpperCase()}
+                  </div>
                   <div>
                     <h3 className="font-extrabold text-white text-base leading-tight">{restaurant.name}</h3>
                     <span className="text-xs text-slate-400 font-semibold">{restaurant.cuisine_type}</span>
