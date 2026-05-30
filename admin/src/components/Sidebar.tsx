@@ -6,7 +6,9 @@ import {
   ClipboardList, 
   ChefHat, 
   LogOut, 
-  X
+  X,
+  Bell,
+  Users
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -151,6 +153,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <Store size={18} />
                   Tenant Registry
+                </button>
+                <button
+                  onClick={() => { setView('customer_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'customer_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Users size={18} />
+                  Customers
+                </button>
+                <button
+                  onClick={() => { setView('notification_center'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'notification_center' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Bell size={18} />
+                  Notifications
                 </button>
               </>
             ) : (

@@ -28,6 +28,7 @@ export interface Restaurant {
   slug: string;
   city: string;
   cuisine_type: string;
+  description?: string;
   is_active: boolean;
   is_featured: boolean;
   rating: number;

@@ -9,6 +9,8 @@ import { TenantManagement } from './views/TenantManagement';
 import { BranchDashboard } from './views/BranchDashboard';
 import { OrderManagement } from './views/OrderManagement';
 import { MenuManagement } from './views/MenuManagement';
+import { NotificationCenter } from './views/NotificationCenter';
+import { CustomerManagement } from './views/CustomerManagement';
 import { Menu, Sun, Moon, Bell } from 'lucide-react';
 import './index.css';
 
@@ -37,6 +39,10 @@ const MainLayout: React.FC = () => {
         return <OrderManagement />;
       case 'menu_management':
         return <MenuManagement />;
+      case 'notification_center':
+        return <NotificationCenter />;
+      case 'customer_management':
+        return <CustomerManagement />;
       default:
         return isSuper ? <SuperDashboard /> : <BranchDashboard />;
     }

@@ -45,8 +45,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+    'import_export',
     
     # Local apps
+    'config',
     'restaurants',
     'orders',
     'users',
@@ -70,7 +72,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -308,8 +310,8 @@ JAZZMIN_SETTINGS = {
     # Custom sidebar links (appear at bottom)
     "custom_links": {
         "orders": [{
-            "name": "📦 Platform Analytics",
-            "url": "admin:index",
+            "name": "📊 Platform Analytics",
+            "url": "/admin/analytics/",
             "icon": "fas fa-chart-line",
             "permissions": ["auth.view_user"],
         }],

@@ -3,6 +3,21 @@ from django.utils.safestring import mark_safe
 import urllib.parse
 from .models import Order, OrderItem
 from config.admin_utils import get_managed_restaurant
+from import_export import resources
+from import_export.admin import ExportModelAdmin
+
+
+class OrderResource(resources.ModelResource):
+    """Defines which fields are exported when downloading CSV/Excel from admin."""
+    class Meta:
+        model = Order
+        fields = (
+            'id', 'restaurant__name', 'guest_name', 'guest_phone',
+            'status', 'payment_method', 'subtotal', 'delivery_fee',
+            'total', 'delivery_address', 'created_at'
+        )
+        export_order = fields
+
 
 class OrderItemInline(admin.StackedInline):
     model = OrderItem
@@ -39,7 +54,8 @@ class OrderItemInline(admin.StackedInline):
 
 
 @admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(ExportModelAdmin):
+    resource_classes = [OrderResource]
     list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'total', 'created_at', 'send_to_rider_whatsapp')
     list_filter = ('status', 'payment_method', 'restaurant', 'created_at')
     search_fields = ('id', 'guest_name', 'guest_phone', 'user__username')

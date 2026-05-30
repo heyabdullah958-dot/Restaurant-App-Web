@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Restaurant, MenuCategory, MenuItem
 from config.admin_utils import get_managed_restaurant
+from config.mixins import AuditLogMixin
 
 class MenuCategoryInline(admin.TabularInline):
     model = MenuCategory
@@ -8,7 +9,7 @@ class MenuCategoryInline(admin.TabularInline):
     extra = 1
 
 @admin.register(Restaurant)
-class RestaurantAdmin(admin.ModelAdmin):
+class RestaurantAdmin(AuditLogMixin, admin.ModelAdmin):
     list_display = ('name', 'city', 'cuisine_type', 'loyalty_points_ratio', 'is_active', 'is_featured', 'rating', 'delivery_fee')
     list_filter = ('city', 'is_active', 'is_featured', 'cuisine_type')
     search_fields = ('name', 'city', 'address')
@@ -52,7 +53,7 @@ class RestaurantAdmin(admin.ModelAdmin):
 
 
 @admin.register(MenuItem)
-class MenuItemAdmin(admin.ModelAdmin):
+class MenuItemAdmin(AuditLogMixin, admin.ModelAdmin):
     list_display = ('name', 'category', 'get_restaurant', 'price', 'is_available', 'is_featured')
     list_filter = ('category__restaurant', 'is_available', 'is_featured')
     search_fields = ('name', 'category__name', 'category__restaurant__name')

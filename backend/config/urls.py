@@ -4,6 +4,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from config.views import health_check, db_debug, root_view, trigger_seed, init_db
+from config.admin_views import platform_analytics
 
 urlpatterns = [
     path('', root_view, name='root'),
@@ -19,6 +20,9 @@ urlpatterns = [
     path('api/', include('restaurants.urls')),
     path('api/', include('orders.urls')),
     path('api/', include('payments.urls')),
+
+    # Admin extras
+    path('admin/analytics/', platform_analytics, name='admin_analytics'),
 ]
 
 # BUG-17 FIX: Serve media files in development
