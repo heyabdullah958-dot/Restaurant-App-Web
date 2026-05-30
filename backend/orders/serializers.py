@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 from django.db import transaction
 from django.db.models import F
@@ -81,7 +82,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                             price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
                         except (ValueError, TypeError):
                             pass
-                from decimal import Decimal
                 item_price += Decimal(price_modifier_sum)
                 subtotal += item_price * item['quantity']
 
@@ -135,7 +135,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                             price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
                         except (ValueError, TypeError):
                             pass
-                from decimal import Decimal
                 unit_price += Decimal(price_modifier_sum)
                 total_price = unit_price * quantity
                 subtotal += total_price
@@ -212,3 +211,14 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Propagate request context for absolute image/logo URL resolution
+        request = self.context.get('request')
+        if request:
+            ret['restaurant'] = RestaurantSerializer(
+                instance.restaurant,
+                context={'request': request}
+            ).data
+        return ret

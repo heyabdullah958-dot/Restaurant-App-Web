@@ -22,10 +22,12 @@ def health_check(request):
 def db_debug(request):
     """
     Database diagnostics endpoint.
-    RESTRICTED: Only accessible by staff/admin users.
+    RESTRICTED: Only accessible by superuser.
     """
+    if not request.user.is_superuser:
+        return JsonResponse({'error': 'Superuser required'}, status=403)
     try:
-        engine = settings.DATABASES['default']['ENGINE']
+        engine = settings.DATABASES['default']['ENGINE'].split('.')[-1]
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1;")
             row = cursor.fetchone()
@@ -37,9 +39,8 @@ def db_debug(request):
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'engine': settings.DATABASES['default']['ENGINE'],
             'connection_test': 'FAILED',
-            'error': str(e),
+            'error': 'Database connection failed',
         })
 
 
@@ -47,17 +48,11 @@ def root_view(request):
     """
     Root API endpoint welcome message.
     """
-    from restaurants.models import Restaurant
     return JsonResponse({
         'name': 'FoodSphere REST API Backend',
         'status': 'Online',
         'health_check': '/health/',
-        'admin_panel': '/admin/',
-        'api_root': '/api/',
-        'message': 'Welcome to the FoodSphere API. Use the above endpoints to interact with the backend.',
-        'restaurant_count': Restaurant.objects.count(),
-        'active_restaurant_count': Restaurant.objects.filter(is_active=True).count(),
-        'all_restaurant_slugs': list(Restaurant.objects.values_list('slug', flat=True))
+        'version': '1.0.0',
     })
 
 
@@ -90,13 +85,25 @@ def trigger_seed(request):
 def init_db(request):
     """
     Emergency database initializer.
-    GET request secured by a simple query key.
+    GET request secured by environment variable INIT_DB_SECRET_KEY.
     """
-    if request.GET.get('key') != 'foodsphere123':
+    import secrets
+    expected_key = os.environ.get('INIT_DB_SECRET_KEY', '')
+    provided_key = request.GET.get('key', '')
+    
+    if not expected_key:
         return JsonResponse({
-            'success': False,
-            'message': 'Unauthorized. Key required.'
-        }, status=403)
+            'success': False, 
+            'message': 'INIT_DB_SECRET_KEY environment variable not configured.'
+        }, status=503)
+    
+    # Constant-time comparison (timing attack prevention)
+    if not secrets.compare_digest(provided_key, expected_key):
+        return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
+    
+    # Sirf superuser hi call kar sakta hai (double protection)
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Superuser login required.'}, status=403)
         
     from django.core.management import call_command
     try:

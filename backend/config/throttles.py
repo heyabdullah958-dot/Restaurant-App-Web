@@ -1,5 +1,4 @@
-from rest_framework.throttling import AnonRateThrottle
-
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 class GuestAuthThrottle(AnonRateThrottle):
     """
@@ -7,3 +6,10 @@ class GuestAuthThrottle(AnonRateThrottle):
     Limits to 5 guest accounts per IP per hour to prevent abuse.
     """
     rate = '5/hour'
+
+class OrderCreateThrottle(UserRateThrottle):
+    """
+    Strict throttle class for limiting order creation requests.
+    Uses 'order_create' scope defined in settings.py.
+    """
+    scope = 'order_create'

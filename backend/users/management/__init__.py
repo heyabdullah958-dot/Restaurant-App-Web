@@ -1,1 +1,1 @@
-# init file
+# Django management package

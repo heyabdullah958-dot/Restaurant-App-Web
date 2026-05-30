@@ -3,10 +3,12 @@ from django.conf import settings
 
 class Order(models.Model):
     STATUS_CHOICES = (
+        ('pending', 'Pending'),
         ('received', 'Received'),
         ('preparing', 'Preparing'),
         ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
     )
     
     PAYMENT_METHODS = (
@@ -29,7 +31,7 @@ class Order(models.Model):
     )
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received', db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod')
     delivery_address = models.TextField()
     delivery_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)

@@ -6,7 +6,8 @@ Requires IsAdminUser (is_staff=True) permission.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Count, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
 from orders.models import Order
@@ -27,38 +28,62 @@ class PlatformAnalyticsView(APIView):
         last_7 = today - timedelta(days=7)
         last_30 = today - timedelta(days=30)
 
-        # Daily trend — last 7 days
+        # Daily trend — last 7 days (efficient single-query approach)
+        orders_7d_stats = Order.objects.filter(
+            created_at__date__gte=today - timedelta(days=6)
+        ).annotate(
+            date_only=TruncDate('created_at')
+        ).values('date_only').annotate(
+            order_count=Count('id'),
+            revenue_sum=Sum('total')
+        )
+        stats_map = {stat['date_only']: stat for stat in orders_7d_stats}
+
         daily_trend = []
         for i in range(6, -1, -1):
             day = today - timedelta(days=i)
-            day_orders = Order.objects.filter(created_at__date=day)
+            stat = stats_map.get(day)
             daily_trend.append({
                 'date': day.strftime('%a'),
-                'orders': day_orders.count(),
-                'revenue': float(day_orders.aggregate(Sum('total'))['total__sum'] or 0),
+                'orders': stat['order_count'] if stat else 0,
+                'revenue': float(stat['revenue_sum'] or 0) if stat else 0.0,
             })
 
-        # Per-restaurant breakdown (last 30 days & all-time)
-        restaurant_breakdown = []
-        for r in Restaurant.objects.all():
-            r_orders_30d = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
-            r_orders_all = Order.objects.filter(restaurant=r)
-            restaurant_breakdown.append({
-                'id': r.id,
-                'name': r.name,
-                'slug': r.slug,
-                'orders_30d': r_orders_30d.count(),
-                'revenue_30d': float(r_orders_30d.aggregate(Sum('total'))['total__sum'] or 0),
-                'orders_all_time': r_orders_all.count(),
-                'revenue_all_time': float(r_orders_all.aggregate(Sum('total'))['total__sum'] or 0),
-                'avg_order': float(r_orders_all.aggregate(Avg('total'))['total__avg'] or 0),
-            })
+        # Per-restaurant breakdown (last 30 days & all-time) in a single aggregated query
+        restaurant_stats = Restaurant.objects.annotate(
+            orders_30d=Count(
+                'orders',
+                filter=Q(orders__created_at__date__gte=last_30),
+                distinct=True
+            ),
+            revenue_30d=Sum(
+                'orders__total',
+                filter=Q(orders__created_at__date__gte=last_30)
+            ),
+            orders_all_time=Count('orders', distinct=True),
+            revenue_all_time=Sum('orders__total'),
+            avg_order=Avg('orders__total'),
+        ).values(
+            'id', 'name', 'slug',
+            'orders_30d', 'revenue_30d',
+            'orders_all_time', 'revenue_all_time', 'avg_order'
+        )
 
-        # Order status breakdown (all time)
-        status_breakdown = {}
-        for status_choice in Order.STATUS_CHOICES:
-            code = status_choice[0]
-            status_breakdown[code] = Order.objects.filter(status=code).count()
+        restaurant_breakdown = [{
+            'id': r['id'],
+            'name': r['name'],
+            'slug': r['slug'],
+            'orders_30d': r['orders_30d'] or 0,
+            'revenue_30d': float(r['revenue_30d'] or 0),
+            'orders_all_time': r['orders_all_time'] or 0,
+            'revenue_all_time': float(r['revenue_all_time'] or 0),
+            'avg_order': float(r['avg_order'] or 0),
+        } for r in restaurant_stats]
+
+        # Order status breakdown (all time) in a single query
+        status_counts = Order.objects.values('status').annotate(count=Count('id'))
+        status_map_db = {item['status']: item['count'] for item in status_counts}
+        status_breakdown = {status_choice[0]: status_map_db.get(status_choice[0], 0) for status_choice in Order.STATUS_CHOICES}
 
         return Response({
             'summary': {
@@ -112,15 +137,26 @@ class RestaurantAnalyticsView(APIView):
 
         orders_30d = Order.objects.filter(restaurant=restaurant, created_at__date__gte=last_30)
 
-        # Daily breakdown
+        # Daily breakdown (efficient single-query approach)
+        restaurant_orders_7d = Order.objects.filter(
+            restaurant=restaurant,
+            created_at__date__gte=today - timedelta(days=6)
+        ).annotate(
+            date_only=TruncDate('created_at')
+        ).values('date_only').annotate(
+            order_count=Count('id'),
+            revenue_sum=Sum('total')
+        )
+        stats_map = {stat['date_only']: stat for stat in restaurant_orders_7d}
+
         daily_trend = []
         for i in range(6, -1, -1):
             day = today - timedelta(days=i)
-            day_orders = orders_30d.filter(created_at__date=day)
+            stat = stats_map.get(day)
             daily_trend.append({
                 'date': day.strftime('%a'),
-                'orders': day_orders.count(),
-                'revenue': float(day_orders.aggregate(Sum('total'))['total__sum'] or 0),
+                'orders': stat['order_count'] if stat else 0,
+                'revenue': float(stat['revenue_sum'] or 0) if stat else 0.0,
             })
 
         return Response({
@@ -134,3 +170,4 @@ class RestaurantAnalyticsView(APIView):
             },
             'daily_trend': daily_trend,
         })
+

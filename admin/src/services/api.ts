@@ -183,19 +183,72 @@ export interface ApiCustomer {
   total_orders: number;
 }
 
-export const fetchCustomers = (search?: string) =>
-  apiFetch<{ count: number; results: ApiCustomer[] }>(
+// Mock customer fallback data for demo/mock mode
+let MOCK_CUSTOMERS: ApiCustomer[] = [
+  { id: 10, username: 'testuser_7216', email: 'testuser_7216@gmail.com', phone: '03001234567', loyalty_points: 0, is_guest: false, date_joined: '2026-05-15T12:00:00Z', total_orders: 4 },
+  { id: 11, username: 'testuser_4780', email: 'testuser_4780@gmail.com', phone: '03129876543', loyalty_points: 10, is_guest: false, date_joined: '2026-05-20T14:30:00Z', total_orders: 8 },
+  { id: 12, username: 'testuser_5355', email: 'testuser_5355@gmail.com', phone: '03211112222', loyalty_points: 120, is_guest: false, date_joined: '2026-05-22T09:15:00Z', total_orders: 15 },
+  { id: 1, username: 'guest_35056afa667f', email: '', phone: '03335556666', loyalty_points: 0, is_guest: true, date_joined: '2026-05-29T18:45:00Z', total_orders: 1 }
+];
+
+export const fetchCustomers = async (search?: string) => {
+  const isMock = localStorage.getItem('foodsphere_admin_mock_user');
+  if (isMock || !getToken()) {
+    let filtered = [...MOCK_CUSTOMERS];
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(
+        (c) =>
+          c.username.toLowerCase().includes(q) ||
+          c.email.toLowerCase().includes(q) ||
+          c.phone.includes(q)
+      );
+    }
+    return { count: filtered.length, results: filtered };
+  }
+  
+  return apiFetch<{ count: number; results: ApiCustomer[] }>(
     `/api/admin/customers/${search ? `?search=${encodeURIComponent(search)}` : ''}`
   );
+};
 
-export const fetchCustomerDetail = (userId: number) =>
-  apiFetch<any>(`/api/admin/customers/${userId}/`);
+export const fetchCustomerDetail = async (userId: number) => {
+  const isMock = localStorage.getItem('foodsphere_admin_mock_user');
+  if (isMock || !getToken()) {
+    const customer = MOCK_CUSTOMERS.find((c) => c.id === userId);
+    if (!customer) throw new Error('Customer not found (Mock)');
+    return {
+      ...customer,
+      loyalty_history: [
+        { id: 1, points: 10, transaction_type: 'earned', description: 'Order #3 completed', created_at: '2026-05-20T14:35:00Z' }
+      ]
+    };
+  }
+  return apiFetch<any>(`/api/admin/customers/${userId}/`);
+};
 
-export const updateCustomerLoyalty = (userId: number, points: number, reason: string) =>
-  apiFetch<any>(`/api/admin/customers/${userId}/loyalty/`, {
+export const updateCustomerLoyalty = async (userId: number, points: number, reason: string) => {
+  const isMock = localStorage.getItem('foodsphere_admin_mock_user');
+  if (isMock || !getToken()) {
+    const idx = MOCK_CUSTOMERS.findIndex((c) => c.id === userId);
+    if (idx === -1) throw new Error('Customer not found (Mock)');
+    const old = MOCK_CUSTOMERS[idx].loyalty_points;
+    MOCK_CUSTOMERS[idx].loyalty_points = points;
+    return {
+      success: true,
+      user_id: userId,
+      username: MOCK_CUSTOMERS[idx].username,
+      old_points: old,
+      new_points: points,
+      diff: points - old
+    };
+  }
+
+  return apiFetch<any>(`/api/admin/customers/${userId}/loyalty/`, {
     method: 'PATCH',
     body: JSON.stringify({ loyalty_points: points, reason }),
   });
+};
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 

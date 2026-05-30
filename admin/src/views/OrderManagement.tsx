@@ -34,10 +34,12 @@ export const OrderManagement: React.FC = () => {
 
   // Group orders by status
   const columns: { title: string; status: OrderStatus; color: string; bg: string }[] = [
+    { title: 'Pending', status: 'pending', color: 'text-zinc-500 dark:text-zinc-400', bg: 'bg-zinc-50/80 dark:bg-zinc-950/10 border-zinc-200/50 dark:border-zinc-900/20' },
     { title: 'Received', status: 'received', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30' },
     { title: 'Preparing', status: 'preparing', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30' },
     { title: 'Out For Delivery', status: 'out_for_delivery', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-900/30' },
     { title: 'Delivered', status: 'delivered', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/30' },
+    { title: 'Cancelled', status: 'cancelled', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50/50 dark:bg-rose-950/10 border-rose-200/30 dark:border-rose-900/20' },
   ];
 
   // Trigger WhatsApp dispatch pre-filled message directly to rider +92 309 0349090
@@ -62,6 +64,7 @@ export const OrderManagement: React.FC = () => {
   };
 
   const getNextStatus = (current: OrderStatus): OrderStatus | null => {
+    if (current === 'pending') return 'received';
     if (current === 'received') return 'preparing';
     if (current === 'preparing') return 'out_for_delivery';
     if (current === 'out_for_delivery') return 'delivered';
@@ -69,6 +72,7 @@ export const OrderManagement: React.FC = () => {
   };
 
   const getActionLabel = (current: OrderStatus): string => {
+    if (current === 'pending') return 'Confirm Order';
     if (current === 'received') return 'Accept & Prepare';
     if (current === 'preparing') return 'Mark Ready & Dispatch';
     if (current === 'out_for_delivery') return 'Complete Delivery';
@@ -86,7 +90,7 @@ export const OrderManagement: React.FC = () => {
       </div>
 
       {/* Kanban Board Columns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
         {columns.map((col) => {
           const colOrders = brandOrders.filter((o) => o.status === col.status);
           
@@ -185,6 +189,21 @@ export const OrderManagement: React.FC = () => {
                             <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 py-1.5">
                               <CheckCircle size={13} /> Completed
                             </div>
+                          )}
+
+                          {order.status === 'cancelled' && (
+                            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 py-1.5">
+                              Cancelled
+                            </div>
+                          )}
+
+                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                            <button
+                              onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                              className="w-full flex items-center justify-center gap-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 font-bold py-2 rounded-lg text-[11px] transition-all"
+                            >
+                              Cancel Order
+                            </button>
                           )}
                         </div>
                       </div>

@@ -9,10 +9,10 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write('Seeding restaurant data...')
         
-        # 1. Clear existing data to prevent duplicates on multiple runs
-        MenuItem.objects.all().delete()
-        MenuCategory.objects.all().delete()
-        Restaurant.objects.all().delete()
+        # 1. Skip if already seeded to prevent overwriting dynamic data
+        if Restaurant.objects.exists():
+            self.stdout.write(self.style.SUCCESS('Restaurant database already seeded. Skipping.'))
+            return
         
         # Define the 7 brands and their data
         brands = [

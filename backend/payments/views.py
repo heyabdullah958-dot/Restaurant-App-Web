@@ -89,6 +89,10 @@ class ConfirmCODPaymentView(APIView):
                     'transaction_id': f"COD-{order.id}"
                 }
             )
+            # Transition order status to received
+            if order.status == 'pending':
+                order.status = 'received'
+                order.save()
 
             return Response({
                 'success': True,
@@ -135,18 +139,21 @@ class CreateStripePaymentIntentView(APIView):
                 payment_method_types=['card'],
                 line_items=[{
                     'price_data': {
-                        'currency': 'usd',
+                        'currency': 'pkr',
                         'product_data': {
                             'name': f"FoodSphere Order #{order.id}",
                         },
-                        'unit_amount': int(order.total * 100),
+                        'unit_amount': int(order.total),
                     },
                     'quantity': 1,
                 }],
                 mode='payment',
                 success_url=f"{host}/api/payments/stripe/success/?order_id={order.id}",
                 cancel_url=f"{host}/api/payments/stripe/cancel/?order_id={order.id}",
-                metadata={'order_id': order.id},
+                metadata={'order_id': str(order.id)},
+                payment_intent_data={
+                    'metadata': {'order_id': str(order.id)}
+                },
                 expand=['payment_intent']
             )
 
@@ -221,6 +228,11 @@ class ConfirmStripePaymentView(APIView):
                 payment.gateway_response = intent
                 payment.save()
 
+                # Transition order status to received
+                if order.status == 'pending':
+                    order.status = 'received'
+                    order.save()
+
                 return Response({
                     'success': True,
                     'message': 'Stripe payment confirmed successfully',
@@ -269,10 +281,15 @@ class StripeWebhookView(APIView):
                 event = stripe.Webhook.construct_event(
                     payload, sig_header, endpoint_secret
                 )
-            else:
-                # Local dev fallback
+            elif not endpoint_secret and settings.DEBUG:
+                # Sirf DEBUG mode mein skip allowed
                 import json
                 event = json.loads(payload.decode('utf-8'))
+                logger.warning("Stripe webhook verification skipped — DEBUG mode only!")
+            else:
+                # Production mein secret hona zaroori hai
+                logger.error("STRIPE_WEBHOOK_SECRET not configured in production!")
+                return HttpResponse(status=400)
         except ValueError as e:
             return HttpResponse(status=400)
         except stripe.error.SignatureVerificationError as e:
@@ -291,6 +308,12 @@ class StripeWebhookView(APIView):
                 payment.gateway_response = data_obj
                 payment.save()
                 logger.info(f"PaymentIntent {payment_intent_id} verified via webhook.")
+
+                # Transition order status to received
+                order = payment.order
+                if order.status == 'pending':
+                    order.status = 'received'
+                    order.save()
             except Payment.DoesNotExist:
                 if order_id:
                     try:
@@ -305,6 +328,10 @@ class StripeWebhookView(APIView):
                                 'gateway_response': data_obj
                             }
                         )
+                        # Transition order status to received
+                        if order.status == 'pending':
+                            order.status = 'received'
+                            order.save()
                     except Order.DoesNotExist:
                         logger.error(f"Order #{order_id} not found in Webhook.")
 
@@ -374,6 +401,9 @@ class StripeSuccessLandingView(APIView):
                 if payment and payment.status == 'pending':
                     payment.status = 'completed'
                     payment.save()
+                if order.status == 'pending':
+                    order.status = 'received'
+                    order.save()
         except Exception as e:
             logger.error(f"Error auto-completing Stripe payment on success landing: {str(e)}")
 
@@ -674,6 +704,11 @@ class PayFastITNView(APIView):
             if payment_status == 'COMPLETE':
                 payment.status = 'completed'
                 payment.save()
+                # Transition order status to received
+                order = payment.order
+                if order.status == 'pending':
+                    order.status = 'received'
+                    order.save()
                 logger.info(f"PayFast Payment #{payment_id} successfully completed.")
             else:
                 payment.status = 'failed'
@@ -708,6 +743,9 @@ class PayFastSuccessLandingView(APIView):
                 if payment and payment.status == 'pending':
                     payment.status = 'completed'
                     payment.save()
+                if order.status == 'pending':
+                    order.status = 'received'
+                    order.save()
         except Exception as e:
             logger.error(f"Error auto-completing PayFast payment on success landing: {str(e)}")
 

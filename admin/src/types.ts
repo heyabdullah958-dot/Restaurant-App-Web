@@ -46,7 +46,7 @@ export interface Restaurant {
   phone?: string;
 }
 
-export type OrderStatus = 'received' | 'preparing' | 'out_for_delivery' | 'delivered';
+export type OrderStatus = 'pending' | 'received' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
 export type PaymentMethod = 'cod' | 'stripe' | 'payfast';
 
 export interface OrderItemDetail {

@@ -13,7 +13,7 @@ services:
       python manage.py seed_restaurants &&
       python manage.py create_admin &&
       python manage.py create_restaurant_managers
-    startCommand: gunicorn config.wsgi --log-file - --timeout 120 --workers 2 --worker-class sync
+    startCommand: gunicorn config.wsgi:application --log-file - --timeout 30 --workers 2 --worker-class gthread --threads 2 --max-requests 1000 --max-requests-jitter 100 --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -24,9 +24,9 @@ services:
       - key: ALLOWED_HOSTS
         value: "*"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://foodsphere-app.pages.dev"
+        value: "https://foodsphere-admin.pages.dev,https://seenbanao-foodsphere.pages.dev,https://dineatblue-foodsphere.pages.dev,https://jushhpk-foodsphere.pages.dev,https://tandooristoppk-foodsphere.pages.dev,https://sandmelts-foodsphere.pages.dev,https://birdmanfoodspk-foodsphere.pages.dev,https://getafomo-foodsphere.pages.dev,https://foodsphere-admin.netlify.app"
       - key: CORS_ALLOW_ALL_ORIGINS
-        value: "True"
+        value: "False"
       - key: SUPABASE_TENANT_SUFFIX
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
@@ -37,3 +37,12 @@ services:
         sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"
+
+  - type: cron
+    name: cleanup-stale-guests
+    env: python
+    rootDir: backend
+    schedule: "0 3 * * 0"  # Har Sunday raat 3 baje
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py cleanup_stale_guests
+

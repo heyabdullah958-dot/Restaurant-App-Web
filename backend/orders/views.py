@@ -19,6 +19,12 @@ class OrderListCreateView(generics.ListCreateAPIView):
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
+    def get_throttles(self):
+        if self.request.method == 'POST':
+            from config.throttles import OrderCreateThrottle
+            return [OrderCreateThrottle()]
+        return super().get_throttles()
+
     def get_queryset(self):
         return Order.objects.select_related('restaurant').prefetch_related('items__menu_item').order_by('-created_at')
 

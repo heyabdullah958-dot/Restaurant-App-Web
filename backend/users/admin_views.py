@@ -22,24 +22,21 @@ class AdminCustomerListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
-        qs = User.objects.filter(is_staff=False).order_by('-date_joined')
-        # Optional search filter
-        search = self.request.query_params.get('search', '')
+        from django.db.models import Q
+        qs = User.objects.filter(is_staff=False)
+        search = self.request.query_params.get('search', '').strip()
         if search:
             qs = qs.filter(
-                username__icontains=search
-            ) | User.objects.filter(
-                email__icontains=search,
-                is_staff=False
-            ) | User.objects.filter(
-                phone__icontains=search,
-                is_staff=False
+                Q(username__icontains=search) |
+                Q(email__icontains=search) |
+                Q(phone__icontains=search)
             )
-            qs = qs.distinct()
-        return qs
+        return qs.order_by('-date_joined')
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().annotate(
+            total_orders_count=Count('orders')
+        )
         # Augment with stats
         results = []
         for user in queryset[:100]:  # Cap at 100 for performance
@@ -51,7 +48,7 @@ class AdminCustomerListView(generics.ListAPIView):
                 'loyalty_points': user.loyalty_points,
                 'is_guest': user.is_guest,
                 'date_joined': user.date_joined.isoformat() if user.date_joined else None,
-                'total_orders': user.orders.count() if hasattr(user, 'orders') else 0,
+                'total_orders': user.total_orders_count,
             })
         return Response({
             'count': queryset.count(),

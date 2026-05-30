@@ -34,13 +34,16 @@ class AuditLogMixin:
         super().save_model(request, obj, form, change)
 
     def delete_model(self, request, obj):
-        """Log delete before calling the real delete."""
+        """Log delete PEHLE karo, phir actual delete."""
+        obj_pk = obj.pk
+        obj_repr = str(obj)  # Delete se pehle capture karein
+        
         AdminAuditLog.objects.create(
             user=request.user,
             action='delete',
             model_name=obj.__class__.__name__,
-            object_id=obj.pk,
-            object_repr=str(obj),
+            object_id=obj_pk,
+            object_repr=obj_repr,
             changes={},
             ip_address=request.META.get('REMOTE_ADDR'),
         )

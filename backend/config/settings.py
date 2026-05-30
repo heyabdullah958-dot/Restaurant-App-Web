@@ -22,7 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-dkz@bb-(725)%acj&-o&1@u9@)!!i(=)5ig726yn3rd4!flj)*')
+from django.core.exceptions import ImproperlyConfigured
+_secret_key = config('SECRET_KEY', default='')
+if not _secret_key:
+    if str(config('DEBUG', default=False)).strip().lower() in ('true', '1', 't', 'y', 'yes'):
+        import secrets
+        _secret_key = secrets.token_hex(50)
+        import warnings
+        warnings.warn("SECRET_KEY not set — using random key for dev only!", stacklevel=2)
+    else:
+        raise ImproperlyConfigured("SECRET_KEY environment variable must be set in production!")
+SECRET_KEY = _secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config('DEBUG', default=False)).strip().lower() in ('true', '1', 't', 'y', 'yes')
@@ -45,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'import_export',
     
     # Local apps
@@ -131,7 +142,7 @@ if DB_HOST and DB_USER and DB_PASSWORD:
             'OPTIONS': {
                 'sslmode': 'require',
             },
-            'CONN_MAX_AGE': 600,
+            'CONN_MAX_AGE': 60,
         }
     }
 else:
@@ -168,7 +179,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Karachi'
 
 USE_I18N = True
 
@@ -192,8 +203,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 
 # Media Files (Uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
+
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True
+    )
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+        'API_KEY': CLOUDINARY_API_KEY,
+        'API_SECRET': CLOUDINARY_API_SECRET,
+    }
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Django REST Framework Settings
 REST_FRAMEWORK = {
@@ -209,8 +243,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',
-        'user': '1000/hour',
+        'anon': '30/hour',
+        'user': '500/hour',
+        'order_create': '10/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'config.pagination.StandardResultsPagination',
     'PAGE_SIZE': 20,
@@ -218,10 +253,10 @@ REST_FRAMEWORK = {
 
 # Simple JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # 1 hour secure
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),     # 30 days comfortable UX
+    'ROTATE_REFRESH_TOKENS': True,      # Rotate refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,   # Blacklist rotated tokens
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
@@ -392,11 +427,12 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '[{levelname}] {asctime} {module} — {message}',
+            'format': '[{levelname}] {asctime} {module} {process:d} {thread:d} — {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '[{levelname}] {message}',
+        'json': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[{server_time}] {message}',
             'style': '{',
         },
     },
@@ -404,6 +440,7 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
     },
     'root': {
@@ -449,5 +486,47 @@ PAYFAST_MERCHANT_KEY = config('PAYFAST_MERCHANT_KEY', default='46f0z58cltpa2')  
 PAYFAST_PASSPHRASE = config('PAYFAST_PASSPHRASE', default='jt776ha7zb0b7')  # Sandbox default passphrase
 PAYFAST_IS_SANDBOX = config('PAYFAST_IS_SANDBOX', cast=bool, default=True)
 PAYFAST_HOST = 'sandbox.payfast.co.za' if PAYFAST_IS_SANDBOX else 'www.payfast.co.za'
+
+# FCM Service Account for Firebase Admin SDK
+FCM_SERVICE_ACCOUNT_JSON = os.environ.get('FCM_SERVICE_ACCOUNT_JSON', '')
+
+# RIDER WHATSAPP DISPATCH NUMBER
+RIDER_WHATSAPP = os.environ.get('RIDER_WHATSAPP_NUMBER', '923090349090')
+
+# Sentry Monitoring integration
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+if SENTRY_DSN and not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
+
+# Security and HSTS Config (SEC-1)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Redis Cache Integration (SEC-3)
+REDIS_URL = os.environ.get('REDIS_URL', '')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
 

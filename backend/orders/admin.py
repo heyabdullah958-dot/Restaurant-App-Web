@@ -112,8 +112,9 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
             f"Address: {obj.delivery_address}\n"
             f"Location Link: {location_link}"
         )
-        encoded_message = urllib.parse.quote(message)
-        whatsapp_url = f"https://wa.me/923090349090?text={encoded_message}"
+        from django.conf import settings
+        rider_phone = getattr(settings, 'RIDER_WHATSAPP', '923090349090')
+        whatsapp_url = f"https://wa.me/{rider_phone}?text={encoded_message}"
         return mark_safe(
             f'<a href="{whatsapp_url}" target="_blank" '
             f'style="background-color: #25D366; color: white; padding: 4px 8px; border-radius: 4px; '
