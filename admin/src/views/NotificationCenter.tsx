@@ -63,26 +63,28 @@ export const NotificationCenter: React.FC = () => {
         showToast(`Notification sent to ${getTargetLabel()} ✅`, 'success');
       }
 
-      setHistory(prev => [{
+      const newNotif: SentNotification = {
         id: Date.now(),
         target: getTargetLabel(),
         title: form.title,
         body: form.body,
         sentAt: new Date().toLocaleTimeString(),
         status: result.status === 'not_configured' ? 'error' : 'success',
-      }, ...prev].slice(0, 20));
+      };
+      setHistory(prev => [newNotif, ...prev].slice(0, 20));
 
       setForm(f => ({ ...f, title: '', body: '' }));
     } catch (err: any) {
       showToast(err.message || 'Failed to send notification', 'error');
-      setHistory(prev => [{
+      const newNotif: SentNotification = {
         id: Date.now(),
         target: getTargetLabel(),
         title: form.title,
         body: form.body,
         sentAt: new Date().toLocaleTimeString(),
         status: 'error',
-      }, ...prev].slice(0, 20));
+      };
+      setHistory(prev => [newNotif, ...prev].slice(0, 20));
     } finally {
       setSending(false);
     }

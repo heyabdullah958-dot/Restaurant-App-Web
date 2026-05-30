@@ -107,7 +107,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           username: payload.username || 'Admin',
           email: '',
           role: payload.is_staff ? 'super_admin' : 'branch_manager',
-          restaurantId: payload.is_staff ? null : undefined,
+          restaurantId: undefined,
         };
         setUser(restoredUser);
         setActiveView(payload.is_staff ? 'super_dashboard' : 'branch_dashboard');
@@ -205,7 +205,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           username,
           email: `${username}@foodsphere.com`,
           role: isMockSuper ? 'super_admin' : 'branch_manager',
-          restaurantId: isMockSuper ? null : 1,
+          restaurantId: isMockSuper ? undefined : 1,
         };
         setUser(mockUser);
         setActiveView(isMockSuper ? 'super_dashboard' : 'branch_dashboard');

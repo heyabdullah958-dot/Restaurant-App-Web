@@ -4,7 +4,7 @@ import urllib.parse
 from .models import Order, OrderItem
 from config.admin_utils import get_managed_restaurant
 from import_export import resources
-from import_export.admin import ExportModelAdmin
+from import_export.admin import ExportMixin
 
 
 class OrderResource(resources.ModelResource):
@@ -54,7 +54,7 @@ class OrderItemInline(admin.StackedInline):
 
 
 @admin.register(Order)
-class OrderAdmin(ExportModelAdmin):
+class OrderAdmin(ExportMixin, admin.ModelAdmin):
     resource_classes = [OrderResource]
     list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'total', 'created_at', 'send_to_rider_whatsapp')
     list_filter = ('status', 'payment_method', 'restaurant', 'created_at')
