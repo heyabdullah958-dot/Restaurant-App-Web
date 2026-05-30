@@ -260,6 +260,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-http-method-override',
 ]
 
 # OWASP 2025 Security Headers
