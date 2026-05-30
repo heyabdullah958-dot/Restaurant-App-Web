@@ -10,6 +10,7 @@ import {
   getToken,
   decodeToken,
   createRestaurant,
+  deleteRestaurant,
   fetchRestaurantMenu,
   createMenuCategory,
   deleteMenuCategory,
@@ -45,6 +46,7 @@ interface AdminContextProps {
   updateOrderStatus: (orderId: number, newStatus: OrderStatus) => void;
   toggleMenuAvailability: (restaurantId: number, categoryId: number, itemId: number) => void;
   onboardNewRestaurant: (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => void;
+  removeRestaurant: (id: number) => Promise<void>;
   refreshOrders: () => Promise<void>;
   addMenuCategory: (name: string) => Promise<void>;
   removeMenuCategory: (id: number) => Promise<void>;
@@ -369,6 +371,24 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // Remove brand/restaurant
+  const removeRestaurant = async (id: number) => {
+    if (!window.confirm('Are you sure you want to remove this restaurant brand? All categories and menu items will be deleted permanently.')) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await deleteRestaurant(id);
+      setRestaurants((prev) => prev.filter((r) => r.id !== id));
+      showToast('Restaurant brand removed successfully', 'info');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to remove restaurant', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Add menu category
   const addMenuCategory = async (name: string) => {
     setLoading(true);
@@ -557,6 +577,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateOrderStatus,
         toggleMenuAvailability,
         onboardNewRestaurant,
+        removeRestaurant,
         refreshOrders,
         addMenuCategory,
         removeMenuCategory,

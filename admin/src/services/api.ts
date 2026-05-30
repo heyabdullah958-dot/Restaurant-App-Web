@@ -213,6 +213,11 @@ export const updateRestaurant = (id: number, data: any) =>
     body: JSON.stringify(data),
   });
 
+export const deleteRestaurant = (id: number) =>
+  apiFetch<any>(`/api/admin/restaurants/${id}/`, {
+    method: 'DELETE',
+  });
+
 export const createMenuCategory = (data: any) =>
   apiFetch<any>('/api/admin/menu-categories/', {
     method: 'POST',

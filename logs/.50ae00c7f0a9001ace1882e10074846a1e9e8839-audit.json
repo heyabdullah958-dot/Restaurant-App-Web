@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "D:\\sitesdata\\Resturent App\\logs\\.50ae00c7f0a9001ace1882e10074846a1e9e8839-audit.json",
+    "files": [
+        {
+            "date": 1780122566712,
+            "name": "D:\\sitesdata\\Resturent App\\logs\\mcp-puppeteer-2026-05-30.log",
+            "hash": "48155c72ffc4e19f20630a0fed8d9b1b51c4a8fba01687fdff1e0ab8624edd31"
+        }
+    ],
+    "hashType": "sha256"
+}

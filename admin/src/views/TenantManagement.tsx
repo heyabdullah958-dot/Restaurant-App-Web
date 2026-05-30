@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
-import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles } from 'lucide-react';
+import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2 } from 'lucide-react';
 
 export const TenantManagement: React.FC = () => {
-  const { restaurants, onboardNewRestaurant } = useAdmin();
+  const { restaurants, onboardNewRestaurant, removeRestaurant } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
 
   // Form states
@@ -122,9 +122,18 @@ export const TenantManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-700/30 flex justify-between items-center text-xs">
-                <span className="text-slate-500">Slug: <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded font-mono">{restaurant.slug}</code></span>
-                <span className="text-slate-500">Tenant ID: <code className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded font-mono">#{restaurant.id}</code></span>
+              <div className="mt-5 pt-3 border-t border-slate-700/30 flex flex-col gap-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500">Slug: <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded font-mono">{restaurant.slug}</code></span>
+                  <span className="text-slate-500">Tenant ID: <code className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded font-mono">#{restaurant.id}</code></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeRestaurant(restaurant.id)}
+                  className="w-full flex items-center justify-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-xl py-2 text-xs font-bold transition-all"
+                >
+                  <Trash2 size={13} /> Remove Brand
+                </button>
               </div>
             </div>
           </div>
