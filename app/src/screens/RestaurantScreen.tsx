@@ -10,6 +10,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -56,6 +57,8 @@ export default function RestaurantScreen() {
   const cart = useSelector((state: RootState) => state.cart);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedItemForOptions, setSelectedItemForOptions] = useState<MenuItem | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   // Load details on mount or slug change
   useEffect(() => {
@@ -130,7 +133,48 @@ export default function RestaurantScreen() {
   }
 
   // Cart helper functions
+  const confirmAddVariantToCart = (item: MenuItem, variant: any) => {
+    const itemToAdd = {
+      id: item.id,
+      name: `${item.name} (${variant.name})`,
+      price: Number(variant.price),
+      quantity: 1,
+      selectedOptions: [{
+        name: variant.name,
+        price_modifier: Number(variant.price) - Number(item.price),
+        specifications: variant.specifications || {}
+      }]
+    };
+
+    if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
+      Alert.alert(
+        'Reset Cart?',
+        'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Yes, Reset',
+            onPress: () => {
+              dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+              setSelectedItemForOptions(null);
+            },
+          },
+        ]
+      );
+    } else {
+      dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+      setSelectedItemForOptions(null);
+    }
+  };
+
   const handleAddToCart = (item: MenuItem) => {
+    // If the item has variants, open the options selection modal
+    if (item.options?.has_variants && item.options?.variants?.length > 0) {
+      setSelectedItemForOptions(item);
+      setSelectedVariant(item.options.variants[0]);
+      return;
+    }
+
     // If adding an item from a different restaurant, show confirmation to reset cart
     if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
       Alert.alert(
@@ -399,7 +443,7 @@ export default function RestaurantScreen() {
 
                   {/* Quantity Selector overlay / add button */}
                   <View style={styles.quantitySelectorContainer}>
-                    {quantity > 0 ? (
+                    {quantity > 0 && !item.options?.has_variants ? (
                       <View style={styles.quantityRow}>
                         <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
@@ -422,7 +466,9 @@ export default function RestaurantScreen() {
                         onPress={() => handleAddToCart(item)}
                       >
                         <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
-                        <Text style={styles.addButtonText}>ADD</Text>
+                        <Text style={styles.addButtonText}>
+                          {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -460,6 +506,100 @@ export default function RestaurantScreen() {
             </View>
           </TouchableOpacity>
         </View>
+      )}
+
+      {/* Custom Option/Variant Selection Sheet */}
+      {selectedItemForOptions && (
+        <Modal
+          visible={true}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setSelectedItemForOptions(null)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.modalTitle}>{selectedItemForOptions.name}</Text>
+                  <Text style={styles.modalSubtitle}>{selectedItemForOptions.categoryName || 'Item Details'}</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.modalCloseBtn}
+                  onPress={() => setSelectedItemForOptions(null)}
+                >
+                  <Ionicons name="close" size={20} color={COLORS.gray} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                <Text style={styles.modalDesc}>{selectedItemForOptions.description}</Text>
+                
+                <Text style={styles.optionSectionHeader}>Select Variant / Size</Text>
+                {selectedItemForOptions.options?.variants?.map((v: any) => {
+                  const isSelected = selectedVariant?.id === v.id;
+                  return (
+                    <TouchableOpacity
+                      key={v.id}
+                      activeOpacity={0.8}
+                      style={[
+                        styles.variantCard,
+                        isSelected && styles.variantCardSelected
+                      ]}
+                      onPress={() => setSelectedVariant(v)}
+                    >
+                      <View style={styles.variantRadioRow}>
+                        <View style={[
+                          styles.radioOuter,
+                          isSelected && styles.radioOuterSelected
+                        ]}>
+                          {isSelected && <View style={styles.radioInner} />}
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 10 }}>
+                          <Text style={[
+                            styles.variantName,
+                            isSelected && styles.variantNameSelected
+                          ]}>
+                            {v.name}
+                          </Text>
+                          {v.specifications && Object.keys(v.specifications).length > 0 && (
+                            <View style={styles.specsBadgeRow}>
+                              {Object.entries(v.specifications).map(([key, val]) => (
+                                val ? (
+                                  <View key={key} style={styles.specBadge}>
+                                    <Text style={styles.specBadgeText}>
+                                      {key.replace('_', ' ')}: {String(val)}
+                                    </Text>
+                                  </View>
+                                ) : null
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.variantPrice}>Rs. {v.price}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  style={styles.modalAddBtn}
+                  onPress={() => {
+                    if (selectedVariant) {
+                      confirmAddVariantToCart(selectedItemForOptions, selectedVariant);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalAddBtnText}>
+                    Add to Cart - Rs. {selectedVariant?.price}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       )}
     </SafeAreaView>
   );
@@ -860,6 +1000,146 @@ const styles = StyleSheet.create({
   },
   openText: {
     fontSize: 12,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: SPACING.lg,
+    maxHeight: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    paddingBottom: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0f172a',
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    color: COLORS.gray,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    padding: 6,
+    borderRadius: 20,
+    backgroundColor: '#f1f5f9',
+  },
+  modalScroll: {
+    marginBottom: SPACING.lg,
+  },
+  modalDesc: {
+    fontSize: 13,
+    color: COLORS.gray,
+    lineHeight: 18,
+    marginBottom: SPACING.lg,
+  },
+  optionSectionHeader: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: SPACING.sm,
+  },
+  variantCard: {
+    backgroundColor: '#f8fafc',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    borderRadius: 16,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  variantCardSelected: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#3b82f6',
+  },
+  variantRadioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioOuterSelected: {
+    borderColor: '#3b82f6',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#3b82f6',
+  },
+  variantName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  variantNameSelected: {
+    color: '#1e40af',
+  },
+  variantPrice: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  specsBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  specBadge: {
+    backgroundColor: '#e2e8f0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  specBadgeText: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#475569',
+  },
+  modalFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    paddingTop: SPACING.md,
+  },
+  modalAddBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalAddBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

@@ -85,40 +85,40 @@ export default function CartScreen() {
 
   const activeRestaurant = restaurants.find((r) => r.id === cart.restaurantId);
 
-  const handleIncrement = (itemId: number, currentQty: number) => {
+  const handleIncrement = (item: any) => {
     dispatch(
       updateQuantity({
-        id: itemId,
-        selectedOptions: [],
-        quantity: currentQty + 1,
+        id: item.id,
+        selectedOptions: item.selectedOptions || [],
+        quantity: item.quantity + 1,
       })
     );
   };
 
-  const handleDecrement = (itemId: number, currentQty: number) => {
-    if (currentQty <= 1) {
+  const handleDecrement = (item: any) => {
+    if (item.quantity <= 1) {
       dispatch(
         removeItemFromCart({
-          id: itemId,
-          selectedOptions: [],
+          id: item.id,
+          selectedOptions: item.selectedOptions || [],
         })
       );
     } else {
       dispatch(
         updateQuantity({
-          id: itemId,
-          selectedOptions: [],
-          quantity: currentQty - 1,
+          id: item.id,
+          selectedOptions: item.selectedOptions || [],
+          quantity: item.quantity - 1,
         })
       );
     }
   };
 
-  const handleRemove = (itemId: number) => {
+  const handleRemove = (item: any) => {
     dispatch(
       removeItemFromCart({
-        id: itemId,
-        selectedOptions: [],
+        id: item.id,
+        selectedOptions: item.selectedOptions || [],
       })
     );
   };
@@ -193,38 +193,41 @@ export default function CartScreen() {
         {/* Cart Items List */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Selected Items</Text>
-          {cart.items.map((item: any) => (
-            <SwipeableRow key={item.id} onSwipeLeft={() => handleRemove(item.id)}>
-              <View style={styles.cartItemRow}>
-                <View style={styles.itemMeta}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemUnitPrice}>Rs. {item.price} each</Text>
-                </View>
-                
-                <View style={styles.qtyContainer}>
-                  <TouchableOpacity activeOpacity={0.75}
-                    style={styles.qtyBtn}
-                    onPress={() => handleDecrement(item.id, item.quantity)}
-                  >
-                    <Ionicons name="remove" size={14} color={COLORS.white} />
-                  </TouchableOpacity>
-                  <Text style={styles.qtyText}>{item.quantity}</Text>
-                  <TouchableOpacity activeOpacity={0.75}
-                    style={styles.qtyBtn}
-                    onPress={() => handleIncrement(item.id, item.quantity)}
-                  >
-                    <Ionicons name="add" size={14} color={COLORS.white} />
-                  </TouchableOpacity>
-                </View>
+          {cart.items.map((item: any) => {
+            const itemKey = `${item.id}-${JSON.stringify(item.selectedOptions)}`;
+            return (
+              <SwipeableRow key={itemKey} onSwipeLeft={() => handleRemove(item)}>
+                <View style={styles.cartItemRow}>
+                  <View style={styles.itemMeta}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemUnitPrice}>Rs. {item.price} each</Text>
+                  </View>
+                  
+                  <View style={styles.qtyContainer}>
+                    <TouchableOpacity activeOpacity={0.75}
+                      style={styles.qtyBtn}
+                      onPress={() => handleDecrement(item)}
+                    >
+                      <Ionicons name="remove" size={14} color={COLORS.white} />
+                    </TouchableOpacity>
+                    <Text style={styles.qtyText}>{item.quantity}</Text>
+                    <TouchableOpacity activeOpacity={0.75}
+                      style={styles.qtyBtn}
+                      onPress={() => handleIncrement(item)}
+                    >
+                      <Ionicons name="add" size={14} color={COLORS.white} />
+                    </TouchableOpacity>
+                  </View>
 
-                <Text style={styles.itemTotalPrice}>Rs. {item.price * item.quantity}</Text>
-                
-                <TouchableOpacity activeOpacity={0.75} onPress={() => handleRemove(item.id)} style={styles.deleteBtn}>
-                  <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
-                </TouchableOpacity>
-              </View>
-            </SwipeableRow>
-          ))}
+                  <Text style={styles.itemTotalPrice}>Rs. {item.price * item.quantity}</Text>
+                  
+                  <TouchableOpacity activeOpacity={0.75} onPress={() => handleRemove(item)} style={styles.deleteBtn}>
+                    <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
+                  </TouchableOpacity>
+                </View>
+              </SwipeableRow>
+            );
+          })}
         </View>
 
         {/* Bill Summary */}

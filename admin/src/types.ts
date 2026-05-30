@@ -14,6 +14,8 @@ export interface MenuItem {
   image_url?: string;
   is_available: boolean;
   category_name?: string;
+  preparation_time?: number;
+  options?: any;
 }
 
 export interface MenuCategory {

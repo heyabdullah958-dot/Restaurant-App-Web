@@ -7,6 +7,8 @@ export interface MenuItem {
   is_available: boolean;
   is_featured: boolean;
   preparation_time: number;
+  options?: any;
+  categoryName?: string;
 }
 
 export interface MenuCategory {

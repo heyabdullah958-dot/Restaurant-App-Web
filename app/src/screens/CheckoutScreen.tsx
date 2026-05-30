@@ -90,17 +90,22 @@ export default function CheckoutScreen() {
     setIsSubmitting(true);
 
     // 2. Map cart items to payload
-    const orderItems = items.map((item) => ({
-      menu_item: item.id,
-      quantity: item.quantity,
-      special_notes: item.selectedOptions
-        ? (typeof item.selectedOptions === 'object'
-            ? Object.entries(item.selectedOptions)
-                .map(([k, v]) => `${k}: ${v}`)
-                .join(', ')
-            : String(item.selectedOptions))
-        : '',
-    }));
+    const orderItems = items.map((item) => {
+      const selected_options = [];
+      let notes = '';
+
+      if (item.selectedOptions && Array.isArray(item.selectedOptions)) {
+        selected_options.push(...item.selectedOptions);
+        notes = item.selectedOptions.map((opt: any) => `${opt.name || 'Option'} (+Rs. ${opt.price_modifier || 0})`).join(', ');
+      }
+
+      return {
+        menu_item: item.id,
+        quantity: item.quantity,
+        special_notes: notes,
+        selected_options: selected_options,
+      };
+    });
 
     // 3. Assemble order payload
     const orderData: any = {

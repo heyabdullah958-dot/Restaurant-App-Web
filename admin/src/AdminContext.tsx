@@ -51,6 +51,7 @@ interface AdminContextProps {
   addMenuItem: (categoryId: number, name: string, description: string, price: number) => Promise<void>;
   removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
   updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
+  editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -507,6 +508,38 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // Edit/update menu item properties
+  const editMenuItem = async (categoryId: number, itemId: number, data: any) => {
+    setLoading(true);
+    try {
+      const updatedItem = await updateMenuItem(itemId, data);
+      setMenuItems((prev) => {
+        const existingCategories = prev[selectedBrandId] || [];
+        const updated = existingCategories.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              items: category.items.map((item) =>
+                item.id === itemId ? updatedItem : item
+              ),
+            };
+          }
+          return category;
+        });
+        return {
+          ...prev,
+          [selectedBrandId]: updated,
+        };
+      });
+      showToast('Item updated successfully! ✅', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to update item', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -533,6 +566,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addMenuItem,
         removeMenuItem,
         updateItemOptions,
+        editMenuItem,
       }}
     >
       {children}
