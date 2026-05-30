@@ -69,3 +69,24 @@ class RestaurantMenuView(generics.GenericAPIView):
                 'success': False,
                 'message': 'Restaurant not found'
             }, status=404)
+
+
+from rest_framework import viewsets
+from .models import MenuCategory, MenuItem
+from .serializers import MenuItemSerializer
+
+class AdminRestaurantViewSet(viewsets.ModelViewSet):
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminMenuCategoryViewSet(viewsets.ModelViewSet):
+    queryset = MenuCategory.objects.all()
+    serializer_class = MenuCategorySerializer
+    permission_classes = [permissions.IsAdminUser]
+
+class AdminMenuItemViewSet(viewsets.ModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+    permission_classes = [permissions.IsAdminUser]
+

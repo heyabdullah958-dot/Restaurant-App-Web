@@ -9,6 +9,13 @@ import {
   clearTokens,
   getToken,
   decodeToken,
+  createRestaurant,
+  fetchRestaurantMenu,
+  createMenuCategory,
+  deleteMenuCategory,
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
   type ApiRestaurant,
   type ApiOrder,
 } from './services/api';
@@ -38,6 +45,10 @@ interface AdminContextProps {
   toggleMenuAvailability: (restaurantId: number, categoryId: number, itemId: number) => void;
   onboardNewRestaurant: (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => void;
   refreshOrders: () => Promise<void>;
+  addMenuCategory: (name: string) => Promise<void>;
+  removeMenuCategory: (id: number) => Promise<void>;
+  addMenuItem: (categoryId: number, name: string, description: string, price: number) => Promise<void>;
+  removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -134,6 +145,27 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.warn('[AdminContext] Failed to load app data:', err);
     }
   };
+
+  // Load menu dynamically when brand switches
+  useEffect(() => {
+    const selectedRest = restaurants.find((r) => r.id === selectedBrandId);
+    if (selectedRest) {
+      const loadMenu = async () => {
+        try {
+          const res = await fetchRestaurantMenu(selectedRest.slug);
+          if (res && res.success) {
+            setMenuItems((prev) => ({
+              ...prev,
+              [selectedRest.id]: res.data,
+            }));
+          }
+        } catch (err) {
+          console.warn('[loadMenu] Failed to load menu:', err);
+        }
+      };
+      loadMenu();
+    }
+  }, [selectedBrandId, restaurants]);
 
   // Show dynamic toast notifications
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -272,19 +304,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Toggle menu item availability (local state — persisted via Django admin separately)
-  const toggleMenuAvailability = (restaurantId: number, categoryId: number, itemId: number) => {
+  // Toggle menu item availability
+  const toggleMenuAvailability = async (restaurantId: number, categoryId: number, itemId: number) => {
+    let nextState = false;
     setMenuItems((prev) => {
       const restaurantCategories = prev[restaurantId] || [];
       const updatedCategories = restaurantCategories.map((category) => {
         if (category.id === categoryId) {
           const updatedItems = category.items.map((item) => {
             if (item.id === itemId) {
-              const nextState = !item.is_available;
-              showToast(
-                `${item.name} is now ${nextState ? 'In Stock ✅' : 'Out of Stock ⚠️'}`,
-                nextState ? 'success' : 'info'
-              );
+              nextState = !item.is_available;
               return { ...item, is_available: nextState };
             }
             return item;
@@ -295,40 +324,159 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
       return { ...prev, [restaurantId]: updatedCategories };
     });
+
+    try {
+      await updateMenuItem(itemId, { is_available: nextState });
+      showToast(
+        `Availability updated: ${nextState ? 'In Stock ✅' : 'Out of Stock ⚠️'}`,
+        nextState ? 'success' : 'info'
+      );
+    } catch (err: any) {
+      console.warn('[toggleMenuAvailability] API sync failed:', err);
+      showToast(err.message || 'Failed to update availability on server', 'error');
+    }
   };
 
   // Onboard new brand
-  const onboardNewRestaurant = (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => {
+  const onboardNewRestaurant = async (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => {
     setLoading(true);
-    setTimeout(() => {
-      const newId = restaurants.length + 1;
-      const created: Restaurant = {
-        ...newRestaurant,
-        id: newId,
-        rating: 4.5,
-        logo_url: '',
-        cover_url: '',
+    try {
+      const payload = {
+        name: newRestaurant.name,
+        slug: newRestaurant.slug,
+        cuisine_type: newRestaurant.cuisine_type,
+        city: newRestaurant.city,
+        phone: newRestaurant.phone || '+92 300 1234567',
+        opens_at: newRestaurant.opens_at + ':00',
+        closes_at: newRestaurant.closes_at + ':00',
+        delivery_fee: newRestaurant.delivery_fee,
+        min_order_amount: newRestaurant.min_order_amount,
+        address: newRestaurant.city + ', Pakistan',
       };
-      setRestaurants((prev) => [...prev, created]);
-      setMenuItems((prev) => ({
-        ...prev,
-        [newId]: [{
-          id: newId * 100 + 1,
-          name: 'Featured Items',
-          items: [{
-            id: newId * 1000 + 1,
-            name: `${newRestaurant.name} House Special`,
-            description: 'House specialty cooked to order',
-            price: 750,
-            is_available: true,
-            category_name: 'Featured Items',
-          }],
-        }],
-      }));
-      setLoading(false);
-      showToast(`Restaurant "${newRestaurant.name}" onboarded!`, 'success');
+      const created = await createRestaurant(payload);
+      const mapped = mapApiRestaurant(created);
+      setRestaurants((prev) => [...prev, mapped]);
+      showToast(`Restaurant "${newRestaurant.name}" onboarded! 🚀`, 'success');
       setView('super_dashboard');
-    }, 600);
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to onboard restaurant', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add menu category
+  const addMenuCategory = async (name: string) => {
+    setLoading(true);
+    try {
+      const created = await createMenuCategory({
+        restaurant: selectedBrandId,
+        name,
+        is_active: true,
+        order: 0,
+      });
+      setMenuItems((prev) => {
+        const existing = prev[selectedBrandId] || [];
+        return {
+          ...prev,
+          [selectedBrandId]: [...existing, { ...created, items: [] }],
+        };
+      });
+      showToast(`Category "${name}" created successfully!`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to create category', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Remove menu category
+  const removeMenuCategory = async (id: number) => {
+    setLoading(true);
+    try {
+      await deleteMenuCategory(id);
+      setMenuItems((prev) => {
+        const existing = prev[selectedBrandId] || [];
+        return {
+          ...prev,
+          [selectedBrandId]: existing.filter((c) => c.id !== id),
+        };
+      });
+      showToast('Category deleted successfully', 'info');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to delete category', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add menu item
+  const addMenuItem = async (categoryId: number, name: string, description: string, price: number) => {
+    setLoading(true);
+    try {
+      const created = await createMenuItem({
+        category: categoryId,
+        name,
+        description,
+        price,
+        is_available: true,
+      });
+      setMenuItems((prev) => {
+        const existingCategories = prev[selectedBrandId] || [];
+        const updated = existingCategories.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              items: [...category.items, created],
+            };
+          }
+          return category;
+        });
+        return {
+          ...prev,
+          [selectedBrandId]: updated,
+        };
+      });
+      showToast(`Item "${name}" added to menu!`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to add item', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Remove menu item
+  const removeMenuItem = async (categoryId: number, itemId: number) => {
+    setLoading(true);
+    try {
+      await deleteMenuItem(itemId);
+      setMenuItems((prev) => {
+        const existingCategories = prev[selectedBrandId] || [];
+        const updated = existingCategories.map((category) => {
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              items: category.items.filter((item) => item.id !== itemId),
+            };
+          }
+          return category;
+        });
+        return {
+          ...prev,
+          [selectedBrandId]: updated,
+        };
+      });
+      showToast('Item deleted from menu', 'info');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to delete item', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -352,6 +500,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleMenuAvailability,
         onboardNewRestaurant,
         refreshOrders,
+        addMenuCategory,
+        removeMenuCategory,
+        addMenuItem,
+        removeMenuItem,
       }}
     >
       {children}

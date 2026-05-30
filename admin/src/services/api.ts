@@ -95,7 +95,7 @@ export const fetchRestaurants = () =>
   apiFetch<{ results: ApiRestaurant[]; count: number }>('/api/restaurants/');
 
 export const fetchRestaurantMenu = (slug: string) =>
-  apiFetch<any[]>(`/api/restaurants/${slug}/menu/`);
+  apiFetch<any>(`/api/restaurants/${slug}/menu/`);
 
 // ─── ORDERS ───────────────────────────────────────────────────────────────────
 
@@ -197,6 +197,54 @@ export const sendPushNotification = (payload: SendNotificationPayload) =>
   apiFetch<any>('/api/admin/notifications/send/', {
     method: 'POST',
     body: JSON.stringify(payload),
+  });
+
+// ─── ADMIN CRUDS ─────────────────────────────────────────────────────────────
+
+export const createRestaurant = (data: any) =>
+  apiFetch<any>('/api/admin/restaurants/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const updateRestaurant = (id: number, data: any) =>
+  apiFetch<any>(`/api/admin/restaurants/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
+export const createMenuCategory = (data: any) =>
+  apiFetch<any>('/api/admin/menu-categories/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const updateMenuCategory = (id: number, data: any) =>
+  apiFetch<any>(`/api/admin/menu-categories/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
+export const deleteMenuCategory = (id: number) =>
+  apiFetch<any>(`/api/admin/menu-categories/${id}/`, {
+    method: 'DELETE',
+  });
+
+export const createMenuItem = (data: any) =>
+  apiFetch<any>('/api/admin/menu-items/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+export const updateMenuItem = (id: number, data: any) =>
+  apiFetch<any>(`/api/admin/menu-items/${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
+export const deleteMenuItem = (id: number) =>
+  apiFetch<any>(`/api/admin/menu-items/${id}/`, {
+    method: 'DELETE',
   });
 
 // ─── TOKEN DECODE HELPER ──────────────────────────────────────────────────────

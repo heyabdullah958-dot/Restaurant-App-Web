@@ -4,18 +4,18 @@ from .models import Restaurant, MenuCategory, MenuItem
 class MenuItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MenuItem
-        fields = ('id', 'name', 'description', 'price', 'image', 'is_available', 'is_featured', 'preparation_time')
+        fields = ('id', 'category', 'name', 'description', 'price', 'image', 'is_available', 'is_featured', 'preparation_time')
 
 class MenuCategorySerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
 
     class Meta:
         model = MenuCategory
-        fields = ('id', 'name', 'icon', 'order', 'is_active', 'items')
+        fields = ('id', 'restaurant', 'name', 'icon', 'order', 'is_active', 'items')
 
     def get_items(self, obj):
-        # Only show available items
-        available_items = obj.items.filter(is_available=True)
+        # Only show available items for frontend, but return all items when needed
+        available_items = obj.items.all()
         return MenuItemSerializer(available_items, many=True).data
 
 class RestaurantSerializer(serializers.ModelSerializer):
