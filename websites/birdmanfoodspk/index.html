@@ -907,35 +907,38 @@
       }
     });
 
-    // Handle AJAX Form Submission with Formspree
-    async function handleFormSubmit(e) {
+    // Handle WhatsApp Catering Inquiry Submission
+    function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerHTML;
       
-      btn.innerHTML = '⏳ Sending...';
-      btn.disabled = true;
+      const name = form.name.value;
+      const phone = form.phone.value;
+      const guests = form.guests.value;
+      const event_date = form.event_date.value;
+      const selectedPackage = form.package.value;
+      const notes = form.notes ? form.notes.value : '';
       
-      try {
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (response.ok) {
-          form.style.display = 'none';
-          document.getElementById('form-success').style.display = 'block';
-        } else {
-          btn.innerHTML = '❌ Try Again';
-          btn.disabled = false;
-          setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
-        }
-      } catch {
-        btn.innerHTML = '❌ Error — Try Again';
-        btn.disabled = false;
-        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+      const message = `Assalam o Alaikum! I want to submit a catering inquiry for Birdman Foods 🍗\n\n` +
+                      `*Inquiry Details:*\n` +
+                      `• *Name:* ${name}\n` +
+                      `• *Phone:* ${phone}\n` +
+                      `• *Event Date:* ${event_date}\n` +
+                      `• *Guest Count:* ${guests}\n` +
+                      `• *Selected Package:* ${selectedPackage}\n\n` +
+                      (notes.trim() ? `*Special Notes:* ${notes}\n` : '');
+                      
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/923000000000?text=${encodedMessage}`;
+      
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      // Show success message on UI
+      form.style.display = 'none';
+      const successDiv = document.getElementById('form-success');
+      if (successDiv) {
+        successDiv.style.display = 'block';
       }
     }
 

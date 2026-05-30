@@ -763,35 +763,40 @@
       }
     });
 
-    // Handle AJAX Form Submission with Formspree
-    async function handleFormSubmit(e) {
+    // Handle WhatsApp Reservation Submission
+    function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerHTML;
       
-      btn.innerHTML = '⏳ Sending...';
-      btn.disabled = true;
+      const name = form.name.value;
+      const phone = form.phone.value;
+      const date = form.date.value;
+      const time = form.time.value;
+      const guests = form.guests.value;
+      const occasion = form.occasion.value;
+      const requests = form.requests ? form.requests.value : '';
       
-      try {
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (response.ok) {
-          form.style.display = 'none';
-          document.getElementById('form-success').style.display = 'block';
-        } else {
-          btn.innerHTML = '❌ Try Again';
-          btn.disabled = false;
-          setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
-        }
-      } catch {
-        btn.innerHTML = '❌ Error — Try Again';
-        btn.disabled = false;
-        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+      const message = `Assalam o Alaikum! I want to request a table reservation at Dine At Blue 🍽️\n\n` +
+                      `*Reservation Details:*\n` +
+                      `• *Name:* ${name}\n` +
+                      `• *Phone:* ${phone}\n` +
+                      `• *Date:* ${date}\n` +
+                      `• *Time:* ${time}\n` +
+                      `• *Guests:* ${guests}\n` +
+                      `• *Occasion:* ${occasion}\n\n` +
+                      (requests.trim() ? `*Special Requests:* ${requests}\n` : '');
+                      
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/923000000000?text=${encodedMessage}`;
+      
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      // Show success message on UI
+      form.style.display = 'none';
+      const successDiv = document.getElementById('form-success');
+      if (successDiv) {
+        successDiv.style.display = 'block';
       }
     }
   </script>

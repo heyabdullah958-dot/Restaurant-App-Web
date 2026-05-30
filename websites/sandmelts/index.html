@@ -978,35 +978,36 @@
       }
     });
 
-    // Handle AJAX Form Submission with Formspree
-    async function handleFormSubmit(e) {
+    // Handle WhatsApp Order Submission
+    function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerHTML;
       
-      btn.innerHTML = '⏳ Sending...';
-      btn.disabled = true;
+      const name = form.name.value;
+      const phone = form.phone.value;
+      const address = form.address.value;
+      const order = form.order.value;
       
-      try {
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (response.ok) {
-          form.style.display = 'none';
-          document.getElementById('form-success').style.display = 'block';
-        } else {
-          btn.innerHTML = '❌ Try Again';
-          btn.disabled = false;
-          setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
-        }
-      } catch {
-        btn.innerHTML = '❌ Error — Try Again';
-        btn.disabled = false;
-        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 2000);
+      const message = `Assalam o Alaikum! I want to place an order from SandMelts Website 🛵\n\n` +
+                      `*Customer Details:*\n` +
+                      `• *Name:* ${name}\n` +
+                      `• *Phone:* ${phone}\n` +
+                      `• *Address:* ${address}\n\n` +
+                      `*Order Details:*\n` +
+                      `${order}\n\n` +
+                      `*Payment Method:* Cash on Delivery (COD)`;
+                      
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/923210563636?text=${encodedMessage}`;
+      
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      // Show success message on UI
+      form.style.display = 'none';
+      const successDiv = document.getElementById('form-success');
+      if (successDiv) {
+        successDiv.style.display = 'block';
       }
     }
 
