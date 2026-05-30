@@ -218,13 +218,13 @@ FoodSphere/
 | App store submission | ⏳ Pending | TBD |
 
 ### 🔗 Deployed Prototypes (Netlify)
-- **seenbanao website:** [https://seenbanao-foodsphere-125.netlify.app](https://seenbanao-foodsphere-125.netlify.app)
-- **dineatblue website:** [https://dineatblue-foodsphere-652.netlify.app](https://dineatblue-foodsphere-652.netlify.app)
-- **jushhpk website:** [https://jushhpk-foodsphere-624.netlify.app](https://jushhpk-foodsphere-624.netlify.app)
-- **tandooristoppk website:** [https://tandooristoppk-foodsphere-218.netlify.app](https://tandooristoppk-foodsphere-218.netlify.app)
-- **sandmelts website:** [https://sandmelts-foodsphere-378.netlify.app](https://sandmelts-foodsphere-378.netlify.app)
-- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere-691.netlify.app](https://birdmanfoodspk-foodsphere-691.netlify.app)
-- **getafomo website:** [https://getafomo-foodsphere-286.netlify.app](https://getafomo-foodsphere-286.netlify.app)
+- **seenbanao website:** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
+- **dineatblue website:** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
+- **jushhpk website:** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
+- **tandooristoppk website:** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
+- **sandmelts website:** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
+- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
+- **getafomo website:** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
 
 
 ---
