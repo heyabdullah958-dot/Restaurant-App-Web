@@ -112,6 +112,7 @@ FoodSphere/
 | **Payments** | Stripe + PayFast + Cash on Delivery |
 | **Notifications** | Firebase Cloud Messaging (FCM) |
 | **Hosting (Websites)** | Netlify / Vercel |
+| **Hosting (Admin Dashboard)** | Cloudflare Pages |
 | **Hosting (Backend)** | Render.com |
 
 ---
