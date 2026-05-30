@@ -211,20 +211,20 @@ FoodSphere/
 |---|---|---|
 | App UI Design (Google Stitch mockups) | ✅ Completed (Live on Cloudflare) | Done |
 | 3 Website UIs (6 brand sites active) | ✅ Completed (Live on Cloudflare) | Done |
-| Backend setup & models | ⏳ Pending | TBD |
-| App core screens (Home, Menu, Cart) | ⏳ Pending | TBD |
+| Backend setup & models | ✅ Completed (Live on Render) | Done |
+| App core screens (Home, Menu, Cart) | ⏳ Pending (Local Build Active) | TBD |
 | Payment integration | ⏳ Pending | TBD |
-| All 7 websites live | ⏳ Pending (6/7 Live) | TBD |
+| All 7 websites live | ✅ Completed (7/7 Live) | Done |
 | App store submission | ⏳ Pending | TBD |
 
-### 🔗 Deployed Prototypes (Cloudflare Pages)
-- **Unified App Prototype:** [https://foodsphere-app.pages.dev](https://foodsphere-app.pages.dev)
-- **seenbanao website:** [https://foodsphere-seenbanao.pages.dev](https://foodsphere-seenbanao.pages.dev)
-- **dineatblue website:** [https://foodsphere-dineatblue.pages.dev](https://foodsphere-dineatblue.pages.dev)
-- **jushhpk website:** [https://foodsphere-jushhpk.pages.dev](https://foodsphere-jushhpk.pages.dev)
-- **tandooristoppk website:** [https://foodsphere-tandooristoppk.pages.dev](https://foodsphere-tandooristoppk.pages.dev)
-- **sandmelts website:** [https://foodsphere-sandmelts.pages.dev](https://foodsphere-sandmelts.pages.dev)
-- **getafomo website:** [https://foodsphere-getafomo.pages.dev](https://foodsphere-getafomo.pages.dev)
+### 🔗 Deployed Prototypes (Netlify)
+- **seenbanao website:** [https://seenbanao-foodsphere.netlify.app](https://seenbanao-foodsphere.netlify.app)
+- **dineatblue website:** [https://dineatblue-foodsphere.netlify.app](https://dineatblue-foodsphere.netlify.app)
+- **jushhpk website:** [https://jushhpk-foodsphere.netlify.app](https://jushhpk-foodsphere.netlify.app)
+- **tandooristoppk website:** [https://tandooristoppk-foodsphere.netlify.app](https://tandooristoppk-foodsphere.netlify.app)
+- **sandmelts website:** [https://sandmelts-foodsphere.netlify.app](https://sandmelts-foodsphere.netlify.app)
+- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere.netlify.app](https://birdmanfoodspk-foodsphere.netlify.app)
+- **getafomo website:** [https://getafomo-foodsphere.netlify.app](https://getafomo-foodsphere.netlify.app)
 
 
 ---
