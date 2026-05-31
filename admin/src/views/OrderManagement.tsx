@@ -92,7 +92,9 @@ export const OrderManagement: React.FC = () => {
       {/* Kanban Board Columns Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
         {columns.map((col) => {
-          const colOrders = brandOrders.filter((o) => o.status === col.status);
+          const colOrders = brandOrders
+            .filter((o) => o.status === col.status)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
           
           return (
             <div 

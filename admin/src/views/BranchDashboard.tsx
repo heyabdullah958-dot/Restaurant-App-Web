@@ -186,7 +186,7 @@ export const BranchDashboard: React.FC = () => {
             <p className="text-xs text-zinc-400 dark:text-slate-400">Incoming actions at this branch</p>
             
             <div className="mt-5 space-y-4">
-              {brandOrders.slice(0, 3).map((order) => (
+              {[...brandOrders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 3).map((order) => (
                 <div key={order.id} className="flex justify-between items-start text-xs border-b border-zinc-100 dark:border-slate-700/40 pb-3">
                   <div>
                     <span className="font-bold text-zinc-800 dark:text-slate-200">Order #{order.id}</span>

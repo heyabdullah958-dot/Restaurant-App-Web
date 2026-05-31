@@ -392,16 +392,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Update order status — tries API first, falls back to local state
   const updateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
-    // Optimistic local update
-    setOrders((prev) =>
-      prev.map((order) => {
+    setOrders((prev) => {
+      const updated = prev.map((order) => {
         if (order.id === orderId) {
           showToast(`Order #${orderId} → ${newStatus}`, 'success');
           return { ...order, status: newStatus };
         }
         return order;
-      })
-    );
+      });
+      return [...updated].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    });
 
     // Sync to API
     try {
