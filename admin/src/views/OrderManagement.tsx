@@ -196,15 +196,6 @@ export const OrderManagement: React.FC = () => {
                               Cancelled
                             </div>
                           )}
-
-                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                            <button
-                              onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                              className="w-full flex items-center justify-center gap-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 text-rose-600 dark:text-rose-400 font-bold py-2 rounded-lg text-[11px] transition-all"
-                            >
-                              Cancel Order
-                            </button>
-                          )}
                         </div>
                       </div>
                     </div>

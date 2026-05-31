@@ -158,3 +158,8 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
             else:
                 kwargs["queryset"] = db_field.related_model.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == "status":
+            kwargs["choices"] = [choice for choice in db_field.choices if choice[0] != 'cancelled']
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
