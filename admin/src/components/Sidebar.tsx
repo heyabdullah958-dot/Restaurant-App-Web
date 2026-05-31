@@ -8,7 +8,8 @@ import {
   LogOut, 
   X,
   Bell,
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -178,6 +179,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <Users size={18} />
                   Customers
+                </button>
+                <button
+                  onClick={() => { setView('manager_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'manager_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Lock size={18} />
+                  Manager Accounts
                 </button>
                 <button
                   onClick={() => { setView('notification_center'); setIsOpen(false); }}

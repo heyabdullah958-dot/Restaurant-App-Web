@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView, CustomTokenObtainPairView, LogoutView
-from .admin_views import AdminCustomerListView, AdminCustomerLoyaltyView, AdminCustomerDetailView
+from .admin_views import AdminCustomerListView, AdminCustomerLoyaltyView, AdminCustomerDetailView, AdminManagerListView, AdminManagerChangePasswordView
 from config.analytics_views import PlatformAnalyticsView, RestaurantAnalyticsView
 from config.notification_views import SendNotificationView
 
@@ -22,6 +22,10 @@ urlpatterns = [
     path('admin/customers/', AdminCustomerListView.as_view(), name='admin_customer_list'),
     path('admin/customers/<int:pk>/', AdminCustomerDetailView.as_view(), name='admin_customer_detail'),
     path('admin/customers/<int:pk>/loyalty/', AdminCustomerLoyaltyView.as_view(), name='admin_customer_loyalty'),
+
+    # ── Admin Manager Management ───────────────────────────
+    path('admin/managers/', AdminManagerListView.as_view(), name='admin_manager_list'),
+    path('admin/managers/<int:pk>/change-password/', AdminManagerChangePasswordView.as_view(), name='admin_manager_change_password'),
 
     # ── Analytics API ──────────────────────────────────────
     path('analytics/platform/', PlatformAnalyticsView.as_view(), name='analytics_platform'),

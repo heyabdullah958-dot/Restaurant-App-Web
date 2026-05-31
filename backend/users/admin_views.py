@@ -142,3 +142,55 @@ class AdminCustomerDetailView(APIView):
                 'created_at': t.created_at.isoformat(),
             } for t in transactions],
         })
+
+
+from config.admin_utils import get_managed_restaurant
+
+class AdminManagerListView(APIView):
+    """
+    GET /api/admin/managers/
+    Returns list of all restaurant managers with their assigned restaurants.
+    Super admin only.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        managers = User.objects.filter(is_staff=True, is_superuser=False).order_by('username')
+        results = []
+        for u in managers:
+            managed = get_managed_restaurant(u)
+            results.append({
+                'id': u.id,
+                'username': u.username,
+                'email': u.email or '',
+                'restaurant_name': managed.name if managed else 'None',
+                'restaurant_id': managed.id if managed else None,
+            })
+        return Response(results)
+
+
+class AdminManagerChangePasswordView(APIView):
+    """
+    POST /api/admin/managers/<pk>/change-password/
+    Change password for a restaurant manager.
+    Super admin only.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk, is_staff=True, is_superuser=False)
+        except User.DoesNotExist:
+            return Response({'error': 'Manager not found'}, status=404)
+
+        new_password = request.data.get('password')
+        if not new_password or len(new_password.strip()) < 6:
+            return Response({'error': 'Password must be at least 6 characters long'}, status=400)
+
+        user.set_password(new_password.strip())
+        user.save()
+
+        return Response({
+            'success': True,
+            'message': f"Password for {user.username} has been changed successfully!"
+        })

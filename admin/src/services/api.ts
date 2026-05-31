@@ -393,6 +393,15 @@ export const updateMenuItemOptions = (id: number, options: any[]) =>
     body: JSON.stringify({ options }),
   });
 
+export const fetchAllManagers = () =>
+  apiFetch<any[]>('/api/admin/managers/');
+
+export const changeManagerPassword = (managerId: number, password: string) =>
+  apiFetch<any>(`/api/admin/managers/${managerId}/change-password/`, {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+
 // ─── TOKEN DECODE HELPER ──────────────────────────────────────────────────────
 
 export interface JWTPayload {
