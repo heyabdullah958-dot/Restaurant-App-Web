@@ -43,6 +43,7 @@ export interface Restaurant {
   min_order_amount: number;
   logo_url?: string;
   cover_url?: string;
+  banner_url?: string;
   phone?: string;
 }
 

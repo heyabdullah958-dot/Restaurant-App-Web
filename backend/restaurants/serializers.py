@@ -75,47 +75,42 @@ class AdminMenuCategorySerializer(serializers.ModelSerializer):
         return MenuItemSerializer(all_items, many=True, context=self.context).data
 
 
+class AbsoluteImageField(serializers.ImageField):
+    def to_representation(self, value):
+        return build_absolute_image_url(value, self.context)
+
+
 class RestaurantSerializer(serializers.ModelSerializer):
-    logo = serializers.SerializerMethodField()
-    cover_image = serializers.SerializerMethodField()
+    logo = AbsoluteImageField(required=False, allow_null=True)
+    cover_image = AbsoluteImageField(required=False, allow_null=True)
+    banner_image = AbsoluteImageField(required=False, allow_null=True)
 
     class Meta:
         model = Restaurant
         fields = (
-            'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image',
+            'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio'
         )
 
-    def get_logo(self, obj):
-        return build_absolute_image_url(obj.logo, self.context)
-
-    def get_cover_image(self, obj):
-        return build_absolute_image_url(obj.cover_image, self.context)
-
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
-    logo = serializers.SerializerMethodField()
-    cover_image = serializers.SerializerMethodField()
+    logo = AbsoluteImageField(required=False, allow_null=True)
+    cover_image = AbsoluteImageField(required=False, allow_null=True)
+    banner_image = AbsoluteImageField(required=False, allow_null=True)
     categories = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = (
-            'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image',
+            'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'categories'
         )
-
-    def get_logo(self, obj):
-        return build_absolute_image_url(obj.logo, self.context)
-
-    def get_cover_image(self, obj):
-        return build_absolute_image_url(obj.cover_image, self.context)
 
     def get_categories(self, obj):
         # Only return active categories

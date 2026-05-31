@@ -13,6 +13,7 @@ import {
   getRefreshToken,
   decodeToken,
   createRestaurant,
+  updateRestaurant,
   deleteRestaurant,
   fetchRestaurantMenu,
   createMenuCategory,
@@ -49,7 +50,7 @@ interface AdminContextProps {
   setSelectedBrand: (id: number) => void;
   updateOrderStatus: (orderId: number, newStatus: OrderStatus) => void;
   toggleMenuAvailability: (restaurantId: number, categoryId: number, itemId: number) => void;
-  onboardNewRestaurant: (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => void;
+  onboardNewRestaurant: (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url' | 'banner_url'>) => void;
   removeRestaurant: (id: number) => Promise<void>;
   refreshOrders: () => Promise<void>;
   addMenuCategory: (name: string) => Promise<void>;
@@ -58,6 +59,7 @@ interface AdminContextProps {
   removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
   updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
+  updateRestaurantBanner: (id: number, file: File) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -80,8 +82,10 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     min_order_amount: typeof r.min_order_amount === 'string' ? parseFloat(r.min_order_amount) : r.min_order_amount,
     logo_url: getFullImageUrl(r.logo),
     cover_url: getFullImageUrl(r.cover_image),
+    banner_url: getFullImageUrl(r.banner_image),
     opens_at: r.opens_at,
     closes_at: r.closes_at,
+    phone: r.phone,
   };
 }
 
@@ -473,7 +477,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Onboard new brand
-  const onboardNewRestaurant = async (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url'>) => {
+  const onboardNewRestaurant = async (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url' | 'banner_url'>) => {
     setLoading(true);
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
     if (isMock) {
@@ -484,6 +488,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         rating: 4.5,
         logo_url: undefined,
         cover_url: undefined,
+        banner_url: undefined,
       };
       setRestaurants((prev) => [...prev, mapped]);
       setMenuItems((prev) => ({ ...prev, [newId]: [] }));
@@ -851,6 +856,38 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const updateRestaurantBanner = async (id: number, file: File) => {
+    setLoading(true);
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (isMock) {
+      const mockUrl = URL.createObjectURL(file);
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, banner_url: mockUrl } : r))
+      );
+      showToast('Banner updated (Mock)! 🖼️', 'success');
+      setLoading(false);
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('banner_image', file);
+      
+      const updated = await updateRestaurant(id, formData);
+      const mapped = mapApiRestaurant(updated);
+      
+      // Update local state so it immediately reflects
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? mapped : r))
+      );
+      showToast('Banner image updated successfully! 🖼️', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to update banner image', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Polling for live orders (every 30 seconds)
   useEffect(() => {
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
@@ -891,6 +928,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeMenuItem,
         updateItemOptions,
         editMenuItem,
+        updateRestaurantBanner,
       }}
     >
       {children}

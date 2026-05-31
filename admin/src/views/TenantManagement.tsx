@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
-import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2 } from 'lucide-react';
+import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera } from 'lucide-react';
 
 export const TenantManagement: React.FC = () => {
-  const { restaurants, onboardNewRestaurant, removeRestaurant } = useAdmin();
+  const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
 
   // Form states
@@ -73,9 +73,9 @@ export const TenantManagement: React.FC = () => {
           <div key={restaurant.id} className="bg-slate-800 border border-slate-700/60 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between">
             {/* Cover Banner */}
             <div className="h-28 relative overflow-hidden">
-              {restaurant.cover_url ? (
+              {restaurant.banner_url ? (
                 <img
-                  src={restaurant.cover_url}
+                  src={restaurant.banner_url}
                   alt={restaurant.name}
                   className="w-full h-full object-cover opacity-80"
                   onError={(e) => {
@@ -85,24 +85,50 @@ export const TenantManagement: React.FC = () => {
                   }}
                 />
               ) : null}
-              {/* Gradient fallback — shows when no image or image fails */}
+              {/* Green gradient fallback — shows when no image or image fails */}
               <div
                 className={`absolute inset-0 ${
-                  restaurant.cover_url ? 'hidden' : 'flex'
+                  restaurant.banner_url ? 'hidden' : 'flex'
                 } items-center justify-center`}
                 style={{
-                  background: `linear-gradient(135deg, hsl(${(restaurant.id * 47) % 360}, 50%, 20%), hsl(${(restaurant.id * 47 + 120) % 360}, 60%, 15%))`,
+                  background: 'linear-gradient(135deg, #064e3b, #022c22)',
                 }}
               >
-                <span className="text-3xl opacity-30">🍽️</span>
+                <span className="text-3xl opacity-35">🍽️</span>
               </div>
-              <span className={`absolute top-3 right-3 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border ${
+              
+              {/* Online/Disabled badge */}
+              <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border backdrop-blur-md ${
                 restaurant.is_active
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/35'
                   : 'bg-rose-500/20 text-rose-400 border-rose-500/35'
               }`}>
                 {restaurant.is_active ? 'Online' : 'Disabled'}
               </span>
+
+              {/* Upload Banner Button */}
+              <button
+                type="button"
+                onClick={() => document.getElementById(`banner-input-${restaurant.id}`)?.click()}
+                className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                title="Upload Cover Banner"
+              >
+                <Camera size={14} />
+              </button>
+              
+              {/* Hidden file input */}
+              <input
+                type="file"
+                id={`banner-input-${restaurant.id}`}
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    updateRestaurantBanner(restaurant.id, file);
+                  }
+                }}
+              />
             </div>
 
             {/* Content Details */}

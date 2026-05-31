@@ -165,8 +165,10 @@ export interface ApiRestaurant {
   min_order_amount: string | number;
   logo: string | null;
   cover_image: string | null;
+  banner_image: string | null;
   opens_at: string;
   closes_at: string;
+  phone?: string;
 }
 
 export const fetchRestaurants = () =>
@@ -338,11 +340,13 @@ export const createRestaurant = (data: any) =>
     body: JSON.stringify(data),
   });
 
-export const updateRestaurant = (id: number, data: any) =>
-  apiFetch<any>(`/api/admin/restaurants/${id}/`, {
+export const updateRestaurant = (id: number, data: any) => {
+  const isFormData = data instanceof FormData;
+  return apiFetch<any>(`/api/admin/restaurants/${id}/`, {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: isFormData ? data : JSON.stringify(data),
   });
+};
 
 export const deleteRestaurant = (id: number) =>
   apiFetch<any>(`/api/admin/restaurants/${id}/`, {

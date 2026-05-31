@@ -6,6 +6,7 @@ class Restaurant(models.Model):
     cuisine_type = models.CharField(max_length=255)
     logo = models.ImageField(upload_to='restaurants/logos/', null=True, blank=True)
     cover_image = models.ImageField(upload_to='restaurants/covers/', null=True, blank=True)
+    banner_image = models.ImageField(upload_to='restaurants/banners/', null=True, blank=True)
     description = models.TextField(blank=True)
     address = models.TextField()
     city = models.CharField(max_length=100, db_index=True)
