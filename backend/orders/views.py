@@ -40,15 +40,18 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OrderDetailView(generics.RetrieveAPIView):
+class OrderDetailView(generics.RetrieveUpdateAPIView):
     """
-    GET /api/orders/{id}/
-    Retrieve order details and tracking status.
-    BUG-08 FIX: select_related to avoid N+1 on restaurant.
+    GET /api/orders/{id}/ - Retrieve order details (AllowAny).
+    PATCH /api/orders/{id}/ - Update order status (IsAdminUser).
     """
     queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
     serializer_class = OrderDetailSerializer
-    permission_classes = [permissions.AllowAny]  # Guest order tracking allowed
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
 
 
 class MyOrdersListView(generics.ListAPIView):
