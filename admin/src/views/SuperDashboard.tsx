@@ -254,6 +254,74 @@ export const SuperDashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Recent Orders Table */}
+      <div className="bg-slate-800 border border-slate-700/60 rounded-2xl shadow-sm overflow-hidden mt-6">
+        <div className="p-6 border-b border-slate-700/60 flex justify-between items-center">
+          <div>
+            <h3 className="font-bold text-white text-base">Recent Orders</h3>
+            <p className="text-xs text-slate-400">Individual orders mapped line-by-line</p>
+          </div>
+          <button 
+            onClick={() => setView('order_management')}
+            className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+          >
+            View All Orders <ArrowUpRight size={14} />
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-900/50 border-b border-slate-700/40 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                <th className="py-4 px-6">Order ID</th>
+                <th className="py-4 px-6">Restaurant</th>
+                <th className="py-4 px-6">Customer</th>
+                <th className="py-4 px-6 text-right">Total Amount</th>
+                <th className="py-4 px-6 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-700/40 text-sm text-slate-300">
+              {filteredOrders.slice(0, 15).map((order) => (
+                <tr key={order.id} className="hover:bg-slate-700/20 transition-colors">
+                  <td className="py-4.5 px-6 font-bold text-slate-200">
+                    #{order.id}
+                  </td>
+                  <td className="py-4.5 px-6 font-semibold text-white">
+                    {order.restaurant_name}
+                  </td>
+                  <td className="py-4.5 px-6 text-slate-300">
+                    {order.user_or_guest || order.guest_name || 'Guest'}
+                  </td>
+                  <td className="py-4.5 px-6 text-right font-bold text-white">
+                    Rs. {order.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                  <td className="py-4.5 px-6 text-center">
+                    <span
+                      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
+                        order.status === 'delivered'
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : order.status === 'cancelled' || order.status === 'rejected'
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      }`}
+                    >
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {filteredOrders.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-400 text-sm">
+                    No recent orders found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
