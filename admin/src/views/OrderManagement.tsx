@@ -175,8 +175,8 @@ export const OrderManagement: React.FC = () => {
                             </button>
                           )}
                           
-                          {/* Rider dispatch via WhatsApp (Triggerable during prep or out for delivery states) */}
-                          {(order.status === 'preparing' || order.status === 'out_for_delivery') && (
+                          {/* Rider dispatch via WhatsApp (Triggerable for all active order states) */}
+                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <button
                               onClick={() => triggerRiderWhatsApp(order)}
                               className="w-full flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-2 rounded-lg text-[11px] transition-all shadow-sm"
