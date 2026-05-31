@@ -117,7 +117,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           username: payload.username || 'Admin',
           email: '',
           role: payload.is_staff ? 'super_admin' : 'branch_manager',
-          restaurantId: undefined,
+          restaurantId: payload.is_staff ? undefined : payload.restaurant_id,
         };
       }
     }
@@ -205,9 +205,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setOrders(orderData.results.map(mapApiOrder));
       
       if (mapped.length > 0) {
-        const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
-        const exists = savedBrandId && mapped.some((r) => r.id === Number(savedBrandId));
-        setSelectedBrandId(exists ? Number(savedBrandId) : mapped[0].id);
+        const token = getToken();
+        const payload = token ? decodeToken(token) : null;
+        const isSuper = payload?.is_staff === true;
+        const managerRestId = isSuper ? undefined : payload?.restaurant_id;
+
+        if (managerRestId) {
+          setSelectedBrandId(managerRestId);
+          localStorage.setItem('foodsphere_admin_brand_id', String(managerRestId));
+        } else {
+          const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
+          const exists = savedBrandId && mapped.some((r) => r.id === Number(savedBrandId));
+          setSelectedBrandId(exists ? Number(savedBrandId) : mapped[0].id);
+        }
       }
     } catch (err) {
       console.warn('[AdminContext] Failed to load app data:', err);
@@ -284,8 +294,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setRestaurants(mappedRestaurants);
       setOrders(orderData.results.map(mapApiOrder));
 
+      const managerRestId = isSuperAdmin ? undefined : payload?.restaurant_id;
       if (mappedRestaurants.length > 0) {
-        setSelectedBrandId(mappedRestaurants[0].id);
+        const activeBrandId = managerRestId || mappedRestaurants[0].id;
+        setSelectedBrandId(activeBrandId);
+        localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
       }
 
       // 4. Set user state
@@ -294,14 +307,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         username,
         email: '',
         role: isSuperAdmin ? 'super_admin' : 'branch_manager',
-        restaurantId: isSuperAdmin ? undefined : mappedRestaurants[0]?.id,
+        restaurantId: managerRestId,
       };
       setUser(loggedInUser);
       const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';
       localStorage.setItem('foodsphere_admin_view', defaultView);
-      if (mappedRestaurants.length > 0) {
-        localStorage.setItem('foodsphere_admin_brand_id', String(mappedRestaurants[0].id));
-      }
       setActiveView(defaultView);
       showToast(`Welcome back, ${username}! 🚀`, 'success');
       return true;

@@ -49,7 +49,9 @@ async function performTokenRefresh(): Promise<string> {
   }
   const data = await res.json();
   const newAccess = data.access;
-  setTokens(newAccess, refresh);
+  // ROTATE_REFRESH_TOKENS=True means Django sends a new refresh token too
+  // Always save the latest refresh token to avoid "token already blacklisted" errors
+  setTokens(newAccess, data.refresh ?? refresh);
   return newAccess;
 }
 
@@ -394,6 +396,7 @@ export interface JWTPayload {
   username?: string;
   is_staff?: boolean;
   is_superuser?: boolean;
+  restaurant_id?: number;
   exp: number;
 }
 

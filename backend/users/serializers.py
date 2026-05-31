@@ -44,5 +44,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['is_staff'] = user.is_staff
         token['is_superuser'] = user.is_superuser
+        
+        # Inject the managed restaurant ID for branch manager context mapping
+        from config.admin_utils import get_managed_restaurant
+        managed = get_managed_restaurant(user)
+        token['restaurant_id'] = managed.id if managed else None
+        
         return token
 
