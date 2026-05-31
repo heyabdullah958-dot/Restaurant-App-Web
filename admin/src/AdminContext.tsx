@@ -651,7 +651,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const created = await createMenuItem(payload);
       const mappedCreated = {
         ...created,
-        image: getFullImageUrl(created.image),
+        image: getFullImageUrl(created.image_url || created.image),
       };
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];
@@ -812,7 +812,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const updatedItem = await updateMenuItem(itemId, data);
       const mappedUpdated = {
         ...updatedItem,
-        image: getFullImageUrl(updatedItem.image),
+        image: getFullImageUrl(updatedItem.image_url || updatedItem.image),
       };
       setMenuItems((prev) => {
         const existingCategories = prev[selectedBrandId] || [];

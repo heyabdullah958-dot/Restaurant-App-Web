@@ -35,7 +35,11 @@ export const AnalyticsCharts: React.FC<ChartProps> = ({ brandSlug, brandColor })
 
       if (brandSlug) {
         const matchedRest = restaurants.find(r => r.slug === brandSlug);
-        return matchesDate && matchedRest && Number(o.restaurant_id) === Number(matchedRest.id);
+        return matchesDate && matchedRest && (
+          Number(o.restaurant_id) === Number(matchedRest.id) ||
+          (o.restaurant_name && matchedRest.name && 
+           o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === matchedRest.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+        );
       }
       return matchesDate;
     });

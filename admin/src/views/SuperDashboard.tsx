@@ -13,7 +13,11 @@ export const SuperDashboard: React.FC = () => {
   // Calculate live statistics based on scope and timeframe
   let filteredOrders = orders;
   if (scope === 'selected' && selectedBrand) {
-    filteredOrders = orders.filter(o => Number(o.restaurant_id) === Number(selectedBrand.id));
+    filteredOrders = orders.filter(o => 
+      Number(o.restaurant_id) === Number(selectedBrand.id) ||
+      (o.restaurant_name && selectedBrand.name && 
+       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === selectedBrand.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    );
   }
 
   const now = new Date();
@@ -183,7 +187,11 @@ export const SuperDashboard: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-700/40 text-sm text-slate-300">
               {restaurants.map((restaurant) => {
-                const tenantOrders = orders.filter(o => Number(o.restaurant_id) === Number(restaurant.id));
+                const tenantOrders = orders.filter(o => 
+                  Number(o.restaurant_id) === Number(restaurant.id) ||
+                  (o.restaurant_name && restaurant.name && 
+                   o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+                );
                 const tenantRevenue = tenantOrders.reduce((sum, o) => sum + o.total, 0);
                 const tenantAOV = tenantOrders.length > 0 ? tenantRevenue / tenantOrders.length : 0;
                 

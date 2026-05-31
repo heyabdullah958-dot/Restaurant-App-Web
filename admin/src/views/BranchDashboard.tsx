@@ -33,7 +33,11 @@ export const BranchDashboard: React.FC = () => {
   const brandStats = MOCK_BRAND_STATS[restaurant.id] || { revenue: 0, orders: 0, aov: 0 };
 
   // Filter orders for this restaurant (robust casting)
-  const brandOrders = orders.filter((o) => Number(o.restaurant_id) === Number(restaurant.id));
+  const brandOrders = orders.filter((o) => 
+    Number(o.restaurant_id) === Number(restaurant.id) ||
+    (o.restaurant_name && restaurant.name && 
+     o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  );
   const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
 
   // Calculate live stats
