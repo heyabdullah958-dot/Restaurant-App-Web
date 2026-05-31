@@ -74,9 +74,9 @@ export const TenantManagement: React.FC = () => {
           <div key={restaurant.id} className="bg-slate-800 border border-slate-700/60 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between">
             {/* Cover Banner */}
             <div className="h-28 relative overflow-hidden">
-              {restaurant.banner_url ? (
+              {restaurant.banner_url || restaurant.cover_url ? (
                 <img
-                  src={restaurant.banner_url}
+                  src={restaurant.banner_url || restaurant.cover_url}
                   alt={restaurant.name}
                   className="w-full h-full object-cover opacity-80"
                   onError={(e) => {
@@ -89,7 +89,7 @@ export const TenantManagement: React.FC = () => {
               {/* Green gradient fallback — shows when no image or image fails */}
               <div
                 className={`absolute inset-0 ${
-                  restaurant.banner_url ? 'hidden' : 'flex'
+                  restaurant.banner_url || restaurant.cover_url ? 'hidden' : 'flex'
                 } items-center justify-center`}
                 style={{
                   background: 'linear-gradient(135deg, #064e3b, #022c22)',

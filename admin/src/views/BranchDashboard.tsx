@@ -120,9 +120,9 @@ export const BranchDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Brand Header Banner */}
       <div className="relative rounded-2xl overflow-hidden shadow-premium bg-slate-900 border border-zinc-200/60 dark:border-slate-800 h-44">
-        {restaurant.banner_url ? (
+        {restaurant.banner_url || restaurant.cover_url ? (
           <img
-            src={restaurant.banner_url}
+            src={restaurant.banner_url || restaurant.cover_url}
             alt={restaurant.name}
             className="w-full h-full object-cover opacity-60"
             onError={(e) => {
@@ -134,7 +134,7 @@ export const BranchDashboard: React.FC = () => {
         {/* Green gradient fallback */}
         <div
           className={`absolute inset-0 ${
-            restaurant.banner_url ? 'hidden' : 'flex'
+            restaurant.banner_url || restaurant.cover_url ? 'hidden' : 'flex'
           } items-center justify-center`}
           style={{
             background: 'linear-gradient(135deg, #064e3b, #022c22)',
