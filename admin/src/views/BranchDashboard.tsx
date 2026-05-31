@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
 import { MOCK_BRAND_STATS } from '../mockData';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
@@ -10,11 +10,16 @@ import {
   MapPin, 
   Phone,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  Trash2,
+  Eye,
+  X
 } from 'lucide-react';
 
 export const BranchDashboard: React.FC = () => {
-  const { selectedBrandId, restaurants, orders, setView } = useAdmin();
+  const { selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
   
@@ -114,13 +119,78 @@ export const BranchDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Brand Header Banner */}
-      <div className="relative rounded-2xl overflow-hidden shadow-premium bg-slate-900 border border-zinc-200/60 dark:border-slate-800">
-        <img
-          src={restaurant.cover_url}
-          alt={restaurant.name}
-          className="w-full h-44 object-cover opacity-60"
-        />
+      <div className="relative rounded-2xl overflow-hidden shadow-premium bg-slate-900 border border-zinc-200/60 dark:border-slate-800 h-44">
+        {restaurant.banner_url ? (
+          <img
+            src={restaurant.banner_url}
+            alt={restaurant.name}
+            className="w-full h-full object-cover opacity-60"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        {/* Green gradient fallback */}
+        <div
+          className={`absolute inset-0 ${
+            restaurant.banner_url ? 'hidden' : 'flex'
+          } items-center justify-center`}
+          style={{
+            background: 'linear-gradient(135deg, #064e3b, #022c22)',
+          }}
+        >
+          <span className="text-4xl opacity-35">🍽️</span>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-transparent" />
+
+        {/* Upload Banner Button */}
+        <button
+          type="button"
+          onClick={() => document.getElementById(`banner-input-${restaurant.id}`)?.click()}
+          className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+          title="Upload Cover Banner"
+        >
+          <Camera size={14} />
+        </button>
+
+        {/* Remove Banner Button */}
+        {restaurant.banner_url ? (
+          <button
+            type="button"
+            onClick={() => removeRestaurantBanner(restaurant.id)}
+            className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-20 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            title="Remove Cover Banner"
+          >
+            <Trash2 size={14} />
+          </button>
+        ) : null}
+
+        {/* Preview Banner Button */}
+        {restaurant.banner_url ? (
+          <button
+            type="button"
+            onClick={() => setPreviewImage(restaurant.banner_url || null)}
+            className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            title="Preview Cover Banner"
+          >
+            <Eye size={14} />
+          </button>
+        ) : null}
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          id={`banner-input-${restaurant.id}`}
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              updateRestaurantBanner(restaurant.id, file);
+            }
+          }}
+        />
         
         {/* Banner Details Overlay */}
         <div className="absolute bottom-5 left-6 right-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -230,6 +300,32 @@ export const BranchDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div 
+            className="relative max-w-4xl w-full max-h-[85vh] bg-slate-900 border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 bg-slate-950/60 hover:bg-slate-950 text-slate-300 hover:text-white p-2 rounded-xl border border-slate-700/50 transition-colors z-50 flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={previewImage} 
+              alt="Banner Preview" 
+              className="w-full h-auto max-h-[80vh] object-contain mx-auto"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
