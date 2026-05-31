@@ -105,7 +105,7 @@ export default function TrackingScreen() {
     }
   }, [activeStep]);
 
-  const riderPosition = useMemo(() => {
+  const riderPosition = useMemo<any>(() => {
     if (riderProgress <= 0.5) {
       const segProgress = riderProgress / 0.5;
       const left = 15 + (80 - 15) * segProgress;

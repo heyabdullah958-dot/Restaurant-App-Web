@@ -265,7 +265,7 @@ export default function RestaurantScreen() {
         <View>
           {/* Cover Image & Header Controls */}
           <View style={styles.coverContainer}>
-            <Image source={getImageUrl(restaurant.cover_image)} style={styles.coverImage} />
+            <Image source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} style={styles.coverImage} />
             <View style={styles.coverOverlay} />
 
             {/* Floating Header buttons */}

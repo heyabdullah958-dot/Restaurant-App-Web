@@ -27,6 +27,7 @@ export interface Restaurant {
   cuisine_type: string;
   logo: string | null;
   cover_image: string | null;
+  banner_image?: string | null;
   description: string;
   address: string;
   city: string;

@@ -260,9 +260,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                 onPress={() => navigation.navigate('Restaurant', { slug: brand.slug })}
               >
                 <View style={[styles.brandBand, { backgroundColor: color }]}>
-                  {brand.cover_image ? (
+                  {brand.banner_image || brand.cover_image ? (
                     <Image 
-                      source={getImageUrl(brand.cover_image)} 
+                      source={getImageUrl(brand.banner_image || brand.cover_image)} 
                       style={[StyleSheet.absoluteFill, { opacity: 0.8 }]} 
                       resizeMode="cover"
                     />
