@@ -340,21 +340,38 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (err: any) {
       console.error('[Login Error]', err);
       // Fallback to mock login for development convenience
-      if (username === 'admin' || username === 'seenbanao_mgr') {
+      const isMockManager = username.endsWith('_mgr') || username.startsWith('manager_');
+      if (username === 'admin' || isMockManager) {
         showToast('API unreachable — using demo mode', 'info');
         const isMockSuper = username === 'admin';
+
+        // Extract restaurant ID based on slug
+        const getMockRestaurantId = (uname: string): number => {
+          const clean = uname.replace('manager_', '').replace('_mgr', '');
+          const mapping: Record<string, number> = {
+            'seenbanao': 1,
+            'dineatblue': 2,
+            'jushhpk': 3,
+            'tandooristoppk': 4,
+            'sandmelts': 5,
+            'birdmanfoodspk': 6,
+            'getafomo': 7
+          };
+          return mapping[clean] || 1;
+        };
+
         const mockUser: User = {
           id: 1,
           username,
           email: `${username}@foodsphere.com`,
           role: isMockSuper ? 'super_admin' : 'branch_manager',
-          restaurantId: isMockSuper ? undefined : 1,
+          restaurantId: isMockSuper ? undefined : getMockRestaurantId(username),
         };
         setUser(mockUser);
         const mockView = isMockSuper ? 'super_dashboard' : 'branch_dashboard';
         localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
         localStorage.setItem('foodsphere_admin_view', mockView);
-        localStorage.setItem('foodsphere_admin_brand_id', '1');
+        localStorage.setItem('foodsphere_admin_brand_id', String(mockUser.restaurantId || 1));
         setActiveView(mockView);
         return true;
       }

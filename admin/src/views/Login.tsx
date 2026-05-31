@@ -52,7 +52,7 @@ export const Login: React.FC = () => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. admin or seenbanao_mgr"
+                placeholder="e.g. admin or manager_seenbanao"
                 className="w-full bg-slate-900 border border-slate-700/60 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15"
                 required
               />
@@ -95,14 +95,19 @@ export const Login: React.FC = () => {
             <ShieldAlert size={14} />
             <span>Developer Test Credentials</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-[11px] text-slate-400">
+          <div className="grid grid-cols-1 gap-3 text-[11px] text-slate-400">
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
-              <span className="block font-bold text-slate-300">Super-Admin</span>
+              <span className="block font-bold text-slate-300">Super-Admin (Live/Demo)</span>
               <span className="block mt-0.5">User: <code className="text-blue-400 font-bold bg-slate-800 px-1 py-0.5 rounded">admin</code></span>
               <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">admin123</code></span>
             </div>
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
-              <span className="block font-bold text-slate-300">Branch Manager</span>
+              <span className="block font-bold text-slate-300">Live SeenBanao Manager (Connected to Live API)</span>
+              <span className="block mt-0.5">User: <code className="text-orange-400 font-bold bg-slate-800 px-1 py-0.5 rounded">manager_seenbanao</code></span>
+              <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">seenbanao@2025</code></span>
+            </div>
+            <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
+              <span className="block font-bold text-slate-300">Demo SeenBanao Manager (Mock / Local Fallback)</span>
               <span className="block mt-0.5">User: <code className="text-orange-400 font-bold bg-slate-800 px-1 py-0.5 rounded">seenbanao_mgr</code></span>
               <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">manager123</code></span>
             </div>
