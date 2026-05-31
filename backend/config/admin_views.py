@@ -10,45 +10,61 @@ from django.utils import timezone
 from datetime import timedelta
 from orders.models import Order
 from restaurants.models import Restaurant
+import traceback
+from django.http import HttpResponse
+import logging
 
+logger = logging.getLogger('django')
 
 @staff_member_required
 def platform_analytics(request):
-    today = timezone.now().date()
-    last_7 = today - timedelta(days=7)
-    last_30 = today - timedelta(days=30)
+    try:
+        today = timezone.now().date()
+        last_7 = today - timedelta(days=7)
+        last_30 = today - timedelta(days=30)
 
-    stats = {
-        'orders_today': Order.objects.filter(created_at__date=today).count(),
-        'revenue_today': Order.objects.filter(created_at__date=today).aggregate(Sum('total'))['total__sum'] or 0,
-        'orders_7d': Order.objects.filter(created_at__date__gte=last_7).count(),
-        'revenue_7d': Order.objects.filter(created_at__date__gte=last_7).aggregate(Sum('total'))['total__sum'] or 0,
-        'orders_30d': Order.objects.filter(created_at__date__gte=last_30).count(),
-        'revenue_30d': Order.objects.filter(created_at__date__gte=last_30).aggregate(Sum('total'))['total__sum'] or 0,
-    }
+        stats = {
+            'orders_today': Order.objects.filter(created_at__date=today).count(),
+            'revenue_today': Order.objects.filter(created_at__date=today).aggregate(Sum('total'))['total__sum'] or 0,
+            'orders_7d': Order.objects.filter(created_at__date__gte=last_7).count(),
+            'revenue_7d': Order.objects.filter(created_at__date__gte=last_7).aggregate(Sum('total'))['total__sum'] or 0,
+            'orders_30d': Order.objects.filter(created_at__date__gte=last_30).count(),
+            'revenue_30d': Order.objects.filter(created_at__date__gte=last_30).aggregate(Sum('total'))['total__sum'] or 0,
+        }
 
-    # Per-restaurant breakdown (last 30 days)
-    restaurant_stats = []
-    for r in Restaurant.objects.filter(is_active=True):
-        r_orders = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
-        restaurant_stats.append({
-            'name': r.name,
-            'orders': r_orders.count(),
-            'revenue': r_orders.aggregate(Sum('total'))['total__sum'] or 0,
-            'avg_order': r_orders.aggregate(Avg('total'))['total__avg'] or 0,
+        # Per-restaurant breakdown (last 30 days)
+        restaurant_stats = []
+        for r in Restaurant.objects.filter(is_active=True):
+            r_orders = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
+            restaurant_stats.append({
+                'name': r.name,
+                'orders': r_orders.count(),
+                'revenue': r_orders.aggregate(Sum('total'))['total__sum'] or 0,
+                'avg_order': r_orders.aggregate(Avg('total'))['total__avg'] or 0,
+            })
+
+        # Daily order trend (last 7 days)
+        daily_orders = []
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+            count = Order.objects.filter(created_at__date=day).count()
+            rev = Order.objects.filter(created_at__date=day).aggregate(Sum('total'))['total__sum'] or 0
+            daily_orders.append({'date': day.strftime('%a %d'), 'orders': count, 'revenue': float(rev)})
+
+        return render(request, 'admin/platform_analytics.html', {
+            'stats': stats,
+            'restaurant_stats': restaurant_stats,
+            'daily_orders': daily_orders,
+            'title': 'Platform Analytics',
         })
-
-    # Daily order trend (last 7 days)
-    daily_orders = []
-    for i in range(6, -1, -1):
-        day = today - timedelta(days=i)
-        count = Order.objects.filter(created_at__date=day).count()
-        rev = Order.objects.filter(created_at__date=day).aggregate(Sum('total'))['total__sum'] or 0
-        daily_orders.append({'date': day.strftime('%a %d'), 'orders': count, 'revenue': float(rev)})
-
-    return render(request, 'admin/platform_analytics.html', {
-        'stats': stats,
-        'restaurant_stats': restaurant_stats,
-        'daily_orders': daily_orders,
-        'title': 'Platform Analytics',
-    })
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"[Platform Analytics Error] {tb}")
+        if request.user.is_superuser:
+            return HttpResponse(
+                f"<h1>Platform Analytics Error (Superuser Diagnostic)</h1>"
+                f"<p>This error info is shown only to Superusers.</p>"
+                f"<pre>{tb}</pre>",
+                status=500
+            )
+        raise e
