@@ -41,18 +41,24 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         request = self.context.get('request')
 
-        # Guest validation — require name/phone for unauthenticated or guest users
+        # Require phone for all users (either via payload or existing user profile)
         is_guest_or_anon = (
             not request or
             not request.user or
             request.user.is_anonymous or
             (hasattr(request.user, 'is_guest') and request.user.is_guest)
         )
-        if is_guest_or_anon:
-            if not attrs.get('guest_name') or not attrs.get('guest_phone'):
-                raise serializers.ValidationError(
-                    "Guest name and phone are required for guest checkout."
-                )
+        
+        has_phone = bool(attrs.get('guest_phone')) or (not is_guest_or_anon and getattr(request.user, 'phone', None))
+        if not has_phone:
+            raise serializers.ValidationError(
+                "A contact phone number is required to place an order."
+            )
+
+        if is_guest_or_anon and not attrs.get('guest_name'):
+            raise serializers.ValidationError(
+                "Guest name is required for guest checkout."
+            )
 
         # Must have at least one item
         if not attrs.get('items'):
@@ -108,8 +114,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             user = None
             if request and request.user and request.user.is_authenticated:
                 user = request.user
-                # Update guest phone if provided (inside atomic block)
-                if user.is_guest and validated_data.get('guest_phone'):
+                # Save phone number to user profile if missing or if guest
+                if (user.is_guest or not user.phone) and validated_data.get('guest_phone'):
                     user.phone = validated_data.get('guest_phone', '')
                     user.save()
 

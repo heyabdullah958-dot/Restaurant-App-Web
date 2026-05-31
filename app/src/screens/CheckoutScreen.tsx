@@ -76,10 +76,11 @@ export default function CheckoutScreen() {
         Alert.alert('Required Field', 'Please enter your name.');
         return;
       }
-      if (!guestPhone.trim()) {
-        Alert.alert('Required Field', 'Please enter your phone number.');
-        return;
-      }
+    }
+
+    if (!guestPhone.trim()) {
+      Alert.alert('Required Field', 'Please enter a valid contact phone number.');
+      return;
     }
 
     if (!restaurantId || items.length === 0) {
@@ -114,11 +115,11 @@ export default function CheckoutScreen() {
       payment_method: paymentMethod,
       delivery_address: address,
       special_instructions: instructions || undefined,
+      guest_phone: guestPhone,
     };
 
     if (isGuestMode) {
       orderData.guest_name = guestName;
-      orderData.guest_phone = guestPhone;
     }
 
     try {
@@ -237,16 +238,18 @@ export default function CheckoutScreen() {
                   value={guestName}
                   onChangeText={setGuestName}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Phone Number (e.g. +92 300 1234567)"
-                  placeholderTextColor={COLORS.gray}
-                  keyboardType="phone-pad"
-                  value={guestPhone}
-                  onChangeText={setGuestPhone}
-                />
               </View>
             )}
+
+            <Text style={styles.fieldLabel}>Contact Phone (Required)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number (e.g. 03001234567)"
+              placeholderTextColor={COLORS.gray}
+              keyboardType="phone-pad"
+              value={guestPhone}
+              onChangeText={setGuestPhone}
+            />
 
             <Text style={styles.fieldLabel}>Delivery Address</Text>
             <View style={styles.addressRow}>
