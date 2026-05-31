@@ -52,14 +52,13 @@ export const OrderManagement: React.FC = () => {
     );
   }, [orders, restaurant]);
 
-  // Group orders by status
-  const columns: { title: string; status: OrderStatus; color: string; bg: string }[] = [
-    { title: 'Pending', status: 'pending', color: 'text-zinc-500 dark:text-zinc-400', bg: 'bg-zinc-50/80 dark:bg-zinc-950/10 border-zinc-200/50 dark:border-zinc-900/20' },
-    { title: 'Received', status: 'received', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30' },
-    { title: 'Preparing', status: 'preparing', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30' },
-    { title: 'Out For Delivery', status: 'out_for_delivery', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-900/30' },
-    { title: 'Delivered', status: 'delivered', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/30' },
-    { title: 'Cancelled', status: 'cancelled', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50/50 dark:bg-rose-950/10 border-rose-200/30 dark:border-rose-900/20' },
+  // Group orders by status (removed 'cancelled')
+  const columns: { title: string; status: OrderStatus; color: string; bg: string; icon: React.ReactNode }[] = [
+    { title: 'Pending', status: 'pending', color: 'text-zinc-500 dark:text-zinc-400', bg: 'bg-zinc-50/80 dark:bg-zinc-950/10 border-zinc-200/50 dark:border-zinc-900/20', icon: <Clock size={16} /> },
+    { title: 'Received', status: 'received', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30', icon: <CheckCircle size={16} /> },
+    { title: 'Preparing', status: 'preparing', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30', icon: <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-600 border-t-transparent" /> },
+    { title: 'Out For Delivery', status: 'out_for_delivery', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-900/30', icon: <ArrowRight size={16} className="animate-pulse" /> },
+    { title: 'Delivered', status: 'delivered', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/30', icon: <CheckCircle className="text-emerald-500" size={16} /> },
   ];
 
   // Trigger WhatsApp dispatch pre-filled message directly to rider +92 309 0349090
@@ -83,22 +82,6 @@ export const OrderManagement: React.FC = () => {
     window.open(whatsappUrl, '_blank');
   };
 
-  const getNextStatus = (current: OrderStatus): OrderStatus | null => {
-    if (current === 'pending') return 'received';
-    if (current === 'received') return 'preparing';
-    if (current === 'preparing') return 'out_for_delivery';
-    if (current === 'out_for_delivery') return 'delivered';
-    return null;
-  };
-
-  const getActionLabel = (current: OrderStatus): string => {
-    if (current === 'pending') return 'Confirm Order';
-    if (current === 'received') return 'Accept & Prepare';
-    if (current === 'preparing') return 'Mark Ready & Dispatch';
-    if (current === 'out_for_delivery') return 'Complete Delivery';
-    return '';
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -110,7 +93,7 @@ export const OrderManagement: React.FC = () => {
       </div>
 
       {/* Kanban Board Columns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
         {columns.map((col) => {
           const colOrders = brandOrders
             .filter((o) => o.status === col.status)
@@ -123,7 +106,9 @@ export const OrderManagement: React.FC = () => {
             >
               {/* Column Header */}
               <div className="flex justify-between items-center mb-4 pb-2 border-b border-zinc-200/40 dark:border-slate-800/40">
-                <span className={`font-extrabold text-sm ${col.color}`}>{col.title}</span>
+                <span className={`font-extrabold text-sm ${col.color} flex items-center gap-1.5`}>
+                  {col.icon} {col.title}
+                </span>
                 <span className="bg-zinc-200 dark:bg-slate-800 text-zinc-700 dark:text-slate-300 font-bold px-2 py-0.5 rounded-full text-xs">
                   {colOrders.length}
                 </span>
@@ -132,12 +117,11 @@ export const OrderManagement: React.FC = () => {
               {/* Column Cards Container */}
               <div className="flex-1 space-y-3 overflow-y-auto pr-1">
                 {colOrders.map((order) => {
-                  const nextStatus = getNextStatus(order.status);
                   
                   return (
                     <div 
                       key={order.id} 
-                      className="bg-white dark:bg-slate-800 border border-zinc-200/60 dark:border-slate-700/50 p-4.5 rounded-xl shadow-sm flex flex-col justify-between hover:shadow-premium transition-all duration-200"
+                      className="bg-white dark:bg-slate-800 border border-zinc-200/60 dark:border-slate-700/50 p-4.5 rounded-xl shadow-sm flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                     >
                       <div>
                         {/* Order ID & Time */}
@@ -186,15 +170,26 @@ export const OrderManagement: React.FC = () => {
                           </span>
                         </div>
 
-                        {/* Kanban Action buttons */}
+                        {/* Kanban Action buttons & Status Dropdown */}
                         <div className="space-y-2">
-                          {nextStatus && (
-                            <button
-                              onClick={() => updateOrderStatus(order.id, nextStatus)}
-                              className="w-full flex items-center justify-center gap-1 bg-zinc-900 hover:bg-zinc-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold py-2 rounded-lg text-[11px] transition-all"
-                            >
-                              {getActionLabel(order.status)} <ArrowRight size={12} />
-                            </button>
+                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                            <div className="w-full relative">
+                              <select 
+                                value={order.status}
+                                onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
+                                className="w-full appearance-none bg-zinc-900 hover:bg-zinc-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg text-[11px] transition-all cursor-pointer text-center outline-none"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="received">Received</option>
+                                <option value="preparing">Preparing</option>
+                                <option value="out_for_delivery">Out For Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center px-2 text-white">
+                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                              </div>
+                            </div>
                           )}
                           
                           {/* Rider dispatch via WhatsApp (Triggerable for all active order states) */}

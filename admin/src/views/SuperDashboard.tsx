@@ -279,6 +279,7 @@ export const SuperDashboard: React.FC = () => {
                 <th className="py-4 px-6">Customer</th>
                 <th className="py-4 px-6 text-right">Total Amount</th>
                 <th className="py-4 px-6 text-center">Status</th>
+                <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/40 text-sm text-slate-300">
@@ -309,11 +310,22 @@ export const SuperDashboard: React.FC = () => {
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                   </td>
+                  <td className="py-4.5 px-6 text-center">
+                    <button
+                      onClick={() => {
+                        setSelectedBrand(order.restaurant_id);
+                        setView('order_management');
+                      }}
+                      className="text-xs font-bold bg-slate-700 hover:bg-slate-600 text-white py-1.5 px-3 rounded-lg border border-slate-600 hover:border-slate-500 transition-all"
+                    >
+                      Enter Workspace
+                    </button>
+                  </td>
                 </tr>
               ))}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 text-sm">
+                  <td colSpan={6} className="py-8 text-center text-slate-400 text-sm">
                     No recent orders found.
                   </td>
                 </tr>

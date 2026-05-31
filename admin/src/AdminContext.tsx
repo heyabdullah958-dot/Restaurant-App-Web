@@ -275,6 +275,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [toasts]);
 
+  // Auto-polling for new orders every 15 seconds
+  useEffect(() => {
+    if (activeView !== 'login') {
+      const interval = setInterval(() => {
+        refreshOrders();
+      }, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [activeView]);
+
   // ─── Real JWT Login ────────────────────────────────────────────────────────
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
