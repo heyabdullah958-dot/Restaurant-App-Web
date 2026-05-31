@@ -338,8 +338,8 @@ export const INITIAL_ORDERS: Order[] = [
     special_instructions: 'Rider ko gate par phone karne ko kahein.',
     created_at: '2026-05-27T21:40:00Z',
     items: [
-      { id: 10451, menu_item_id: 1001, menu_item_name: 'Chicken Tikka Boti', quantity: 2, unit_price: 420.00, total_price: 840.00 },
-      { id: 10452, menu_item_id: 1002, menu_item_name: 'Seekh Kabab Handi', quantity: 1, unit_price: 780.00, total_price: 780.00 } // Wait, subtotal would be 1620, but we just simulate a discount or fixed subtotal
+      { id: 10451, menu_item: 1001, menu_item_name: 'Chicken Tikka Boti', quantity: 2, unit_price: 420.00, total_price: 840.00 },
+      { id: 10452, menu_item: 1002, menu_item_name: 'Seekh Kabab Handi', quantity: 1, unit_price: 780.00, total_price: 780.00 } // Wait, subtotal would be 1620, but we just simulate a discount or fixed subtotal
     ]
   },
   {
@@ -359,7 +359,7 @@ export const INITIAL_ORDERS: Order[] = [
     special_instructions: 'Make it extra spicy!',
     created_at: '2026-05-27T21:15:00Z',
     items: [
-      { id: 10461, menu_item_id: 3001, menu_item_name: 'Jushh Smash Burger', quantity: 2, unit_price: 680.00, total_price: 1360.00 }
+      { id: 10461, menu_item: 3001, menu_item_name: 'Jushh Smash Burger', quantity: 2, unit_price: 680.00, total_price: 1360.00 }
     ]
   },
   {
@@ -379,8 +379,8 @@ export const INITIAL_ORDERS: Order[] = [
     special_instructions: 'Deliver to reception on the 3rd floor.',
     created_at: '2026-05-27T20:50:00Z',
     items: [
-      { id: 10471, menu_item_id: 2001, menu_item_name: 'Dynamite Prawns', quantity: 1, unit_price: 990.00, total_price: 990.00 },
-      { id: 10472, menu_item_id: 2002, menu_item_name: 'Calamari Rings', quantity: 1, unit_price: 790.00, total_price: 790.00 }
+      { id: 10471, menu_item: 2001, menu_item_name: 'Dynamite Prawns', quantity: 1, unit_price: 990.00, total_price: 990.00 },
+      { id: 10472, menu_item: 2002, menu_item_name: 'Calamari Rings', quantity: 1, unit_price: 790.00, total_price: 790.00 }
     ]
   },
   {
@@ -399,8 +399,8 @@ export const INITIAL_ORDERS: Order[] = [
     total: 1030.00,
     created_at: '2026-05-27T19:30:00Z',
     items: [
-      { id: 10481, menu_item_id: 7001, menu_item_name: 'Spanish Latte', quantity: 1, unit_price: 490.00, total_price: 490.00 },
-      { id: 10482, menu_item_id: 7003, menu_item_name: 'Fomo Chocolate Lava Cake', quantity: 1, unit_price: 580.00, total_price: 580.00 }
+      { id: 10481, menu_item: 7001, menu_item_name: 'Spanish Latte', quantity: 1, unit_price: 490.00, total_price: 490.00 },
+      { id: 10482, menu_item: 7003, menu_item_name: 'Fomo Chocolate Lava Cake', quantity: 1, unit_price: 580.00, total_price: 580.00 }
     ]
   },
   {
@@ -419,7 +419,7 @@ export const INITIAL_ORDERS: Order[] = [
     total: 1800.00,
     created_at: '2026-05-27T18:10:00Z',
     items: [
-      { id: 10491, menu_item_id: 1004, menu_item_name: 'Chicken Karahi (Half)', quantity: 2, unit_price: 950.00, total_price: 1900.00 }
+      { id: 10491, menu_item: 1004, menu_item_name: 'Chicken Karahi (Half)', quantity: 2, unit_price: 950.00, total_price: 1900.00 }
     ]
   }
 ];

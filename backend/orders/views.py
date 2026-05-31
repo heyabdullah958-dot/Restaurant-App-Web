@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from .models import Order
-from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer
+from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer, AdminOrderListSerializer
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
@@ -12,7 +12,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return OrderCreateSerializer
-        return OrderListSerializer
+        # Admin GET request -> full detail serializer
+        return AdminOrderListSerializer
 
     def get_permissions(self):
         if self.request.method == 'POST':

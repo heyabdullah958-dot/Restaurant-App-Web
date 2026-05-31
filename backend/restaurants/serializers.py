@@ -23,14 +23,17 @@ def build_absolute_image_url(image_field, context):
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    # GET requests ke liye absolute URL return karta hai
+    image_url = serializers.SerializerMethodField(read_only=True)
+    # POST/PATCH ke liye writable ImageField
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = MenuItem
-        fields = ('id', 'category', 'name', 'description', 'price', 'image',
+        fields = ('id', 'category', 'name', 'description', 'price', 'image', 'image_url',
                   'is_available', 'is_featured', 'preparation_time', 'options')
 
-    def get_image(self, obj):
+    def get_image_url(self, obj):
         return build_absolute_image_url(obj.image, self.context)
 
 
@@ -45,6 +48,20 @@ class MenuCategorySerializer(serializers.ModelSerializer):
         # Only show available items
         available_items = obj.items.filter(is_available=True)
         return MenuItemSerializer(available_items, many=True, context=self.context).data
+
+
+class AdminMenuCategorySerializer(serializers.ModelSerializer):
+    """Admin ke liye — ALL items (available + unavailable dono)"""
+    items = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MenuCategory
+        fields = ('id', 'restaurant', 'name', 'icon', 'order', 'is_active', 'items')
+
+    def get_items(self, obj):
+        # NO is_available filter — admin ko sab items dikhne chahiye
+        all_items = obj.items.all()
+        return MenuItemSerializer(all_items, many=True, context=self.context).data
 
 
 class RestaurantSerializer(serializers.ModelSerializer):

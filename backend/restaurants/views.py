@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from .models import Restaurant
-from .serializers import RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer
+from .serializers import RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer, AdminMenuCategorySerializer
 
 
 class RestaurantListView(generics.ListAPIView):
@@ -59,7 +59,11 @@ class RestaurantMenuView(generics.GenericAPIView):
             ).get(slug=slug, is_active=True)
 
             categories = restaurant.categories.filter(is_active=True).order_by('order', 'name')
-            serializer = MenuCategorySerializer(categories, many=True)
+            # Admin users ko sab items dikhao (available + unavailable)
+            if request.user and request.user.is_staff:
+                serializer = AdminMenuCategorySerializer(categories, many=True, context={'request': request})
+            else:
+                serializer = MenuCategorySerializer(categories, many=True, context={'request': request})
             return Response({
                 'success': True,
                 'data': serializer.data

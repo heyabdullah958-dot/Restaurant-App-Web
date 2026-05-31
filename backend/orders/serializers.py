@@ -200,6 +200,25 @@ class OrderListSerializer(serializers.ModelSerializer):
         fields = ('id', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
 
 
+class AdminOrderListSerializer(serializers.ModelSerializer):
+    restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = (
+            'id', 'restaurant', 'restaurant_name',
+            'guest_name', 'guest_phone',
+            'status', 'payment_method',
+            'delivery_address',
+            'subtotal', 'delivery_fee', 'discount', 'total',
+            'special_instructions',
+            'items',
+            'created_at', 'updated_at',
+        )
+
+
+
 class OrderDetailSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     restaurant = RestaurantSerializer(read_only=True)

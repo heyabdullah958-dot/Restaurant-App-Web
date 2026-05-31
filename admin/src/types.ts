@@ -51,7 +51,7 @@ export type PaymentMethod = 'cod' | 'stripe' | 'payfast';
 
 export interface OrderItemDetail {
   id: number;
-  menu_item_id: number;
+  menu_item: number;
   menu_item_name: string;
   quantity: number;
   unit_price: number;

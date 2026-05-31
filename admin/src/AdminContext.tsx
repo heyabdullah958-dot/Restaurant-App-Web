@@ -236,7 +236,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               ...category,
               items: (category.items || []).map((item: any) => ({
                 ...item,
-                image: getFullImageUrl(item.image),
+                image: getFullImageUrl(item.image_url || item.image),
               })),
             }));
             setMenuItems((prev) => ({
