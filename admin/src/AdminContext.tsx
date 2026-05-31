@@ -339,11 +339,22 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     } catch (err: any) {
       console.error('[Login Error]', err);
+
+      // Determine if it is a genuine connection/network error rather than credentials rejection
+      const isAuthError = err.message && (
+        err.message.includes('HTTP 401') || 
+        err.message.includes('HTTP 403') || 
+        err.message.includes('HTTP 400')
+      );
+      const isNetworkError = !isAuthError;
+
       // Fallback to mock login for development convenience
-      const isMockManager = username.endsWith('_mgr') || username.startsWith('manager_');
-      if (username === 'admin' || isMockManager) {
+      const isMockManager = username.endsWith('_mgr') || (isNetworkError && username.startsWith('manager_'));
+      const isMockSuper = username === 'admin' && isNetworkError;
+
+      if (username === 'seenbanao_mgr' || isMockManager || isMockSuper) {
         showToast('API unreachable — using demo mode', 'info');
-        const isMockSuper = username === 'admin';
+        const isMockSuperUser = username === 'admin';
 
         // Extract restaurant ID based on slug
         const getMockRestaurantId = (uname: string): number => {
@@ -364,11 +375,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           id: 1,
           username,
           email: `${username}@foodsphere.com`,
-          role: isMockSuper ? 'super_admin' : 'branch_manager',
-          restaurantId: isMockSuper ? undefined : getMockRestaurantId(username),
+          role: isMockSuperUser ? 'super_admin' : 'branch_manager',
+          restaurantId: isMockSuperUser ? undefined : getMockRestaurantId(username),
         };
+
+        // Load mock data immediately to prevent "No Restaurant Data Available" screen
+        setRestaurants(MOCK_RESTAURANTS);
+        setOrders(INITIAL_ORDERS);
+
         setUser(mockUser);
-        const mockView = isMockSuper ? 'super_dashboard' : 'branch_dashboard';
+        const mockView = isMockSuperUser ? 'super_dashboard' : 'branch_dashboard';
         localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
         localStorage.setItem('foodsphere_admin_view', mockView);
         localStorage.setItem('foodsphere_admin_brand_id', String(mockUser.restaurantId || 1));
