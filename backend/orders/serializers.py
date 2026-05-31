@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models import F
 from .models import Order, OrderItem
 from restaurants.models import MenuItem, Restaurant
-from restaurants.serializers import RestaurantSerializer
+from restaurants.serializers import RestaurantSerializer, build_absolute_image_url
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -199,11 +199,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
 class OrderListSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
-    restaurant_logo = serializers.ImageField(source='restaurant.logo', read_only=True)
+    restaurant_logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = ('id', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+
+    def get_restaurant_logo(self, obj):
+        return build_absolute_image_url(obj.restaurant.logo, self.context)
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):

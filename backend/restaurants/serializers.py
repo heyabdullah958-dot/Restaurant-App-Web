@@ -19,7 +19,18 @@ def build_absolute_image_url(image_field, context):
     request = context.get('request') if context else None
     if request:
         return request.build_absolute_uri(url)
-    return url
+    
+    # Fallback to backend domain if request context is not available
+    from django.conf import settings
+    backend_url = getattr(settings, 'BACKEND_URL', 'https://restaurant-app-web.onrender.com')
+    if settings.DEBUG:
+        backend_url = getattr(settings, 'BACKEND_URL', 'http://127.0.0.1:8000')
+    
+    if url.startswith('/') and backend_url.endswith('/'):
+        return backend_url + url[1:]
+    elif not url.startswith('/') and not backend_url.endswith('/'):
+        return backend_url + '/' + url
+    return backend_url + url
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
