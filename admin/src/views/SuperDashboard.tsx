@@ -92,6 +92,10 @@ export const SuperDashboard: React.FC = () => {
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">HQ Command Center</h1>
           <p className="text-sm text-slate-400">Multi-tenant network health and consolidated sales aggregates</p>
         </div>
+        <span className="flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider">
+          <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+          Auto-Sync Active (15s)
+        </span>
       </div>
 
       {/* Interactive Command Filters */}

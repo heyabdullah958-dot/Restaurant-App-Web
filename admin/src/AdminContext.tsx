@@ -61,6 +61,7 @@ interface AdminContextProps {
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
   removeRestaurantBanner: (id: number) => Promise<void>;
+  updateUser: (fields: Partial<User>) => void;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -430,6 +431,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSelectedBrandId(id);
     localStorage.setItem('foodsphere_admin_brand_id', String(id));
     showToast(`Switched view to ${restaurants.find((r) => r.id === id)?.name}`, 'info');
+  };
+
+  const updateUser = (fields: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...fields };
+      // Sync mock user locally if saved
+      const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
+      if (mockUserJson) {
+        localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(updated));
+      }
+      return updated;
+    });
   };
 
   // Refresh orders from API
@@ -1056,6 +1070,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         editMenuItem,
         updateRestaurantBanner,
         removeRestaurantBanner,
+        updateUser,
       }}
     >
       {children}

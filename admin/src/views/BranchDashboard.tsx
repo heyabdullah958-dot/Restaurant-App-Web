@@ -279,8 +279,14 @@ export const BranchDashboard: React.FC = () => {
 
       {/* Timeframe Selector */}
       <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-900 border border-zinc-205 dark:border-slate-800/80 p-4.5 rounded-2xl shadow-premium gap-3">
-        <div className="text-xs font-black text-zinc-700 dark:text-slate-200 uppercase tracking-wider">
-          Sales Performance Timeframe
+        <div className="flex items-center gap-2">
+          <div className="text-xs font-black text-zinc-700 dark:text-slate-200 uppercase tracking-wider">
+            Sales Performance Timeframe
+          </div>
+          <span className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Auto-Sync Active (15s)
+          </span>
         </div>
         <div className="flex bg-zinc-100 dark:bg-slate-950 p-1 rounded-xl border border-zinc-200/30 dark:border-slate-800">
           {[

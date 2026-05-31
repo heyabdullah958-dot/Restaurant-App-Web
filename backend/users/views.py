@@ -133,3 +133,26 @@ class LogoutView(APIView):
                 'message': 'Token is already invalid or blacklisted, logged out successfully'
             }, status=status.HTTP_200_OK)
 
+
+class ChangeOwnPasswordView(APIView):
+    """
+    POST /api/users/change-password/
+    Change password for the currently logged in user.
+    Requires authentication (IsAuthenticated).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        new_password = request.data.get('password')
+        if not new_password or len(new_password.strip()) < 6:
+            return Response({'error': 'Password must be at least 6 characters long'}, status=400)
+
+        user = request.user
+        user.set_password(new_password.strip())
+        user.save()
+
+        return Response({
+            'success': True,
+            'message': 'Your password has been changed successfully!'
+        })
+

@@ -11,6 +11,7 @@ import {
   Users,
   Lock
 } from 'lucide-react';
+import { changeOwnPassword, updateUserProfile, getToken } from '../services/api';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,12 +19,97 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
-  const { user, activeView, setView, logout, restaurants, selectedBrandId, setSelectedBrand } = useAdmin();
+  const { user, activeView, setView, logout, restaurants, selectedBrandId, setSelectedBrand, showToast, updateUser } = useAdmin();
+
+  const [showPassModal, setShowPassModal] = React.useState(false);
+  const [usernameInput, setUsernameInput] = React.useState(user?.username || '');
+  const [emailInput, setEmailInput] = React.useState(user?.email || '');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [loadingModal, setLoadingModal] = React.useState(false);
+  const [modalError, setModalError] = React.useState('');
+
+  // Sync inputs when user changes
+  React.useEffect(() => {
+    if (user) {
+      setUsernameInput(user.username);
+      setEmailInput(user.email || '');
+    }
+  }, [user]);
 
   if (!user) return null;
 
   const isSuper = user.role === 'super_admin';
   const activeRestaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+
+  const getFocusBorderColor = () => {
+    switch (activeRestaurant?.slug) {
+      case 'seenbanao': return 'focus:border-seenbanao';
+      case 'dineatblue': return 'focus:border-dineatblue';
+      case 'jushhpk': return 'focus:border-jushhpk';
+      case 'tandooristoppk': return 'focus:border-tandooristoppk';
+      case 'sandmelts': return 'focus:border-sandmelts';
+      case 'birdmanfoodspk': return 'focus:border-birdmanfoodspk';
+      case 'getafomo': return 'focus:border-getafomo';
+      default: return 'focus:border-orange-600';
+    }
+  };
+
+  const handleUpdateCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalError('');
+    
+    if (!usernameInput.trim()) {
+      setModalError('Username cannot be empty');
+      return;
+    }
+
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        setModalError('Password must be at least 6 characters long');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setModalError('Passwords do not match');
+        return;
+      }
+    }
+
+    setLoadingModal(true);
+    try {
+      const isMock = !getToken() || !!localStorage.getItem('foodsphere_admin_mock_user');
+      
+      if (isMock) {
+        // Simulate update
+        updateUser({ username: usernameInput, email: emailInput });
+        showToast('Credentials updated successfully (Demo Mode)', 'success');
+        setShowPassModal(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        // 1. Update Profile (username, email)
+        if (usernameInput !== user.username || emailInput !== (user.email || '')) {
+          await updateUserProfile({ username: usernameInput, email: emailInput });
+          updateUser({ username: usernameInput, email: emailInput });
+        }
+
+        // 2. Update Password (if provided)
+        if (newPassword) {
+          await changeOwnPassword(newPassword);
+        }
+
+        showToast('Account credentials updated successfully!', 'success');
+        setShowPassModal(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err: any) {
+      console.error('[Update Credentials Error]', err);
+      setModalError(err.message || 'Failed to update credentials. Please try again.');
+    } finally {
+      setLoadingModal(false);
+    }
+  };
 
   // Map brand colors to backgrounds
   const getBrandBgColor = () => {
@@ -250,6 +336,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             </div>
           </div>
           <button
+            onClick={() => setShowPassModal(true)}
+            className={`w-full flex items-center justify-center gap-2 py-2 px-4 mb-2 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+              isSuper
+                ? 'border-slate-700 hover:bg-slate-800 hover:text-blue-400 hover:border-blue-500/30 text-slate-300'
+                : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 hover:border-zinc-300 dark:hover:border-slate-700 text-zinc-600 dark:text-slate-400'
+            }`}
+          >
+            <Lock size={14} />
+            Update Credentials
+          </button>
+          <button
             onClick={logout}
             className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold border transition-all duration-200 ${
               isSuper
@@ -262,6 +359,141 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           </button>
         </div>
       </aside>
+
+      {/* Update Credentials Modal */}
+      {showPassModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div 
+            className={`w-full max-w-md rounded-xl border p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 ${
+              isSuper 
+                ? 'bg-slate-900 border-slate-800 text-white shadow-blue-500/5' 
+                : 'bg-white dark:bg-slate-900 border-zinc-200 dark:border-slate-800 text-zinc-800 dark:text-slate-100'
+            }`}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-base font-bold tracking-tight">Update Credentials</h3>
+              <button 
+                onClick={() => { setShowPassModal(false); setModalError(''); }}
+                className={`p-1.5 rounded-lg transition-all ${
+                  isSuper ? 'hover:bg-slate-800 text-slate-400 hover:text-white' : 'hover:bg-zinc-100 dark:hover:bg-slate-850 text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200'
+                }`}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Error Message */}
+            {modalError && (
+              <div className="mb-4 p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-red-500 text-xs font-semibold animate-shake">
+                {modalError}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleUpdateCredentials} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                  Login ID (Username)
+                </label>
+                <input
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  className={`w-full text-sm p-2.5 rounded-lg border outline-none transition-all duration-200 ${
+                    isSuper
+                      ? 'bg-slate-950 border-slate-800 focus:border-blue-500 text-slate-100'
+                      : `bg-zinc-50 dark:bg-slate-950 border-zinc-200 dark:border-slate-800 ${getFocusBorderColor()} text-zinc-800 dark:text-slate-100`
+                  }`}
+                  placeholder="Enter login ID"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  className={`w-full text-sm p-2.5 rounded-lg border outline-none transition-all duration-200 ${
+                    isSuper
+                      ? 'bg-slate-950 border-slate-800 focus:border-blue-500 text-slate-100'
+                      : `bg-zinc-50 dark:bg-slate-950 border-zinc-200 dark:border-slate-800 ${getFocusBorderColor()} text-zinc-800 dark:text-slate-100`
+                  }`}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+
+              <hr className={isSuper ? 'border-slate-800' : 'border-zinc-150 dark:border-slate-800'} />
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                  New Password <span className="text-[10px] font-normal lowercase text-slate-500">(Leave blank to keep current)</span>
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className={`w-full text-sm p-2.5 rounded-lg border outline-none transition-all duration-200 ${
+                    isSuper
+                      ? 'bg-slate-950 border-slate-800 focus:border-blue-500 text-slate-100'
+                      : `bg-zinc-50 dark:bg-slate-950 border-zinc-200 dark:border-slate-800 ${getFocusBorderColor()} text-zinc-800 dark:text-slate-100`
+                  }`}
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400 mb-1.5">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full text-sm p-2.5 rounded-lg border outline-none transition-all duration-200 ${
+                    isSuper
+                      ? 'bg-slate-950 border-slate-800 focus:border-blue-500 text-slate-100'
+                      : `bg-zinc-50 dark:bg-slate-950 border-zinc-200 dark:border-slate-800 ${getFocusBorderColor()} text-zinc-800 dark:text-slate-100`
+                  }`}
+                  placeholder="Confirm password"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => { setShowPassModal(false); setModalError(''); }}
+                  disabled={loadingModal}
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                    isSuper
+                      ? 'border-slate-800 hover:bg-slate-800 text-slate-300'
+                      : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-50 dark:hover:bg-slate-800 text-zinc-600 dark:text-slate-350'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingModal}
+                  className={`px-5 py-2 rounded-lg text-xs font-bold text-white transition-all duration-200 shadow-md ${
+                    isSuper
+                      ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20 disabled:bg-blue-800'
+                      : `${getBrandBgColor()} hover:opacity-90 disabled:opacity-50`
+                  }`}
+                >
+                  {loadingModal ? 'Updating...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 };

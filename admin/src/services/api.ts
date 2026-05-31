@@ -402,6 +402,18 @@ export const changeManagerPassword = (managerId: number, password: string) =>
     body: JSON.stringify({ password }),
   });
 
+export const changeOwnPassword = (password: string) =>
+  apiFetch<any>('/api/users/change-password/', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+
+export const updateUserProfile = (data: { username: string; email: string }) =>
+  apiFetch<any>('/api/users/profile/', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
 // ─── TOKEN DECODE HELPER ──────────────────────────────────────────────────────
 
 export interface JWTPayload {
