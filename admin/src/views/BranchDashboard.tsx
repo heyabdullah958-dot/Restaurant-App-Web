@@ -45,20 +45,48 @@ export const BranchDashboard: React.FC = () => {
   );
   const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
 
-  // Calculate live stats
-  const liveRevenue = brandOrders.reduce((sum, o) => sum + o.total, 0);
-  const liveOrdersCount = brandOrders.length;
+  const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month' | 'all'>('today');
 
-  // Calculate today's stats for "Today's Brand Sales"
+  // Calculate live stats based on timeframe
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfToday);
-  const todayRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
-  const todayOrdersCount = todayOrders.length;
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // In live mode, we show today's sales
-  const displayRevenue = isMock ? brandStats.revenue : todayRevenue;
-  const displayOrdersCount = isMock ? brandStats.orders : todayOrdersCount;
+  let filteredBrandOrders = brandOrders;
+  if (timeframe === 'today') {
+    filteredBrandOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfToday);
+  } else if (timeframe === 'week') {
+    filteredBrandOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfWeek);
+  } else if (timeframe === 'month') {
+    filteredBrandOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfMonth);
+  }
+
+  const liveRevenue = filteredBrandOrders.reduce((sum, o) => sum + o.total, 0);
+  const liveOrdersCount = filteredBrandOrders.length;
+  
+  // All time aggregates for reference in subtitles
+  const allTimeRevenue = brandOrders.reduce((sum, o) => sum + o.total, 0);
+  const allTimeOrdersCount = brandOrders.length;
+
+  // Mock scaling for demo mode
+  const getMockStats = () => {
+    switch (timeframe) {
+      case 'today':
+        return { revenue: brandStats.revenue * 0.1, orders: Math.max(1, Math.round(brandStats.orders * 0.1)) };
+      case 'week':
+        return { revenue: brandStats.revenue * 0.4, orders: Math.max(1, Math.round(brandStats.orders * 0.4)) };
+      case 'month':
+        return { revenue: brandStats.revenue * 0.9, orders: Math.max(1, Math.round(brandStats.orders * 0.9)) };
+      default:
+        return brandStats;
+    }
+  };
+
+  const mockStats = getMockStats();
+  const displayRevenue = isMock ? mockStats.revenue : liveRevenue;
+  const displayOrdersCount = isMock ? mockStats.orders : liveOrdersCount;
 
   // Decide brand color
   const getBrandColor = () => {
@@ -87,6 +115,37 @@ export const BranchDashboard: React.FC = () => {
     }
   };
 
+  const getSalesCardTitle = () => {
+    switch (timeframe) {
+      case 'today': return "Today's Brand Sales";
+      case 'week': return "Weekly Sales (This Week)";
+      case 'month': return "Monthly Sales (This Month)";
+      case 'all': return "All-Time Brand Sales";
+    }
+  };
+
+  const getSalesCardStatus = () => {
+    if (isMock) {
+      return `Total: ${displayOrdersCount} Orders (${timeframe.toUpperCase()})`;
+    }
+    const timeframeText = timeframe === 'today' ? 'today' : timeframe === 'week' ? 'this week' : timeframe === 'month' ? 'this month' : 'all-time';
+    return `Total: ${displayOrdersCount} Orders ${timeframeText} (Rs. ${Math.round(allTimeRevenue).toLocaleString()} / ${allTimeOrdersCount} All-time)`;
+  };
+
+  const formatOrderTime = (createdAt: string) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const isToday = date.getDate() === now.getDate() &&
+                    date.getMonth() === now.getMonth() &&
+                    date.getFullYear() === now.getFullYear();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) {
+      return `Today, ${timeStr}`;
+    }
+    const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+    return `${dateStr}, ${timeStr}`;
+  };
+
   const stats = [
     {
       title: 'Pending Live Orders',
@@ -95,12 +154,10 @@ export const BranchDashboard: React.FC = () => {
       status: pendingOrdersCount > 0 ? 'Action Needed' : 'All Clear',
     },
     {
-      title: "Today's Brand Sales",
+      title: getSalesCardTitle(),
       value: `Rs. ${displayRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <TrendingUp size={20} />,
-      status: isMock 
-        ? `Total: ${brandStats.orders} Orders`
-        : `Total: ${displayOrdersCount} Orders Today (Rs. ${Math.round(liveRevenue).toLocaleString()} / ${liveOrdersCount} All-time)`,
+      status: getSalesCardStatus(),
     },
     {
       title: 'Avg Delivery Time',
@@ -220,6 +277,33 @@ export const BranchDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Timeframe Selector */}
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-900 border border-zinc-205 dark:border-slate-800/80 p-4.5 rounded-2xl shadow-premium gap-3">
+        <div className="text-xs font-black text-zinc-700 dark:text-slate-200 uppercase tracking-wider">
+          Sales Performance Timeframe
+        </div>
+        <div className="flex bg-zinc-100 dark:bg-slate-950 p-1 rounded-xl border border-zinc-200/30 dark:border-slate-800">
+          {[
+            { id: 'today', label: 'Today' },
+            { id: 'week', label: 'Weekly' },
+            { id: 'month', label: 'Monthly' },
+            { id: 'all', label: 'All-Time' }
+          ].map((tf) => (
+            <button
+              key={tf.id}
+              onClick={() => setTimeframe(tf.id as any)}
+              className={`px-4.5 py-2 rounded-lg text-[10px] font-black transition-all uppercase tracking-wider ${
+                timeframe === tf.id
+                  ? `bg-white dark:bg-slate-800 text-zinc-900 dark:text-white shadow-sm border border-zinc-200/40 dark:border-slate-700/60`
+                  : 'text-zinc-500 hover:text-zinc-800 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              {tf.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Local stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
         {stats.map((stat, i) => (
@@ -266,7 +350,7 @@ export const BranchDashboard: React.FC = () => {
                     <span className="font-bold text-zinc-800 dark:text-slate-200">Order #{order.id}</span>
                     <span className="block text-zinc-500 dark:text-slate-400 text-[10px] mt-0.5">{order.user_or_guest}</span>
                     <span className="block font-medium text-zinc-400 dark:text-slate-500 text-[10px] mt-1">
-                      {new Date(order.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                      {formatOrderTime(order.created_at)}
                     </span>
                   </div>
                   <div className="text-right">

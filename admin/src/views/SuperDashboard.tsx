@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAdmin } from '../AdminContext';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
-import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight } from 'lucide-react';
+import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight, Clock } from 'lucide-react';
 
 export const SuperDashboard: React.FC = () => {
   const { restaurants, orders, setSelectedBrand, setView, selectedBrandId } = useAdmin();
@@ -9,6 +9,20 @@ export const SuperDashboard: React.FC = () => {
   const [timeframe, setTimeframe] = React.useState<'all' | 'today' | 'week' | 'month'>('all');
 
   const selectedBrand = restaurants.find(r => r.id === selectedBrandId) || restaurants[0];
+
+  const formatOrderTime = (createdAt: string) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const isToday = date.getDate() === now.getDate() &&
+                    date.getMonth() === now.getMonth() &&
+                    date.getFullYear() === now.getFullYear();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) {
+      return `Today, ${timeStr}`;
+    }
+    const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+    return `${dateStr}, ${timeStr}`;
+  };
 
   // Calculate live statistics based on scope and timeframe
   let filteredOrders = orders;
@@ -277,6 +291,7 @@ export const SuperDashboard: React.FC = () => {
                 <th className="py-4 px-6">Order ID</th>
                 <th className="py-4 px-6">Restaurant</th>
                 <th className="py-4 px-6">Customer</th>
+                <th className="py-4 px-6">Placed At</th>
                 <th className="py-4 px-6 text-right">Total Amount</th>
                 <th className="py-4 px-6 text-center">Status</th>
                 <th className="py-4 px-6 text-center">Actions</th>
@@ -293,6 +308,12 @@ export const SuperDashboard: React.FC = () => {
                   </td>
                   <td className="py-4.5 px-6 text-slate-300">
                     {order.user_or_guest || order.guest_name || 'Guest'}
+                  </td>
+                  <td className="py-4.5 px-6 text-xs text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Clock size={11} className="text-slate-500" />
+                      {formatOrderTime(order.created_at)}
+                    </span>
                   </td>
                   <td className="py-4.5 px-6 text-right font-bold text-white">
                     Rs. {order.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
