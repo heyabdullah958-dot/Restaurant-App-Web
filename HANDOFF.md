@@ -23,13 +23,13 @@ FoodSphere is a **multi-brand food delivery aggregator** — like FoodPanda — 
 
 ### Phase 2 — Individual Restaurant Websites ✅ (7 of 7 Live)
 All in `D:\sitesdata\Resturent App\websites\`
-- SeenBanao (Desi BBQ): https://seenbanao-foodsphere-944.netlify.app
-- DineAtBlue (Seafood): https://dineatblue-foodsphere-922.netlify.app
-- JushhPK (Fast food): https://jushhpk-foodsphere-170.netlify.app
-- TandooriStopPK: https://tandooristoppk-foodsphere-287.netlify.app
-- SandMelts: https://sandmelts-foodsphere-246.netlify.app
-- GetAFomo (Café): https://getafomo-foodsphere-674.netlify.app
-- BirdManFoodsPK (Catering): https://birdmanfoodspk-foodsphere-663.netlify.app
+- SeenBanao (Desi BBQ): https://seenbanao-foodsphere.pages.dev
+- DineAtBlue (Seafood): https://dineatblue-foodsphere.pages.dev
+- JushhPK (Fast food): https://jushhpk-foodsphere.pages.dev
+- TandooriStopPK: https://tandooristoppk-foodsphere.pages.dev
+- SandMelts: https://sandmelts-foodsphere.pages.dev
+- GetAFomo (Café): https://getafomo-foodsphere.pages.dev
+- BirdManFoodsPK (Catering): https://birdmanfoodspk-foodsphere.pages.dev
 
 ### Phase 3 — Mobile Responsiveness ✅
 - All 6 websites have mobile responsive CSS.
@@ -57,7 +57,7 @@ All in `D:\sitesdata\Resturent App\websites\`
 - Created TypeScript React.js admin interface inside `/admin`.
 - Connected to Django REST Backend with JWT Authentication and real-time dashboard data syncing.
 - Integrated Audit Logging, Custom Platform Analytics, Customer Loyalty Point editor, and target topic FCM Push Notification dispatch.
-- **Live Deployment:** https://foodsphere-admin.netlify.app
+- **Live Deployment:** https://foodsphere-admin.pages.dev
 
 ---
 

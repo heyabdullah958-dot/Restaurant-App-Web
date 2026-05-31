@@ -111,7 +111,7 @@ FoodSphere/
 | **Authentication** | JWT Tokens (simplejwt) |
 | **Payments** | Stripe + PayFast + Cash on Delivery |
 | **Notifications** | Firebase Cloud Messaging (FCM) |
-| **Hosting (Websites)** | Netlify / Vercel |
+| **Hosting (Websites)** | Cloudflare Pages |
 | **Hosting (Admin Dashboard)** | Cloudflare Pages |
 | **Hosting (Backend)** | Render.com |
 
@@ -125,7 +125,7 @@ FoodSphere/
 - [x] Loyalty Points System (F() expressions based)
 - [x] Restaurant admin panel (Django Jazzmin + React Dashboard)
 - [x] Super-admin dashboard (real-time order polling & live charts)
-- [x] 7 fully responsive websites (live on netlify/cloudflare pages)
+- [x] 7 fully responsive websites (live on Cloudflare Pages)
 - [x] Full GitHub repository access
 - [x] Automated integration testing suite (`test_backend.py`)
 
@@ -136,7 +136,7 @@ FoodSphere/
 | Milestone | Status | Target Date |
 |---|---|---|
 | App UI Design (Google Stitch mockups) | ✅ Completed (Live on Cloudflare) | Done |
-| 7 Website UIs (7 brand sites active) | ✅ Completed (Live on Netlify/Cloudflare) | Done |
+| 7 Website UIs (7 brand sites active) | ✅ Completed (Live on Cloudflare Pages) | Done |
 | Backend setup & models | ✅ Completed (Live on Render) | Done |
 | App core screens (Home, Menu, Cart) | ✅ Completed (Build Configured) | Done |
 | Payment integration (Stripe + PayFast) | ✅ Completed (Staging endpoints wired) | Done |
@@ -156,15 +156,7 @@ FoodSphere/
 - **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev)
 - **getafomo website:** [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev)
 
-#### 🕸️ Netlify (Archived)
-- **seenbanao website:** [https://seenbanao-foodsphere-944.netlify.app](https://seenbanao-foodsphere-944.netlify.app)
-- **dineatblue website:** [https://dineatblue-foodsphere-922.netlify.app](https://dineatblue-foodsphere-922.netlify.app)
-- **jushhpk website:** [https://jushhpk-foodsphere-170.netlify.app](https://jushhpk-foodsphere-170.netlify.app)
-- **tandooristoppk website:** [https://tandooristoppk-foodsphere-287.netlify.app](https://tandooristoppk-foodsphere-287.netlify.app)
-- **sandmelts website:** [https://sandmelts-foodsphere-246.netlify.app](https://sandmelts-foodsphere-246.netlify.app)
-- **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere-663.netlify.app](https://birdmanfoodspk-foodsphere-663.netlify.app)
-- **getafomo website:** [https://getafomo-foodsphere-674.netlify.app](https://getafomo-foodsphere-674.netlify.app)
-- **admin panel website:** [https://foodsphere-admin.netlify.app](https://foodsphere-admin.netlify.app)
+
 
 ---
 
