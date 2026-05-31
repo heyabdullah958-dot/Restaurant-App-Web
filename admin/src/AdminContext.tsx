@@ -202,7 +202,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ]);
       const mapped = restaurantData.results.map(mapApiRestaurant);
       setRestaurants(mapped);
-      setOrders(orderData.results.map(mapApiOrder));
+      setOrders(
+        orderData.results.map(mapApiOrder)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
       
       if (mapped.length > 0) {
         const token = getToken();
@@ -292,7 +295,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const mappedRestaurants = restaurantData.results.map(mapApiRestaurant);
       setRestaurants(mappedRestaurants);
-      setOrders(orderData.results.map(mapApiOrder));
+      setOrders(
+        orderData.results.map(mapApiOrder)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
 
       const managerRestId = isSuperAdmin ? undefined : payload?.restaurant_id;
       if (mappedRestaurants.length > 0) {
@@ -384,7 +390,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (isMock) return;
     try {
       const orderData = await fetchAllOrders();
-      setOrders(orderData.results.map(mapApiOrder));
+      setOrders(
+        orderData.results.map(mapApiOrder)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      );
     } catch (err) {
       console.warn('[refreshOrders] Failed:', err);
     }
@@ -831,6 +840,18 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setLoading(false);
     }
   };
+
+  // Polling for live orders (every 30 seconds)
+  useEffect(() => {
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (isMock || !user) return;
+
+    const interval = setInterval(() => {
+      refreshOrders();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <AdminContext.Provider

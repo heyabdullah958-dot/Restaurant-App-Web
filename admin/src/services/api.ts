@@ -195,7 +195,7 @@ export interface ApiOrder {
 }
 
 export const fetchAllOrders = () =>
-  apiFetch<{ results: ApiOrder[]; count: number }>('/api/orders/');
+  apiFetch<{ results: ApiOrder[]; count: number }>('/api/orders/?page_size=100');
 
 export const updateOrderStatus = (orderId: number, status: string) =>
   apiFetch<ApiOrder>(`/api/orders/${orderId}/`, {

@@ -16,6 +16,22 @@ export const OrderManagement: React.FC = () => {
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
 
+  const formatOrderTime = (createdAt: string) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const isToday = date.getDate() === now.getDate() &&
+                    date.getMonth() === now.getMonth() &&
+                    date.getFullYear() === now.getFullYear();
+    
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) {
+      return `Today, ${timeStr}`;
+    } else {
+      const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+      return `${dateStr}, ${timeStr}`;
+    }
+  };
+
   if (!restaurant) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -125,9 +141,9 @@ export const OrderManagement: React.FC = () => {
                           <span className="font-extrabold text-xs text-zinc-800 dark:text-slate-200 bg-zinc-100 dark:bg-slate-700/60 px-2 py-0.5 rounded">
                             #{order.id}
                           </span>
-                          <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+                           <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
                             <Clock size={10} />
-                            {new Date(order.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                            {formatOrderTime(order.created_at)}
                           </span>
                         </div>
 

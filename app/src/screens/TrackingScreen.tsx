@@ -84,14 +84,13 @@ export default function TrackingScreen() {
     return 0;
   }, [currentOrder]);
 
-  // Rider animation state and memo commented out to resolve UI-12 map placeholder change
-  /*
+  // Rider animation state and memo for dynamic status-based visualization
   const [riderProgress, setRiderProgress] = useState(0);
 
   useEffect(() => {
     if (activeStep === 0 || activeStep === 1) {
       setRiderProgress(0); // Rider at restaurant
-    } else if (activeStep === 3) {
+    } else if (activeStep === 4) {
       setRiderProgress(1); // Rider at customer home
     } else if (activeStep === 2) {
       // Loop rider movement from 10% to 90% to simulate transit
@@ -119,7 +118,6 @@ export default function TrackingScreen() {
       return { left: `${left}%`, top: `${top}%` };
     }
   }, [riderProgress]);
-  */
 
   // Calculate dynamic ETA based on status
   const etaText = useMemo(() => {
@@ -227,19 +225,45 @@ export default function TrackingScreen() {
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />
           </View>
 
-          {/* Map Placeholder */}
-          <View style={styles.mapPlaceholder}>
-            <View style={styles.mapPlaceholderInner}>
-              <View style={styles.mapIconRing}>
-                <Ionicons name="map-outline" size={40} color={COLORS.primary} />
+          {/* Simulated Map / Rider Visualization */}
+          <View style={styles.mapContainer}>
+            {/* Grid background lines to simulate a map */}
+            <View style={[styles.mapGridLineH, { top: '25%' }]} />
+            <View style={[styles.mapGridLineH, { top: '50%' }]} />
+            <View style={[styles.mapGridLineH, { top: '75%' }]} />
+            <View style={[styles.mapGridLineV, { left: '25%' }]} />
+            <View style={[styles.mapGridLineV, { left: '50%' }]} />
+            <View style={[styles.mapGridLineV, { left: '75%' }]} />
+
+            {/* Roads */}
+            <View style={[styles.roadOverlayH, { top: '23%', left: '10%', width: '75%' }]} />
+            <View style={[styles.roadOverlayV, { top: '23%', left: '78%', height: '55%' }]} />
+
+            {/* Restaurant Marker */}
+            <View style={[styles.mapMarker, styles.restaurantMarkerPos]}>
+              <Text style={styles.mapMarkerIcon}>🏪</Text>
+              <View style={styles.mapMarkerLabel}>
+                <Text style={styles.mapMarkerLabelText}>Kitchen</Text>
               </View>
-              <Text style={styles.mapPlaceholderTitle}>Live Tracking Map</Text>
-              <Text style={styles.mapPlaceholderSub}>Real-time map coming soon</Text>
-              {/* Simulated road/route visual */}
-              <View style={styles.mapRoute}>
-                <View style={styles.mapRouteDot} />
-                <View style={styles.mapRouteLine} />
-                <View style={[styles.mapRouteDot, { backgroundColor: COLORS.primary }]} />
+            </View>
+
+            {/* Home Marker */}
+            <View style={[styles.mapMarker, styles.homeMarkerPos]}>
+              <Text style={styles.mapMarkerIcon}>🏡</Text>
+              <View style={styles.mapMarkerLabel}>
+                <Text style={styles.mapMarkerLabelText}>Home</Text>
+              </View>
+            </View>
+
+            {/* Animated Rider Dot / Marker */}
+            <View style={[styles.mapMarkerRider, riderPosition]}>
+              <Text style={styles.mapMarkerIconRider}>
+                {activeStep === 2 ? '🚴' : activeStep === 4 ? '✅' : '⏳'}
+              </Text>
+              <View style={styles.riderMarkerLabel}>
+                <Text style={styles.riderMarkerLabelText}>
+                  {activeStep === 0 || activeStep === 1 ? 'Preparing' : activeStep === 2 ? 'In Transit' : 'Arrived'}
+                </Text>
               </View>
             </View>
           </View>
