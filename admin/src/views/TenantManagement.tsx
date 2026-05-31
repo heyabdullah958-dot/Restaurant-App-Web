@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
-import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera } from 'lucide-react';
+import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera, Eye } from 'lucide-react';
 
 export const TenantManagement: React.FC = () => {
   const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -125,6 +126,18 @@ export const TenantManagement: React.FC = () => {
                   title="Remove Cover Banner"
                 >
                   <Trash2 size={14} />
+                </button>
+              ) : null}
+
+              {/* Preview Banner Button */}
+              {restaurant.banner_url ? (
+                <button
+                  type="button"
+                  onClick={() => setPreviewImage(restaurant.banner_url || null)}
+                  className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                  title="Preview Cover Banner"
+                >
+                  <Eye size={14} />
                 </button>
               ) : null}
               
@@ -390,6 +403,32 @@ export const TenantManagement: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div 
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div 
+            className="relative max-w-4xl w-full max-h-[85vh] bg-slate-900 border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 bg-slate-950/60 hover:bg-slate-950 text-slate-300 hover:text-white p-2 rounded-xl border border-slate-700/50 transition-colors z-50 flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            >
+              <X size={18} />
+            </button>
+            <img 
+              src={previewImage} 
+              alt="Banner Preview" 
+              className="w-full h-auto max-h-[80vh] object-contain mx-auto"
+            />
           </div>
         </div>
       )}
