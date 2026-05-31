@@ -8,6 +8,7 @@ from config.admin_views import platform_analytics
 
 urlpatterns = [
     path('', root_view, name='root'),
+    path('admin/analytics/', platform_analytics, name='admin_analytics'),
     path('admin/', admin.site.urls),
     path('health/', health_check, name='health_check'),
     path('api/health/', health_check, name='api_health_check'),
@@ -20,9 +21,6 @@ urlpatterns = [
     path('api/', include('restaurants.urls')),
     path('api/', include('orders.urls')),
     path('api/', include('payments.urls')),
-
-    # Admin extras
-    path('admin/analytics/', platform_analytics, name='admin_analytics'),
 ]
 
 # BUG-17 FIX: Serve media files in development
