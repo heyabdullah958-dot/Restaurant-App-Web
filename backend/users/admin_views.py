@@ -159,6 +159,8 @@ class AdminManagerListView(APIView):
         results = []
         for u in managers:
             managed = get_managed_restaurant(u)
+            if not managed:
+                continue
             results.append({
                 'id': u.id,
                 'username': u.username,
