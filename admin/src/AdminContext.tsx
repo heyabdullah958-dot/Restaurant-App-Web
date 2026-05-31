@@ -121,8 +121,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           id: payload.user_id,
           username: payload.username || 'Admin',
           email: '',
-          role: payload.is_staff ? 'super_admin' : 'branch_manager',
-          restaurantId: payload.is_staff ? undefined : payload.restaurant_id,
+          role: payload.is_superuser ? 'super_admin' : 'branch_manager',
+          restaurantId: payload.is_superuser ? undefined : payload.restaurant_id,
         };
       }
     }
@@ -145,7 +145,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (token) {
       const payload = decodeToken(token);
       if (payload && payload.exp * 1000 > Date.now()) {
-        return payload.is_staff ? 'super_dashboard' : 'branch_dashboard';
+        return payload.is_superuser ? 'super_dashboard' : 'branch_dashboard';
       }
     }
     const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
@@ -215,7 +215,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (mapped.length > 0) {
         const token = getToken();
         const payload = token ? decodeToken(token) : null;
-        const isSuper = payload?.is_staff === true;
+        const isSuper = payload?.is_superuser === true;
         const managerRestId = isSuper ? undefined : payload?.restaurant_id;
 
         if (managerRestId) {
@@ -300,7 +300,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       // 2. Decode JWT to determine role
       const payload = decodeToken(response.access);
-      const isSuperAdmin = payload?.is_staff === true;
+      const isSuperAdmin = payload?.is_superuser === true;
 
       // 3. Fetch live data from API
       const [restaurantData, orderData] = await Promise.all([
