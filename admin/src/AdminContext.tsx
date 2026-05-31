@@ -60,6 +60,7 @@ interface AdminContextProps {
   updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
+  removeRestaurantBanner: (id: number) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -888,6 +889,33 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const removeRestaurantBanner = async (id: number) => {
+    setLoading(true);
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (isMock) {
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, banner_url: undefined } : r))
+      );
+      showToast('Banner removed (Mock)! 🗑️', 'success');
+      setLoading(false);
+      return;
+    }
+    try {
+      const updated = await updateRestaurant(id, { banner_image: null });
+      const mapped = mapApiRestaurant(updated);
+      
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? mapped : r))
+      );
+      showToast('Banner image removed! 🗑️', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to remove banner image', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Polling for live orders (every 30 seconds)
   useEffect(() => {
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
@@ -929,6 +957,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateItemOptions,
         editMenuItem,
         updateRestaurantBanner,
+        removeRestaurantBanner,
       }}
     >
       {children}

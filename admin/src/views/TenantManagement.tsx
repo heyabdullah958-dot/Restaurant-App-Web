@@ -3,7 +3,7 @@ import { useAdmin } from '../AdminContext';
 import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera } from 'lucide-react';
 
 export const TenantManagement: React.FC = () => {
-  const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner } = useAdmin();
+  const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
 
   // Form states
@@ -115,6 +115,18 @@ export const TenantManagement: React.FC = () => {
               >
                 <Camera size={14} />
               </button>
+
+              {/* Remove Banner Button */}
+              {restaurant.banner_url ? (
+                <button
+                  type="button"
+                  onClick={() => removeRestaurantBanner(restaurant.id)}
+                  className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-20 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                  title="Remove Cover Banner"
+                >
+                  <Trash2 size={14} />
+                </button>
+              ) : null}
               
               {/* Hidden file input */}
               <input
