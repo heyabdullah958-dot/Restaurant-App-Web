@@ -3,12 +3,14 @@ import type { User, Restaurant, Order, MenuCategory, OrderStatus } from './types
 import { MOCK_MENU_ITEMS, MOCK_RESTAURANTS, INITIAL_ORDERS } from './mockData';
 import {
   loginAdmin,
+  logoutAdmin,
   fetchRestaurants,
   fetchAllOrders,
   updateOrderStatus as apiUpdateOrderStatus,
   setTokens,
   clearTokens,
   getToken,
+  getRefreshToken,
   decodeToken,
   createRestaurant,
   deleteRestaurant,
@@ -333,6 +335,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const logout = () => {
+    const refresh = getRefreshToken();
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (refresh && !isMock) {
+      logoutAdmin(refresh).catch((err) => {
+        console.warn('[Logout API failed]', err);
+      });
+    }
     clearTokens();
     localStorage.removeItem('foodsphere_admin_view');
     localStorage.removeItem('foodsphere_admin_brand_id');

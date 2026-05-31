@@ -104,3 +104,32 @@ class LoyaltyHistoryView(APIView):
                 'transactions': serializer.data
             }
         })
+
+from rest_framework_simplejwt.exceptions import TokenError
+
+class LogoutView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get('refresh')
+            if not refresh_token:
+                return Response({
+                    'success': False,
+                    'message': 'Refresh token is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({
+                'success': True,
+                'message': 'Successfully logged out'
+            }, status=status.HTTP_200_OK)
+        except TokenError:
+            # Token is already invalid, expired, or blacklisted.
+            # Return success anyway to ensure logout idempotency.
+            return Response({
+                'success': True,
+                'message': 'Token is already invalid or blacklisted, logged out successfully'
+            }, status=status.HTTP_200_OK)
+

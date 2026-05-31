@@ -4,7 +4,9 @@
  * All API calls go through here — never call fetch() directly in components.
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://restaurant-app-web.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
+  ? import.meta.env.VITE_API_URL 
+  : (import.meta.env.DEV ? '' : 'https://restaurant-app-web.onrender.com');
 
 // ─── Token Management ────────────────────────────────────────────────────────
 
@@ -26,6 +28,31 @@ export const clearTokens = (): void => {
 
 // ─── Authenticated Fetch Wrapper ─────────────────────────────────────────────
 
+let refreshPromise: Promise<string> | null = null;
+
+async function performTokenRefresh(): Promise<string> {
+  const refresh = getRefreshToken();
+  if (!refresh) {
+    throw new Error('No refresh token available');
+  }
+  // Call refresh endpoint directly to avoid circular dependency
+  const res = await fetch(`${BASE_URL}/api/auth/refresh/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!res.ok) {
+    clearTokens();
+    localStorage.removeItem('foodsphere_admin_mock_user');
+    window.location.reload();
+    throw new Error('Refresh token expired or invalid');
+  }
+  const data = await res.json();
+  const newAccess = data.access;
+  setTokens(newAccess, refresh);
+  return newAccess;
+}
+
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   let method = options.method || 'GET';
@@ -43,15 +70,46 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  let response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     method,
     headers,
   });
 
+  // Intercept 401 Unauthorized for Auto Refresh
+  if (response.status === 401 && getRefreshToken() && !endpoint.includes('/api/auth/')) {
+    try {
+      if (!refreshPromise) {
+        refreshPromise = performTokenRefresh().finally(() => {
+          refreshPromise = null;
+        });
+      }
+      const newAccessToken = await refreshPromise;
+      // Retry request with new token
+      headers['Authorization'] = `Bearer ${newAccessToken}`;
+      response = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        method,
+        headers,
+      });
+    } catch (err) {
+      console.warn('[apiFetch] Auto-refresh failed:', err);
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
   if (!response.ok) {
-    const errText = await response.text().catch(() => `HTTP ${response.status}`);
-    throw new Error(`API ${response.status}: ${errText}`);
+    let errorMsg = `HTTP ${response.status}`;
+    try {
+      const errJson = await response.json();
+      errorMsg = errJson.message || errJson.detail || JSON.stringify(errJson);
+    } catch {
+      try {
+        const text = await response.text();
+        if (text) errorMsg = text;
+      } catch {}
+    }
+    throw new Error(errorMsg);
   }
 
   // Handle 204 No Content
@@ -73,6 +131,12 @@ export const loginAdmin = (username: string, password: string) =>
   apiFetch<LoginResponse>('/api/auth/login/', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
+  });
+
+export const logoutAdmin = (refresh: string) =>
+  apiFetch<any>('/api/auth/logout/', {
+    method: 'POST',
+    body: JSON.stringify({ refresh }),
   });
 
 export const refreshAccessToken = (refreshToken: string) =>

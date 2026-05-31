@@ -93,6 +93,11 @@ Authorization: Bearer <access_token>
 - **Body:** `{ "refresh": "..." }`
 - **Response:** `{ "success": true, "data": { "access": "..." } }`
 
+#### `POST /api/auth/logout/`
+- **Description:** Blacklists the provided refresh token so it cannot be reused.
+- **Body:** `{ "refresh": "..." }`
+- **Response:** `{ "success": true, "message": "Successfully logged out" }`
+
 ### 3. Restaurants (`/api/restaurants/`)
 #### `GET /api/restaurants/`
 - **Description:** List all active restaurants.
