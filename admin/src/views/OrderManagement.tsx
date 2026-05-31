@@ -29,7 +29,7 @@ export const OrderManagement: React.FC = () => {
 
   // Filter orders belonging to this brand
   const brandOrders = useMemo(() => {
-    return orders.filter((o) => o.restaurant_id === restaurant.id);
+    return orders.filter((o) => Number(o.restaurant_id) === Number(restaurant.id));
   }, [orders, restaurant]);
 
   // Group orders by status

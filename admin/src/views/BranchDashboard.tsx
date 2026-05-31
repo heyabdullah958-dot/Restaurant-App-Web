@@ -29,11 +29,27 @@ export const BranchDashboard: React.FC = () => {
     );
   }
 
+  const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
   const brandStats = MOCK_BRAND_STATS[restaurant.id] || { revenue: 0, orders: 0, aov: 0 };
 
-  // Filter orders for this restaurant
-  const brandOrders = orders.filter((o) => o.restaurant_id === restaurant.id);
-  const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered').length;
+  // Filter orders for this restaurant (robust casting)
+  const brandOrders = orders.filter((o) => Number(o.restaurant_id) === Number(restaurant.id));
+  const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
+
+  // Calculate live stats
+  const liveRevenue = brandOrders.reduce((sum, o) => sum + o.total, 0);
+  const liveOrdersCount = brandOrders.length;
+
+  // Calculate today's stats for "Today's Brand Sales"
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfToday);
+  const todayRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
+  const todayOrdersCount = todayOrders.length;
+
+  // In live mode, we show today's sales
+  const displayRevenue = isMock ? brandStats.revenue : todayRevenue;
+  const displayOrdersCount = isMock ? brandStats.orders : todayOrdersCount;
 
   // Decide brand color
   const getBrandColor = () => {
@@ -71,9 +87,11 @@ export const BranchDashboard: React.FC = () => {
     },
     {
       title: "Today's Brand Sales",
-      value: `Rs. ${brandStats.revenue.toLocaleString()}`,
+      value: `Rs. ${displayRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <TrendingUp size={20} />,
-      status: `Total: ${brandStats.orders} Orders`,
+      status: isMock 
+        ? `Total: ${brandStats.orders} Orders`
+        : `Total: ${displayOrdersCount} Orders Today (Rs. ${Math.round(liveRevenue).toLocaleString()} / ${liveOrdersCount} All-time)`,
     },
     {
       title: 'Avg Delivery Time',
