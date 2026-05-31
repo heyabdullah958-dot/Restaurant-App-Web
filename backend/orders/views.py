@@ -27,7 +27,19 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return super().get_throttles()
 
     def get_queryset(self):
-        return Order.objects.select_related('restaurant').prefetch_related('items__menu_item').order_by('-created_at')
+        user = self.request.user
+        queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item').order_by('-created_at')
+        
+        # If user is a branch manager (staff but not superuser), filter by their managed restaurant
+        if user.is_authenticated and user.is_staff and not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed = get_managed_restaurant(user)
+            if managed:
+                queryset = queryset.filter(restaurant=managed)
+            else:
+                queryset = queryset.none()
+                
+        return queryset
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
