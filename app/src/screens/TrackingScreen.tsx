@@ -434,7 +434,7 @@ export default function TrackingScreen() {
         {/* Close Button / Go to History */}
         <TouchableOpacity activeOpacity={0.75}
           style={styles.doneBtn}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Main')}
         >
           <Text style={styles.doneBtnText}>Back to Home</Text>
         </TouchableOpacity>

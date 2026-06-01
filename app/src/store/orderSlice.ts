@@ -251,7 +251,8 @@ const orderSlice = createSlice({
       })
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.myOrders = action.payload;
+        const payload = action.payload;
+        state.myOrders = (payload && Array.isArray(payload.results)) ? payload.results : (Array.isArray(payload) ? payload : []);
       })
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;

@@ -69,15 +69,24 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         user = self.request.user
         queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
         
+        # If superuser, allow all
+        if user.is_authenticated and user.is_superuser:
+            return queryset
+            
         # If the user is a manager (is_staff and not is_superuser), restrict queryset to their managed restaurant
-        if user.is_authenticated and user.is_staff and not user.is_superuser:
+        if user.is_authenticated and user.is_staff:
             from config.admin_utils import get_managed_restaurant
             managed = get_managed_restaurant(user)
             if managed:
                 return queryset.filter(restaurant=managed)
             return Order.objects.none()
             
-        return queryset
+        # If ordinary authenticated user or guest, restrict strictly to their own orders
+        if user.is_authenticated:
+            return queryset.filter(user=user)
+            
+        # If anonymous (no token attached), deny access to prevent ID guessing leaks
+        return Order.objects.none()
 
 
 class MyOrdersListView(generics.ListAPIView):

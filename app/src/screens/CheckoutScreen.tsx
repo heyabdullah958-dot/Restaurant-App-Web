@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart } from '../store/cartSlice';
+import { guestLogin } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 
 export default function CheckoutScreen() {
@@ -123,7 +124,17 @@ export default function CheckoutScreen() {
     }
 
     try {
-      // 4. Dispatch placeOrder
+      // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
+      if (!isAuthenticated) {
+        const guestAction = await dispatch(guestLogin());
+        if (!guestLogin.fulfilled.match(guestAction)) {
+          Alert.alert('Checkout Error', 'Failed to initialize guest checkout session.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // 5. Dispatch placeOrder
       const resultAction = await dispatch(placeOrder(orderData));
       
       if (placeOrder.fulfilled.match(resultAction)) {

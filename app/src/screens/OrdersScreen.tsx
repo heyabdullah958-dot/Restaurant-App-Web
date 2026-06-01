@@ -33,14 +33,14 @@ export default function OrdersScreen() {
   // APP-14: Selected filter and computed list
   const [orderFilter, setOrderFilter] = React.useState<'all' | 'active' | 'delivered'>('all');
   const filteredOrders = React.useMemo(() => {
-    if (!myOrders) return [];
+    const ordersArray = Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []);
     if (orderFilter === 'active') {
-      return myOrders.filter((o: any) => o.status !== 'delivered');
+      return ordersArray.filter((o: any) => o.status !== 'delivered');
     }
     if (orderFilter === 'delivered') {
-      return myOrders.filter((o: any) => o.status === 'delivered');
+      return ordersArray.filter((o: any) => o.status === 'delivered');
     }
-    return myOrders;
+    return ordersArray;
   }, [myOrders, orderFilter]);
 
   // Fetch orders on mount (if authenticated)
