@@ -19,8 +19,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart } from '../store/cartSlice';
-import { guestLogin } from '../store/userSlice';
+import { guestLogin, updateUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CheckoutScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -140,6 +141,18 @@ export default function CheckoutScreen() {
       if (placeOrder.fulfilled.match(resultAction)) {
         const createdOrder = resultAction.payload;
         const orderId = createdOrder.id;
+
+        // Save delivery address locally for future use
+        try {
+          if (user?.id) {
+            await AsyncStorage.setItem(`user_address_${user.id}`, address.trim());
+          } else {
+            await AsyncStorage.setItem('guest_address', address.trim());
+          }
+          dispatch(updateUserProfile({ addresses: [address.trim()] }));
+        } catch (e) {
+          console.error('Failed to save delivery address on checkout:', e);
+        }
 
         // 5. Handle payments integration based on choice
         if (paymentMethod === 'cod') {

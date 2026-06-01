@@ -84,40 +84,7 @@ export default function TrackingScreen() {
     return 0;
   }, [currentOrder]);
 
-  // Rider animation state and memo for dynamic status-based visualization
-  const [riderProgress, setRiderProgress] = useState(0);
 
-  useEffect(() => {
-    if (activeStep === 0 || activeStep === 1) {
-      setRiderProgress(0); // Rider at restaurant
-    } else if (activeStep === 4) {
-      setRiderProgress(1); // Rider at customer home
-    } else if (activeStep === 2) {
-      // Loop rider movement from 10% to 90% to simulate transit
-      let current = 0.1;
-      setRiderProgress(current);
-      const interval = setInterval(() => {
-        current += 0.025;
-        if (current > 0.9) current = 0.1;
-        setRiderProgress(current);
-      }, 800);
-      return () => clearInterval(interval);
-    }
-  }, [activeStep]);
-
-  const riderPosition = useMemo<any>(() => {
-    if (riderProgress <= 0.5) {
-      const segProgress = riderProgress / 0.5;
-      const left = 15 + (80 - 15) * segProgress;
-      const top = 25;
-      return { left: `${left}%`, top: `${top}%` };
-    } else {
-      const segProgress = (riderProgress - 0.5) / 0.5;
-      const left = 80;
-      const top = 25 + (75 - 25) * segProgress;
-      return { left: `${left}%`, top: `${top}%` };
-    }
-  }, [riderProgress]);
 
   // Calculate dynamic ETA based on status
   const etaText = useMemo(() => {
@@ -217,7 +184,7 @@ export default function TrackingScreen() {
           </View>
         </View>
 
-        {/* ETA & Live Map Card */}
+        {/* ETA Card */}
         <View style={styles.mapCard}>
           <View style={styles.mapHeader}>
             <View>
@@ -227,49 +194,6 @@ export default function TrackingScreen() {
               <Text style={styles.etaTime}>{etaText}</Text>
             </View>
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />
-          </View>
-
-          {/* Simulated Map / Rider Visualization */}
-          <View style={styles.mapContainer}>
-            {/* Grid background lines to simulate a map */}
-            <View style={[styles.mapGridLineH, { top: '25%' }]} />
-            <View style={[styles.mapGridLineH, { top: '50%' }]} />
-            <View style={[styles.mapGridLineH, { top: '75%' }]} />
-            <View style={[styles.mapGridLineV, { left: '25%' }]} />
-            <View style={[styles.mapGridLineV, { left: '50%' }]} />
-            <View style={[styles.mapGridLineV, { left: '75%' }]} />
-
-            {/* Roads */}
-            <View style={[styles.roadOverlayH, { top: '23%', left: '10%', width: '75%' }]} />
-            <View style={[styles.roadOverlayV, { top: '23%', left: '78%', height: '55%' }]} />
-
-            {/* Restaurant Marker */}
-            <View style={[styles.mapMarker, styles.restaurantMarkerPos]}>
-              <Text style={styles.mapMarkerIcon}>🏪</Text>
-              <View style={styles.mapMarkerLabel}>
-                <Text style={styles.mapMarkerLabelText}>Kitchen</Text>
-              </View>
-            </View>
-
-            {/* Home Marker */}
-            <View style={[styles.mapMarker, styles.homeMarkerPos]}>
-              <Text style={styles.mapMarkerIcon}>🏡</Text>
-              <View style={styles.mapMarkerLabel}>
-                <Text style={styles.mapMarkerLabelText}>Home</Text>
-              </View>
-            </View>
-
-            {/* Animated Rider Dot / Marker */}
-            <View style={[styles.mapMarkerRider, riderPosition]}>
-              <Text style={styles.mapMarkerIconRider}>
-                {activeStep === 2 ? '🚴' : activeStep === 4 ? '✅' : '⏳'}
-              </Text>
-              <View style={styles.riderMarkerLabel}>
-                <Text style={styles.riderMarkerLabelText}>
-                  {activeStep === 0 || activeStep === 1 ? 'Preparing' : activeStep === 2 ? 'In Transit' : 'Arrived'}
-                </Text>
-              </View>
-            </View>
           </View>
         </View>
 
@@ -426,7 +350,7 @@ export default function TrackingScreen() {
               3. Update the status field from <Text style={styles.guideBold}>Received</Text> to <Text style={styles.guideBold}>Preparing</Text> or <Text style={styles.guideBold}>Out for Delivery</Text> and save.
             </Text>
             <Text style={styles.guideStep}>
-              4. Watch the map in the app automatically update the rider's position and route in real-time!
+              4. Watch the order status in the app automatically update in real-time!
             </Text>
           </View>
         </View>

@@ -10,13 +10,17 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  Switch,
+  Linking,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { AppDispatch, RootState } from '../store';
-import { logoutUser, updateProfile } from '../store/userSlice';
+import { logoutUser, updateProfile, updateUserProfile } from '../store/userSlice';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
@@ -33,6 +37,47 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   // Validation Errors
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Notification Prefs State
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [emailEnabled, setEmailEnabled] = useState(true);
+  const [smsEnabled, setSmsEnabled] = useState(false);
+
+  // Customer Support State
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
+  // Check if Address changed compared to stored addresses
+  const isAddressDirty = address.trim() !== (user?.addresses?.[0] || '');
+
+  React.useEffect(() => {
+    if (user) {
+      setUsername(user.username || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+      setAddress(user.addresses?.[0] || '');
+    }
+  }, [user]);
+
+  const handleSaveAddress = async () => {
+    if (!address.trim()) {
+      Alert.alert('Validation Error', 'Delivery address cannot be empty.');
+      return;
+    }
+    try {
+      if (user?.id) {
+        await AsyncStorage.setItem(`user_address_${user.id}`, address.trim());
+        dispatch(updateUserProfile({ addresses: [address.trim()] }));
+        Alert.alert('Success', 'Delivery address saved successfully!');
+      } else {
+        await AsyncStorage.setItem('guest_address', address.trim());
+        dispatch(updateUserProfile({ addresses: [address.trim()] }));
+        Alert.alert('Success', 'Guest delivery address saved successfully!');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to save address. Please try again.');
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -263,6 +308,14 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
               />
             </View>
           </View>
+          {isAddressDirty && (
+            <TouchableOpacity activeOpacity={0.8}
+              style={styles.addressSaveBtn}
+              onPress={handleSaveAddress}
+            >
+              <Text style={styles.addressSaveBtnText}>Save Delivery Address</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Quick Actions List */}
@@ -282,7 +335,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => setShowNotificationsModal(true)}>
             <View style={styles.actionLeft}>
               <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
               <Text style={styles.actionLabel}>Notification Preferences</Text>
@@ -290,7 +343,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => setShowSupportModal(true)}>
             <View style={styles.actionLeft}>
               <Ionicons name="help-circle-outline" size={22} color={COLORS.dark} />
               <Text style={styles.actionLabel}>Customer Support</Text>
@@ -309,6 +362,163 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         </View>
 
       </ScrollView>
+
+      {/* Notification Preferences Modal */}
+      <Modal
+        visible={showNotificationsModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowNotificationsModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, SHADOWS.medium]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notification Settings</Text>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => setShowNotificationsModal(false)}>
+                <Ionicons name="close" size={24} color={COLORS.dark} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalBody}>
+              <View style={styles.toggleRow}>
+                <View style={styles.toggleTextContainer}>
+                  <Text style={styles.toggleTitle}>Push Notifications</Text>
+                  <Text style={styles.toggleDesc}>Receive updates on your active orders</Text>
+                </View>
+                <Switch
+                  value={pushEnabled}
+                  onValueChange={setPushEnabled}
+                  trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+                  thumbColor={Platform.OS === 'android' ? COLORS.white : undefined}
+                />
+              </View>
+
+              <View style={styles.toggleRow}>
+                <View style={styles.toggleTextContainer}>
+                  <Text style={styles.toggleTitle}>Email Notifications</Text>
+                  <Text style={styles.toggleDesc}>Receive receipts and promotional offers</Text>
+                </View>
+                <Switch
+                  value={emailEnabled}
+                  onValueChange={setEmailEnabled}
+                  trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+                  thumbColor={Platform.OS === 'android' ? COLORS.white : undefined}
+                />
+              </View>
+
+              <View style={styles.toggleRow}>
+                <View style={styles.toggleTextContainer}>
+                  <Text style={styles.toggleTitle}>SMS Updates</Text>
+                  <Text style={styles.toggleDesc}>Get direct carrier status texts</Text>
+                </View>
+                <Switch
+                  value={smsEnabled}
+                  onValueChange={setSmsEnabled}
+                  trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
+                  thumbColor={Platform.OS === 'android' ? COLORS.white : undefined}
+                />
+              </View>
+
+              <TouchableOpacity activeOpacity={0.9}
+                style={styles.modalSaveBtn}
+                onPress={() => {
+                  setShowNotificationsModal(false);
+                  Alert.alert('Preferences Saved', 'Your notification preferences have been successfully updated.');
+                }}
+              >
+                <Text style={styles.modalSaveBtnText}>Save Preferences</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Customer Support Modal */}
+      <Modal
+        visible={showSupportModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowSupportModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, SHADOWS.medium]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Customer Support</Text>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => setShowSupportModal(false)}>
+                <Ionicons name="close" size={24} color={COLORS.dark} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalBody}>
+              <Text style={styles.supportIntro}>
+                Need help with an order or have a general inquiry? Choose a contact channel below to connect with us instantly.
+              </Text>
+
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.supportOption}
+                onPress={() => {
+                  setShowSupportModal(false);
+                  Linking.openURL('tel:+923001234567').catch(() => {
+                    Alert.alert('Dialer Error', 'Could not launch dialer. Please call +92 300 1234567 directly.');
+                  });
+                }}
+              >
+                <View style={styles.supportOptionLeft}>
+                  <View style={[styles.supportIconBg, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]}>
+                    <Ionicons name="call" size={22} color="#4CAF50" />
+                  </View>
+                  <View>
+                    <Text style={styles.supportOptionTitle}>Call Hotline</Text>
+                    <Text style={styles.supportOptionDesc}>Talk to our support agent directly</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.supportOption}
+                onPress={() => {
+                  setShowSupportModal(false);
+                  Linking.openURL('mailto:support@foodsphere.com?subject=FoodSphere Inquiry').catch(() => {
+                    Alert.alert('Email Error', 'Could not open mail client. Please contact support@foodsphere.com.');
+                  });
+                }}
+              >
+                <View style={styles.supportOptionLeft}>
+                  <View style={[styles.supportIconBg, { backgroundColor: 'rgba(33, 150, 243, 0.1)' }]}>
+                    <Ionicons name="mail" size={22} color="#2196F3" />
+                  </View>
+                  <View>
+                    <Text style={styles.supportOptionTitle}>Email Support</Text>
+                    <Text style={styles.supportOptionDesc}>Send us a detailed message</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.supportOption}
+                onPress={() => {
+                  setShowSupportModal(false);
+                  Alert.alert('Live Chat', 'Our Live Chat feature is coming soon! In the meantime, please call or email us.');
+                }}
+              >
+                <View style={styles.supportOptionLeft}>
+                  <View style={[styles.supportIconBg, { backgroundColor: 'rgba(255, 87, 34, 0.1)' }]}>
+                    <Ionicons name="chatbubbles" size={22} color={COLORS.primary} />
+                  </View>
+                  <View>
+                    <Text style={styles.supportOptionTitle}>Live Chat</Text>
+                    <Text style={styles.supportOptionDesc}>Chat with us in real-time (Coming Soon)</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 }
@@ -592,5 +802,120 @@ const styles = StyleSheet.create({
   },
   logoutItem: {
     borderBottomWidth: 0,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    paddingBottom: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    ...FONTS.subtitle,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  modalBody: {
+    marginTop: SPACING.xs,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+  },
+  toggleTextContainer: {
+    flex: 1,
+    marginRight: SPACING.md,
+  },
+  toggleTitle: {
+    fontSize: 14.5,
+    fontWeight: '600',
+    color: COLORS.dark,
+  },
+  toggleDesc: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginTop: 2,
+  },
+  modalSaveBtn: {
+    backgroundColor: COLORS.primary,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.xl,
+    ...SHADOWS.small,
+  },
+  modalSaveBtnText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  supportIntro: {
+    fontSize: 13.5,
+    color: COLORS.gray,
+    lineHeight: 19,
+    marginBottom: SPACING.lg,
+  },
+  supportOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+  },
+  supportOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  supportIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  supportOptionTitle: {
+    fontSize: 14.5,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  supportOptionDesc: {
+    fontSize: 11.5,
+    color: COLORS.gray,
+    marginTop: 2,
+  },
+  addressSaveBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.sm,
+  },
+  addressSaveBtnText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: 'bold',
   },
 });

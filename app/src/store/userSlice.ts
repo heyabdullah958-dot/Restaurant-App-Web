@@ -52,6 +52,12 @@ export const loadSavedToken = createAsyncThunk<
       // Fetch user profile info to verify token works
       const profileResponse = await api.get('/users/profile/') as any;
       const user = profileResponse.data || profileResponse;
+      try {
+        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
       
       return { user, token, refreshToken: refreshToken || '' };
     } catch (error: any) {
@@ -91,6 +97,12 @@ export const loginUser = createAsyncThunk<
       // Fetch user profile info
       const profileResponse = await api.get('/users/profile/') as any;
       const user = profileResponse.data || profileResponse;
+      try {
+        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
       
       return { user, token, refreshToken };
     } catch (error: any) {
@@ -111,6 +123,12 @@ export const registerUser = createAsyncThunk<
       // POST to /auth/register/
       const response = await api.post('/auth/register/', { username, email, password, phone }) as any;
       const { user, tokens } = response.data || response;
+      try {
+        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
       const token = tokens.access;
       
       // Set default auth header
@@ -143,6 +161,15 @@ export const guestLogin = createAsyncThunk<
       // POST to /auth/guest/
       const response = await api.post('/auth/guest/') as any;
       const { user, tokens } = response.data || response;
+      try {
+        let savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (!savedAddress) {
+          savedAddress = await AsyncStorage.getItem('guest_address');
+        }
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
       const token = tokens.access;
       
       // Set default auth header
@@ -173,7 +200,14 @@ export const fetchUserProfile = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/users/profile/') as any;
-      return response.data || response;
+      const user = response.data || response;
+      try {
+        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
+      return user;
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Failed to fetch profile';
       return rejectWithValue(message);
@@ -190,7 +224,14 @@ export const updateProfile = createAsyncThunk<
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await api.put('/users/profile/', profileData) as any;
-      return response.data || response;
+      const user = response.data || response;
+      try {
+        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+        if (savedAddress) {
+          user.addresses = [savedAddress];
+        }
+      } catch (e) {}
+      return user;
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Failed to update profile';
       return rejectWithValue(message);
