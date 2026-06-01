@@ -94,3 +94,28 @@ This session focused on completing Phase 5 (React Native App 12 Screens and Redu
 ### 🟡 Upcoming Features:
 3. **Phase 6 Online Payments**: Implement live Stripe elements gateway and PayFast local redirect payment loops.
 
+
+---
+
+## 🚀 Session 5 Update (June 1, 2026 — Security Audit, UI Redesign, and Live Sync)
+
+In this session, we reviewed the comprehensive end-to-end security sweep findings on the live server, successfully patched all identified security vulnerabilities, redesigned the Live Order Board UI for all managers, and implemented real-time status updates in the mobile app.
+
+### 1. Multi-Tenant Backend Security Hardening
+* **Tenant Data & Cross-Talk Isolation**: Refactored `AdminRestaurantViewSet`, `AdminMenuCategoryViewSet`, and `AdminMenuItemViewSet` in `backend/restaurants/views.py` to use dynamic querysets filtering strictly on `get_managed_restaurant(user)`. Detail operations on items belonging to other brands now return `404 Not Found`.
+* **Platform & Competitor Analytics Security**: Implemented strict superuser-only blocks on Platform analytics, and restricted Restaurant analytics exclusively to the manager assigned to that specific brand.
+* **Customer Management Shielding**: Replaced `IsAdminUser` with custom `IsSuperUser` checks on all admin customer views (points adjusts, details, manager profiles), preventing branch managers from viewing or altering customer details.
+* **Account Takeover Prevention**: Blocked staff managers from changing their passwords via API (`ChangeOwnPasswordView`) and the Django Admin panel by routing `/admin/password_change/` to a custom view throwing `PermissionDenied` for non-superuser staff.
+* **Order State Consistency**: Enforced validation constraints inside `OrderDetailSerializer` so once an order is `delivered`, it is locked from any edits, and `out_for_delivery` or `delivered` orders cannot be transitioned to `cancelled`.
+
+### 2. Live Order Board UI/UX Redesign
+* **Unified Kanban Glassmorphism**: Redesigned `OrderManagement.tsx` to replace mismatching multi-color backgrounds with a sleek unified dark glassmorphism layout (`bg-slate-900/30 backdrop-blur-md border-slate-800`). Added modern Webkit scrollbars and a live pulsating ping sync indicator.
+* **Sunset-Rose Alerts & Glowing Card Accent Lights**:
+  * Highlighted the **Pending** column with an energetic Coral Sunset-Rose alert theme (`text-rose-400`, `bg-rose-500/10`).
+  * Placed glowing status border accents (`border-l-rose-500`, `shadow-rose-500/5`) on Pending cards to capture manager focus instantly.
+* **Kanban "✓ Accept Order" Button**: Replaced the select dropdown in the Pending column with an elegant glowing, pulsating **`✓ Accept Order`** button, giving a satisfying one-click acceptance flow.
+* **Status Selector Cleanup**: Removed `'pending'` and `'cancelled'` status options from active selectors to prevent any regression or accidental order cancellations.
+
+### 3. 3-Second Live Sync in Mobile App
+* **Status Sync Acceleration**: Reduced order polling interval inside the mobile `TrackingScreen.tsx` from 15 seconds to **3 seconds**, making all backend status transitions feel practically instantaneous on the client's screen.
+* **Dynamic ETAs**: Configured tracking view header to display a friendly `STATUS: Awaiting Confirmation...` banner when an order is first submitted, switching to the estimated minute counter as soon as the manager accepts the order.
