@@ -64,6 +64,12 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [OrderItemInline]
 
+    def get_list_filter(self, request):
+        if request.user.is_superuser:
+            return ('status', 'payment_method', 'restaurant', 'created_at')
+        return ('status', 'payment_method', 'created_at')
+
+
     fieldsets = (
         ('Order Info', {
             'fields': ('restaurant', 'status', 'payment_method')

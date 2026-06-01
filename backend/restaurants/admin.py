@@ -59,6 +59,12 @@ class MenuItemAdmin(AuditLogMixin, admin.ModelAdmin):
     search_fields = ('name', 'category__name', 'category__restaurant__name')
     list_editable = ('price', 'is_available')
 
+    def get_list_filter(self, request):
+        if request.user.is_superuser:
+            return ('category__restaurant', 'is_available', 'is_featured')
+        return ('is_available', 'is_featured')
+
+
     def get_restaurant(self, obj):
         return obj.category.restaurant.name
     get_restaurant.short_description = 'Restaurant'

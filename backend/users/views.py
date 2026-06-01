@@ -148,6 +148,9 @@ class ChangeOwnPasswordView(APIView):
             return Response({'error': 'Password must be at least 6 characters long'}, status=400)
 
         user = request.user
+        if user.is_staff and not user.is_superuser:
+            return Response({'error': 'Managers are not allowed to change their own passwords.'}, status=403)
+
         user.set_password(new_password.strip())
         user.save()
 
@@ -155,4 +158,5 @@ class ChangeOwnPasswordView(APIView):
             'success': True,
             'message': 'Your password has been changed successfully!'
         })
+
 

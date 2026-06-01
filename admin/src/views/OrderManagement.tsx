@@ -7,7 +7,10 @@ import {
   Phone, 
   MessageSquare,
   CheckCircle,
-  Clock
+  Clock,
+  User,
+  ShoppingBag,
+  DollarSign
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
@@ -52,13 +55,55 @@ export const OrderManagement: React.FC = () => {
     );
   }, [orders, restaurant]);
 
-  // Group orders by status (removed 'cancelled')
-  const columns: { title: string; status: OrderStatus; color: string; bg: string; icon: React.ReactNode }[] = [
-    { title: 'Pending', status: 'pending', color: 'text-zinc-500 dark:text-zinc-400', bg: 'bg-zinc-50/80 dark:bg-zinc-950/10 border-zinc-200/50 dark:border-zinc-900/20', icon: <Clock size={16} /> },
-    { title: 'Received', status: 'received', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-900/30', icon: <CheckCircle size={16} /> },
-    { title: 'Preparing', status: 'preparing', color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-900/30', icon: <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-600 border-t-transparent" /> },
-    { title: 'Out For Delivery', status: 'out_for_delivery', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200/50 dark:border-blue-900/30', icon: <ArrowRight size={16} className="animate-pulse" /> },
-    { title: 'Delivered', status: 'delivered', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/30', icon: <CheckCircle className="text-emerald-500" size={16} /> },
+  // Group orders by status with dynamic accent mappings
+  const columns: { 
+    title: string; 
+    status: OrderStatus; 
+    color: string; 
+    border: string; 
+    accent: string; 
+    icon: React.ReactNode 
+  }[] = [
+    { 
+      title: 'Pending', 
+      status: 'pending', 
+      color: 'text-slate-400', 
+      border: 'border-l-slate-400',
+      accent: 'bg-slate-400/10 text-slate-400 border-slate-400/20', 
+      icon: <Clock size={15} /> 
+    },
+    { 
+      title: 'Received', 
+      status: 'received', 
+      color: 'text-indigo-400', 
+      border: 'border-l-indigo-500',
+      accent: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', 
+      icon: <CheckCircle size={15} /> 
+    },
+    { 
+      title: 'Preparing', 
+      status: 'preparing', 
+      color: 'text-amber-400', 
+      border: 'border-l-amber-500',
+      accent: 'bg-amber-500/10 text-amber-400 border-amber-500/20', 
+      icon: <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-amber-400 border-t-transparent" /> 
+    },
+    { 
+      title: 'Out For Delivery', 
+      status: 'out_for_delivery', 
+      color: 'text-sky-400', 
+      border: 'border-l-sky-500',
+      accent: 'bg-sky-500/10 text-sky-400 border-sky-500/20', 
+      icon: <ArrowRight size={15} className="animate-pulse" /> 
+    },
+    { 
+      title: 'Delivered', 
+      status: 'delivered', 
+      color: 'text-emerald-400', 
+      border: 'border-l-emerald-500',
+      accent: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', 
+      icon: <CheckCircle size={15} /> 
+    },
   ];
 
   // Trigger WhatsApp dispatch pre-filled message directly to rider +92 300 0000000
@@ -84,16 +129,43 @@ export const OrderManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Dynamic Scrollbar Injection */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.1);
+          border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.25);
+        }
+      `}</style>
+
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight">Live Order board</h1>
-          <p className="text-sm text-zinc-500 dark:text-slate-400">Manage incoming orders, trigger rider WhatsApp dispatches, and track statuses</p>
+          <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2">
+            Live Order Board
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+          </h1>
+          <p className="text-sm text-slate-400">Track and dispatch orders, manage status transitions, and sync riders in real time</p>
+        </div>
+        <div className="bg-slate-900 border border-slate-800/80 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2">
+          <span>Brand Hub:</span>
+          <span className="text-blue-400 uppercase tracking-wide font-black">{restaurant.name}</span>
         </div>
       </div>
 
       {/* Kanban Board Columns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
         {columns.map((col) => {
           const colOrders = brandOrders
             .filter((o) => o.status === col.status)
@@ -102,82 +174,88 @@ export const OrderManagement: React.FC = () => {
           return (
             <div 
               key={col.status} 
-              className={`rounded-2xl border p-4 flex flex-col max-h-[80vh] overflow-hidden ${col.bg}`}
+              className="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-800"
             >
               {/* Column Header */}
-              <div className="flex justify-between items-center mb-4 pb-2 border-b border-zinc-200/40 dark:border-slate-800/40">
-                <span className={`font-extrabold text-sm ${col.color} flex items-center gap-1.5`}>
+              <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-slate-800/60">
+                <span className={`font-black text-xs uppercase tracking-wider ${col.color} flex items-center gap-2`}>
                   {col.icon} {col.title}
                 </span>
-                <span className="bg-zinc-200 dark:bg-slate-800 text-zinc-700 dark:text-slate-300 font-bold px-2 py-0.5 rounded-full text-xs">
+                <span className={`font-black px-2.5 py-0.5 rounded-full text-xs border ${col.accent}`}>
                   {colOrders.length}
                 </span>
               </div>
 
               {/* Column Cards Container */}
-              <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+              <div className="flex-1 space-y-3.5 overflow-y-auto pr-1 custom-scrollbar">
                 {colOrders.map((order) => {
                   
                   return (
                     <div 
                       key={order.id} 
-                      className="bg-white dark:bg-slate-800 border border-zinc-200/60 dark:border-slate-700/50 p-4.5 rounded-xl shadow-sm flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                      className={`bg-slate-950/40 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border}`}
                     >
                       <div>
                         {/* Order ID & Time */}
                         <div className="flex justify-between items-center mb-3">
-                          <span className="font-extrabold text-xs text-zinc-800 dark:text-slate-200 bg-zinc-100 dark:bg-slate-700/60 px-2 py-0.5 rounded">
+                          <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-850 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                            <ShoppingBag size={11} className="text-slate-400" />
                             #{order.id}
                           </span>
-                           <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
-                            <Clock size={10} />
+                          <span className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
+                            <Clock size={10} className="text-slate-500" />
                             {formatOrderTime(order.created_at)}
                           </span>
                         </div>
 
                         {/* Customer Info */}
-                        <div className="space-y-1 mb-3">
-                          <span className="block font-bold text-xs text-zinc-900 dark:text-white leading-tight">
+                        <div className="space-y-1.5 mb-3.5 bg-slate-950/20 p-2.5 rounded-lg border border-slate-900/10">
+                          <span className="block font-black text-xs text-slate-100 flex items-center gap-1">
+                            <User size={11} className="text-slate-500" />
                             {order.guest_name || order.user_or_guest}
                           </span>
-                          <div className="flex items-center gap-1 text-[10px] text-zinc-500 dark:text-slate-400">
-                            <Phone size={10} />
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold">
+                            <Phone size={10} className="text-slate-500" />
                             <span>{order.guest_phone || 'N/A'}</span>
                           </div>
-                          <div className="flex items-start gap-1 text-[10px] text-zinc-500 dark:text-slate-400 leading-normal">
-                            <MapPin size={10} className="mt-0.5 flex-shrink-0" />
+                          <div className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-relaxed">
+                            <MapPin size={10} className="mt-0.5 flex-shrink-0 text-slate-500" />
                             <span className="line-clamp-2">{order.delivery_address}</span>
                           </div>
                         </div>
 
                         {/* Items summary list */}
-                        <div className="border-t border-zinc-100 dark:border-slate-700/50 pt-2.5 mb-3 space-y-1">
+                        <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-1.5">
                           {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-[10px] text-zinc-600 dark:text-slate-300">
-                              <span><strong className="text-zinc-800 dark:text-slate-200">{item.quantity}x</strong> {item.menu_item_name}</span>
-                              <span className="font-medium">Rs. {item.total_price}</span>
+                            <div key={idx} className="flex justify-between items-start text-[10px] text-slate-300">
+                              <span className="line-clamp-1">
+                                <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
+                                {item.menu_item_name}
+                              </span>
+                              <span className="font-semibold text-slate-400 ml-2">Rs.{item.total_price}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       {/* Pricing, Payment & Actions */}
-                      <div className="border-t border-zinc-100 dark:border-slate-700/50 pt-3">
-                        <div className="flex justify-between items-center text-xs mb-3.5">
-                          <span className="font-bold text-zinc-900 dark:text-white">Rs. {order.total}</span>
-                          <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-slate-500">
+                      <div className="border-t border-slate-900 pt-3">
+                        <div className="flex justify-between items-center mb-3.5 bg-slate-900/20 px-2 py-1.5 rounded-lg">
+                          <span className="text-[10px] uppercase font-black text-slate-400 flex items-center gap-0.5">
+                            <DollarSign size={10} className="text-slate-500" />
                             {order.payment_method}
                           </span>
+                          <span className="font-extrabold text-sm text-emerald-400">Rs. {order.total}</span>
                         </div>
 
                         {/* Kanban Action buttons & Status Dropdown */}
                         <div className="space-y-2">
                           {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                            <div className="w-full relative">
+                            <div className="w-full relative group/select">
                               <select 
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                                className="w-full appearance-none bg-zinc-900 hover:bg-zinc-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold py-2 px-3 rounded-lg text-[11px] transition-all cursor-pointer text-center outline-none"
+                                className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white font-bold py-2 pl-3 pr-8 rounded-lg text-[11px] transition-all cursor-pointer text-center outline-none select-none"
                               >
                                 <option value="pending">Pending</option>
                                 <option value="received">Received</option>
@@ -186,8 +264,10 @@ export const OrderManagement: React.FC = () => {
                                 <option value="delivered">Delivered</option>
                                 <option value="cancelled">Cancelled</option>
                               </select>
-                              <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center px-2 text-white">
-                                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 group-hover/select:text-white transition-colors">
+                                <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                </svg>
                               </div>
                             </div>
                           )}
@@ -196,21 +276,21 @@ export const OrderManagement: React.FC = () => {
                           {order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <button
                               onClick={() => triggerRiderWhatsApp(order)}
-                              className="w-full flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold py-2 rounded-lg text-[11px] transition-all shadow-sm"
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-black py-2 rounded-lg text-[11px] transition-all shadow-md active:scale-[0.98]"
                             >
-                              <MessageSquare size={12} /> WhatsApp Rider
+                              <MessageSquare size={11} /> WhatsApp Rider
                             </button>
                           )}
 
                           {order.status === 'delivered' && (
-                            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 py-1.5">
-                              <CheckCircle size={13} /> Completed
+                            <div className="flex items-center justify-center gap-1.5 text-[11px] font-black text-emerald-400 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                              <CheckCircle size={12} /> COMPLETED
                             </div>
                           )}
 
                           {order.status === 'cancelled' && (
-                            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 py-1.5">
-                              Cancelled
+                            <div className="flex items-center justify-center gap-1.5 text-[11px] font-black text-rose-400 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                              CANCELLED
                             </div>
                           )}
                         </div>
@@ -220,8 +300,8 @@ export const OrderManagement: React.FC = () => {
                 })}
 
                 {colOrders.length === 0 && (
-                  <div className="text-center py-10 border border-dashed border-zinc-200 dark:border-slate-700 rounded-xl text-xs text-zinc-400 dark:text-slate-500 font-medium">
-                    No orders
+                  <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    No active orders
                   </div>
                 )}
               </div>
