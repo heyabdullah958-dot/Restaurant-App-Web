@@ -189,7 +189,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -237,7 +237,7 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
     # Ensure cloudinary_storage is loaded before staticfiles if needed, or simply present
     if 'cloudinary_storage' not in INSTALLED_APPS:
         idx = INSTALLED_APPS.index('django.contrib.staticfiles')
-        INSTALLED_APPS.insert(idx, 'cloudinary_storage')
+        INSTALLED_APPS.insert(idx + 1, 'cloudinary_storage')
     if 'cloudinary' not in INSTALLED_APPS:
         INSTALLED_APPS.append('cloudinary')
 else:
