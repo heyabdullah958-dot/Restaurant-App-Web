@@ -114,7 +114,7 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
         )
         encoded_message = urllib.parse.quote(message)
         from django.conf import settings
-        rider_phone = getattr(settings, 'RIDER_WHATSAPP', '923090349090')
+        rider_phone = getattr(settings, 'RIDER_WHATSAPP', '923000000000')
         whatsapp_url = f"https://wa.me/{rider_phone}?text={encoded_message}"
         return mark_safe(
             f'<a href="{whatsapp_url}" target="_blank" '

@@ -61,7 +61,7 @@ export const OrderManagement: React.FC = () => {
     { title: 'Delivered', status: 'delivered', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/30', icon: <CheckCircle className="text-emerald-500" size={16} /> },
   ];
 
-  // Trigger WhatsApp dispatch pre-filled message directly to rider +92 309 0349090
+  // Trigger WhatsApp dispatch pre-filled message directly to rider +92 300 0000000
   const triggerRiderWhatsApp = (order: Order) => {
     const name = order.guest_name || order.user_or_guest;
     const phone = order.guest_phone || 'N/A';
@@ -78,7 +78,7 @@ export const OrderManagement: React.FC = () => {
       `Location Link: ${locationLink}`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/923090349090?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/923000000000?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 

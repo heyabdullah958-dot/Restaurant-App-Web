@@ -514,7 +514,7 @@ PAYFAST_HOST = 'sandbox.payfast.co.za' if PAYFAST_IS_SANDBOX else 'www.payfast.c
 FCM_SERVICE_ACCOUNT_JSON = os.environ.get('FCM_SERVICE_ACCOUNT_JSON', '')
 
 # RIDER WHATSAPP DISPATCH NUMBER
-RIDER_WHATSAPP = os.environ.get('RIDER_WHATSAPP_NUMBER', '923090349090')
+RIDER_WHATSAPP = os.environ.get('RIDER_WHATSAPP_NUMBER', '923000000000')
 
 # Sentry Monitoring integration
 SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
