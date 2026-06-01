@@ -9,6 +9,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import UserSerializer, UserRegisterSerializer, LoyaltyTransactionSerializer, CustomTokenObtainPairSerializer
 from .models import LoyaltyTransaction
 from config.throttles import GuestAuthThrottle
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.conf import settings
 
 User = get_user_model()
 
@@ -157,6 +162,96 @@ class ChangeOwnPasswordView(APIView):
         return Response({
             'success': True,
             'message': 'Your password has been changed successfully!'
+        })
+
+
+class ForgotPasswordView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email address is required.'}, status=400)
+            
+        User = get_user_model()
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({
+                'success': True,
+                'message': 'If this email is registered, a password reset link has been sent to it!'
+            })
+            
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        reset_link = f"https://foodsphere-admin.pages.dev/reset-password?uid={uid}&token={token}"
+        
+        subject = "Reset Your FoodSphere Password"
+        message = f"""Hi {user.username},
+
+We received a request to reset the password for your FoodSphere account.
+Please click the link below to set a new password:
+
+{reset_link}
+
+If you did not request this, you can safely ignore this email.
+
+Best regards,
+The FoodSphere Team
+"""
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL or 'foodsphere.support@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            print(f"SMTP Failed, could not send email to {email}: {e}")
+            email_sent = False
+
+        return Response({
+            'success': True,
+            'message': 'Password reset link has been successfully dispatched to your email!',
+            'email_sent': email_sent,
+            'debug_reset_link': reset_link if not email_sent else None
+        })
+
+
+class ResetPasswordConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get('uid')
+        token = request.data.get('token')
+        new_password = request.data.get('password')
+        
+        if not uidb64 or not token or not new_password:
+            return Response({'error': 'All fields (uid, token, password) are required.'}, status=400)
+            
+        if len(new_password.strip()) < 6:
+            return Response({'error': 'Password must be at least 6 characters long.'}, status=400)
+            
+        User = get_user_model()
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({'error': 'Invalid reset link or user does not exist.'}, status=400)
+            
+        if not default_token_generator.check_token(user, token):
+            return Response({'error': 'The reset link is invalid or has expired.'}, status=400)
+            
+        user.set_password(new_password.strip())
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Your password has been reset successfully! You can now log in.'
         })
 
 

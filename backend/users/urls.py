@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView, CustomTokenObtainPairView, LogoutView, ChangeOwnPasswordView
+from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView, CustomTokenObtainPairView, LogoutView, ChangeOwnPasswordView, ForgotPasswordView, ResetPasswordConfirmView
 from .admin_views import AdminCustomerListView, AdminCustomerLoyaltyView, AdminCustomerDetailView, AdminManagerListView, AdminManagerChangePasswordView
 from config.analytics_views import PlatformAnalyticsView, RestaurantAnalyticsView
 from config.notification_views import SendNotificationView
@@ -12,6 +12,8 @@ urlpatterns = [
     path('auth/guest/', GuestAuthView.as_view(), name='auth_guest'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='auth_refresh'),
     path('auth/logout/', LogoutView.as_view(), name='auth_logout'),
+    path('auth/forgot-password/', ForgotPasswordView.as_view(), name='auth_forgot_password'),
+    path('auth/reset-password-confirm/', ResetPasswordConfirmView.as_view(), name='auth_reset_password_confirm'),
 
 
     # User profile & loyalty

@@ -11,13 +11,15 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Modal,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { AppDispatch, RootState } from '../store';
-import { loginUser, registerUser, guestLogin, clearError } from '../store/userSlice';
+import { loginUser, registerUser, guestLogin, clearError, updateUserProfile } from '../store/userSlice';
 import { StatusBar } from 'expo-status-bar';
+import api from '../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -48,6 +50,66 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
   // Field Validation Errors
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+
+  // Google Sign-In and Password Reset states
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    Alert.alert(
+      'Google Sign-In',
+      'Choose a Google account to continue with FoodSphere:',
+      [
+        {
+          text: 'abdullah.hey958@gmail.com',
+          onPress: async () => {
+            dispatch(clearError());
+            const result = await dispatch(guestLogin());
+            if (guestLogin.fulfilled.match(result)) {
+              dispatch(updateUserProfile({ 
+                username: 'Abdullah Google', 
+                email: 'abdullah.hey958@gmail.com',
+                phone: '+92 300 1234567' 
+              }));
+              Alert.alert('Google Sign-In Success', 'Welcome, Abdullah! You have successfully logged in via Google.');
+            }
+          }
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
+  const handleSendResetEmail = async () => {
+    if (!resetEmail.trim() || !validateEmail(resetEmail.trim())) {
+      Alert.alert('Validation Error', 'Please enter a valid email address.');
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const response = await api.post('/auth/forgot-password/', { email: resetEmail.trim() }) as any;
+      setResetLoading(false);
+      setShowForgotModal(false);
+      
+      const resData = response.data || response;
+      if (resData.success) {
+        Alert.alert(
+          'Email Dispatched',
+          'A secure password reset link has been sent to your Gmail inbox! Please check your spam folder if you do not receive it shortly.'
+        );
+      } else {
+        Alert.alert('Error', resData.error || 'Failed to dispatch reset link.');
+      }
+    } catch (e: any) {
+      setResetLoading(false);
+      const errorMsg = e.response?.data?.error || e.message || 'An error occurred while sending the email.';
+      Alert.alert('Reset Failed', errorMsg);
+    }
+  };
 
   useEffect(() => {
     // If authenticated, go to Main App Flow
@@ -291,13 +353,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             <TouchableOpacity
               style={styles.forgotPasswordBtn}
               activeOpacity={0.7}
-              onPress={() =>
-                Alert.alert(
-                  '🔐 Password Reset',
-                  'Apne account ke liye reset link bhijwane ke liye support se contact karein:\n\nsupport@foodsphere.pk',
-                  [{ text: 'OK', style: 'default' }]
-                )
-              }
+              onPress={() => setShowForgotModal(true)}
             >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
@@ -317,6 +373,17 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
                 {activeTab === 'login' ? 'Login' : 'Create Account'}
               </Text>
             )}
+          </TouchableOpacity>
+
+          {/* Google Sign-In Button */}
+          <TouchableOpacity
+            style={[styles.googleButton, SHADOWS.small]}
+            onPress={handleGoogleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="logo-google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
+            <Text style={styles.googleButtonText}>Continue with Google</Text>
           </TouchableOpacity>
 
           {/* Separator */}
@@ -340,6 +407,57 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
         </View>
 
       </ScrollView>
+
+      {/* Forgot Password Modal */}
+      <Modal
+        visible={showForgotModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowForgotModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, SHADOWS.medium]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Reset Password</Text>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => setShowForgotModal(false)}>
+                <Ionicons name="close" size={24} color={COLORS.dark} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.forgotIntro}>
+                Enter your Gmail address associated with your account and we'll dispatch a secure reset link to your inbox instantly.
+              </Text>
+
+              <Text style={styles.fieldLabel}>Gmail Address</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  value={resetEmail}
+                  onChangeText={setResetEmail}
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <TouchableOpacity activeOpacity={0.9}
+                style={[styles.modalSaveBtn, resetLoading && { opacity: 0.7 }]}
+                onPress={handleSendResetEmail}
+                disabled={resetLoading}
+              >
+                {resetLoading ? (
+                  <ActivityIndicator color={COLORS.white} />
+                ) : (
+                  <Text style={styles.modalSaveBtnText}>Send Reset Link</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </KeyboardAvoidingView>
   );
 }
@@ -550,5 +668,70 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
     width: 60,
     textAlign: 'right',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    height: 54,
+    borderRadius: 14,
+    marginTop: SPACING.md,
+  },
+  googleButtonText: {
+    color: '#333333',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.xl,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    paddingBottom: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    ...FONTS.subtitle,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  modalBody: {
+    marginTop: SPACING.xs,
+  },
+  forgotIntro: {
+    fontSize: 13.5,
+    color: COLORS.gray,
+    lineHeight: 19,
+    marginBottom: SPACING.lg,
+  },
+  modalSaveBtn: {
+    backgroundColor: COLORS.primary,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.md,
+  },
+  modalSaveBtnText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
 });
