@@ -8,6 +8,9 @@ import {
   ActivityIndicator,
   SafeAreaView,
   RefreshControl,
+  Animated,
+  Easing,
+  Dimensions,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -15,6 +18,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { fetchOrderDetails, clearCurrentOrder } from '../store/orderSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
+
+const { width } = Dimensions.get('window');
 
 const STEPS = [
   { key: 'received', label: 'Received', icon: 'receipt-outline', desc: 'We have received your order' },
@@ -33,6 +38,194 @@ export default function TrackingScreen() {
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
   
   const orderId = route.params?.orderId || activeOrder?.id;
+
+  // Animation Values
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+  const driveAnim = React.useRef(new Animated.Value(0)).current;
+  const bounceAnim = React.useRef(new Animated.Value(0)).current;
+  const steamAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Animation Side Effects
+  useEffect(() => {
+    // 1. Radar Pulse (for Received / Pending)
+    if (activeStep === 0) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.3,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+
+    // 2. Chef Pot Steam & Bounce (for Preparing)
+    if (activeStep === 1) {
+      Animated.loop(
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(steamAnim, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(steamAnim, {
+              toValue: 0,
+              duration: 0,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.sequence([
+            Animated.timing(bounceAnim, {
+              toValue: -8,
+              duration: 400,
+              easing: Easing.quad,
+              useNativeDriver: true,
+            }),
+            Animated.timing(bounceAnim, {
+              toValue: 0,
+              duration: 400,
+              easing: Easing.quad,
+              useNativeDriver: true,
+            }),
+          ])
+        ])
+      ).start();
+    }
+
+    // 3. Scooter Drive (for Out for Delivery)
+    if (activeStep === 2) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(driveAnim, {
+            toValue: 1,
+            duration: 2500,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          })
+        ])
+      ).start();
+    }
+
+    // 4. Success Pop (for Delivered)
+    if (activeStep === 4) {
+      bounceAnim.setValue(0);
+      Animated.spring(bounceAnim, {
+        toValue: 1,
+        friction: 4,
+        tension: 40,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    return () => {
+      pulseAnim.setValue(1);
+      driveAnim.setValue(0);
+      bounceAnim.setValue(0);
+      steamAnim.setValue(0);
+    };
+  }, [activeStep]);
+
+  const renderStatusAnimation = () => {
+    // 1. RECEIVED STAGE
+    if (activeStep === 0) {
+      return (
+        <View style={styles.animCard}>
+          <View style={styles.radarContainer}>
+            <Animated.View style={[styles.radarRing, { transform: [{ scale: pulseAnim }] }]} />
+            <Animated.View style={[styles.radarRingOuter, { transform: [{ scale: Animated.multiply(pulseAnim, 1.2) }] }]} />
+            <View style={styles.animIconBg}>
+              <Ionicons name="receipt-outline" size={40} color={COLORS.primary} />
+            </View>
+          </View>
+          <Text style={styles.animTitle}>Order Accepted!</Text>
+          <Text style={styles.animDesc}>The kitchen is reviewing your order details...</Text>
+        </View>
+      );
+    }
+
+    // 2. PREPARING STAGE
+    if (activeStep === 1) {
+      const steamY = steamAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -25],
+      });
+      const steamOpacity = steamAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0.8, 0],
+      });
+
+      return (
+        <View style={styles.animCard}>
+          <View style={styles.preparingContainer}>
+            {/* Animated Steam */}
+            <Animated.View style={[styles.steamLine, { transform: [{ translateY: steamY }], opacity: steamOpacity, left: '42%' }]} />
+            <Animated.View style={[styles.steamLine, { transform: [{ translateY: steamY }], opacity: steamOpacity, left: '50%' }]} />
+            <Animated.View style={[styles.steamLine, { transform: [{ translateY: steamY }], opacity: steamOpacity, left: '58%' }]} />
+
+            <Animated.View style={[styles.animIconBg, { transform: [{ translateY: bounceAnim }] }]}>
+              <Ionicons name="restaurant-outline" size={40} color={COLORS.primary} />
+            </Animated.View>
+          </View>
+          <Text style={styles.animTitle}>Kitchen is Cooking!</Text>
+          <Text style={styles.animDesc}>Chef is preparing your fresh meal with top secret ingredients...</Text>
+        </View>
+      );
+    }
+
+    // 3. OUT FOR DELIVERY (RIDER ANIMATION)
+    if (activeStep === 2) {
+      const driveX = driveAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-60, width - 40],
+      });
+
+      return (
+        <View style={[styles.animCard, { overflow: 'hidden' }]}>
+          <View style={styles.roadContainer}>
+            <Animated.View style={[styles.riderContainer, { transform: [{ translateX: driveX }] }]}>
+              <Ionicons name="bicycle" size={32} color={COLORS.primary} />
+              <View style={styles.exhaustPuff} />
+            </Animated.View>
+            <View style={styles.roadLine} />
+            <View style={styles.roadDashesContainer}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <View key={i} style={styles.roadDash} />
+              ))}
+            </View>
+          </View>
+          <Text style={styles.animTitle}>Rider is on the Way!</Text>
+          <Text style={styles.animDesc}>Rider is speeding through traffic to deliver your food piping hot...</Text>
+        </View>
+      );
+    }
+
+    // 4. DELIVERED STAGE (SUCCESS STAGE)
+    if (activeStep === 4) {
+      const successScale = bounceAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.3, 1],
+      });
+
+      return (
+        <View style={styles.animCard}>
+          <Animated.View style={[styles.animIconBg, { backgroundColor: COLORS.success, transform: [{ scale: successScale }] }]}>
+            <Ionicons name="checkmark-circle-outline" size={44} color={COLORS.white} />
+          </Animated.View>
+          <Text style={[styles.animTitle, { color: COLORS.success }]}>Order Delivered!</Text>
+          <Text style={styles.animDesc}>Bon appétit! We hope you love your delicious meal.</Text>
+        </View>
+      );
+    }
+
+    return null;
+  };
 
   // Fetch order details on mount or ID change
   useEffect(() => {
@@ -196,6 +389,9 @@ export default function TrackingScreen() {
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />
           </View>
         </View>
+
+        {/* Foodpanda Style Status Animation */}
+        {renderStatusAnimation()}
 
         {/* Stepper Stepper Card */}
         <View style={styles.card}>
@@ -647,6 +843,123 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  animCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
+  },
+  animTitle: {
+    ...FONTS.title,
+    fontSize: 18,
+    color: COLORS.dark,
+    marginTop: SPACING.md,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  animDesc: {
+    ...FONTS.caption,
+    fontSize: 13,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 18,
+    paddingHorizontal: SPACING.md,
+  },
+  radarContainer: {
+    width: 90,
+    height: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  radarRing: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 87, 34, 0.25)',
+    backgroundColor: 'rgba(255, 87, 34, 0.04)',
+  },
+  radarRingOuter: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 87, 34, 0.12)',
+  },
+  animIconBg: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 87, 34, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  preparingContainer: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  steamLine: {
+    position: 'absolute',
+    top: 5,
+    width: 2,
+    height: 10,
+    backgroundColor: COLORS.primary,
+    borderRadius: 1,
+  },
+  roadContainer: {
+    width: '100%',
+    height: 60,
+    justifyContent: 'flex-end',
+    position: 'relative',
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  riderContainer: {
+    position: 'absolute',
+    bottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  exhaustPuff: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.lightGray,
+    marginLeft: 4,
+    opacity: 0.6,
+  },
+  roadLine: {
+    height: 3,
+    backgroundColor: COLORS.lightGray,
+    width: '100%',
+    position: 'absolute',
+    bottom: 6,
+  },
+  roadDashesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    paddingHorizontal: SPACING.sm,
+  },
+  roadDash: {
+    width: 14,
+    height: 2,
+    backgroundColor: COLORS.lightGray,
+    opacity: 0.4,
   },
   mapCard: {
     backgroundColor: COLORS.cardBackground,
