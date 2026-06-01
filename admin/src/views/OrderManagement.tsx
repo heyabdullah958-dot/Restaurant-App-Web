@@ -22,16 +22,36 @@ export const OrderManagement: React.FC = () => {
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
-    const isToday = date.getDate() === now.getDate() &&
-                    date.getMonth() === now.getMonth() &&
-                    date.getFullYear() === now.getFullYear();
+
+    // Use Intl.DateTimeFormat to force timezone calculation under Asia/Karachi (PKT)
+    const optionsDate: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Asia/Karachi', 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    };
     
-    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const fmt = new Intl.DateTimeFormat('en-US', optionsDate);
+    const dateStrKarachi = fmt.format(date);
+    const nowStrKarachi = fmt.format(now);
+    const isToday = dateStrKarachi === nowStrKarachi;
+
+    const timeStr = date.toLocaleTimeString('en-US', {
+      timeZone: 'Asia/Karachi',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
     if (isToday) {
       return `Today, ${timeStr}`;
     } else {
-      const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
-      return `${dateStr}, ${timeStr}`;
+      const datePart = date.toLocaleDateString('en-US', {
+        timeZone: 'Asia/Karachi',
+        day: '2-digit',
+        month: 'short'
+      });
+      return `${datePart}, ${timeStr}`;
     }
   };
 
@@ -166,7 +186,7 @@ export const OrderManagement: React.FC = () => {
       </div>
 
       {/* Kanban Board Columns Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
+      <div className="flex flex-col lg:flex-row gap-5 items-start overflow-x-auto pb-4 custom-scrollbar">
         {columns.map((col) => {
           const colOrders = brandOrders
             .filter((o) => o.status === col.status)
@@ -175,7 +195,7 @@ export const OrderManagement: React.FC = () => {
           return (
             <div 
               key={col.status} 
-              className="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-800"
+              className="w-full lg:w-[320px] lg:min-w-[300px] flex-shrink-0 bg-slate-900/30 border border-slate-800/60 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-800"
             >
               {/* Column Header */}
               <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-slate-800/60">
@@ -205,7 +225,7 @@ export const OrderManagement: React.FC = () => {
                             <ShoppingBag size={11} className="text-slate-400" />
                             #{order.id}
                           </span>
-                          <span className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
+                          <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
                             <Clock size={10} className="text-slate-500" />
                             {formatOrderTime(order.created_at)}
                           </span>
@@ -217,25 +237,25 @@ export const OrderManagement: React.FC = () => {
                             <User size={11} className="text-slate-500" />
                             {order.guest_name || order.user_or_guest}
                           </span>
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold">
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
                             <Phone size={10} className="text-slate-500" />
                             <span>{order.guest_phone || 'N/A'}</span>
                           </div>
-                          <div className="flex items-start gap-1.5 text-[10px] text-slate-400 leading-relaxed">
+                          <div className="flex items-start gap-1.5 text-[11px] text-slate-400 leading-relaxed">
                             <MapPin size={10} className="mt-0.5 flex-shrink-0 text-slate-500" />
-                            <span className="line-clamp-2">{order.delivery_address}</span>
+                            <span className="line-clamp-none break-words">{order.delivery_address}</span>
                           </div>
                         </div>
 
                         {/* Items summary list */}
                         <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-1.5">
                           {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-start text-[10px] text-slate-300">
-                              <span className="line-clamp-1">
+                            <div key={idx} className="flex justify-between items-start text-[11px] text-slate-300">
+                              <span className="flex-1 pr-2 break-words">
                                 <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
                                 {item.menu_item_name}
                               </span>
-                              <span className="font-semibold text-slate-400 ml-2">Rs.{item.total_price}</span>
+                              <span className="font-semibold text-slate-400 ml-2 whitespace-nowrap">Rs.{item.total_price}</span>
                             </div>
                           ))}
                         </div>
@@ -244,7 +264,7 @@ export const OrderManagement: React.FC = () => {
                       {/* Pricing, Payment & Actions */}
                       <div className="border-t border-slate-900 pt-3">
                         <div className="flex justify-between items-center mb-3.5 bg-slate-900/20 px-2 py-1.5 rounded-lg">
-                          <span className="text-[10px] uppercase font-black text-slate-400 flex items-center gap-0.5">
+                          <span className="text-[11px] uppercase font-black text-slate-400 flex items-center gap-0.5">
                             <DollarSign size={10} className="text-slate-500" />
                             {order.payment_method}
                           </span>
@@ -310,7 +330,7 @@ export const OrderManagement: React.FC = () => {
                 })}
 
                 {colOrders.length === 0 && (
-                  <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-[11px] text-slate-500 font-bold uppercase tracking-wider">
                     No active orders
                   </div>
                 )}

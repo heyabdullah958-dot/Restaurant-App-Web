@@ -19,7 +19,7 @@ export const AnalyticsCharts: React.FC<ChartProps> = ({ brandSlug, brandColor })
   });
 
   const formatDateLabel = (d: Date) => {
-    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+    return d.toLocaleDateString('en-US', { timeZone: 'Asia/Karachi', day: '2-digit', month: 'short' });
   };
   
   const labels = last7Days.map(formatDateLabel);

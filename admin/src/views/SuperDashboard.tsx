@@ -13,15 +13,37 @@ export const SuperDashboard: React.FC = () => {
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
-    const isToday = date.getDate() === now.getDate() &&
-                    date.getMonth() === now.getMonth() &&
-                    date.getFullYear() === now.getFullYear();
-    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+    // Use Intl.DateTimeFormat to force timezone calculation under Asia/Karachi (PKT)
+    const optionsDate: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Asia/Karachi', 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    };
+    
+    const fmt = new Intl.DateTimeFormat('en-US', optionsDate);
+    const dateStrKarachi = fmt.format(date);
+    const nowStrKarachi = fmt.format(now);
+    const isToday = dateStrKarachi === nowStrKarachi;
+
+    const timeStr = date.toLocaleTimeString('en-US', {
+      timeZone: 'Asia/Karachi',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
     if (isToday) {
       return `Today, ${timeStr}`;
+    } else {
+      const datePart = date.toLocaleDateString('en-US', {
+        timeZone: 'Asia/Karachi',
+        day: '2-digit',
+        month: 'short'
+      });
+      return `${datePart}, ${timeStr}`;
     }
-    const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
-    return `${dateStr}, ${timeStr}`;
   };
 
   // Calculate live statistics based on scope and timeframe

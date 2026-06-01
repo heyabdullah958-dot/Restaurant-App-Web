@@ -76,7 +76,12 @@ export const CustomerManagement: React.FC = () => {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('en-PK', {
+      timeZone: 'Asia/Karachi',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
   };
 
   return (
