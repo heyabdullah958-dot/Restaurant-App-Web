@@ -24,6 +24,8 @@ class PlatformAnalyticsView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
+        if not request.user.is_superuser:
+            return Response({'error': 'You do not have permission to view platform-wide analytics.'}, status=403)
         today = timezone.now().date()
         last_7 = today - timedelta(days=7)
         last_30 = today - timedelta(days=30)
@@ -126,6 +128,11 @@ class RestaurantAnalyticsView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, restaurant_id):
+        if not request.user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(request.user)
+            if not managed_restaurant or str(managed_restaurant.id) != str(restaurant_id):
+                return Response({'error': 'You do not have permission to view this restaurant\'s analytics.'}, status=403)
         today = timezone.now().date()
         last_7 = today - timedelta(days=7)
         last_30 = today - timedelta(days=30)

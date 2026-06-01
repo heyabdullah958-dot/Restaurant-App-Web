@@ -80,17 +80,89 @@ from .models import MenuCategory, MenuItem
 from .serializers import MenuItemSerializer
 
 class AdminRestaurantViewSet(viewsets.ModelViewSet):
-    queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
     permission_classes = [permissions.IsAdminUser]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Restaurant.objects.all()
+        from config.admin_utils import get_managed_restaurant
+        managed_restaurant = get_managed_restaurant(user)
+        if managed_restaurant:
+            return Restaurant.objects.filter(id=managed_restaurant.id)
+        return Restaurant.objects.none()
+
 class AdminMenuCategoryViewSet(viewsets.ModelViewSet):
-    queryset = MenuCategory.objects.all()
     serializer_class = MenuCategorySerializer
     permission_classes = [permissions.IsAdminUser]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return MenuCategory.objects.all()
+        from config.admin_utils import get_managed_restaurant
+        managed_restaurant = get_managed_restaurant(user)
+        if managed_restaurant:
+            return MenuCategory.objects.filter(restaurant=managed_restaurant)
+        return MenuCategory.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You do not manage any restaurant.")
+            serializer.save(restaurant=managed_restaurant)
+        else:
+            serializer.save()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            restaurant = serializer.validated_data.get('restaurant')
+            if restaurant and restaurant != managed_restaurant:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("You cannot reassign this category to another restaurant.")
+        serializer.save()
+
 class AdminMenuItemViewSet(viewsets.ModelViewSet):
-    queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
     permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return MenuItem.objects.all()
+        from config.admin_utils import get_managed_restaurant
+        managed_restaurant = get_managed_restaurant(user)
+        if managed_restaurant:
+            return MenuItem.objects.filter(category__restaurant=managed_restaurant)
+        return MenuItem.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            category = serializer.validated_data.get('category')
+            if category and category.restaurant != managed_restaurant:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("You cannot add items to a category belonging to another restaurant.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            category = serializer.validated_data.get('category')
+            if category and category.restaurant != managed_restaurant:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("You cannot move items to a category belonging to another restaurant.")
+        serializer.save()
 

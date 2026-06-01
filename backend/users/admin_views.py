@@ -12,6 +12,13 @@ from .models import User, LoyaltyTransaction
 from .serializers import UserSerializer
 
 
+class IsSuperUser(permissions.BasePermission):
+    """
+    Allows access only to superusers.
+    """
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.is_superuser)
+
 class AdminCustomerListView(generics.ListAPIView):
     """
     GET /api/admin/customers/
@@ -19,7 +26,7 @@ class AdminCustomerListView(generics.ListAPIView):
     Super admin only.
     """
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def get_queryset(self):
         from django.db.models import Q
@@ -65,7 +72,7 @@ class AdminCustomerLoyaltyView(APIView):
     Body:
         { "loyalty_points": 500, "reason": "Compensation for late order" }
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def patch(self, request, pk):
         try:
@@ -115,7 +122,7 @@ class AdminCustomerDetailView(APIView):
     GET /api/admin/customers/<pk>/
     Returns detailed profile + loyalty transaction history for a single customer.
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def get(self, request, pk):
         try:
@@ -152,7 +159,7 @@ class AdminManagerListView(APIView):
     Returns list of all restaurant managers with their assigned restaurants.
     Super admin only.
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def get(self, request):
         managers = User.objects.filter(is_staff=True, is_superuser=False).order_by('username')
@@ -177,7 +184,7 @@ class AdminManagerChangePasswordView(APIView):
     Change password for a restaurant manager.
     Super admin only.
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def post(self, request, pk):
         try:

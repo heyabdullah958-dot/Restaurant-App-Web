@@ -58,13 +58,26 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
     GET /api/orders/{id}/ - Retrieve order details (AllowAny).
     PATCH /api/orders/{id}/ - Update order status (IsAdminUser).
     """
-    queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
     serializer_class = OrderDetailSerializer
 
     def get_permissions(self):
         if self.request.method in ['PUT', 'PATCH']:
             return [permissions.IsAdminUser()]
         return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
+        
+        # If the user is a manager (is_staff and not is_superuser), restrict queryset to their managed restaurant
+        if user.is_authenticated and user.is_staff and not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed = get_managed_restaurant(user)
+            if managed:
+                return queryset.filter(restaurant=managed)
+            return Order.objects.none()
+            
+        return queryset
 
 
 class MyOrdersListView(generics.ListAPIView):

@@ -240,6 +240,22 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
 
+    def validate(self, attrs):
+        # State transition validation (lock delivered orders / block invalid cancellations)
+        if 'status' in attrs:
+            new_status = attrs['status']
+            if self.instance:
+                current_status = self.instance.status
+                if current_status == 'delivered':
+                    raise serializers.ValidationError(
+                        f"This order has already been delivered. You cannot change its status from '{current_status}' to '{new_status}'."
+                    )
+                if new_status == 'cancelled' and current_status in ['out_for_delivery', 'delivered']:
+                    raise serializers.ValidationError(
+                        f"This order is already {current_status.replace('_', ' ')}. You cannot cancel it now."
+                    )
+        return attrs
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         # Propagate request context for absolute image/logo URL resolution
