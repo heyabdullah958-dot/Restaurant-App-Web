@@ -67,11 +67,12 @@ export const OrderManagement: React.FC = () => {
     { 
       title: 'Pending', 
       status: 'pending', 
-      color: 'text-slate-400', 
-      border: 'border-l-slate-400',
-      accent: 'bg-slate-400/10 text-slate-400 border-slate-400/20', 
-      icon: <Clock size={15} /> 
+      color: 'text-rose-400', 
+      border: 'border-l-rose-500',
+      accent: 'bg-rose-500/10 text-rose-400 border-rose-500/20', 
+      icon: <Clock size={15} className="text-rose-400 animate-pulse" /> 
     },
+
     { 
       title: 'Received', 
       status: 'received', 
@@ -193,7 +194,9 @@ export const OrderManagement: React.FC = () => {
                   return (
                     <div 
                       key={order.id} 
-                      className={`bg-slate-950/40 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border}`}
+                      className={`bg-slate-950/40 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border} ${
+                        col.status === 'pending' ? 'shadow-rose-500/5 hover:shadow-rose-500/10 hover:border-rose-900' : ''
+                      }`}
                     >
                       <div>
                         {/* Order ID & Time */}
