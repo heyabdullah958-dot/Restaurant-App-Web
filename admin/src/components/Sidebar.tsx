@@ -174,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         }`}
       >
         {/* Top Branding Section */}
-        <div>
+        <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-0.5">
           <div className={`p-6 border-b flex justify-between items-center ${isSuper ? 'border-slate-800' : 'border-zinc-100 dark:border-slate-800'}`}>
             <div className="flex items-center gap-2.5">
               {isSuper ? (
