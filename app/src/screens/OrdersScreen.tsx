@@ -35,12 +35,12 @@ export default function OrdersScreen() {
   const filteredOrders = React.useMemo(() => {
     const ordersArray = Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []);
     if (orderFilter === 'active') {
-      return ordersArray.filter((o: any) => o.status !== 'delivered');
+      return ordersArray.filter((o: any) => o && o.status !== 'delivered');
     }
     if (orderFilter === 'delivered') {
-      return ordersArray.filter((o: any) => o.status === 'delivered');
+      return ordersArray.filter((o: any) => o && o.status === 'delivered');
     }
-    return ordersArray;
+    return ordersArray.filter((o: any) => o !== null && o !== undefined);
   }, [myOrders, orderFilter]);
 
   // Fetch orders on mount (if authenticated)
@@ -161,8 +161,9 @@ export default function OrdersScreen() {
   };
 
   const renderOrderItem = ({ item }: { item: any }) => {
-    const statusInfo = getStatusDetails(item.status);
-    const logoUrl = getImageUrl(item.restaurant_logo);
+    if (!item) return null;
+    const statusInfo = getStatusDetails(item?.status);
+    const logoUrl = getImageUrl(item?.restaurant_logo);
 
     return (
       <View style={styles.orderCard}>
@@ -178,22 +179,22 @@ export default function OrdersScreen() {
             )}
             <View style={styles.restaurantMeta}>
               <Text style={styles.restaurantName} numberOfLines={1}>
-                {item.restaurant_name}
+                {item?.restaurant_name || 'Restaurant'}
               </Text>
-              <Text style={styles.orderDate}>{formatDate(item.created_at)}</Text>
+              <Text style={styles.orderDate}>{formatDate(item?.created_at)}</Text>
             </View>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: statusInfo.color + '15' }]}>
-            <Text style={[styles.statusText, { color: statusInfo.color }]}>
-              {statusInfo.label}
+          <View style={[styles.statusBadge, { backgroundColor: (statusInfo?.color || COLORS.gray) + '15' }]}>
+            <Text style={[styles.statusText, { color: statusInfo?.color || COLORS.gray }]}>
+              {statusInfo?.label || 'Pending'}
             </Text>
           </View>
         </View>
 
         {/* Card Price/Total info */}
         <View style={styles.cardBody}>
-          <Text style={styles.orderNum}>Order #{item.id}</Text>
-          <Text style={styles.orderAmount}>Rs. {parseFloat(item.total).toFixed(2)}</Text>
+          <Text style={styles.orderNum}>Order #{item?.id}</Text>
+          <Text style={styles.orderAmount}>Rs. {parseFloat(item?.total || 0).toFixed(2)}</Text>
         </View>
 
         {/* Action Buttons */}
