@@ -46,7 +46,7 @@ export default function TrackingScreen() {
     };
   }, [dispatch, orderId]);
 
-  // Set up polling (refreshes order status every 15 seconds while not delivered)
+  // Set up polling (refreshes order status every 3 seconds while not delivered)
   useEffect(() => {
     if (!orderId || (currentOrder && currentOrder.status?.toLowerCase() === 'delivered')) {
       return;
@@ -54,7 +54,7 @@ export default function TrackingScreen() {
 
     const interval = setInterval(() => {
       dispatch(fetchOrderDetails(orderId));
-    }, 15000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [dispatch, orderId, currentOrder]);
@@ -122,6 +122,8 @@ export default function TrackingScreen() {
   // Calculate dynamic ETA based on status
   const etaText = useMemo(() => {
     switch (currentOrder?.status?.toLowerCase()) {
+      case 'pending':
+        return 'Awaiting Confirmation...';
       case 'received':
         return '35 - 45 mins';
       case 'preparing':
@@ -219,7 +221,9 @@ export default function TrackingScreen() {
         <View style={styles.mapCard}>
           <View style={styles.mapHeader}>
             <View>
-              <Text style={styles.etaLabel}>ESTIMATED DELIVERY</Text>
+              <Text style={styles.etaLabel}>
+                {currentOrder?.status?.toLowerCase() === 'pending' ? 'STATUS' : 'ESTIMATED DELIVERY'}
+              </Text>
               <Text style={styles.etaTime}>{etaText}</Text>
             </View>
             <Ionicons name="time-outline" size={32} color={COLORS.primary} />

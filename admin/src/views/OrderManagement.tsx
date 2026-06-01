@@ -253,19 +253,26 @@ export const OrderManagement: React.FC = () => {
 
                         {/* Kanban Action buttons & Status Dropdown */}
                         <div className="space-y-2">
-                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                          {order.status === 'pending' && (
+                            <button
+                              onClick={() => updateOrderStatus(order.id, 'received')}
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 text-white font-black py-2.5 rounded-lg text-xs transition-all shadow-md active:scale-[0.98] animate-pulse"
+                            >
+                              <CheckCircle size={13} /> Accept Order
+                            </button>
+                          )}
+
+                          {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <div className="w-full relative group/select">
                               <select 
                                 value={order.status}
                                 onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
                                 className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white font-bold py-2 pl-3 pr-8 rounded-lg text-[11px] transition-all cursor-pointer text-center outline-none select-none"
                               >
-                                <option value="pending">Pending</option>
                                 <option value="received">Received</option>
                                 <option value="preparing">Preparing</option>
                                 <option value="out_for_delivery">Out For Delivery</option>
                                 <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
                               </select>
                               <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 group-hover/select:text-white transition-colors">
                                 <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -275,8 +282,8 @@ export const OrderManagement: React.FC = () => {
                             </div>
                           )}
                           
-                          {/* Rider dispatch via WhatsApp (Triggerable for all active order states) */}
-                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                          {/* Rider dispatch via WhatsApp (Triggerable for all active order states except pending) */}
+                          {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <button
                               onClick={() => triggerRiderWhatsApp(order)}
                               className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-black py-2 rounded-lg text-[11px] transition-all shadow-md active:scale-[0.98]"
