@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   Linking,
 } from 'react-native';
+import * as Location from 'expo-location';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -46,6 +47,49 @@ export default function CheckoutScreen() {
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+  const handleDetectLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Please grant location permission to detect your address automatically.');
+        return;
+      }
+      
+      setIsDetectingLocation(true);
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      
+      let reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      
+      setIsDetectingLocation(false);
+      
+      if (reverseGeocode.length > 0) {
+        const addressObj = reverseGeocode[0];
+        const formattedAddress = [
+          addressObj.name,
+          addressObj.street,
+          addressObj.district,
+          addressObj.city,
+          addressObj.region,
+          addressObj.country
+        ].filter(Boolean).join(', ');
+        
+        setAddress(formattedAddress);
+        Alert.alert('Location Detected', `Auto-filled address:\n${formattedAddress}`);
+      } else {
+        Alert.alert('Error', 'Could not resolve coordinates to a readable address.');
+      }
+    } catch (e) {
+      setIsDetectingLocation(false);
+      Alert.alert('Error', 'Failed to fetch location. Please ensure GPS is turned on.');
+    }
+  };
 
   // Calculate pricing
   const restaurant = useMemo(() => {
@@ -291,6 +335,21 @@ export default function CheckoutScreen() {
                 <Text style={styles.addressHintText}>
                   💡 Exact address likho — rider ko dhundne mein asaani hogi
                 </Text>
+                
+                <TouchableOpacity activeOpacity={0.8}
+                  style={[styles.detectLocationBtn, isDetectingLocation && { opacity: 0.7 }]}
+                  onPress={handleDetectLocation}
+                  disabled={isDetectingLocation}
+                >
+                  {isDetectingLocation ? (
+                    <ActivityIndicator size="small" color={COLORS.primary} style={{ marginRight: 6 }} />
+                  ) : (
+                    <Ionicons name="locate-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
+                  )}
+                  <Text style={styles.detectLocationBtnText}>
+                    {isDetectingLocation ? 'Detecting Location...' : 'Auto-Detect Address'}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -649,5 +708,23 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: SPACING.md,
     fontStyle: 'italic',
+  },
+  detectLocationBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 87, 34, 0.06)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 87, 34, 0.15)',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.sm,
+    marginLeft: SPACING.sm,
+  },
+  detectLocationBtnText: {
+    color: COLORS.primary,
+    fontSize: 13,
+    fontWeight: 'bold',
   },
 });

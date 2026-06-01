@@ -56,32 +56,67 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    Alert.alert(
-      'Google Sign-In',
-      'Choose a Google account to continue with FoodSphere:',
-      [
-        {
-          text: 'abdullah.hey958@gmail.com',
-          onPress: async () => {
-            dispatch(clearError());
-            const result = await dispatch(guestLogin());
-            if (guestLogin.fulfilled.match(result)) {
-              dispatch(updateUserProfile({ 
-                username: 'Abdullah Google', 
-                email: 'abdullah.hey958@gmail.com',
-                phone: '+92 300 1234567' 
-              }));
-              Alert.alert('Google Sign-In Success', 'Welcome, Abdullah! You have successfully logged in via Google.');
-            }
-          }
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        }
-      ]
-    );
+  // Phone OTP login and Google Selection states
+  const [loginMethod, setLoginMethod] = useState<'username' | 'phone'>('username');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [googleModalVisible, setGoogleModalVisible] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
+  const [customGoogleName, setCustomGoogleName] = useState('');
+
+  const handleGoogleLogin = () => {
+    setGoogleModalVisible(true);
+  };
+
+  const handleSendOtp = () => {
+    if (!phone.trim()) {
+      setValidationErrors({ phone: 'Phone number is required' });
+      return;
+    }
+    setIsSendingOtp(true);
+    setTimeout(() => {
+      setIsSendingOtp(false);
+      setOtpSent(true);
+      Alert.alert(
+        '🔑 OTP Code Dispatched',
+        `A secure 4-digit verification code has been sent to ${phone}.\n\n(Use standard test code: 1234)`,
+        [{ text: 'OK' }]
+      );
+    }, 1500);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode !== '1234') {
+      Alert.alert('Verification Failed', 'Invalid verification code. Please enter the code sent to your phone (1234).');
+      return;
+    }
+    
+    dispatch(clearError());
+    const result = await dispatch(guestLogin());
+    if (guestLogin.fulfilled.match(result)) {
+      dispatch(updateUserProfile({ 
+        username: `User_${phone.slice(-4)}`, 
+        phone: phone.trim(),
+        email: `phone_user_${phone.slice(-4)}@foodsphere.com`
+      }));
+      Alert.alert('Success', 'Phone verification successful! Welcome to FoodSphere.');
+    }
+  };
+
+  const handleSelectGoogleAccount = async (selectedEmail: string, displayName: string) => {
+    setGoogleModalVisible(false);
+    dispatch(clearError());
+    
+    const result = await dispatch(guestLogin());
+    if (guestLogin.fulfilled.match(result)) {
+      dispatch(updateUserProfile({ 
+        username: displayName, 
+        email: selectedEmail,
+        phone: '+92 300 1234567' 
+      }));
+      Alert.alert('Google Sign-In Success', `Welcome, ${displayName}! You have logged in with ${selectedEmail}.`);
+    }
   };
 
   const handleSendResetEmail = async () => {
@@ -131,6 +166,15 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   };
 
   const handleAuthAction = () => {
+    if (activeTab === 'login' && loginMethod === 'phone') {
+      if (otpSent) {
+        handleVerifyOtp();
+      } else {
+        handleSendOtp();
+      }
+      return;
+    }
+
     setValidationErrors({});
     dispatch(clearError());
 
@@ -226,56 +270,26 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
         {/* Form Fields */}
         <View style={styles.formContainer}>
           
-          {/* Username Field */}
-          <Text style={styles.fieldLabel}>Username</Text>
-          <View style={[styles.inputWrapper, validationErrors.username ? styles.inputError : null]}>
-            <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your username"
-              value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                if (validationErrors.username) {
-                  setValidationErrors(prev => ({ ...prev, username: '' }));
-                }
-              }}
-              autoCapitalize="none"
-            />
-          </View>
-          {validationErrors.username && (
-            <Text style={styles.errorText}>{validationErrors.username}</Text>
+          {activeTab === 'login' && (
+            <View style={styles.methodContainer}>
+              <TouchableOpacity activeOpacity={0.75}
+                style={[styles.methodBtn, loginMethod === 'username' && styles.activeMethodBtn]}
+                onPress={() => setLoginMethod('username')}
+              >
+                <Text style={[styles.methodText, loginMethod === 'username' && styles.activeMethodText]}>Username Login</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.75}
+                style={[styles.methodBtn, loginMethod === 'phone' && styles.activeMethodBtn]}
+                onPress={() => setLoginMethod('phone')}
+              >
+                <Text style={[styles.methodText, loginMethod === 'phone' && styles.activeMethodText]}>Phone OTP Login</Text>
+              </TouchableOpacity>
+            </View>
           )}
 
-          {/* Email Field (Sign Up Only) */}
-          {activeTab === 'register' && (
+          {activeTab === 'login' && loginMethod === 'phone' ? (
             <>
-              <Text style={styles.fieldLabel}>Email Address</Text>
-              <View style={[styles.inputWrapper, validationErrors.email ? styles.inputError : null]}>
-                <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
-                  keyboardType="email-address"
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (validationErrors.email) {
-                      setValidationErrors(prev => ({ ...prev, email: '' }));
-                    }
-                  }}
-                  autoCapitalize="none"
-                />
-              </View>
-              {validationErrors.email && (
-                <Text style={styles.errorText}>{validationErrors.email}</Text>
-              )}
-            </>
-          )}
-
-          {/* Phone Field (Sign Up Only) */}
-          {activeTab === 'register' && (
-            <>
+              {/* Phone Login Fields */}
               <Text style={styles.fieldLabel}>Phone Number</Text>
               <View style={[styles.inputWrapper, validationErrors.phone ? styles.inputError : null]}>
                 <Ionicons name="call-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
@@ -290,41 +304,134 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
                       setValidationErrors(prev => ({ ...prev, phone: '' }));
                     }
                   }}
+                  editable={!otpSent}
                 />
               </View>
               {validationErrors.phone && (
                 <Text style={styles.errorText}>{validationErrors.phone}</Text>
               )}
-            </>
-          )}
 
-          {/* Password Field */}
-          <Text style={styles.fieldLabel}>Password</Text>
-          <View style={[styles.inputWrapper, validationErrors.password ? styles.inputError : null]}>
-            <Ionicons name="lock-closed-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                if (validationErrors.password) {
-                  setValidationErrors(prev => ({ ...prev, password: '' }));
-                }
-              }}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity activeOpacity={0.75} onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={20}
-                color={COLORS.gray}
-              />
-            </TouchableOpacity>
-          </View>
-          {validationErrors.password && (
-            <Text style={styles.errorText}>{validationErrors.password}</Text>
+              {otpSent && (
+                <>
+                  <Text style={styles.fieldLabel}>4-Digit Verification Code</Text>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="key-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter verification code (1234)"
+                      keyboardType="number-pad"
+                      maxLength={4}
+                      value={otpCode}
+                      onChangeText={setOtpCode}
+                    />
+                  </View>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Standard Username/Password Fields */}
+              {/* Username Field */}
+              <Text style={styles.fieldLabel}>Username</Text>
+              <View style={[styles.inputWrapper, validationErrors.username ? styles.inputError : null]}>
+                <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your username"
+                  value={username}
+                  onChangeText={(text) => {
+                    setUsername(text);
+                    if (validationErrors.username) {
+                      setValidationErrors(prev => ({ ...prev, username: '' }));
+                    }
+                  }}
+                  autoCapitalize="none"
+                />
+              </View>
+              {validationErrors.username && (
+                <Text style={styles.errorText}>{validationErrors.username}</Text>
+              )}
+
+              {/* Email Field (Sign Up Only) */}
+              {activeTab === 'register' && (
+                <>
+                  <Text style={styles.fieldLabel}>Email Address</Text>
+                  <View style={[styles.inputWrapper, validationErrors.email ? styles.inputError : null]}>
+                    <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your email"
+                      keyboardType="email-address"
+                      value={email}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        if (validationErrors.email) {
+                          setValidationErrors(prev => ({ ...prev, email: '' }));
+                        }
+                      }}
+                      autoCapitalize="none"
+                    />
+                  </View>
+                  {validationErrors.email && (
+                    <Text style={styles.errorText}>{validationErrors.email}</Text>
+                  )}
+                </>
+              )}
+
+              {/* Phone Field (Sign Up Only) */}
+              {activeTab === 'register' && (
+                <>
+                  <Text style={styles.fieldLabel}>Phone Number</Text>
+                  <View style={[styles.inputWrapper, validationErrors.phone ? styles.inputError : null]}>
+                    <Ionicons name="call-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your phone number (e.g. +923001234567)"
+                      keyboardType="phone-pad"
+                      value={phone}
+                      onChangeText={(text) => {
+                        setPhone(text);
+                        if (validationErrors.phone) {
+                          setValidationErrors(prev => ({ ...prev, phone: '' }));
+                        }
+                      }}
+                    />
+                  </View>
+                  {validationErrors.phone && (
+                    <Text style={styles.errorText}>{validationErrors.phone}</Text>
+                  )}
+                </>
+              )}
+
+              {/* Password Field */}
+              <Text style={styles.fieldLabel}>Password</Text>
+              <View style={[styles.inputWrapper, validationErrors.password ? styles.inputError : null]}>
+                <Ionicons name="lock-closed-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (validationErrors.password) {
+                      setValidationErrors(prev => ({ ...prev, password: '' }));
+                    }
+                  }}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity activeOpacity={0.75} onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={COLORS.gray}
+                  />
+                </TouchableOpacity>
+              </View>
+              {validationErrors.password && (
+                <Text style={styles.errorText}>{validationErrors.password}</Text>
+              )}
+            </>
           )}
 
           {activeTab === 'register' && password.length > 0 && (() => {
@@ -363,14 +470,20 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
           <TouchableOpacity
             style={[styles.submitButton, SHADOWS.medium]}
             onPress={handleAuthAction}
-            disabled={loading}
+            disabled={loading || isSendingOtp}
             activeOpacity={0.8}
           >
-            {loading ? (
+            {loading || isSendingOtp ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <Text style={styles.submitButtonText}>
-                {activeTab === 'login' ? 'Login' : 'Create Account'}
+                {activeTab === 'register' 
+                  ? 'Create Account' 
+                  : loginMethod === 'phone' 
+                    ? otpSent 
+                      ? 'Verify & Login' 
+                      : 'Send OTP Code' 
+                    : 'Login'}
               </Text>
             )}
           </TouchableOpacity>
@@ -453,6 +566,100 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
                   <Text style={styles.modalSaveBtnText}>Send Reset Link</Text>
                 )}
               </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Google Account Selector Modal */}
+      <Modal
+        visible={googleModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setGoogleModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, SHADOWS.medium]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Sign in with Google</Text>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => setGoogleModalVisible(false)}>
+                <Ionicons name="close" size={24} color={COLORS.dark} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalBody}>
+              <Text style={styles.forgotIntro}>
+                Select an account to log in securely or type your own Gmail below to simulate a real OAuth sign-in.
+              </Text>
+
+              {/* Account 1 */}
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.googleAccountItem}
+                onPress={() => handleSelectGoogleAccount('abdullah.hey958@gmail.com', 'Abdullah Hey')}
+              >
+                <View style={styles.googleAvatar}>
+                  <Text style={styles.googleAvatarText}>A</Text>
+                </View>
+                <View style={styles.googleAccountText}>
+                  <Text style={styles.googleAccountName}>Abdullah Hey</Text>
+                  <Text style={styles.googleAccountEmail}>abdullah.hey958@gmail.com</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              {/* Account 2 */}
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.googleAccountItem}
+                onPress={() => handleSelectGoogleAccount('heyabdullah958@gmail.com', 'Hey Abdullah')}
+              >
+                <View style={[styles.googleAvatar, { backgroundColor: '#FF5722' }]}>
+                  <Text style={styles.googleAvatarText}>H</Text>
+                </View>
+                <View style={styles.googleAccountText}>
+                  <Text style={styles.googleAccountName}>Hey Abdullah</Text>
+                  <Text style={styles.googleAccountEmail}>heyabdullah958@gmail.com</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              {/* Custom Selector Input */}
+              <View style={styles.googleCustomInputWrapper}>
+                <Text style={styles.fieldLabel}>Use Another Account</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your Display Name"
+                    value={customGoogleName}
+                    onChangeText={setCustomGoogleName}
+                  />
+                </View>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your Gmail address"
+                    keyboardType="email-address"
+                    value={customGoogleEmail}
+                    onChangeText={setCustomGoogleEmail}
+                    autoCapitalize="none"
+                  />
+                </View>
+                
+                <TouchableOpacity activeOpacity={0.9}
+                  style={styles.modalSaveBtn}
+                  onPress={() => {
+                    if (!customGoogleEmail.trim() || !validateEmail(customGoogleEmail.trim())) {
+                      Alert.alert('Error', 'Please enter a valid Gmail address.');
+                      return;
+                    }
+                    const name = customGoogleName.trim() || customGoogleEmail.split('@')[0];
+                    handleSelectGoogleAccount(customGoogleEmail.trim(), name);
+                  }}
+                >
+                  <Text style={styles.modalSaveBtnText}>Continue with Custom Gmail</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -733,5 +940,72 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  methodContainer: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.light,
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: SPACING.lg,
+  },
+  methodBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  activeMethodBtn: {
+    backgroundColor: COLORS.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  methodText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gray,
+  },
+  activeMethodText: {
+    color: COLORS.primary,
+    fontWeight: 'bold',
+  },
+  googleAccountItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+  },
+  googleAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#3F51B5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  googleAvatarText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  googleAccountText: {
+    flex: 1,
+  },
+  googleAccountName: {
+    fontSize: 14.5,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  googleAccountEmail: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginTop: 2,
+  },
+  googleCustomInputWrapper: {
+    marginTop: SPACING.md,
   },
 });
