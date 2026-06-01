@@ -39,6 +39,17 @@ export default function TrackingScreen() {
   
   const orderId = route.params?.orderId || activeOrder?.id;
 
+  // Determine current active step
+  const activeStep = useMemo(() => {
+    if (!currentOrder) return 0;
+    const status = currentOrder.status?.toLowerCase();
+    if (status === 'received') return 0;
+    if (status === 'preparing') return 1;
+    if (status === 'out_for_delivery' || status === 'out for delivery') return 2;
+    if (status === 'delivered') return 4; // All 4 steps (0, 1, 2, 3) completed
+    return 0;
+  }, [currentOrder]);
+
   // Animation Values
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
   const driveAnim = React.useRef(new Animated.Value(0)).current;
@@ -266,16 +277,7 @@ export default function TrackingScreen() {
     return restObj?.name || currentOrder.restaurant_name || 'Restaurant';
   }, [currentOrder, restaurants]);
 
-  // Determine current active step
-  const activeStep = useMemo(() => {
-    if (!currentOrder) return 0;
-    const status = currentOrder.status?.toLowerCase();
-    if (status === 'received') return 0;
-    if (status === 'preparing') return 1;
-    if (status === 'out_for_delivery' || status === 'out for delivery') return 2;
-    if (status === 'delivered') return 4; // All 4 steps (0, 1, 2, 3) completed
-    return 0;
-  }, [currentOrder]);
+
 
 
 
