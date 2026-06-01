@@ -18,6 +18,18 @@ import { updateUserProfile } from '../store/userSlice';
 import api from '../services/api';
 import { StatusBar } from 'expo-status-bar';
 
+// High-fidelity animation and gesture imports
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+
 const { width } = Dimensions.get('window');
 
 interface Transaction {
@@ -37,6 +49,47 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [points, setPoints] = useState(user?.loyalty_points || 0);
+
+  // Parallax and Shimmer Shared Values
+  const rotateX = useSharedValue(0);
+  const rotateY = useSharedValue(0);
+  const shimmerX = useSharedValue(-width);
+
+  useEffect(() => {
+    // Continuous metallic shimmer sweep loop
+    shimmerX.value = withRepeat(
+      withTiming(width * 1.5, { duration: 2500, easing: Easing.bezier(0.4, 0, 0.2, 1) }),
+      -1,
+      false
+    );
+  }, []);
+
+  const gesture = Gesture.Pan()
+    .onUpdate((event) => {
+      // 3D parallax rotations limited to +/- 12 degrees for safety and premium feel
+      rotateX.value = -event.translationY / 25;
+      rotateY.value = event.translationX / 25;
+    })
+    .onEnd(() => {
+      rotateX.value = withSpring(0, { damping: 12 });
+      rotateY.value = withSpring(0, { damping: 12 });
+    });
+
+  const animatedCardStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { perspective: 1000 },
+        { rotateX: `${rotateX.value}deg` },
+        { rotateY: `${rotateY.value}deg` },
+      ],
+    };
+  });
+
+  const animatedShimmerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: shimmerX.value }],
+    };
+  });
 
   // Fetch Loyalty Data from Backend
   const fetchLoyaltyData = async (isRefreshing = false) => {
@@ -148,53 +201,71 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
   const renderHeader = () => {
     return (
       <View style={styles.headerContainer}>
-        {/* Tier Card */}
-        <View style={[styles.tierCard, { shadowColor: tier.color }, SHADOWS.large]}>
-          <View style={styles.cardHeader}>
-            <View style={styles.tierBadge}>
-              <Ionicons name={tier.badgeIcon as any} size={28} color={tier.color} />
-              <Text style={[styles.tierName, { color: tier.color }]}>{tier.name} Member</Text>
-            </View>
-            <Ionicons name="sparkles" size={20} color={COLORS.secondary} />
-          </View>
-
-          <View style={styles.pointsContainer}>
-            <Text style={styles.pointsLabel}>Available Balance</Text>
-            <Text style={styles.pointsValue}>{points}</Text>
-            <Text style={styles.pointsUnit}>FoodSphere Points</Text>
-          </View>
-
-          {/* Progress Bar Container */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressLabel}>Tier Progress</Text>
-              <Text style={styles.progressValues}>
-                {points} / {tier.max}
-              </Text>
-            </View>
-            
-            <View style={styles.progressBarBg}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${Math.min(100, Math.max(5, tier.progress * 100))}%`,
-                    backgroundColor: tier.color,
-                  },
-                ]}
+        {/* Tier Card with Interactive 3D Parallax & Metallic Shimmer Overlay */}
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={[styles.tierCard, { shadowColor: tier.color }, SHADOWS.large, animatedCardStyle]}>
+            {/* Shimmer sweep overlay */}
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFill,
+                animatedShimmerStyle,
+                { width: '200%', opacity: 0.15 }
+              ]}
+            >
+              <LinearGradient
+                colors={['transparent', 'rgba(255, 255, 255, 0.8)', 'transparent']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
               />
+            </Animated.View>
+
+            <View style={styles.cardHeader}>
+              <View style={styles.tierBadge}>
+                <Ionicons name={tier.badgeIcon as any} size={28} color={tier.color} />
+                <Text style={[styles.tierName, { color: tier.color }]}>{tier.name} Member</Text>
+              </View>
+              <Ionicons name="sparkles" size={20} color={COLORS.secondary} />
             </View>
 
-            {tier.remaining > 0 ? (
-              <Text style={styles.progressFooter}>
-                Earn <Text style={{ fontWeight: 'bold' }}>{tier.remaining}</Text> more points for{' '}
-                <Text style={{ color: tier.color, fontWeight: 'bold' }}>{tier.nextName}</Text> Tier
-              </Text>
-            ) : (
-              <Text style={styles.progressFooter}>You are in the elite tier!</Text>
-            )}
-          </View>
-        </View>
+            <View style={styles.pointsContainer}>
+              <Text style={styles.pointsLabel}>Available Balance</Text>
+              <Text style={styles.pointsValue}>{points}</Text>
+              <Text style={styles.pointsUnit}>FoodSphere Points</Text>
+            </View>
+
+            {/* Progress Bar Container */}
+            <View style={styles.progressContainer}>
+              <View style={styles.progressHeader}>
+                <Text style={styles.progressLabel}>Tier Progress</Text>
+                <Text style={styles.progressValues}>
+                  {points} / {tier.max}
+                </Text>
+              </View>
+              
+              <View style={styles.progressBarBg}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${Math.min(100, Math.max(5, tier.progress * 100))}%`,
+                      backgroundColor: tier.color,
+                    },
+                  ]}
+                />
+              </View>
+
+              {tier.remaining > 0 ? (
+                <Text style={styles.progressFooter}>
+                  Earn <Text style={{ fontWeight: 'bold' }}>{tier.remaining}</Text> more points for{' '}
+                  <Text style={{ color: tier.color, fontWeight: 'bold' }}>{tier.nextName}</Text> Tier
+                </Text>
+              ) : (
+                <Text style={styles.progressFooter}>You are in the elite tier!</Text>
+              )}
+            </View>
+          </Animated.View>
+        </GestureDetector>
 
         {/* Benefits Info Box */}
         <View style={[styles.infoBox, SHADOWS.small]}>
@@ -263,42 +334,44 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      {/* Custom Navigation Header */}
-      <View style={styles.navHeader}>
-        <TouchableOpacity activeOpacity={0.75} style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
-        </TouchableOpacity>
-        <Text style={styles.navTitle}>Loyalty & Rewards</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      {loading && !refreshing ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loaderText}>Loading rewards dashboard...</Text>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        {/* Custom Navigation Header */}
+        <View style={styles.navHeader}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
+          </TouchableOpacity>
+          <Text style={styles.navTitle}>Loyalty & Rewards</Text>
+          <View style={{ width: 40 }} />
         </View>
-      ) : (
-        <FlatList
-          data={transactions}
-          renderItem={renderTransactionItem}
-          keyExtractor={(item) => item.id.toString()}
-          ListHeaderComponent={renderHeader}
-          ListEmptyComponent={renderEmptyState}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => fetchLoyaltyData(true)}
-              tintColor={COLORS.primary}
-              colors={[COLORS.primary]}
-            />
-          }
-        />
-      )}
-    </SafeAreaView>
+
+        {loading && !refreshing ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.loaderText}>Loading rewards dashboard...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={transactions}
+            renderItem={renderTransactionItem}
+            keyExtractor={(item) => item.id.toString()}
+            ListHeaderComponent={renderHeader}
+            ListEmptyComponent={renderEmptyState}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchLoyaltyData(true)}
+                tintColor={COLORS.primary}
+                colors={[COLORS.primary]}
+              />
+            }
+          />
+        )}
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 

@@ -19,22 +19,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
 import { getImageUrl } from '../services/fallbackData';
+import { RestaurantCardSkeleton } from '../components/SkeletonLoader';
+import Animated from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
 const categories = ['All', 'BBQ', 'Seafood', 'Burgers', 'Tandoori', 'Sandwiches', 'Desserts'];
 
-// APP-04: Loading Skeleton Card Component
-const SkeletonCard = () => (
-  <View style={styles.skeletonCard}>
-    <View style={styles.skeletonImage} />
-    <View style={styles.skeletonBody}>
-      <View style={styles.skeletonTitle} />
-      <View style={styles.skeletonSubtitle} />
-      <View style={styles.skeletonMeta} />
-    </View>
-  </View>
-);
+// Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
@@ -221,7 +213,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         {/* APP-04 & APP-05: Loading / Empty / Content block */}
         {loading ? (
           <View style={{ paddingHorizontal: 0 }}>
-            {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+            {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
           </View>
         ) : filteredRestaurants.length === 0 ? (
           <View style={styles.emptyStateBox}>
@@ -261,10 +253,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               >
                 <View style={[styles.brandBand, { backgroundColor: color }]}>
                   {brand.banner_image || brand.cover_image ? (
-                    <Image 
+                    <Animated.Image 
                       source={getImageUrl(brand.banner_image || brand.cover_image)} 
                       style={[StyleSheet.absoluteFill, { opacity: 0.8 }]} 
                       resizeMode="cover"
+                      sharedTransitionTag={`restaurant-${brand.slug}-image`}
                     />
                   ) : (
                     <Ionicons name={icon as any} size={32} color={COLORS.white} />

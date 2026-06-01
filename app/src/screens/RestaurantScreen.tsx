@@ -16,6 +16,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
@@ -265,7 +266,11 @@ export default function RestaurantScreen() {
         <View>
           {/* Cover Image & Header Controls */}
           <View style={styles.coverContainer}>
-            <Image source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} style={styles.coverImage} />
+            <Animated.Image 
+              source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} 
+              style={styles.coverImage} 
+              sharedTransitionTag={`restaurant-${restaurant.slug}-image`}
+            />
             <View style={styles.coverOverlay} />
 
             {/* Floating Header buttons */}
@@ -442,23 +447,30 @@ export default function RestaurantScreen() {
                   )}
 
                   {/* Quantity Selector overlay / add button */}
-                  <View style={styles.quantitySelectorContainer}>
+                  <Animated.View 
+                    layout={LinearTransition.springify().damping(15).mass(0.8)}
+                    style={styles.quantitySelectorContainer}
+                  >
                     {quantity > 0 && !item.options?.has_variants ? (
-                      <View style={styles.quantityRow}>
+                      <Animated.View 
+                        entering={FadeIn} 
+                        exiting={FadeOut}
+                        style={styles.quantityRow}
+                      >
                         <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
                           onPress={() => handleDecrement(item, quantity)}
                         >
                           <Ionicons name="remove" size={16} color={COLORS.white} />
                         </TouchableOpacity>
-                        <Text style={styles.quantityText}>{quantity}</Text>
+                        <Animated.Text entering={FadeIn} exiting={FadeOut} style={styles.quantityText}>{quantity}</Animated.Text>
                         <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
                           onPress={() => handleIncrement(item, quantity)}
                         >
                           <Ionicons name="add" size={16} color={COLORS.white} />
                         </TouchableOpacity>
-                      </View>
+                      </Animated.View>
                     ) : (
                       <TouchableOpacity
                         style={styles.addButton}
@@ -471,7 +483,7 @@ export default function RestaurantScreen() {
                         </Text>
                       </TouchableOpacity>
                     )}
-                  </View>
+                  </Animated.View>
                 </View>
               </View>
             );

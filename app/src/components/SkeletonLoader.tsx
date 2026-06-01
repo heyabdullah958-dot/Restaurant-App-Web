@@ -1,6 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, ViewStyle } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, ViewStyle, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { COLORS } from '../theme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface SkeletonProps {
   width?: number | string;
@@ -15,30 +25,51 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
   borderRadius = 4,
   style,
 }) => {
-  const opacity = useRef(new Animated.Value(0.3)).current;
+  const shimmerX = useSharedValue(-200);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 700, useNativeDriver: true }),
-      ])
-    ).start();
-  }, [opacity]);
+    shimmerX.value = withRepeat(
+      withTiming(200, { duration: 1500, easing: Easing.linear }),
+      -1, // Loop infinitely
+      false
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: shimmerX.value }],
+    };
+  });
 
   return (
-    <Animated.View
+    <View
       style={[
         {
           width: width as any,
           height,
           borderRadius,
-          backgroundColor: COLORS.lightGray,
-          opacity,
+          backgroundColor: '#ECEEEF', // Warm, premium light gray placeholder
+          overflow: 'hidden',
+          position: 'relative',
         },
         style,
       ]}
-    />
+    >
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          animatedStyle,
+          { width: '150%' } // Allow wider range for natural sweeping speed
+        ]}
+      >
+        <LinearGradient
+          colors={['transparent', 'rgba(255, 255, 255, 0.65)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+    </View>
   );
 };
 
