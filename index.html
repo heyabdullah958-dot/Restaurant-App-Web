@@ -50,6 +50,12 @@
                 </div>
                 <div class="logo-glow"></div>
               </div>
+              <!-- Sequential popping food elements -->
+              <div class="splash-food-popups">
+                <span class="food-pop icon-drink">🥤</span>
+                <span class="food-pop icon-burger">🍔</span>
+                <span class="food-pop icon-fries">🍟</span>
+              </div>
               <h1 class="splash-title">FoodSphere</h1>
               <p class="splash-tagline">One App · Seven Unique Dining Experiences</p>
               <div class="splash-loader">
@@ -75,12 +81,30 @@
               <div class="onboard-slide active" id="slide-1">
                 <div class="slide-visual slide-1-visual">
                   <div class="food-grid">
-                    <div class="food-tile tile-1">🍖<span>Desi BBQ</span></div>
-                    <div class="food-tile tile-2">🍔<span>Burgers</span></div>
-                    <div class="food-tile tile-3">🐟<span>Seafood</span></div>
-                    <div class="food-tile tile-4">🍗<span>Tandoori</span></div>
-                    <div class="food-tile tile-5">🥪<span>Melts</span></div>
-                    <div class="food-tile tile-6">☕<span>Café</span></div>
+                    <div class="food-tile tile-1">
+                      <div class="food-tile-img">🍖</div>
+                      <span class="food-tile-text">Desi BBQ</span>
+                    </div>
+                    <div class="food-tile tile-2">
+                      <div class="food-tile-img">🍔</div>
+                      <span class="food-tile-text">Burgers</span>
+                    </div>
+                    <div class="food-tile tile-3">
+                      <div class="food-tile-img">🐟</div>
+                      <span class="food-tile-text">Seafood</span>
+                    </div>
+                    <div class="food-tile tile-4">
+                      <div class="food-tile-img">🍗</div>
+                      <span class="food-tile-text">Tandoori</span>
+                    </div>
+                    <div class="food-tile tile-5">
+                      <div class="food-tile-img">🥪</div>
+                      <span class="food-tile-text">Melts</span>
+                    </div>
+                    <div class="food-tile tile-6">
+                      <div class="food-tile-img">☕</div>
+                      <span class="food-tile-text">Café</span>
+                    </div>
                   </div>
                   <div class="slide1-star">⭐</div>
                 </div>
@@ -137,9 +161,91 @@
           </div>
         </div>
 
+        <!-- ===== SCREEN 2B: PERMISSIONS ===== -->
+        <div class="screen" id="screen-permissions">
+          <div class="permissions-wrap">
+            <div class="permissions-steps">
+              <!-- Step 1 Location -->
+              <div class="permission-step active" id="perm-step-1">
+                <div class="perm-visual location-visual">
+                  <div class="map-bg-circle"></div>
+                  <div class="pin-marker">📍</div>
+                  <div class="pulse-ring-map"></div>
+                </div>
+                <h2 class="perm-title">Allow Location Access</h2>
+                <p class="perm-desc">We need your location to show available restaurants and estimate delivery times in Johar Town, Lahore.</p>
+                <button class="perm-btn yellow-btn" onclick="requestLocationPermission()">Continue</button>
+                <div class="perm-footer-indicator">1 / 2</div>
+              </div>
+
+              <!-- Step 2 Notification -->
+              <div class="permission-step" id="perm-step-2">
+                <div class="perm-visual notification-visual">
+                  <div class="bell-bg-circle"></div>
+                  <div class="bell-icon">🔔</div>
+                  <div class="bell-glow"></div>
+                </div>
+                <h2 class="perm-title">Enable Notifications</h2>
+                <p class="perm-desc">Get real-time updates on your order preparation, driver location, and exclusive loyalty rewards.</p>
+                <button class="perm-btn yellow-btn" onclick="requestNotificationPermission()">Continue</button>
+                <div class="perm-footer-indicator">2 / 2</div>
+              </div>
+            </div>
+
+            <!-- Mock OS Native Dialogs -->
+            <div class="mock-dialog-overlay" id="mock-dialog-overlay" style="display: none;">
+              <!-- Location Access OS Mock Dialog -->
+              <div class="mock-dialog" id="mock-dialog-location" style="display: none;">
+                <div class="mock-dialog-header">
+                  <span class="dialog-icon">🗺️</span>
+                  <h4>Allow "FoodSphere" to access your location?</h4>
+                </div>
+                <p class="mock-dialog-body">This allows the app to find restaurants and delivery partners near you in Lahore.</p>
+                <div class="mock-precise-selector">
+                  <div class="precise-option active" id="opt-precise" onclick="setPreciseLocation(true)">
+                    <div class="mock-map-preview precise-map">🎯 Precise</div>
+                  </div>
+                  <div class="precise-option" id="opt-approx" onclick="setPreciseLocation(false)">
+                    <div class="mock-map-preview approx-map">🌐 Approx</div>
+                  </div>
+                </div>
+                <div class="mock-dialog-buttons">
+                  <button class="dialog-btn text-blue font-bold" onclick="grantLocation(true)">While Using App</button>
+                  <button class="dialog-btn text-blue" onclick="grantLocation(false)">Only This Time</button>
+                  <button class="dialog-btn text-muted" onclick="dismissLocationMock()">Don't Allow</button>
+                </div>
+              </div>
+
+              <!-- Notification Access OS Mock Dialog -->
+              <div class="mock-dialog" id="mock-dialog-notification" style="display: none;">
+                <div class="mock-dialog-header">
+                  <span class="dialog-icon">🔔</span>
+                  <h4>"FoodSphere" Would Like to Send You Notifications</h4>
+                </div>
+                <p class="mock-dialog-body">Notifications may include alerts, sounds, and icon badges. These can be configured in Settings.</p>
+                <div class="mock-dialog-buttons stack-buttons">
+                  <button class="dialog-btn text-blue font-bold" onclick="grantNotifications()">Allow</button>
+                  <button class="dialog-btn text-muted" onclick="dismissNotificationMock()">Don't Allow</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ===== SCREEN 3: HOME ===== -->
         <div class="screen" id="screen-home">
           <div class="home-wrap">
+            <!-- Sticky login banner -->
+            <div class="sticky-login-card" id="sticky-login-card">
+              <div class="login-card-content">
+                <span class="lock-icon">🔒</span>
+                <div>
+                  <h4>Seems you're not logged in</h4>
+                  <p>Log in now to earn loyalty points on every purchase!</p>
+                </div>
+              </div>
+              <button class="login-card-close" onclick="closeStickyLoginCard(event)">✕</button>
+            </div>
             <!-- Header -->
             <div class="home-header">
               <div class="location-pick">
@@ -295,10 +401,10 @@
           <!-- Bottom Nav -->
           <div class="bottom-nav">
             <div class="nav-item active" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
-            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
-            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
             <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
-            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
           </div>
         </div>
 
@@ -652,6 +758,16 @@
               <h3>FoodSphere</h3>
               <button class="icon-btn">🔔</button>
             </div>
+            
+            <!-- Point Progress Header Card -->
+            <div class="points-header-card">
+              <div class="points-header-content">
+                <h4>Points on every purchase</h4>
+                <p>Order from any of our 7 brands and watch your points grow! Redeem them for free food.</p>
+              </div>
+              <div class="points-graphic">📈🔥</div>
+            </div>
+
             <div class="rewards-title-row">
               <span class="crown-icon">👑</span>
               <h4>My Rewards</h4>
@@ -666,17 +782,55 @@
                 <p class="tier-note">760 more points to reach Gold tier</p>
               </div>
             </div>
-            <div class="earn-section">
-              <h5>How to Earn</h5>
-              <p class="earn-rule">Earn 1 point for every Rs. 10 spent</p>
-              <div class="earn-steps">
-                <div class="earn-step"><div class="earn-icon">🛒</div><span>Order Food</span></div>
-                <div class="earn-arrow">→</div>
-                <div class="earn-step"><div class="earn-icon">⭐</div><span>Earn Points</span></div>
-                <div class="earn-arrow">→</div>
-                <div class="earn-step"><div class="earn-icon">🎁</div><span>Get Discounts</span></div>
+
+            <!-- Exclusive Rewards Shop with unavailable deals mapping -->
+            <div class="deals-shop-section">
+              <h5>Exclusive Rewards Shop</h5>
+              <p class="section-subtitle">Redeem your points for free meals & drinks</p>
+              <div class="deals-grid">
+                <!-- Deal 1 -->
+                <div class="deal-card unlocked" onclick="claimReward('Blue Lagoon mocktail', 500)">
+                  <div class="deal-emoji">🍹</div>
+                  <div class="deal-info">
+                    <h6>Free Blue Drink</h6>
+                    <p>DineAtBlue · 500 pts</p>
+                  </div>
+                  <span class="deal-badge claim">Claim</span>
+                </div>
+                <!-- Deal 2 -->
+                <div class="deal-card unlocked" onclick="claimReward('Seekh Kabab Plate', 1000)">
+                  <div class="deal-emoji">🍖</div>
+                  <div class="deal-info">
+                    <h6>Seekh Kabab</h6>
+                    <p>SeenBanao · 1,000 pts</p>
+                  </div>
+                  <span class="deal-badge claim">Claim</span>
+                </div>
+                <!-- Deal 3 -->
+                <div class="deal-card locked">
+                  <div class="deal-emoji">🍔</div>
+                  <div class="deal-info">
+                    <h6>Jushh Combo</h6>
+                    <p>JushhPK · 2,000 pts</p>
+                  </div>
+                  <div class="gray-overlay">
+                    <span class="lock-badge">Unavailable now</span>
+                  </div>
+                </div>
+                <!-- Deal 4 -->
+                <div class="deal-card locked">
+                  <div class="deal-emoji">🔥</div>
+                  <div class="deal-info">
+                    <h6>Family BBQ Platter</h6>
+                    <p>SeenBanao · 3,000 pts</p>
+                  </div>
+                  <div class="gray-overlay">
+                    <span class="lock-badge">Unavailable now</span>
+                  </div>
+                </div>
               </div>
             </div>
+
             <div class="rewards-history">
               <h5>Recent Activity</h5>
               <div class="history-item"><span class="hist-rest">SeenBanao</span><span class="hist-pts earned">+85 pts</span><span class="hist-time">2h ago</span></div>
@@ -686,10 +840,10 @@
           </div>
           <div class="bottom-nav">
             <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
-            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
-            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
             <div class="nav-item active" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
-            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
           </div>
         </div>
 
@@ -697,8 +851,36 @@
         <div class="screen" id="screen-orders">
           <div class="orders-wrap">
             <div class="orders-header">
-              <h3>My Orders</h3>
+              <h3>My Order</h3>
             </div>
+            
+            <!-- Static Aligned Delivery Settings Header (Pickup Removed) -->
+            <div class="delivery-settings-header">
+              <span class="delivery-header-icon">🛵</span>
+              <h4>Delivery Details</h4>
+            </div>
+
+            <!-- Delivery options permanently visible -->
+            <div class="delivery-options-area" id="delivery-options-area" style="display: block;">
+              <div class="order-delivery-address-card">
+                <span class="addr-icon">📍</span>
+                <div class="addr-details">
+                  <h6>Delivery Address</h6>
+                  <p>Johar Town, Lahore, Pakistan</p>
+                </div>
+                <button class="addr-edit">Edit</button>
+              </div>
+              
+              <div class="schedule-delivery-card" onclick="openScheduleBottomSheet()">
+                <span class="sched-icon">🕒</span>
+                <div class="sched-details">
+                  <h6>Schedule Delivery</h6>
+                  <p id="selected-schedule-label">Instant (As soon as possible)</p>
+                </div>
+                <span class="sched-arrow">❯</span>
+              </div>
+            </div>
+
             <div class="order-tabs">
               <div class="order-tab active">Active</div>
               <div class="order-tab">Past</div>
@@ -755,10 +937,10 @@
           </div>
           <div class="bottom-nav">
             <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
-            <div class="nav-item" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
-            <div class="nav-item active" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
             <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
-            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+            <div class="nav-item active" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
           </div>
         </div>
 
@@ -826,7 +1008,10 @@
               <h4>Popular Items</h4>
               <div class="search-popular-list">
                 <div class="search-popular-item" onclick="openRestaurant('seenbanao')">
-                  <div class="search-popular-emoji">🔥 BBQ</div>
+                  <div class="search-popular-category-wrapper">
+                    <div class="search-popular-emoji-box">🔥</div>
+                    <span class="search-popular-tag">BBQ</span>
+                  </div>
                   <div class="search-popular-details">
                     <h5>Chicken Tikka Handi</h5>
                     <p>SeenBanao · Desi BBQ &amp; Handi</p>
@@ -834,7 +1019,10 @@
                   <div class="search-popular-price">Rs. 950</div>
                 </div>
                 <div class="search-popular-item" onclick="openRestaurant('jushhpk')">
-                  <div class="search-popular-emoji">🍔 Burgers</div>
+                  <div class="search-popular-category-wrapper">
+                    <div class="search-popular-emoji-box">🍔</div>
+                    <span class="search-popular-tag">Burgers</span>
+                  </div>
                   <div class="search-popular-details">
                     <h5>Smash Combo</h5>
                     <p>JushhPK · Burgers &amp; Fast Food</p>
@@ -842,7 +1030,10 @@
                   <div class="search-popular-price">Rs. 850</div>
                 </div>
                 <div class="search-popular-item" onclick="openRestaurant('dineatblue')">
-                  <div class="search-popular-emoji">🐟 Seafood</div>
+                  <div class="search-popular-category-wrapper">
+                    <div class="search-popular-emoji-box">🐟</div>
+                    <span class="search-popular-tag">Seafood</span>
+                  </div>
                   <div class="search-popular-details">
                     <h5>Grilled Red Snapper</h5>
                     <p>DineAtBlue · Seafood Specialty</p>
@@ -850,7 +1041,10 @@
                   <div class="search-popular-price">Rs. 2,400</div>
                 </div>
                 <div class="search-popular-item" onclick="openRestaurant('sandmelts')">
-                  <div class="search-popular-emoji">🥪 Melts</div>
+                  <div class="search-popular-category-wrapper">
+                    <div class="search-popular-emoji-box">🥪</div>
+                    <span class="search-popular-tag">Melts</span>
+                  </div>
                   <div class="search-popular-details">
                     <h5>Spicy Beef Melt</h5>
                     <p>SandMelts · Sandwiches &amp; Shakes</p>
@@ -858,7 +1052,10 @@
                   <div class="search-popular-price">Rs. 650</div>
                 </div>
                 <div class="search-popular-item" onclick="openRestaurant('tandooristoppk')">
-                  <div class="search-popular-emoji">🫓 Naan</div>
+                  <div class="search-popular-category-wrapper">
+                    <div class="search-popular-emoji-box">🫓</div>
+                    <span class="search-popular-tag">Naan</span>
+                  </div>
                   <div class="search-popular-details">
                     <h5>Cheese Garlic Naan</h5>
                     <p>TandooriStopPK · Tandoor &amp; Naan</p>
@@ -871,11 +1068,254 @@
           
           <div class="bottom-nav">
             <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
-            <div class="nav-item active" onclick="goTo('screen-search')"><span class="nav-icon">🔍</span><span>Search</span></div>
-            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Orders</span></div>
             <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
-            <div class="nav-item" onclick="goTo('screen-profile')"><span class="nav-icon">👤</span><span>Profile</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
           </div>
+        </div>
+
+        <!-- ===== SCREEN 7B: MAP LOCATOR ===== -->
+        <div class="screen" id="screen-map">
+          <div class="map-wrap">
+            <div class="map-header">
+              <h3>Restaurant Locator</h3>
+              <button class="refresh-map-btn" onclick="startMapAnimation()">🔄 Recenter</button>
+            </div>
+            <div class="map-canvas-container">
+              <div class="map-viewport" id="map-viewport">
+                <!-- SVG Premium Styled Map with Roads and Buildings -->
+                <div class="map-svg-wrapper" id="map-svg-wrapper">
+                  <svg class="map-svg" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="800" height="800" class="map-bg-rect" />
+                    <!-- River -->
+                    <path d="M-100 200 C300 150 400 450 900 350" fill="none" class="map-river" stroke-width="40" />
+                    <!-- Roads -->
+                    <line x1="100" y1="0" x2="100" y2="800" class="map-road" stroke-width="8" />
+                    <line x1="300" y1="0" x2="300" y2="800" class="map-road" stroke-width="8" />
+                    <line x1="500" y1="0" x2="500" y2="800" class="map-road" stroke-width="8" />
+                    <line x1="700" y1="0" x2="700" y2="800" class="map-road" stroke-width="8" />
+
+                    <line x1="0" y1="150" x2="800" y2="150" class="map-road" stroke-width="8" />
+                    <line x1="0" y1="350" x2="800" y2="350" class="map-road" stroke-width="8" />
+                    <line x1="0" y1="550" x2="800" y2="550" class="map-road" stroke-width="8" />
+                    
+                    <!-- Major Highway -->
+                    <path d="M-100 -50 L900 850" fill="none" class="map-highway" stroke-width="12" />
+                  </svg>
+                  <!-- Local Pins in Johar Town, Lahore -->
+                  <div class="map-pins-container" id="map-pins-container">
+                    <!-- Cluster Marker -->
+                    <div class="map-cluster active" id="map-cluster" onclick="zoomToCluster()">
+                      <span class="cluster-count">7</span>
+                      <div class="cluster-pulse"></div>
+                    </div>
+
+                    <!-- Custom pins (initially hidden, drop when zoomed in) -->
+                    <div class="map-pin" id="pin-seenbanao" style="top: 420px; left: 380px;" onclick="selectMapPin('seenbanao')">
+                      <div class="pin-bubble">🍖</div>
+                      <div class="pin-label">SeenBanao</div>
+                    </div>
+                    <div class="map-pin" id="pin-dineatblue" style="top: 320px; left: 520px;" onclick="selectMapPin('dineatblue')">
+                      <div class="pin-bubble">🐟</div>
+                      <div class="pin-label">DineAtBlue</div>
+                    </div>
+                    <div class="map-pin" id="pin-jushhpk" style="top: 500px; left: 290px;" onclick="selectMapPin('jushhpk')">
+                      <div class="pin-bubble">🍔</div>
+                      <div class="pin-label">JushhPK</div>
+                    </div>
+                    <div class="map-pin" id="pin-tandoori" style="top: 280px; left: 410px;" onclick="selectMapPin('tandoori')">
+                      <div class="pin-bubble">🍗</div>
+                      <div class="pin-label">TandooriStop</div>
+                    </div>
+                    <div class="map-pin" id="pin-sandmelts" style="top: 460px; left: 480px;" onclick="selectMapPin('sandmelts')">
+                      <div class="pin-bubble">🥪</div>
+                      <div class="pin-label">SandMelts</div>
+                    </div>
+                    <div class="map-pin" id="pin-birdman" style="top: 360px; left: 320px;" onclick="selectMapPin('birdman')">
+                      <div class="pin-bubble">🍗</div>
+                      <div class="pin-label">Birdman Foods</div>
+                    </div>
+                    <div class="map-pin" id="pin-getafomo" style="top: 520px; left: 440px;" onclick="selectMapPin('getafomo')">
+                      <div class="pin-bubble">☕</div>
+                      <div class="pin-label">GetAFomo</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Map Card Info -->
+            <div class="map-bottom-overlay" id="map-bottom-overlay">
+              <div class="map-card glass" id="map-card-details">
+                <div class="map-card-header">
+                  <div class="map-card-emoji" id="map-card-emoji">🍖</div>
+                  <div>
+                    <h4 id="map-card-name">SeenBanao BBQ</h4>
+                    <p id="map-card-cuisine">Desi BBQ & Handi Specialties</p>
+                  </div>
+                </div>
+                <div class="map-card-body">
+                  <span>⭐ <strong id="map-card-rating">4.9</strong> (150+ reviews)</span>
+                  <span>⏱️ 20-30 mins</span>
+                </div>
+                <button class="map-card-btn" id="map-card-btn" onclick="orderFromMapRest()">Order Now</button>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item active" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- ===== SCREEN 9B: MORE OPTIONS ===== -->
+        <div class="screen" id="screen-more">
+          <div class="more-wrap">
+            <div class="more-header">
+              <h3>More Options</h3>
+            </div>
+            <div class="more-profile-summary">
+              <div class="avatar-lg">H</div>
+              <div class="more-profile-info">
+                <h4>Hamza Abdullah</h4>
+                <p>hamza.abdullah@example.com</p>
+              </div>
+            </div>
+
+            <div class="accordion-container">
+              <!-- Promo Code Accordion -->
+              <div class="accordion-item" id="acc-promo">
+                <div class="accordion-header" onclick="toggleAccordion('acc-promo')">
+                  <span>🎟️ Promo Codes & Coupons</span>
+                  <span class="chevron">❯</span>
+                </div>
+                <div class="accordion-content">
+                  <div class="promo-box">
+                    <input type="text" placeholder="Enter promo code" class="promo-input" id="more-promo-input" />
+                    <button class="apply-promo-btn" onclick="applyMorePromo()">Apply</button>
+                  </div>
+                  <p class="promo-hint">Active Coupon: <strong>FIRSTBITE</strong> (Free delivery)</p>
+                </div>
+              </div>
+
+              <!-- Receipt Validator Accordion -->
+              <div class="accordion-item" id="acc-receipt">
+                <div class="accordion-header" onclick="toggleAccordion('acc-receipt')">
+                  <span>📸 Receipt Validator (OCR)</span>
+                  <span class="chevron">❯</span>
+                </div>
+                <div class="accordion-content">
+                  <p class="receipt-desc">Scan your physical receipt to instantly earn points or validate delivery orders.</p>
+                  <div class="scanner-frame-mock" id="scanner-frame-mock">
+                    <div class="scanner-camera-bg">
+                      <div class="ocr-receipt-mock">
+                        <div class="receipt-text-line">SeenBanao Rest</div>
+                        <div class="receipt-text-line">Mix BBQ ..... 850</div>
+                        <div class="receipt-text-line">TAX .......... 15%</div>
+                        <div class="receipt-text-line">TOTAL ....... Rs.977</div>
+                      </div>
+                      <div class="laser-scanner-line"></div>
+                      <div class="camera-grid"></div>
+                    </div>
+                    <button class="scan-action-btn" onclick="triggerReceiptScan()">Scan Receipt</button>
+                  </div>
+                  <div class="scan-result" id="scan-result" style="display: none;">
+                    <div class="alert alert-success">✓ Receipt Validated! <strong>+97 Points</strong> successfully credited to Hamza Abdullah!</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Legal Terms Accordion -->
+              <div class="accordion-item" id="acc-legal">
+                <div class="accordion-header" onclick="toggleAccordion('acc-legal')">
+                  <span>⚖️ Legal Terms & Policy</span>
+                  <span class="chevron">❯</span>
+                </div>
+                <div class="accordion-content">
+                  <div class="mock-webview-frame">
+                    <div class="webview-header">
+                      <span>🔒 https://foodsphere.pk/terms</span>
+                    </div>
+                    <div class="webview-body">
+                      <h5>1. Introduction</h5>
+                      <p>Welcome to FoodSphere. These Terms and Conditions govern your use of our platform aggregating 7 premium dining brands across Pakistan...</p>
+                      <h5>2. Loyalty Points Program</h5>
+                      <p>Loyalty points are calculated at 1 point per Rs. 10 spent. Points are calculated on order subtotal and cannot be converted to physical cash. Inactive points expire after 365 days.</p>
+                      <h5>3. Refunds and Cancellation</h5>
+                      <p>Once orders are accepted by branch managers, cancellations are strictly prohibited. In cases of delivery delays exceeding 60 minutes, users may request store credits.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- General Support Accordion -->
+              <div class="accordion-item" id="acc-support">
+                <div class="accordion-header" onclick="toggleAccordion('acc-support')">
+                  <span>📞 Contact Customer Care</span>
+                  <span class="chevron">❯</span>
+                </div>
+                <div class="accordion-content">
+                  <div class="support-content">
+                    <p>Have an issue with your order? Our 24/7 support line is ready to assist you immediately.</p>
+                    <a href="tel:042111111" class="support-action-btn phone">📞 Call 042-111-111-222</a>
+                    <a href="mailto:support@foodsphere.pk" class="support-action-btn email">✉️ Email Support</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logout action -->
+            <button class="logout-action-btn" onclick="goTo('screen-splash')">Log Out Account</button>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item" onclick="goTo('screen-home')"><span class="nav-icon">🏠</span><span>Home</span></div>
+            <div class="nav-item" onclick="goTo('screen-rewards')"><span class="nav-icon">🏅</span><span>Rewards</span></div>
+            <div class="nav-item" onclick="goTo('screen-orders')"><span class="nav-icon">📦</span><span>Order</span></div>
+            <div class="nav-item" onclick="goTo('screen-map')"><span class="nav-icon">🗺️</span><span>Restaurant</span></div>
+            <div class="nav-item active" onclick="goTo('screen-more')"><span class="nav-icon">☰</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- Schedule Delivery Bottom Sheet Overlay -->
+        <div class="bottom-sheet-overlay" id="schedule-sheet-overlay" style="display: none;" onclick="closeScheduleBottomSheet()">
+          <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="bottom-sheet-drag-handle"></div>
+            <div class="bottom-sheet-header">
+              <h4>Schedule Delivery</h4>
+              <button class="close-sheet-btn" onclick="closeScheduleBottomSheet()">Done</button>
+            </div>
+            <p class="sheet-sub">Select date & time for delivery</p>
+            <div class="wheel-selector-container">
+              <!-- Date Wheel -->
+              <div class="wheel-column" id="wheel-date">
+                <div class="wheel-item selected" onclick="selectWheelItem(this, 'date')">Today</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'date')">Tomorrow, Jun 3</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'date')">Thursday, Jun 4</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'date')">Friday, Jun 5</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'date')">Saturday, Jun 6</div>
+              </div>
+              <!-- Time Wheel -->
+              <div class="wheel-column" id="wheel-time">
+                <div class="wheel-item selected" onclick="selectWheelItem(this, 'time')">ASAP (Immediate)</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">12:00 PM - 12:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">01:00 PM - 01:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">02:00 PM - 02:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">03:00 PM - 03:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">06:00 PM - 06:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">07:00 PM - 07:30 PM</div>
+                <div class="wheel-item" onclick="selectWheelItem(this, 'time')">08:00 PM - 08:30 PM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central Circle Loader Spinner -->
+        <div class="global-tab-loader" id="global-tab-loader" style="display: none;">
+          <div class="spinner-circle"></div>
         </div>
 
       </div><!-- /phone-screen -->
@@ -886,13 +1326,16 @@
       <div class="screen-nav-list">
         <button class="screen-nav-btn active" onclick="goTo('screen-splash')">💫 Splash</button>
         <button class="screen-nav-btn" onclick="goTo('screen-onboarding')">📖 Onboarding</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-permissions')">🔒 Permissions</button>
         <button class="screen-nav-btn" onclick="goTo('screen-home')">🏠 Home</button>
         <button class="screen-nav-btn" onclick="goTo('screen-restaurant')">🍖 Restaurant</button>
         <button class="screen-nav-btn" onclick="goTo('screen-cart')">🛒 Cart</button>
         <button class="screen-nav-btn" onclick="goTo('screen-checkout')">✅ Checkout</button>
         <button class="screen-nav-btn" onclick="goTo('screen-tracking')">📍 Tracking</button>
         <button class="screen-nav-btn" onclick="goTo('screen-rewards')">🏅 Rewards</button>
-        <button class="screen-nav-btn" onclick="goTo('screen-orders')">📦 Orders</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-orders')">📦 Order Tab</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-map')">🗺️ Map Locator</button>
+        <button class="screen-nav-btn" onclick="goTo('screen-more')">☰ More Options</button>
         <button class="screen-nav-btn" onclick="goTo('screen-profile')">👤 Profile</button>
         <button class="screen-nav-btn" onclick="goTo('screen-search')">🔍 Search</button>
       </div>

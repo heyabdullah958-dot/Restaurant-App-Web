@@ -369,6 +369,19 @@ const loyaltyDiscountValue = 50;
 
 // ─── Screen Navigation ───────────────────────
 function goTo(screenId) {
+  // Show global tab circle loader spinner for premium skeleton switch transitions
+  const loader = document.getElementById('global-tab-loader');
+  if (loader) {
+    loader.style.display = 'flex';
+    loader.classList.add('active');
+    setTimeout(() => {
+      loader.classList.remove('active');
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 200);
+    }, 450); // Show spinner for 450ms for realistic API sync feel
+  }
+
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
   const target = document.getElementById(screenId);
@@ -389,6 +402,8 @@ function goTo(screenId) {
     renderCheckout();
   } else if (screenId === 'screen-tracking') {
     renderTrackingSummary();
+  } else if (screenId === 'screen-map') {
+    startMapAnimation();
   }
 }
 
@@ -722,7 +737,295 @@ function initHearts() {
 function initSplash() {
   setTimeout(() => {
     goTo('screen-onboarding');
-  }, 2800);
+  }, 3200); // Allow smooth sequential popping animations of food elements & horizontal progress bar
+}
+
+// ─── Onboarding Permissions Step-by-Step Logic ─────────────────
+let currentPermStep = 1;
+
+function requestLocationPermission() {
+  const overlay = document.getElementById('mock-dialog-overlay');
+  const dialogLoc = document.getElementById('mock-dialog-location');
+  const dialogNotif = document.getElementById('mock-dialog-notification');
+  
+  if (overlay && dialogLoc) {
+    overlay.style.display = 'flex';
+    dialogLoc.style.display = 'block';
+    if (dialogNotif) dialogNotif.style.display = 'none';
+  }
+}
+
+function grantLocation(isPrecise) {
+  // Hide location dialog and overlay
+  document.getElementById('mock-dialog-location').style.display = 'none';
+  document.getElementById('mock-dialog-overlay').style.display = 'none';
+  
+  // Transition perm step screen content to step 2 with bell animation
+  const step1 = document.getElementById('perm-step-1');
+  const step2 = document.getElementById('perm-step-2');
+  if (step1 && step2) {
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    currentPermStep = 2;
+  }
+}
+
+function dismissLocationMock() {
+  document.getElementById('mock-dialog-location').style.display = 'none';
+  document.getElementById('mock-dialog-overlay').style.display = 'none';
+  
+  // Advance to step 2 anyway for prototype flow
+  const step1 = document.getElementById('perm-step-1');
+  const step2 = document.getElementById('perm-step-2');
+  if (step1 && step2) {
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    currentPermStep = 2;
+  }
+}
+
+function setPreciseLocation(precise) {
+  const optPrecise = document.getElementById('opt-precise');
+  const optApprox = document.getElementById('opt-approx');
+  if (optPrecise && optApprox) {
+    if (precise) {
+      optPrecise.classList.add('active');
+      optApprox.classList.remove('active');
+    } else {
+      optPrecise.classList.remove('active');
+      optApprox.classList.add('active');
+    }
+  }
+}
+
+function requestNotificationPermission() {
+  const overlay = document.getElementById('mock-dialog-overlay');
+  const dialogLoc = document.getElementById('mock-dialog-location');
+  const dialogNotif = document.getElementById('mock-dialog-notification');
+  
+  if (overlay && dialogNotif) {
+    overlay.style.display = 'flex';
+    if (dialogLoc) dialogLoc.style.display = 'none';
+    dialogNotif.style.display = 'block';
+  }
+}
+
+function grantNotifications() {
+  document.getElementById('mock-dialog-notification').style.display = 'none';
+  document.getElementById('mock-dialog-overlay').style.display = 'none';
+  
+  // Navigate to main Home Dashboard
+  goTo('screen-home');
+}
+
+function dismissNotificationMock() {
+  document.getElementById('mock-dialog-notification').style.display = 'none';
+  document.getElementById('mock-dialog-overlay').style.display = 'none';
+  
+  // Proceed to Home
+  goTo('screen-home');
+}
+
+// ─── Sticky Login card close logic ───────────────────────────
+function closeStickyLoginCard(event) {
+  if (event) event.stopPropagation();
+  const card = document.getElementById('sticky-login-card');
+  if (card) {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      card.style.display = 'none';
+    }, 300);
+  }
+}
+
+// ─── Aligned Pickup & Delivery Segment Control (Pickup Sunsetted) ───
+let currentOrderSegment = 'delivery';
+
+function setOrderSegment(segment) {
+  // Always enforce delivery mode as Pickup option is removed
+  currentOrderSegment = 'delivery';
+  const deliveryArea = document.getElementById('delivery-options-area');
+  if (deliveryArea) {
+    deliveryArea.style.display = 'block';
+  }
+}
+
+// ─── Schedule Delivery Bottom Sheet Wheel selectors ─────────────
+function openScheduleBottomSheet() {
+  const overlay = document.getElementById('schedule-sheet-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    setTimeout(() => {
+      overlay.classList.add('active');
+    }, 10);
+  }
+}
+
+function closeScheduleBottomSheet() {
+  const overlay = document.getElementById('schedule-sheet-overlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
+}
+
+let selectedSchedDate = 'Today';
+let selectedSchedTime = 'ASAP (Immediate)';
+
+function selectWheelItem(element, type) {
+  const column = element.parentElement;
+  if (!column) return;
+  
+  column.querySelectorAll('.wheel-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  element.classList.add('selected');
+  
+  if (type === 'date') {
+    selectedSchedDate = element.textContent;
+  } else {
+    selectedSchedTime = element.textContent;
+  }
+  
+  const label = document.getElementById('selected-schedule-label');
+  if (label) {
+    if (selectedSchedTime.includes('ASAP')) {
+      label.textContent = `Instant (As soon as possible)`;
+    } else {
+      label.textContent = `${selectedSchedDate} at ${selectedSchedTime}`;
+    }
+  }
+}
+
+// ─── Interactive Cluster & Custom Map Pins ──────────────────────
+function zoomToCluster() {
+  const cluster = document.getElementById('map-cluster');
+  const svgWrapper = document.getElementById('map-svg-wrapper');
+  
+  if (cluster && svgWrapper) {
+    cluster.classList.remove('active');
+    svgWrapper.classList.add('zoomed');
+    
+    // Drop custom pins sequentially
+    const pins = document.querySelectorAll('.map-pin');
+    pins.forEach((pin, idx) => {
+      setTimeout(() => {
+        pin.classList.add('active');
+      }, 300 + (idx * 120));
+    });
+  }
+}
+
+// Recenter Map Helper
+function startMapAnimation() {
+  const cluster = document.getElementById('map-cluster');
+  const svgWrapper = document.getElementById('map-svg-wrapper');
+  const pins = document.querySelectorAll('.map-pin');
+  const cardOverlay = document.getElementById('map-bottom-overlay');
+  
+  if (cardOverlay) cardOverlay.classList.remove('active');
+  pins.forEach(pin => {
+    pin.classList.remove('active');
+    pin.classList.remove('selected');
+  });
+  if (svgWrapper) svgWrapper.classList.remove('zoomed');
+  
+  setTimeout(() => {
+    if (cluster) cluster.classList.add('active');
+  }, 400);
+}
+
+const MAP_RESTAURANT_DETAILS = {
+  seenbanao: { emoji: '🍖', name: 'SeenBanao BBQ', cuisine: 'Desi BBQ & Handi', rating: '4.9', slug: 'seenbanao' },
+  dineatblue: { emoji: '🐟', name: 'DineAtBlue Seafood', cuisine: 'Seafood Specialties', rating: '4.7', slug: 'dineatblue' },
+  jushhpk: { emoji: '🍔', name: 'JushhPK Burgers', cuisine: 'Smash Burgers & Combos', rating: '4.6', slug: 'jushhpk' },
+  tandoori: { emoji: '🍗', name: 'TandooriStopPK', cuisine: 'Tandoori & Naan Counter', rating: '4.5', slug: 'tandooristoppk' },
+  sandmelts: { emoji: '🥪', name: 'SandMelts', cuisine: 'Sandwiches & Melts', rating: '4.8', slug: 'sandmelts' },
+  birdman: { emoji: '🍗', name: 'Birdman Foods', cuisine: 'Fried Chicken & Wings', rating: '4.7', slug: 'birdmanfoodspk' },
+  getafomo: { emoji: '☕', name: 'GetAFomo Cafe', cuisine: 'Cold Brews & Dessert', rating: '4.8', slug: 'getafomo' }
+};
+
+let currentMapSelectedRestaurant = 'seenbanao';
+
+function selectMapPin(brandId) {
+  const data = MAP_RESTAURANT_DETAILS[brandId];
+  if (!data) return;
+  
+  currentMapSelectedRestaurant = data.slug;
+  
+  document.querySelectorAll('.map-pin').forEach(pin => pin.classList.remove('selected'));
+  const activePin = document.getElementById(`pin-${brandId}`);
+  if (activePin) activePin.classList.add('selected');
+  
+  document.getElementById('map-card-emoji').textContent = data.emoji;
+  document.getElementById('map-card-name').textContent = data.name;
+  document.getElementById('map-card-cuisine').textContent = data.cuisine;
+  document.getElementById('map-card-rating').textContent = data.rating;
+  
+  const cardOverlay = document.getElementById('map-bottom-overlay');
+  if (cardOverlay) cardOverlay.classList.add('active');
+}
+
+function orderFromMapRest() {
+  if (currentMapSelectedRestaurant) {
+    openRestaurant(currentMapSelectedRestaurant);
+  }
+}
+
+// ─── Accordion Options Sidebar & Scanner OCR Logic ─────────────
+function toggleAccordion(itemId) {
+  const item = document.getElementById(itemId);
+  if (!item) return;
+  const isExpanded = item.classList.contains('active');
+  
+  document.querySelectorAll('.accordion-item').forEach(acc => {
+    acc.classList.remove('active');
+  });
+  
+  if (!isExpanded) {
+    item.classList.add('active');
+  }
+}
+
+function applyMorePromo() {
+  const input = document.getElementById('more-promo-input');
+  if (!input) return;
+  const val = input.value.trim().toUpperCase();
+  if (val === 'FIRSTBITE') {
+    alert('🎉 Promo Code Applied! Free delivery is now locked in for your next order.');
+  } else if (val === '') {
+    alert('Please enter a promo code first.');
+  } else {
+    alert('❌ Invalid promo code. Try FIRSTBITE!');
+  }
+}
+
+function triggerReceiptScan() {
+  const scanner = document.getElementById('scanner-frame-mock');
+  const result = document.getElementById('scan-result');
+  
+  if (scanner) {
+    scanner.classList.add('scanning');
+    setTimeout(() => {
+      scanner.classList.remove('scanning');
+      if (result) result.style.display = 'block';
+      
+      // Update points values inside UI to reflect scanner credit instantly
+      const pointsLabel = document.querySelector('.points-big');
+      if (pointsLabel) {
+        pointsLabel.innerHTML = '🏅 1,337 Points';
+        const savingsLabel = document.querySelector('.points-value');
+        if (savingsLabel) savingsLabel.textContent = '= Rs. 133.7 in savings';
+      }
+    }, 2500);
+  }
+}
+
+function claimReward(rewardName, costPoints) {
+  alert(`🎉 Reward Claimed: Free ${rewardName}! Coupon code sent via SMS/Email. -${costPoints} pts`);
 }
 
 // ─── Ripple Effect on Buttons ─────────────────
