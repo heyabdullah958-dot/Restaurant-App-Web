@@ -300,15 +300,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   end={{ x: 1, y: 1 }}
                   style={[styles.brandBand, { alignItems: 'center', justifyContent: 'center' }]}
                 >
-                  {brand.banner_image || brand.cover_image ? (
-                    <Animated.Image 
-                      source={getImageUrl(brand.banner_image || brand.cover_image)} 
-                      style={[StyleSheet.absoluteFill, { opacity: 0.8 }]} 
-                      resizeMode="cover"
-                      sharedTransitionTag={`restaurant-${brand.slug}-image`}
-                    />
-                  ) : (
-                    <Text style={{ fontSize: 40 }}>{styleData.emoji}</Text>
+                  <Animated.Image 
+                    source={getImageUrl(brand.banner_image || brand.cover_image)} 
+                    style={[StyleSheet.absoluteFill, { opacity: (brand.banner_image || brand.cover_image) ? 0.8 : 0.2 }]} 
+                    resizeMode="cover"
+                    sharedTransitionTag={`restaurant-${brand.slug}-image`}
+                  />
+                  {!(brand.banner_image || brand.cover_image) && (
+                    <Text style={{ fontSize: 40, position: 'absolute', zIndex: 2 }}>{styleData.emoji}</Text>
                   )}
                   <View style={styles.ratingBadge}>
                     <Ionicons name="star" size={14} color="#FFC107" />

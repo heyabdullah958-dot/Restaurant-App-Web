@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useSelector } from 'react-redux';
@@ -19,6 +19,8 @@ const MOCK_LOCATIONS: Record<string, { lat: number; lng: number }> = {
 
 export default function MapScreen({ navigation }: { navigation: any }) {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean>(false);
+  const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
@@ -28,63 +30,77 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setErrorMsg('Permission to access location was denied');
+          setLoadingLocation(false);
           return;
         }
-
+        setHasPermission(true);
         let loc = await Location.getCurrentPositionAsync({});
         setLocation(loc);
       } catch (error) {
         console.warn('Location request failed:', error);
         setErrorMsg('Failed to fetch location. Please ensure GPS is enabled.');
+      } finally {
+        setLoadingLocation(false);
       }
     })();
   }, []);
 
   // Default to Lahore center if location not loaded yet
   const initialRegion = {
-    latitude: location ? location.coords.latitude : 31.5204,
-    longitude: location ? location.coords.longitude : 74.3587,
+    latitude: location?.coords?.latitude || 31.5204,
+    longitude: location?.coords?.longitude || 74.3587,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   };
+
+  if (loadingLocation) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.light }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ marginTop: 12, color: COLORS.gray, fontWeight: '500' }}>Loading map location...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <MapView 
         style={styles.map} 
         initialRegion={initialRegion} 
-        showsUserLocation={true}
+        showsUserLocation={hasPermission && location !== null}
         provider={null}
       >
-        {restaurants.map((restaurant: any) => {
-          const coords = MOCK_LOCATIONS[restaurant.slug] || {
-            // Random offset if not found
-            lat: 31.5204 + (Math.random() - 0.5) * 0.05,
-            lng: 74.3587 + (Math.random() - 0.5) * 0.05,
-          };
+        {(restaurants || [])
+          .filter((restaurant: any) => restaurant && restaurant.slug)
+          .map((restaurant: any) => {
+            const coords = MOCK_LOCATIONS[restaurant.slug] || {
+              // Random offset if not found
+              lat: 31.5204 + (Math.random() - 0.5) * 0.05,
+              lng: 74.3587 + (Math.random() - 0.5) * 0.05,
+            };
 
-          return (
-            <Marker
-              key={restaurant.id}
-              coordinate={{ latitude: coords.lat, longitude: coords.lng }}
-            >
-              {/* Custom Red Pin UI */}
-              <View style={styles.customPinContainer}>
-                <View style={styles.customPin}>
-                  <Ionicons name="restaurant" size={16} color={COLORS.white} />
+            return (
+              <Marker
+                key={restaurant.id}
+                coordinate={{ latitude: Number(coords.lat), longitude: Number(coords.lng) }}
+              >
+                {/* Custom Red Pin UI */}
+                <View style={styles.customPinContainer}>
+                  <View style={styles.customPin}>
+                    <Ionicons name="restaurant" size={16} color={COLORS.white} />
+                  </View>
+                  <View style={styles.pinPointer} />
                 </View>
-                <View style={styles.pinPointer} />
-              </View>
-              
-              <Callout onPress={() => navigation.navigate('Restaurant', { slug: restaurant.slug })}>
-                <View style={styles.callout}>
-                  <Text style={styles.calloutTitle}>{restaurant.name}</Text>
-                  <Text style={styles.calloutText}>Tap to order</Text>
-                </View>
-              </Callout>
-            </Marker>
-          );
-        })}
+                
+                <Callout onPress={() => navigation.navigate('Restaurant', { slug: restaurant.slug })}>
+                  <View style={styles.callout}>
+                    <Text style={styles.calloutTitle}>{restaurant.name}</Text>
+                    <Text style={styles.calloutText}>Tap to order</Text>
+                  </View>
+                </Callout>
+              </Marker>
+            );
+          })}
       </MapView>
     </View>
   );

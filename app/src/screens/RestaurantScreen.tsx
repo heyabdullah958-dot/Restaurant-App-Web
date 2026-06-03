@@ -355,7 +355,7 @@ export default function RestaurantScreen() {
               <View style={[styles.infoRow, { marginTop: 6 }]}>
                 <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
                 <Text style={styles.moreInfoText}>
-                  Working hours: {restaurant.opens_at.slice(0, 5)} - {restaurant.closes_at.slice(0, 5)}
+                  Working hours: {restaurant.opens_at && restaurant.closes_at ? `${restaurant.opens_at.slice(0, 5)} - ${restaurant.closes_at.slice(0, 5)}` : 'Closed / N/A'}
                 </Text>
               </View>
             </View>
