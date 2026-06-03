@@ -21,6 +21,7 @@ import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanim
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurantDetail, clearCurrentRestaurant } from '../store/restaurantSlice';
+import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 
@@ -148,14 +149,15 @@ export default function RestaurantScreen() {
     };
 
     if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
-      Alert.alert(
+      showAlert(
         'Reset Cart?',
         'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: 'Cancel', style: 'cancel', onPress: hideAlert },
           {
             text: 'Yes, Reset',
             onPress: () => {
+              hideAlert();
               dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
               setSelectedItemForOptions(null);
             },
@@ -178,14 +180,15 @@ export default function RestaurantScreen() {
 
     // If adding an item from a different restaurant, show confirmation to reset cart
     if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
-      Alert.alert(
+      showAlert(
         'Reset Cart?',
         'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: 'Cancel', style: 'cancel', onPress: hideAlert },
           {
             text: 'Yes, Reset',
             onPress: () => {
+              hideAlert();
               dispatch(
                 addItemToCart({
                   item: {
@@ -613,6 +616,13 @@ export default function RestaurantScreen() {
           </View>
         </Modal>
       )}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        actions={alertConfig.actions}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

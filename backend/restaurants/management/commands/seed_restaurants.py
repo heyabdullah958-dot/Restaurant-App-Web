@@ -6,11 +6,20 @@ from restaurants.models import Restaurant, MenuCategory, MenuItem
 class Command(BaseCommand):
     help = 'Seeds the database with the 7 restaurant brands and their menus'
 
-    def handle(self, *args, **kwargs):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Force seed by clearing existing restaurants first',
+        )
+
+    def handle(self, *args, **options):
         self.stdout.write('Seeding restaurant data...')
         
-        # 1. Skip if already seeded to prevent overwriting dynamic data
-        if Restaurant.objects.exists():
+        if options.get('force'):
+            self.stdout.write('Force flag detected. Clearing existing restaurant data...')
+            Restaurant.objects.all().delete()
+        elif Restaurant.objects.exists():
             self.stdout.write(self.style.SUCCESS('Restaurant database already seeded. Skipping.'))
             return
         
@@ -194,10 +203,10 @@ class Command(BaseCommand):
                         {"name": "Tandoori Chicken Boneless (Cheese Naan Single)", "price": 1350.00, "desc": "Boneless tandoori chicken served with 1 cheese naan"},
                         {"name": "Tandoori Chicken Bone (Cheese Naan Double)", "price": 1950.00, "desc": "Tandoori chicken (with bone) served with 2 cheese naans"},
                         {"name": "Tandoori Chicken Boneless (Cheese Naan Double)", "price": 2299.00, "desc": "Boneless tandoori chicken served with 2 cheese naans"},
-                        {"name": "Tandoori Chicken Bone (With Rice)", "price": 780.00, "desc": "Tandoori chicken (with bone) served with aromatic rice"},
-                        {"name": "Tandoori Chicken Boneless (With Rice)", "price": 980.00, "desc": "Boneless tandoori chicken served with aromatic rice"},
-                        {"name": "Tandoori Chicken Bone", "price": 750.00, "desc": "Traditional flame-grilled tandoori chicken (with bone)"},
-                        {"name": "Tandoori Chicken Boneless", "price": 899.00, "desc": "Traditional flame-grilled boneless tandoori chicken"}
+                        {"name": "Tandoori Chicken Bone (With Rice)", "price": 980.00, "desc": "Tandoori chicken (with bone) served with aromatic rice"},
+                        {"name": "Tandoori Chicken Boneless (With Rice)", "price": 780.00, "desc": "Boneless tandoori chicken served with aromatic rice"},
+                        {"name": "Tandoori Chicken Bone (Plain)", "price": 750.00, "desc": "Traditional flame-grilled tandoori chicken (with bone)"},
+                        {"name": "Tandoori Chicken Boneless (Plain)", "price": 899.00, "desc": "Traditional flame-grilled boneless tandoori chicken"}
                     ],
                     "CHICKEN SAJJI": [
                         {"name": "Quarter Sajji", "price": 799.00, "desc": "Slow-roasted quarter chicken sajji"},
@@ -215,8 +224,8 @@ class Command(BaseCommand):
                     ],
                     "TAWA CHICKEN": [
                         {"name": "Tawa Chicken", "price": 750.00, "desc": "Spicy stir-fried tawa chicken piece"},
-                        {"name": "Tawa Chicken Platter (Single)", "price": 800.00, "desc": "Single serving of stir-fried tawa chicken platter"},
-                        {"name": "Tawa Chicken Platter (Double)", "price": 1400.00, "desc": "Double serving of stir-fried tawa chicken platter"}
+                        {"name": "Tawa Chicken Platter with 2 Roti (Single Serving)", "price": 800.00, "desc": "Single serving of stir-fried tawa chicken platter"},
+                        {"name": "Tawa Chicken Platter with 4 Roti (Double Serving)", "price": 1400.00, "desc": "Double serving of stir-fried tawa chicken platter"}
                     ],
                     "BBQ": [
                         {"name": "Malai Boti (Per Seekh)", "price": 450.00, "desc": "Single seekh of creamy grilled malai boti"},
@@ -249,9 +258,28 @@ class Command(BaseCommand):
                         {"name": "Butter Naan", "price": 350.00, "desc": "Buttery flatbread naan"},
                         {"name": "Cheese Naan", "price": 500.00, "desc": "Naan stuffed with melted cheese"},
                         {"name": "Rice", "price": 350.00, "desc": "Extra serving of aromatic rice"},
+                        {"name": "Plain Roti", "price": 30.00, "desc": "Hot whole wheat roti"},
                         {"name": "Salad", "price": 350.00, "desc": "Fresh seasonal salad"},
                         {"name": "Raita", "price": 70.00, "desc": "Yogurt herb raita dip"},
                         {"name": "Puri Paratha", "price": 270.00, "desc": "Flaky deep-fried puri paratha"}
+                    ],
+                    "MOJITOS": [
+                        {"name": "Blueberry Mojito", "price": 300.00, "desc": "Blueberry refreshing mocktail"},
+                        {"name": "Strawberry Mojito", "price": 300.00, "desc": "Strawberry refreshing mocktail"},
+                        {"name": "Peach Mojito", "price": 300.00, "desc": "Peach refreshing mocktail"},
+                        {"name": "Apple Mojito", "price": 300.00, "desc": "Apple refreshing mocktail"}
+                    ],
+                    "SUNDAE": [
+                        {"name": "Oreo Sundae", "price": 400.00, "desc": "Oreo cookies and vanilla ice cream sundae"},
+                        {"name": "Lotus Three Sundae", "price": 400.00, "desc": "Lotus Biscoff crumbs and sauce sundae"},
+                        {"name": "Nutella Sundae", "price": 400.00, "desc": "Nutella chocolate fudge sundae"}
+                    ],
+                    "DRINKS": [
+                        {"name": "Water (Small)", "price": 80.00, "desc": "Chilled mineral water"},
+                        {"name": "Soft Drink (300ml)", "price": 120.00, "desc": "Carbonated soft drink regular"},
+                        {"name": "Soft Drink (Tin)", "price": 150.00, "desc": "Carbonated soft drink tin can"},
+                        {"name": "Fresh Lime", "price": 350.00, "desc": "Zesty fresh lime soda"},
+                        {"name": "Mint Margaritas", "price": 300.00, "desc": "Minty blended ice margarita"}
                     ]
                 }
             },

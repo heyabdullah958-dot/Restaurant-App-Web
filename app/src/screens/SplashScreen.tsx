@@ -95,6 +95,13 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
         <Animated.View style={{ opacity: subtextOpacity }}>
           <Text style={styles.tagline}>One App · Seven Unique Dining Experiences</Text>
         </Animated.View>
+
+        {/* Food Popups */}
+        <View style={styles.foodPopups}>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🥤</Animated.Text>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🍔</Animated.Text>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🍟</Animated.Text>
+        </View>
       </View>
 
       {/* Loading Indicator or Footer */}
@@ -162,5 +169,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     fontWeight: '600',
+  },
+  foodPopups: {
+    flexDirection: 'row',
+    marginTop: SPACING.xl,
+    gap: SPACING.md,
+  },
+  foodEmoji: {
+    fontSize: 32,
   },
 });

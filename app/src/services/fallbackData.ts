@@ -315,50 +315,144 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     categories: [
       {
         id: 401,
-        name: "Tandoori Platters",
+        name: "Tandoori Chicken",
         icon: "restaurant",
         order: 1,
         is_active: true,
         items: [
-          {
-            id: 4001,
-            name: "Tandoori Chicken Tikka (Leg)",
-            description: "Traditional spicy red chicken leg quarter grilled to perfection in clay oven.",
-            price: 380,
-            image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: true,
-            preparation_time: 15
-          }
+          { id: 4001, name: "Tandoori Chicken Bone (Cheese Naan Single)", description: "Tandoori chicken (with bone) served with 1 cheese naan", price: 1150, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 15 },
+          { id: 4002, name: "Tandoori Chicken Boneless (Cheese Naan Single)", description: "Boneless tandoori chicken served with 1 cheese naan", price: 1350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4003, name: "Tandoori Chicken Bone (Cheese Naan Double)", description: "Tandoori chicken (with bone) served with 2 cheese naans", price: 1950, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 20 },
+          { id: 4004, name: "Tandoori Chicken Boneless (Cheese Naan Double)", description: "Boneless tandoori chicken served with 2 cheese naans", price: 2299, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 20 },
+          { id: 4005, name: "Tandoori Chicken Bone (With Rice)", description: "Tandoori chicken (with bone) served with aromatic rice", price: 980, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4006, name: "Tandoori Chicken Boneless (With Rice)", description: "Boneless tandoori chicken served with aromatic rice", price: 780, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4007, name: "Tandoori Chicken Bone (Plain)", description: "Traditional flame-grilled tandoori chicken (with bone)", price: 750, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 12 },
+          { id: 4008, name: "Tandoori Chicken Boneless (Plain)", description: "Traditional flame-grilled boneless tandoori chicken", price: 899, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 12 }
         ]
       },
       {
         id: 402,
-        name: "Specialty Naans",
-        icon: "pizza",
+        name: "Chicken Sajji",
+        icon: "restaurant",
         order: 2,
         is_active: true,
         items: [
-          {
-            id: 4002,
-            name: "Cheese Stuffed Naan",
-            description: "Soft naan bread stuffed with a blend of mozzarella and cheddar cheese, sprinkled with herbs.",
-            price: 350,
-            image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: true,
-            preparation_time: 10
-          },
-          {
-            id: 4003,
-            name: "Dessert Nutella Naan",
-            description: "Warm naan bread slathered with rich chocolate Nutella and sliced almonds.",
-            price: 450,
-            image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: false,
-            preparation_time: 10
-          }
+          { id: 4009, name: "Quarter Sajji", description: "Slow-roasted quarter chicken sajji", price: 799, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 20 },
+          { id: 4010, name: "Half Sajji", description: "Slow-roasted half chicken sajji", price: 1400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4011, name: "Full Sajji", description: "Slow-roasted full chicken sajji", price: 2500, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 35 },
+          { id: 4012, name: "Peri Peri Quarter Sajji", description: "Spiced peri peri quarter chicken sajji", price: 900, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 20 },
+          { id: 4013, name: "Peri Peri Half Sajji", description: "Spiced peri peri half chicken sajji", price: 1600, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4014, name: "Peri Peri Full Sajji", description: "Spiced peri peri full chicken sajji", price: 2900, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 35 }
+        ]
+      },
+      {
+        id: 403,
+        name: "Paratha Roll",
+        icon: "pizza",
+        order: 3,
+        is_active: true,
+        items: [
+          { id: 4015, name: "Full Stop Roll", description: "TandooriStopp signature giant roll", price: 650, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 4016, name: "Tandoori Chicken Roll", description: "Tandoori chicken chunks wrapped in paratha", price: 520, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 4017, name: "Malai Boti Roll", description: "Creamy malai boti wrapped in paratha", price: 550, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 4018, name: "Chicken Paratha Roll", description: "Classic chicken paratha roll", price: 499, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
+        ]
+      },
+      {
+        id: 404,
+        name: "Tawa Chicken",
+        icon: "restaurant",
+        order: 4,
+        is_active: true,
+        items: [
+          { id: 4019, name: "Tawa Chicken", description: "Spicy stir-fried tawa chicken piece", price: 750, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4020, name: "Tawa Chicken Platter with 2 Roti (Single Serving)", description: "Single serving of stir-fried tawa chicken platter", price: 800, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4021, name: "Tawa Chicken Platter with 4 Roti (Double Serving)", description: "Double serving of stir-fried tawa chicken platter", price: 1400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 20 }
+        ]
+      },
+      {
+        id: 405,
+        name: "BBQ",
+        icon: "restaurant",
+        order: 5,
+        is_active: true,
+        items: [
+          { id: 4022, name: "Malai Boti (Seekh)", description: "Single seekh of creamy grilled malai boti", price: 450, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4023, name: "Malai Boti (Per KG)", description: "One KG of creamy grilled malai boti", price: 2200, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4024, name: "Tikka Boti (Seekh)", description: "Single seekh of classic tikka boti", price: 400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 },
+          { id: 4025, name: "Tikka Boti (Per KG)", description: "One KG of classic tikka boti", price: 1999, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4026, name: "Seekh Kabab (Seekh)", description: "Single seekh of spiced chicken seekh kabab", price: 250, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 12 },
+          { id: 4027, name: "Seekh Kabab (Per KG)", description: "One KG of spiced chicken seekh kabab", price: 1999, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 }
+        ]
+      },
+      {
+        id: 406,
+        name: "Karahi",
+        icon: "restaurant",
+        order: 6,
+        is_active: true,
+        items: [
+          { id: 4028, name: "Chicken Karahi (Half)", description: "Traditional wok chicken karahi half portion", price: 1300, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4029, name: "Chicken Karahi (Full)", description: "Traditional wok chicken karahi full portion", price: 2500, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 35 },
+          { id: 4030, name: "Chicken White Karahi (Half)", description: "Creamy white chicken karahi half portion", price: 1500, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4031, name: "Chicken White Karahi (Full)", description: "Creamy white chicken karahi full portion", price: 2700, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 35 },
+          { id: 4032, name: "Chicken Kabab Masala (Half)", description: "Chicken kabab masala half portion", price: 1350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 4033, name: "Chicken Kabab Masala (Full)", description: "Chicken kabab masala full portion", price: 2600, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 35 }
+        ]
+      },
+      {
+        id: 407,
+        name: "Add Ons",
+        icon: "pizza",
+        order: 7,
+        is_active: true,
+        items: [
+          { id: 4034, name: "Roghni Nan", description: "Fluffy sesame roghni naan", price: 200, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4035, name: "Butter Nan", description: "Buttery flatbread naan", price: 350, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4036, name: "Cheese Nan", description: "Naan stuffed with melted cheese", price: 500, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 4037, name: "Rice", description: "Extra serving of aromatic rice", price: 350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 4038, name: "Plain Roti", description: "Hot whole wheat roti", price: 30, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4039, name: "Puri Paratha", description: "Flaky deep-fried puri paratha", price: 270, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 4040, name: "Raita", description: "Yogurt herb raita dip", price: 70, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 3 }
+        ]
+      },
+      {
+        id: 408,
+        name: "Mojitos",
+        icon: "cafe",
+        order: 8,
+        is_active: true,
+        items: [
+          { id: 4041, name: "Blueberry Mojito", description: "Blueberry refreshing mocktail", price: 300, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4042, name: "Strawberry Mojito", description: "Strawberry refreshing mocktail", price: 300, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4043, name: "Peach Mojito", description: "Peach refreshing mocktail", price: 300, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4044, name: "Apple Mojito", description: "Apple refreshing mocktail", price: 300, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 }
+        ]
+      },
+      {
+        id: 409,
+        name: "Sundae",
+        icon: "cafe",
+        order: 9,
+        is_active: true,
+        items: [
+          { id: 4045, name: "Oreo Sundae", description: "Oreo cookies and vanilla ice cream sundae", price: 400, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 4046, name: "Lotus Three Sundae", description: "Lotus Biscoff crumbs and sauce sundae", price: 400, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 4047, name: "Nutella Sundae", description: "Nutella chocolate fudge sundae", price: 400, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 }
+        ]
+      },
+      {
+        id: 410,
+        name: "Drinks",
+        icon: "cafe",
+        order: 10,
+        is_active: true,
+        items: [
+          { id: 4048, name: "Water (Small)", description: "Chilled mineral water", price: 80, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 4049, name: "Soft Drink (300ml)", description: "Carbonated soft drink regular", price: 120, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 4050, name: "Soft Drink (Tin)", description: "Carbonated soft drink tin can", price: 150, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 4051, name: "Fresh Lime", description: "Zesty fresh lime soda", price: 350, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 4052, name: "Mint Margaritas", description: "Minty blended ice margarita", price: 300, image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 }
         ]
       }
     ]

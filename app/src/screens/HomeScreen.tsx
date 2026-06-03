@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,10 +22,20 @@ import { StatusBar } from 'expo-status-bar';
 import { getImageUrl } from '../services/fallbackData';
 import { RestaurantCardSkeleton } from '../components/SkeletonLoader';
 import Animated from 'react-native-reanimated';
+import * as Location from 'expo-location';
+import LocationPromptModal from '../components/LocationPromptModal';
 
 const { width } = Dimensions.get('window');
 
-const categories = ['All', 'BBQ', 'Seafood', 'Burgers', 'Tandoori', 'Sandwiches', 'Desserts'];
+const categories = [
+  { id: 'All', name: 'All', icon: '🍽️' },
+  { id: 'BBQ', name: 'BBQ', icon: '🍖' },
+  { id: 'Seafood', name: 'Seafood', icon: '🐟' },
+  { id: 'Burgers', name: 'Burgers', icon: '🍔' },
+  { id: 'Tandoori', name: 'Tandoori', icon: '🍗' },
+  { id: 'Sandwiches', name: 'Melts', icon: '🥪' },
+  { id: 'Desserts', name: 'Café', icon: '☕' },
+];
 
 // Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 
@@ -47,6 +58,27 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       r.name?.toLowerCase().includes(selectedCategory.toLowerCase())
     );
   }, [restaurants, selectedCategory]);
+
+  const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkLocation = async () => {
+      let { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setShowLocationPrompt(true);
+      }
+    };
+    checkLocation();
+  }, []);
+
+  const handleAllowLocation = async () => {
+    setShowLocationPrompt(false);
+    await Location.requestForegroundPermissionsAsync();
+  };
+
+  const handleDenyLocation = () => {
+    setShowLocationPrompt(false);
+  };
 
   // APP-02: STEP 1 — State aur data add karo
   const [bannerIndex, setBannerIndex] = React.useState(0);
@@ -91,22 +123,25 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [dispatch]);
 
   // APP-01: STEP 3 — renderCategoryChip function REPLACE karo
-  const renderCategoryChip = ({ item }: { item: string }) => (
+  const renderCategoryChip = ({ item }: { item: typeof categories[0] }) => (
     <TouchableOpacity
       style={[
         styles.categoryChip,
-        item === selectedCategory && styles.activeCategoryChip,
+        item.id === selectedCategory && styles.activeCategoryChip,
         SHADOWS.small,
       ]}
-      onPress={() => setSelectedCategory(item)}
+      onPress={() => setSelectedCategory(item.id)}
       activeOpacity={0.75}
     >
-      <Text style={[
-        styles.categoryText,
-        item === selectedCategory && styles.activeCategoryText,
-      ]}>
-        {item}
-      </Text>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text style={{fontSize: 16, marginRight: 6}}>{item.icon}</Text>
+        <Text style={[
+          styles.categoryText,
+          item.id === selectedCategory && styles.activeCategoryText,
+        ]}>
+          {item.name}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -197,7 +232,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <FlatList
           data={categories}
           renderItem={renderCategoryChip}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.categoriesList}
@@ -239,10 +274,18 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
         ) : (
           filteredRestaurants.map((brand: any, index: number) => {
-            const colors = ['#FF5722', '#2196F3', '#E91E63', '#FF9800', '#4CAF50', '#9C27B0', '#795548'];
-            const icons = ['flame', 'boat', 'fast-food', 'leaf', 'beer', 'egg', 'cafe'];
-            const color = colors[index % colors.length];
-            const icon = icons[index % icons.length];
+            // Web Prototype matching gradients and emojis
+            const prototypeStyles: Record<string, { colors: readonly [string, string, ...string[]], emoji?: string }> = {
+              'seenbanao': { colors: ['#3E1F00', '#FF5722'] as const, emoji: '🔥' },
+              'jushhpk': { colors: ['#1A0A00', '#D2691E'] as const, emoji: '🍔' },
+              'dineatblue': { colors: ['#001529', '#0055A4'] as const, emoji: '🐟' },
+              'sandmelts': { colors: ['#FF6B00', '#FF3CAC'] as const, emoji: '🥪🧀' },
+              'tandooristoppk': { colors: ['#FF9900', '#E65100'] as const, emoji: '🍗🔥' },
+              'getafomo': { colors: ['#E0C3FC', '#8EC5FC'] as const, emoji: '☕🍰' },
+              'default': { colors: ['#FF5722', '#E91E63'] as const, emoji: '🍽️' }
+            };
+
+            const styleData = prototypeStyles[brand.slug] || prototypeStyles['default'];
             
             return (
               <TouchableOpacity
@@ -251,7 +294,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                 activeOpacity={0.95}
                 onPress={() => navigation.navigate('Restaurant', { slug: brand.slug })}
               >
-                <View style={[styles.brandBand, { backgroundColor: color }]}>
+                <LinearGradient 
+                  colors={styleData.colors}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[styles.brandBand, { alignItems: 'center', justifyContent: 'center' }]}
+                >
                   {brand.banner_image || brand.cover_image ? (
                     <Animated.Image 
                       source={getImageUrl(brand.banner_image || brand.cover_image)} 
@@ -260,13 +308,13 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                       sharedTransitionTag={`restaurant-${brand.slug}-image`}
                     />
                   ) : (
-                    <Ionicons name={icon as any} size={32} color={COLORS.white} />
+                    <Text style={{ fontSize: 40 }}>{styleData.emoji}</Text>
                   )}
                   <View style={styles.ratingBadge}>
                     <Ionicons name="star" size={14} color="#FFC107" />
                     <Text style={styles.ratingText}>{Number(brand.rating).toFixed(1)}</Text>
                   </View>
-                </View>
+                </LinearGradient>
 
                 <View style={styles.brandDetails}>
                   <View style={styles.brandTitleRow}>
@@ -288,6 +336,34 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           })
         )}
       </ScrollView>
+
+      {/* Guest Login Banner */}
+      {user?.is_guest && (
+        <View style={styles.stickyLoginCard}>
+          <View style={styles.stickyLoginLeft}>
+            <View style={styles.stickyLoginIconBg}>
+              <Ionicons name="person" size={16} color="#d97706" />
+            </View>
+            <View style={{ marginLeft: SPACING.sm }}>
+              <Text style={styles.stickyLoginTitle}>Browsing as Guest</Text>
+              <Text style={styles.stickyLoginSubtitle}>Sign in to earn loyalty points</Text>
+            </View>
+          </View>
+          <TouchableOpacity activeOpacity={0.8}
+            style={styles.stickyLoginBtn}
+            onPress={() => navigation.navigate('Auth')}
+          >
+            <Text style={styles.stickyLoginBtnText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Location Prompt Modal */}
+      <LocationPromptModal
+        visible={showLocationPrompt}
+        onAllow={handleAllowLocation}
+        onDeny={handleDenyLocation}
+      />
     </SafeAreaView>
   );
 }
@@ -599,5 +675,50 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 13,
+  },
+  stickyLoginCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fffbeb', // bg-amber-50
+    borderTopWidth: 1,
+    borderColor: '#fde68a', // border-amber-200
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm + 4,
+  },
+  stickyLoginLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  stickyLoginIconBg: {
+    backgroundColor: '#fef3c7', // bg-amber-100
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stickyLoginTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#92400e', // text-amber-800
+  },
+  stickyLoginSubtitle: {
+    fontSize: 11,
+    color: '#b45309', // text-amber-700
+    marginTop: 1,
+  },
+  stickyLoginBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  stickyLoginBtnText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

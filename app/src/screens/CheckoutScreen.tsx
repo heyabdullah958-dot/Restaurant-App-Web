@@ -24,6 +24,7 @@ import { clearCart } from '../store/cartSlice';
 import { guestLogin, updateUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomAlertModal from '../components/CustomAlertModal';
 
 const DATE_OPTIONS = ['Today', 'Tomorrow', 'Day After'];
 const TIME_OPTIONS = [
@@ -75,11 +76,25 @@ export default function CheckoutScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
+  // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    actions?: any[];
+  }>({ visible: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string, actions?: any[]) => {
+    setAlertConfig({ visible: true, title, message, actions });
+  };
+
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+
   const handleDetectLocation = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Please grant location permission to detect your address automatically.');
+        showAlert('Permission Denied', 'Please grant location permission to detect your address automatically.');
         return;
       }
       
@@ -107,13 +122,13 @@ export default function CheckoutScreen() {
         ].filter(Boolean).join(', ');
         
         setAddress(formattedAddress);
-        Alert.alert('Location Detected', `Auto-filled address:\n${formattedAddress}`);
+        showAlert('Location Detected', `Auto-filled address:\n${formattedAddress}`);
       } else {
-        Alert.alert('Error', 'Could not resolve coordinates to a readable address.');
+        showAlert('Error', 'Could not resolve coordinates to a readable address.');
       }
     } catch (e) {
       setIsDetectingLocation(false);
-      Alert.alert('Error', 'Failed to fetch location. Please ensure GPS is turned on.');
+      showAlert('Error', 'Failed to fetch location. Please ensure GPS is turned on.');
     }
   };
 
@@ -139,24 +154,23 @@ export default function CheckoutScreen() {
   const handlePlaceOrder = async () => {
     // 1. Validations
     if (!address.trim()) {
-      Alert.alert('Required Field', 'Please enter a delivery address.');
+      showAlert('Required Field', 'Please enter a delivery address.');
       return;
     }
 
     if (isGuestMode) {
       if (!guestName.trim()) {
-        Alert.alert('Required Field', 'Please enter your name.');
+        showAlert('Required Field', 'Please enter your name.');
+        return;
+      }
+      if (!guestPhone.trim() || guestPhone.trim().length < 10) {
+        showAlert('Required Field', 'Please enter a valid contact phone number.');
         return;
       }
     }
 
-    if (!guestPhone.trim()) {
-      Alert.alert('Required Field', 'Please enter a valid contact phone number.');
-      return;
-    }
-
-    if (!restaurantId || items.length === 0) {
-      Alert.alert('Cart Error', 'Your cart is empty or invalid.');
+    if (!items || items.length === 0) {
+      showAlert('Cart Error', 'Your cart is empty or invalid.');
       return;
     }
 
@@ -205,10 +219,11 @@ export default function CheckoutScreen() {
     try {
       // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
       if (!isAuthenticated) {
-        const guestAction = await dispatch(guestLogin());
-        if (!guestLogin.fulfilled.match(guestAction)) {
-          Alert.alert('Checkout Error', 'Failed to initialize guest checkout session.');
+        try {
+          await dispatch(guestLogin({ name: guestName.trim(), phone: guestPhone.trim() })).unwrap();
+        } catch (e) {
           setIsSubmitting(false);
+          showAlert('Checkout Error', 'Failed to initialize guest checkout session.');
           return;
         }
       }
@@ -235,23 +250,25 @@ export default function CheckoutScreen() {
         // 5. Handle payments integration based on choice
         if (paymentMethod === 'cod') {
           await dispatch(confirmCODPayment(orderId));
-          Alert.alert('Success', 'Order placed successfully! Cash on Delivery confirmed.');
+          showAlert('Success', 'Order placed successfully! Cash on Delivery confirmed.', [
+             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned }); } }
+          ]);
         } else if (paymentMethod === 'stripe') {
           const stripeResult = await dispatch(createStripeIntent(orderId));
           if (createStripeIntent.fulfilled.match(stripeResult)) {
             const checkoutUrl = stripeResult.payload.checkout_url;
             if (checkoutUrl) {
-              Alert.alert(
+              showAlert(
                 'Redirecting to Stripe',
                 'We are opening Stripe secure checkout to complete the payment.',
-                [{ text: 'OK', onPress: () => Linking.openURL(checkoutUrl) }]
+                [{ text: 'OK', onPress: () => { hideAlert(); Linking.openURL(checkoutUrl); navigation.replace('Orders'); } }]
               );
             } else {
-              Alert.alert('Payment Error', 'Failed to retrieve Stripe checkout URL.');
+              showAlert('Payment Error', 'Failed to retrieve Stripe checkout URL.');
             }
           } else {
             const errMsg = stripeResult.payload || 'Failed to initialize Stripe payment';
-            Alert.alert('Payment Error', String(errMsg));
+            showAlert('Payment Error', String(errMsg));
             setIsSubmitting(false);
             return;
           }
@@ -260,17 +277,17 @@ export default function CheckoutScreen() {
           if (createPayFastPayment.fulfilled.match(payFastResult)) {
             const redirectUrl = payFastResult.payload.redirect_url;
             if (redirectUrl) {
-              Alert.alert(
+              showAlert(
                 'Redirecting to PayFast',
                 'Redirecting you to PayFast secure portal to complete your payment.',
-                [{ text: 'OK', onPress: () => Linking.openURL(redirectUrl) }]
+                [{ text: 'OK', onPress: () => { hideAlert(); Linking.openURL(redirectUrl); navigation.replace('Orders'); } }]
               );
             } else {
-              Alert.alert('Payment Error', 'Failed to retrieve PayFast checkout URL.');
+              showAlert('Payment Error', 'Failed to retrieve PayFast checkout URL.');
             }
           } else {
             const errMsg = payFastResult.payload || 'Failed to initialize PayFast payment';
-            Alert.alert('Payment Error', String(errMsg));
+            showAlert('Payment Error', String(errMsg));
             setIsSubmitting(false);
             return;
           }
@@ -279,15 +296,14 @@ export default function CheckoutScreen() {
         // 6. Clear cart & redirect to order confirmation success page
         dispatch(clearCart());
         setIsSubmitting(false);
-        navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned });
       } else {
         setIsSubmitting(false);
         const errMsg = resultAction.payload || 'Failed to place order';
-        Alert.alert('Checkout Error', String(errMsg));
+        showAlert('Checkout Error', String(errMsg));
       }
     } catch (err: any) {
       setIsSubmitting(false);
-      Alert.alert('Checkout Error', err.message || 'Something went wrong.');
+      showAlert('Checkout Error', err.message || 'Something went wrong.');
     }
   };
 
@@ -387,42 +403,7 @@ export default function CheckoutScreen() {
               </View>
             </View>
 
-            <Text style={styles.fieldLabel}>Delivery Time</Text>
-            <View style={styles.scheduleOptionRow}>
-              <TouchableOpacity activeOpacity={0.75}
-                style={[
-                  styles.scheduleOptionBtn,
-                  !isScheduled && styles.scheduleOptionBtnActive
-                ]}
-                onPress={() => setIsScheduled(false)}
-              >
-                <Ionicons name="flash-sharp" size={16} color={!isScheduled ? COLORS.white : COLORS.primary} />
-                <Text style={[
-                  styles.scheduleOptionText,
-                  !isScheduled && styles.scheduleOptionTextActive
-                ]}>ASAP (Instant)</Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity activeOpacity={0.75}
-                style={[
-                  styles.scheduleOptionBtn,
-                  isScheduled && styles.scheduleOptionBtnActive
-                ]}
-                onPress={() => {
-                  setTempDate(schedDate);
-                  setTempTime(schedTime);
-                  setDatePickerVisible(true);
-                }}
-              >
-                <Ionicons name="time-sharp" size={16} color={isScheduled ? COLORS.white : COLORS.primary} />
-                <Text style={[
-                  styles.scheduleOptionText,
-                  isScheduled && styles.scheduleOptionTextActive
-                ]}>
-                  {isScheduled ? `${schedDate} - ${schedTime}` : 'Schedule Later'}
-                </Text>
-              </TouchableOpacity>
-            </View>
 
             <Text style={styles.fieldLabel}>Delivery Instructions (Optional)</Text>
             <TextInput
@@ -566,77 +547,15 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Date/Time Picker Modal */}
-        <Modal
-          visible={isDatePickerVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setDatePickerVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Schedule Delivery</Text>
-                <TouchableOpacity activeOpacity={0.75} onPress={() => setDatePickerVisible(false)}>
-                  <Ionicons name="close" size={24} color={COLORS.dark} />
-                </TouchableOpacity>
-              </View>
 
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScrollContent}>
-                <Text style={styles.modalSectionLabel}>Select Date</Text>
-                <View style={styles.modalOptionsRow}>
-                  {DATE_OPTIONS.map((opt) => (
-                    <TouchableOpacity activeOpacity={0.75}
-                      key={opt}
-                      style={[
-                        styles.modalOptionPill,
-                        tempDate === opt && styles.modalOptionPillActive
-                      ]}
-                      onPress={() => setTempDate(opt)}
-                    >
-                      <Text style={[
-                        styles.modalOptionPillText,
-                        tempDate === opt && styles.modalOptionPillTextActive
-                      ]}>{opt}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={[styles.modalSectionLabel, { marginTop: SPACING.md }]}>Select Time Slot</Text>
-                <View style={styles.modalOptionsGrid}>
-                  {TIME_OPTIONS.map((opt) => (
-                    <TouchableOpacity activeOpacity={0.75}
-                      key={opt}
-                      style={[
-                        styles.modalOptionGridItem,
-                        tempTime === opt && styles.modalOptionGridItemActive
-                      ]}
-                      onPress={() => setTempTime(opt)}
-                    >
-                      <Text style={[
-                        styles.modalOptionGridItemText,
-                        tempTime === opt && styles.modalOptionGridItemTextActive
-                      ]}>{opt}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-
-              <TouchableOpacity activeOpacity={0.8}
-                style={styles.modalConfirmBtn}
-                onPress={() => {
-                  setSchedDate(tempDate);
-                  setSchedTime(tempTime);
-                  setIsScheduled(tempTime !== 'ASAP (Immediate)');
-                  setDatePickerVisible(false);
-                }}
-              >
-                <Text style={styles.modalConfirmBtnText}>Apply Schedule</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </KeyboardAvoidingView>
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        actions={alertConfig.actions}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

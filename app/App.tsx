@@ -20,6 +20,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import MapScreen from './src/screens/MapScreen';
 import SearchScreen from './src/screens/SearchScreen';
 import OrdersScreen from './src/screens/OrdersScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
@@ -46,6 +47,7 @@ type RootStackParamList = {
 
 type MainTabParamList = {
   Home: undefined;
+  Map: undefined;
   Search: undefined;
   Cart: undefined;
   Orders: undefined;
@@ -66,6 +68,8 @@ function MainTabs() {
 
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Map') {
+            iconName = focused ? 'map' : 'map-outline';
           } else if (route.name === 'Search') {
             iconName = focused ? 'search' : 'search-outline';
           } else if (route.name === 'Cart') {
@@ -127,6 +131,11 @@ function MainTabs() {
         name="Home" 
         component={HomeScreen} 
         options={{ tabBarLabel: 'Home' }} 
+      />
+      <Tab.Screen 
+        name="Map" 
+        component={MapScreen} 
+        options={{ tabBarLabel: 'Map' }} 
       />
       <Tab.Screen 
         name="Search" 

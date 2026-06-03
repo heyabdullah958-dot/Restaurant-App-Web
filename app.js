@@ -190,10 +190,10 @@ const restaurantsData = {
         { name: "Tandoori Chicken Boneless (Cheese Naan Single)", price: 1350, desc: "Boneless tandoori chicken served with 1 cheese naan", emoji: "🍗" },
         { name: "Tandoori Chicken Bone (Cheese Naan Double)", price: 1950, desc: "Tandoori chicken (with bone) served with 2 cheese naans", emoji: "🍗" },
         { name: "Tandoori Chicken Boneless (Cheese Naan Double)", price: 2299, desc: "Boneless tandoori chicken served with 2 cheese naans", emoji: "🍗" },
-        { name: "Tandoori Chicken Bone (With Rice)", price: 780, desc: "Tandoori chicken (with bone) served with aromatic rice", emoji: "🍗" },
-        { name: "Tandoori Chicken Boneless (With Rice)", price: 980, desc: "Boneless tandoori chicken served with aromatic rice", emoji: "🍗" },
-        { name: "Tandoori Chicken Bone", price: 750, desc: "Traditional flame-grilled tandoori chicken (with bone)", emoji: "🍗" },
-        { name: "Tandoori Chicken Boneless", price: 899, desc: "Traditional flame-grilled boneless tandoori chicken", emoji: "🍗" }
+        { name: "Tandoori Chicken Bone (With Rice)", price: 980, desc: "Tandoori chicken (with bone) served with aromatic rice", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless (With Rice)", price: 780, desc: "Boneless tandoori chicken served with aromatic rice", emoji: "🍗" },
+        { name: "Tandoori Chicken Bone (Plain)", price: 750, desc: "Traditional flame-grilled tandoori chicken (with bone)", emoji: "🍗" },
+        { name: "Tandoori Chicken Boneless (Plain)", price: 899, desc: "Traditional flame-grilled boneless tandoori chicken", emoji: "🍗" }
       ],
       "CHICKEN SAJJI": [
         { name: "Quarter Sajji", price: 799, desc: "Slow-roasted quarter chicken sajji", emoji: "🍗" },
@@ -211,8 +211,8 @@ const restaurantsData = {
       ],
       "TAWA CHICKEN": [
         { name: "Tawa Chicken", price: 750, desc: "Spicy stir-fried tawa chicken piece", emoji: "🍳" },
-        { name: "Tawa Chicken Platter (Single)", price: 800, desc: "Single serving of stir-fried tawa chicken platter", emoji: "🍳" },
-        { name: "Tawa Chicken Platter (Double)", price: 1400, desc: "Double serving of stir-fried tawa chicken platter", emoji: "🍳" }
+        { name: "Tawa Chicken Platter with 2 Roti (Single Serving)", price: 800, desc: "Single serving of stir-fried tawa chicken platter", emoji: "🍳" },
+        { name: "Tawa Chicken Platter with 4 Roti (Double Serving)", price: 1400, desc: "Double serving of stir-fried tawa chicken platter", emoji: "🍳" }
       ],
       "BBQ": [
         { name: "Malai Boti (Per Seekh)", price: 450, desc: "Single seekh of creamy grilled malai boti", emoji: "🍢" },
@@ -245,6 +245,7 @@ const restaurantsData = {
         { name: "Butter Naan", price: 350, desc: "Buttery flatbread naan", emoji: "🫓" },
         { name: "Cheese Naan", price: 500, desc: "Naan stuffed with melted cheese", emoji: "🫓" },
         { name: "Rice", price: 350, desc: "Extra serving of aromatic rice", emoji: "🍚" },
+        { name: "Plain Roti", price: 30, desc: "Hot whole wheat roti", emoji: "🫓" },
         { name: "Salad", price: 350, desc: "Fresh seasonal salad", emoji: "🥗" },
         { name: "Raita", price: 70, desc: "Yogurt herb raita dip", emoji: "🏺" },
         { name: "Puri Paratha", price: 270, desc: "Flaky deep-fried puri paratha", emoji: "🫓" }
@@ -254,6 +255,11 @@ const restaurantsData = {
         { name: "Strawberry Mojito", price: 300, desc: "Strawberry refreshing mocktail", emoji: "🍹" },
         { name: "Peach Mojito", price: 300, desc: "Peach refreshing mocktail", emoji: "🍹" },
         { name: "Apple Mojito", price: 300, desc: "Apple refreshing mocktail", emoji: "🍹" }
+      ],
+      "SUNDAE": [
+        { name: "Oreo Sundae", price: 400, desc: "Oreo cookies and vanilla ice cream sundae", emoji: "🍨" },
+        { name: "Lotus Three Sundae", price: 400, desc: "Lotus Biscoff crumbs and sauce sundae", emoji: "🍨" },
+        { name: "Nutella Sundae", price: 400, desc: "Nutella chocolate fudge sundae", emoji: "🍨" }
       ],
       "DRINKS": [
         { name: "Water (Small)", price: 80, desc: "Chilled mineral water", emoji: "🥤" },

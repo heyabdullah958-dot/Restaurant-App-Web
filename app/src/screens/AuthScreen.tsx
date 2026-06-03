@@ -12,7 +12,9 @@ import {
   Alert,
   Dimensions,
   Modal,
+  Image,
 } from 'react-native';
+import CustomAlertModal from '../components/CustomAlertModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
@@ -65,6 +67,20 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [customGoogleName, setCustomGoogleName] = useState('');
 
+  // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    actions?: any[];
+  }>({ visible: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string, actions?: any[]) => {
+    setAlertConfig({ visible: true, title, message, actions });
+  };
+
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+
   const handleGoogleLogin = () => {
     setGoogleModalVisible(true);
   };
@@ -78,7 +94,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     setTimeout(() => {
       setIsSendingOtp(false);
       setOtpSent(true);
-      Alert.alert(
+      showAlert(
         '🔑 OTP Code Dispatched',
         `A secure 4-digit verification code has been sent to ${phone}.\n\n(Use standard test code: 1234)`,
         [{ text: 'OK' }]
@@ -88,7 +104,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
   const handleVerifyOtp = async () => {
     if (otpCode !== '1234') {
-      Alert.alert('Verification Failed', 'Invalid verification code. Please enter the code sent to your phone (1234).');
+      showAlert('Verification Failed', 'Invalid verification code. Please enter the code sent to your phone (1234).');
       return;
     }
     
@@ -100,7 +116,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
         phone: phone.trim(),
         email: `phone_user_${phone.slice(-4)}@foodsphere.com`
       }));
-      Alert.alert('Success', 'Phone verification successful! Welcome to FoodSphere.');
+      showAlert('Success', 'Phone verification successful! Welcome to FoodSphere.');
     }
   };
 
@@ -115,13 +131,13 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
         email: selectedEmail,
         phone: '+92 300 1234567' 
       }));
-      Alert.alert('Google Sign-In Success', `Welcome, ${displayName}! You have logged in with ${selectedEmail}.`);
+      showAlert('Google Sign-In Success', `Welcome, ${displayName}! You have logged in with ${selectedEmail}.`);
     }
   };
 
   const handleSendResetEmail = async () => {
     if (!resetEmail.trim() || !validateEmail(resetEmail.trim())) {
-      Alert.alert('Validation Error', 'Please enter a valid email address.');
+      showAlert('Validation Error', 'Please enter a valid email address.');
       return;
     }
     setResetLoading(true);
@@ -132,17 +148,17 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       
       const resData = response.data || response;
       if (resData.success) {
-        Alert.alert(
+        showAlert(
           'Email Dispatched',
           'A secure password reset link has been sent to your Gmail inbox! Please check your spam folder if you do not receive it shortly.'
         );
       } else {
-        Alert.alert('Error', resData.error || 'Failed to dispatch reset link.');
+        showAlert('Error', resData.error || 'Failed to dispatch reset link.');
       }
     } catch (e: any) {
       setResetLoading(false);
       const errorMsg = e.response?.data?.error || e.message || 'An error occurred while sending the email.';
-      Alert.alert('Reset Failed', errorMsg);
+      showAlert('Reset Failed', errorMsg);
     }
   };
 
@@ -165,7 +181,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     return re.test(emailStr);
   };
 
-  const handleAuthAction = () => {
+  const handleAuthAction = async () => {
     if (activeTab === 'login' && loginMethod === 'phone') {
       if (otpSent) {
         handleVerifyOtp();
@@ -204,18 +220,22 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
+      showAlert('Validation Error', 'Please correct the errors in the form before proceeding.');
       return;
     }
 
     if (activeTab === 'login') {
       dispatch(loginUser({ username: username.trim(), password }));
     } else {
-      dispatch(registerUser({ 
+      const result = await dispatch(registerUser({ 
         username: username.trim(), 
         email: email.trim().toLowerCase(), 
-        password, 
+        password: password.trim(),
         phone: phone.trim() 
       }));
+      if (registerUser.fulfilled.match(result)) {
+        showAlert('Registration Successful', 'Welcome to FoodSphere!');
+      }
     }
   };
 
@@ -495,7 +515,10 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Ionicons name="logo-google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
+            <Image 
+              source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png' }} 
+              style={{ width: 22, height: 22, marginRight: 12 }}
+            />
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </TouchableOpacity>
 
@@ -650,7 +673,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
                   style={styles.modalSaveBtn}
                   onPress={() => {
                     if (!customGoogleEmail.trim() || !validateEmail(customGoogleEmail.trim())) {
-                      Alert.alert('Error', 'Please enter a valid Gmail address.');
+                      showAlert('Error', 'Please enter a valid Gmail address.');
                       return;
                     }
                     const name = customGoogleName.trim() || customGoogleEmail.split('@')[0];
@@ -664,6 +687,15 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Alert Modal */}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        actions={alertConfig.actions}
+        onDismiss={hideAlert}
+      />
 
     </KeyboardAvoidingView>
   );

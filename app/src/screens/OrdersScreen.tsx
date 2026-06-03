@@ -18,6 +18,7 @@ import { RootState, AppDispatch } from '../store';
 import { fetchMyOrders, fetchOrderDetails } from '../store/orderSlice';
 import { addItemToCart } from '../store/cartSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
+import CustomAlertModal from '../components/CustomAlertModal';
 
 export default function OrdersScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,6 +30,20 @@ export default function OrdersScreen() {
 
   // Re-ordering state to track specific order spinner
   const [reorderingId, setReorderingId] = useState<number | null>(null);
+
+  // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    actions?: any[];
+  }>({ visible: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string, actions?: any[]) => {
+    setAlertConfig({ visible: true, title, message, actions });
+  };
+
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
   // APP-14: Selected filter and computed list
   const [orderFilter, setOrderFilter] = React.useState<'all' | 'active' | 'delivered'>('all');
@@ -108,14 +123,17 @@ export default function OrdersScreen() {
         const fullOrder = resultAction.payload;
         const restId = fullOrder.restaurant?.id || fullOrder.restaurant;
 
-        Alert.alert(
+        showAlert(
           'Re-order',
           `Add all items from ${fullOrder.restaurant?.name || 'this order'} to your cart?`,
           [
             {
               text: 'Cancel',
               style: 'cancel',
-              onPress: () => setReorderingId(null),
+              onPress: () => {
+                setReorderingId(null);
+                hideAlert();
+              },
             },
             {
               text: 'Add to Cart',
@@ -138,12 +156,12 @@ export default function OrdersScreen() {
 
                 setReorderingId(null);
 
-                Alert.alert(
+                showAlert(
                   'Added to Cart',
                   'Items have been successfully added. Go to cart?',
                   [
-                    { text: 'Keep Browsing', style: 'cancel' },
-                    { text: 'Go to Cart', onPress: () => navigation.navigate('Cart') },
+                    { text: 'Keep Browsing', style: 'cancel', onPress: hideAlert },
+                    { text: 'Go to Cart', onPress: () => { hideAlert(); navigation.navigate('Cart'); } },
                   ]
                 );
               },
@@ -152,11 +170,11 @@ export default function OrdersScreen() {
         );
       } else {
         setReorderingId(null);
-        Alert.alert('Error', 'Failed to retrieve order items.');
+        showAlert('Error', 'Failed to retrieve order items.');
       }
-    } catch {
+    } catch (err) {
       setReorderingId(null);
-      Alert.alert('Error', 'Something went wrong while re-ordering.');
+      showAlert('Error', 'Something went wrong while re-ordering.');
     }
   };
 
@@ -343,6 +361,13 @@ export default function OrdersScreen() {
           }
         />
       )}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        actions={alertConfig.actions}
+        onClose={hideAlert}
+      />
     </SafeAreaView>
   );
 }

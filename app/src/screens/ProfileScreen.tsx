@@ -22,6 +22,7 @@ import { AppDispatch, RootState } from '../store';
 import { logoutUser, updateProfile, updateUserProfile } from '../store/userSlice';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomAlertModal from '../components/CustomAlertModal';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +49,20 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   // Customer Support State
   const [showSupportModal, setShowSupportModal] = useState(false);
 
+  // Custom Alert State
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    actions?: any[];
+  }>({ visible: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string, actions?: any[]) => {
+    setAlertConfig({ visible: true, title, message, actions });
+  };
+
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+
   // Check if Address changed compared to stored addresses
   const isAddressDirty = address.trim() !== (user?.addresses?.[0] || '');
 
@@ -57,7 +72,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Please grant location permission to detect your address automatically.');
+        showAlert('Permission Denied', 'Please grant location permission to detect your address automatically.');
         return;
       }
       
@@ -85,13 +100,13 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         ].filter(Boolean).join(', ');
         
         setAddress(formattedAddress);
-        Alert.alert('Location Detected', `Auto-filled address:\n${formattedAddress}`);
+        showAlert('Location Detected', `Auto-filled address:\n${formattedAddress}`);
       } else {
-        Alert.alert('Error', 'Could not resolve coordinates to a readable address.');
+        showAlert('Error', 'Could not resolve coordinates to a readable address.');
       }
     } catch (e) {
       setIsDetectingLocation(false);
-      Alert.alert('Error', 'Failed to fetch location. Please ensure GPS is turned on.');
+      showAlert('Error', 'Failed to fetch location. Please ensure GPS is turned on.');
     }
   };
 
@@ -106,26 +121,26 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   const handleSaveAddress = async () => {
     if (!address.trim()) {
-      Alert.alert('Validation Error', 'Delivery address cannot be empty.');
+      showAlert('Validation Error', 'Delivery address cannot be empty.');
       return;
     }
     try {
       if (user?.id) {
         await AsyncStorage.setItem(`user_address_${user.id}`, address.trim());
         dispatch(updateUserProfile({ addresses: [address.trim()] }));
-        Alert.alert('Success', 'Delivery address saved successfully!');
+        showAlert('Success', 'Delivery address saved successfully!');
       } else {
         await AsyncStorage.setItem('guest_address', address.trim());
         dispatch(updateUserProfile({ addresses: [address.trim()] }));
-        Alert.alert('Success', 'Guest delivery address saved successfully!');
+        showAlert('Success', 'Guest delivery address saved successfully!');
       }
     } catch (e) {
-      Alert.alert('Error', 'Failed to save address. Please try again.');
+      showAlert('Error', 'Failed to save address. Please try again.');
     }
   };
 
   const handleLogout = () => {
-    Alert.alert(
+    showAlert(
       'Logout',
       'Are you sure you want to log out?',
       [
@@ -138,8 +153,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             navigation.replace('Auth');
           },
         },
-      ],
-      { cancelable: true }
+      ]
     );
   };
 
@@ -173,12 +187,12 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
       if (updateProfile.fulfilled.match(resultAction)) {
         setIsEditing(false);
-        Alert.alert('Success', 'Profile updated successfully!');
+        showAlert('Success', 'Profile updated successfully!');
       } else {
-        Alert.alert('Error', (resultAction.payload as string) || 'Failed to update profile');
+        showAlert('Error', (resultAction.payload as string) || 'Failed to update profile');
       }
     } catch (err) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      showAlert('Error', 'An unexpected error occurred');
     }
   };
 
@@ -208,7 +222,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             {!user?.is_guest && (
               <TouchableOpacity activeOpacity={0.75}
                 style={styles.cameraOverlay}
-                onPress={() => Alert.alert('Coming Soon', 'Profile photo upload will be available soon!')}
+                onPress={() => showAlert('Coming Soon', 'Profile photo upload will be available soon!')}
               >
                 <Ionicons name="camera" size={14} color={COLORS.white} />
               </TouchableOpacity>
@@ -484,7 +498,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 style={styles.modalSaveBtn}
                 onPress={() => {
                   setShowNotificationsModal(false);
-                  Alert.alert('Preferences Saved', 'Your notification preferences have been successfully updated.');
+                  showAlert('Preferences Saved', 'Your notification preferences have been successfully updated.');
                 }}
               >
                 <Text style={styles.modalSaveBtnText}>Save Preferences</Text>
@@ -520,7 +534,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 onPress={() => {
                   setShowSupportModal(false);
                   Linking.openURL('tel:+923001234567').catch(() => {
-                    Alert.alert('Dialer Error', 'Could not launch dialer. Please call +92 300 1234567 directly.');
+                    showAlert('Dialer Error', 'Could not launch dialer. Please call +92 300 1234567 directly.');
                   });
                 }}
               >
@@ -541,7 +555,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 onPress={() => {
                   setShowSupportModal(false);
                   Linking.openURL('mailto:support@foodsphere.com?subject=FoodSphere Inquiry').catch(() => {
-                    Alert.alert('Email Error', 'Could not open mail client. Please contact support@foodsphere.com.');
+                    showAlert('Email Error', 'Could not open mail client. Please contact support@foodsphere.com.');
                   });
                 }}
               >
@@ -561,7 +575,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 style={styles.supportOption}
                 onPress={() => {
                   setShowSupportModal(false);
-                  Alert.alert('Live Chat', 'Our Live Chat feature is coming soon! In the meantime, please call or email us.');
+                  showAlert('Live Chat', 'Our Live Chat feature is coming soon! In the meantime, please call or email us.');
                 }}
               >
                 <View style={styles.supportOptionLeft}>
@@ -579,6 +593,15 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* Custom Alert Modal */}
+      <CustomAlertModal
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        actions={alertConfig.actions}
+        onDismiss={hideAlert}
+      />
 
     </KeyboardAvoidingView>
   );
