@@ -155,6 +155,7 @@ class Command(BaseCommand):
                         {"name": "Beef Pouch Shawarma", "price": 700.00, "desc": "Pocket-style beef shawarma pocket bread"},
                         {"name": "Chicken Shawarma", "price": 550.00, "desc": "Classic Lebanese chicken shawarma wrap"},
                         {"name": "Beef Shawarma", "price": 750.00, "desc": "Classic Lebanese beef shawarma wrap"},
+                        {"name": "Charcoal Shawarma Chicken", "price": 750.00, "desc": "Charcoal grilled chicken shawarma wrapped in flatbread"},
                         {"name": "Chicken Shawarma Platter", "price": 900.00, "desc": "Deconstructed chicken shawarma served on a platter"},
                         {"name": "Chicken Shawarma Platter (with cheese)", "price": 1000.00, "desc": "Deconstructed chicken shawarma topped with melted cheese"}
                     ],

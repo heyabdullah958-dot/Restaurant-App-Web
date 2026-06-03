@@ -243,50 +243,88 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     categories: [
       {
         id: 301,
-        name: "Burgers",
-        icon: "fast-food",
+        name: "Appetizer",
+        icon: "restaurant",
         order: 1,
         is_active: true,
         items: [
-          {
-            id: 3001,
-            name: "Jush Double Smash Burger",
-            description: "Two smashed premium beef patties, melted cheddar cheese, caramelized onions, and house Jush sauce on a toasted brioche bun.",
-            price: 850,
-            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: true,
-            preparation_time: 12
-          },
-          {
-            id: 3002,
-            name: "Spicy Crispy Zinger",
-            description: "Crispy fried chicken breast, shredded lettuce, and spicy mayo on a sesame bun.",
-            price: 600,
-            image: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: false,
-            preparation_time: 10
-          }
+          { id: 3001, name: "Chicken Doner Fries", description: "Crispy fries topped with sliced chicken doner and sauces", price: 600, image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 3002, name: "Beef Doner Fries", description: "Crispy fries topped with sliced beef doner and signature sauces", price: 750, image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       },
       {
         id: 302,
-        name: "Combo Deals",
-        icon: "gift",
+        name: "Turkish Specials",
+        icon: "restaurant",
         order: 2,
         is_active: true,
         items: [
-          {
-            id: 3003,
-            name: "Duo Feast Combo",
-            description: "2 Jush Double Smash Burgers, 1 Large Fries, and 2 Soft Drinks.",
-            price: 1850,
-            image: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: true,
-            preparation_time: 15
-          }
+          { id: 3003, name: "Chicken Grilled Sandwich", description: "Grilled chicken sandwich Turkish style", price: 750, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 12 },
+          { id: 3004, name: "Half Dubai Shawaya", description: "Traditional roasted chicken shawaya half portion", price: 1400, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 20 },
+          { id: 3005, name: "Full Dubai Shawaya", description: "Traditional roasted chicken shawaya full portion", price: 2500, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 3006, name: "Add-on Rice", description: "Spiced Arabic rice serving for Shawaya", price: 300, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 3007, name: "Chicken Turkish Wrap", description: "Spiced chicken doner wrapped in soft flatbread", price: 600, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3008, name: "Beef Turkish Wrap", description: "Premium beef doner wrapped in soft flatbread", price: 900, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3009, name: "Chicken Turkish Doner", description: "Traditional Turkish chicken doner in pita bread", price: 850, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3010, name: "Beef Turkish Doner", description: "Traditional Turkish beef doner in pita bread", price: 1100, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
+        ]
+      },
+      {
+        id: 303,
+        name: "Shawarma",
+        icon: "pizza",
+        order: 3,
+        is_active: true,
+        items: [
+          { id: 3011, name: "Chicken Pouch Shawarma", description: "Pocket-style chicken shawarma pocket bread", price: 450, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3012, name: "Beef Pouch Shawarma", description: "Pocket-style beef shawarma pocket bread", price: 700, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3013, name: "Chicken Shawarma", description: "Classic Lebanese chicken shawarma wrap", price: 550, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3014, name: "Beef Shawarma", description: "Classic Lebanese beef shawarma wrap", price: 750, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3015, name: "Charcoal Shawarma Chicken", description: "Charcoal grilled chicken shawarma wrapped in flatbread", price: 750, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3016, name: "Chicken Shawarma Platter", description: "Deconstructed chicken shawarma served on a platter", price: 900, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 12 },
+          { id: 3032, name: "Chicken Shawarma Platter (with cheese)", description: "Deconstructed chicken shawarma topped with melted cheese", price: 1000, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 12 }
+        ]
+      },
+      {
+        id: 304,
+        name: "Desserts",
+        icon: "pizza",
+        order: 4,
+        is_active: true,
+        items: [
+          { id: 3017, name: "Lotus Can Dessert", description: "Creamy Lotus Biscoff dessert served in a signature can", price: 600, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 8 },
+          { id: 3018, name: "Red Velvet Can Dessert", description: "Rich red velvet cake layered in a signature can", price: 600, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 3019, name: "Nutella Can Dessert", description: "Decadent Nutella chocolate dessert in a signature can", price: 600, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 }
+        ]
+      },
+      {
+        id: 305,
+        name: "Add Ons",
+        icon: "pizza",
+        order: 5,
+        is_active: true,
+        items: [
+          { id: 3020, name: "Cheese", description: "Extra melted cheese portion", price: 90, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3021, name: "Dip", description: "Signature Jushh garlic or spicy dip", price: 90, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3022, name: "Tortilla Bread", description: "Extra soft tortilla flatbread", price: 90, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3023, name: "Pita Bread", description: "Extra Lebanese pita pocket bread", price: 60, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3024, name: "Plain Fries", description: "Golden salted french fries side", price: 150, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 }
+        ]
+      },
+      {
+        id: 306,
+        name: "Beverages",
+        icon: "cafe",
+        order: 6,
+        is_active: true,
+        items: [
+          { id: 3025, name: "Water", description: "Mineral water bottle", price: 80, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3026, name: "Soft Drink", description: "Chilled regular soft drink", price: 150, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3027, name: "Blueberry Mojito", description: "Refreshing blueberry mocktail", price: 290, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3028, name: "Strawberry Mojito", description: "Refreshing strawberry mocktail", price: 290, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3029, name: "Green Apple Mojito", description: "Refreshing green apple mocktail", price: 290, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3030, name: "Peach Mojito", description: "Refreshing peach mocktail", price: 290, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3031, name: "Lemon Mojito", description: "Refreshing lemon mint mocktail", price: 290, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 }
         ]
       }
     ]
