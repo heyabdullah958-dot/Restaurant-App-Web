@@ -21,8 +21,8 @@ class AdminAuditLog(models.Model):
         related_name='audit_logs'
     )
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
-    model_name = models.CharField(max_length=100)
-    object_id = models.IntegerField(null=True, blank=True)
+    model_name = models.CharField(max_length=100, db_index=True)
+    object_id = models.CharField(max_length=255, null=True, blank=True)
     object_repr = models.CharField(max_length=255, blank=True)
     changes = models.JSONField(default=dict)
     ip_address = models.GenericIPAddressField(null=True, blank=True)

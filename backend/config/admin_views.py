@@ -5,7 +5,8 @@ Requires staff login. Renders as a Jazzmin-compatible admin page.
 """
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, Count, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
 from orders.models import Order
@@ -32,24 +33,50 @@ def platform_analytics(request):
             'revenue_30d': Order.objects.filter(created_at__date__gte=last_30).aggregate(Sum('total'))['total__sum'] or 0,
         }
 
-        # Per-restaurant breakdown (last 30 days)
-        restaurant_stats = []
-        for r in Restaurant.objects.filter(is_active=True):
-            r_orders = Order.objects.filter(restaurant=r, created_at__date__gte=last_30)
-            restaurant_stats.append({
-                'name': r.name,
-                'orders': r_orders.count(),
-                'revenue': r_orders.aggregate(Sum('total'))['total__sum'] or 0,
-                'avg_order': r_orders.aggregate(Avg('total'))['total__avg'] or 0,
-            })
+        # Per-restaurant breakdown (last 30 days) — optimized single query using annotations
+        restaurant_stats_qs = Restaurant.objects.filter(is_active=True).annotate(
+            orders_30d_count=Count(
+                'orders',
+                filter=Q(orders__created_at__date__gte=last_30),
+                distinct=True
+            ),
+            revenue_30d_sum=Sum(
+                'orders__total',
+                filter=Q(orders__created_at__date__gte=last_30)
+            ),
+            avg_order_val=Avg(
+                'orders__total',
+                filter=Q(orders__created_at__date__gte=last_30)
+            ),
+        ).values('name', 'orders_30d_count', 'revenue_30d_sum', 'avg_order_val')
+        
+        restaurant_stats = [{
+            'name': r['name'],
+            'orders': r['orders_30d_count'] or 0,
+            'revenue': float(r['revenue_30d_sum'] or 0),
+            'avg_order': float(r['avg_order_val'] or 0),
+        } for r in restaurant_stats_qs]
 
-        # Daily order trend (last 7 days)
+        # Daily order trend — optimized single query for 7-day trend instead of 14 queries in a loop
+        orders_7d_stats = Order.objects.filter(
+            created_at__date__gte=today - timedelta(days=6)
+        ).annotate(
+            date_only=TruncDate('created_at')
+        ).values('date_only').annotate(
+            order_count=Count('id'),
+            revenue_sum=Sum('total')
+        )
+        stats_map = {stat['date_only']: stat for stat in orders_7d_stats}
+        
         daily_orders = []
         for i in range(6, -1, -1):
             day = today - timedelta(days=i)
-            count = Order.objects.filter(created_at__date=day).count()
-            rev = Order.objects.filter(created_at__date=day).aggregate(Sum('total'))['total__sum'] or 0
-            daily_orders.append({'date': day.strftime('%a %d'), 'orders': count, 'revenue': float(rev)})
+            stat = stats_map.get(day)
+            daily_orders.append({
+                'date': day.strftime('%a %d'),
+                'orders': stat['order_count'] if stat else 0,
+                'revenue': float(stat['revenue_sum'] or 0) if stat else 0.0
+            })
 
         return render(request, 'admin/platform_analytics.html', {
             'stats': stats,

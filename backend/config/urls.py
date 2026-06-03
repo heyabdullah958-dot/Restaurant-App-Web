@@ -14,7 +14,14 @@ def custom_admin_password_change(request, *args, **kwargs):
         raise PermissionDenied("Managers are not allowed to change their own passwords.")
     return PasswordChangeView.as_view(success_url='/admin/')(request, *args, **kwargs)
 
+from django.http import HttpResponse
+
+def robots_txt(request):
+    content = "User-agent: *\nDisallow: /api/\nDisallow: /admin/\n"
+    return HttpResponse(content, content_type='text/plain')
+
 urlpatterns = [
+    path('robots.txt', robots_txt, name='robots_txt'),
     path('', root_view, name='root'),
     path('admin/password_change/', custom_admin_password_change, name='admin_password_change'),
     path('admin/analytics/', platform_analytics, name='admin_analytics'),

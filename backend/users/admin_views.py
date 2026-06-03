@@ -41,12 +41,19 @@ class AdminCustomerListView(generics.ListAPIView):
         return qs.order_by('-date_joined')
 
     def list(self, request, *args, **kwargs):
+        page_size = min(int(request.query_params.get('page_size', 50)), 200)
+        page = max(int(request.query_params.get('page', 1)), 1)
+        offset = (page - 1) * page_size
+        
         queryset = self.get_queryset().annotate(
             total_orders_count=Count('orders')
         )
-        # Augment with stats
+        
+        total = queryset.count()
+        users_page = queryset[offset:offset + page_size]
+        
         results = []
-        for user in queryset[:100]:  # Cap at 100 for performance
+        for user in users_page:
             results.append({
                 'id': user.id,
                 'username': user.username,
@@ -57,8 +64,12 @@ class AdminCustomerListView(generics.ListAPIView):
                 'date_joined': user.date_joined.isoformat() if user.date_joined else None,
                 'total_orders': user.total_orders_count,
             })
+        
         return Response({
-            'count': queryset.count(),
+            'count': total,
+            'page': page,
+            'page_size': page_size,
+            'total_pages': (total + page_size - 1) // page_size,
             'results': results,
         })
 
@@ -162,18 +173,45 @@ class AdminManagerListView(APIView):
     permission_classes = [IsSuperUser]
 
     def get(self, request):
-        managers = User.objects.filter(is_staff=True, is_superuser=False).order_by('username')
+        from django.contrib.auth.models import Group
+        from restaurants.models import Restaurant
+        
+        # Fetch manager groups and user relations
+        manager_groups = Group.objects.filter(
+            name__startswith='manager_'
+        ).prefetch_related('user_set')
+        
+        # Slug -> Restaurant mapping in one query
+        slugs = [g.name.replace('manager_', '') for g in manager_groups]
+        restaurants_map = {
+            r.slug: r 
+            for r in Restaurant.objects.filter(slug__in=slugs)
+        }
+        
+        # Fetch managers and prefetch groups
+        managers = User.objects.filter(
+            is_staff=True, 
+            is_superuser=False
+        ).prefetch_related('groups').order_by('username')
+        
         results = []
         for u in managers:
-            managed = get_managed_restaurant(u)
-            if not managed:
+            restaurant = None
+            for group in u.groups.all():
+                if group.name.startswith('manager_'):
+                    slug = group.name.replace('manager_', '')
+                    restaurant = restaurants_map.get(slug)
+                    break
+            
+            if not restaurant:
                 continue
+                
             results.append({
                 'id': u.id,
                 'username': u.username,
                 'email': u.email or '',
-                'restaurant_name': managed.name if managed else 'None',
-                'restaurant_id': managed.id if managed else None,
+                'restaurant_name': restaurant.name,
+                'restaurant_id': restaurant.id,
             })
         return Response(results)
 
@@ -192,11 +230,18 @@ class AdminManagerChangePasswordView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Manager not found'}, status=404)
 
-        new_password = request.data.get('password')
-        if not new_password or len(new_password.strip()) < 6:
-            return Response({'error': 'Password must be at least 6 characters long'}, status=400)
+        new_password = request.data.get('password', '').strip()
+        if not new_password:
+            return Response({'error': 'Password is required.'}, status=400)
 
-        user.set_password(new_password.strip())
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        try:
+            validate_password(new_password, user)
+        except DjangoValidationError as e:
+            return Response({'error': '; '.join(e.messages)}, status=400)
+
+        user.set_password(new_password)
         user.save()
 
         return Response({

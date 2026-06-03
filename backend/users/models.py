@@ -5,7 +5,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
     loyalty_points = models.IntegerField(default=0)
-    is_guest = models.BooleanField(default=False)
+    is_guest = models.BooleanField(default=False, db_index=True)
 
     def __str__(self):
         if self.is_guest:

@@ -8,15 +8,43 @@ from django.views.decorators.http import require_POST
 
 def health_check(request):
     """
-    Standard health check endpoint returning success, status, and server timestamp.
+    Enhanced health check — checks DB connectivity.
+    Returns 200 if healthy, 503 if unhealthy.
     """
-    return JsonResponse({
-        'success': True,
+    import time
+    start = time.time()
+    
+    db_status = 'unknown'
+    db_error = None
+    
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+        db_status = 'ok'
+    except Exception as e:
+        db_status = 'error'
+        db_error = str(e)
+    
+    elapsed = round((time.time() - start) * 1000, 2)
+    
+    is_healthy = db_status == 'ok'
+    
+    response_data = {
+        'success': is_healthy,
         'data': {
-            'status': 'OK',
-            'timestamp': timezone.now().isoformat()
+            'status': 'OK' if is_healthy else 'DEGRADED',
+            'timestamp': timezone.now().isoformat(),
+            'database': db_status,
+            'response_time_ms': elapsed,
         }
-    })
+    }
+    
+    if db_error and request.user.is_authenticated and request.user.is_superuser:
+        response_data['data']['db_error'] = db_error
+    
+    http_status = 200 if is_healthy else 503
+    return JsonResponse(response_data, status=http_status)
 
 @staff_member_required
 def db_debug(request):
@@ -82,14 +110,24 @@ def trigger_seed(request):
         }, status=500)
 
 
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["POST"])
 def init_db(request):
     """
     Emergency database initializer.
-    GET request secured by environment variable INIT_DB_SECRET_KEY.
+    POST request only. Key request body mein honi chahiye (not URL).
     """
     import secrets
+    import json
     expected_key = os.environ.get('INIT_DB_SECRET_KEY', '')
-    provided_key = request.GET.get('key', '')
+    
+    # POST body or POST parameters se key lo
+    try:
+        body = json.loads(request.body.decode('utf-8'))
+        provided_key = body.get('key', '')
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        provided_key = request.POST.get('key', '')
     
     if not expected_key:
         return JsonResponse({
@@ -97,23 +135,17 @@ def init_db(request):
             'message': 'INIT_DB_SECRET_KEY environment variable not configured.'
         }, status=503)
     
-    # Constant-time comparison (timing attack prevention)
     if not secrets.compare_digest(provided_key, expected_key):
         return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
     
-    # Sirf superuser hi call kar sakta hai (double protection)
     if not request.user.is_authenticated or not request.user.is_superuser:
         return JsonResponse({'success': False, 'message': 'Superuser login required.'}, status=403)
         
     from django.core.management import call_command
     try:
-        # Run migrations
         call_command('migrate', interactive=False)
-        # Create superuser
         call_command('create_admin')
-        # Create restaurant managers
         call_command('create_restaurant_managers')
-        # Seed restaurants
         call_command('seed_restaurants')
         return JsonResponse({
             'success': True,
@@ -123,4 +155,4 @@ def init_db(request):
         return JsonResponse({
             'success': False,
             'error': str(e)
-        })
+        }, status=500)

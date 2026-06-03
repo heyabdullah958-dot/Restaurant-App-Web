@@ -148,15 +148,23 @@ class ChangeOwnPasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        new_password = request.data.get('password')
-        if not new_password or len(new_password.strip()) < 6:
-            return Response({'error': 'Password must be at least 6 characters long'}, status=400)
+        new_password = request.data.get('password', '').strip()
+        if not new_password:
+            return Response({'error': 'Password is required.'}, status=400)
+
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            validate_password(new_password, request.user)
+        except DjangoValidationError as e:
+            return Response({'error': '; '.join(e.messages)}, status=400)
 
         user = request.user
         if user.is_staff and not user.is_superuser:
             return Response({'error': 'Managers are not allowed to change their own passwords.'}, status=403)
 
-        user.set_password(new_password.strip())
+        user.set_password(new_password)
         user.save()
 
         return Response({
@@ -214,12 +222,16 @@ The FoodSphere Team
             print(f"SMTP Failed, could not send email to {email}: {e}")
             email_sent = False
 
-        return Response({
+        response_data = {
             'success': True,
-            'message': 'Password reset link has been successfully dispatched to your email!',
-            'email_sent': email_sent,
-            'debug_reset_link': reset_link if not email_sent else None
-        })
+            'message': 'If this email is registered, a password reset link has been sent to it!',
+        }
+
+        if settings.DEBUG and not email_sent:
+            response_data['debug_reset_link'] = reset_link
+            response_data['email_sent'] = email_sent
+
+        return Response(response_data)
 
 
 class ResetPasswordConfirmView(APIView):

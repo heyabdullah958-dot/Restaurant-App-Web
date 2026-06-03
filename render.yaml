@@ -13,7 +13,7 @@ services:
       python manage.py seed_restaurants &&
       python manage.py create_admin &&
       python manage.py create_restaurant_managers
-    startCommand: gunicorn config.wsgi:application --log-file - --timeout 30 --workers 2 --worker-class gthread --threads 2 --max-requests 1000 --max-requests-jitter 100 --bind 0.0.0.0:$PORT
+    startCommand: gunicorn config.wsgi:application --log-file - --timeout 120 --workers 1 --worker-class gthread --threads 4 --max-requests 500 --max-requests-jitter 50 --bind 0.0.0.0:$PORT --keep-alive 5
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -22,7 +22,7 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "*"
+        value: "restaurant-app-web.onrender.com,localhost,127.0.0.1"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://foodsphere-admin.pages.dev,https://seenbanao-foodsphere.pages.dev,https://dineatblue-foodsphere.pages.dev,https://jushhpk-foodsphere.pages.dev,https://tandooristoppk-foodsphere.pages.dev,https://sandmelts-foodsphere.pages.dev,https://birdmanfoodspk-foodsphere.pages.dev,https://getafomo-foodsphere.pages.dev,https://foodsphere-admin.netlify.app"
       - key: CORS_ALLOW_ALL_ORIGINS
@@ -35,6 +35,32 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYFAST_MERCHANT_ID
+        sync: false
+      - key: PAYFAST_MERCHANT_KEY
+        sync: false
+      - key: PAYFAST_PASSPHRASE
+        sync: false
+      - key: PAYFAST_IS_SANDBOX
+        value: "True"
+      - key: FCM_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: RIDER_WHATSAPP_NUMBER
+        sync: false
+      - key: INIT_DB_SECRET_KEY
+        sync: false
       - key: PYTHON_VERSION
         value: "3.11.9"
 
@@ -45,4 +71,3 @@ services:
     schedule: "0 3 * * 0"  # Har Sunday raat 3 baje
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py cleanup_stale_guests
-

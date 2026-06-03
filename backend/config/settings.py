@@ -39,8 +39,21 @@ DEBUG = str(config('DEBUG', default=False)).strip().lower() in ('true', '1', 't'
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
+if not DEBUG and ALLOWED_HOSTS == ['*']:
+    import warnings
+    warnings.warn(
+        "SECURITY WARNING: ALLOWED_HOSTS is set to '*' in production! "
+        "Set it to your actual domain in environment variables.",
+        stacklevel=2
+    )
 
 # Application definition
+
+_CLOUDINARY_ACTIVE = bool(
+    config('CLOUDINARY_CLOUD_NAME', default='') and
+    config('CLOUDINARY_API_KEY', default='') and
+    config('CLOUDINARY_API_SECRET', default='')
+)
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -50,14 +63,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+] + (['cloudinary_storage'] if _CLOUDINARY_ACTIVE else []) + [
     # Third-party apps
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'import_export',
-    
+] + (['cloudinary'] if _CLOUDINARY_ACTIVE else []) + [
     # Local apps
     'config',
     'restaurants',
@@ -142,7 +155,7 @@ if DB_HOST and DB_USER and DB_PASSWORD:
             'OPTIONS': {
                 'sslmode': 'require',
             },
-            'CONN_MAX_AGE': 60,
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '30')),
         }
     }
 else:
@@ -192,7 +205,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 WHITENOISE_MANIFEST_STRICT = False
 
 # Default primary key field type
@@ -222,7 +234,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='foodsphere.support@gmail.co
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='FoodSphere <foodsphere.support@gmail.com>')
 
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+if _CLOUDINARY_ACTIVE:
     cloudinary.config(
         cloud_name=CLOUDINARY_CLOUD_NAME,
         api_key=CLOUDINARY_API_KEY,
@@ -243,12 +255,6 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
             'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         }
     }
-    # Ensure cloudinary_storage is loaded before staticfiles if needed, or simply present
-    if 'cloudinary_storage' not in INSTALLED_APPS:
-        idx = INSTALLED_APPS.index('django.contrib.staticfiles')
-        INSTALLED_APPS.insert(idx + 1, 'cloudinary_storage')
-    if 'cloudinary' not in INSTALLED_APPS:
-        INSTALLED_APPS.append('cloudinary')
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
@@ -527,14 +533,16 @@ RIDER_WHATSAPP = os.environ.get('RIDER_WHATSAPP_NUMBER', '923000000000')
 
 # Sentry Monitoring integration
 SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
-if SENTRY_DSN and not DEBUG:
+if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
-        traces_sample_rate=0.1,
+        traces_sample_rate=0.05 if not DEBUG else 0.0,  # Production mein 5% sampling
         send_default_pii=False,
+        environment='development' if DEBUG else 'production',
+        release=os.environ.get('RENDER_GIT_COMMIT', 'unknown'),
     )
 
 # Security and HSTS Config (SEC-1)

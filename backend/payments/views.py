@@ -67,6 +67,15 @@ class ConfirmCODPaymentView(APIView):
                         'success': False,
                         'message': 'You do not have permission to confirm this order.'
                     }, status=status.HTTP_403_FORBIDDEN)
+            else:
+                if order.user is not None:
+                    logger.warning(
+                        f"Anonymous user attempted to confirm registered user's order {order_id}"
+                    )
+                    return Response({
+                        'success': False,
+                        'message': 'You do not have permission to confirm this order.'
+                    }, status=status.HTTP_403_FORBIDDEN)
 
             if order.status not in ('received', 'pending'):
                 return Response({
@@ -143,7 +152,7 @@ class CreateStripePaymentIntentView(APIView):
                         'product_data': {
                             'name': f"FoodSphere Order #{order.id}",
                         },
-                        'unit_amount': int(order.total),
+                        'unit_amount': int(round(order.total)),  # PKR is zero-decimal in Stripe
                     },
                     'quantity': 1,
                 }],
@@ -673,7 +682,22 @@ class PayFastITNView(APIView):
     """
     permission_classes = [permissions.AllowAny]
 
+    PAYFAST_IPS = [
+        '197.97.145.144', '197.97.145.145', '197.97.145.146', '197.97.145.147',
+        '41.74.179.194', '41.74.179.195', '41.74.179.196', '41.74.179.197',
+    ]
+
     def post(self, request):
+        # IP verification (only check in production/non-DEBUG mode)
+        if not settings.DEBUG:
+            client_ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+            # Get the first IP in case of proxy headers
+            client_ip = client_ip.split(',')[0].strip()
+            
+            if client_ip not in self.PAYFAST_IPS:
+                logger.warning(f"PayFast ITN from unauthorized IP: {client_ip}")
+                return HttpResponse(status=403)
+
         post_data = request.POST.dict()
         signature_received = post_data.get('signature')
 

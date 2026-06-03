@@ -56,8 +56,9 @@ class MenuCategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'restaurant', 'name', 'icon', 'order', 'is_active', 'items')
 
     def get_items(self, obj):
-        # Only show available items
-        available_items = obj.items.filter(is_available=True)
+        # Use prefetched items to avoid extra database query
+        all_items = obj.items.all()
+        available_items = [item for item in all_items if item.is_available]
         return MenuItemSerializer(available_items, many=True, context=self.context).data
 
 
@@ -113,6 +114,8 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         )
 
     def get_categories(self, obj):
-        # Only return active categories
-        active_cats = obj.categories.filter(is_active=True).order_by('order', 'name')
+        # Use prefetched categories to avoid extra database query
+        all_cats = obj.categories.all()
+        active_cats = [cat for cat in all_cats if cat.is_active]
+        active_cats.sort(key=lambda c: (c.order, c.name))
         return MenuCategorySerializer(active_cats, many=True, context=self.context).data

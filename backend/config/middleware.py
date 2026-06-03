@@ -8,14 +8,22 @@ class MethodOverrideMiddleware:
 
     def __call__(self, request):
         if request.method == 'POST':
+            ALLOWED_OVERRIDE_METHODS = {'PUT', 'PATCH', 'DELETE'}
+            
             # Check for header
             method_override = request.META.get('HTTP_X_HTTP_METHOD_OVERRIDE')
             if method_override:
-                request.method = method_override.upper()
+                override_upper = method_override.upper()
+                if override_upper in ALLOWED_OVERRIDE_METHODS:
+                    request.method = override_upper
             # Check for query param or post body field
             elif '_method' in request.POST:
-                request.method = request.POST['_method'].upper()
+                override_upper = request.POST['_method'].upper()
+                if override_upper in ALLOWED_OVERRIDE_METHODS:
+                    request.method = override_upper
             elif '_method' in request.GET:
-                request.method = request.GET['_method'].upper()
+                override_upper = request.GET['_method'].upper()
+                if override_upper in ALLOWED_OVERRIDE_METHODS:
+                    request.method = override_upper
 
         return self.get_response(request)

@@ -43,10 +43,14 @@ def custom_exception_handler(exc, context):
     else:
         # Handles 500 internal server errors (non-DRF exceptions)
         import traceback
+        from django.conf import settings
         tb_str = traceback.format_exc()
         logger.error(f"Unhandled server error: {str(exc)}\n{tb_str}", exc_info=True)
         
-        message = f"Server Error: {str(exc)}\n{tb_str}"
+        if settings.DEBUG:
+            message = f"Server Error: {str(exc)}\n{tb_str}"
+        else:
+            message = "An internal server error occurred. Our team has been notified."
 
         response = Response(
             {

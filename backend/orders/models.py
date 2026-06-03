@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -32,7 +33,7 @@ class Order(models.Model):
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod', db_index=True)
     delivery_address = models.TextField()
     delivery_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     delivery_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -50,7 +51,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     menu_item = models.ForeignKey('restaurants.MenuItem', on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100)])
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     special_notes = models.TextField(blank=True, null=True)

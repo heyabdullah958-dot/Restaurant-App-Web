@@ -17,9 +17,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderCreateItemSerializer(serializers.Serializer):
-    menu_item = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
-    quantity = serializers.IntegerField(min_value=1)
-    special_notes = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    menu_item = serializers.PrimaryKeyRelatedField(
+        queryset=MenuItem.objects.select_related('category__restaurant')
+    )
+    quantity = serializers.IntegerField(min_value=1, max_value=100)
+    special_notes = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        allow_null=True,
+        max_length=500
+    )
     selected_options = serializers.JSONField(required=False, default=list)
 
 
@@ -157,7 +164,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             delivery_fee = restaurant.delivery_fee
             discount = 0
             total = subtotal + delivery_fee - discount
-
+            total = round(total, 2)
             # Create the Order record
             order = Order.objects.create(
                 user=user,

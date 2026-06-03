@@ -117,13 +117,28 @@ class NotificationHistoryView(APIView):
 
     def get(self, request):
         from config.models import AdminAuditLog
-        logs = AdminAuditLog.objects.filter(
+        limit = min(int(request.query_params.get('limit', 50)), 200)
+        offset = int(request.query_params.get('offset', 0))
+        
+        logs_qs = AdminAuditLog.objects.filter(
             action='create',
             model_name='Notification'
-        ).order_by('-timestamp')[:50]
+        ).select_related('user').order_by('-timestamp')
+        
+        total = logs_qs.count()
+        logs = logs_qs[offset:offset + limit]
 
-        return Response([{
-            'timestamp': log.timestamp,
-            'user': str(log.user),
-            'changes': log.changes,
-        } for log in logs])
+        return Response({
+            'total': total,
+            'limit': limit,
+            'offset': offset,
+            'results': [{
+                'id': log.id,
+                'timestamp': log.timestamp,
+                'user': str(log.user) if log.user else 'Unknown',
+                'title': log.changes.get('title', ''),
+                'body': log.changes.get('body', ''),
+                'target': log.changes.get('target', ''),
+                'message_id': log.changes.get('message_id', ''),
+            } for log in logs]
+        })

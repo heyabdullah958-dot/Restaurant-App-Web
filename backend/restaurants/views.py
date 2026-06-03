@@ -58,9 +58,13 @@ class RestaurantMenuView(generics.GenericAPIView):
                 'categories__items'
             ).get(slug=slug, is_active=True)
 
-            categories = restaurant.categories.filter(is_active=True).order_by('order', 'name')
-            # Admin users ko sab items dikhao (available + unavailable)
-            if request.user and request.user.is_staff:
+            # Use prefetched categories to avoid extra DB query
+            all_cats = list(restaurant.categories.all())
+            categories = [cat for cat in all_cats if cat.is_active]
+            categories.sort(key=lambda c: (c.order, c.name))
+            
+            # Admin/staff users get all items (including unavailable ones)
+            if request.user and request.user.is_authenticated and request.user.is_staff:
                 serializer = AdminMenuCategorySerializer(categories, many=True, context={'request': request})
             else:
                 serializer = MenuCategorySerializer(categories, many=True, context={'request': request})

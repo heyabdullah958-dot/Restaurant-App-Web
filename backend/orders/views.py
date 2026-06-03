@@ -81,11 +81,15 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                 return queryset.filter(restaurant=managed)
             return Order.objects.none()
             
-        # If ordinary authenticated user or guest, restrict strictly to their own orders
+        # If ordinary authenticated user, restrict strictly to their own orders
         if user.is_authenticated:
             return queryset.filter(user=user)
             
-        # If anonymous (no token attached), deny access to prevent ID guessing leaks
+        # If anonymous (no token attached), restrict to guest orders where phone matches
+        guest_phone = self.request.query_params.get('phone', '')
+        if guest_phone:
+            return queryset.filter(user__isnull=True, guest_phone=guest_phone)
+        
         return Order.objects.none()
 
 
