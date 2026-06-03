@@ -21,6 +21,7 @@ interface CustomAlertModalProps {
   message: string;
   actions?: AlertAction[];
   onDismiss?: () => void;
+  onClose?: () => void;
 }
 
 export default function CustomAlertModal({
@@ -29,9 +30,11 @@ export default function CustomAlertModal({
   message,
   actions,
   onDismiss,
+  onClose,
 }: CustomAlertModalProps) {
+  const dismissHandler = onDismiss || onClose;
   const defaultActions: AlertAction[] = [
-    { text: 'OK', onPress: onDismiss, style: 'default' },
+    { text: 'OK', onPress: dismissHandler, style: 'default' },
   ];
 
   const renderActions = actions || defaultActions;
@@ -41,9 +44,9 @@ export default function CustomAlertModal({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onDismiss}
+      onRequestClose={dismissHandler}
     >
-      <TouchableWithoutFeedback onPress={onDismiss}>
+      <TouchableWithoutFeedback onPress={dismissHandler}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={[styles.alertBox, SHADOWS.medium]}>
@@ -64,7 +67,7 @@ export default function CustomAlertModal({
                       ]}
                       onPress={() => {
                         if (action.onPress) action.onPress();
-                        if (onDismiss) onDismiss();
+                        if (dismissHandler) dismissHandler();
                       }}
                     >
                       <Text

@@ -7,26 +7,42 @@ This document lists the critical bug fixes implemented in both the React Native 
 ## 📱 Mobile App Bug Fixes
 
 ### 📁 Modified Files (Mobile)
-1. **Map Screen**: [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx)
-2. **Home Screen**: [HomeScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/HomeScreen.tsx)
-3. **Restaurant Detail Screen**: [RestaurantScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/RestaurantScreen.tsx)
+1. **App Root Entry**: [App.tsx](file:///d:/sitesdata/Resturent App/app/App.tsx)
+2. **Map Screen**: [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx)
+3. **Home Screen**: [HomeScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/HomeScreen.tsx)
+4. **Restaurant Detail Screen**: [RestaurantScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/RestaurantScreen.tsx)
+5. **Checkout Screen**: [CheckoutScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/CheckoutScreen.tsx)
+6. **Alert Modal Component**: [CustomAlertModal.tsx](file:///d:/sitesdata/Resturent App/app/src/components/CustomAlertModal.tsx)
 
 ### 🔍 Detailed Mobile Bug Fixes
 
-#### 1. Map Section App Close/Crash Fix
-* **Issue**: Opening the maps section immediately crashed the app on several Android/iOS devices.
-* **Root Cause**: 
-  1. The app requested location permissions concurrently with mounting the native map element while `showsUserLocation` was toggled to true, triggering native thread race conditions.
-  2. If the GPS services were disabled, `getCurrentPositionAsync` failed, and `MapView` attempted to use dynamic geolocation hooks in an unhandled/broken state.
-  3. String coordinates (if loaded from the API) passed directly to the `Marker` component caused react-native-maps coordinate serialization failures.
+#### 1. Map Section Black Screen and Crash Resolution (Option B - Leaflet/OpenStreetMap WebView)
+* **Issue**: Standalone mobile APKs without Google Maps API keys failed silently or rendered completely black map screens. Concurrently requesting geolocation/permissions and mounting native maps also triggered native thread deadlocks and crashes.
 * **Fix implemented**:
-  * Added `loadingLocation` state in [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx#L21) to show a standard `<ActivityIndicator>` loader while permissions and geolocation are being fetched.
-  * Native `MapView` is not mounted until `loadingLocation` resolves to `false`.
-  * Only set `showsUserLocation={hasPermission && location !== null}` to avoid calling native location updates on null references.
-  * Cast coordinate fields defensively to numbers: `coordinate={{ latitude: Number(coords.lat), longitude: Number(coords.lng) }}` in [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx#L80).
-  * Filtered out any null restaurants or restaurants without a slug before rendering markers.
+  * Removed the native `react-native-maps` dependency implementation from [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx).
+  * Rewrote [MapScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/MapScreen.tsx) completely using a high-performance Leaflet & OpenStreetMap interactive map rendered inside a `react-native-webview`.
+  * Passes coordinate pins mapped dynamically to our active brands (e.g. `seenbanao`, `dineatblue`, `jushhpk`, etc.) with brand-specific emojis (🍢, 🐟, 🍔, 🥪, 🍗, ☕) rendering inside CSS-designed custom pins.
+  * Injects current GPS location dynamically (obtained via `expo-location` safely prior to loading webview) as a pulsing blue geolocation marker.
+  * Captures tap message payloads (`NAVIGATE_TO_RESTAURANT`) from the Leaflet popup buttons inside the WebView and redirects users seamlessly to detail screens using `navigation.navigate('Restaurant', { slug })`.
+  * Added fallback default coordinates (Lahore: `31.5204`, `74.3587`) so that even if location permissions are denied, the map still renders gracefully instead of crashing.
+  * Added a premium floating header card at the top of the map view for a polished look.
 
-#### 2. Jushh!! Menu Black Screen Resolution (Transition Mismatch)
+#### 2. Root Gesture Handler Wrapper (BUG-06)
+* **Issue**: Incomplete setup of gesture handlers could lead to scroll issues or crashes when interacting with screens built with `react-native-gesture-handler`.
+* **Fix implemented**:
+  * Wrapped the entire application component tree inside `<GestureHandlerRootView style={{ flex: 1 }}>` in [App.tsx](file:///d:/sitesdata/Resturent App/app/App.tsx).
+
+#### 3. Custom Alert Modal Propagation Fix
+* **Issue**: Custom alerts inside `CheckoutScreen.tsx`, `OrdersScreen.tsx`, and `RestaurantScreen.tsx` triggered type errors and rendering failures due to mismatches between `onClose` and `onDismiss`.
+* **Fix implemented**:
+  * Patched [CustomAlertModal.tsx](file:///d:/sitesdata/Resturent App/app/src/components/CustomAlertModal.tsx) to accept both `onDismiss` and `onClose` props in its type signature, executing whichever is supplied.
+
+#### 4. Guest Checkout Session Synchronization
+* **Issue**: TypeScript compilation failed due to calling `guestLogin` with user info objects (`{ name, phone }`) when the slice expected a parameterless `void` action.
+* **Fix implemented**:
+  * Corrected the dispatch call in [CheckoutScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/CheckoutScreen.tsx#L223) to `dispatch(guestLogin())`. The guest name/phone are already bound to the final checkout `orderData` payload.
+
+#### 5. Jushh!! Menu Black Screen Resolution (Transition Mismatch)
 * **Issue**: Clicking on the Jushh!! brand card loaded a blank/black screen and didn't display the menu.
 * **Root Cause**:
   * Jushh!! (`jushhpk`) in the production database has empty/null values for `cover_image` and `banner_image`.
@@ -38,7 +54,7 @@ This document lists the critical bug fixes implemented in both the React Native 
   * When cover images are empty, it loads the default placeholder image defined in `fallbackData.ts` with low opacity (`opacity: 0.2`) and overlays the brand emoji.
   * This guarantees a matching shared transition tag element is always present in both views, resolving the Reanimated animation crash.
 
-#### 3. Safe Parsing of Restaurant Operational Hours
+#### 6. Safe Parsing of Restaurant Operational Hours
 * **Issue**: Potential blank screens when loading restaurants with incomplete profiles on the API.
 * **Root Cause**:
   * [RestaurantScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/RestaurantScreen.tsx) was directly calling `opens_at.slice(0, 5)` and `closes_at.slice(0, 5)`. If those hours returned null or undefined from the backend database, it crashed the entire view render.

@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { store, AppDispatch, RootState } from './src/store';
 import { setupInterceptors } from './src/services/api';
@@ -196,8 +197,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <AppContent />
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <AppContent />
+      </Provider>
+    </GestureHandlerRootView>
   );
 }

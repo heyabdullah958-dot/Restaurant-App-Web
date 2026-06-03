@@ -62,6 +62,19 @@ export default function RestaurantScreen() {
   const [selectedItemForOptions, setSelectedItemForOptions] = useState<MenuItem | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    actions?: any[];
+  }>({ visible: false, title: '', message: '' });
+
+  const showAlert = (title: string, message: string, actions?: any[]) => {
+    setAlertConfig({ visible: true, title, message, actions });
+  };
+
+  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+
   // Load details on mount or slug change
   useEffect(() => {
     dispatch(fetchRestaurantDetail(slug));
@@ -111,7 +124,7 @@ export default function RestaurantScreen() {
     return matchedCategory ? matchedCategory.items.map(item => ({ ...item, categoryName: matchedCategory.name })) : [];
   }, [restaurant, selectedCategory]);
 
-  if (loading) {
+  if (loading && !restaurant) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -269,10 +282,9 @@ export default function RestaurantScreen() {
         <View>
           {/* Cover Image & Header Controls */}
           <View style={styles.coverContainer}>
-            <Animated.Image 
+            <Image 
               source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} 
               style={styles.coverImage} 
-              sharedTransitionTag={`restaurant-${restaurant.slug}-image`}
             />
             <View style={styles.coverOverlay} />
 

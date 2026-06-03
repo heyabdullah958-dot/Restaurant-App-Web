@@ -220,7 +220,7 @@ export default function CheckoutScreen() {
       // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
       if (!isAuthenticated) {
         try {
-          await dispatch(guestLogin({ name: guestName.trim(), phone: guestPhone.trim() })).unwrap();
+          await dispatch(guestLogin()).unwrap();
         } catch (e) {
           setIsSubmitting(false);
           showAlert('Checkout Error', 'Failed to initialize guest checkout session.');
