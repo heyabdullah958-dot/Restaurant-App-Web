@@ -80,8 +80,13 @@ export const loginUser = createAsyncThunk<
     try {
       // POST to /auth/login/
       const loginResponse = await api.post('/auth/login/', { username, password }) as any;
-      const token = loginResponse.access;
-      const refreshToken = loginResponse.refresh;
+      const loginData = loginResponse.data || loginResponse;
+      const token = loginData.access;
+      const refreshToken = loginData.refresh;
+      
+      if (!token || !refreshToken) {
+        throw new Error('Invalid login response from authentication server');
+      }
       
       // Set the default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -96,7 +101,10 @@ export const loginUser = createAsyncThunk<
       
       // Fetch user profile info
       const profileResponse = await api.get('/users/profile/') as any;
-      const user = profileResponse.data || profileResponse;
+      const profileData = profileResponse.data || profileResponse;
+      // Handle nesting if { success: true, data: { ...user } }
+      const user = (profileData.data && profileData.data.id) ? profileData.data : (profileData.id ? profileData : profileResponse);
+      
       try {
         const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
         if (savedAddress) {
@@ -122,13 +130,14 @@ export const registerUser = createAsyncThunk<
     try {
       // POST to /auth/register/
       const response = await api.post('/auth/register/', { username, email, password, phone }) as any;
-      const { user, tokens } = response.data || response;
-      try {
-        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
-        if (savedAddress) {
-          user.addresses = [savedAddress];
-        }
-      } catch (e) {}
+      const responseData = response.data || response;
+      const payload = (responseData.data && responseData.data.user) ? responseData.data : responseData;
+      const { user, tokens } = payload;
+      
+      if (!user || !tokens || !tokens.access) {
+        throw new Error('Invalid registration response from server');
+      }
+      
       const token = tokens.access;
       
       // Set default auth header
@@ -160,7 +169,14 @@ export const guestLogin = createAsyncThunk<
     try {
       // POST to /auth/guest/
       const response = await api.post('/auth/guest/') as any;
-      const { user, tokens } = response.data || response;
+      const responseData = response.data || response;
+      const payload = (responseData.data && responseData.data.user) ? responseData.data : responseData;
+      const { user, tokens } = payload;
+      
+      if (!user || !tokens || !tokens.access) {
+        throw new Error('Invalid guest login response from server');
+      }
+      
       try {
         let savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
         if (!savedAddress) {
