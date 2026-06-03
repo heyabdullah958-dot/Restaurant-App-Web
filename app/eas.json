@@ -12,6 +12,7 @@
       }
     },
     "preview": {
+      "channel": "preview",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
@@ -23,6 +24,7 @@
       }
     },
     "production": {
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
         "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
