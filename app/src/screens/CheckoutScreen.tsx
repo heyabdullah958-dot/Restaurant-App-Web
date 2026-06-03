@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Linking,
+  Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useSelector, useDispatch } from 'react-redux';
@@ -23,6 +24,21 @@ import { clearCart } from '../store/cartSlice';
 import { guestLogin, updateUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const DATE_OPTIONS = ['Today', 'Tomorrow', 'Day After'];
+const TIME_OPTIONS = [
+  'ASAP (Immediate)',
+  '12:00 PM - 1:00 PM',
+  '1:00 PM - 2:00 PM',
+  '2:00 PM - 3:00 PM',
+  '3:00 PM - 4:00 PM',
+  '4:00 PM - 5:00 PM',
+  '5:00 PM - 6:00 PM',
+  '6:00 PM - 7:00 PM',
+  '7:00 PM - 8:00 PM',
+  '8:00 PM - 9:00 PM',
+  '9:00 PM - 10:00 PM',
+];
 
 export default function CheckoutScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -44,6 +60,16 @@ export default function CheckoutScreen() {
   // Guest details state
   const [guestName, setGuestName] = useState(user?.name || '');
   const [guestPhone, setGuestPhone] = useState(user?.phone || '');
+
+  // Delivery scheduling states
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [schedDate, setSchedDate] = useState('Today');
+  const [schedTime, setSchedTime] = useState('ASAP (Immediate)');
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+
+  // Temporary picker states
+  const [tempDate, setTempDate] = useState('Today');
+  const [tempTime, setTempTime] = useState('ASAP (Immediate)');
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,12 +181,20 @@ export default function CheckoutScreen() {
     });
 
     // 3. Assemble order payload
+    let finalInstructions = instructions.trim();
+    if (isScheduled) {
+      const schedulePrefix = `[SCHEDULED: ${schedDate} at ${schedTime}]`;
+      finalInstructions = finalInstructions 
+        ? `${schedulePrefix} - ${finalInstructions}`
+        : schedulePrefix;
+    }
+
     const orderData: any = {
       restaurant: restaurantId,
       items: orderItems,
       payment_method: paymentMethod,
       delivery_address: address,
-      special_instructions: instructions || undefined,
+      special_instructions: finalInstructions || undefined,
       guest_phone: guestPhone,
     };
 
@@ -353,6 +387,43 @@ export default function CheckoutScreen() {
               </View>
             </View>
 
+            <Text style={styles.fieldLabel}>Delivery Time</Text>
+            <View style={styles.scheduleOptionRow}>
+              <TouchableOpacity activeOpacity={0.75}
+                style={[
+                  styles.scheduleOptionBtn,
+                  !isScheduled && styles.scheduleOptionBtnActive
+                ]}
+                onPress={() => setIsScheduled(false)}
+              >
+                <Ionicons name="flash-sharp" size={16} color={!isScheduled ? COLORS.white : COLORS.primary} />
+                <Text style={[
+                  styles.scheduleOptionText,
+                  !isScheduled && styles.scheduleOptionTextActive
+                ]}>ASAP (Instant)</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.75}
+                style={[
+                  styles.scheduleOptionBtn,
+                  isScheduled && styles.scheduleOptionBtnActive
+                ]}
+                onPress={() => {
+                  setTempDate(schedDate);
+                  setTempTime(schedTime);
+                  setDatePickerVisible(true);
+                }}
+              >
+                <Ionicons name="time-sharp" size={16} color={isScheduled ? COLORS.white : COLORS.primary} />
+                <Text style={[
+                  styles.scheduleOptionText,
+                  isScheduled && styles.scheduleOptionTextActive
+                ]}>
+                  {isScheduled ? `${schedDate} - ${schedTime}` : 'Schedule Later'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <Text style={styles.fieldLabel}>Delivery Instructions (Optional)</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
@@ -494,6 +565,77 @@ export default function CheckoutScreen() {
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Date/Time Picker Modal */}
+        <Modal
+          visible={isDatePickerVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setDatePickerVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Schedule Delivery</Text>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => setDatePickerVisible(false)}>
+                  <Ionicons name="close" size={24} color={COLORS.dark} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScrollContent}>
+                <Text style={styles.modalSectionLabel}>Select Date</Text>
+                <View style={styles.modalOptionsRow}>
+                  {DATE_OPTIONS.map((opt) => (
+                    <TouchableOpacity activeOpacity={0.75}
+                      key={opt}
+                      style={[
+                        styles.modalOptionPill,
+                        tempDate === opt && styles.modalOptionPillActive
+                      ]}
+                      onPress={() => setTempDate(opt)}
+                    >
+                      <Text style={[
+                        styles.modalOptionPillText,
+                        tempDate === opt && styles.modalOptionPillTextActive
+                      ]}>{opt}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={[styles.modalSectionLabel, { marginTop: SPACING.md }]}>Select Time Slot</Text>
+                <View style={styles.modalOptionsGrid}>
+                  {TIME_OPTIONS.map((opt) => (
+                    <TouchableOpacity activeOpacity={0.75}
+                      key={opt}
+                      style={[
+                        styles.modalOptionGridItem,
+                        tempTime === opt && styles.modalOptionGridItemActive
+                      ]}
+                      onPress={() => setTempTime(opt)}
+                    >
+                      <Text style={[
+                        styles.modalOptionGridItemText,
+                        tempTime === opt && styles.modalOptionGridItemTextActive
+                      ]}>{opt}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+
+              <TouchableOpacity activeOpacity={0.8}
+                style={styles.modalConfirmBtn}
+                onPress={() => {
+                  setSchedDate(tempDate);
+                  setSchedTime(tempTime);
+                  setIsScheduled(tempTime !== 'ASAP (Immediate)');
+                  setDatePickerVisible(false);
+                }}
+              >
+                <Text style={styles.modalConfirmBtnText}>Apply Schedule</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -725,6 +867,135 @@ const styles = StyleSheet.create({
   detectLocationBtnText: {
     color: COLORS.primary,
     fontSize: 13,
+    fontWeight: 'bold',
+  },
+  scheduleOptionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  scheduleOptionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    gap: SPACING.xs,
+  },
+  scheduleOptionBtnActive: {
+    backgroundColor: COLORS.primary,
+  },
+  scheduleOptionText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  scheduleOptionTextActive: {
+    color: COLORS.white,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.lg,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    paddingBottom: SPACING.sm,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  modalScrollContent: {
+    paddingBottom: SPACING.lg,
+  },
+  modalSectionLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+    marginBottom: SPACING.sm,
+  },
+  modalOptionsRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  modalOptionPill: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.light,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+  },
+  modalOptionPillActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  modalOptionPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.dark,
+  },
+  modalOptionPillTextActive: {
+    color: COLORS.white,
+  },
+  modalOptionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  modalOptionGridItem: {
+    width: '48%',
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: COLORS.light,
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+  },
+  modalOptionGridItemActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  modalOptionGridItemText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.dark,
+  },
+  modalOptionGridItemTextActive: {
+    color: COLORS.white,
+  },
+  modalConfirmBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    ...SHADOWS.small,
+  },
+  modalConfirmBtnText: {
+    color: COLORS.white,
+    fontSize: 15,
     fontWeight: 'bold',
   },
 });
