@@ -94,10 +94,20 @@ This document lists the critical bug fixes implemented in both the React Native 
 
 ---
 
-## 🚀 Publishing OTA Updates (Expo EAS)
+## 🚀 Mobile Distribution Updates (Expo EAS)
 
+### 1. OTA (Over-The-Air) Updates
 The updates can be pushed to the active mobile applications via Expo OTA (Over-The-Air) update using:
 ```bash
 cd app
 $env:EXPO_PUBLIC_API_URL="https://restaurant-app-web.onrender.com/api"; $env:CI="1"; npx eas-cli update --channel preview --platform android --environment preview --message "Fix MapScreen crash and JushhPK menu layout" --non-interactive
 ```
+
+### 2. Standalone Android APK Build
+To ensure all native configurations, Reanimated bundles, and permissions are cleanly embedded in the binary (and since OTA updates won't apply to different native app configurations), we triggered a fresh standalone Android APK build:
+```bash
+cd app
+$env:EXPO_PUBLIC_API_URL="https://restaurant-app-web.onrender.com/api"; $env:CI="1"; npx eas-cli build --platform android --profile preview --non-interactive
+```
+* **Build Logs/Download Link**: [Expo EAS Build 738a6cf5](https://expo.dev/accounts/abdullah958/projects/app/builds/738a6cf5-1bef-4c52-bacd-0af545b4143a)
+* **Status**: In progress / building on Expo servers. Once finished, this build will generate a downloadable APK ready to install on Android devices.
