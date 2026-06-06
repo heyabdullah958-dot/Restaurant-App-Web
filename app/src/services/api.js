@@ -15,7 +15,11 @@ const api = axios.create({
 // Request interceptor to attach JWT auth token
 api.interceptors.request.use(
   async (config) => {
-    if (!config.headers['Authorization']) {
+    // Do not attach token for public auth endpoints to avoid 401 on login with expired tokens
+    const publicAuthUrls = ['/auth/login/', '/auth/register/', '/auth/guest/', '/auth/forgot-password/', '/auth/reset-password-confirm/'];
+    const isPublicUrl = config.url && publicAuthUrls.some(url => config.url.endsWith(url));
+
+    if (!isPublicUrl && !config.headers['Authorization']) {
       try {
         const token = await AsyncStorage.getItem('auth_token');
         if (token) {
