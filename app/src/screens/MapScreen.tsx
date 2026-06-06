@@ -338,7 +338,6 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         style={styles.map}
         onMessage={handleMessage}
         mixedContentMode="always"
-        androidLayerType="hardware"
         allowsInlineMediaPlayback={true}
         mediaPlaybackRequiresUserAction={false}
         startInLoadingState={true}

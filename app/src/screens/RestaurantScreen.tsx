@@ -16,7 +16,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
@@ -462,14 +462,11 @@ export default function RestaurantScreen() {
                   )}
 
                   {/* Quantity Selector overlay / add button */}
-                  <Animated.View 
-                    layout={LinearTransition.springify().damping(15).mass(0.8)}
+                  <View 
                     style={styles.quantitySelectorContainer}
                   >
                     {quantity > 0 && !item.options?.has_variants ? (
-                      <Animated.View 
-                        entering={FadeIn} 
-                        exiting={FadeOut}
+                      <View 
                         style={styles.quantityRow}
                       >
                         <TouchableOpacity activeOpacity={0.75}
@@ -478,14 +475,14 @@ export default function RestaurantScreen() {
                         >
                           <Ionicons name="remove" size={16} color={COLORS.white} />
                         </TouchableOpacity>
-                        <Animated.Text entering={FadeIn} exiting={FadeOut} style={styles.quantityText}>{quantity}</Animated.Text>
+                        <Text style={styles.quantityText}>{quantity}</Text>
                         <TouchableOpacity activeOpacity={0.75}
                           style={styles.quantityBtn}
                           onPress={() => handleIncrement(item, quantity)}
                         >
                           <Ionicons name="add" size={16} color={COLORS.white} />
                         </TouchableOpacity>
-                      </Animated.View>
+                      </View>
                     ) : (
                       <TouchableOpacity
                         style={styles.addButton}
@@ -498,7 +495,7 @@ export default function RestaurantScreen() {
                         </Text>
                       </TouchableOpacity>
                     )}
-                  </Animated.View>
+                  </View>
                 </View>
               </View>
             );
