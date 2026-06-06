@@ -12,6 +12,7 @@ class RestaurantListView(generics.ListAPIView):
     """
     serializer_class = RestaurantSerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
     def get_queryset(self):
         queryset = Restaurant.objects.filter(is_active=True)

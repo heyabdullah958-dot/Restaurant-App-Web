@@ -123,6 +123,8 @@ class Command(BaseCommand):
                 "name": "JushhPK",
                 "cuisine_type": "Turkish Doner & Shawarma",
                 "description": "Authentic Turkish wraps, doner, shawarma specialties, and delicious desserts.",
+                "logo": "menu_items/jushh_logo.jpg",
+                "cover_image": "menu_items/jushh_banner_collage.jpg",
                 "address": "G-11 Markaz, Islamabad",
                 "city": "Islamabad",
                 "phone": "+923112345678",
@@ -137,27 +139,28 @@ class Command(BaseCommand):
                 "is_featured": True,
                 "menu": {
                     "APPETIZER": [
-                        {"name": "Chicken Doner Fries", "price": 600.00, "desc": "Crispy fries topped with sliced chicken doner and sauces"},
-                        {"name": "Beef Doner Fries", "price": 750.00, "desc": "Crispy fries topped with sliced beef doner and signature sauces"}
+                        {"name": "Chicken Doner Fries", "price": 600.00, "desc": "Crispy fries topped with sliced chicken doner and sauces", "image": "menu_items/chicken_doner_fries.jpg"},
+                        {"name": "Beef Doner Fries", "price": 750.00, "desc": "Crispy fries topped with sliced beef doner and signature sauces", "image": "menu_items/beef_doner_fries.jpg"}
                     ],
                     "TURKISH SPECIALS": [
-                        {"name": "Chicken Grilled Sandwich", "price": 750.00, "desc": "Grilled chicken sandwich Turkish style"},
-                        {"name": "Half Dubai Shawaya", "price": 1400.00, "desc": "Traditional roasted chicken shawaya half portion"},
-                        {"name": "Full Dubai Shawaya", "price": 2500.00, "desc": "Traditional roasted chicken shawaya full portion"},
-                        {"name": "Add-on Rice", "price": 300.00, "desc": "Spiced Arabic rice serving for Shawaya"},
-                        {"name": "Chicken Turkish Wrap", "price": 600.00, "desc": "Spiced chicken doner wrapped in soft flatbread"},
-                        {"name": "Beef Turkish Wrap", "price": 900.00, "desc": "Premium beef doner wrapped in soft flatbread"},
-                        {"name": "Chicken Turkish Doner", "price": 850.00, "desc": "Traditional Turkish chicken doner in pita bread"},
-                        {"name": "Beef Turkish Doner", "price": 1100.00, "desc": "Traditional Turkish beef doner in pita bread"}
+                        {"name": "Chicken Grilled Sandwich", "price": 750.00, "desc": "Grilled chicken sandwich Turkish style", "image": "menu_items/chicken_grilled_sandwich.jpg"},
+                        {"name": "Beef Grilled Sandwich", "price": 950.00, "desc": "Grilled beef sandwich Turkish style", "image": "menu_items/beef_grilled_sandwich.jpg"},
+                        {"name": "Half Dubai Shawaya", "price": 1400.00, "desc": "Traditional roasted chicken shawaya half portion", "image": "menu_items/half_dubai_shawaya.jpg"},
+                        {"name": "Full Dubai Shawaya", "price": 2500.00, "desc": "Traditional roasted chicken shawaya full portion", "image": "menu_items/full_dubai_shawaya.jpg"},
+                        {"name": "Add-on Rice", "price": 300.00, "desc": "Spiced Arabic rice serving for Shawaya", "image": "menu_items/addon_rice.jpg"},
+                        {"name": "Chicken Turkish Wrap", "price": 600.00, "desc": "Spiced chicken doner wrapped in soft flatbread", "image": "menu_items/chicken_turkish_wrap.jpg"},
+                        {"name": "Beef Turkish Wrap", "price": 900.00, "desc": "Premium beef doner wrapped in soft flatbread", "image": "menu_items/beef_turkish_wrap.jpg"},
+                        {"name": "Chicken Turkish Doner", "price": 850.00, "desc": "Traditional Turkish chicken doner in pita bread", "image": "menu_items/chicken_turkish_doner.jpg"},
+                        {"name": "Beef Turkish Doner", "price": 1100.00, "desc": "Traditional Turkish beef doner in pita bread", "image": "menu_items/beef_turkish_doner.jpg"}
                     ],
                     "SHAWARMA": [
-                        {"name": "Chicken Pouch Shawarma", "price": 450.00, "desc": "Pocket-style chicken shawarma pocket bread"},
-                        {"name": "Beef Pouch Shawarma", "price": 700.00, "desc": "Pocket-style beef shawarma pocket bread"},
-                        {"name": "Chicken Shawarma", "price": 550.00, "desc": "Classic Lebanese chicken shawarma wrap"},
-                        {"name": "Beef Shawarma", "price": 750.00, "desc": "Classic Lebanese beef shawarma wrap"},
-                        {"name": "Charcoal Shawarma Chicken", "price": 750.00, "desc": "Charcoal grilled chicken shawarma wrapped in flatbread"},
-                        {"name": "Chicken Shawarma Platter", "price": 900.00, "desc": "Deconstructed chicken shawarma served on a platter"},
-                        {"name": "Chicken Shawarma Platter (with cheese)", "price": 1000.00, "desc": "Deconstructed chicken shawarma topped with melted cheese"}
+                        {"name": "Chicken Pouch Shawarma", "price": 450.00, "desc": "Pocket-style chicken shawarma pocket bread", "image": "menu_items/chicken_pouch_shawarma.jpg"},
+                        {"name": "Beef Pouch Shawarma", "price": 700.00, "desc": "Pocket-style beef shawarma pocket bread", "image": "menu_items/beef_pouch_shawarma.jpg"},
+                        {"name": "Chicken Shawarma", "price": 550.00, "desc": "Classic Lebanese chicken shawarma wrap", "image": "menu_items/chicken_turkish_wrap.jpg"},
+                        {"name": "Beef Shawarma", "price": 750.00, "desc": "Classic Lebanese beef shawarma wrap", "image": "menu_items/beef_turkish_wrap.jpg"},
+                        {"name": "Charcoal Shawarma Chicken", "price": 750.00, "desc": "Charcoal grilled chicken shawarma wrapped in flatbread", "image": "menu_items/charcoal_shawarma_chicken.jpg"},
+                        {"name": "Chicken Shawarma Platter", "price": 900.00, "desc": "Deconstructed chicken shawarma served on a platter", "image": "menu_items/chicken_shawarma_platter.jpg"},
+                        {"name": "Chicken Shawarma Platter (with cheese)", "price": 1000.00, "desc": "Deconstructed chicken shawarma topped with melted cheese", "image": "menu_items/chicken_shawarma_platter.jpg"}
                     ],
                     "DESSERTS": [
                         {"name": "Lotus Can Dessert", "price": 600.00, "desc": "Creamy Lotus Biscoff dessert served in a signature can"},
@@ -166,19 +169,19 @@ class Command(BaseCommand):
                     ],
                     "ADD ONS": [
                         {"name": "Cheese", "price": 90.00, "desc": "Extra melted cheese portion"},
-                        {"name": "Dip", "price": 90.00, "desc": "Signature Jushh garlic or spicy dip"},
+                        {"name": "Dip", "price": 90.00, "desc": "Signature Jushh garlic or spicy dip", "image": "menu_items/garlic_dip.jpg"},
                         {"name": "Tortilla Bread", "price": 90.00, "desc": "Extra soft tortilla flatbread"},
-                        {"name": "Pita Bread", "price": 60.00, "desc": "Extra Lebanese pita pocket bread"},
+                        {"name": "Pita Bread", "price": 60.00, "desc": "Extra Lebanese pita pocket bread", "image": "menu_items/pita_bread.jpg"},
                         {"name": "Plain Fries", "price": 150.00, "desc": "Golden salted french fries side"}
                     ],
                     "BEVERAGES": [
-                        {"name": "Water", "price": 80.00, "desc": "Mineral water bottle"},
-                        {"name": "Soft Drink", "price": 150.00, "desc": "Chilled regular soft drink"},
-                        {"name": "Blueberry Mojito", "price": 290.00, "desc": "Refreshing blueberry mocktail"},
-                        {"name": "Strawberry Mojito", "price": 290.00, "desc": "Refreshing strawberry mocktail"},
-                        {"name": "Green Apple Mojito", "price": 290.00, "desc": "Refreshing green apple mocktail"},
-                        {"name": "Peach Mojito", "price": 290.00, "desc": "Refreshing peach mocktail"},
-                        {"name": "Lemon Mojito", "price": 290.00, "desc": "Refreshing lemon mint mocktail"}
+                        {"name": "Water", "price": 80.00, "desc": "Mineral water bottle", "image": "menu_items/water_bottle.jpg"},
+                        {"name": "Soft Drink", "price": 150.00, "desc": "Chilled regular soft drink", "image": "menu_items/soft_drink.jpg"},
+                        {"name": "Blueberry Mojito", "price": 290.00, "desc": "Refreshing blueberry mocktail", "image": "menu_items/blueberry_mojito.jpg"},
+                        {"name": "Strawberry Mojito", "price": 290.00, "desc": "Refreshing strawberry mocktail", "image": "menu_items/strawberry_mojito.jpg"},
+                        {"name": "Green Apple Mojito", "price": 290.00, "desc": "Refreshing green apple mocktail", "image": "menu_items/green_apple_mojito.jpg"},
+                        {"name": "Peach Mojito", "price": 290.00, "desc": "Refreshing peach mocktail", "image": "menu_items/peach_mojito.jpg"},
+                        {"name": "Lemon Mojito", "price": 290.00, "desc": "Refreshing lemon mint mocktail", "image": "menu_items/lemon_mojito.jpg"}
                     ]
                 }
             },
@@ -443,6 +446,7 @@ class Command(BaseCommand):
                         name=item_data["name"],
                         price=item_data["price"],
                         description=item_data.get("desc", ""),
+                        image=item_data.get("image", None),
                         is_available=True
                     )
                     items_to_create.append(item)

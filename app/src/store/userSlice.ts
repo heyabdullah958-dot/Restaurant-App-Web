@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export interface UserProfile {
   id: number;
@@ -46,12 +47,46 @@ export const loadSavedToken = createAsyncThunk<
       
       if (!token) return null;
       
+      let activeToken: string = token;
+      
+      // Proactively attempt token refresh on launch if refreshToken exists
+      if (refreshToken) {
+        try {
+          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
+          const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
+          const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken });
+          
+          if (refreshResponse.data && refreshResponse.data.success && refreshResponse.data.data && refreshResponse.data.data.access) {
+            const newAccessToken = refreshResponse.data.data.access;
+            await AsyncStorage.setItem('auth_token', newAccessToken);
+            activeToken = newAccessToken;
+            console.log('Successfully refreshed token proactively on app launch');
+          }
+        } catch (refreshErr) {
+          console.warn('Proactive token refresh failed on app launch:', refreshErr);
+          // If refresh fails on launch, we probably have expired credentials.
+          // Let's clear tokens and return null to show login/onboarding.
+          delete api.defaults.headers.common['Authorization'];
+          await AsyncStorage.removeItem('auth_token').catch(() => {});
+          await AsyncStorage.removeItem('refresh_token').catch(() => {});
+          return null;
+        }
+      }
+      
       // Set default auth header
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${activeToken}`;
       
       // Fetch user profile info to verify token works
       const profileResponse = await api.get('/users/profile/') as any;
-      const user = profileResponse.data || profileResponse;
+      
+      // Extract user profile data robustly
+      let user = profileResponse;
+      if (profileResponse && typeof profileResponse === 'object') {
+        if ('data' in profileResponse) {
+          user = profileResponse.data;
+        }
+      }
+      
       try {
         const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
         if (savedAddress) {
@@ -59,7 +94,7 @@ export const loadSavedToken = createAsyncThunk<
         }
       } catch (e) {}
       
-      return { user, token, refreshToken: refreshToken || '' };
+      return { user, token: activeToken, refreshToken: refreshToken || '' };
     } catch (error: any) {
       // If profile fails, clean up token
       delete api.defaults.headers.common['Authorization'];
@@ -101,9 +136,12 @@ export const loginUser = createAsyncThunk<
       
       // Fetch user profile info
       const profileResponse = await api.get('/users/profile/') as any;
-      const profileData = profileResponse.data || profileResponse;
-      // Handle nesting if { success: true, data: { ...user } }
-      const user = (profileData.data && profileData.data.id) ? profileData.data : (profileData.id ? profileData : profileResponse);
+      let user = profileResponse;
+      if (profileResponse && typeof profileResponse === 'object') {
+        if ('data' in profileResponse) {
+          user = profileResponse.data;
+        }
+      }
       
       try {
         const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
@@ -216,7 +254,12 @@ export const fetchUserProfile = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/users/profile/') as any;
-      const user = response.data || response;
+      let user = response;
+      if (response && typeof response === 'object') {
+        if ('data' in response) {
+          user = response.data;
+        }
+      }
       try {
         const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
         if (savedAddress) {
@@ -240,7 +283,12 @@ export const updateProfile = createAsyncThunk<
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await api.put('/users/profile/', profileData) as any;
-      const user = response.data || response;
+      let user = response;
+      if (response && typeof response === 'object') {
+        if ('data' in response) {
+          user = response.data;
+        }
+      }
       try {
         const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
         if (savedAddress) {

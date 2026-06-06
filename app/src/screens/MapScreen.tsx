@@ -7,6 +7,7 @@ import { RootState, AppDispatch } from '../store';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { COLORS, SHADOWS } from '../theme';
 import { Ionicons } from '@expo/vector-icons';
+import { FALLBACK_RESTAURANTS } from '../services/fallbackData';
 
 const MOCK_LOCATIONS: Record<string, { lat: number; lng: number }> = {
   'seenbanao': { lat: 31.4700, lng: 74.2800 },
@@ -65,8 +66,9 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     );
   }
 
-  // Map restaurant data to passing array
-  const restaurantMarkers = (restaurants || [])
+  // Map restaurant data to passing array, fallback to local data if empty
+  const activeRestaurants = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+  const restaurantMarkers = (activeRestaurants || [])
     .filter((r: any) => r && r.slug)
     .map((r: any) => {
       const coords = MOCK_LOCATIONS[r.slug] || {
@@ -335,6 +337,32 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         domStorageEnabled={true}
         style={styles.map}
         onMessage={handleMessage}
+        mixedContentMode="always"
+        androidLayerType="hardware"
+        allowsInlineMediaPlayback={true}
+        mediaPlaybackRequiresUserAction={false}
+        startInLoadingState={true}
+        renderLoading={() => (
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.light }]}
+          />
+        )}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView error: ', nativeEvent);
+          setErrorMsg('Failed to load map. Please check your internet connection.');
+        }}
+        renderError={(errorName, errorCode, errorDesc) => (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.light, padding: 20 }}>
+            <Ionicons name="cloud-offline-outline" size={48} color={COLORS.gray} />
+            <Text style={{ marginTop: 12, color: COLORS.dark, fontWeight: '600', fontSize: 16 }}>Failed to load map</Text>
+            <Text style={{ marginTop: 4, color: COLORS.gray, textAlign: 'center', fontSize: 13 }}>
+              {errorDesc || 'Please ensure you are online and try again.'}
+            </Text>
+          </View>
+        )}
       />
     </View>
   );

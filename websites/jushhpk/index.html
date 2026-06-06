@@ -48,7 +48,7 @@
     .hero {
       min-height: 100vh;
       background: var(--dark);
-      display: flex; align-items: center;
+      display: flex; align-items: center; justify-content: space-between; gap: 40px;
       padding: 120px 5% 80px;
       position: relative; overflow: hidden;
     }
@@ -57,6 +57,29 @@
       position: absolute; top: 0; right: 0; width: 60vw; height: 100vh;
       background: linear-gradient(145deg, rgba(200,16,46,0.18) 0%, rgba(255,107,53,0.06) 60%, transparent 80%);
       clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
+    }
+    .hero-image-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3;
+      max-width: 520px;
+      position: relative;
+    }
+    .hero-image {
+      width: 100%;
+      height: auto;
+      border-radius: 24px;
+      border: 2px solid rgba(200,16,46,0.25);
+      box-shadow: 0 20px 50px rgba(200,16,46,0.3);
+      transform: rotate(2deg);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-image:hover {
+      transform: rotate(0deg) scale(1.03);
+      border-color: var(--orange);
+      box-shadow: 0 30px 60px rgba(255,107,53,0.45);
     }
     .hero-orbs { position: absolute; inset: 0; pointer-events: none; }
     .orb { position: absolute; border-radius: 50%; filter: blur(70px); }
@@ -162,7 +185,9 @@
       color: white; font-size: 10px; font-weight: 900;
       padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;
     }
-    .combo-img { height: 170px; display: flex; align-items: center; justify-content: center; font-size: 60px; }
+    .combo-img { height: 170px; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden; }
+    .combo-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .combo-card:hover .combo-img img { transform: scale(1.1); }
     .ci1 { background: linear-gradient(135deg, #1A0002, #330008); }
     .ci2 { background: linear-gradient(135deg, #0D0000, #1F0004); }
     .ci3 { background: linear-gradient(135deg, #1A0800, #2A1000); }
@@ -249,7 +274,8 @@
       nav { padding: 14px 16px; }
       .nav-links { display: none; }
       
-      .hero { padding: 100px 16px 60px; min-height: auto; }
+      .hero { padding: 100px 16px 60px; min-height: auto; flex-direction: column; text-align: center; gap: 30px; }
+      .hero-image-wrap { width: 100%; max-width: 380px; margin: 0 auto; order: -1; }
       .hero-title { font-size: 28px; line-height: 1.15; }
       
       .section { padding: 50px 16px; }
@@ -540,6 +566,9 @@
         </div>
       </div>
     </div>
+    <div class="hero-image-wrap">
+      <img src="./images/jushh_banner_collage.jpg" alt="Jushh Specials Collage" class="hero-image" />
+    </div>
   </section>
 
   <!-- MARQUEE -->
@@ -677,44 +706,45 @@
   <script>
     const menuData = {
       appetizer: [
-        { name: "Chicken Doner Fries", price: 600, desc: "Crispy fries topped with sliced chicken doner and sauces", emoji: "🍟" },
-        { name: "Beef Doner Fries", price: 750, desc: "Crispy fries topped with sliced beef doner and signature sauces", emoji: "🍟" }
+        { name: "Chicken Doner Fries", price: 600, desc: "Crispy fries topped with sliced chicken doner and sauces", emoji: "🍟", image: "./images/chicken_doner_fries.jpg" },
+        { name: "Beef Doner Fries", price: 750, desc: "Crispy fries topped with sliced beef doner and signature sauces", emoji: "🍟", image: "./images/beef_doner_fries.jpg" }
       ],
       turkish: [
-        { name: "Chicken Grilled Sandwich", price: 750, desc: "Grilled chicken sandwich Turkish style", emoji: "🥪" },
-        { name: "Half Dubai Shawaya", price: 1400, desc: "Traditional roasted chicken shawaya half portion", emoji: "🍗" },
-        { name: "Full Dubai Shawaya", price: 2500, desc: "Traditional roasted chicken shawaya full portion", emoji: "🍗" },
-        { name: "Add-on Rice", price: 300, desc: "Spiced Arabic rice serving for Shawaya", emoji: "🍚" },
-        { name: "Chicken Turkish Wrap", price: 600, desc: "Spiced chicken doner wrapped in soft flatbread", emoji: "🌯" },
-        { name: "Beef Turkish Wrap", price: 900, desc: "Premium beef doner wrapped in soft flatbread", emoji: "🌯" },
-        { name: "Chicken Turkish Doner", price: 850, desc: "Traditional Turkish chicken doner in pita bread", emoji: "🥙" },
-        { name: "Beef Turkish Doner", price: 1100, desc: "Traditional Turkish beef doner in pita bread", emoji: "🥙" }
+        { name: "Chicken Grilled Sandwich", price: 750, desc: "Grilled chicken sandwich Turkish style", emoji: "🥪", image: "./images/chicken_grilled_sandwich.jpg" },
+        { name: "Beef Grilled Sandwich", price: 950, desc: "Grilled beef sandwich Turkish style", emoji: "🥪", image: "./images/beef_grilled_sandwich.jpg" },
+        { name: "Half Dubai Shawaya", price: 1400, desc: "Traditional roasted chicken shawaya half portion", emoji: "🍗", image: "./images/half_dubai_shawaya.jpg" },
+        { name: "Full Dubai Shawaya", price: 2500, desc: "Traditional roasted chicken shawaya full portion", emoji: "🍗", image: "./images/full_dubai_shawaya.jpg" },
+        { name: "Add-on Rice", price: 300, desc: "Spiced Arabic rice serving for Shawaya", emoji: "🍚", image: "./images/addon_rice.jpg" },
+        { name: "Chicken Turkish Wrap", price: 600, desc: "Spiced chicken doner wrapped in soft flatbread", emoji: "🌯", image: "./images/chicken_turkish_wrap.jpg" },
+        { name: "Beef Turkish Wrap", price: 900, desc: "Premium beef doner wrapped in soft flatbread", emoji: "🌯", image: "./images/beef_turkish_wrap.jpg" },
+        { name: "Chicken Turkish Doner", price: 850, desc: "Traditional Turkish chicken doner in pita bread", emoji: "🥙", image: "./images/chicken_turkish_doner.jpg" },
+        { name: "Beef Turkish Doner", price: 1100, desc: "Traditional Turkish beef doner in pita bread", emoji: "🥙", image: "./images/beef_turkish_doner.jpg" }
       ],
       shawarma: [
-        { name: "Chicken Pouch Shawarma", price: 450, desc: "Pocket-style chicken shawarma pocket bread", emoji: "🥟" },
-        { name: "Beef Pouch Shawarma", price: 700, desc: "Pocket-style beef shawarma pocket bread", emoji: "🥟" },
-        { name: "Chicken Shawarma", price: 550, desc: "Classic Lebanese chicken shawarma wrap", emoji: "🌯" },
-        { name: "Beef Shawarma", price: 750, desc: "Classic Lebanese beef shawarma wrap", emoji: "🌯" },
-        { name: "Charcoal Shawarma Chicken", price: 750, desc: "Charcoal grilled chicken shawarma wrapped in flatbread", emoji: "🌯" },
-        { name: "Chicken Shawarma Platter", price: 900, desc: "Deconstructed chicken shawarma served on a platter", emoji: "🍽️" },
-        { name: "Chicken Shawarma Platter (with cheese)", price: 1000, desc: "Deconstructed chicken shawarma topped with melted cheese", emoji: "🍽️" }
+        { name: "Chicken Pouch Shawarma", price: 450, desc: "Pocket-style chicken shawarma pocket bread", emoji: "🥟", image: "./images/chicken_pouch_shawarma.jpg" },
+        { name: "Beef Pouch Shawarma", price: 700, desc: "Pocket-style beef shawarma pocket bread", emoji: "🥟", image: "./images/beef_pouch_shawarma.jpg" },
+        { name: "Chicken Shawarma", price: 550, desc: "Classic Lebanese chicken shawarma wrap", emoji: "🌯", image: "./images/chicken_turkish_wrap.jpg" },
+        { name: "Beef Shawarma", price: 750, desc: "Classic Lebanese beef shawarma wrap", emoji: "🌯", image: "./images/beef_turkish_wrap.jpg" },
+        { name: "Charcoal Shawarma Chicken", price: 750, desc: "Charcoal grilled chicken shawarma wrapped in flatbread", emoji: "🌯", image: "./images/charcoal_shawarma_chicken.jpg" },
+        { name: "Chicken Shawarma Platter", price: 900, desc: "Deconstructed chicken shawarma served on a platter", emoji: "🍽️", image: "./images/chicken_shawarma_platter.jpg" },
+        { name: "Chicken Shawarma Platter (with cheese)", price: 1000, desc: "Deconstructed chicken shawarma topped with melted cheese", emoji: "🍽️", image: "./images/chicken_shawarma_platter.jpg" }
       ],
       desserts: [
         { name: "Lotus Can Dessert", price: 600, desc: "Creamy Lotus Biscoff dessert served in a signature can", emoji: "🍰" },
         { name: "Red Velvet Can Dessert", price: 600, desc: "Rich red velvet cake layered in a signature can", emoji: "🍰" },
         { name: "Nutella Can Dessert", price: 600, desc: "Decadent Nutella chocolate dessert in a signature can", emoji: "🍰" },
         { name: "Cheese Add-on", price: 90, desc: "Extra melted cheese portion", emoji: "🧀" },
-        { name: "Dip Add-on", price: 90, desc: "Signature Jushh garlic or spicy dip", emoji: "🏺" },
+        { name: "Dip Add-on", price: 90, desc: "Signature Jushh garlic or spicy dip", emoji: "🏺", image: "./images/garlic_dip.jpg" },
         { name: "Tortilla Bread", price: 90, desc: "Extra soft tortilla flatbread", emoji: "🫓" },
-        { name: "Pita Bread", price: 60, desc: "Extra Lebanese pita pocket bread", emoji: "🫓" },
+        { name: "Pita Bread", price: 60, desc: "Extra Lebanese pita pocket bread", emoji: "🫓", image: "./images/pita_bread.jpg" },
         { name: "Plain Fries", price: 150, desc: "Golden salted french fries side", emoji: "🍟" },
-        { name: "Water", price: 80, desc: "Mineral water bottle", emoji: "🥤" },
-        { name: "Soft Drink", price: 150, desc: "Chilled regular soft drink", emoji: "🥤" },
-        { name: "Blueberry Mojito", price: 290, desc: "Refreshing blueberry mocktail", emoji: "🍹" },
-        { name: "Strawberry Mojito", price: 290, desc: "Refreshing strawberry mocktail", emoji: "🍹" },
-        { name: "Green Apple Mojito", price: 290, desc: "Refreshing green apple mocktail", emoji: "🍹" },
-        { name: "Peach Mojito", price: 290, desc: "Refreshing peach mocktail", emoji: "🍹" },
-        { name: "Lemon Mojito", price: 290, desc: "Refreshing lemon mint mocktail", emoji: "🍹" }
+        { name: "Water", price: 80, desc: "Mineral water bottle", emoji: "🥤", image: "./images/water_bottle.jpg" },
+        { name: "Soft Drink", price: 150, desc: "Chilled regular soft drink", emoji: "🥤", image: "./images/soft_drink.jpg" },
+        { name: "Blueberry Mojito", price: 290, desc: "Refreshing blueberry mocktail", emoji: "🍹", image: "./images/blueberry_mojito.jpg" },
+        { name: "Strawberry Mojito", price: 290, desc: "Refreshing strawberry mocktail", emoji: "🍹", image: "./images/strawberry_mojito.jpg" },
+        { name: "Green Apple Mojito", price: 290, desc: "Refreshing green apple mocktail", emoji: "🍹", image: "./images/green_apple_mojito.jpg" },
+        { name: "Peach Mojito", price: 290, desc: "Refreshing peach mocktail", emoji: "🍹", image: "./images/peach_mojito.jpg" },
+        { name: "Lemon Mojito", price: 290, desc: "Refreshing lemon mint mocktail", emoji: "🍹", image: "./images/lemon_mojito.jpg" }
       ]
     };
 
@@ -749,8 +779,12 @@
         const bgs = ['ci1', 'ci2', 'ci3'];
         const bgClass = bgs[idx % bgs.length];
 
+        const imgContent = item.image 
+          ? `<img src="${item.image}" alt="${item.name}" />`
+          : item.emoji;
+
         card.innerHTML = `
-          <div class="combo-img ${bgClass}">${item.emoji}</div>
+          <div class="combo-img ${item.image ? '' : bgClass}">${imgContent}</div>
           <div class="combo-body">
             <div class="combo-name">${item.name}</div>
             <div class="combo-includes">${item.desc}</div>

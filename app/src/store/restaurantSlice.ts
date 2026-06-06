@@ -15,10 +15,7 @@ export const fetchRestaurants = createAsyncThunk(
       if (queryString) url += `?${queryString}`;
       
       const response = await api.get(url);
-      // Backend format is { success: true, data: [...] } or direct list depending on API documentation.
-      // API.md shows GET /api/restaurants/ lists all active restaurants.
-      // Custom exceptions middleware maps response success: true, data: [...]
-      return response.data || response;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch restaurants');
     }
@@ -30,7 +27,7 @@ export const fetchRestaurantDetail = createAsyncThunk(
   async (slug: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/restaurants/${slug}/`);
-      return response.data || response;
+      return response;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch restaurant details');
     }
@@ -61,9 +58,21 @@ const restaurantSlice = createSlice({
       })
       .addCase(fetchRestaurants.fulfilled, (state, action) => {
         state.loading = false;
-        const payload = action.payload;
-        const list = payload?.data ?? payload;
-        state.restaurants = Array.isArray(list) ? list : list?.results || [];
+        const payload = action.payload as any;
+        let list = payload;
+        if (payload && typeof payload === 'object') {
+          if ('data' in payload) {
+            list = payload.data;
+          } else if ('results' in payload) {
+            list = payload.results;
+          }
+        }
+        if (list && typeof list === 'object' && !Array.isArray(list)) {
+          if ('results' in list) {
+            list = list.results;
+          }
+        }
+        state.restaurants = Array.isArray(list) ? list : [];
       })
       .addCase(fetchRestaurants.rejected, (state, action) => {
         state.loading = false;
@@ -76,8 +85,12 @@ const restaurantSlice = createSlice({
       })
       .addCase(fetchRestaurantDetail.fulfilled, (state, action) => {
         state.loading = false;
-        const payload = action.payload;
-        state.currentRestaurant = payload?.data ?? payload;
+        const payload = action.payload as any;
+        let detail = payload;
+        if (payload && typeof payload === 'object' && 'data' in payload) {
+          detail = payload.data;
+        }
+        state.currentRestaurant = detail;
       })
       .addCase(fetchRestaurantDetail.rejected, (state, action) => {
         state.loading = false;
