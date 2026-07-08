@@ -1,4 +1,5 @@
-import stripe
+# stripe removed — using COD + PayFast only
+# import stripe  ← uncomment if Stripe is re-enabled in the future
 import logging
 import hashlib
 import urllib.parse
@@ -16,8 +17,7 @@ from .serializers import PaymentSerializer
 
 logger = logging.getLogger(__name__)
 
-# Initialize Stripe API Key
-stripe.api_key = getattr(settings, 'STRIPE_SECRET_KEY', 'sk_test_mock_stripe_key_123')
+# NOTE: Stripe disabled — no API key initialization needed
 
 
 def generate_payfast_signature(data, passphrase=None):
@@ -116,10 +116,14 @@ class ConfirmCODPaymentView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
 
+# ═══════════════════════════════════════════════════════════════
+# STRIPE VIEWS — DISABLED (Stripe removed from this project)
+# Uncomment and re-enable if Stripe is added back in the future
+# ═══════════════════════════════════════════════════════════════
 class CreateStripePaymentIntentView(APIView):
     """
     POST /api/payments/stripe/create/
-    Creates a Stripe Checkout Session (providing checkout_url) and expands the PaymentIntent (client_secret).
+    DISABLED — Stripe removed. Use PayFast or COD instead.
     """
     permission_classes = [permissions.AllowAny]
 

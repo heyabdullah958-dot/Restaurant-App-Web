@@ -332,6 +332,17 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    // FIX 1B: Dedicated action for auto-logout due to session expiry (401 interceptor).
+    // Unlike `logout` (which clears error = null), this sets a user-visible error message
+    // so the AuthScreen banner renders after the session expires silently.
+    sessionExpired(state) {
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = 'Your session has expired. Please log in again.';
+    },
     clearError(state) {
       state.error = null;
     },
@@ -430,5 +441,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { logout, clearError, updateUserProfile } = userSlice.actions;
+export const { logout, sessionExpired, clearError, updateUserProfile } = userSlice.actions;
 export default userSlice.reducer;

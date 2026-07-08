@@ -19,7 +19,13 @@ api.interceptors.request.use(
     const publicAuthUrls = ['/auth/login/', '/auth/register/', '/auth/guest/', '/auth/forgot-password/', '/auth/reset-password-confirm/'];
     const isPublicUrl = config.url && publicAuthUrls.some(url => config.url.endsWith(url));
 
-    if (!isPublicUrl && !config.headers['Authorization']) {
+    if (isPublicUrl) {
+      // FIX 1A: Purge stale instance-level Authorization header from previous sessions.
+      // api.defaults.headers.common persists across app launches in memory, so an expired
+      // token from a previous session would be sent to login/register endpoints, causing 401.
+      delete api.defaults.headers.common['Authorization'];
+      delete config.headers['Authorization'];
+    } else if (!config.headers['Authorization']) {
       try {
         const token = await AsyncStorage.getItem('auth_token');
         if (token) {
@@ -104,16 +110,18 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
 
-      console.warn('Unauthorized request! Logging out...');
+      console.warn('Unauthorized request — session expired. Logging out...');
       // Delete authorization header
       delete api.defaults.headers.common['Authorization'];
       // Remove token from AsyncStorage
       AsyncStorage.removeItem('auth_token').catch((e) => console.error(e));
       AsyncStorage.removeItem('refresh_token').catch((e) => console.error(e));
 
-      // Dispatch logout to clear user state
+      // FIX 1C: Dispatch sessionExpired (not logout) so the AuthScreen can show
+      // a "session expired" error message to the user instead of silently clearing state.
+      // 'user/logout' reducer clears state.error = null, so no banner would appear.
       if (storeInstance) {
-        storeInstance.dispatch({ type: 'user/logout' });
+        storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
     } else if (error.response) {
       console.error('API Error Response:', error.response.status, error.response.data);
@@ -127,4 +135,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-

@@ -78,7 +78,14 @@ class AdminMenuCategorySerializer(serializers.ModelSerializer):
 
 class AbsoluteImageField(serializers.ImageField):
     def to_representation(self, value):
-        return build_absolute_image_url(value, self.context)
+        # FIX 2B: Guard against Cloudinary SDK errors (misconfigured credentials,
+        # deleted asset, no .url property) which would raise 500 instead of returning None.
+        if not value:
+            return None
+        try:
+            return build_absolute_image_url(value, self.context)
+        except Exception:
+            return None
 
 
 class RestaurantSerializer(serializers.ModelSerializer):

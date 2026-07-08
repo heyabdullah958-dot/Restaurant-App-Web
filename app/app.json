@@ -24,17 +24,21 @@
         "googleMaps": {
           "apiKey": "DUMMY_API_KEY_PREVENT_CRASH"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "c148418c-3d1b-4d90-ba37-5c942dbd2ca9"
+        "projectId": "a9aa889c-4c98-49ee-bc19-0e6f517fd342"
       }
     },
-    "owner": "abdullah958",
+    "owner": "ak47letsgoo",
     "plugins": [
       [
         "expo-build-properties",

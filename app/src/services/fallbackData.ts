@@ -4,6 +4,8 @@ export interface MenuItem {
   description: string;
   price: number;
   image: string | null;
+  image_url?: string | null; // FIX 2A: Absolute Cloudinary URL from backend serializer.
+                              // Prefer this over `image` (raw storage path) for rendering.
   is_available: boolean;
   is_featured: boolean;
   preparation_time: number;

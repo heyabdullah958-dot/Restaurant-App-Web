@@ -291,8 +291,11 @@ REST_FRAMEWORK = {
 
 # Simple JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # 1 hour secure
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),     # 30 days comfortable UX
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),    # FIX 1D: Extended from 60min → 6h to prevent
+                                                    # 3rd-4th launch 401 from token rotation race.
+                                                    # Frequent short-lived tokens + ROTATE_REFRESH_TOKENS=True
+                                                    # caused blacklisted token reuse on rapid relaunches.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),   # 30 days comfortable UX
     'ROTATE_REFRESH_TOKENS': True,      # Rotate refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,   # Blacklist rotated tokens
     'ALGORITHM': 'HS256',
@@ -515,17 +518,23 @@ LOGGING = {
 }
 
 
-# Stripe and PayFast payment gateway configurations
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_mock_stripe_key_123')
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='pk_test_mock_stripe_key_123')
+# ─────────────────────────────────────────────────────────
+# PAYMENT GATEWAYS — COD + PayFast only (Stripe removed)
+# ─────────────────────────────────────────────────────────
 
-PAYFAST_MERCHANT_ID = config('PAYFAST_MERCHANT_ID', default='10000100')  # Sandbox default merchant ID
-PAYFAST_MERCHANT_KEY = config('PAYFAST_MERCHANT_KEY', default='46f0z58cltpa2')  # Sandbox default merchant key
-PAYFAST_PASSPHRASE = config('PAYFAST_PASSPHRASE', default='jt776ha7zb0b7')  # Sandbox default passphrase
+# PayFast — Local Pakistani payment gateway
+# Sandbox default credentials (replace with live keys in Render env vars)
+PAYFAST_MERCHANT_ID = config('PAYFAST_MERCHANT_ID', default='10000100')      # Sandbox merchant ID
+PAYFAST_MERCHANT_KEY = config('PAYFAST_MERCHANT_KEY', default='46f0z58cltpa2') # Sandbox merchant key
+PAYFAST_PASSPHRASE = config('PAYFAST_PASSPHRASE', default='jt776ha7zb0b7')   # Sandbox passphrase
 PAYFAST_IS_SANDBOX = config('PAYFAST_IS_SANDBOX', cast=bool, default=True)
 PAYFAST_HOST = 'sandbox.payfast.co.za' if PAYFAST_IS_SANDBOX else 'www.payfast.co.za'
 
-# FCM Service Account for Firebase Admin SDK
+# ─────────────────────────────────────────────────────────
+# FIREBASE — Push Notifications (Client provides their own)
+# Set FCM_SERVICE_ACCOUNT_JSON in Render environment variables
+# Download from: Firebase Console → Project Settings → Service Accounts
+# ─────────────────────────────────────────────────────────
 FCM_SERVICE_ACCOUNT_JSON = os.environ.get('FCM_SERVICE_ACCOUNT_JSON', '')
 
 # RIDER WHATSAPP DISPATCH NUMBER

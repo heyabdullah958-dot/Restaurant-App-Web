@@ -450,8 +450,12 @@ export default function RestaurantScreen() {
                 </View>
 
                 <View style={styles.menuItemImageContainer}>
-                  {item.image ? (
-                    <Image source={getImageUrl(item.image)} style={styles.itemImage} />
+                  {/* FIX 2A: Prefer image_url (absolute Cloudinary URL from backend serializer)
+                      over image (raw Cloudinary storage path). When using Cloudinary storage,
+                      item.image is a path like `menu_items/xyz.jpg`, not a full URL.
+                      item.image_url is the correctly computed `https://res.cloudinary.com/...` URL. */}
+                  {(item.image_url || item.image) ? (
+                    <Image source={getImageUrl(item.image_url || item.image)} style={styles.itemImage} />
                   ) : (
                     <View style={styles.itemImagePlaceholder}>
                       <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
