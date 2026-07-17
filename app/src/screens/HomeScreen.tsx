@@ -11,7 +11,10 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
+import { logoutUser } from '../store/userSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
@@ -348,7 +351,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
           <TouchableOpacity activeOpacity={0.8}
             style={styles.stickyLoginBtn}
-            onPress={() => navigation.navigate('Auth')}
+            onPress={() => dispatch(logoutUser())}
           >
             <Text style={styles.stickyLoginBtnText}>Sign In</Text>
           </TouchableOpacity>
@@ -375,7 +378,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) + SPACING.sm : SPACING.sm,
+    paddingBottom: SPACING.sm,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
