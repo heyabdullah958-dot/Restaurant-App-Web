@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: SPACING.md,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   headerContainer: {
     width: '100%',

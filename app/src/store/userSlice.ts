@@ -368,9 +368,9 @@ const userSlice = createSlice({
           state.isAuthenticated = true;
         }
       })
-      .addCase(loadSavedToken.rejected, (state, action) => {
+      .addCase(loadSavedToken.rejected, (state) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to load token';
+        state.error = null;
         state.isAuthenticated = false;
       })
       // Login

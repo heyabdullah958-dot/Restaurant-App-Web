@@ -169,6 +169,12 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     }
   }, [isAuthenticated, navigation]);
 
+  useEffect(() => {
+    // Clear any stale Redux errors from background operations (loadSavedToken)
+    // so the error banner does not appear on fresh AuthScreen load
+    dispatch(clearError());
+  }, [dispatch]);
+
   // Clear errors when switching tabs
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);

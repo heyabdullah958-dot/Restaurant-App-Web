@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.md,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   profileCard: {
     backgroundColor: COLORS.white,

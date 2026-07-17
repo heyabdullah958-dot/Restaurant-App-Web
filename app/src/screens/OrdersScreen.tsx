@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: SPACING.md,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   orderCard: {
     backgroundColor: COLORS.cardBackground,

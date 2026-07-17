@@ -356,6 +356,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: SPACING.md,
+    paddingBottom: 100,
   },
   popularContainer: {
     marginTop: SPACING.xs,
@@ -424,6 +425,7 @@ const styles = StyleSheet.create({
   resultsScroll: {
     flex: 1,
     paddingHorizontal: SPACING.md,
+    paddingBottom: 100,
   },
   resultsSection: {
     marginTop: SPACING.sm,
