@@ -45,6 +45,26 @@ class OrderListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             order = serializer.save()
+            
+            # Send FCM push notification
+            from config.notification_views import get_firebase_app
+            app = get_firebase_app()
+            if app:
+                from firebase_admin import messaging
+                try:
+                    topic = f'restaurant_{order.restaurant.id}'
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title=f"New Order #{order.id}",
+                            body=f"New order received from {order.guest_name or getattr(order.user, 'username', 'Customer')} for Rs. {order.total}"
+                        ),
+                        topic=topic,
+                    )
+                    messaging.send(message)
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(f"Failed to send order FCM: {e}")
+                    
             return Response({
                 'success': True,
                 'message': 'Order placed successfully',
@@ -88,7 +108,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         # If anonymous (no token attached), restrict to guest orders where phone matches
         guest_phone = self.request.query_params.get('phone', '')
         if guest_phone:
-            return queryset.filter(user__isnull=True, guest_phone=guest_phone)
+            return queryset.filter(guest_phone=guest_phone)
         
         return Order.objects.none()
 
@@ -100,9 +120,19 @@ class MyOrdersListView(generics.ListAPIView):
     BUG-08 FIX: select_related('restaurant') — no N+1 per order row.
     """
     serializer_class = OrderListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return Order.objects.filter(
-            user=self.request.user
-        ).select_related('restaurant').order_by('-created_at')
+        user = self.request.user
+        if user.is_authenticated:
+            return Order.objects.filter(
+                user=user
+            ).select_related('restaurant').order_by('-created_at')
+            
+        guest_phone = self.request.query_params.get('phone', '')
+        if guest_phone:
+            return Order.objects.filter(
+                guest_phone=guest_phone
+            ).select_related('restaurant').order_by('-created_at')
+            
+        return Order.objects.none()

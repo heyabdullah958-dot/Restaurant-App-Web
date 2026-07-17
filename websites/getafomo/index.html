@@ -580,19 +580,42 @@
           📸 Follow @getafomo
         </a>
       </div>
-      <div class="ig-grid">
+      
+      <!-- Instafeed.js Container -->
+      <div id="instafeed" class="ig-grid"></div>
+
+      <p style="font-size:13px;color:rgba(44,24,16,0.5);margin-top:14px;text-align:center">
+        *Follow us to see our latest moments! @getafomo · 4,721 followers & growing 🌿
+      </p>
+    </div>
+  </section>
+
+  <!-- Add Instafeed.js for real Instagram Integration -->
+  <script src="https://cdn.jsdelivr.net/gh/stevenschobert/instafeed.js@2.0.0rc1/src/instafeed.min.js"></script>
+  <script>
+    // Note: To make this work in production, generate an Instagram Basic Display API Access Token
+    // and replace 'YOUR_INSTAGRAM_ACCESS_TOKEN' below.
+    const instaToken = 'YOUR_INSTAGRAM_ACCESS_TOKEN'; 
+
+    if (instaToken !== 'YOUR_INSTAGRAM_ACCESS_TOKEN') {
+      var feed = new Instafeed({
+        accessToken: instaToken,
+        limit: 6,
+        template: '<a href="{{link}}" target="_blank" class="ig-tile" style="background-image: url({{image}}); background-size: cover; background-position: center;"><div class="ig-overlay">View Post</div></a>',
+      });
+      feed.run();
+    } else {
+      // Fallback static tiles if no token is provided
+      document.getElementById('instafeed').innerHTML = `
         <div class="ig-tile igt1">☕<div class="ig-overlay">View Post</div></div>
         <div class="ig-tile igt2">🍰<div class="ig-overlay">View Post</div></div>
         <div class="ig-tile igt3">🌿<div class="ig-overlay">View Post</div></div>
         <div class="ig-tile igt4">🎂<div class="ig-overlay">View Post</div></div>
         <div class="ig-tile igt5">✨<div class="ig-overlay">View Post</div></div>
         <div class="ig-tile igt6">🥐<div class="ig-overlay">View Post</div></div>
-      </div>
-      <p style="font-size:13px;color:rgba(44,24,16,0.5);margin-top:14px;text-align:center">
-        *Representative preview tiles. Click any post to view on our Instagram @getafomo · 4,721 followers & growing 🌿
-      </p>
-    </div>
-  </section>
+      `;
+    }
+  </script>
 
   <!-- EVENTS -->
   <section class="section sec-cream" id="events">

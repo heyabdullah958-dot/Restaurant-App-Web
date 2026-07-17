@@ -155,7 +155,7 @@ if DB_HOST and DB_USER and DB_PASSWORD:
             'OPTIONS': {
                 'sslmode': 'require',
             },
-            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '30')),
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '600')),
         }
     }
 else:
@@ -322,6 +322,8 @@ CORS_ALLOWED_ORIGINS = config(
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.pages\.dev$",
     r"^https://.*\.netlify\.app$",
+    r"^https://.*\.expo\.dev$",
+    r"^exp://.*$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -562,19 +564,31 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Redis Cache Integration (SEC-3)
-REDIS_URL = os.environ.get('REDIS_URL', '')
+# ── Cache & Session Settings (Production Redis) ──────────────────────────
+REDIS_URL = config('REDIS_URL', default=None)
 if REDIS_URL:
     CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-            'LOCATION': REDIS_URL,
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "CONNECTION_POOL_KWARGS": {
+                    "max_connections": 20,
+                    "retry_on_timeout": True
+                }
+            }
         }
     }
+    # Store user sessions in Redis instead of the database for 10x faster lookups
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
 else:
+    # Safe fallback for local development (no Redis required)
     CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
         }
     }
 

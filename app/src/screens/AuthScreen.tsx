@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: SPACING.lg,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: SPACING.xl,
+    paddingBottom: Platform.OS === 'android' ? 80 : SPACING.xl,
   },
   headerContainer: {
     alignItems: 'center',

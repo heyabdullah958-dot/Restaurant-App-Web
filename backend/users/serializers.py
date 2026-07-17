@@ -5,10 +5,15 @@ from .models import LoyaltyTransaction
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'phone', 'profile_photo', 'loyalty_points', 'is_guest')
+        fields = ('id', 'username', 'name', 'email', 'phone', 'profile_photo', 'loyalty_points', 'is_guest')
         read_only_fields = ('id', 'loyalty_points', 'is_guest')
+
+    def get_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
