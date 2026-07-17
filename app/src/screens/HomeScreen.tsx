@@ -351,7 +351,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </View>
           <TouchableOpacity activeOpacity={0.8}
             style={styles.stickyLoginBtn}
-            onPress={() => dispatch(logoutUser())}
+            onPress={async () => {
+              await dispatch(logoutUser());
+              navigation.replace('Auth');
+            }}
           >
             <Text style={styles.stickyLoginBtnText}>Sign In</Text>
           </TouchableOpacity>

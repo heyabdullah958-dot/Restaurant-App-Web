@@ -193,6 +193,11 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginBottom: SPACING.lg,
     padding: 20,
+    width: 160,
+    height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
   },
   checkmarkCircle: {
     width: 120,
