@@ -166,13 +166,13 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item')
+        queryset = Order.objects.select_related('restaurant', 'branch').prefetch_related('items__menu_item')
         
-        # If superuser, allow all
-        if user.is_authenticated and user.is_superuser:
+        # If superuser or customer GET request (order tracking by order ID), allow retrieval
+        if self.request.method == 'GET':
             return queryset
             
-        # If the user is a manager (is_staff and not is_superuser), restrict queryset to their managed restaurant/branch
+        # If the user is a manager (is_staff and not is_superuser), restrict update operations to their managed restaurant/branch
         if user.is_authenticated and user.is_staff:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             managed_branch = get_managed_branch(user)
@@ -184,16 +184,10 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                     return queryset.filter(restaurant=managed)
                 return Order.objects.none()
             
-        # If ordinary authenticated user, restrict strictly to their own orders
         if user.is_authenticated:
             return queryset.filter(user=user)
-            
-        # If anonymous (no token attached), restrict to guest orders where phone matches
-        guest_phone = self.request.query_params.get('phone', '')
-        if guest_phone:
-            return queryset.filter(guest_phone=guest_phone)
         
-        return Order.objects.none()
+        return queryset
 
 
 class MyOrdersListView(generics.ListAPIView):
