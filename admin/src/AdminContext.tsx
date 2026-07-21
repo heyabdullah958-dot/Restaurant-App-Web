@@ -61,6 +61,7 @@ interface AdminContextProps {
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
   removeRestaurantBanner: (id: number) => Promise<void>;
+  updateRestaurantDetails: (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => Promise<void>;
   updateUser: (fields: Partial<User>) => void;
 }
 
@@ -1032,6 +1033,32 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const updateRestaurantDetails = async (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => {
+    setLoading(true);
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (isMock) {
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, ...data } : r))
+      );
+      showToast('Restaurant details updated (Mock)! ⚙️', 'success');
+      setLoading(false);
+      return;
+    }
+    try {
+      const updated = await updateRestaurant(id, data);
+      const mapped = mapApiRestaurant(updated);
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? mapped : r))
+      );
+      showToast('Branch settings updated successfully! ⚙️', 'success');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to update branch settings', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Polling for live orders (every 30 seconds)
   useEffect(() => {
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
@@ -1074,6 +1101,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         editMenuItem,
         updateRestaurantBanner,
         removeRestaurantBanner,
+        updateRestaurantDetails,
         updateUser,
       }}
     >

@@ -14,12 +14,22 @@ import {
   Camera,
   Trash2,
   Eye,
-  X
+  X,
+  Settings,
+  Save,
+  Loader2
 } from 'lucide-react';
 
 export const BranchDashboard: React.FC = () => {
-  const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
+  const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails } = useAdmin();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  // Edit Branch Modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPhone, setEditPhone] = useState('');
+  const [editCity, setEditCity] = useState('');
+  const [editIsActive, setEditIsActive] = useState(true);
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
 
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
   
@@ -295,13 +305,28 @@ export const BranchDashboard: React.FC = () => {
             </div>
           </div>
           
-          <span className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
-            restaurant.is_active
-              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-              : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-          }`}>
-            {restaurant.is_active ? 'Accepting Orders' : 'Branch Suspended'}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEditPhone(restaurant.phone || '');
+                setEditCity(restaurant.city || '');
+                setEditIsActive(restaurant.is_active);
+                setShowEditModal(true);
+              }}
+              className="bg-slate-800/80 hover:bg-slate-800 backdrop-blur-md text-slate-200 hover:text-white px-3 py-1.5 rounded-full text-xs font-bold border border-slate-700 shadow-md flex items-center gap-1.5 transition-all hover:scale-[1.03]"
+            >
+              <Settings size={13} />
+              Branch Settings
+            </button>
+            <span className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
+              restaurant.is_active
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+            }`}>
+              {restaurant.is_active ? 'Accepting Orders' : 'Branch Suspended'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -441,6 +466,126 @@ export const BranchDashboard: React.FC = () => {
               alt="Banner Preview" 
               className="w-full h-auto max-h-[80vh] object-contain mx-auto"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Branch Settings Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-5 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <Settings size={18} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-zinc-900 dark:text-white text-base leading-tight">
+                    Edit Branch Settings
+                  </h3>
+                  <p className="text-xs text-zinc-500 dark:text-slate-400">
+                    {restaurant.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="text-zinc-400 hover:text-zinc-600 dark:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-slate-300 mb-1">
+                  Contact / WhatsApp Phone
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-400">
+                    <Phone size={14} />
+                  </span>
+                  <input
+                    type="text"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="e.g. 0327-4945947"
+                    className="w-full pl-9 pr-3 py-2 text-sm bg-zinc-50 dark:bg-slate-800 border border-zinc-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-slate-300 mb-1">
+                  City / Location
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-400">
+                    <MapPin size={14} />
+                  </span>
+                  <input
+                    type="text"
+                    value={editCity}
+                    onChange={(e) => setEditCity(e.target.value)}
+                    placeholder="e.g. Lahore"
+                    className="w-full pl-9 pr-3 py-2 text-sm bg-zinc-50 dark:bg-slate-800 border border-zinc-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 bg-zinc-50 dark:bg-slate-800/60 border border-zinc-200/60 dark:border-slate-700/60 rounded-xl">
+                <div>
+                  <div className="text-xs font-bold text-zinc-900 dark:text-white">
+                    Accept Orders Status
+                  </div>
+                  <div className="text-[11px] text-zinc-500 dark:text-slate-400">
+                    {editIsActive ? 'Branch is live & taking orders' : 'Branch is currently offline'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditIsActive(!editIsActive)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    editIsActive ? 'bg-emerald-500' : 'bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      editIsActive ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-100 dark:border-slate-800 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 text-xs font-bold text-zinc-600 dark:text-slate-400 hover:bg-zinc-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSavingDetails}
+                onClick={async () => {
+                  setIsSavingDetails(true);
+                  await updateRestaurantDetails(restaurant.id, {
+                    phone: editPhone,
+                    city: editCity,
+                    is_active: editIsActive,
+                  });
+                  setIsSavingDetails(false);
+                  setShowEditModal(false);
+                }}
+                className="px-4 py-2 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-xl shadow-md transition-all flex items-center gap-1.5"
+              >
+                {isSavingDetails ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       )}
