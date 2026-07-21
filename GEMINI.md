@@ -142,7 +142,11 @@ FoodSphere/
 | Payment integration (Stripe + PayFast) | ✅ Completed (Staging endpoints wired) | Done |
 | Admin Panels (Django + React Live) | ✅ Completed (100% Integrated) | Done |
 | All 7 websites live | ✅ Completed (7/7 Live) | Done |
-| App store submission | ⏳ Pending (Awaiting client accounts) | TBD |
+| Tandoori Stop Asset Upload | ✅ Completed (41 Menu Items + Logo linked to Cloudinary) | Done |
+| Branch Manager Settings Modal | ✅ Completed (Interactive contact & status modal) | Done |
+| Heroku 24/7 Migration | ⏳ Pending (Awaiting client Heroku account & card) | Client Handoff |
+| Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
+| App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
 ### 🔗 Deployed Prototypes
 
