@@ -69,39 +69,39 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     import logging
                     logging.getLogger(__name__).error(f"Failed to send order FCM: {e}")
             
-            # Send email notification to branch manager
-            if order.branch:
-                try:
-                    from restaurants.models import Branch
-                    from users.models import ManagerProfile
-                    from django.core.mail import send_mail
-                    from django.conf import settings
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    
+            # Send email notifications (Branch Manager: Full details | Restaurant Manager: Summary)
+            try:
+                from users.models import ManagerProfile, User
+                from django.core.mail import send_mail
+                from django.conf import settings
+                import logging
+                logger = logging.getLogger(__name__)
+                
+                customer_name = (
+                    order.guest_name or 
+                    getattr(order.user, 'username', 'Customer')
+                )
+                
+                order_items_text = '\n'.join([
+                    f"  - {item.menu_item.name} x{item.quantity} = Rs. {item.total_price}"
+                    for item in order.items.select_related('menu_item').all()
+                ])
+
+                # 1. Branch Manager Email (Full Order Details)
+                if order.branch:
                     branch_managers = ManagerProfile.objects.filter(
                         branch=order.branch
                     ).select_related('user')
                     
-                    manager_emails = [
+                    branch_emails = [
                         mp.notification_email 
                         for mp in branch_managers 
                         if mp.notification_email
                     ]
                     
-                    if manager_emails:
-                        order_items_text = '\n'.join([
-                            f"  - {item.menu_item.name} x{item.quantity} = Rs. {item.total_price}"
-                            for item in order.items.select_related('menu_item').all()
-                        ])
-                        
-                        customer_name = (
-                            order.guest_name or 
-                            getattr(order.user, 'username', 'Customer')
-                        )
-                        
-                        subject = f"🛵 New Order #{order.id} — {order.branch.name} Branch"
-                        message = f"""New order received at your branch!
+                    if branch_emails:
+                        branch_subject = f"🛵 [Branch Order] Order #{order.id} — {order.branch.name} Branch"
+                        branch_message = f"""New order received at your branch!
 
 ORDER DETAILS
 ─────────────────────────────
@@ -129,20 +129,59 @@ https://foodsphere-admin.pages.dev
 — FoodSphere Platform
 """
                         send_mail(
-                            subject,
-                            message,
+                            branch_subject,
+                            branch_message,
                             settings.DEFAULT_FROM_EMAIL,
-                            manager_emails,
+                            branch_emails,
                             fail_silently=True,
                         )
-                        logger.info(
-                            f"Order #{order.id} notification sent to: {manager_emails}"
-                        )
-                except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).error(
-                        f"Failed to send branch manager email for Order #{order.id}: {e}"
+                        logger.info(f"Order #{order.id} branch email sent to: {branch_emails}")
+
+                # 2. Restaurant Manager Email (Order Summary)
+                rest_group_name = f"manager_{order.restaurant.slug}"
+                rest_managers = User.objects.filter(
+                    groups__name=rest_group_name,
+                    is_staff=True
+                ).exclude(manager_profile__isnull=False)
+                
+                rest_emails = [u.email for u in rest_managers if u.email]
+                if not rest_emails:
+                    rest_emails = [f"manager.{order.restaurant.slug}@foodsphere.com"]
+                
+                if rest_emails:
+                    rest_subject = f"📊 [Restaurant Summary] Order #{order.id} — {order.restaurant.name}"
+                    rest_message = f"""New order placed across {order.restaurant.name}!
+
+ORDER SUMMARY
+─────────────────────────────
+Order #:     {order.id}
+Restaurant:  {order.restaurant.name}
+Branch:      {order.branch.name if order.branch else 'Unassigned'}
+Customer:    {customer_name}
+Total:       Rs. {order.total}
+Payment:     {order.get_payment_method_display()}
+Placed at:   {order.created_at.strftime('%d %b %Y, %I:%M %p')}
+─────────────────────────────
+Log in to FoodSphere Admin Panel:
+https://foodsphere-admin.pages.dev
+
+— FoodSphere Platform
+"""
+                    send_mail(
+                        rest_subject,
+                        rest_message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        rest_emails,
+                        fail_silently=True,
                     )
+                    logger.info(f"Order #{order.id} restaurant summary email sent to: {rest_emails}")
+
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(
+                    f"Failed to send email notifications for Order #{order.id}: {e}"
+                )
+
                     
             return Response({
                 'success': True,

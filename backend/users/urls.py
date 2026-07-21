@@ -27,10 +27,12 @@ urlpatterns = [
     path('admin/customers/<int:pk>/loyalty/', AdminCustomerLoyaltyView.as_view(), name='admin_customer_loyalty'),
 
     # ── Admin Manager Management ───────────────────────────
+    path('managers/', AdminManagerListView.as_view(), name='manager_list'),
     path('admin/managers/', AdminManagerListView.as_view(), name='admin_manager_list'),
     path('admin/managers/create/', AdminManagerCreateView.as_view(), name='admin_manager_create'),
     path('admin/branches/', AdminBranchListView.as_view(), name='admin_branch_list'),
     path('admin/managers/<int:pk>/change-password/', AdminManagerChangePasswordView.as_view(), name='admin_manager_change_password'),
+
 
     # ── Analytics API ──────────────────────────────────────
     path('analytics/platform/', PlatformAnalyticsView.as_view(), name='analytics_platform'),

@@ -57,8 +57,9 @@ class ConfirmCODPaymentView(APIView):
         try:
             order = Order.objects.get(pk=order_id)
 
-            if request.user.is_authenticated:
-                if order.user and order.user != request.user:
+            # Check permission: if registered user, verify ownership. Allow guests & anonymous checkout.
+            if request.user.is_authenticated and not getattr(request.user, 'is_guest', False):
+                if order.user and order.user != request.user and not order.user.is_guest:
                     logger.warning(
                         f"User {request.user.id} attempted to confirm order {order_id} "
                         f"owned by user {order.user.id}"
@@ -67,15 +68,7 @@ class ConfirmCODPaymentView(APIView):
                         'success': False,
                         'message': 'You do not have permission to confirm this order.'
                     }, status=status.HTTP_403_FORBIDDEN)
-            else:
-                if order.user is not None:
-                    logger.warning(
-                        f"Anonymous user attempted to confirm registered user's order {order_id}"
-                    )
-                    return Response({
-                        'success': False,
-                        'message': 'You do not have permission to confirm this order.'
-                    }, status=status.HTTP_403_FORBIDDEN)
+
 
             if order.status not in ('received', 'pending'):
                 return Response({

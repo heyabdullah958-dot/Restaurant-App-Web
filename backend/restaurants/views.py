@@ -171,3 +171,37 @@ class AdminMenuItemViewSet(viewsets.ModelViewSet):
                 raise ValidationError("You cannot move items to a category belonging to another restaurant.")
         serializer.save()
 
+
+from .models import Branch
+
+class BranchListView(generics.ListAPIView):
+    """
+    GET /api/branches/
+    Lists active branches. Optional filter: ?restaurant_id=1 or ?restaurant_slug=tandooristoppk
+    """
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+    def get(self, request):
+        qs = Branch.objects.filter(is_active=True).select_related('restaurant')
+        restaurant_id = request.query_params.get('restaurant_id')
+        restaurant_slug = request.query_params.get('restaurant_slug')
+        if restaurant_id:
+            qs = qs.filter(restaurant_id=restaurant_id)
+        elif restaurant_slug:
+            qs = qs.filter(restaurant__slug=restaurant_slug)
+        return Response({
+            'success': True,
+            'data': [{
+                'id': b.id,
+                'name': b.name,
+                'address': b.address,
+                'phone': b.phone,
+                'area_keywords': b.area_keywords,
+                'restaurant_id': b.restaurant_id,
+                'restaurant_name': b.restaurant.name,
+                'restaurant_slug': b.restaurant.slug,
+            } for b in qs]
+        })
+
+

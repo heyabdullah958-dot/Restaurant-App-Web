@@ -458,57 +458,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const refreshOrders = async () => {
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
     if (isMock) {
-      // Simulate incoming live orders in demo mode (25% chance every poll)
-      if (Math.random() < 0.25) {
-        const nextId = orders.length > 0 ? Math.max(...orders.map((o) => o.id)) + 1 : 101;
-        const mockNames = ['Zainab Khan', 'Hamza Ali', 'Aisha Bibi', 'Mustafa Shah', 'Fatima Lodhi'];
-        const randomName = mockNames[Math.floor(Math.random() * mockNames.length)];
-        const mockDishes = [
-          { name: 'Chicken Karahi', price: 1200 },
-          { name: 'Seekh Kabab Plate', price: 800 },
-          { name: 'Special Mutton Handi', price: 2200 },
-          { name: 'Garlic Naan', price: 150 }
-        ];
-        const randomDish = mockDishes[Math.floor(Math.random() * mockDishes.length)];
-        const qty = Math.floor(Math.random() * 2) + 1;
-        const itemTotal = randomDish.price * qty;
-
-        const newMockOrder: Order = {
-          id: nextId,
-          restaurant_id: selectedBrandId,
-          restaurant_name: restaurants.find((r) => r.id === selectedBrandId)?.name || 'SeenBanao',
-          user_or_guest: randomName,
-          guest_name: randomName,
-          guest_phone: `+92 3${Math.floor(100000000 + Math.random() * 900000000)}`,
-          delivery_address: 'Street 4, Sector G-11, Islamabad',
-          payment_method: 'cod',
-          status: 'pending',
-          subtotal: itemTotal,
-          delivery_fee: 0,
-          discount: 0,
-          total: itemTotal,
-          created_at: new Date().toISOString(),
-          items: [{
-            id: Math.floor(Math.random() * 100000),
-            menu_item: Math.floor(Math.random() * 100000),
-            menu_item_name: randomDish.name,
-            quantity: qty,
-            unit_price: randomDish.price,
-            total_price: itemTotal
-          }]
-        };
-
-        setOrders((prev) => [newMockOrder, ...prev]);
-        
-        // Play digital notification sound
-        try {
-          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
-          audio.play().catch(() => {});
-        } catch {}
-        showToast(`🔔 New Order #${nextId} received!`, 'info');
-      }
+      // Mock mode — do not auto-generate fake random orders
       return;
     }
+
     try {
       const orderData = await fetchAllOrders();
       const newOrders = orderData.results.map(mapApiOrder);

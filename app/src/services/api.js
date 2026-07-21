@@ -1,10 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Base URL can be configured via environment variables or fall back to localhost
+// Base URL — always use production Heroku backend.
+// NOTE: process.env.EXPO_PUBLIC_API_URL only loads correctly when running via QR code scan (Metro bundler).
+// When running Expo Go without QR (direct local), env vars don't inject — so we hardcode the production URL here.
 import { Platform } from 'react-native';
-const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
