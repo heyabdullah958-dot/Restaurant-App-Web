@@ -22,7 +22,7 @@
 | Platform / Website | Live URL | Status |
 |---|---|---|
 | 👑 **Admin Panel (HQ Dashboard)** | [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev) | ✅ Live on Cloudflare |
-| 🐍 **Backend API** | [https://restaurant-app-web.onrender.com](https://restaurant-app-web.onrender.com) | ✅ Live on Render |
+| 🚀 **Backend API (Heroku 24/7)** | [https://getfoodpk-fd9b20442fcf.herokuapp.com](https://getfoodpk-fd9b20442fcf.herokuapp.com) | ✅ Live on Heroku (24/7 Zero-Sleep) |
 | 🫓 **Tandoori Stop Website** | [https://tandooristoppk-foodsphere.pages.dev](https://tandooristoppk-foodsphere.pages.dev) | ✅ Live (HD Photos & Logo) |
 | 🍔 **Jushh Website** | [https://jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev) | ✅ Live |
 | ☕️ **GetAFomo Website** | [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev) | ✅ Live (Instagram Feed) |

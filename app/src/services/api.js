@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Base URL can be configured via environment variables or fall back to localhost
 import { Platform } from 'react-native';
 const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

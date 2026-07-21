@@ -82,7 +82,7 @@ const MainLayout: React.FC = () => {
             </span>
             <button 
               onClick={() => {
-                const apiBase = import.meta.env.VITE_API_URL || 'https://restaurant-app-web.onrender.com/api';
+                const apiBase = import.meta.env.VITE_API_URL || 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
                 const healthUrl = apiBase.endsWith('/api') ? `${apiBase}/health/` : `${apiBase}/api/health/`;
                 fetch(healthUrl, { mode: 'cors' })
                   .then(r => {
