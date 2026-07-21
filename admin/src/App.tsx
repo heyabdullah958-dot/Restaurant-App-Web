@@ -21,7 +21,7 @@ const MainLayout: React.FC = () => {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('admin-theme') === 'dark';
   });
-  const isMockMode = !!localStorage.getItem('foodsphere_admin_mock_user');
+  const isMockMode = !!localStorage.getItem('foodsphere_admin_mock_user') && !localStorage.getItem('foodsphere_admin_token');
 
   useEffect(() => {
     if (darkMode) {
