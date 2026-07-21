@@ -302,6 +302,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // 1. Authenticate and get JWT tokens
       const response = await loginAdmin(username, password);
       setTokens(response.access, response.refresh);
+      localStorage.removeItem('foodsphere_admin_mock_user');
 
       // 2. Decode JWT to determine role
       const payload = decodeToken(response.access);
