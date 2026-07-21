@@ -207,6 +207,11 @@ export const guestLogin = createAsyncThunk<
   'user/guestLogin',
   async (_, { rejectWithValue }) => {
     try {
+      // Clear stale authorization headers so SimpleJWT does not reject guest authentication
+      delete api.defaults.headers.common['Authorization'];
+      await AsyncStorage.removeItem('auth_token').catch(() => {});
+      await AsyncStorage.removeItem('refresh_token').catch(() => {});
+
       // POST to /auth/guest/
       const response = await api.post('/auth/guest/') as any;
       const responseData = response.data || response;

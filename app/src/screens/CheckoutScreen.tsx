@@ -218,13 +218,12 @@ export default function CheckoutScreen() {
 
     try {
       // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
-      if (!isAuthenticated) {
+      if (!isAuthenticated || isGuestMode) {
         try {
+          delete api.defaults.headers.common['Authorization'];
           await dispatch(guestLogin()).unwrap();
         } catch (e) {
-          setIsSubmitting(false);
-          showAlert('Checkout Error', 'Failed to initialize guest checkout session.');
-          return;
+          console.warn('Guest login error in checkout, proceeding with guest payload:', e);
         }
       }
 
