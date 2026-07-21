@@ -467,6 +467,14 @@ export default function TrackingScreen() {
             <Ionicons name="location-outline" size={20} color={COLORS.gray} />
             <Text style={styles.infoValueText}>{currentOrder?.delivery_address}</Text>
           </View>
+          {(currentOrder?.branch_name || currentOrder?.branch?.name) && (
+            <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
+              <Ionicons name="storefront-outline" size={20} color={COLORS.primary} />
+              <Text style={[styles.infoValueText, { fontWeight: 'bold', color: COLORS.primary }]}>
+                Branch: {currentOrder.branch_name || currentOrder.branch.name}
+              </Text>
+            </View>
+          )}
           {currentOrder?.special_instructions && (
             <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
               <Ionicons name="chatbox-ellipses-outline" size={20} color={COLORS.gray} />

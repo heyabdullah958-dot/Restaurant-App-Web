@@ -247,11 +247,13 @@ export default function CheckoutScreen() {
           console.error('Failed to save delivery address on checkout:', e);
         }
 
+        const branchName = createdOrder.branch_name || createdOrder.branch?.name;
+
         // 5. Handle payments integration based on choice
         if (paymentMethod === 'cod') {
           await dispatch(confirmCODPayment(orderId));
           showAlert('Success', 'Order placed successfully! Cash on Delivery confirmed.', [
-             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned }); } }
+             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned, branchName }); } }
           ]);
         } else if (paymentMethod === 'stripe') {
           const stripeResult = await dispatch(createStripeIntent(orderId));

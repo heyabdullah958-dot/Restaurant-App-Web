@@ -52,7 +52,7 @@ type RootStackParamList = {
   Home: undefined;
   Main: undefined;
   Tracking: { orderId: number };
-  OrderConfirmation: { orderId: number; loyaltyPointsEarned?: number };
+  OrderConfirmation: { orderId: number; loyaltyPointsEarned?: number; branchName?: string };
 };
 
 type OrderConfirmationRouteProp = RouteProp<RootStackParamList, 'OrderConfirmation'>;
@@ -61,7 +61,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'OrderConfir
 export default function OrderConfirmationScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<OrderConfirmationRouteProp>();
-  const { orderId, loyaltyPointsEarned = 0 } = route.params || {};
+  const { orderId, loyaltyPointsEarned = 0, branchName } = route.params || {};
 
   // Animation values
   const scaleValue = useRef(new Animated.Value(0.3)).current;
@@ -146,6 +146,17 @@ export default function OrderConfirmationScreen() {
                 Estimated Delivery: <Text style={{ fontWeight: 'bold', color: COLORS.dark }}>30–45 minutes</Text>
               </Text>
             </View>
+            {branchName ? (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.etaRow}>
+                  <Ionicons name="location" size={16} color={COLORS.primary} />
+                  <Text style={styles.etaText}>
+                    Assigned Branch: <Text style={{ fontWeight: 'bold', color: COLORS.primary }}>{branchName}</Text>
+                  </Text>
+                </View>
+              </>
+            ) : null}
           </View>
 
           {/* Rewards Card */}
