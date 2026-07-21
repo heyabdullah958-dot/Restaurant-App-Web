@@ -94,10 +94,12 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
 
 /** Convert API order shape → internal Order shape */
 function mapApiOrder(o: ApiOrder): Order {
+  const restId = typeof o.restaurant === 'object' && o.restaurant ? Number((o.restaurant as any).id) : Number(o.restaurant);
+  const restName = o.restaurant_name || (typeof o.restaurant === 'object' && o.restaurant ? (o.restaurant as any).name : `Restaurant #${o.restaurant}`);
   return {
     id: o.id,
-    restaurant_id: o.restaurant,
-    restaurant_name: o.restaurant_name || `Restaurant #${o.restaurant}`,
+    restaurant_id: restId,
+    restaurant_name: restName,
     user_or_guest: o.guest_name || 'Guest',
     guest_name: o.guest_name,
     guest_phone: o.guest_phone,
