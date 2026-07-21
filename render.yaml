@@ -12,6 +12,7 @@ services:
       python manage.py migrate --noinput &&
       python manage.py seed_restaurants &&
       python manage.py seed_branches &&
+      python manage.py seed_tandoori_images &&
       python manage.py create_admin &&
       python manage.py create_restaurant_managers
     startCommand: gunicorn config.wsgi:application --log-file - --timeout 120 --workers 2 --worker-class gthread --threads 4 --max-requests 1000 --max-requests-jitter 100 --bind 0.0.0.0:$PORT --keep-alive 5
