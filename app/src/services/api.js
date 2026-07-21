@@ -112,7 +112,7 @@ api.interceptors.response.use(
         isRefreshing = false;
       }
 
-      console.warn('Unauthorized request — session expired. Logging out...');
+      console.log('Unauthorized request — session expired. Logging out...');
       // Delete authorization header
       delete api.defaults.headers.common['Authorization'];
       // Remove token from AsyncStorage

@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { guestLogin } from './userSlice';
 
 export const placeOrder = createAsyncThunk(
   'order/placeOrder',
@@ -10,11 +12,25 @@ export const placeOrder = createAsyncThunk(
     items: Array<{ menu_item: number; quantity: number; special_notes?: string }>;
     payment_method: string;
     delivery_address: string;
-  }, { rejectWithValue }) => {
+  }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post('/orders/', orderData);
       return response.data || response;
     } catch (error: any) {
+      // If 401 invalid/expired token error occurs, automatically clear bad token and retry with a fresh guest session
+      if (error.response?.status === 401 || JSON.stringify(error.response?.data || '').includes('token')) {
+        try {
+          delete api.defaults.headers.common['Authorization'];
+          await AsyncStorage.removeItem('auth_token');
+          await AsyncStorage.removeItem('refresh_token');
+          await dispatch(guestLogin()).unwrap();
+          const retryResponse = await api.post('/orders/', orderData);
+          return retryResponse.data || retryResponse;
+        } catch (retryErr: any) {
+          console.warn('Auto-retry place order with fresh session failed:', retryErr);
+        }
+      }
+
       const errorData = error.response?.data;
       let errMsg = 'Failed to place order';
       if (errorData) {
