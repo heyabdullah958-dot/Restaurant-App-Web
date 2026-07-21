@@ -126,11 +126,11 @@ api.interceptors.response.use(
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
     } else if (error.response) {
-      console.error('API Error Response:', error.response.status, error.response.data);
+      console.warn('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
-      console.error('API No Response:', error.request);
+      console.warn('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
     } else {
-      console.error('API Request Setup Error:', error.message);
+      console.warn('API Request Setup Error:', error.message);
     }
     return Promise.reject(error);
   }
