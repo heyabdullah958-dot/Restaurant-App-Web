@@ -82,22 +82,26 @@ const MainLayout: React.FC = () => {
             </span>
             <button 
               onClick={() => {
-                fetch((import.meta.env.VITE_API_URL || 'https://restaurant-app-web.onrender.com') + '/health/')
+                const apiBase = import.meta.env.VITE_API_URL || 'https://restaurant-app-web.onrender.com/api';
+                const healthUrl = apiBase.endsWith('/api') ? `${apiBase}/health/` : `${apiBase}/api/health/`;
+                fetch(healthUrl, { mode: 'cors' })
                   .then(r => {
-                    if (r.ok) {
+                    if (r.ok || r.status < 500) {
                       localStorage.removeItem('foodsphere_admin_mock_user');
                       localStorage.removeItem('foodsphere_admin_token');
                       localStorage.removeItem('foodsphere_admin_refresh');
                       window.location.reload();
                     } else {
-                      alert('Server is still waking up... Please wait another moment ☕');
+                      alert('Server is still waking up... Please wait 10-15 seconds and try again ☕');
                     }
                   })
                   .catch(() => {
-                    alert('Server is still waking up... Please wait another moment ☕');
+                    // Try removing mock flag and refreshing directly
+                    localStorage.removeItem('foodsphere_admin_mock_user');
+                    window.location.reload();
                   });
               }}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase transition-all"
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               Try Reconnect
             </button>
