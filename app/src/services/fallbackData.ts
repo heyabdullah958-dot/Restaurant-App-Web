@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export interface MenuItem {
   id: number;
   name: string;
@@ -226,11 +228,11 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     name: "jushhpk",
     slug: "jushhpk",
     cuisine_type: "Fast Food & Burgers",
-    logo: "https://jushhpk-foodsphere.pages.dev/images/jushh_logo.jpg",
-    cover_image: "https://jushhpk-foodsphere.pages.dev/images/jushh_banner_collage.jpg",
+    logo: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+    cover_image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_banner_collage.jpg",
     description: "Sizzling gourmet burgers, loaded dynamic fries, and unbeatable value combo meals.",
-    address: "F-11 Markaz, Islamabad",
-    city: "Islamabad",
+    address: "Gulberg III, Lahore",
+    city: "Lahore",
     phone: "+92 51 9876543",
     is_active: true,
     is_featured: true,
@@ -250,8 +252,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 1,
         is_active: true,
         items: [
-          { id: 3001, name: "Chicken Doner Fries", description: "Crispy fries topped with sliced chicken doner and sauces", price: 600, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_doner_fries.jpg", is_available: true, is_featured: true, preparation_time: 10 },
-          { id: 3002, name: "Beef Doner Fries", description: "Crispy fries topped with sliced beef doner and signature sauces", price: 750, image: "https://jushhpk-foodsphere.pages.dev/images/beef_doner_fries.jpg", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 3001, name: "Chicken Doner Fries", description: "Crispy fries topped with sliced chicken doner and sauces", price: 600, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 3002, name: "Beef Doner Fries", description: "Crispy fries topped with sliced beef doner and signature sauces", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       },
       {
@@ -261,15 +263,15 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 2,
         is_active: true,
         items: [
-          { id: 3003, name: "Chicken Grilled Sandwich", description: "Grilled chicken sandwich Turkish style", price: 750, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_grilled_sandwich.jpg", is_available: true, is_featured: true, preparation_time: 12 },
-          { id: 3033, name: "Beef Grilled Sandwich", description: "Grilled beef sandwich Turkish style", price: 950, image: "https://jushhpk-foodsphere.pages.dev/images/beef_grilled_sandwich.jpg", is_available: true, is_featured: false, preparation_time: 12 },
-          { id: 3004, name: "Half Dubai Shawaya", description: "Traditional roasted chicken shawaya half portion", price: 1400, image: "https://jushhpk-foodsphere.pages.dev/images/half_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 20 },
-          { id: 3005, name: "Full Dubai Shawaya", description: "Traditional roasted chicken shawaya full portion", price: 2500, image: "https://jushhpk-foodsphere.pages.dev/images/full_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 25 },
-          { id: 3006, name: "Add-on Rice", description: "Spiced Arabic rice serving for Shawaya", price: 300, image: "https://jushhpk-foodsphere.pages.dev/images/addon_rice.jpg", is_available: true, is_featured: false, preparation_time: 8 },
-          { id: 3007, name: "Chicken Turkish Wrap", description: "Spiced chicken doner wrapped in soft flatbread", price: 600, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3008, name: "Beef Turkish Wrap", description: "Premium beef doner wrapped in soft flatbread", price: 900, image: "https://jushhpk-foodsphere.pages.dev/images/beef_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3009, name: "Chicken Turkish Doner", description: "Traditional Turkish chicken doner in pita bread", price: 850, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_turkish_doner.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3010, name: "Beef Turkish Doner", description: "Traditional Turkish beef doner in pita bread", price: 1100, image: "https://jushhpk-foodsphere.pages.dev/images/beef_turkish_doner.jpg", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 3003, name: "Chicken Grilled Sandwich", description: "Grilled chicken sandwich Turkish style", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg", is_available: true, is_featured: true, preparation_time: 12 },
+          { id: 3033, name: "Beef Grilled Sandwich", description: "Grilled beef sandwich Turkish style", price: 950, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg", is_available: true, is_featured: false, preparation_time: 12 },
+          { id: 3004, name: "Half Dubai Shawaya", description: "Traditional roasted chicken shawaya half portion", price: 1400, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 20 },
+          { id: 3005, name: "Full Dubai Shawaya", description: "Traditional roasted chicken shawaya full portion", price: 2500, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 25 },
+          { id: 3006, name: "Add-on Rice", description: "Spiced Arabic rice serving for Shawaya", price: 300, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg", is_available: true, is_featured: false, preparation_time: 8 },
+          { id: 3007, name: "Chicken Turkish Wrap", description: "Spiced chicken doner wrapped in soft flatbread", price: 600, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3008, name: "Beef Turkish Wrap", description: "Premium beef doner wrapped in soft flatbread", price: 900, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3009, name: "Chicken Turkish Doner", description: "Traditional Turkish chicken doner in pita bread", price: 850, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3010, name: "Beef Turkish Doner", description: "Traditional Turkish beef doner in pita bread", price: 1100, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       },
       {
@@ -279,13 +281,13 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 3,
         is_active: true,
         items: [
-          { id: 3011, name: "Chicken Pouch Shawarma", description: "Pocket-style chicken shawarma pocket bread", price: 450, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3012, name: "Beef Pouch Shawarma", description: "Pocket-style beef shawarma pocket bread", price: 700, image: "https://jushhpk-foodsphere.pages.dev/images/beef_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3013, name: "Chicken Shawarma", description: "Classic Lebanese chicken shawarma wrap", price: 550, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3014, name: "Beef Shawarma", description: "Classic Lebanese beef shawarma wrap", price: 750, image: "https://jushhpk-foodsphere.pages.dev/images/beef_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3015, name: "Charcoal Shawarma Chicken", description: "Charcoal grilled chicken shawarma wrapped in flatbread", price: 750, image: "https://jushhpk-foodsphere.pages.dev/images/charcoal_shawarma_chicken.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 3016, name: "Chicken Shawarma Platter", description: "Deconstructed chicken shawarma served on a platter", price: 900, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_shawarma_platter.jpg", is_available: true, is_featured: false, preparation_time: 12 },
-          { id: 3032, name: "Chicken Shawarma Platter (with cheese)", description: "Deconstructed chicken shawarma topped with melted cheese", price: 1000, image: "https://jushhpk-foodsphere.pages.dev/images/chicken_shawarma_platter.jpg", is_available: true, is_featured: false, preparation_time: 12 }
+          { id: 3011, name: "Chicken Pouch Shawarma", description: "Pocket-style chicken shawarma pocket bread", price: 450, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3012, name: "Beef Pouch Shawarma", description: "Pocket-style beef shawarma pocket bread", price: 700, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3013, name: "Chicken Shawarma", description: "Classic Lebanese chicken shawarma wrap", price: 550, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3014, name: "Beef Shawarma", description: "Classic Lebanese beef shawarma wrap", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3015, name: "Charcoal Shawarma Chicken", description: "Charcoal grilled chicken shawarma wrapped in flatbread", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 3016, name: "Chicken Shawarma Platter", description: "Deconstructed chicken shawarma served on a platter", price: 900, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg", is_available: true, is_featured: false, preparation_time: 12 },
+          { id: 3032, name: "Chicken Shawarma Platter (with cheese)", description: "Deconstructed chicken shawarma topped with melted cheese", price: 1000, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg", is_available: true, is_featured: false, preparation_time: 12 }
         ]
       },
       {
@@ -308,9 +310,9 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         is_active: true,
         items: [
           { id: 3020, name: "Cheese", description: "Extra melted cheese portion", price: 90, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 2 },
-          { id: 3021, name: "Dip", description: "Signature Jushh garlic or spicy dip", price: 90, image: "https://jushhpk-foodsphere.pages.dev/images/garlic_dip.jpg", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3021, name: "Dip", description: "Signature Jushh garlic or spicy dip", price: 90, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg", is_available: true, is_featured: false, preparation_time: 2 },
           { id: 3022, name: "Tortilla Bread", description: "Extra soft tortilla flatbread", price: 90, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 5 },
-          { id: 3023, name: "Pita Bread", description: "Extra Lebanese pita pocket bread", price: 60, image: "https://jushhpk-foodsphere.pages.dev/images/pita_bread.jpg", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3023, name: "Pita Bread", description: "Extra Lebanese pita pocket bread", price: 60, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg", is_available: true, is_featured: false, preparation_time: 5 },
           { id: 3024, name: "Plain Fries", description: "Golden salted french fries side", price: 150, image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 8 }
         ]
       },
@@ -321,13 +323,13 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 6,
         is_active: true,
         items: [
-          { id: 3025, name: "Water", description: "Mineral water bottle", price: 80, image: "https://jushhpk-foodsphere.pages.dev/images/water_bottle.jpg", is_available: true, is_featured: false, preparation_time: 2 },
-          { id: 3026, name: "Soft Drink", description: "Chilled regular soft drink", price: 150, image: "https://jushhpk-foodsphere.pages.dev/images/soft_drink.jpg", is_available: true, is_featured: false, preparation_time: 2 },
-          { id: 3027, name: "Blueberry Mojito", description: "Refreshing blueberry mocktail", price: 290, image: "https://jushhpk-foodsphere.pages.dev/images/blueberry_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
-          { id: 3028, name: "Strawberry Mojito", description: "Refreshing strawberry mocktail", price: 290, image: "https://jushhpk-foodsphere.pages.dev/images/strawberry_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
-          { id: 3029, name: "Green Apple Mojito", description: "Refreshing green apple mocktail", price: 290, image: "https://jushhpk-foodsphere.pages.dev/images/green_apple_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
-          { id: 3030, name: "Peach Mojito", description: "Refreshing peach mocktail", price: 290, image: "https://jushhpk-foodsphere.pages.dev/images/peach_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
-          { id: 3031, name: "Lemon Mojito", description: "Refreshing lemon mint mocktail", price: 290, image: "https://jushhpk-foodsphere.pages.dev/images/lemon_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 }
+          { id: 3025, name: "Water", description: "Mineral water bottle", price: 80, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3026, name: "Soft Drink", description: "Chilled regular soft drink", price: 150, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg", is_available: true, is_featured: false, preparation_time: 2 },
+          { id: 3027, name: "Blueberry Mojito", description: "Refreshing blueberry mocktail", price: 290, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3028, name: "Strawberry Mojito", description: "Refreshing strawberry mocktail", price: 290, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3029, name: "Green Apple Mojito", description: "Refreshing green apple mocktail", price: 290, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3030, name: "Peach Mojito", description: "Refreshing peach mocktail", price: 290, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 },
+          { id: 3031, name: "Lemon Mojito", description: "Refreshing lemon mint mocktail", price: 290, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg", is_available: true, is_featured: false, preparation_time: 5 }
         ]
       }
     ]
@@ -694,7 +696,8 @@ export const getImageUrl = (path: string | null) => {
     return { uri: path };
   }
   // Remove /api if present at the end of the base URL
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
+  const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
   const base = apiUrl.replace(/\/api\/?$/, '');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return { uri: `${base}${cleanPath}` };

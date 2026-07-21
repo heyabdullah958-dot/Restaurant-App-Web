@@ -274,7 +274,7 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
             <View style={styles.infoBullet}>
               <Ionicons name="pizza-outline" size={16} color={COLORS.primary} />
             </View>
-            <Text style={styles.infoText}>Earn 1 point for every Rs. 100 spent across all 7 restaurant brands.</Text>
+            <Text style={styles.infoText}>Earn 1 point for every Rs. 100 spent across all 3 restaurant brands.</Text>
           </View>
           <View style={styles.infoRow}>
             <View style={styles.infoBullet}>

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { Platform } from 'react-native';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -52,7 +53,8 @@ export const loadSavedToken = createAsyncThunk<
       // Proactively attempt token refresh on launch if refreshToken exists
       if (refreshToken) {
         try {
-          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
+          const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
+          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
           const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken });
           

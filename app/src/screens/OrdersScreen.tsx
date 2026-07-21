@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import {
   View,
   Text,
@@ -94,7 +95,8 @@ export default function OrdersScreen() {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
+    const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
+    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
     const domain = apiBaseUrl.replace('/api', '');
     return `${domain}${imagePath}`;
   };

@@ -23,6 +23,14 @@ def get_tokens_for_user(user):
     refresh['username'] = user.username
     refresh['is_staff'] = user.is_staff
     refresh['is_superuser'] = user.is_superuser
+    # ADD:
+    if user.is_staff and not user.is_superuser:
+        try:
+            refresh['branch_id'] = user.manager_profile.branch_id
+        except Exception:
+            refresh['branch_id'] = None
+    else:
+        refresh['branch_id'] = None
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),

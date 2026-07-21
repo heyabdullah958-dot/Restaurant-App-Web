@@ -26,3 +26,36 @@ class LoyaltyTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.points} points ({self.transaction_type})"
+
+class ManagerProfile(models.Model):
+    """
+    Links a staff user to a specific restaurant branch.
+    One ManagerProfile per branch manager.
+    """
+    user = models.OneToOneField(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='manager_profile'
+    )
+    restaurant = models.ForeignKey(
+        'restaurants.Restaurant',
+        on_delete=models.CASCADE,
+        related_name='managers'
+    )
+    branch = models.ForeignKey(
+        'restaurants.Branch',
+        on_delete=models.CASCADE,
+        related_name='managers'
+    )
+    notification_email = models.EmailField(
+        help_text="Email address to receive new order notifications for this branch."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Manager Profile'
+        verbose_name_plural = 'Manager Profiles'
+
+    def __str__(self):
+        return f"{self.user.username} → {self.restaurant.name} / {self.branch.name}"

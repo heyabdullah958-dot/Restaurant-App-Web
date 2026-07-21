@@ -28,6 +28,29 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
+class Branch(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, 
+                                   related_name='branches')
+    name = models.CharField(max_length=100)
+    address = models.TextField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    # For nearest-branch matching: map customer area keywords to this branch
+    area_keywords = models.JSONField(
+        default=list, blank=True,
+        help_text="List of area/neighborhood keywords that map to this branch. "
+                  "e.g. ['johar town', 'johar', 'jt']"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = 'Branches'
+        ordering = ['restaurant', 'name']
+
+    def __str__(self):
+        return f"{self.restaurant.name} — {self.name}"
+
 class MenuCategory(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name='categories')
     name = models.CharField(max_length=100)

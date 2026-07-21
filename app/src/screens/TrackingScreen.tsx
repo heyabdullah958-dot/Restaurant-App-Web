@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  SafeAreaView,
   RefreshControl,
   Animated,
   Easing,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -227,7 +227,7 @@ export default function TrackingScreen() {
       return (
         <View style={styles.animCard}>
           <Animated.View style={[styles.animIconBg, { backgroundColor: COLORS.success, transform: [{ scale: successScale }] }]}>
-            <Ionicons name="checkmark-circle-outline" size={44} color={COLORS.white} />
+            <Ionicons name="checkmark" size={32} color={COLORS.white} />
           </Animated.View>
           <Text style={[styles.animTitle, { color: COLORS.success }]}>Order Delivered!</Text>
           <Text style={styles.animDesc}>Bon appétit! We hope you love your delicious meal.</Text>

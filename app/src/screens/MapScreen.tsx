@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, SafeAreaView, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { StyleSheet, View, Text, ActivityIndicator, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 import { useDispatch, useSelector } from 'react-redux';
@@ -57,17 +58,13 @@ export default function MapScreen({ navigation }: { navigation: any }) {
   const initialLat = location?.coords?.latitude || 31.5204;
   const initialLng = location?.coords?.longitude || 74.3587;
 
-  if (loadingLocation) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.light }]}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={{ marginTop: 12, color: COLORS.gray, fontWeight: '500' }}>Loading map...</Text>
-      </View>
-    );
-  }
-
   // Map restaurant data to passing array, fallback to local data if empty
-  const activeRestaurants = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+  const activeRestaurants = useMemo(() => {
+    const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+    const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
+    return src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
+  }, [restaurants]);
+  
   const restaurantMarkers = (activeRestaurants || [])
     .filter((r: any) => r && r.slug)
     .map((r: any) => {
@@ -319,6 +316,15 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       console.error('Failed to parse message from map webview', err);
     }
   };
+
+  if (loadingLocation) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.light }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ marginTop: 12, color: COLORS.gray, fontWeight: '500' }}>Loading map...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

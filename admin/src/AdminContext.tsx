@@ -107,6 +107,8 @@ function mapApiOrder(o: ApiOrder): Order {
     delivery_fee: typeof o.delivery_fee === 'string' ? parseFloat(o.delivery_fee) : (o.delivery_fee || 0),
     discount: 0,
     delivery_address: o.delivery_address,
+    branch_name: o.branch_name ?? undefined,
+    branch_id: o.branch_id ?? undefined,
     created_at: o.created_at,
     items: o.items || [],
   };
@@ -124,6 +126,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           email: '',
           role: payload.is_superuser ? 'super_admin' : 'branch_manager',
           restaurantId: payload.is_superuser ? undefined : payload.restaurant_id,
+          branchId: payload.is_superuser ? undefined : payload.branch_id,
         };
       }
     }
@@ -330,6 +333,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         email: '',
         role: isSuperAdmin ? 'super_admin' : 'branch_manager',
         restaurantId: managerRestId,
+        branchId: isSuperAdmin ? undefined : payload?.branch_id,
       };
       setUser(loggedInUser);
       const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';

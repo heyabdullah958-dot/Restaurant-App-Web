@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const BranchDashboard: React.FC = () => {
-  const { selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
+  const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
@@ -281,6 +281,12 @@ export const BranchDashboard: React.FC = () => {
             />
             <div>
               <h1 className="text-2xl font-extrabold text-white leading-none">{restaurant.name}</h1>
+              {user?.branchId && (
+                <span className="inline-flex items-center gap-1 mt-1 mb-0.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  <MapPin size={10} />
+                  Branch Manager View
+                </span>
+              )}
               <p className="text-sm text-slate-300 font-semibold mt-1">{restaurant.cuisine_type}</p>
               <div className="flex gap-4 text-xs text-slate-400 mt-2 font-medium">
                 <span className="flex items-center gap-1"><MapPin size={12} /> {restaurant.city}</span>

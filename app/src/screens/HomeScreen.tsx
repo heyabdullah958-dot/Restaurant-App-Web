@@ -6,14 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
   FlatList,
   Image,
   ActivityIndicator,
   RefreshControl,
   Platform,
-  StatusBar as RNStatusBar,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { logoutUser } from '../store/userSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,7 +22,7 @@ import { fetchRestaurants } from '../store/restaurantSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
-import { getImageUrl } from '../services/fallbackData';
+import { getImageUrl, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { RestaurantCardSkeleton } from '../components/SkeletonLoader';
 import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
@@ -31,13 +31,19 @@ const { width } = Dimensions.get('window');
 
 const categories = [
   { id: 'All', name: 'All', icon: '🍽️' },
-  { id: 'BBQ', name: 'BBQ', icon: '🍖' },
-  { id: 'Seafood', name: 'Seafood', icon: '🐟' },
-  { id: 'Burgers', name: 'Burgers', icon: '🍔' },
   { id: 'Tandoori', name: 'Tandoori', icon: '🍗' },
-  { id: 'Sandwiches', name: 'Melts', icon: '🥪' },
-  { id: 'Desserts', name: 'Café', icon: '☕' },
+  { id: 'Burgers', name: 'Burgers', icon: '🍔' },
+  { id: 'Café', name: 'Café', icon: '☕' },
 ];
+
+// Reliable slug map — category chip → restaurant slug
+// Works even when the API list endpoint omits cuisine_type
+const CATEGORY_SLUG_MAP: Record<string, string> = {
+  'Tandoori': 'tandooristoppk',
+  'Burgers':  'jushhpk',
+  'Café':     'getafomo',
+};
+
 
 // Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 
@@ -45,6 +51,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.user);
   const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
+  const insets = useSafeAreaInsets();
 
   // APP-01: STEP 1 — State add karo
   const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
@@ -54,28 +61,72 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   // APP-01: STEP 2 — Filtered list compute karo
   const filteredRestaurants = React.useMemo(() => {
-    if (selectedCategory === 'All') return restaurants;
-    return restaurants.filter((r: any) =>
+    const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
+    // Use API data if available, otherwise fall back to local data (mirrors SearchScreen pattern)
+    const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+    const available = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
+
+    if (selectedCategory === 'All') return available;
+
+    // Direct slug match — works even when API omits cuisine_type on list endpoint
+    const targetSlug = CATEGORY_SLUG_MAP[selectedCategory];
+    if (targetSlug) {
+      return available.filter((r: any) => 
+        r.slug === targetSlug || 
+        r.name?.toLowerCase().replace(/\s+/g, '') === targetSlug
+      );
+    }
+
+    // Fallback: string match on cuisine_type / name
+    return available.filter((r: any) =>
       r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
       r.name?.toLowerCase().includes(selectedCategory.toLowerCase())
     );
   }, [restaurants, selectedCategory]);
 
   const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
+  const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    const checkLocation = async () => {
-      let { status } = await Location.getForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setShowLocationPrompt(true);
+  const fetchCurrentLocation = async () => {
+    try {
+      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      let reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      if (reverseGeocode.length > 0) {
+        const addressObj = reverseGeocode[0];
+        const formattedAddress = [addressObj.name, addressObj.street, addressObj.district, addressObj.city].filter(Boolean).join(', ');
+        setCurrentAddress(formattedAddress);
       }
-    };
-    checkLocation();
-  }, []);
+    } catch (e) {
+      console.log('Location fetch error', e);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkLocation = async () => {
+        let { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          // Only show prompt if we don't have an address yet
+          if (!currentAddress) {
+            setShowLocationPrompt(true);
+          }
+        } else {
+          fetchCurrentLocation();
+        }
+      };
+      checkLocation();
+    }, [currentAddress])
+  );
 
   const handleAllowLocation = async () => {
     setShowLocationPrompt(false);
-    await Location.requestForegroundPermissionsAsync();
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status === 'granted') {
+      fetchCurrentLocation();
+    }
   };
 
   const handleDenyLocation = () => {
@@ -87,7 +138,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const BANNERS = [
     {
       icon: 'fast-food' as const,
-      title: '7 Brands, One Cart!',
+      title: '3 Brands, One Cart!',
       subtitle: 'Mix cuisines in a single order.',
       bg: COLORS.primary,
     },
@@ -148,22 +199,26 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
       <StatusBar style="dark" />
       
       {/* Top Welcome Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.welcomeText}>
             Deliver to {user?.is_guest ? 'Guest' : user?.username || 'Guest'}
           </Text>
-          <View style={styles.locationContainer}>
+          <TouchableOpacity 
+            style={styles.locationContainer} 
+            activeOpacity={0.7} 
+            onPress={() => setShowLocationPrompt(true)}
+          >
             <Ionicons name="location-sharp" size={16} color={COLORS.primary} />
             <Text style={styles.locationText} numberOfLines={1}>
-              Street 45, Blue Area, Islamabad
+              {currentAddress || (user?.addresses && user.addresses.length > 0 ? user.addresses[0] : 'Set your delivery location')}
             </Text>
             <Ionicons name="chevron-down" size={14} color={COLORS.gray} />
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* APP-03: Header Search Icon Button */}
@@ -353,7 +408,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             style={styles.stickyLoginBtn}
             onPress={async () => {
               await dispatch(logoutUser());
-              navigation.replace('Auth');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' }],
+              });
             }}
           >
             <Text style={styles.stickyLoginBtnText}>Sign In</Text>
@@ -367,7 +425,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         onAllow={handleAllowLocation}
         onDeny={handleDenyLocation}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -381,8 +439,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 24) + SPACING.sm : SPACING.sm,
-    paddingBottom: SPACING.sm,
+    paddingTop: 10,
+    paddingBottom: SPACING.md,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,

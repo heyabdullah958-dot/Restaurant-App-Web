@@ -114,7 +114,8 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       dispatch(updateUserProfile({ 
         username: `User_${phone.slice(-4)}`, 
         phone: phone.trim(),
-        email: `phone_user_${phone.slice(-4)}@foodsphere.com`
+        email: `phone_user_${phone.slice(-4)}@foodsphere.com`,
+        is_guest: false
       }));
       showAlert('Success', 'Phone verification successful! Welcome to FoodSphere.');
     }
@@ -129,7 +130,8 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       dispatch(updateUserProfile({ 
         username: displayName, 
         email: selectedEmail,
-        phone: '+92 300 1234567' 
+        phone: '+92 300 1234567',
+        is_guest: false
       }));
       showAlert('Google Sign-In Success', `Welcome, ${displayName}! You have logged in with ${selectedEmail}.`);
     }
@@ -266,7 +268,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
           <Text style={styles.titleText}>
             Food<Text style={{ color: COLORS.primary }}>Sphere</Text>
           </Text>
-          <Text style={styles.subtitleText}>Sign in to access 7 premium dining spots</Text>
+          <Text style={styles.subtitleText}>Sign in to access 3 premium dining spots</Text>
         </View>
 
         {/* Auth Tabs */}

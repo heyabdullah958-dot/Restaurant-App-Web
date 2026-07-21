@@ -182,6 +182,8 @@ export const OrderManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800/80 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2">
           <span>Brand Hub:</span>
           <span className="text-blue-400 uppercase tracking-wide font-black">{restaurant.name}</span>
+          <span className="text-slate-600">·</span>
+          <span className="text-slate-500">{brandOrders.length} total orders</span>
         </div>
       </div>
 
@@ -245,6 +247,13 @@ export const OrderManagement: React.FC = () => {
                             <MapPin size={10} className="mt-0.5 flex-shrink-0 text-slate-500" />
                             <span className="line-clamp-none break-words">{order.delivery_address}</span>
                           </div>
+                          {order.branch_name && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                📍 {order.branch_name} Branch
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Items summary list */}

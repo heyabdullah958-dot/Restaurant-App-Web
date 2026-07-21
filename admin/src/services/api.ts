@@ -183,6 +183,8 @@ export interface ApiOrder {
   id: number;
   restaurant: number;
   restaurant_name?: string;
+  branch_id?: number | null;
+  branch_name?: string | null;
   status: string;
   payment_method: string;
   total: string | number;
@@ -402,6 +404,32 @@ export const changeManagerPassword = (managerId: number, password: string) =>
     body: JSON.stringify({ password }),
   });
 
+export const fetchBranches = (restaurantId?: number): Promise<any[]> =>
+  apiFetch<any[]>(
+    restaurantId 
+      ? `/api/admin/branches/?restaurant_id=${restaurantId}` 
+      : '/api/admin/branches/'
+  );
+
+export const createManagerAccount = (data: {
+  restaurant_id: number;
+  branch_id: number;
+  notification_email: string;
+  password?: string;
+}): Promise<{
+  success: boolean;
+  username: string;
+  password: string;
+  restaurant: string;
+  branch: string;
+  notification_email: string;
+  message: string;
+}> =>
+  apiFetch('/api/admin/managers/create/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
 export const changeOwnPassword = (password: string) =>
   apiFetch<any>('/api/users/change-password/', {
     method: 'POST',
@@ -422,6 +450,7 @@ export interface JWTPayload {
   is_staff?: boolean;
   is_superuser?: boolean;
   restaurant_id?: number;
+  branch_id?: number;
   exp: number;
 }
 

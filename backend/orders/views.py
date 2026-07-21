@@ -32,12 +32,16 @@ class OrderListCreateView(generics.ListCreateAPIView):
         
         # If user is a branch manager (staff but not superuser), filter by their managed restaurant
         if user.is_authenticated and user.is_staff and not user.is_superuser:
-            from config.admin_utils import get_managed_restaurant
-            managed = get_managed_restaurant(user)
-            if managed:
-                queryset = queryset.filter(restaurant=managed)
+            from config.admin_utils import get_managed_restaurant, get_managed_branch
+            managed_branch = get_managed_branch(user)
+            if managed_branch:
+                queryset = queryset.filter(branch=managed_branch)
             else:
-                queryset = queryset.none()
+                managed = get_managed_restaurant(user)
+                if managed:
+                    queryset = queryset.filter(restaurant=managed)
+                else:
+                    queryset = queryset.none()
                 
         return queryset
 
@@ -64,6 +68,81 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 except Exception as e:
                     import logging
                     logging.getLogger(__name__).error(f"Failed to send order FCM: {e}")
+            
+            # Send email notification to branch manager
+            if order.branch:
+                try:
+                    from restaurants.models import Branch
+                    from users.models import ManagerProfile
+                    from django.core.mail import send_mail
+                    from django.conf import settings
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    
+                    branch_managers = ManagerProfile.objects.filter(
+                        branch=order.branch
+                    ).select_related('user')
+                    
+                    manager_emails = [
+                        mp.notification_email 
+                        for mp in branch_managers 
+                        if mp.notification_email
+                    ]
+                    
+                    if manager_emails:
+                        order_items_text = '\n'.join([
+                            f"  - {item.menu_item.name} x{item.quantity} = Rs. {item.total_price}"
+                            for item in order.items.select_related('menu_item').all()
+                        ])
+                        
+                        customer_name = (
+                            order.guest_name or 
+                            getattr(order.user, 'username', 'Customer')
+                        )
+                        
+                        subject = f"🛵 New Order #{order.id} — {order.branch.name} Branch"
+                        message = f"""New order received at your branch!
+
+ORDER DETAILS
+─────────────────────────────
+Order #:     {order.id}
+Branch:      {order.branch.name}
+Restaurant:  {order.restaurant.name}
+Customer:    {customer_name}
+Phone:       {order.guest_phone or getattr(order.user, 'phone', 'N/A')}
+Payment:     {order.get_payment_method_display()}
+
+ITEMS ORDERED
+─────────────────────────────
+{order_items_text}
+
+TOTAL:       Rs. {order.total}
+Delivery to: {order.delivery_address}
+
+Special Notes: {order.special_instructions or 'None'}
+─────────────────────────────
+Placed at: {order.created_at.strftime('%d %b %Y, %I:%M %p')}
+
+Log in to admin panel to update status:
+https://foodsphere-admin.pages.dev
+
+— FoodSphere Platform
+"""
+                        send_mail(
+                            subject,
+                            message,
+                            settings.DEFAULT_FROM_EMAIL,
+                            manager_emails,
+                            fail_silently=True,
+                        )
+                        logger.info(
+                            f"Order #{order.id} notification sent to: {manager_emails}"
+                        )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).error(
+                        f"Failed to send branch manager email for Order #{order.id}: {e}"
+                    )
                     
             return Response({
                 'success': True,
@@ -93,13 +172,17 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         if user.is_authenticated and user.is_superuser:
             return queryset
             
-        # If the user is a manager (is_staff and not is_superuser), restrict queryset to their managed restaurant
+        # If the user is a manager (is_staff and not is_superuser), restrict queryset to their managed restaurant/branch
         if user.is_authenticated and user.is_staff:
-            from config.admin_utils import get_managed_restaurant
-            managed = get_managed_restaurant(user)
-            if managed:
-                return queryset.filter(restaurant=managed)
-            return Order.objects.none()
+            from config.admin_utils import get_managed_restaurant, get_managed_branch
+            managed_branch = get_managed_branch(user)
+            if managed_branch:
+                return queryset.filter(branch=managed_branch)
+            else:
+                managed = get_managed_restaurant(user)
+                if managed:
+                    return queryset.filter(restaurant=managed)
+                return Order.objects.none()
             
         # If ordinary authenticated user, restrict strictly to their own orders
         if user.is_authenticated:

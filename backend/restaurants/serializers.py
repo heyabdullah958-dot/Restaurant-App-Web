@@ -11,7 +11,12 @@ def build_absolute_image_url(image_field, context):
     """
     if not image_field:
         return None
-    url = image_field.url
+    
+    name = getattr(image_field, 'name', '')
+    if name and (name.startswith('http://') or name.startswith('https://')):
+        return name
+
+    url = getattr(image_field, 'url', '')
     # Already absolute (Cloudinary, S3, etc.)
     if url.startswith('http://') or url.startswith('https://'):
         return url

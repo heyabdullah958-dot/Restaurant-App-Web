@@ -16,7 +16,7 @@ The client's long-term vision is to **scale and onboard more brands** in the fut
 
 - **Deal Type:** Full product development contract
 - **Client Vision:** FoodPanda-style UX, scalable multi-brand platform
-- **Current Scope:** 5 brands active at launch (2 more to be onboarded soon)
+- **Current Scope:** 3 brands active at launch (4 more hidden for now)
 - **Future Expectation:** Client will add more restaurant brands over time — architecture must support this cleanly
 
 ---
@@ -33,7 +33,7 @@ The client's long-term vision is to **scale and onboard more brands** in the fut
 | 6 | **birdmanfoodspk** | Grilled & fried chicken | Catering inquiry |
 | 7 | **getafomo** | Trendy café items | Instagram feed integration, event booking |
 
-> ⚠️ **Phase 1 Active Brands:** 5 brands launching first. All 7 must be architected from day one for clean onboarding.
+> ⚠️ **Phase 1 Active Brands:** 3 brands launching first. All 7 must be architected from day one for clean onboarding.
 
 ---
 

@@ -30,6 +30,14 @@ class Order(models.Model):
         on_delete=models.CASCADE,
         related_name='orders'
     )
+    branch = models.ForeignKey(
+        'restaurants.Branch',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orders',
+        help_text="Auto-assigned branch based on customer delivery area."
+    )
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)

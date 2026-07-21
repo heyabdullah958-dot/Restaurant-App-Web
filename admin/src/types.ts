@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: 'super_admin' | 'branch_manager';
   restaurantId?: number; // Linked restaurant if branch_manager
+  branchId?: number;     // Linked branch if branch_manager
 }
 
 export interface MenuItem {
@@ -64,6 +65,8 @@ export interface Order {
   id: number;
   restaurant_id: number;
   restaurant_name: string;
+  branch_name?: string;
+  branch_id?: number;
   user_or_guest: string;
   guest_name?: string;
   guest_phone?: string;

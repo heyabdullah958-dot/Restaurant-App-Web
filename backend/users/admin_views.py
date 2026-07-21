@@ -164,6 +164,111 @@ class AdminCustomerDetailView(APIView):
 
 from config.admin_utils import get_managed_restaurant
 
+class AdminManagerCreateView(APIView):
+    """
+    POST /api/admin/managers/create/
+    Creates a branch manager user + ManagerProfile.
+    Body: { 
+      "restaurant_id": int, 
+      "branch_id": int, 
+      "notification_email": str,
+      "password": str (optional, auto-generated if not provided)
+    }
+    Super admin only.
+    """
+    permission_classes = [IsSuperUser]
+
+    def post(self, request):
+        from restaurants.models import Restaurant, Branch
+        from users.models import ManagerProfile
+        from django.contrib.auth.models import Group
+        import secrets
+        
+        restaurant_id = request.data.get('restaurant_id')
+        branch_id = request.data.get('branch_id')
+        notification_email = request.data.get('notification_email', '').strip()
+        password = request.data.get('password', '').strip() or secrets.token_urlsafe(12)
+        
+        if not restaurant_id or not branch_id:
+            return Response({'error': 'restaurant_id and branch_id are required.'}, status=400)
+        if not notification_email:
+            return Response({'error': 'notification_email is required.'}, status=400)
+        
+        try:
+            restaurant = Restaurant.objects.get(pk=restaurant_id)
+            branch = Branch.objects.get(pk=branch_id, restaurant=restaurant)
+        except Restaurant.DoesNotExist:
+            return Response({'error': 'Restaurant not found.'}, status=404)
+        except Branch.DoesNotExist:
+            return Response({'error': 'Branch not found or does not belong to this restaurant.'}, status=404)
+        
+        # Username: manager_{restaurant_slug}_{branch_name_slug}
+        import re
+        branch_slug = re.sub(r'[^a-z0-9]+', '_', branch.name.lower()).strip('_')
+        username = f"manager_{restaurant.slug}_{branch_slug}"
+        
+        User = get_user_model()
+        if User.objects.filter(username=username).exists():
+            return Response({'error': f'Manager account already exists: {username}'}, status=409)
+        
+        # Create user
+        user = User.objects.create_user(
+            username=username,
+            email=notification_email,
+            password=password,
+            is_staff=True,
+            is_active=True,
+        )
+        
+        # Add to restaurant manager group (preserve existing group-based auth)
+        group_name = f"manager_{restaurant.slug}"
+        group, _ = Group.objects.get_or_create(name=group_name)
+        user.groups.add(group)
+        
+        # Create ManagerProfile
+        ManagerProfile.objects.create(
+            user=user,
+            restaurant=restaurant,
+            branch=branch,
+            notification_email=notification_email,
+        )
+        
+        return Response({
+            'success': True,
+            'username': username,
+            'password': password,
+            'restaurant': restaurant.name,
+            'branch': branch.name,
+            'notification_email': notification_email,
+            'message': f'Manager account created. Save the password — it is shown only once.'
+        }, status=201)
+
+
+class AdminBranchListView(APIView):
+    """
+    GET /api/admin/branches/?restaurant_id=<id>
+    Returns all branches for a restaurant.
+    Super admin only.
+    """
+    permission_classes = [IsSuperUser]
+
+    def get(self, request):
+        from restaurants.models import Branch
+        restaurant_id = request.query_params.get('restaurant_id')
+        qs = Branch.objects.select_related('restaurant')
+        if restaurant_id:
+            qs = qs.filter(restaurant_id=restaurant_id)
+        return Response([{
+            'id': b.id,
+            'name': b.name,
+            'address': b.address,
+            'phone': b.phone,
+            'is_active': b.is_active,
+            'restaurant_id': b.restaurant_id,
+            'restaurant_name': b.restaurant.name,
+        } for b in qs])
+
+
 class AdminManagerListView(APIView):
     """
     GET /api/admin/managers/
@@ -212,6 +317,12 @@ class AdminManagerListView(APIView):
                 'email': u.email or '',
                 'restaurant_name': restaurant.name,
                 'restaurant_id': restaurant.id,
+                'branch_name': (u.manager_profile.branch.name 
+                                if hasattr(u, 'manager_profile') else ''),
+                'branch_id': (u.manager_profile.branch_id 
+                              if hasattr(u, 'manager_profile') else None),
+                'notification_email': (u.manager_profile.notification_email 
+                                       if hasattr(u, 'manager_profile') else u.email or ''),
             })
         return Response(results)
 

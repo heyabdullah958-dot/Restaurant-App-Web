@@ -72,7 +72,10 @@ const restaurantSlice = createSlice({
             list = list.results;
           }
         }
-        state.restaurants = Array.isArray(list) ? list.filter((r: any) => r.is_active !== false) : [];
+        state.restaurants = Array.isArray(list) ? list.filter((r: any) => 
+          r.is_active !== false && 
+          ['tandooristoppk', 'jushhpk', 'getafomo'].includes(r.slug)
+        ) : [];
       })
       .addCase(fetchRestaurants.rejected, (state, action) => {
         state.loading = false;

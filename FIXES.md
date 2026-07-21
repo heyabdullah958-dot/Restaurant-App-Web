@@ -48,9 +48,20 @@ We ported the visual alignments to the mobile application codebase to ensure par
 * **Changes**: Modified styles to replace the dark-blue container with a light-theme layout.
 * **Theme**: Set the banner background to pure white (`COLORS.white`), added a light-gray border (`COLORS.lightGray`), and updated labels and titles to dark text (`COLORS.dark` and `COLORS.gray`) to align with the light theme guidelines.
 
+### 3. OrderConfirmationScreen Clipping Fix
+* **OrderConfirmationScreen Layout**: [OrderConfirmationScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/OrderConfirmationScreen.tsx)
+* **Changes**: Wrapped the content in a `ScrollView` and applied `flexGrow: 1` to prevent UI elements (top tick mark and bottom buttons) from getting clipped on smaller screens.
+
+### 4. TrackingScreen Header Overlap Fix
+* **TrackingScreen Layout**: [TrackingScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/TrackingScreen.tsx)
+* **Changes**: Replaced the default React Native `SafeAreaView` with the one from `react-native-safe-area-context` to properly pad the header below the Android status bar.
+
+### 5. App Rebranding for 3 Active Brands
+* **AuthScreen Layout**: [AuthScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/AuthScreen.tsx)
+* **Changes**: Updated the subtitle text from "7 premium dining spots" to "3 premium dining spots" to accurately reflect the current launch scope.
+
 ---
 
 ## 🌐 Web Prototype URL
 The local prototype development server is running and accessible at:
 👉 **[http://localhost:8000](http://localhost:8000)**
-

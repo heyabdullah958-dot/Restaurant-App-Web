@@ -7,6 +7,7 @@ import {
   Animated,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -103,7 +104,7 @@ export default function OrderConfirmationScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.light} />
       
-      <View style={styles.contentContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Animated Checkmark Icon */}
         <Animated.View
           style={[
@@ -174,7 +175,7 @@ export default function OrderConfirmationScreen() {
             </TouchableOpacity>
           </View>
         </Animated.View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -184,20 +185,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.light,
   },
-  contentContainer: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
   },
   iconContainer: {
     marginBottom: SPACING.lg,
     padding: 20,
-    width: 160,
-    height: 160,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'visible',
   },
   checkmarkCircle: {
     width: 120,

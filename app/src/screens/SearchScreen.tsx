@@ -8,11 +8,11 @@ import {
   ScrollView,
   FlatList,
   Image,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,7 +31,7 @@ type RootStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Search'>;
 
-const POPULAR_SEARCHES = ['Burgers', 'BBQ', 'Seafood', 'Naan', 'Melt', 'Coffee', 'Tikka', 'Karahi'];
+const POPULAR_SEARCHES = ['Chicken Handi', 'Beef Burger', 'Special Karahi', 'Chicken Doner Fries', 'Dubai Shawaya', 'Sandwich'];
 
 interface MatchingDish {
   item: MenuItem;
@@ -70,7 +70,9 @@ export default function SearchScreen() {
 
   // Get active source of restaurants (API state or local fallback)
   const activeSource = useMemo(() => {
-    return restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+    const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
+    const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
+    return src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
   }, [restaurants]);
 
   // Filter matching restaurants and dishes
@@ -300,7 +302,7 @@ export default function SearchScreen() {
                         <Text style={styles.dishPrice}>Rs. {item.price}</Text>
                       </View>
                       {item.image && (
-                        <Image source={getImageUrl(item.image)} style={styles.dishImage} />
+                        <Image source={getImageUrl(item.image_url || item.image)} style={styles.dishImage} />
                       )}
                     </TouchableOpacity>
                   ))}
@@ -323,7 +325,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + SPACING.sm : SPACING.sm,
+    paddingTop: SPACING.sm,
     paddingBottom: SPACING.sm,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,

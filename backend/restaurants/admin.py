@@ -1,11 +1,16 @@
 from django.contrib import admin
-from .models import Restaurant, MenuCategory, MenuItem
+from .models import Restaurant, MenuCategory, MenuItem, Branch
 from config.admin_utils import get_managed_restaurant
 from config.mixins import AuditLogMixin
 
 class MenuCategoryInline(admin.TabularInline):
     model = MenuCategory
     fields = ['name', 'icon', 'order', 'is_active']
+    extra = 1
+
+class BranchInline(admin.TabularInline):
+    model = Branch
+    fields = ['name', 'address', 'phone', 'is_active', 'area_keywords']
     extra = 1
 
 @admin.register(Restaurant)
@@ -16,7 +21,7 @@ class RestaurantAdmin(AuditLogMixin, admin.ModelAdmin):
     list_editable = ('is_active', 'is_featured')
     readonly_fields = ('rating', 'total_reviews', 'created_at', 'updated_at')
     prepopulated_fields = {'slug': ('name',)}
-    inlines = [MenuCategoryInline]
+    inlines = [BranchInline, MenuCategoryInline]
 
     fieldsets = (
         ('Basic Info', {
@@ -50,6 +55,22 @@ class RestaurantAdmin(AuditLogMixin, admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
+
+@admin.register(Branch)
+class BranchAdmin(AuditLogMixin, admin.ModelAdmin):
+    list_display = ('restaurant', 'name', 'address', 'phone', 'is_active')
+    list_filter = ('restaurant', 'is_active')
+    search_fields = ('name', 'address', 'restaurant__name')
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        managed_restaurant = get_managed_restaurant(request.user)
+        if managed_restaurant:
+            return qs.filter(restaurant=managed_restaurant)
+        return qs.none()
 
 
 @admin.register(MenuItem)
