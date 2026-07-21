@@ -305,7 +305,15 @@ export const BranchDashboard: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setView('menu')}
+              className="bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-md text-amber-300 hover:text-amber-200 px-3.5 py-1.5 rounded-full text-xs font-extrabold border border-amber-500/40 shadow-md flex items-center gap-1.5 transition-all hover:scale-[1.03]"
+            >
+              <Layers size={13} />
+              Stock & Menu Control
+            </button>
             <button
               type="button"
               onClick={() => {
