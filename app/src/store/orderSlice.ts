@@ -15,8 +15,17 @@ export const placeOrder = createAsyncThunk(
   }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post('/orders/', orderData);
-      return response.data || response;
+      const data = response.data || response;
+      // Validate we got a real order back (must have an id)
+      if (!data || !data.id) {
+        console.error('[placeOrder] Backend returned no order id. Response:', JSON.stringify(data));
+        return rejectWithValue('Order creation failed — no order ID returned from server.');
+      }
+      console.log('[placeOrder] Order created successfully:', data.id, 'Restaurant:', data.restaurant);
+      return data;
     } catch (error: any) {
+      console.error('[placeOrder] Error:', error.response?.status, JSON.stringify(error.response?.data || error.message));
+
       // If 401 invalid/expired token error occurs, automatically clear bad token and retry with a fresh guest session
       if (error.response?.status === 401 || JSON.stringify(error.response?.data || '').includes('token')) {
         try {
@@ -25,9 +34,15 @@ export const placeOrder = createAsyncThunk(
           await AsyncStorage.removeItem('refresh_token');
           await dispatch(guestLogin()).unwrap();
           const retryResponse = await api.post('/orders/', orderData);
-          return retryResponse.data || retryResponse;
+          const retryData = retryResponse.data || retryResponse;
+          if (!retryData || !retryData.id) {
+            return rejectWithValue('Order retry failed — no order ID returned from server.');
+          }
+          console.log('[placeOrder] Retry succeeded. Order:', retryData.id);
+          return retryData;
         } catch (retryErr: any) {
-          console.warn('Auto-retry place order with fresh session failed:', retryErr);
+          console.error('[placeOrder] Retry also failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
+          return rejectWithValue('Session expired and retry failed. Please try again.');
         }
       }
 

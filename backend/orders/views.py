@@ -1,7 +1,9 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Order
 from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer, AdminOrderListSerializer
+
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
@@ -252,3 +254,21 @@ class MyOrdersListView(generics.ListAPIView):
             ).select_related('restaurant').order_by('-created_at')
             
         return Order.objects.none()
+
+
+class PurgeOrdersView(APIView):
+    """
+    POST /api/orders/purge-all/
+    Purge all orders from database (IsAdminUser only).
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        from payments.models import Payment
+        Payment.objects.all().delete()
+        count, _ = Order.objects.all().delete()
+        return Response({
+            'success': True,
+            'message': f'Successfully purged all {count} order(s) and associated payments.'
+        }, status=status.HTTP_200_OK)
+
