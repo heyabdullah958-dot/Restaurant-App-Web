@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
-import { MOCK_BRAND_STATS } from '../mockData';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
+
 import { 
   ShoppingBag, 
   TrendingUp, 
@@ -45,7 +45,7 @@ export const BranchDashboard: React.FC = () => {
   }
 
   const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-  const brandStats = MOCK_BRAND_STATS[restaurant.id] || { revenue: 0, orders: 0, aov: 0 };
+
 
   // Filter orders for this restaurant (robust casting)
   const brandOrders = orders.filter((o) => 
@@ -80,23 +80,9 @@ export const BranchDashboard: React.FC = () => {
   const allTimeRevenue = brandOrders.reduce((sum, o) => sum + o.total, 0);
   const allTimeOrdersCount = brandOrders.length;
 
-  // Mock scaling for demo mode
-  const getMockStats = () => {
-    switch (timeframe) {
-      case 'today':
-        return { revenue: brandStats.revenue * 0.1, orders: Math.max(1, Math.round(brandStats.orders * 0.1)) };
-      case 'week':
-        return { revenue: brandStats.revenue * 0.4, orders: Math.max(1, Math.round(brandStats.orders * 0.4)) };
-      case 'month':
-        return { revenue: brandStats.revenue * 0.9, orders: Math.max(1, Math.round(brandStats.orders * 0.9)) };
-      default:
-        return brandStats;
-    }
-  };
+  const displayRevenue = liveRevenue;
+  const displayOrdersCount = liveOrdersCount;
 
-  const mockStats = getMockStats();
-  const displayRevenue = isMock ? mockStats.revenue : liveRevenue;
-  const displayOrdersCount = isMock ? mockStats.orders : liveOrdersCount;
 
   // Decide brand color
   const getBrandColor = () => {

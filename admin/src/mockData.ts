@@ -323,32 +323,25 @@ export const MOCK_MENU_ITEMS: Record<number, MenuCategory[]> = {
 export const INITIAL_ORDERS: Order[] = [];
 
 
-// Global Platform Analytics
+// Global Platform Analytics (Initialized to 0 for live testing)
 export const MOCK_GLOBAL_STATS = {
-  totalRevenue: 284350.00,
-  activeTenants: 6, // 6 out of 7 active
-  totalOrders: 1948,
-  averageOrderValue: 1459.70
+  totalRevenue: 0.00,
+  activeTenants: 7,
+  totalOrders: 0,
+  averageOrderValue: 0.00
 };
 
-// Brand Analytics
+// Brand Analytics (Initialized to 0 for live testing)
 export const MOCK_BRAND_STATS: Record<number, { revenue: number, orders: number, aov: number }> = {
-  1: { revenue: 84900.00, orders: 580, aov: 1463.79 }, // SeenBanao
-  2: { revenue: 52100.00, orders: 260, aov: 2003.85 }, // DineAtBlue
-  3: { revenue: 68350.00, orders: 490, aov: 1394.90 }, // JushhPK
-  4: { revenue: 31200.00, orders: 290, aov: 1075.86 }, // TandooriStopPK
-  5: { revenue: 24700.00, orders: 190, aov: 1300.00 }, // SandMelts
-  6: { revenue: 0.00, orders: 0, aov: 0 },             // BirdManFoodsPK (Pending)
-  7: { revenue: 23100.00, orders: 138, aov: 1673.91 }  // GetAFomo
+  1: { revenue: 0, orders: 0, aov: 0 },
+  2: { revenue: 0, orders: 0, aov: 0 },
+  3: { revenue: 0, orders: 0, aov: 0 },
+  4: { revenue: 0, orders: 0, aov: 0 },
+  5: { revenue: 0, orders: 0, aov: 0 },
+  6: { revenue: 0, orders: 0, aov: 0 },
+  7: { revenue: 0, orders: 0, aov: 0 }
 };
 
 // Revenue History for charts
-export const MOCK_REVENUE_CHART = [
-  { date: 'May 21', 'SeenBanao': 12000, 'JushhPK': 9000, 'DineAtBlue': 7000, 'Others': 8000, total: 36000 },
-  { date: 'May 22', 'SeenBanao': 14000, 'JushhPK': 10500, 'DineAtBlue': 6800, 'Others': 9000, total: 40300 },
-  { date: 'May 23', 'SeenBanao': 11000, 'JushhPK': 8000, 'DineAtBlue': 9000, 'Others': 7500, total: 35500 },
-  { date: 'May 24', 'SeenBanao': 16500, 'JushhPK': 13000, 'DineAtBlue': 8500, 'Others': 11000, total: 49000 },
-  { date: 'May 25', 'SeenBanao': 18000, 'JushhPK': 12000, 'DineAtBlue': 11000, 'Others': 12500, total: 53500 },
-  { date: 'May 26', 'SeenBanao': 15000, 'JushhPK': 14000, 'DineAtBlue': 10000, 'Others': 13000, total: 52000 },
-  { date: 'May 27', 'SeenBanao': 20000, 'JushhPK': 15500, 'DineAtBlue': 12000, 'Others': 14500, total: 62000 },
-];
+export const MOCK_REVENUE_CHART: any[] = [];
+

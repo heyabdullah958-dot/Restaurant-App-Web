@@ -34,7 +34,40 @@ const getSpecsForCategory = (categoryName: string) => {
   return SPEC_CONFIGS.general;
 };
 
+const getFallbackFoodImage = (itemName: string, categoryName: string): string => {
+  const name = `${itemName || ''} ${categoryName || ''}`.toLowerCase();
+  if (name.includes('burger') || name.includes('smash') || name.includes('zinger')) {
+    return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('fries') || name.includes('starter') || name.includes('snack') || name.includes('nablet')) {
+    return 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('bbq') || name.includes('tikka') || name.includes('kabab') || name.includes('sajji') || name.includes('grill') || name.includes('boti') || name.includes('tender')) {
+    return 'https://images.unsplash.com/photo-1544025162-d76694265947?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('karahi') || name.includes('handi') || name.includes('daal') || name.includes('curry') || name.includes('main')) {
+    return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('prawn') || name.includes('fish') || name.includes('lobster') || name.includes('seafood') || name.includes('calamari')) {
+    return 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('naan') || name.includes('roti') || name.includes('bread') || name.includes('clay oven')) {
+    return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('sandwich') || name.includes('melt') || name.includes('sub')) {
+    return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('coffee') || name.includes('latte') || name.includes('brew') || name.includes('drink') || name.includes('shake')) {
+    return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&auto=format&fit=crop&q=80';
+  }
+  if (name.includes('cake') || name.includes('dessert') || name.includes('sweet') || name.includes('lava')) {
+    return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&auto=format&fit=crop&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=80';
+};
+
 export const MenuManagement: React.FC = () => {
+
   const {
     selectedBrandId,
     restaurants,
@@ -168,17 +201,16 @@ export const MenuManagement: React.FC = () => {
                 >
                   {/* Left content detail with Image Thumbnail */}
                   <div className="flex items-start gap-4 flex-1 min-w-0 pr-4">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-14 h-14 rounded-xl object-cover border border-zinc-200/60 dark:border-slate-700/60 shadow-sm flex-shrink-0 bg-slate-900"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-zinc-400 dark:text-slate-600 border border-dashed border-zinc-200 dark:border-slate-800 flex-shrink-0 text-[10px] font-bold">
-                        DISH
-                      </div>
-                    )}
+                    <img
+                      src={item.image || getFallbackFoodImage(item.name, category.name)}
+                      alt={item.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getFallbackFoodImage(item.name, category.name);
+                      }}
+                      className="w-14 h-14 rounded-xl object-cover border border-zinc-200/60 dark:border-slate-700/60 shadow-sm flex-shrink-0 bg-slate-900"
+                    />
+
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="font-extrabold text-zinc-900 dark:text-white text-sm truncate">{item.name}</h4>
