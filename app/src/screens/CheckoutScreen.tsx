@@ -150,41 +150,67 @@ export default function CheckoutScreen() {
 
   // Load branches for selected restaurant
   React.useEffect(() => {
-    if (restaurant) {
-      if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
-        setBranches(restaurant.branches);
-      } else {
-        api.get(`/branches/?restaurant_slug=${restaurant.slug}`)
-          .then((res: any) => {
-            const list = res?.data?.data || res?.data || [];
-            if (Array.isArray(list) && list.length > 0) {
-              setBranches(list);
-            }
-          })
-          .catch(() => {
-            const fallbackMap: any = {
-              tandooristoppk: [
-                { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
-                { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
-                { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
-              ],
-              jushhpk: [
-                { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
-                { id: 5, name: 'DHA', address: 'DHA, Lahore' },
-                { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
-                { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
-              ],
-              getafomo: [
-                { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
-                { id: 9, name: 'DHA', address: 'DHA, Lahore' },
-                { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
-              ]
-            };
-            setBranches(fallbackMap[restaurant.slug] || []);
-          });
-      }
-    }
-  }, [restaurant]);
+    const slugKey = restaurant?.slug || String(restaurantId || 'tandooristoppk');
+    const fallbackMap: Record<string, any[]> = {
+      tandooristoppk: [
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+      ],
+      jushhpk: [
+        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+      ],
+      getafomo: [
+        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+      ],
+      '1': [
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+      ],
+      '2': [
+        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+      ],
+      '3': [
+        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+      ],
+    };
+
+    const initialBranches = (restaurant?.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0)
+      ? restaurant.branches
+      : (fallbackMap[slugKey] || fallbackMap['tandooristoppk']);
+
+    setBranches(initialBranches);
+
+    const targetSlug = restaurant?.slug;
+    const targetUrl = targetSlug 
+      ? `/branches/?restaurant_slug=${targetSlug}` 
+      : (restaurantId ? `/branches/?restaurant_id=${restaurantId}` : '/branches/');
+
+    api.get(targetUrl)
+      .then((res: any) => {
+        let list = res?.data?.data || res?.data || [];
+        if (typeof list === 'object' && !Array.isArray(list) && 'results' in list) {
+          list = list.results;
+        }
+        if (Array.isArray(list) && list.length > 0) {
+          setBranches(list);
+        }
+      })
+      .catch((e) => {
+        console.warn('Failed to fetch live branches, using default branches:', e);
+      });
+  }, [restaurant, restaurantId]);
 
   const deliveryFee = useMemo(() => {
     if (restaurant && restaurant.delivery_fee) {
