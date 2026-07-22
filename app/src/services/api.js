@@ -13,7 +13,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 90000, // 90 seconds to allow Render cold-starts (45-60s) to complete
 });
 
 // Request interceptor to attach JWT auth token
@@ -24,9 +24,6 @@ api.interceptors.request.use(
     const isPublicUrl = config.url && publicAuthUrls.some(url => config.url.endsWith(url));
 
     if (isPublicUrl) {
-      // FIX 1A: Purge stale instance-level Authorization header from previous sessions.
-      // api.defaults.headers.common persists across app launches in memory, so an expired
-      // token from a previous session would be sent to login/register endpoints, causing 401.
       delete api.defaults.headers.common['Authorization'];
       delete config.headers['Authorization'];
     } else if (!config.headers['Authorization']) {
@@ -67,12 +64,21 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Response interceptor to unwrap data and handle 401 Unauthorized globally
+// Response interceptor to unwrap data and handle 401 & Network Errors / Cold Starts globally
 api.interceptors.response.use(
   (response) => response.data || response,
   async (error) => {
-    const originalRequest = error.config;
+    const originalRequest = error.config || {};
 
+    // 1. Auto-retry on Network Error / Timeout (e.g. Render backend waking up from cold start)
+    if (!error.response && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+      console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${originalRequest.url}...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return api(originalRequest);
+    }
+
+    // 2. Handle 401 Unauthorized globally
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -94,11 +100,10 @@ api.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem('refresh_token');
         if (refreshToken) {
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
-          // Use base axios to avoid infinite loops
           const response = await axios.post(refreshUrl, { refresh: refreshToken });
           
-          if (response.data && response.data.success && response.data.data && response.data.data.access) {
-            const newAccessToken = response.data.data.access;
+          if (response.data && (response.data.access || response.data.data?.access)) {
+            const newAccessToken = response.data.access || response.data.data.access;
             await AsyncStorage.setItem('auth_token', newAccessToken);
             api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -115,15 +120,10 @@ api.interceptors.response.use(
       }
 
       console.log('Unauthorized request — session expired. Logging out...');
-      // Delete authorization header
       delete api.defaults.headers.common['Authorization'];
-      // Remove token from AsyncStorage
       AsyncStorage.removeItem('auth_token').catch((e) => console.error(e));
       AsyncStorage.removeItem('refresh_token').catch((e) => console.error(e));
 
-      // FIX 1C: Dispatch sessionExpired (not logout) so the AuthScreen can show
-      // a "session expired" error message to the user instead of silently clearing state.
-      // 'user/logout' reducer clears state.error = null, so no banner would appear.
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }

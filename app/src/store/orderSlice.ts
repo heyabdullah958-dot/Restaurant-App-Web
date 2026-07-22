@@ -24,7 +24,9 @@ export const placeOrder = createAsyncThunk(
       console.log('[placeOrder] Order created successfully:', data.id, 'Restaurant:', data.restaurant);
       return data;
     } catch (error: any) {
-      console.error('[placeOrder] Error:', error.response?.status, JSON.stringify(error.response?.data || error.message));
+      const status = error.response?.status ? `${error.response.status}` : 'Network/Timeout';
+      const detailMsg = error.response?.data ? JSON.stringify(error.response.data) : (error.message || 'Unknown network error');
+      console.error(`[placeOrder] Error (${status}):`, detailMsg);
 
       // If 401 invalid/expired token error occurs, automatically clear bad token and retry with a fresh guest session
       if (error.response?.status === 401 || JSON.stringify(error.response?.data || '').includes('token')) {
@@ -60,6 +62,10 @@ export const placeOrder = createAsyncThunk(
             .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
             .join('\n');
         }
+      } else if (error.message && (error.message.includes('Network Error') || error.message.includes('timeout'))) {
+        errMsg = 'Server is waking up or connection was slow. Please try placing your order again now.';
+      } else if (error.message) {
+        errMsg = error.message;
       }
       return rejectWithValue(errMsg);
     }
