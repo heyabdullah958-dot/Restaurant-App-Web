@@ -25,6 +25,7 @@ import { guestLogin, updateUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomAlertModal from '../components/CustomAlertModal';
+import api from '../services/api';
 
 const DATE_OPTIONS = ['Today', 'Tomorrow', 'Day After'];
 const TIME_OPTIONS = [
@@ -58,9 +59,19 @@ export default function CheckoutScreen() {
   const [instructions, setInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe' | 'payfast'>('cod');
   
-  // Guest details state
-  const [guestName, setGuestName] = useState(user?.name || '');
+  // Guest / Customer details state
+  const initialName = (user?.name && !user.name.startsWith('guest_')) 
+    ? user.name 
+    : (user?.username && !user.username.startsWith('guest_'))
+    ? user.username
+    : '';
+
+  const [guestName, setGuestName] = useState(initialName);
   const [guestPhone, setGuestPhone] = useState(user?.phone || '');
+
+  // Branch Selection State (null = Auto-Detect)
+  const [branches, setBranches] = useState<any[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
 
   // Delivery scheduling states
   const [isScheduled, setIsScheduled] = useState(false);
@@ -137,6 +148,44 @@ export default function CheckoutScreen() {
     return restaurants.find((r) => r.id === restaurantId);
   }, [restaurantId, restaurants]);
 
+  // Load branches for selected restaurant
+  React.useEffect(() => {
+    if (restaurant) {
+      if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
+        setBranches(restaurant.branches);
+      } else {
+        api.get(`/branches/?restaurant_slug=${restaurant.slug}`)
+          .then((res: any) => {
+            const list = res?.data?.data || res?.data || [];
+            if (Array.isArray(list) && list.length > 0) {
+              setBranches(list);
+            }
+          })
+          .catch(() => {
+            const fallbackMap: any = {
+              tandooristoppk: [
+                { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
+                { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
+                { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+              ],
+              jushhpk: [
+                { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
+                { id: 5, name: 'DHA', address: 'DHA, Lahore' },
+                { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
+                { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+              ],
+              getafomo: [
+                { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
+                { id: 9, name: 'DHA', address: 'DHA, Lahore' },
+                { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+              ]
+            };
+            setBranches(fallbackMap[restaurant.slug] || []);
+          });
+      }
+    }
+  }, [restaurant]);
+
   const deliveryFee = useMemo(() => {
     if (restaurant && restaurant.delivery_fee) {
       return parseFloat(restaurant.delivery_fee);
@@ -152,21 +201,21 @@ export default function CheckoutScreen() {
   const loyaltyPointsEarned = Math.floor(finalTotal / 100);
 
   const handlePlaceOrder = async () => {
-    // 1. Validations
-    if (!address.trim()) {
-      showAlert('Required Field', 'Please enter a delivery address.');
+    const effectiveName = guestName.trim() || ((user?.name && !user.name.startsWith('guest_')) ? user.name : '');
+    if (!effectiveName || effectiveName.startsWith('guest_')) {
+      showAlert('Required Field', 'Please enter your full name for delivery.');
       return;
     }
 
-    if (isGuestMode) {
-      if (!guestName.trim()) {
-        showAlert('Required Field', 'Please enter your name.');
-        return;
-      }
-      if (!guestPhone.trim() || guestPhone.trim().length < 10) {
-        showAlert('Required Field', 'Please enter a valid contact phone number.');
-        return;
-      }
+    const effectivePhone = guestPhone.trim() || user?.phone || '';
+    if (!effectivePhone || effectivePhone.length < 10) {
+      showAlert('Required Field', 'Please enter a valid contact phone number (at least 10 digits).');
+      return;
+    }
+
+    if (!address.trim()) {
+      showAlert('Required Field', 'Please enter a delivery address.');
+      return;
     }
 
     if (!items || items.length === 0) {
@@ -205,16 +254,14 @@ export default function CheckoutScreen() {
 
     const orderData: any = {
       restaurant: restaurantId,
+      branch: selectedBranchId || undefined,
       items: orderItems,
       payment_method: paymentMethod,
-      delivery_address: address,
+      delivery_address: address.trim(),
       special_instructions: finalInstructions || undefined,
-      guest_phone: guestPhone,
+      guest_name: effectiveName,
+      guest_phone: effectivePhone,
     };
-
-    if (isGuestMode) {
-      orderData.guest_name = guestName;
-    }
 
     try {
       // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
@@ -240,7 +287,7 @@ export default function CheckoutScreen() {
           } else {
             await AsyncStorage.setItem('guest_address', address.trim());
           }
-          dispatch(updateUserProfile({ addresses: [address.trim()] }));
+          dispatch(updateUserProfile({ name: effectiveName, phone: effectivePhone, addresses: [address.trim()] }));
         } catch (e) {
           console.error('Failed to save delivery address on checkout:', e);
         }
@@ -338,26 +385,14 @@ export default function CheckoutScreen() {
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Delivery Details</Text>
             
-            {!isGuestMode ? (
-              <View style={styles.profileSummary}>
-                <Ionicons name="person-circle-outline" size={24} color={COLORS.gray} />
-                <View style={styles.profileTextContainer}>
-                  <Text style={styles.profileName}>{user?.name || 'Authenticated User'}</Text>
-                  <Text style={styles.profilePhone}>{user?.phone || 'No phone set'}</Text>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.guestForm}>
-                <Text style={styles.guestLabel}>Contact Information (Guest Checkout)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Full Name"
-                  placeholderTextColor={COLORS.gray}
-                  value={guestName}
-                  onChangeText={setGuestName}
-                />
-              </View>
-            )}
+            <Text style={styles.fieldLabel}>Full Name (Required)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your full name (e.g. Ali Khan)"
+              placeholderTextColor={COLORS.gray}
+              value={guestName}
+              onChangeText={setGuestName}
+            />
 
             <Text style={styles.fieldLabel}>Contact Phone (Required)</Text>
             <TextInput
@@ -415,6 +450,74 @@ export default function CheckoutScreen() {
               value={instructions}
               onChangeText={setInstructions}
             />
+          </View>
+
+          {/* Preferred Branch Selection */}
+          <View style={styles.sectionCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <Text style={styles.sectionTitle}>Preferred Fulfill Branch</Text>
+              <View style={styles.badgeAuto}>
+                <Ionicons name="location" size={12} color={COLORS.primary} />
+                <Text style={styles.badgeAutoText}>Select Branch</Text>
+              </View>
+            </View>
+            <Text style={styles.branchSubText}>
+              Choose the branch you prefer to prepare and deliver your order:
+            </Text>
+
+            {/* Option 1: Auto-Detect */}
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={[
+                styles.branchCardOption,
+                selectedBranchId === null && styles.branchCardSelected
+              ]}
+              onPress={() => setSelectedBranchId(null)}
+            >
+              <Ionicons 
+                name={selectedBranchId === null ? "radio-button-on" : "radio-button-off"} 
+                size={20} 
+                color={selectedBranchId === null ? COLORS.primary : COLORS.gray} 
+              />
+              <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.branchOptionTitle}>Auto-Detect Nearest Branch</Text>
+                  <Text style={styles.recommendedTag}>Auto</Text>
+                </View>
+                <Text style={styles.branchOptionDesc}>Auto-assigns branch based on delivery address</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Specific Branches */}
+            {branches.map((b) => {
+              const isSelected = selectedBranchId === b.id;
+              return (
+                <TouchableOpacity 
+                  key={b.id}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.branchCardOption,
+                    isSelected && styles.branchCardSelected
+                  ]}
+                  onPress={() => setSelectedBranchId(b.id)}
+                >
+                  <Ionicons 
+                    name={isSelected ? "radio-button-on" : "radio-button-off"} 
+                    size={20} 
+                    color={isSelected ? COLORS.primary : COLORS.gray} 
+                  />
+                  <View style={{ flex: 1, marginLeft: SPACING.sm }}>
+                    <Text style={styles.branchOptionTitle}>{b.name} Branch</Text>
+                    {!!b.address && <Text style={styles.branchOptionDesc}>{b.address}</Text>}
+                  </View>
+                  {isSelected && (
+                    <View style={styles.selectedCheckBadge}>
+                      <Ionicons name="checkmark" size={12} color={COLORS.white} />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Payment Methods */}
@@ -916,5 +1019,68 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  badgeAuto: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF0ED',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  badgeAutoText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  branchSubText: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginBottom: SPACING.md,
+  },
+  branchCardOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.lightGray,
+    backgroundColor: COLORS.white,
+    marginBottom: SPACING.xs,
+  },
+  branchCardSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: '#FFF9F8',
+  },
+  branchOptionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  branchOptionDesc: {
+    fontSize: 11,
+    color: COLORS.gray,
+    marginTop: 2,
+  },
+  recommendedTag: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    backgroundColor: '#FFE3DE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 6,
+    overflow: 'hidden',
+  },
+  selectedCheckBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: SPACING.xs,
   },
 });

@@ -37,6 +37,7 @@ class RestaurantDetailView(generics.RetrieveAPIView):
     BUG-07 FIX: prefetch_related('categories__items') reduces N+1 to 3 queries max.
     """
     queryset = Restaurant.objects.filter(is_active=True).prefetch_related(
+        'branches',
         'categories',
         'categories__items'
     )

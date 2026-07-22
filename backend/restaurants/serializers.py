@@ -109,11 +109,21 @@ class RestaurantSerializer(serializers.ModelSerializer):
         )
 
 
+from .models import Restaurant, MenuCategory, MenuItem, Branch
+
+
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ('id', 'name', 'address', 'phone', 'area_keywords')
+
+
 class RestaurantDetailSerializer(serializers.ModelSerializer):
     logo = AbsoluteImageField(required=False, allow_null=True)
     cover_image = AbsoluteImageField(required=False, allow_null=True)
     banner_image = AbsoluteImageField(required=False, allow_null=True)
     categories = serializers.SerializerMethodField()
+    branches = BranchSerializer(many=True, read_only=True)
 
     class Meta:
         model = Restaurant
@@ -122,7 +132,7 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
-            'loyalty_points_ratio', 'categories'
+            'loyalty_points_ratio', 'branches', 'categories'
         )
 
     def get_categories(self, obj):

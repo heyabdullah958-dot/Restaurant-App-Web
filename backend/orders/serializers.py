@@ -36,7 +36,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'restaurant', 'guest_name', 'guest_phone', 'payment_method',
+            'id', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
             'items', 'subtotal', 'delivery_fee', 'discount', 'total'
         )
@@ -175,12 +175,13 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 **validated_data
             )
 
-            # Auto-assign branch based on delivery address
-            from config.admin_utils import resolve_branch_for_order
-            assigned_branch = resolve_branch_for_order(restaurant, order.delivery_address)
-            if assigned_branch:
-                order.branch = assigned_branch
-                order.save(update_fields=['branch'])
+            # If branch was not explicitly selected by customer, auto-assign based on delivery address
+            if not order.branch:
+                from config.admin_utils import resolve_branch_for_order
+                assigned_branch = resolve_branch_for_order(restaurant, order.delivery_address)
+                if assigned_branch:
+                    order.branch = assigned_branch
+                    order.save(update_fields=['branch'])
 
             # Create all OrderItem records
             for item in order_items_to_create:

@@ -250,10 +250,13 @@ export const guestLogin = createAsyncThunk<
       const fallbackUser: UserProfile = {
         id: 9999,
         username: 'Guest User',
+        name: 'Guest User',
         email: 'guest@foodsphere.pk',
         phone: '',
         is_guest: true,
         addresses: [],
+        profile_photo: '',
+        loyalty_points: 0,
       };
       const fallbackToken = 'guest_offline_token';
       api.defaults.headers.common['Authorization'] = `Bearer ${fallbackToken}`;
