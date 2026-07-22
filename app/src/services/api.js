@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // NOTE: process.env.EXPO_PUBLIC_API_URL only loads correctly when running via QR code scan (Metro bundler).
 // When running Expo Go without QR (direct local), env vars don't inject — so we hardcode the production URL here.
 import { Platform } from 'react-native';
-const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+const PRODUCTION_API_URL = 'https://restaurant-app-web.onrender.com/api';
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 
 const api = axios.create({
