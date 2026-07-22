@@ -696,8 +696,8 @@ export const getImageUrl = (path: string | null) => {
     return { uri: path };
   }
   // Remove /api if present at the end of the base URL
-  const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
+  const PROD_API_URL = 'https://restaurant-app-web.onrender.com/api';
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
   const base = apiUrl.replace(/\/api\/?$/, '');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return { uri: `${base}${cleanPath}` };

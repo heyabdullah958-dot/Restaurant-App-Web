@@ -53,25 +53,19 @@ export const loadSavedToken = createAsyncThunk<
       // Proactively attempt token refresh on launch if refreshToken exists
       if (refreshToken) {
         try {
-          const LOCAL_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
-          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || LOCAL_API_URL;
+          const PROD_API_URL = 'https://restaurant-app-web.onrender.com/api';
+          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
           const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken });
           
-          if (refreshResponse.data && refreshResponse.data.success && refreshResponse.data.data && refreshResponse.data.data.access) {
-            const newAccessToken = refreshResponse.data.data.access;
+          const newAccessToken = refreshResponse.data?.access || refreshResponse.data?.data?.access;
+          if (newAccessToken) {
             await AsyncStorage.setItem('auth_token', newAccessToken);
             activeToken = newAccessToken;
             console.log('Successfully refreshed token proactively on app launch');
           }
         } catch (refreshErr) {
-          console.warn('Proactive token refresh failed on app launch:', refreshErr);
-          // If refresh fails on launch, we probably have expired credentials.
-          // Let's clear tokens and return null to show login/onboarding.
-          delete api.defaults.headers.common['Authorization'];
-          await AsyncStorage.removeItem('auth_token').catch(() => {});
-          await AsyncStorage.removeItem('refresh_token').catch(() => {});
-          return null;
+          console.warn('Proactive token refresh attempt on app launch:', refreshErr);
         }
       }
       
