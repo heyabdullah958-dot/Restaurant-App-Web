@@ -79,6 +79,13 @@ export const MenuManagement: React.FC = () => {
     editMenuItem,
   } = useAdmin();
 
+  // Local UI States (hooks MUST be called unconditionally)
+  const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  
+  // Editing & Adding state (null item indicates "Create Mode")
+  const [editingItem, setEditingItem] = useState<{ categoryId: number; categoryName: string; item: MenuItem | null } | null>(null);
+
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
   
@@ -94,13 +101,6 @@ export const MenuManagement: React.FC = () => {
   }
 
   const categories = menuItems[restaurant.id] || [];
-
-  // Local UI States
-  const [showAddCategoryForm, setShowAddCategoryForm] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  
-  // Editing & Adding state (null item indicates "Create Mode")
-  const [editingItem, setEditingItem] = useState<{ categoryId: number; categoryName: string; item: MenuItem | null } | null>(null);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();

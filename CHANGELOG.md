@@ -23,4 +23,11 @@
 - Implemented area-based keyword matching in `resolve_branch_for_order` for customer delivery address auto-assignment.
 - Created public/manager `GET /api/branches/` endpoint and `/api/managers/` endpoint routing.
 - Built and passed 100% automated end-to-end integration test suite `test_order_flow_e2e.py`.
+## 2026-07-22 Minified React Error #310 Resolution & Phase 1 Launch Scope Filtering
+- Fixed React Hook ordering rule violations across Admin Panel views (`BranchDashboard.tsx`, `OrderManagement.tsx`, `MenuManagement.tsx`).
+- Resolved production dashboard crash ("Dashboard Encountered an Issue / Minified React error #310") by ensuring `useState` and `useMemo` hooks execute unconditionally before early returns.
+- Restricted Super Admin Console (`AdminContext.tsx`, `Sidebar.tsx`, `SuperDashboard.tsx`, `TenantManagement.tsx`) to strictly display Phase 1 launch brands: **Tandoori Stop**, **Jush**, and **Get A Fomo**. All non-launch brands (*SeenBanao*, *DineAtBlue*, *SandMelts*, *BirdmanFoodsPK*) are hidden across all Super Admin selectors, metrics cards, and registries.
+- Expanded `MOCK_MANAGERS` in `ManagerManagement.tsx` to list all 10 branch manager accounts across all branches of Tandoori Stop, Jush, and Get A Fomo.
+- Built and verified production bundle (`npm run build` -> `dist/assets/index-DW_z81fs.js`).
+
 

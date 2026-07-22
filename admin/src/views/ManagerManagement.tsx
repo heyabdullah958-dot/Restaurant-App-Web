@@ -66,10 +66,21 @@ const MOCK_BRANCHES: Branch[] = [
 ];
 
 const MOCK_MANAGERS: Manager[] = [
+  // Tandoori Stop Branches (3)
   { id: 2, username: 'manager_tandooristoppk_johar_town', email: 'manager@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'Johar Town', branch_id: 1, notification_email: 'manager@tandooristoppk.com' },
   { id: 3, username: 'manager_tandooristoppk_lake_city', email: 'manager2@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'Lake City', branch_id: 2, notification_email: 'manager2@tandooristoppk.com' },
-  { id: 4, username: 'manager_jushhpk_johar_town', email: 'manager@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Johar Town', branch_id: 4, notification_email: 'manager@jushhpk.com' },
-  { id: 5, username: 'manager_getafomo_johar_town', email: 'manager@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Johar Town', branch_id: 8, notification_email: 'manager@getafomo.com' },
+  { id: 4, username: 'manager_tandooristoppk_gt_road_baghbanpura', email: 'manager3@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'GT Road Baghbanpura', branch_id: 3, notification_email: 'manager3@tandooristoppk.com' },
+
+  // Jush Branches (4)
+  { id: 5, username: 'manager_jushhpk_johar_town', email: 'manager@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Johar Town', branch_id: 4, notification_email: 'manager@jushhpk.com' },
+  { id: 6, username: 'manager_jushhpk_dha', email: 'manager.dha@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'DHA', branch_id: 5, notification_email: 'manager.dha@jushhpk.com' },
+  { id: 7, username: 'manager_jushhpk_gulberg', email: 'manager.gulberg@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Gulberg', branch_id: 6, notification_email: 'manager.gulberg@jushhpk.com' },
+  { id: 8, username: 'manager_jushhpk_saddar', email: 'manager.saddar@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Saddar', branch_id: 7, notification_email: 'manager.saddar@jushhpk.com' },
+
+  // GetAFomo Branches (3)
+  { id: 9, username: 'manager_getafomo_johar_town', email: 'manager@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Johar Town', branch_id: 8, notification_email: 'manager@getafomo.com' },
+  { id: 10, username: 'manager_getafomo_dha', email: 'manager.dha@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'DHA', branch_id: 9, notification_email: 'manager.dha@getafomo.com' },
+  { id: 11, username: 'manager_getafomo_gulberg', email: 'manager.gulberg@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Gulberg', branch_id: 10, notification_email: 'manager.gulberg@getafomo.com' },
 ];
 
 export const ManagerManagement: React.FC = () => {
@@ -98,11 +109,16 @@ export const ManagerManagement: React.FC = () => {
 
   const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
 
+  const isLaunchBrand = (str: string) => {
+    const clean = (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
+  };
+
   const loadManagers = async () => {
     setLoading(true);
     if (isMock) {
       setTimeout(() => {
-        setManagers(MOCK_MANAGERS);
+        setManagers(MOCK_MANAGERS.filter(m => isLaunchBrand(m.restaurant_name)));
         setLoading(false);
       }, 500);
       return;
@@ -110,11 +126,12 @@ export const ManagerManagement: React.FC = () => {
 
     try {
       const data = await fetchAllManagers();
-      setManagers(data);
+      const filtered = data.filter((m: Manager) => isLaunchBrand(m.restaurant_name));
+      setManagers(filtered);
     } catch (err: any) {
       console.error('[Load Managers Failed]', err);
       showToast('Failed to load manager accounts. Using offline mocks.', 'error');
-      setManagers(MOCK_MANAGERS);
+      setManagers(MOCK_MANAGERS.filter(m => isLaunchBrand(m.restaurant_name)));
     } finally {
       setLoading(false);
     }
@@ -532,7 +549,7 @@ export const ManagerManagement: React.FC = () => {
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500 transition-all appearance-none pr-8 cursor-pointer"
                     >
                       <option value="">Select a restaurant...</option>
-                      {restaurants.map((r) => (
+                      {restaurants.filter(r => isLaunchBrand(r.slug || r.name)).map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.name} ({r.city})
                         </option>

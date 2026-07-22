@@ -299,6 +299,7 @@ class AdminManagerListView(APIView):
             is_superuser=False
         ).prefetch_related('groups').order_by('username')
         
+        LAUNCH_SLUGS = {'tandooristoppk', 'jushhpk', 'getafomo'}
         results = []
         for u in managers:
             restaurant = None
@@ -308,7 +309,7 @@ class AdminManagerListView(APIView):
                     restaurant = restaurants_map.get(slug)
                     break
             
-            if not restaurant:
+            if not restaurant or restaurant.slug not in LAUNCH_SLUGS:
                 continue
                 
             results.append({

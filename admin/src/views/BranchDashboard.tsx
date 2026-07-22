@@ -30,6 +30,7 @@ export const BranchDashboard: React.FC = () => {
   const [editCity, setEditCity] = useState('');
   const [editIsActive, setEditIsActive] = useState(true);
   const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month' | 'all'>('today');
 
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
   
@@ -54,8 +55,6 @@ export const BranchDashboard: React.FC = () => {
      o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
   );
   const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
-
-  const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month' | 'all'>('today');
 
   // Calculate live stats based on timeframe
   const now = new Date();

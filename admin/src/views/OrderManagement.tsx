@@ -19,6 +19,16 @@ export const OrderManagement: React.FC = () => {
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
 
+  // Filter orders belonging to this brand (hook MUST be called unconditionally)
+  const brandOrders = useMemo(() => {
+    if (!restaurant) return [];
+    return orders.filter((o) => 
+      Number(o.restaurant_id) === Number(restaurant.id) ||
+      (o.restaurant_name && restaurant.name && 
+       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    );
+  }, [orders, restaurant]);
+
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
@@ -65,15 +75,6 @@ export const OrderManagement: React.FC = () => {
       </div>
     );
   }
-
-  // Filter orders belonging to this brand
-  const brandOrders = useMemo(() => {
-    return orders.filter((o) => 
-      Number(o.restaurant_id) === Number(restaurant.id) ||
-      (o.restaurant_name && restaurant.name && 
-       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
-    );
-  }, [orders, restaurant]);
 
   // Group orders by status with dynamic accent mappings
   const columns: { 

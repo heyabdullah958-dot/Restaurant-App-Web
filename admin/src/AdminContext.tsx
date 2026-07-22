@@ -194,15 +194,21 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
+  const isLaunchBrandSlug = (slug: string) => {
+    const clean = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
+  };
+
   const loadAppData = async () => {
     const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
     if (isMock) {
-      setRestaurants(MOCK_RESTAURANTS);
+      const launchMockRestaurants = MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      setRestaurants(launchMockRestaurants);
       setOrders(INITIAL_ORDERS);
-      if (MOCK_RESTAURANTS.length > 0) {
+      if (launchMockRestaurants.length > 0) {
         const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
-        const exists = savedBrandId && MOCK_RESTAURANTS.some((r) => r.id === Number(savedBrandId));
-        setSelectedBrandId(exists ? Number(savedBrandId) : MOCK_RESTAURANTS[0].id);
+        const exists = savedBrandId && launchMockRestaurants.some((r) => r.id === Number(savedBrandId));
+        setSelectedBrandId(exists ? Number(savedBrandId) : launchMockRestaurants[0].id);
       }
       return;
     }
@@ -212,7 +218,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
       ]);
-      const mapped = restaurantData.results.map(mapApiRestaurant);
+      const mapped = restaurantData.results
+        .map(mapApiRestaurant)
+        .filter((r) => isLaunchBrandSlug(r.slug));
       setRestaurants(mapped);
       setOrders(
         orderData.results.map(mapApiOrder)
