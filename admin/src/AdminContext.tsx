@@ -337,9 +337,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // ─── Real JWT Login ────────────────────────────────────────────────────────
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
+    let targetUsername = username.trim();
+
+    // Map demo shortcut usernames to live Heroku manager accounts
+    const SHORTCUT_MAP: Record<string, string> = {
+      'jushhpk_mgr': 'manager_jushhpk_dha',
+      'tandooristoppk_mgr': 'manager_tandooristoppk_johar_town',
+      'getafomo_mgr': 'manager_getafomo_dha',
+      'seenbanao_mgr': 'manager_seenbanao',
+      'dineatblue_mgr': 'manager_dineatblue',
+      'sandmelts_mgr': 'manager_sandmelts',
+      'birdmanfoodspk_mgr': 'manager_birdmanfoodspk',
+    };
+
+    if (SHORTCUT_MAP[targetUsername]) {
+      targetUsername = SHORTCUT_MAP[targetUsername];
+    }
+
     try {
-      // 1. Authenticate and get JWT tokens
-      const response = await loginAdmin(username, password);
+      // 1. Authenticate against Heroku REST API and get JWT tokens
+      const response = await loginAdmin(targetUsername, password);
       setTokens(response.access, response.refresh);
       localStorage.removeItem('foodsphere_admin_mock_user');
 
@@ -347,7 +364,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const payload = decodeToken(response.access);
       const isSuperAdmin = payload?.is_superuser === true;
 
-      // 3. Fetch live data from API
+      // 3. Fetch live data from Heroku API
       const [restaurantData, orderData] = await Promise.all([
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
@@ -367,10 +384,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
       }
 
-      // 4. Set user state
+      // 4. Set live user state
       const loggedInUser: User = {
         id: payload?.user_id || 0,
-        username,
+        username: targetUsername,
         email: '',
         role: isSuperAdmin ? 'super_admin' : 'branch_manager',
         restaurantId: managerRestId,
@@ -380,65 +397,59 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';
       localStorage.setItem('foodsphere_admin_view', defaultView);
       setActiveView(defaultView);
-      showToast(`Welcome back, ${username}! 🚀`, 'success');
+      showToast(`Welcome back, ${targetUsername}! 🚀`, 'success');
       return true;
 
     } catch (err: any) {
       console.error('[Login Error]', err);
 
-      // Determine if it is a genuine connection/network error rather than credentials rejection
       const isAuthError = err.message && (
         err.message.includes('HTTP 401') || 
         err.message.includes('HTTP 403') || 
         err.message.includes('HTTP 400')
       );
-      const isNetworkError = !isAuthError;
 
-      // Fallback to mock login for development convenience
-      const isMockManager = username.endsWith('_mgr') || (isNetworkError && username.startsWith('manager_'));
-      const isMockSuper = username === 'admin' && isNetworkError;
-
-      if (username === 'seenbanao_mgr' || isMockManager || isMockSuper) {
-        showToast('API unreachable — using demo mode', 'info');
-        const isMockSuperUser = username === 'admin';
-
-        // Extract restaurant ID based on slug
-        const getMockRestaurantId = (uname: string): number => {
-          const clean = uname.replace('manager_', '').replace('_mgr', '');
-          const mapping: Record<string, number> = {
-            'seenbanao': 1,
-            'dineatblue': 2,
-            'jushhpk': 3,
-            'tandooristoppk': 4,
-            'sandmelts': 5,
-            'birdmanfoodspk': 6,
-            'getafomo': 7
-          };
-          return mapping[clean] || 1;
-        };
-
-        const mockUser: User = {
-          id: 1,
-          username,
-          email: `${username}@foodsphere.com`,
-          role: isMockSuperUser ? 'super_admin' : 'branch_manager',
-          restaurantId: isMockSuperUser ? undefined : getMockRestaurantId(username),
-        };
-
-        // Load mock data immediately for launch brands to prevent "No Restaurant Data Available" screen
-        setRestaurants(MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug)));
-        setOrders(INITIAL_ORDERS);
-
-        setUser(mockUser);
-        const mockView = isMockSuperUser ? 'super_dashboard' : 'branch_dashboard';
-        localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('foodsphere_admin_view', mockView);
-        localStorage.setItem('foodsphere_admin_brand_id', String(mockUser.restaurantId || 1));
-        setActiveView(mockView);
-        return true;
+      if (isAuthError) {
+        showToast('Invalid username or password. Please check your credentials.', 'error');
+        return false;
       }
-      showToast('Invalid credentials. Please try again.', 'error');
-      return false;
+
+      // Genuine network failure fallback
+      showToast('Backend API unreachable — running offline demo mode', 'info');
+      const isMockSuperUser = targetUsername === 'admin';
+
+      const getMockRestaurantId = (uname: string): number => {
+        const clean = uname.replace('manager_', '').replace('_mgr', '');
+        const mapping: Record<string, number> = {
+          'seenbanao': 1,
+          'dineatblue': 2,
+          'jushhpk': 3,
+          'tandooristoppk': 4,
+          'sandmelts': 5,
+          'birdmanfoodspk': 6,
+          'getafomo': 7
+        };
+        return mapping[clean] || 1;
+      };
+
+      const mockUser: User = {
+        id: 1,
+        username: targetUsername,
+        email: `${targetUsername}@foodsphere.com`,
+        role: isMockSuperUser ? 'super_admin' : 'branch_manager',
+        restaurantId: isMockSuperUser ? undefined : getMockRestaurantId(targetUsername),
+      };
+
+      setRestaurants(MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug)));
+      setOrders(INITIAL_ORDERS);
+
+      setUser(mockUser);
+      const mockView = isMockSuperUser ? 'super_dashboard' : 'branch_dashboard';
+      localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('foodsphere_admin_view', mockView);
+      localStorage.setItem('foodsphere_admin_brand_id', String(mockUser.restaurantId || 1));
+      setActiveView(mockView);
+      return true;
     } finally {
       setLoading(false);
     }
