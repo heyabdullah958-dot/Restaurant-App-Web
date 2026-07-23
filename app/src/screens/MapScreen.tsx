@@ -260,7 +260,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     });
   };
 
-  // HTML Leaflet Map Template with CartoDB tiles & custom pins
+  // HTML Leaflet Map Template with CartoDB tiles & robust WebView container styling
   const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -268,10 +268,19 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
       <style>
-        html, body, #map {
-          margin: 0; padding: 0; width: 100%; height: 100%;
-          background: #EBF0F5; user-select: none; -webkit-user-select: none;
+        * { box-sizing: border-box; }
+        html, body {
+          margin: 0; padding: 0; width: 100vw; height: 100vh;
+          overflow: hidden; background: #EBF0F5;
+          user-select: none; -webkit-user-select: none;
+        }
+        #map {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          width: 100vw; height: 100vh;
+          z-index: 1; background: #EBF0F5;
         }
 
         /* Pulsing user location GPS dot */
@@ -390,74 +399,92 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     <body>
       <div id="map"></div>
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
       <script>
-        var map = L.map('map', {
-          zoomControl: false,
-          attributionControl: false
-        }).setView([${userLat}, ${userLng}], 12);
-
-        // Primary reliable CartoDB Voyager tiles (never blocks webviews, crisp design)
-        var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          subdomains: 'abcd',
-          maxZoom: 19
-        }).addTo(map);
-
-        // Fallback tile handler if network glitches
-        tileLayer.on('tileerror', function() {
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        });
-
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        // Force Leaflet to calculate full height
-        setTimeout(function() {
-          map.invalidateSize();
-        }, 300);
-
-        // User GPS dot
-        var userMarker = L.marker([${userLat}, ${userLng}], {
-          icon: L.divIcon({
-            className: 'user-gps-container',
-            html: '<div class="user-gps-dot"></div>',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
-          })
-        }).addTo(map);
-
+        var map;
         var markersMap = {};
 
-        var branches = ${JSON.stringify(processedBranches)};
-        branches.forEach(function(b) {
-          var pinIcon = L.divIcon({
-            className: 'mcd-pin-container',
-            html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
-                    '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
-                    '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
-                  '</div>',
-            iconAnchor: [40, 20]
+        function initMap() {
+          if (window.mapInitialized) return;
+          if (typeof L === 'undefined') {
+            setTimeout(initMap, 100);
+            return;
+          }
+          window.mapInitialized = true;
+
+          map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+          }).setView([${userLat}, ${userLng}], 12);
+
+          // CartoDB Voyager tiles (never blocks WebViews, crisp design)
+          var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+          }).addTo(map);
+
+          tileLayer.on('tileerror', function() {
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
           });
 
-          var marker = L.marker([b.lat, b.lng], { icon: pinIcon }).addTo(map);
-          markersMap[b.id] = marker;
+          L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-          var popupHtml = '<div class="popup-card">' +
-            '<div class="popup-header"><span class="popup-brand">' + b.brandName + '</span></div>' +
-            '<div class="popup-title">' + b.branchName + '</div>' +
-            '<div class="popup-address">' + b.address + '</div>' +
-            '<button class="popup-btn" onclick="onSelectBranch(\'' + b.id + '\', \'' + b.brandSlug + '\')">🛵 Order From Here</button>' +
-          '</div>';
+          // Force Leaflet map resize at multiple intervals
+          map.invalidateSize();
+          setTimeout(function() { map.invalidateSize(); }, 200);
+          setTimeout(function() { map.invalidateSize(); }, 600);
+          setTimeout(function() { map.invalidateSize(); }, 1200);
 
-          marker.bindPopup(popupHtml, { closeButton: false, offset: L.point(0, -10) });
+          // User GPS dot
+          var userMarker = L.marker([${userLat}, ${userLng}], {
+            icon: L.divIcon({
+              className: 'user-gps-container',
+              html: '<div class="user-gps-dot"></div>',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            })
+          }).addTo(map);
 
-          marker.on('click', function() {
-            if (window.ReactNativeWebView) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({
-                action: 'SELECT_BRANCH',
-                branchId: b.id
-              }));
-            }
+          var branches = ${JSON.stringify(processedBranches)};
+          branches.forEach(function(b) {
+            var pinIcon = L.divIcon({
+              className: 'mcd-pin-container',
+              html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
+                      '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
+                      '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
+                    '</div>',
+              iconAnchor: [40, 20]
+            });
+
+            var marker = L.marker([b.lat, b.lng], { icon: pinIcon }).addTo(map);
+            markersMap[b.id] = marker;
+
+            var popupHtml = '<div class="popup-card">' +
+              '<div class="popup-header"><span class="popup-brand">' + b.brandName + '</span></div>' +
+              '<div class="popup-title">' + b.branchName + '</div>' +
+              '<div class="popup-address">' + b.address + '</div>' +
+              '<button class="popup-btn" onclick="onSelectBranch(\'' + b.id + '\', \'' + b.brandSlug + '\')">🛵 Order From Here</button>' +
+            '</div>';
+
+            marker.bindPopup(popupHtml, { closeButton: false, offset: L.point(0, -10) });
+
+            marker.on('click', function() {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  action: 'SELECT_BRANCH',
+                  branchId: b.id
+                }));
+              }
+            });
           });
-        });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+          initMap();
+        }
+        window.addEventListener('load', initMap);
 
         function onSelectBranch(branchId, brandSlug) {
           if (window.ReactNativeWebView) {
@@ -470,6 +497,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         }
 
         window.focusMarker = function(branchId, lat, lng) {
+          if (!map) return;
           map.flyTo([lat, lng], 15, { duration: 1.2 });
           if (markersMap[branchId]) {
             markersMap[branchId].openPopup();
@@ -477,6 +505,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         };
 
         window.recenterMap = function(lat, lng) {
+          if (!map) return;
           map.flyTo([lat, lng], 13, { duration: 1 });
         };
       </script>
@@ -503,7 +532,11 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: mapHtml }}
+        source={{ html: mapHtml, baseUrl: 'https://unpkg.com' }}
+        mixedContentMode="always"
+        allowFileAccess={true}
+        allowUniversalAccessFromFileURLs={true}
+        allowFileAccessFromFileURLs={true}
         javaScriptEnabled={true}
         domStorageEnabled={true}
         style={styles.map}
