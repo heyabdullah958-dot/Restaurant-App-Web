@@ -21,7 +21,6 @@ const MainLayout: React.FC = () => {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('admin-theme') === 'dark';
   });
-  const isMockMode = !!localStorage.getItem('foodsphere_admin_mock_user') && !localStorage.getItem('foodsphere_admin_token');
 
   useEffect(() => {
     if (darkMode) {
@@ -73,40 +72,6 @@ const MainLayout: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
-        {/* Mock/Demo Mode Banner */}
-        {isMockMode && (
-          <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-500 text-xs px-6 py-2.5 flex items-center justify-between font-bold">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-              Operational fall-back: Backend is sleeping. Running in Demo Mode (Changes will not persist).
-            </span>
-            <button 
-              onClick={() => {
-                const apiBase = import.meta.env.VITE_API_URL || 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
-                const healthUrl = apiBase.endsWith('/api') ? `${apiBase}/health/` : `${apiBase}/api/health/`;
-                fetch(healthUrl, { mode: 'cors' })
-                  .then(r => {
-                    if (r.ok || r.status < 500) {
-                      localStorage.removeItem('foodsphere_admin_mock_user');
-                      localStorage.removeItem('foodsphere_admin_token');
-                      localStorage.removeItem('foodsphere_admin_refresh');
-                      window.location.reload();
-                    } else {
-                      alert('Server is still waking up... Please wait 10-15 seconds and try again ☕');
-                    }
-                  })
-                  .catch(() => {
-                    // Try removing mock flag and refreshing directly
-                    localStorage.removeItem('foodsphere_admin_mock_user');
-                    window.location.reload();
-                  });
-              }}
-              className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase transition-all shadow-sm active:scale-95 cursor-pointer"
-            >
-              Try Reconnect
-            </button>
-          </div>
-        )}
 
         {/* Top Navbar */}
         <header className={`sticky top-0 z-20 flex h-16 items-center justify-between px-6 border-b transition-colors duration-200 ${

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, Restaurant, Order, MenuCategory, OrderStatus } from './types';
-import { MOCK_MENU_ITEMS, MOCK_RESTAURANTS, INITIAL_ORDERS } from './mockData';
+import { MOCK_MENU_ITEMS, MOCK_RESTAURANTS } from './mockData';
 import {
   loginAdmin,
   logoutAdmin,
@@ -119,6 +119,9 @@ function mapApiOrder(o: ApiOrder): Order {
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
+    // Clear any legacy mock user flag from localStorage
+    localStorage.removeItem('foodsphere_admin_mock_user');
+
     const token = getToken();
     if (token) {
       const payload = decodeToken(token);
@@ -131,14 +134,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           restaurantId: payload.is_superuser ? undefined : payload.restaurant_id,
           branchId: payload.is_superuser ? undefined : payload.branch_id,
         };
-      }
-    }
-    const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
-    if (mockUserJson) {
-      try {
-        return JSON.parse(mockUserJson);
-      } catch {
-        return null;
       }
     }
     return null;
@@ -158,13 +153,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (payload && payload.exp * 1000 > Date.now()) {
         return payload.is_superuser ? 'super_dashboard' : 'branch_dashboard';
       }
-    }
-    const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
-    if (mockUserJson) {
-      try {
-        const u = JSON.parse(mockUserJson);
-        return u.role === 'super_admin' ? 'super_dashboard' : 'branch_dashboard';
-      } catch {}
     }
     return 'login';
   });
@@ -226,18 +214,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Restore session from localStorage on mount & listen to browser Back / Forward buttons
   useEffect(() => {
+    localStorage.removeItem('foodsphere_admin_mock_user');
     const token = getToken();
     if (token) {
       const payload = decodeToken(token);
       if (!payload || payload.exp * 1000 <= Date.now()) {
-        // Token expired
         logout();
       } else {
-        loadAppData();
-      }
-    } else {
-      const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
-      if (mockUserJson) {
         loadAppData();
       }
     }
@@ -335,9 +318,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const apiOrders = (orderData.results || []).map(mapApiOrder);
       if (apiOrders.length > 0) {
         setOrders(apiOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-      } else {
-        const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-        setOrders(isMock ? INITIAL_ORDERS : []);
       }
       
       if (finalRestaurants.length > 0) {
@@ -357,10 +337,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
     } catch (err) {
-      console.warn('[AdminContext] Failed to load app data:', err);
-      const launchMockRestaurants = MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
-      setRestaurants(launchMockRestaurants);
-      setOrders(INITIAL_ORDERS);
+      console.warn('[AdminContext] Failed to load app data from server:', err);
     } finally {
       setLoading(false);
     }
@@ -429,7 +406,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLoading(true);
     let targetUsername = username.trim();
 
-    // Map demo shortcut usernames to live Heroku manager accounts
+    // Map shortcut usernames to live Heroku manager accounts
     const SHORTCUT_MAP: Record<string, string> = {
       'jushhpk_mgr': 'manager_jushhpk_dha',
       'tandooristoppk_mgr': 'manager_tandooristoppk_johar_town',
@@ -497,54 +474,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     } catch (err: any) {
       console.error('[Login Error]', err);
-
-      const isAuthError = err.message && (
-        err.message.includes('HTTP 401') || 
-        err.message.includes('HTTP 403') || 
-        err.message.includes('HTTP 400')
-      );
-
-      if (isAuthError) {
-        showToast('Invalid username or password. Please check your credentials.', 'error');
-        return false;
-      }
-
-      // Genuine network failure fallback
-      showToast('Backend API unreachable — running offline demo mode', 'info');
-      const isMockSuperUser = targetUsername === 'admin';
-
-      const getMockRestaurantId = (uname: string): number => {
-        const clean = uname.replace('manager_', '').replace('_mgr', '');
-        const mapping: Record<string, number> = {
-          'seenbanao': 1,
-          'dineatblue': 2,
-          'jushhpk': 3,
-          'tandooristoppk': 4,
-          'sandmelts': 5,
-          'birdmanfoodspk': 6,
-          'getafomo': 7
-        };
-        return mapping[clean] || 1;
-      };
-
-      const mockUser: User = {
-        id: 1,
-        username: targetUsername,
-        email: `${targetUsername}@foodsphere.com`,
-        role: isMockSuperUser ? 'super_admin' : 'branch_manager',
-        restaurantId: isMockSuperUser ? undefined : getMockRestaurantId(targetUsername),
-      };
-
-      setRestaurants(MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug)));
-      setOrders(INITIAL_ORDERS);
-
-      setUser(mockUser);
-      const mockView = isMockSuperUser ? 'super_dashboard' : 'branch_dashboard';
-      localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(mockUser));
-      localStorage.setItem('foodsphere_admin_view', mockView);
-      localStorage.setItem('foodsphere_admin_brand_id', String(mockUser.restaurantId || 1));
-      setActiveView(mockView);
-      return true;
+      showToast(err.message || 'Invalid username or password. Please check your credentials.', 'error');
+      return false;
     } finally {
       setLoading(false);
     }
@@ -552,8 +483,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const logout = () => {
     const refresh = getRefreshToken();
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (refresh && !isMock) {
+    if (refresh) {
       logoutAdmin(refresh).catch((err) => {
         console.warn('[Logout API failed]', err);
       });
@@ -644,12 +574,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [...updated].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     });
 
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      showToast(`Order #${orderId} → ${newStatus.replace('_', ' ')} (Mock)`, 'success');
-      return;
-    }
-
     // Sync to API
     try {
       await apiUpdateOrderStatus(orderId, newStatus);
@@ -683,15 +607,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { ...prev, [restaurantId]: updatedCategories };
     });
 
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      showToast(
-        `Availability updated: ${nextState ? 'In Stock ✅' : 'Out of Stock ⚠️'} (Mock)`,
-        nextState ? 'success' : 'info'
-      );
-      return;
-    }
-
     try {
       await updateMenuItem(itemId, { is_available: nextState });
       showToast(
@@ -707,24 +622,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Onboard new brand
   const onboardNewRestaurant = async (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url' | 'banner_url'>) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const newId = restaurants.length > 0 ? Math.max(...restaurants.map(r => r.id)) + 1 : 1;
-      const mapped: Restaurant = {
-        ...newRestaurant,
-        id: newId,
-        rating: 4.5,
-        logo_url: undefined,
-        cover_url: undefined,
-        banner_url: undefined,
-      };
-      setRestaurants((prev) => [...prev, mapped]);
-      setMenuItems((prev) => ({ ...prev, [newId]: [] }));
-      showToast(`Restaurant "${newRestaurant.name}" onboarded (Mock)! 🚀`, 'success');
-      setView('super_dashboard');
-      setLoading(false);
-      return;
-    }
     try {
       const payload = {
         name: newRestaurant.name,
@@ -757,13 +654,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setRestaurants((prev) => prev.filter((r) => r.id !== id));
-      showToast('Restaurant brand removed successfully (Mock)', 'info');
-      setLoading(false);
-      return;
-    }
     try {
       await deleteRestaurant(id);
       setRestaurants((prev) => prev.filter((r) => r.id !== id));
@@ -779,19 +669,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Add menu category
   const addMenuCategory = async (name: string) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const existing = menuItems[selectedBrandId] || [];
-      const newId = existing.length > 0 ? Math.max(...existing.map(c => c.id)) + 1 : 1;
-      const mockCat: MenuCategory = { id: newId, name, items: [] };
-      setMenuItems((prev) => ({
-        ...prev,
-        [selectedBrandId]: [...existing, mockCat]
-      }));
-      showToast(`Category "${name}" created successfully (Mock)!`, 'success');
-      setLoading(false);
-      return;
-    }
     try {
       const created = await createMenuCategory({
         restaurant: selectedBrandId,
@@ -818,17 +695,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Remove menu category
   const removeMenuCategory = async (id: number) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const existing = menuItems[selectedBrandId] || [];
-      setMenuItems((prev) => ({
-        ...prev,
-        [selectedBrandId]: existing.filter((c) => c.id !== id)
-      }));
-      showToast('Category deleted successfully (Mock)', 'info');
-      setLoading(false);
-      return;
-    }
     try {
       await deleteMenuCategory(id);
       setMenuItems((prev) => {
@@ -850,37 +716,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Add menu item with full configuration (specs, variants, prep time, etc.)
   const addMenuItem = async (categoryId: number, data: any) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const mockItem = {
-        id: Date.now(),
-        name: data.name || (data instanceof FormData ? data.get('name') : 'New Item'),
-        description: data.description || (data instanceof FormData ? data.get('description') : ''),
-        price: Number(data.price || (data instanceof FormData ? data.get('price') : 0)),
-        is_available: true,
-        image: '',
-        options: []
-      };
-      setMenuItems((prev) => {
-        const existingCategories = prev[selectedBrandId] || [];
-        const updated = existingCategories.map((category) => {
-          if (category.id === categoryId) {
-            return {
-              ...category,
-              items: [...category.items, mockItem],
-            };
-          }
-          return category;
-        });
-        return {
-          ...prev,
-          [selectedBrandId]: updated,
-        };
-      });
-      showToast(`Item added to menu (Mock)! ✅`, 'success');
-      setLoading(false);
-      return;
-    }
     try {
       let payload = data;
       if (data instanceof FormData) {
@@ -924,28 +759,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Remove menu item
   const removeMenuItem = async (categoryId: number, itemId: number) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setMenuItems((prev) => {
-        const existingCategories = prev[selectedBrandId] || [];
-        const updated = existingCategories.map((category) => {
-          if (category.id === categoryId) {
-            return {
-              ...category,
-              items: category.items.filter((item) => item.id !== itemId),
-            };
-          }
-          return category;
-        });
-        return {
-          ...prev,
-          [selectedBrandId]: updated,
-        };
-      });
-      showToast('Item deleted from menu (Mock)', 'info');
-      setLoading(false);
-      return;
-    }
     try {
       await deleteMenuItem(itemId);
       setMenuItems((prev) => {
@@ -975,26 +788,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Update item options/variants (sizes, spice levels, toppings…)
   const updateItemOptions = async (categoryId: number, itemId: number, options: any[]) => {
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setMenuItems((prev) => {
-        const existingCategories = prev[selectedBrandId] || [];
-        const updated = existingCategories.map((category) => {
-          if (category.id === categoryId) {
-            return {
-              ...category,
-              items: category.items.map((item) =>
-                item.id === itemId ? { ...item, options } : item
-              ),
-            };
-          }
-          return category;
-        });
-        return { ...prev, [selectedBrandId]: updated };
-      });
-      showToast('Item options saved (Mock)! ✅', 'success');
-      return;
-    }
     try {
       await updateMenuItemOptions(itemId, options);
       setMenuItems((prev) => {
@@ -1022,35 +815,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Edit/update menu item properties
   const editMenuItem = async (categoryId: number, itemId: number, data: any) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setMenuItems((prev) => {
-        const existingCategories = prev[selectedBrandId] || [];
-        const updated = existingCategories.map((category) => {
-          if (category.id === categoryId) {
-            return {
-              ...category,
-              items: category.items.map((item) =>
-                item.id === itemId ? {
-                  ...item,
-                  name: data.name !== undefined ? data.name : item.name,
-                  description: data.description !== undefined ? data.description : item.description,
-                  price: data.price !== undefined ? Number(data.price) : item.price,
-                } : item
-              ),
-            };
-          }
-          return category;
-        });
-        return {
-          ...prev,
-          [selectedBrandId]: updated,
-        };
-      });
-      showToast('Item updated successfully (Mock)! ✅', 'success');
-      setLoading(false);
-      return;
-    }
     try {
       const updatedItem = await updateMenuItem(itemId, data);
       const mappedUpdated = {
@@ -1086,16 +850,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateRestaurantBanner = async (id: number, file: File) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const mockUrl = URL.createObjectURL(file);
-      setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, banner_url: mockUrl } : r))
-      );
-      showToast('Banner updated (Mock)! 🖼️', 'success');
-      setLoading(false);
-      return;
-    }
     try {
       const formData = new FormData();
       formData.append('banner_image', file);
@@ -1103,7 +857,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const updated = await updateRestaurant(id, formData);
       const mapped = mapApiRestaurant(updated);
       
-      // Update local state so it immediately reflects
       setRestaurants((prev) =>
         prev.map((r) => (r.id === id ? mapped : r))
       );
@@ -1118,15 +871,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const removeRestaurantBanner = async (id: number) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, banner_url: undefined } : r))
-      );
-      showToast('Banner removed (Mock)! 🗑️', 'success');
-      setLoading(false);
-      return;
-    }
     try {
       const updated = await updateRestaurant(id, { banner_image: null });
       const mapped = mapApiRestaurant(updated);
@@ -1145,15 +889,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateRestaurantDetails = async (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => {
     setLoading(true);
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...data } : r))
-      );
-      showToast('Restaurant details updated (Mock)! ⚙️', 'success');
-      setLoading(false);
-      return;
-    }
     try {
       const updated = await updateRestaurant(id, data);
       const mapped = mapApiRestaurant(updated);
@@ -1169,14 +904,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Polling for live orders (every 30 seconds)
+  // Polling for live orders (every 10 seconds)
   useEffect(() => {
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock || !user) return;
+    if (!user) return;
 
     const interval = setInterval(() => {
       refreshOrders();
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [user]);

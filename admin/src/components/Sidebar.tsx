@@ -11,7 +11,7 @@ import {
   Users,
   Lock
 } from 'lucide-react';
-import { changeOwnPassword, updateUserProfile, getToken } from '../services/api';
+import { changeOwnPassword, updateUserProfile } from '../services/api';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -77,32 +77,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
     setLoadingModal(true);
     try {
-      const isMock = !getToken() || !!localStorage.getItem('foodsphere_admin_mock_user');
-      
-      if (isMock) {
-        // Simulate update
+      // 1. Update Profile (username, email)
+      if (usernameInput !== user.username || emailInput !== (user.email || '')) {
+        await updateUserProfile({ username: usernameInput, email: emailInput });
         updateUser({ username: usernameInput, email: emailInput });
-        showToast('Credentials updated successfully (Demo Mode)', 'success');
-        setShowPassModal(false);
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        // 1. Update Profile (username, email)
-        if (usernameInput !== user.username || emailInput !== (user.email || '')) {
-          await updateUserProfile({ username: usernameInput, email: emailInput });
-          updateUser({ username: usernameInput, email: emailInput });
-        }
-
-        // 2. Update Password (if provided)
-        if (newPassword) {
-          await changeOwnPassword(newPassword);
-        }
-
-        showToast('Account credentials updated successfully!', 'success');
-        setShowPassModal(false);
-        setNewPassword('');
-        setConfirmPassword('');
       }
+
+      // 2. Update Password (if provided)
+      if (newPassword) {
+        await changeOwnPassword(newPassword);
+      }
+
+      showToast('Account credentials updated successfully!', 'success');
+      setShowPassModal(false);
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (err: any) {
       console.error('[Update Credentials Error]', err);
       setModalError(err.message || 'Failed to update credentials. Please try again.');
