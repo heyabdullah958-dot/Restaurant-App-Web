@@ -170,7 +170,7 @@ FoodSphere/
 2. **Unified API:** One set of endpoints, restaurant_id as parameter
 3. **Modular websites:** Each website is an independent React app — can be deployed/updated independently
 4. **Guest ordering:** No account required to place an order (JWT guest token)
-5. **Offline resilience:** App caches menu data for offline viewing
+6. **Mobile Fallback & Database Primary Keys:** Static fallback data in `app/src/services/fallbackData.ts` and component fallback maps must always match live PostgreSQL primary keys in Django (`seenbanao`: 70, `dineatblue`: 71, `jushhpk`: 72, `tandooristoppk`: 73, `sandmelts`: 74, `birdmanfoodspk`: 75, `getafomo`: 76). Never assume 1-based sequential IDs.
 
 ---
 
