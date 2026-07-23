@@ -169,8 +169,53 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return 'login';
   });
 
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const isLaunchBrandSlug = (slug: string) => {
+    const clean = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
+  };
+
+  const [restaurants, setRestaurantsState] = useState<Restaurant[]>(() => {
+    const cached = localStorage.getItem('foodsphere_admin_restaurants_cache');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    return MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+  });
+
+  const setRestaurants = (action: React.SetStateAction<Restaurant[]>) => {
+    setRestaurantsState((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      try {
+        localStorage.setItem('foodsphere_admin_restaurants_cache', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const [orders, setOrdersState] = useState<Order[]>(() => {
+    const cached = localStorage.getItem('foodsphere_admin_orders_cache');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    return [];
+  });
+
+  const setOrders = (action: React.SetStateAction<Order[]>) => {
+    setOrdersState((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      try {
+        localStorage.setItem('foodsphere_admin_orders_cache', JSON.stringify(next.slice(0, 100)));
+      } catch {}
+      return next;
+    });
+  };
+
   const [menuItems, setMenuItems] = useState<Record<number, MenuCategory[]>>(MOCK_MENU_ITEMS);
   const [selectedBrandId, setSelectedBrandId] = useState<number>(() => {
     const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
@@ -228,12 +273,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [activeView]);
 
-  const isLaunchBrandSlug = (slug: string) => {
-    const clean = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
-  };
-
   const loadAppData = async () => {
+    if (orders.length === 0) setLoading(true);
     try {
       const [restaurantData, orderData] = await Promise.all([
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
@@ -273,6 +314,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const launchMockRestaurants = MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
       setRestaurants(launchMockRestaurants);
       setOrders(INITIAL_ORDERS);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -324,12 +367,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [toasts]);
 
-  // Auto-polling for new orders every 15 seconds
+  // Auto-polling for new orders every 5 seconds for real-time responsiveness
   useEffect(() => {
     if (activeView !== 'login') {
       const interval = setInterval(() => {
         refreshOrders();
-      }, 15000);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [activeView]);
