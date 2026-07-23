@@ -163,22 +163,46 @@ export const OrderManagement: React.FC = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  const [selectedColumnFilter, setSelectedColumnFilter] = useState<OrderStatus | 'all'>('all');
+
+  const boardContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleStatusChange = (orderId: number, newStatus: OrderStatus) => {
+    updateOrderStatus(orderId, newStatus);
+    
+    // Auto-scroll board to the target column if viewing all columns
+    if (selectedColumnFilter === 'all') {
+      setTimeout(() => {
+        const targetCol = document.getElementById(`column-${newStatus}`);
+        if (targetCol && boardContainerRef.current) {
+          targetCol.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }, 100);
+    }
+  };
+
+  const filteredColumns = useMemo(() => {
+    if (selectedColumnFilter === 'all') return columns;
+    return columns.filter((c) => c.status === selectedColumnFilter);
+  }, [columns, selectedColumnFilter]);
+
   return (
     <div className="space-y-6">
       {/* Dynamic Scrollbar Injection */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
+          width: 6px;
+          height: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(148, 163, 184, 0.1);
+          background: rgba(148, 163, 184, 0.2);
           border-radius: 9999px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(148, 163, 184, 0.25);
+          background: rgba(148, 163, 184, 0.4);
         }
       `}</style>
 
@@ -199,7 +223,7 @@ export const OrderManagement: React.FC = () => {
           {/* Brand Filter Selector */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
             <Store size={14} className="text-blue-400" />
-            <span className="text-slate-400 font-medium">Filter:</span>
+            <span className="text-slate-400 font-medium">Brand:</span>
             <select
               value={filterBrandId}
               onChange={(e) => {
@@ -232,9 +256,45 @@ export const OrderManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Kanban Board Columns Grid */}
-      <div className="flex flex-col lg:flex-row gap-5 items-start overflow-x-auto pb-4 custom-scrollbar">
+      {/* Column Filter Tabs — Allows jumping to Out for Delivery or Delivered instantly */}
+      <div className="flex flex-wrap items-center gap-2 bg-slate-900/60 p-2 rounded-2xl border border-slate-800/80 backdrop-blur-md">
+        <button
+          onClick={() => setSelectedColumnFilter('all')}
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            selectedColumnFilter === 'all'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+          }`}
+        >
+          All Columns ({brandOrders.length})
+        </button>
         {columns.map((col) => {
+          const count = brandOrders.filter((o) => o.status === col.status).length;
+          const isActive = selectedColumnFilter === col.status;
+          return (
+            <button
+              key={col.status}
+              onClick={() => setSelectedColumnFilter(col.status)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                isActive
+                  ? `${col.accent} border-current shadow-sm`
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              }`}
+            >
+              {col.icon}
+              <span>{col.title}</span>
+              <span className="bg-slate-950/40 px-2 py-0.5 rounded-full text-[10px] font-extrabold">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Kanban Board Columns Grid */}
+      <div 
+        ref={boardContainerRef}
+        className="flex flex-col lg:flex-row gap-5 items-start overflow-x-auto pb-4 custom-scrollbar"
+      >
+        {filteredColumns.map((col) => {
           const colOrders = brandOrders
             .filter((o) => o.status === col.status)
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -242,7 +302,12 @@ export const OrderManagement: React.FC = () => {
           return (
             <div 
               key={col.status} 
-              className="w-full lg:w-[320px] lg:min-w-[300px] flex-shrink-0 bg-slate-900/30 border border-slate-800/60 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-800"
+              id={`column-${col.status}`}
+              className={`${
+                selectedColumnFilter === 'all'
+                  ? 'w-full lg:w-[280px] xl:w-[300px] lg:min-w-[270px] flex-shrink-0'
+                  : 'w-full'
+              } bg-slate-900/40 border border-slate-800/70 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-700`}
             >
               {/* Column Header */}
               <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-slate-800/60">
@@ -257,11 +322,10 @@ export const OrderManagement: React.FC = () => {
               {/* Column Cards Container */}
               <div className="flex-1 space-y-3.5 overflow-y-auto pr-1 custom-scrollbar">
                 {colOrders.map((order) => {
-                  
                   return (
                     <div 
                       key={order.id} 
-                      className={`bg-slate-950/40 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border} ${
+                      className={`bg-slate-950/60 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border} ${
                         col.status === 'pending' ? 'shadow-rose-500/5 hover:shadow-rose-500/10 hover:border-rose-900' : ''
                       }`}
                     >
@@ -334,40 +398,73 @@ export const OrderManagement: React.FC = () => {
 
                         {/* Kanban Action buttons & Status Dropdown */}
                         <div className="space-y-2">
+                          {/* Step 1: Pending -> Received */}
                           {order.status === 'pending' && (
                             <button
-                              onClick={() => updateOrderStatus(order.id, 'received')}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 text-white font-black py-2.5 rounded-lg text-xs transition-all shadow-md active:scale-[0.98] animate-pulse"
+                              onClick={() => handleStatusChange(order.id, 'received')}
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 text-white font-black py-2.5 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                             >
-                              <CheckCircle size={13} /> Accept Order
+                              <CheckCircle size={13} /> Accept Order →
                             </button>
                           )}
 
-                          {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+                          {/* Step 2: Received -> Preparing */}
+                          {order.status === 'received' && (
+                            <button
+                              onClick={() => handleStatusChange(order.id, 'preparing')}
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-450 hover:to-orange-450 text-slate-950 font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                            >
+                              🍳 Start Preparing →
+                            </button>
+                          )}
+
+                          {/* Step 3: Preparing -> Out for Delivery */}
+                          {order.status === 'preparing' && (
+                            <button
+                              onClick={() => handleStatusChange(order.id, 'out_for_delivery')}
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                            >
+                              🛵 Dispatch Out For Delivery →
+                            </button>
+                          )}
+
+                          {/* Step 4: Out for Delivery -> Delivered */}
+                          {order.status === 'out_for_delivery' && (
+                            <button
+                              onClick={() => handleStatusChange(order.id, 'delivered')}
+                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                            >
+                              <CheckCircle size={13} /> Mark Delivered ✅
+                            </button>
+                          )}
+
+                          {/* Quick Jump Status Dropdown */}
+                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <div className="w-full relative group/select">
                               <select 
                                 value={order.status}
-                                onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                                className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white font-bold py-2 pl-3 pr-8 rounded-lg text-[11px] transition-all cursor-pointer text-center outline-none select-none"
+                                onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                                className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold py-1.5 pl-3 pr-8 rounded-lg text-[10px] transition-all cursor-pointer text-center outline-none select-none"
                               >
+                                <option value="pending">Pending</option>
                                 <option value="received">Received</option>
                                 <option value="preparing">Preparing</option>
                                 <option value="out_for_delivery">Out For Delivery</option>
                                 <option value="delivered">Delivered</option>
                               </select>
-                              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 group-hover/select:text-white transition-colors">
-                                <svg className="fill-current h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500 group-hover/select:text-slate-300 transition-colors">
+                                <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                                 </svg>
                               </div>
                             </div>
                           )}
                           
-                          {/* Rider dispatch via WhatsApp (Triggerable for all active order states except pending) */}
+                          {/* Rider dispatch via WhatsApp */}
                           {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
                             <button
                               onClick={() => triggerRiderWhatsApp(order)}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-black py-2 rounded-lg text-[11px] transition-all shadow-md active:scale-[0.98]"
+                              className="w-full flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-400 font-extrabold py-1.5 rounded-lg text-[10px] transition-all shadow-sm active:scale-[0.98]"
                             >
                               <MessageSquare size={11} /> WhatsApp Rider
                             </button>
