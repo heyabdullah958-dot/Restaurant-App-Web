@@ -113,7 +113,7 @@ FoodSphere/
 | **Notifications** | Firebase Cloud Messaging (FCM) |
 | **Hosting (Websites)** | Cloudflare Pages |
 | **Hosting (Admin Dashboard)** | Cloudflare Pages |
-| **Hosting (Backend)** | Render.com |
+| **Hosting (Backend)** | Heroku (Primary: https://getfoodpk-fd9b20442fcf.herokuapp.com) / Render (Backup) |
 
 ---
 
@@ -137,14 +137,14 @@ FoodSphere/
 |---|---|---|
 | App UI Design (Google Stitch mockups) | ✅ Completed (Live on Cloudflare) | Done |
 | 7 Website UIs (7 brand sites active) | ✅ Completed (Live on Cloudflare Pages) | Done |
-| Backend setup & models | ✅ Completed (Live on Render) | Done |
+| Backend setup & models | ✅ Completed (Live on Heroku) | Done |
 | App core screens (Home, Menu, Cart) | ✅ Completed (Build Configured) | Done |
 | Payment integration (Stripe + PayFast) | ✅ Completed (Staging endpoints wired) | Done |
 | Admin Panels (Django + React Live) | ✅ Completed (100% Integrated) | Done |
 | All 7 websites live | ✅ Completed (7/7 Live) | Done |
 | Tandoori Stop Asset Upload | ✅ Completed (41 Menu Items + Logo linked to Cloudinary) | Done |
 | Branch Manager Settings Modal | ✅ Completed (Interactive contact & status modal) | Done |
-| Heroku 24/7 Migration | ⏳ Pending (Awaiting client Heroku account & card) | Client Handoff |
+| Heroku 24/7 Deployment | ✅ Completed (Live on getfoodpk-fd9b20442fcf.herokuapp.com) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -170,7 +170,7 @@ FoodSphere/
 2. **Unified API:** One set of endpoints, restaurant_id as parameter
 3. **Modular websites:** Each website is an independent React app — can be deployed/updated independently
 4. **Guest ordering:** No account required to place an order (JWT guest token)
-6. **Mobile Fallback & Database Primary Keys:** Static fallback data in `app/src/services/fallbackData.ts` and component fallback maps must always match live PostgreSQL primary keys in Django (`seenbanao`: 70, `dineatblue`: 71, `jushhpk`: 72, `tandooristoppk`: 73, `sandmelts`: 74, `birdmanfoodspk`: 75, `getafomo`: 76). Never assume 1-based sequential IDs.
+6. **Mobile Fallback & Database Primary Keys:** Static fallback data in `app/src/services/fallbackData.ts` and component fallback maps match live Heroku PostgreSQL primary keys in Django (`seenbanao`: 1, `dineatblue`: 2, `jushhpk`: 3, `tandooristoppk`: 4, `sandmelts`: 5, `birdmanfoodspk`: 6, `getafomo`: 7). Render backup uses offset keys (70-76).
 
 ---
 

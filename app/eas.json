@@ -7,7 +7,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api",
         "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
       }
     },
@@ -19,14 +19,14 @@
       },
       "env": {
         "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.parallel=false -Dorg.gradle.daemon=false",
-        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api",
         "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
       }
     },
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://restaurant-app-web.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api",
         "EXPO_ROUTER_DISABLE_RN_NAVIGATION_CHECK": "1"
       }
     }

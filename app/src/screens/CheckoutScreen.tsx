@@ -168,6 +168,22 @@ export default function CheckoutScreen() {
         { id: 9, name: 'DHA', address: 'DHA, Lahore' },
         { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
       ],
+      '4': [
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+      ],
+      '3': [
+        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+      ],
+      '7': [
+        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
+        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
+        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+      ],
       '73': [
         { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
         { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },

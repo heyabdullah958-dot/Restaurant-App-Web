@@ -51,7 +51,7 @@ export interface Restaurant {
 
 export const FALLBACK_RESTAURANTS: Restaurant[] = [
   {
-    id: 70,
+    id: 1,
     name: "seenbanao",
     slug: "seenbanao",
     cuisine_type: "Desi BBQ & Handi",
@@ -104,7 +104,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 71,
+    id: 2,
     name: "dineatblue",
     slug: "dineatblue",
     cuisine_type: "Seafood Specialty",
@@ -147,7 +147,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 72,
+    id: 3,
     name: "jushhpk",
     slug: "jushhpk",
     cuisine_type: "Fast Food & Burgers",
@@ -204,7 +204,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 73,
+    id: 4,
     name: "tandooristoppk",
     slug: "tandooristoppk",
     cuisine_type: "Tandoori & Desi",
@@ -261,7 +261,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 74,
+    id: 5,
     name: "sandmelts",
     slug: "sandmelts",
     cuisine_type: "Sandwiches & Melts",
@@ -304,7 +304,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 75,
+    id: 6,
     name: "birdmanfoodspk",
     slug: "birdmanfoodspk",
     cuisine_type: "Grilled & Fried Chicken",
@@ -347,7 +347,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 76,
+    id: 7,
     name: "getafomo",
     slug: "getafomo",
     cuisine_type: "Trendy Café & Bakery",
