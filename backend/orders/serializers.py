@@ -175,10 +175,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 **validated_data
             )
 
-            # If branch was not explicitly selected by customer, auto-assign based on delivery address
+            # If branch was not explicitly selected by customer, auto-assign based on delivery address / lat lng
             if not order.branch:
                 from config.admin_utils import resolve_branch_for_order
-                assigned_branch = resolve_branch_for_order(restaurant, order.delivery_address)
+                assigned_branch = resolve_branch_for_order(
+                    restaurant,
+                    order.delivery_address,
+                    order.delivery_lat,
+                    order.delivery_lng
+                )
                 if assigned_branch:
                     order.branch = assigned_branch
                     order.save(update_fields=['branch'])

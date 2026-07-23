@@ -34,15 +34,18 @@ def main():
     # 3. Audit Branch Auto-Assignment Logic
     print("\nTesting Branch Auto-Assignment Resolution...")
     test_cases = [
-        ("tandooristoppk", "House 12, PIA Road, Johar Town, Lahore", "Johar Town"),
-        ("tandooristoppk", "Flat 4, Opposite Lake City Mall", "Lake City"),
-        ("tandooristoppk", "Shop 5, GT Road Baghbanpura", "GT Road Baghbanpura"),
+        ("tandooristoppk", "House 12, PIA Road, Johar Town, Lahore", None, None, "Johar Town"),
+        ("tandooristoppk", "Wafaqi Colony, Johar Town, Lahore", None, None, "Johar Town"),
+        ("tandooristoppk", "Wafaqi Colony", None, None, "Johar Town"),
+        ("tandooristoppk", "Near UMT, Wafaqi Colony", 31.4691, 74.2917, "Johar Town"),
+        ("tandooristoppk", "Flat 4, Opposite Lake City Mall", None, None, "Lake City"),
+        ("tandooristoppk", "Shop 5, GT Road Baghbanpura", None, None, "GT Road Baghbanpura"),
     ]
 
     all_passed = True
-    for slug, addr, expected_branch in test_cases:
+    for slug, addr, lat, lng, expected_branch in test_cases:
         rest = Restaurant.objects.get(slug=slug)
-        assigned = resolve_branch_for_order(rest, addr)
+        assigned = resolve_branch_for_order(rest, addr, lat, lng)
         actual_name = assigned.name if assigned else "None"
         status = "PASSED" if actual_name == expected_branch else "FAILED"
         if status == "FAILED":
