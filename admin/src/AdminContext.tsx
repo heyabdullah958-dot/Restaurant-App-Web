@@ -218,16 +218,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
       ]);
-      const mapped = restaurantData.results
+      const mapped = (restaurantData.results || [])
         .map(mapApiRestaurant)
         .filter((r) => isLaunchBrandSlug(r.slug));
-      setRestaurants(mapped);
+      const finalRestaurants = mapped.length > 0 ? mapped : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      setRestaurants(finalRestaurants);
       setOrders(
-        orderData.results.map(mapApiOrder)
+        (orderData.results || []).map(mapApiOrder)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       );
       
-      if (mapped.length > 0) {
+      if (finalRestaurants.length > 0) {
         const token = getToken();
         const payload = token ? decodeToken(token) : null;
         const isSuper = payload?.is_superuser === true;
@@ -396,8 +397,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           restaurantId: isMockSuperUser ? undefined : getMockRestaurantId(username),
         };
 
-        // Load mock data immediately to prevent "No Restaurant Data Available" screen
-        setRestaurants(MOCK_RESTAURANTS);
+        // Load mock data immediately for launch brands to prevent "No Restaurant Data Available" screen
+        setRestaurants(MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug)));
         setOrders(INITIAL_ORDERS);
 
         setUser(mockUser);
