@@ -346,13 +346,6 @@ class AdminManagerChangePasswordView(APIView):
         if not new_password:
             return Response({'error': 'Password is required.'}, status=400)
 
-        from django.contrib.auth.password_validation import validate_password
-        from django.core.exceptions import ValidationError as DjangoValidationError
-        try:
-            validate_password(new_password, user)
-        except DjangoValidationError as e:
-            return Response({'error': '; '.join(e.messages)}, status=400)
-
         user.set_password(new_password)
         user.save()
 
