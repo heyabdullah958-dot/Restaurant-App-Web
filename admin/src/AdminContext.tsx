@@ -200,19 +200,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const loadAppData = async () => {
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      const launchMockRestaurants = MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
-      setRestaurants(launchMockRestaurants);
-      setOrders(INITIAL_ORDERS);
-      if (launchMockRestaurants.length > 0) {
-        const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
-        const exists = savedBrandId && launchMockRestaurants.some((r) => r.id === Number(savedBrandId));
-        setSelectedBrandId(exists ? Number(savedBrandId) : launchMockRestaurants[0].id);
-      }
-      return;
-    }
-
     try {
       const [restaurantData, orderData] = await Promise.all([
         fetchRestaurants().catch(() => ({ results: [], count: 0 })),
@@ -223,10 +210,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .filter((r) => isLaunchBrandSlug(r.slug));
       const finalRestaurants = mapped.length > 0 ? mapped : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
       setRestaurants(finalRestaurants);
-      setOrders(
-        (orderData.results || []).map(mapApiOrder)
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      );
+
+      const apiOrders = (orderData.results || []).map(mapApiOrder);
+      if (apiOrders.length > 0) {
+        setOrders(apiOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+      } else {
+        const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+        setOrders(isMock ? INITIAL_ORDERS : []);
+      }
       
       if (finalRestaurants.length > 0) {
         const token = getToken();
@@ -239,12 +230,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           localStorage.setItem('foodsphere_admin_brand_id', String(managerRestId));
         } else {
           const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
-          const exists = savedBrandId && mapped.some((r) => r.id === Number(savedBrandId));
-          setSelectedBrandId(exists ? Number(savedBrandId) : mapped[0].id);
+          const exists = savedBrandId && finalRestaurants.some((r) => r.id === Number(savedBrandId));
+          setSelectedBrandId(exists ? Number(savedBrandId) : finalRestaurants[0].id);
         }
       }
     } catch (err) {
       console.warn('[AdminContext] Failed to load app data:', err);
+      const launchMockRestaurants = MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      setRestaurants(launchMockRestaurants);
+      setOrders(INITIAL_ORDERS);
     }
   };
 
@@ -465,32 +459,28 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Refresh orders from API
   const refreshOrders = async () => {
-    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-    if (isMock) {
-      // Mock mode — do not auto-generate fake random orders
-      return;
-    }
-
     try {
       const orderData = await fetchAllOrders();
-      const newOrders = orderData.results.map(mapApiOrder);
+      if (orderData && Array.isArray(orderData.results)) {
+        const newOrders = orderData.results.map(mapApiOrder);
 
-      // Look for newly added pending orders compared to our local state
-      const currentPendingIds = new Set(orders.filter((o) => o.status === 'pending').map((o) => o.id));
-      const newlyArrivedPending = newOrders.filter((o) => o.status === 'pending' && !currentPendingIds.has(o.id));
+        // Look for newly added pending orders compared to our local state
+        const currentPendingIds = new Set(orders.filter((o) => o.status === 'pending').map((o) => o.id));
+        const newlyArrivedPending = newOrders.filter((o) => o.status === 'pending' && !currentPendingIds.has(o.id));
 
-      if (newlyArrivedPending.length > 0) {
-        // Play notification sound
-        try {
-          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
-          audio.play().catch(() => {});
-        } catch {}
-        showToast(`🔔 ${newlyArrivedPending.length} New Order(s) Received!`, 'info');
+        if (newlyArrivedPending.length > 0) {
+          // Play notification sound
+          try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
+            audio.play().catch(() => {});
+          } catch {}
+          showToast(`🔔 ${newlyArrivedPending.length} New Order(s) Received!`, 'info');
+        }
+
+        setOrders(
+          newOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        );
       }
-
-      setOrders(
-        newOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      );
     } catch (err) {
       console.warn('[refreshOrders] Failed:', err);
     }
