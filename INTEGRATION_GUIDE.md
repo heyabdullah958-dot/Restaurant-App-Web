@@ -72,7 +72,7 @@ To run both applications in tandem locally without encountering CORS issues, we 
 ### 2. React Admin (`admin/.env` / `.env.local`)
 | Variable | Description | Example |
 |---|---|---|
-| `VITE_API_URL` | Points to the backend base API endpoint | `https://restaurant-app-web.onrender.com` |
+| `VITE_API_URL` | Points to the backend base API endpoint | `https://getfoodpk-fd9b20442fcf.herokuapp.com` |
 
 ---
 

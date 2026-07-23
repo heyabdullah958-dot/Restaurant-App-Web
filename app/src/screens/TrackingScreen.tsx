@@ -547,7 +547,7 @@ export default function TrackingScreen() {
           </Text>
           <View style={styles.guideSteps}>
             <Text style={styles.guideStep}>
-              1. Open the Admin Panel at <Text style={styles.guideCode}>https://restaurant-app-web.onrender.com/admin/</Text> and log in.
+              1. Open the Admin Panel at <Text style={styles.guideCode}>https://getfoodpk-fd9b20442fcf.herokuapp.com/admin/</Text> and log in.
             </Text>
             <Text style={styles.guideStep}>
               2. Go to the <Text style={styles.guideBold}>Orders</Text> section and select Order <Text style={styles.guideBold}>#{orderId}</Text>.

@@ -53,7 +53,7 @@ export const loadSavedToken = createAsyncThunk<
       // Proactively attempt token refresh on launch if refreshToken exists
       if (refreshToken) {
         try {
-          const PROD_API_URL = 'https://restaurant-app-web.onrender.com/api';
+          const PROD_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
           const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
           const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken });

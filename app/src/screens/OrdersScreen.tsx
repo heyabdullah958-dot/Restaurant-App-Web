@@ -95,7 +95,7 @@ export default function OrdersScreen() {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    const PROD_API_URL = 'https://restaurant-app-web.onrender.com/api';
+    const PROD_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
     const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
     const domain = apiBaseUrl.replace('/api', '');
     return `${domain}${imagePath}`;
