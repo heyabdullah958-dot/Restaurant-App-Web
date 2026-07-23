@@ -207,6 +207,9 @@ export default function CheckoutScreen() {
       : (fallbackMap[slugKey] || fallbackMap['tandooristoppk']);
 
     setBranches(initialBranches);
+    if (Array.isArray(initialBranches) && initialBranches.length > 0) {
+      setSelectedBranchId(initialBranches[0].id);
+    }
 
     const targetSlug = restaurant?.slug;
     const targetUrl = targetSlug 
@@ -221,6 +224,10 @@ export default function CheckoutScreen() {
         }
         if (Array.isArray(list) && list.length > 0) {
           setBranches(list);
+          setSelectedBranchId((prev) => {
+            const exists = list.some((b: any) => b.id === prev);
+            return exists ? prev : list[0].id;
+          });
         }
       })
       .catch((e) => {
@@ -257,6 +264,11 @@ export default function CheckoutScreen() {
 
     if (!address.trim()) {
       showAlert('Required Field', 'Please enter a delivery address.');
+      return;
+    }
+
+    if (!selectedBranchId) {
+      showAlert('Branch Required', 'Please select a branch to prepare and deliver your order.');
       return;
     }
 
@@ -497,38 +509,15 @@ export default function CheckoutScreen() {
           {/* Preferred Branch Selection */}
           <View style={styles.sectionCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <Text style={styles.sectionTitle}>Preferred Fulfill Branch</Text>
+              <Text style={styles.sectionTitle}>Select Fulfill Branch</Text>
               <View style={styles.badgeAuto}>
                 <Ionicons name="location" size={12} color={COLORS.primary} />
                 <Text style={styles.badgeAutoText}>Select Branch</Text>
               </View>
             </View>
             <Text style={styles.branchSubText}>
-              Choose the branch you prefer to prepare and deliver your order:
+              Choose the exact branch that will prepare and deliver your order:
             </Text>
-
-            {/* Option 1: Auto-Detect */}
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              style={[
-                styles.branchCardOption,
-                selectedBranchId === null && styles.branchCardSelected
-              ]}
-              onPress={() => setSelectedBranchId(null)}
-            >
-              <Ionicons 
-                name={selectedBranchId === null ? "radio-button-on" : "radio-button-off"} 
-                size={20} 
-                color={selectedBranchId === null ? COLORS.primary : COLORS.gray} 
-              />
-              <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.branchOptionTitle}>Auto-Detect Nearest Branch</Text>
-                  <Text style={styles.recommendedTag}>Auto</Text>
-                </View>
-                <Text style={styles.branchOptionDesc}>Auto-assigns branch based on delivery address</Text>
-              </View>
-            </TouchableOpacity>
 
             {/* Specific Branches */}
             {branches.map((b) => {
