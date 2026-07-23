@@ -39,7 +39,7 @@ export interface BranchLocation {
   isOpen: boolean;
 }
 
-// REAL Verified Branch Locations Database
+// REAL Verified Branch Locations Database (3 Active Brands, 7 Real Branches)
 const REAL_BRANCH_LOCATIONS: BranchLocation[] = [
   // Jush PK Branches
   {
@@ -147,74 +147,6 @@ const REAL_BRANCH_LOCATIONS: BranchLocation[] = [
     lng: 74.3800,
     emoji: '🍗',
     accentColor: '#E74C3C',
-    opensAt: '12:00 PM',
-    closesAt: '02:00 AM',
-    isOpen: true,
-  },
-
-  // Seen Banao Branch
-  {
-    id: 'seenbanao-main',
-    brandSlug: 'seenbanao',
-    brandName: 'Seen Banao',
-    branchName: 'DHA Commercial Branch',
-    address: '11th Commercial Street, Phase 2 DHA, Lahore',
-    phone: '+92 300 1234567',
-    lat: 31.4780,
-    lng: 74.3720,
-    emoji: '🍢',
-    accentColor: '#D35400',
-    opensAt: '06:00 PM',
-    closesAt: '02:00 AM',
-    isOpen: true,
-  },
-
-  // Dine At Blue Branch
-  {
-    id: 'dineatblue-clifton',
-    brandSlug: 'dineatblue',
-    brandName: 'Dine At Blue',
-    branchName: 'Seafood Pavilion Branch',
-    address: 'Block 4, Clifton Beach Road',
-    phone: '+92 21 3456789',
-    lat: 31.5204,
-    lng: 74.3587,
-    emoji: '🐟',
-    accentColor: '#2980B9',
-    opensAt: '12:00 PM',
-    closesAt: '11:30 PM',
-    isOpen: true,
-  },
-
-  // Sandmelts Branch
-  {
-    id: 'sandmelts-main',
-    brandSlug: 'sandmelts',
-    brandName: 'Sand Melts',
-    branchName: 'Gulberg Melts Outlet',
-    address: 'MM Alam Road, Gulberg III, Lahore',
-    phone: '+92 321 9876543',
-    lat: 31.5080,
-    lng: 74.3510,
-    emoji: '🥪',
-    accentColor: '#F39C12',
-    opensAt: '11:00 AM',
-    closesAt: '01:00 AM',
-    isOpen: true,
-  },
-
-  // Birdman Foods Branch
-  {
-    id: 'birdman-johar',
-    brandSlug: 'birdmanfoodspk',
-    brandName: 'Birdman Foods',
-    branchName: 'Civic Center Branch',
-    address: 'Civic Center, Johar Town, Lahore',
-    phone: '+92 322 4445566',
-    lat: 31.4680,
-    lng: 74.2980,
-    emoji: '🍗',
-    accentColor: '#C0392B',
     opensAt: '12:00 PM',
     closesAt: '02:00 AM',
     isOpen: true,
@@ -608,13 +540,9 @@ export default function MapScreen({ navigation }: { navigation: any }) {
             </TouchableOpacity>
 
             {[
-              { slug: 'tandooristoppk', name: 'Tandoori Stop', emoji: '🍗' },
               { slug: 'jushhpk', name: 'Jush PK', emoji: '🍔' },
               { slug: 'getafomo', name: 'Get A Fomo', emoji: '☕' },
-              { slug: 'seenbanao', name: 'Seen Banao', emoji: '🍢' },
-              { slug: 'dineatblue', name: 'Dine At Blue', emoji: '🐟' },
-              { slug: 'sandmelts', name: 'Sand Melts', emoji: '🥪' },
-              { slug: 'birdmanfoodspk', name: 'Birdman Foods', emoji: '🍗' },
+              { slug: 'tandooristoppk', name: 'Tandoori Stop', emoji: '🍗' },
             ].map((brand) => {
               const isActive = selectedBrandFilter === brand.slug;
               return (
