@@ -12,7 +12,7 @@ import { MenuManagement } from './views/MenuManagement';
 import { NotificationCenter } from './views/NotificationCenter';
 import { CustomerManagement } from './views/CustomerManagement';
 import { ManagerManagement } from './views/ManagerManagement';
-import { Menu, Sun, Moon, Bell } from 'lucide-react';
+import { Menu, Sun, Moon, Bell, ArrowLeft } from 'lucide-react';
 import './index.css';
 
 const MainLayout: React.FC = () => {
@@ -114,8 +114,8 @@ const MainLayout: React.FC = () => {
             ? 'bg-slate-900 border-slate-800 text-slate-100' 
             : 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-zinc-200/50 dark:border-slate-800/50 text-zinc-800 dark:text-slate-100'
         }`}>
-          {/* Left section: Hamburger toggler for mobile */}
-          <div className="flex items-center gap-4">
+          {/* Left section: Hamburger toggler for mobile & Back button */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
               className={`md:hidden p-2 rounded-xl border transition-colors duration-200 ${
@@ -125,6 +125,18 @@ const MainLayout: React.FC = () => {
               }`}
             >
               <Menu size={20} />
+            </button>
+            <button
+              onClick={() => window.history.back()}
+              title="Go Back in History"
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all duration-150 ${
+                isSuper
+                  ? 'border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white'
+                  : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-100 dark:hover:bg-slate-800 text-zinc-700 dark:text-slate-300'
+              }`}
+            >
+              <ArrowLeft size={14} />
+              <span>Back</span>
             </button>
             <div className="hidden md:flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500 relative flex">

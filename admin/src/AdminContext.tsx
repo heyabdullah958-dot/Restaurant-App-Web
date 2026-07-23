@@ -145,6 +145,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [activeView, setActiveView] = useState<string>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && hash !== 'login') {
+      return hash;
+    }
     const savedView = localStorage.getItem('foodsphere_admin_view');
     if (savedView) return savedView;
 
@@ -175,7 +179,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loading, setLoading] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  // Restore session from localStorage on mount
+  // Restore session from localStorage on mount & listen to browser Back / Forward buttons
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -193,6 +197,36 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
   }, []);
+
+  // Listen to browser native Back (←) and Forward (→) button events
+  useEffect(() => {
+    const handlePopState = (event?: PopStateEvent | HashChangeEvent | Event) => {
+      const hashView = window.location.hash.replace('#', '');
+      const stateView = (event as PopStateEvent)?.state?.view;
+      const targetView = hashView || stateView || localStorage.getItem('foodsphere_admin_view');
+      if (targetView && targetView !== activeView) {
+        setActiveView(targetView);
+        localStorage.setItem('foodsphere_admin_view', targetView);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, [activeView]);
+
+  // Keep location hash in sync with activeView
+  useEffect(() => {
+    if (activeView && activeView !== 'login') {
+      if (window.location.hash !== `#${activeView}`) {
+        window.history.replaceState({ view: activeView }, '', `#${activeView}`);
+      }
+    }
+  }, [activeView]);
 
   const isLaunchBrandSlug = (slug: string) => {
     const clean = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -429,13 +463,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Logged out successfully', 'info');
   };
 
-  const setView = (view: string) => {
+  const setView = (view: string, updateHistory = true) => {
     setLoading(true);
     localStorage.setItem('foodsphere_admin_view', view);
+    if (updateHistory && window.location.hash !== `#${view}`) {
+      window.history.pushState({ view }, '', `#${view}`);
+    }
     setTimeout(() => {
       setActiveView(view);
       setLoading(false);
-    }, 300);
+    }, 150);
   };
 
   const setSelectedBrand = (id: number) => {
