@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 {
                     'name': "Lake City",
                     'address': "Opposite Lake City Mall, Raiwind Road, Lahore",
-                    'phone': "",
+                    'phone': "0324-4441735",
                     'area_keywords': LAKE_CITY_KEYWORDS
                 },
                 {
@@ -76,47 +76,29 @@ class Command(BaseCommand):
             ],
             'jushhpk': [
                 {
-                    'name': "Johar Town",
-                    'address': "Johar Town, Lahore",
-                    'phone': "",
-                    'area_keywords': JOHAR_TOWN_KEYWORDS
-                },
-                {
-                    'name': "DHA",
-                    'address': "DHA Phase 3, Lahore",
-                    'phone': "",
+                    'name': "DHA Phase 1",
+                    'address': "F9JW+R3G, Sector H Dha Phase 1, Lahore, Pakistan",
+                    'phone': "03257217221",
                     'area_keywords': DHA_KEYWORDS
                 },
                 {
-                    'name': "Gulberg",
-                    'address': "Gulberg III, Main Boulevard, Lahore",
-                    'phone': "",
-                    'area_keywords': GULBERG_KEYWORDS
+                    'name': "Johar Town",
+                    'address': "Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Block R 2 Phase 2 Johar Town, Lahore, 54000, Pakistan",
+                    'phone': "03269946142",
+                    'area_keywords': JOHAR_TOWN_KEYWORDS
                 },
                 {
-                    'name': "Saddar",
-                    'address': "Saddar Cantt, Lahore",
-                    'phone': "",
-                    'area_keywords': SADDAR_KEYWORDS
+                    'name': "Lake City",
+                    'address': "C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore, 54000, Pakistan",
+                    'phone': "03244441735",
+                    'area_keywords': LAKE_CITY_KEYWORDS
                 }
             ],
             'getafomo': [
                 {
-                    'name': "Johar Town",
-                    'address': "Johar Town, Lahore",
-                    'phone': "",
-                    'area_keywords': JOHAR_TOWN_KEYWORDS
-                },
-                {
-                    'name': "DHA",
-                    'address': "DHA Phase 5, Lahore",
-                    'phone': "",
-                    'area_keywords': DHA_KEYWORDS
-                },
-                {
-                    'name': "Gulberg",
-                    'address': "Gulberg II, MM Alam Road, Lahore",
-                    'phone': "",
+                    'name': "Gulberg III",
+                    'address': "65, Block D1 Gulberg III, Lahore, Pakistan",
+                    'phone': "03212784841",
                     'area_keywords': GULBERG_KEYWORDS
                 }
             ]
@@ -129,6 +111,11 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"Restaurant with slug '{slug}' does not exist. Skipping."))
                 continue
 
+            valid_names = [b['name'] for b in branches]
+            
+            # Deactivate or delete old branches not in the real list
+            Branch.objects.filter(restaurant=restaurant).exclude(name__in=valid_names).update(is_active=False)
+
             for branch_data in branches:
                 branch, created = Branch.objects.get_or_create(
                     restaurant=restaurant,
@@ -136,7 +123,8 @@ class Command(BaseCommand):
                     defaults={
                         'address': branch_data['address'],
                         'phone': branch_data['phone'],
-                        'area_keywords': branch_data['area_keywords']
+                        'area_keywords': branch_data['area_keywords'],
+                        'is_active': True
                     }
                 )
 
@@ -146,7 +134,8 @@ class Command(BaseCommand):
                     branch.address = branch_data['address']
                     branch.phone = branch_data['phone']
                     branch.area_keywords = branch_data['area_keywords']
-                    branch.save(update_fields=['address', 'phone', 'area_keywords'])
+                    branch.is_active = True
+                    branch.save(update_fields=['address', 'phone', 'area_keywords', 'is_active'])
                     self.stdout.write(self.style.SUCCESS(f"Updated branch '{branch.name}' for restaurant '{restaurant.name}'"))
 
-        self.stdout.write(self.style.SUCCESS("Seed branches completed successfully with expanded area keywords."))
+        self.stdout.write(self.style.SUCCESS("Seed branches completed successfully with real addresses and phone numbers."))

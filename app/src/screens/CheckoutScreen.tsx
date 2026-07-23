@@ -153,52 +153,43 @@ export default function CheckoutScreen() {
     const slugKey = restaurant?.slug || String(restaurantId || 'tandooristoppk');
     const fallbackMap: Record<string, any[]> = {
       tandooristoppk: [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
       ],
       jushhpk: [
-        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
-        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
       ],
       getafomo: [
-        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
       ],
       '4': [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
       ],
       '3': [
-        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
-        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
       ],
       '7': [
-        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
       ],
       '73': [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Johar Town' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura' },
+        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
       ],
       '72': [
-        { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 5, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore' },
-        { id: 7, name: 'Saddar', address: 'Saddar, Lahore' },
+        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
       ],
       '76': [
-        { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore' },
-        { id: 9, name: 'DHA', address: 'DHA, Lahore' },
-        { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore' },
+        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
       ],
     };
 
