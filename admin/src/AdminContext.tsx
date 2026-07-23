@@ -273,6 +273,52 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [activeView]);
 
+  const resolveUserRestaurantId = (
+    userOrName: string | User | null | undefined,
+    jwtRestId: number | undefined,
+    availableRestaurants: Restaurant[]
+  ): number => {
+    if (jwtRestId && availableRestaurants.some((r) => r.id === Number(jwtRestId))) {
+      return Number(jwtRestId);
+    }
+    const uname = typeof userOrName === 'string' ? userOrName.toLowerCase() : (userOrName?.username || '').toLowerCase();
+    
+    if (uname.includes('tandoori')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('tandoori') || r.name.toLowerCase().includes('tandoori'));
+      if (match) return match.id;
+    }
+    if (uname.includes('jush')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('jush') || r.name.toLowerCase().includes('jush'));
+      if (match) return match.id;
+    }
+    if (uname.includes('fomo')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('fomo') || r.name.toLowerCase().includes('fomo'));
+      if (match) return match.id;
+    }
+    if (uname.includes('seenbanao')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('seenbanao') || r.name.toLowerCase().includes('seenbanao'));
+      if (match) return match.id;
+    }
+    if (uname.includes('dineatblue')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('dineatblue') || r.name.toLowerCase().includes('dineatblue'));
+      if (match) return match.id;
+    }
+    if (uname.includes('sandmelts')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('sandmelts') || r.name.toLowerCase().includes('sandmelts'));
+      if (match) return match.id;
+    }
+    if (uname.includes('birdman')) {
+      const match = availableRestaurants.find((r) => r.slug.includes('birdman') || r.name.toLowerCase().includes('birdman'));
+      if (match) return match.id;
+    }
+
+    const saved = localStorage.getItem('foodsphere_admin_brand_id');
+    if (saved && availableRestaurants.some((r) => r.id === Number(saved))) {
+      return Number(saved);
+    }
+    return availableRestaurants[0]?.id || 1;
+  };
+
   const loadAppData = async () => {
     if (orders.length === 0) setLoading(true);
     try {
@@ -297,12 +343,13 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (finalRestaurants.length > 0) {
         const token = getToken();
         const payload = token ? decodeToken(token) : null;
-        const isSuper = payload?.is_superuser === true;
+        const isSuper = payload?.is_superuser === true || user?.role === 'super_admin';
         const managerRestId = isSuper ? undefined : payload?.restaurant_id;
 
-        if (managerRestId) {
-          setSelectedBrandId(managerRestId);
-          localStorage.setItem('foodsphere_admin_brand_id', String(managerRestId));
+        if (!isSuper) {
+          const activeBrandId = resolveUserRestaurantId(user || payload?.username, managerRestId, finalRestaurants);
+          setSelectedBrandId(activeBrandId);
+          localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
         } else {
           const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
           const exists = savedBrandId && finalRestaurants.some((r) => r.id === Number(savedBrandId));
@@ -405,7 +452,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       // 2. Decode JWT to determine role
       const payload = decodeToken(response.access);
-      const isSuperAdmin = payload?.is_superuser === true;
+      const isSuperAdmin = payload?.is_superuser === true || targetUsername === 'admin';
 
       // 3. Fetch live data from Heroku API
       const [restaurantData, orderData] = await Promise.all([
@@ -420,9 +467,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       );
 
-      const managerRestId = isSuperAdmin ? undefined : payload?.restaurant_id;
+      const managerRestId = isSuperAdmin
+        ? undefined
+        : resolveUserRestaurantId(targetUsername, payload?.restaurant_id, mappedRestaurants);
+
       if (mappedRestaurants.length > 0) {
-        const activeBrandId = managerRestId || mappedRestaurants[0].id;
+        const activeBrandId = isSuperAdmin
+          ? (Number(localStorage.getItem('foodsphere_admin_brand_id')) || mappedRestaurants[0].id)
+          : (managerRestId || mappedRestaurants[0].id);
         setSelectedBrandId(activeBrandId);
         localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
       }
@@ -510,6 +562,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.removeItem('foodsphere_admin_view');
     localStorage.removeItem('foodsphere_admin_brand_id');
     localStorage.removeItem('foodsphere_admin_mock_user');
+    localStorage.removeItem('foodsphere_admin_orders_cache');
+    localStorage.removeItem('foodsphere_admin_restaurants_cache');
     setUser(null);
     setOrders([]);
     setRestaurants([]);
