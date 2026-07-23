@@ -250,9 +250,10 @@ export default function TrackingScreen() {
     };
   }, [dispatch, orderId]);
 
-  // Set up polling (refreshes order status every 3 seconds while not delivered)
+  // Set up polling (refreshes order status every 3 seconds while active)
   useEffect(() => {
-    if (!orderId || (currentOrder && currentOrder.status?.toLowerCase() === 'delivered')) {
+    const status = currentOrder?.status?.toLowerCase();
+    if (!orderId || status === 'delivered' || status === 'cancelled') {
       return;
     }
 
@@ -261,7 +262,7 @@ export default function TrackingScreen() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [dispatch, orderId, currentOrder]);
+  }, [dispatch, orderId, currentOrder?.status]);
 
   const onRefresh = React.useCallback(() => {
     if (orderId) {

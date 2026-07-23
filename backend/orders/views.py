@@ -216,14 +216,17 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         # If the user is a manager (is_staff and not is_superuser), restrict update operations to their managed restaurant/branch
         if user.is_authenticated and user.is_staff:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
+            from django.db.models import Q
             managed_branch = get_managed_branch(user)
+            managed_restaurant = get_managed_restaurant(user)
+            
             if managed_branch:
-                return queryset.filter(branch=managed_branch)
-            else:
-                managed = get_managed_restaurant(user)
-                if managed:
-                    return queryset.filter(restaurant=managed)
-                return Order.objects.none()
+                return queryset.filter(Q(branch=managed_branch) | Q(restaurant=managed_branch.restaurant))
+            elif managed_restaurant:
+                return queryset.filter(restaurant=managed_restaurant)
+            elif user.is_superuser:
+                return queryset
+            return Order.objects.none()
             
         if user.is_authenticated:
             return queryset.filter(user=user)

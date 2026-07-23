@@ -631,12 +631,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Update order status — tries API first, falls back to local state
+  // Update order status — syncs to API with toast and background refresh
   const updateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
+    // Optimistic UI update
     setOrders((prev) => {
       const updated = prev.map((order) => {
         if (order.id === orderId) {
-          showToast(`Order #${orderId} → ${newStatus}`, 'success');
           return { ...order, status: newStatus };
         }
         return order;
@@ -644,11 +644,21 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return [...updated].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     });
 
+    const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+    if (isMock) {
+      showToast(`Order #${orderId} → ${newStatus.replace('_', ' ')} (Mock)`, 'success');
+      return;
+    }
+
     // Sync to API
     try {
       await apiUpdateOrderStatus(orderId, newStatus);
-    } catch (err) {
-      console.warn('[updateOrderStatus] API sync failed, local state is updated:', err);
+      showToast(`Order #${orderId} → ${newStatus.replace('_', ' ').toUpperCase()}`, 'success');
+      refreshOrders();
+    } catch (err: any) {
+      console.warn('[updateOrderStatus] API sync failed:', err);
+      showToast(`Failed to update Order #${orderId} on server: ${err.message || err}`, 'error');
+      refreshOrders();
     }
   };
 

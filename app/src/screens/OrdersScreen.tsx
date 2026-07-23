@@ -59,10 +59,16 @@ export default function OrdersScreen() {
     return ordersArray.filter((o: any) => o !== null && o !== undefined);
   }, [myOrders, orderFilter]);
 
-  // Fetch orders on mount (if authenticated)
+  // Fetch orders on mount and poll every 4 seconds while screen is open
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchMyOrders());
+
+      const interval = setInterval(() => {
+        dispatch(fetchMyOrders());
+      }, 4000);
+
+      return () => clearInterval(interval);
     }
   }, [dispatch, isAuthenticated]);
 

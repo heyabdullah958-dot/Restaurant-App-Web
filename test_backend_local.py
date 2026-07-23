@@ -52,6 +52,44 @@ def main():
             all_passed = False
         print(f"  [{status}] Addr: '{addr}' -> Assigned: '{actual_name}' (Expected: '{expected_branch}')")
 
+    # 4. Audit Order Status Manager Update Scoping
+    print("\nTesting Order Status Manager Scoping & DRF PATCH...")
+    from orders.models import Order
+    from rest_framework.test import APIRequestFactory, force_authenticate
+    from orders.views import OrderDetailView
+
+    tandoori = Restaurant.objects.get(slug="tandooristoppk")
+    jt_branch = Branch.objects.get(restaurant=tandoori, name="Johar Town")
+    mgr_user = User.objects.get(username="manager_tandooristoppk_johar_town")
+
+    # Create dummy order for testing status update
+    test_order = Order.objects.create(
+        restaurant=tandoori,
+        branch=jt_branch,
+        guest_name="Test Status Customer",
+        guest_phone="03001234567",
+        delivery_address="Test Address, Johar Town",
+        subtotal=500.00,
+        total=500.00,
+        status="received"
+    )
+
+    factory = APIRequestFactory()
+    request = factory.patch(f"/api/orders/{test_order.id}/", {"status": "preparing"}, format="json")
+    force_authenticate(request, user=mgr_user)
+    view = OrderDetailView.as_view()
+    response = view(request, pk=test_order.id)
+
+    test_order.refresh_from_db()
+    if response.status_code == 200 and test_order.status == "preparing":
+        print(f"  [PASSED] Manager updated Order #{test_order.id} status from 'received' -> '{test_order.status}' (HTTP {response.status_code})")
+    else:
+        print(f"  [FAILED] Response code {response.status_code}, status '{test_order.status}'")
+        all_passed = False
+
+    # Cleanup test order
+    test_order.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration tests PASSED successfully!")
     else:
