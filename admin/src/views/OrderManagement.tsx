@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAdmin } from '../AdminContext';
 import type { Order, OrderStatus } from '../types';
 import { 
@@ -10,24 +10,39 @@ import {
   Clock,
   User,
   ShoppingBag,
-  DollarSign
+  DollarSign,
+  RotateCw,
+  Store
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
-  const { selectedBrandId, restaurants, orders, updateOrderStatus } = useAdmin();
+  const { selectedBrandId, restaurants, orders, updateOrderStatus, refreshOrders, setSelectedBrand } = useAdmin();
+  const [filterBrandId, setFilterBrandId] = useState<number | 'all'>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Retrieve current restaurant
   const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
 
-  // Filter orders belonging to this brand (hook MUST be called unconditionally)
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshOrders();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  // Filter orders belonging to selected brand or all launch brands
   const brandOrders = useMemo(() => {
-    if (!restaurant) return [];
+    if (filterBrandId === 'all') {
+      return orders;
+    }
+    const targetRest = restaurants.find((r) => r.id === Number(filterBrandId));
+    if (!targetRest) return orders;
+
     return orders.filter((o) => 
-      Number(o.restaurant_id) === Number(restaurant.id) ||
-      (o.restaurant_name && restaurant.name && 
-       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+      Number(o.restaurant_id) === Number(targetRest.id) ||
+      (o.restaurant_name && targetRest.name && 
+       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === targetRest.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
     );
-  }, [orders, restaurant]);
+  }, [orders, filterBrandId, restaurants]);
 
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
@@ -65,7 +80,7 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
-  if (!restaurant) {
+  if (!restaurant && restaurants.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
@@ -93,7 +108,6 @@ export const OrderManagement: React.FC = () => {
       accent: 'bg-rose-500/10 text-rose-400 border-rose-500/20', 
       icon: <Clock size={15} className="text-rose-400 animate-pulse" /> 
     },
-
     { 
       title: 'Received', 
       status: 'received', 
@@ -137,7 +151,7 @@ export const OrderManagement: React.FC = () => {
 
     const message = 
       `Rider Bhai, ye order deliver karna hai:\n` +
-      `Restaurant: ${restaurant.name}\n` +
+      `Restaurant: ${order.restaurant_name}\n` +
       `Order ID: #${order.id}\n` +
       `Naam: ${name}\n` +
       `Phone: ${phone}\n` +
@@ -180,11 +194,41 @@ export const OrderManagement: React.FC = () => {
           </h1>
           <p className="text-sm text-slate-400">Track and dispatch orders, manage status transitions, and sync riders in real time</p>
         </div>
-        <div className="bg-slate-900 border border-slate-800/80 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 flex items-center gap-2">
-          <span>Brand Hub:</span>
-          <span className="text-blue-400 uppercase tracking-wide font-black">{restaurant.name}</span>
-          <span className="text-slate-600">·</span>
-          <span className="text-slate-500">{brandOrders.length} total orders</span>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Brand Filter Selector */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
+            <Store size={14} className="text-blue-400" />
+            <span className="text-slate-400 font-medium">Filter:</span>
+            <select
+              value={filterBrandId}
+              onChange={(e) => {
+                const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                setFilterBrandId(val);
+                if (val !== 'all') {
+                  setSelectedBrand(val);
+                }
+              }}
+              className="bg-slate-950 border border-slate-700 text-white font-bold rounded px-2 py-1 outline-none text-xs cursor-pointer focus:border-blue-500"
+            >
+              <option value="all">🌟 All Brands ({orders.length} orders)</option>
+              {restaurants.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Manual Refresh Button */}
+          <button
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+          >
+            <RotateCw size={13} className={isRefreshing ? 'animate-spin text-blue-400' : 'text-slate-400'} />
+            {isRefreshing ? 'Syncing...' : 'Sync Live Orders'}
+          </button>
         </div>
       </div>
 
@@ -222,12 +266,19 @@ export const OrderManagement: React.FC = () => {
                       }`}
                     >
                       <div>
-                        {/* Order ID & Time */}
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-850 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
-                            <ShoppingBag size={11} className="text-slate-400" />
-                            #{order.id}
-                          </span>
+                        {/* Order ID, Brand Badge & Time */}
+                        <div className="flex flex-wrap justify-between items-center gap-1.5 mb-3">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                              <ShoppingBag size={11} className="text-slate-400" />
+                              #{order.id}
+                            </span>
+                            {order.restaurant_name && (
+                              <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md">
+                                {order.restaurant_name}
+                              </span>
+                            )}
+                          </div>
                           <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
                             <Clock size={10} className="text-slate-500" />
                             {formatOrderTime(order.created_at)}
