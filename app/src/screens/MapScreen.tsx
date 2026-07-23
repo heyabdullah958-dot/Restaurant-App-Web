@@ -260,7 +260,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     });
   };
 
-  // HTML Leaflet Map Template with McDonald's style custom pins
+  // HTML Leaflet Map Template with CartoDB tiles & custom pins
   const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -271,51 +271,55 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <style>
         html, body, #map {
           margin: 0; padding: 0; width: 100%; height: 100%;
-          background: #F4F6F8; user-select: none; -webkit-user-select: none;
+          background: #EBF0F5; user-select: none; -webkit-user-select: none;
         }
 
         /* Pulsing user location GPS dot */
         .user-gps-dot {
-          background: #007AFF;
+          background: #FF5722;
           border: 3px solid #FFFFFF;
           border-radius: 50%;
-          box-shadow: 0 0 0 10px rgba(0, 122, 255, 0.25);
+          box-shadow: 0 0 0 10px rgba(255, 87, 34, 0.3);
           width: 16px;
           height: 16px;
           animation: pulse 1.8s infinite;
           box-sizing: border-box;
         }
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0px rgba(0, 122, 255, 0.4); }
-          70% { box-shadow: 0 0 0 12px rgba(0, 122, 255, 0); }
-          100% { box-shadow: 0 0 0 0px rgba(0, 122, 255, 0); }
+          0% { box-shadow: 0 0 0 0px rgba(255, 87, 34, 0.4); }
+          70% { box-shadow: 0 0 0 14px rgba(255, 87, 34, 0); }
+          100% { box-shadow: 0 0 0 0px rgba(255, 87, 34, 0); }
         }
 
-        /* McDonald's style custom restaurant pin */
+        /* Custom restaurant pin */
         .mcd-pin-container {
           position: relative;
           cursor: pointer;
         }
         .mcd-pin-badge {
           background: #FFFFFF;
-          border: 2px solid #FF5722;
+          border: 2.5px solid #FF5722;
           border-radius: 20px;
-          padding: 5px 10px;
+          padding: 6px 12px;
           display: flex;
           align-items: center;
           gap: 6px;
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           white-space: nowrap;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          transition: transform 0.2s ease;
         }
-        .mcd-pin-badge:active, .mcd-pin-badge.active {
+        .mcd-pin-badge.brand-jushhpk {
+          border-color: #FF6B00;
+        }
+        .mcd-pin-badge.brand-getafomo {
+          border-color: #8E44AD;
+        }
+        .mcd-pin-badge.brand-tandooristoppk {
+          border-color: #E74C3C;
+        }
+        .mcd-pin-badge:active {
           transform: scale(1.1);
-          background: #FF5722;
-          border-color: #FFFFFF;
-        }
-        .mcd-pin-badge:active .mcd-pin-title, .mcd-pin-badge.active .mcd-pin-title {
-          color: #FFFFFF;
         }
         .mcd-pin-emoji {
           font-size: 16px;
@@ -324,19 +328,19 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         .mcd-pin-title {
           font-size: 12px;
           font-weight: 800;
-          color: #1A1A2E;
+          color: #0F172A;
         }
 
         /* Popup Box Styling */
         .leaflet-popup-content-wrapper {
           border-radius: 16px;
-          box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+          box-shadow: 0 12px 30px rgba(0,0,0,0.22);
           padding: 0;
           overflow: hidden;
         }
         .leaflet-popup-content {
           margin: 0;
-          width: 220px !important;
+          width: 230px !important;
         }
         .popup-card {
           padding: 14px;
@@ -375,7 +379,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           font-weight: 800;
           font-size: 12px;
           text-align: center;
-          padding: 8px 0;
+          padding: 9px 0;
           border-radius: 10px;
           text-decoration: none;
           border: none;
@@ -390,13 +394,25 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         var map = L.map('map', {
           zoomControl: false,
           attributionControl: false
-        }).setView([${userLat}, ${userLng}], 13);
+        }).setView([${userLat}, ${userLng}], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Primary reliable CartoDB Voyager tiles (never blocks webviews, crisp design)
+        var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          subdomains: 'abcd',
           maxZoom: 19
         }).addTo(map);
 
+        // Fallback tile handler if network glitches
+        tileLayer.on('tileerror', function() {
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        });
+
         L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // Force Leaflet to calculate full height
+        setTimeout(function() {
+          map.invalidateSize();
+        }, 300);
 
         // User GPS dot
         var userMarker = L.marker([${userLat}, ${userLng}], {
@@ -414,7 +430,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         branches.forEach(function(b) {
           var pinIcon = L.divIcon({
             className: 'mcd-pin-container',
-            html: '<div class="mcd-pin-badge" id="pin-' + b.id + '">' +
+            html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
                     '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
                     '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
                   '</div>',
@@ -461,7 +477,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         };
 
         window.recenterMap = function(lat, lng) {
-          map.flyTo([lat, lng], 14, { duration: 1 });
+          map.flyTo([lat, lng], 13, { duration: 1 });
         };
       </script>
     </body>
@@ -496,18 +512,21 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         renderLoading={() => (
           <View style={[StyleSheet.absoluteFill, styles.centerLoader]}>
             <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ marginTop: 10, color: COLORS.gray, fontWeight: '600', fontSize: 12 }}>
+              Loading FoodSphere Map...
+            </Text>
           </View>
         )}
       />
 
-      {/* Floating Header & Search Bar (McDonald's Style) */}
+      {/* Creative Floating Header & 3-Brand Hero Cards Row */}
       <SafeAreaView style={styles.floatingTopContainer} pointerEvents="box-none">
-        {/* Brand Header */}
         <View style={styles.searchHeaderCard}>
+          {/* Search Row */}
           <View style={styles.searchRow}>
             <Ionicons name="search" size={18} color={COLORS.gray} />
             <TextInput
-              placeholder="Search area, city or restaurant..."
+              placeholder="Search Johar Town, DHA, Lake City, Gulberg..."
               placeholderTextColor={COLORS.gray}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -520,44 +539,83 @@ export default function MapScreen({ navigation }: { navigation: any }) {
             )}
           </View>
 
-          {/* Brand Filter Horizontal Scroll */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar}>
+          {/* Creative 3-Brand Hero Cards Scroll */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.brandHeroScroll}>
+            {/* Card 0: All Outlets */}
             <TouchableOpacity
+              activeOpacity={0.85}
               onPress={() => setSelectedBrandFilter('all')}
               style={[
-                styles.filterChip,
-                selectedBrandFilter === 'all' && styles.filterChipActive,
+                styles.brandHeroCard,
+                selectedBrandFilter === 'all' && styles.brandHeroCardActive,
+                { borderColor: '#007AFF' },
               ]}
             >
-              <Text
-                style={[
-                  styles.filterChipText,
-                  selectedBrandFilter === 'all' && styles.filterChipTextActive,
-                ]}
-              >
-                🌟 All Brands ({REAL_BRANCH_LOCATIONS.length})
-              </Text>
+              <View style={[styles.brandHeroIconCircle, { backgroundColor: '#E0F2FE' }]}>
+                <Text style={{ fontSize: 16 }}>🌟</Text>
+              </View>
+              <View>
+                <Text style={styles.brandHeroTitle}>All Brands</Text>
+                <Text style={styles.brandHeroSub}>7 Active Outlets</Text>
+              </View>
             </TouchableOpacity>
 
-            {[
-              { slug: 'jushhpk', name: 'Jush PK', emoji: '🍔' },
-              { slug: 'getafomo', name: 'Get A Fomo', emoji: '☕' },
-              { slug: 'tandooristoppk', name: 'Tandoori Stop', emoji: '🍗' },
-            ].map((brand) => {
-              const isActive = selectedBrandFilter === brand.slug;
-              return (
-                <TouchableOpacity
-                  key={brand.slug}
-                  onPress={() => setSelectedBrandFilter(brand.slug)}
-                  style={[styles.filterChip, isActive && styles.filterChipActive]}
-                >
-                  <Text style={styles.chipEmoji}>{brand.emoji}</Text>
-                  <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
-                    {brand.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+            {/* Card 1: Jush PK */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setSelectedBrandFilter('jushhpk')}
+              style={[
+                styles.brandHeroCard,
+                selectedBrandFilter === 'jushhpk' && styles.brandHeroCardActive,
+                { borderColor: '#FF6B00' },
+              ]}
+            >
+              <View style={[styles.brandHeroIconCircle, { backgroundColor: '#FFEDD5' }]}>
+                <Text style={{ fontSize: 16 }}>🍔</Text>
+              </View>
+              <View>
+                <Text style={styles.brandHeroTitle}>Jush PK</Text>
+                <Text style={styles.brandHeroSub}>3 Outlets · Burgers & Doner</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Card 2: Get A Fomo */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setSelectedBrandFilter('getafomo')}
+              style={[
+                styles.brandHeroCard,
+                selectedBrandFilter === 'getafomo' && styles.brandHeroCardActive,
+                { borderColor: '#8E44AD' },
+              ]}
+            >
+              <View style={[styles.brandHeroIconCircle, { backgroundColor: '#F3E8FF' }]}>
+                <Text style={{ fontSize: 16 }}>☕</Text>
+              </View>
+              <View>
+                <Text style={styles.brandHeroTitle}>Get A Fomo</Text>
+                <Text style={styles.brandHeroSub}>Gulberg III · Trendy Café</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Card 3: Tandoori Stop */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setSelectedBrandFilter('tandooristoppk')}
+              style={[
+                styles.brandHeroCard,
+                selectedBrandFilter === 'tandooristoppk' && styles.brandHeroCardActive,
+                { borderColor: '#E74C3C' },
+              ]}
+            >
+              <View style={[styles.brandHeroIconCircle, { backgroundColor: '#FEE2E2' }]}>
+                <Text style={{ fontSize: 16 }}>🍗</Text>
+              </View>
+              <View>
+                <Text style={styles.brandHeroTitle}>Tandoori Stop</Text>
+                <Text style={styles.brandHeroSub}>3 Outlets · BBQ & Naan</Text>
+              </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -718,36 +776,51 @@ const styles = StyleSheet.create({
     color: COLORS.dark,
     padding: 0,
   },
-  filterBar: {
+  brandHeroScroll: {
     marginTop: 10,
     flexDirection: 'row',
   },
-  filterChip: {
+  brandHeroCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    borderRadius: 20,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
-    gap: 4,
+    paddingVertical: 8,
+    marginRight: 10,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  filterChipActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+  brandHeroCardActive: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  filterChipText: {
-    fontSize: 11,
-    fontWeight: '700',
+  brandHeroIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandHeroTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  brandHeroSub: {
+    fontSize: 10,
+    fontWeight: '600',
     color: '#64748B',
-  },
-  filterChipTextActive: {
-    color: COLORS.white,
-  },
-  chipEmoji: {
-    fontSize: 12,
+    marginTop: 1,
   },
   recenterBtn: {
     position: 'absolute',
