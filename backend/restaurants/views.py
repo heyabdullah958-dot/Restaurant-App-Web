@@ -190,13 +190,13 @@ from .models import Branch
 class BranchListView(generics.ListAPIView):
     """
     GET /api/branches/
-    Lists active branches. Optional filter: ?restaurant_id=1 or ?restaurant_slug=tandooristoppk
+    Lists all branches for a restaurant with live is_active status. Optional filter: ?restaurant_id=1 or ?restaurant_slug=tandooristoppk
     """
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
     def get(self, request):
-        qs = Branch.objects.filter(is_active=True).select_related('restaurant')
+        qs = Branch.objects.all().select_related('restaurant')
         restaurant_id = request.query_params.get('restaurant_id')
         restaurant_slug = request.query_params.get('restaurant_slug')
         if restaurant_id:
@@ -210,6 +210,7 @@ class BranchListView(generics.ListAPIView):
                 'name': b.name,
                 'address': b.address,
                 'phone': b.phone,
+                'is_active': b.is_active,
                 'area_keywords': b.area_keywords,
             } for b in qs]
         })

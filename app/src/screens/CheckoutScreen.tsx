@@ -199,8 +199,8 @@ export default function CheckoutScreen() {
 
     setBranches(initialBranches);
     if (Array.isArray(initialBranches) && initialBranches.length > 0) {
-      const firstActive = initialBranches.find((b: any) => b.is_active !== false) || initialBranches[0];
-      setSelectedBranchId(firstActive.id);
+      const firstActive = initialBranches.find((b: any) => b.is_active !== false);
+      setSelectedBranchId(firstActive ? firstActive.id : null);
     }
 
     const targetSlug = restaurant?.slug;
@@ -219,8 +219,8 @@ export default function CheckoutScreen() {
           setSelectedBranchId((prev) => {
             const activePrev = list.find((b: any) => b.id === prev && b.is_active !== false);
             if (activePrev) return prev;
-            const firstActive = list.find((b: any) => b.is_active !== false) || list[0];
-            return firstActive.id;
+            const firstActive = list.find((b: any) => b.is_active !== false);
+            return firstActive ? firstActive.id : null;
           });
         }
       })
@@ -229,6 +229,10 @@ export default function CheckoutScreen() {
         console.warn('Failed to fetch live branches, using default branches:', e);
       });
   }, [restaurant, restaurantId]);
+
+  const areAllBranchesClosed = useMemo(() => {
+    return branches.length > 0 && branches.every((b: any) => b.is_active === false);
+  }, [branches]);
 
   const deliveryFee = useMemo(() => {
     if (restaurant && restaurant.delivery_fee) {
@@ -263,7 +267,13 @@ export default function CheckoutScreen() {
     }
 
     if (!selectedBranchId) {
-      showAlert('Branch Required', 'Please select a branch to prepare and deliver your order.');
+      showAlert('Branch Required', 'Please select an open branch to prepare and deliver your order.');
+      return;
+    }
+
+    const selectedBranch = branches.find((b: any) => b.id === selectedBranchId);
+    if (!selectedBranch || selectedBranch.is_active === false) {
+      showAlert('Branch Closed', 'The selected branch is currently closed and not accepting orders. Please select an active branch.');
       return;
     }
 
@@ -522,8 +532,8 @@ export default function CheckoutScreen() {
 
             {/* Specific Branches */}
             {branches.map((b) => {
-              const isSelected = selectedBranchId === b.id;
               const isClosed = b.is_active === false;
+              const isSelected = selectedBranchId === b.id && !isClosed;
               return (
                 <TouchableOpacity 
                   key={b.id}
@@ -532,27 +542,33 @@ export default function CheckoutScreen() {
                   style={[
                     styles.branchCardOption,
                     isSelected && styles.branchCardSelected,
-                    isClosed && { opacity: 0.5, backgroundColor: '#f1f5f9' }
+                    isClosed && { opacity: 0.5, backgroundColor: '#f8fafc', borderColor: '#cbd5e1' }
                   ]}
-                  onPress={() => !isClosed && setSelectedBranchId(b.id)}
+                  onPress={() => {
+                    if (isClosed) {
+                      showAlert('Branch Closed', `${b.name} Branch is currently closed and not accepting orders.`);
+                    } else {
+                      setSelectedBranchId(b.id);
+                    }
+                  }}
                 >
                   <Ionicons 
                     name={isSelected ? "radio-button-on" : "radio-button-off"} 
                     size={20} 
-                    color={isClosed ? COLORS.gray : (isSelected ? COLORS.primary : COLORS.gray)} 
+                    color={isClosed ? '#94a3b8' : (isSelected ? COLORS.primary : COLORS.gray)} 
                   />
                   <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={[styles.branchOptionTitle, isClosed && { color: COLORS.gray }]}>{b.name} Branch</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 4 }}>
+                      <Text style={[styles.branchOptionTitle, isClosed && { color: '#64748b' }]}>{b.name} Branch</Text>
                       {isClosed && (
-                        <View style={{ backgroundColor: '#ef4444', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-                          <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#ffffff' }}>CLOSED</Text>
+                        <View style={{ backgroundColor: '#ef4444', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: '#ffffff', letterSpacing: 0.5 }}>CLOSED</Text>
                         </View>
                       )}
                     </View>
-                    {!!b.address && <Text style={styles.branchOptionDesc}>{b.address}</Text>}
+                    {!!b.address && <Text style={[styles.branchOptionDesc, isClosed && { color: '#94a3b8' }]}>{b.address}</Text>}
                   </View>
-                  {isSelected && !isClosed && (
+                  {isSelected && (
                     <View style={styles.selectedCheckBadge}>
                       <Ionicons name="checkmark" size={12} color={COLORS.white} />
                     </View>
@@ -560,6 +576,15 @@ export default function CheckoutScreen() {
                 </TouchableOpacity>
               );
             })}
+
+            {areAllBranchesClosed && (
+              <View style={{ marginTop: 10, padding: 12, backgroundColor: '#fef2f2', borderRadius: 10, borderWidth: 1, borderColor: '#fca5a5', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Ionicons name="alert-circle" size={20} color="#dc2626" />
+                <Text style={{ flex: 1, fontSize: 12, fontWeight: 'bold', color: '#991b1b' }}>
+                  All branches for this restaurant are currently closed and not accepting orders.
+                </Text>
+              </View>
+            )}
 
           </View>
 
@@ -678,16 +703,21 @@ export default function CheckoutScreen() {
         {/* Footer sticky place order button */}
         <View style={styles.footer}>
           <TouchableOpacity activeOpacity={0.9}
-            style={[styles.placeOrderBtn, isSubmitting && styles.placeOrderBtnDisabled]}
+            style={[
+              styles.placeOrderBtn,
+              (isSubmitting || areAllBranchesClosed) && styles.placeOrderBtnDisabled
+            ]}
             onPress={handlePlaceOrder}
-            disabled={isSubmitting}
+            disabled={isSubmitting || areAllBranchesClosed}
           >
             {isSubmitting ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <>
-                <Text style={styles.placeOrderText}>Place Order (Rs. {finalTotal.toFixed(2)})</Text>
-                <Ionicons name="checkbox-outline" size={20} color={COLORS.white} />
+                <Text style={styles.placeOrderText}>
+                  {areAllBranchesClosed ? 'All Branches Closed' : `Place Order (Rs. ${finalTotal.toFixed(2)})`}
+                </Text>
+                <Ionicons name={areAllBranchesClosed ? "lock-closed-outline" : "checkbox-outline"} size={20} color={COLORS.white} />
               </>
             )}
           </TouchableOpacity>
