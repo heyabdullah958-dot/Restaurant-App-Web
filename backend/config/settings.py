@@ -281,9 +281,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '30/hour',
-        'user': '500/hour',
-        'order_create': '10/hour',
+        'anon': '500/hour',
+        'user': '2000/hour',
+        'order_create': '200/hour',
     },
     'DEFAULT_PAGINATION_CLASS': 'config.pagination.StandardResultsPagination',
     'PAGE_SIZE': 20,

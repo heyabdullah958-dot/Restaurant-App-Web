@@ -240,7 +240,8 @@ export const guestLogin = createAsyncThunk<
       
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
-      console.warn('Backend guest auth waking up or offline. Using local guest session fallback.');
+      console.warn('Backend guest auth throttled or offline. Using local session state.');
+      delete api.defaults.headers.common['Authorization'];
       const fallbackUser: UserProfile = {
         id: 9999,
         username: 'Guest User',
@@ -252,9 +253,7 @@ export const guestLogin = createAsyncThunk<
         profile_photo: '',
         loyalty_points: 0,
       };
-      const fallbackToken = 'guest_offline_token';
-      api.defaults.headers.common['Authorization'] = `Bearer ${fallbackToken}`;
-      return { user: fallbackUser, token: fallbackToken, refreshToken: '' };
+      return { user: fallbackUser, token: '', refreshToken: '' };
     }
   }
 );

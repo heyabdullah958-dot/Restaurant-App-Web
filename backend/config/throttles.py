@@ -2,10 +2,10 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 class GuestAuthThrottle(AnonRateThrottle):
     """
-    BUG-19 FIX: Stricter throttle for guest account creation.
-    Limits to 5 guest accounts per IP per hour to prevent abuse.
+    Relaxed throttle for guest account creation to support mobile app usage and testing.
+    Limits to 300 guest accounts per IP per hour.
     """
-    rate = '5/hour'
+    rate = '300/hour'
 
 class OrderCreateThrottle(UserRateThrottle):
     """
