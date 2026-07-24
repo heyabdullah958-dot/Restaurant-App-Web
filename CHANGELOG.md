@@ -1,4 +1,10 @@
 
+## 2026-07-24 Out-of-Stock Item Propagation Fix
+- Updated `MenuCategorySerializer` in Django REST Framework to return all menu items (including `is_available = False`).
+- Updated Mobile App (`RestaurantScreen.tsx`) to render out-of-stock items with a red **"OUT OF STOCK"** badge, reduced card opacity, and a disabled button.
+- Added guard logic in `handleAddToCart()` to prevent ordering out-of-stock items.
+- Configured Heroku monorepo deployment pipeline using `git subtree push --prefix backend heroku main`.
+
 ## 2026-07-17 Updates
 - Fixed MapScreen crash caused by hooks conditionality.
 - Fixed Guest Customer bug on AuthScreen after real logins.

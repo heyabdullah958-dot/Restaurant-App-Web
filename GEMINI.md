@@ -86,6 +86,7 @@ FoodSphere/
 ## 🔑 Zaroori Files & Code Routes (Must Know for New Chats)
 
 ### 🖥️ Admin Panel (React)
+- **Official Manager Logins Directory**: [CREDENTIALS.md](file:///d:/sitesdata/Resturent%20App/CREDENTIALS.md) — complete list of usernames and passwords for Super-Admin and all 7 brand/branch managers.
 - **API Requests Handler**: [api.ts](file:///d:/sitesdata/Resturent%20App/admin/src/services/api.ts) — handles token refresh and real API fetch calls.
 - **Global Context Provider**: [AdminContext.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/AdminContext.tsx) — holds state for active view, live order lists, toggles, and login actions.
 - **Push Notification UI**: [NotificationCenter.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/views/NotificationCenter.tsx) — templates and targeted topic-based FCM dispatch.
@@ -184,3 +185,6 @@ FoodSphere/
 - All 7 websites are **static-first** (no backend dependency) with form submission via Formspree
 - **getafomo** requires Instagram feed integration — plan for this early
 - Code must be clean, commented, and **handoff-ready** for client's future team
+- **Stock Availability Rules**: `MenuCategorySerializer` in DRF must **ALWAYS** return all menu items (including `is_available = False`). Out-of-stock items MUST remain visible in customer apps with an **"OUT OF STOCK"** badge and disabled button rather than being removed.
+- **Heroku Deployment Command**: Deploy backend updates using `git subtree push --prefix backend heroku main`.
+
