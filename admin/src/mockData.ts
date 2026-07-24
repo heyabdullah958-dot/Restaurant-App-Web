@@ -119,7 +119,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     min_order_amount: 300,
     phone: '+92 326 9946142',
     logo_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&auto=format&fit=crop&q=80',
-    cover_url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&auto=format&fit=crop&q=80'
+    cover_url: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&auto=format&fit=crop&q=80',
+    branches: [
+      { id: 101, name: 'DHA Phase 1', address: 'Sector H, DHA Phase 1, Lahore', phone: '+92 325 7217221', is_active: true },
+      { id: 102, name: 'Johar Town', address: 'Block R2, Phase 2 Johar Town, Lahore', phone: '+92 326 9946142', is_active: true },
+      { id: 103, name: 'Lake City', address: 'Business Bay M1, Lake City, Lahore', phone: '+92 324 4441735', is_active: true },
+    ]
   },
   {
     id: 4,
@@ -137,9 +142,14 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     delivery_time_min: 25,
     delivery_time_max: 40,
     min_order_amount: 400,
-    phone: '+92 91 111222333',
+    phone: '+92 327 4945947',
     logo_url: 'https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=150&auto=format&fit=crop&q=80',
-    cover_url: 'https://images.unsplash.com/photo-1585938338676-50a62a6318e8?w=800&auto=format&fit=crop&q=80'
+    cover_url: 'https://images.unsplash.com/photo-1585938338676-50a62a6318e8?w=800&auto=format&fit=crop&q=80',
+    branches: [
+      { id: 201, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '+92 327 4945947', is_active: true },
+      { id: 202, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '+92 324 4441735', is_active: true },
+      { id: 203, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '+92 326 6811177', is_active: true },
+    ]
   },
   {
     id: 5,
@@ -185,8 +195,8 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     id: 7,
     name: 'GetAFomo',
     slug: 'getafomo',
-    city: 'Karachi',
-    address: 'DHA Phase 5, Karachi',
+    city: 'Lahore',
+    address: '65, Block D1 Gulberg III, Lahore',
     cuisine_type: 'Cafe & Event Space',
     is_active: true,
     is_featured: true,
@@ -197,9 +207,12 @@ export const MOCK_RESTAURANTS: Restaurant[] = [
     delivery_time_min: 20,
     delivery_time_max: 35,
     min_order_amount: 450,
-    phone: '+92 21 111366677',
-    logo_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=150&auto=format&fit=crop&q=80',
-    cover_url: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=800&auto=format&fit=crop&q=80'
+    phone: '+92 321 2784841',
+    logo_url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=150&auto=format&fit=crop&q=80',
+    cover_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80',
+    branches: [
+      { id: 301, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '+92 321 2784841', is_active: true }
+    ]
   }
 ];
 

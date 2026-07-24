@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant, MenuCategory, MenuItem
+from .models import Restaurant, MenuCategory, MenuItem, Branch
 
 
 def build_absolute_image_url(image_field, context):
@@ -92,10 +92,17 @@ class AbsoluteImageField(serializers.ImageField):
             return None
 
 
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords')
+
+
 class RestaurantSerializer(serializers.ModelSerializer):
     logo = AbsoluteImageField(required=False, allow_null=True)
     cover_image = AbsoluteImageField(required=False, allow_null=True)
     banner_image = AbsoluteImageField(required=False, allow_null=True)
+    branches = BranchSerializer(many=True, read_only=True)
 
     class Meta:
         model = Restaurant
@@ -104,17 +111,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
             'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
-            'loyalty_points_ratio'
+            'loyalty_points_ratio', 'branches'
         )
-
-
-from .models import Restaurant, MenuCategory, MenuItem, Branch
-
-
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Branch
-        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords')
 
 
 
