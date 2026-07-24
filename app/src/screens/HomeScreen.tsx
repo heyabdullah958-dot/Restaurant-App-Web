@@ -54,29 +54,13 @@ const isBrandOpen = (brand: any): boolean => {
     // 0. Super-Admin Master Override Check
     if (brand.is_force_closed === true) return false;
 
-    // 1. Branch Availability Check: if branches array exists, at least one branch must be active
+    // 1. Derived Branch Status Check: Open as long as at least ONE branch is active
     if (brand.branches && Array.isArray(brand.branches) && brand.branches.length > 0) {
-      const hasActiveBranch = brand.branches.some((b: any) => b.is_active !== false);
-      if (!hasActiveBranch) return false;
-    } else if (brand.is_active === false) {
-      return false;
+      return brand.branches.some((b: any) => b.is_active !== false);
     }
-
-    // 2. Operating Hours Check
-    const opensAt: string | undefined = brand.opens_at;
-    const closesAt: string | undefined = brand.closes_at;
-    if (!opensAt || !closesAt) return true; // No hours set → assume open
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-    const [openH, openM] = opensAt.split(':').map(Number);
-    const [closeH, closeM] = closesAt.split(':').map(Number);
-    const openMins = openH * 60 + openM;
-    const closeMins = closeH * 60 + closeM;
-    // Handle overnight ranges (e.g. 22:00 – 02:00)
-    if (closeMins < openMins) {
-      return nowMins >= openMins || nowMins <= closeMins;
-    }
-    return nowMins >= openMins && nowMins <= closeMins;
+    
+    // Fallback if no branches array is present
+    return brand.is_active !== false;
   } catch {
     return true; // Safe default
   }

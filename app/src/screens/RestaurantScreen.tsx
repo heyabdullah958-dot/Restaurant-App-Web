@@ -38,28 +38,15 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Restaurant'
 
 const isRestaurantOpen = (restaurant: any): boolean => {
   try {
+    // 0. Super-Admin Master Override Check
     if (restaurant.is_force_closed === true) return false;
 
+    // 1. Derived Branch Status Check: Open as long as at least ONE branch is active
     if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
-      const hasActiveBranch = restaurant.branches.some((b: any) => b.is_active !== false);
-      if (!hasActiveBranch) return false;
-    } else if (restaurant.is_active === false) {
-      return false;
+      return restaurant.branches.some((b: any) => b.is_active !== false);
     }
-
-    const opensAt = restaurant.opens_at;
-    const closesAt = restaurant.closes_at;
-    if (!opensAt || !closesAt) return true;
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    const [openH, openM] = opensAt.split(':').map(Number);
-    const [closeH, closeM] = closesAt.split(':').map(Number);
-    const openMinutes = openH * 60 + openM;
-    const closeMinutes = closeH * 60 + closeM;
-    if (closeMinutes < openMinutes) {
-      return nowMinutes >= openMinutes || nowMinutes <= closeMinutes;
-    }
-    return nowMinutes >= openMinutes && nowMinutes <= closeMinutes;
+    
+    return restaurant.is_active !== false;
   } catch {
     return true; // Default to open if error
   }

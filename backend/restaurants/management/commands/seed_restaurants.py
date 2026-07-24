@@ -16,11 +16,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Seeding restaurant data...')
         
+        # Ensure all existing restaurants have 24/7 operating hours so availability is strictly governed by branch toggles
+        Restaurant.objects.all().update(opens_at=datetime.time(0, 0), closes_at=datetime.time(23, 59, 59))
+
         if options.get('force'):
             self.stdout.write('Force flag detected. Clearing existing restaurant data...')
             Restaurant.objects.all().delete()
         elif Restaurant.objects.exists():
-            self.stdout.write(self.style.SUCCESS('Restaurant database already seeded. Skipping.'))
+            self.stdout.write(self.style.SUCCESS('Restaurant database operating hours updated to 24/7. Skipping full re-seed.'))
             return
         
         # Define the 7 brands and their data
