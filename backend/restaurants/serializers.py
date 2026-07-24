@@ -61,10 +61,9 @@ class MenuCategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'restaurant', 'name', 'icon', 'order', 'is_active', 'items')
 
     def get_items(self, obj):
-        # Use prefetched items to avoid extra database query
+        # Return all items with their is_available status so frontend apps can render out-of-stock badges
         all_items = obj.items.all()
-        available_items = [item for item in all_items if item.is_available]
-        return MenuItemSerializer(available_items, many=True, context=self.context).data
+        return MenuItemSerializer(all_items, many=True, context=self.context).data
 
 
 class AdminMenuCategorySerializer(serializers.ModelSerializer):

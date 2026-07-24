@@ -184,6 +184,11 @@ export default function RestaurantScreen() {
   };
 
   const handleAddToCart = (item: MenuItem) => {
+    if (item.is_available === false) {
+      showAlert('Item Out of Stock', 'Sorry, this dish is currently out of stock at this restaurant branch.');
+      return;
+    }
+
     // If the item has variants, open the options selection modal
     if (item.options?.has_variants && item.options?.variants?.length > 0) {
       setSelectedItemForOptions(item);
@@ -430,17 +435,25 @@ export default function RestaurantScreen() {
           
           {menuItems.map((item: MenuItem & { categoryName?: string }) => {
             const quantity = getItemQuantity(item.id);
+            const isOutOfStock = item.is_available === false;
             return (
-              <View key={item.id} style={styles.menuItemCard}>
+              <View key={item.id} style={[styles.menuItemCard, isOutOfStock && { opacity: 0.65 }]}>
                 <View style={styles.menuItemTextContent}>
-                  <Text style={styles.itemName}>{item.name}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={[styles.itemName, isOutOfStock && { color: COLORS.gray }]}>{item.name}</Text>
+                    {isOutOfStock && (
+                      <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                        <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
+                      </View>
+                    )}
+                  </View>
                   {selectedCategory === 'All' && item.categoryName && (
                     <Text style={styles.itemCategoryName}>{item.categoryName}</Text>
                   )}
                   <Text style={styles.itemDescription} numberOfLines={2}>
                     {item.description}
                   </Text>
-                  <Text style={styles.itemPrice}>Rs. {Number(item.price)}</Text>
+                  <Text style={[styles.itemPrice, isOutOfStock && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
                   
                   {item.preparation_time > 0 && (
                     <Text style={styles.itemPrepTime}>
@@ -469,7 +482,11 @@ export default function RestaurantScreen() {
                   <View 
                     style={styles.quantitySelectorContainer}
                   >
-                    {quantity > 0 && !item.options?.has_variants ? (
+                    {isOutOfStock ? (
+                      <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+                        <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
+                      </View>
+                    ) : quantity > 0 && !item.options?.has_variants ? (
                       <View 
                         style={styles.quantityRow}
                       >
