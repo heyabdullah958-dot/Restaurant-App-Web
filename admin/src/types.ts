@@ -43,6 +43,8 @@ export interface Restaurant {
   cuisine_type: string;
   description?: string;
   is_active: boolean;
+  is_force_closed?: boolean;
+  is_open?: boolean;
   is_featured: boolean;
   rating: number;
   delivery_fee: number;

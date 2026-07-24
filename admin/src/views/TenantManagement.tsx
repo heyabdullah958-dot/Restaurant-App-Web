@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useAdmin } from '../AdminContext';
-import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera, Eye } from 'lucide-react';
+import { useAdmin, computeStoreOpenStatus } from '../AdminContext';
+import { Plus, X, Phone, MapPin, Clock, DollarSign, Sparkles, Trash2, Camera, Eye, Power } from 'lucide-react';
 
 export const TenantManagement: React.FC = () => {
-  const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner, removeRestaurantBanner } = useAdmin();
+  const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -100,11 +100,17 @@ export const TenantManagement: React.FC = () => {
               
               {/* Online/Disabled badge */}
               <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border backdrop-blur-md ${
-                restaurant.is_active
+                restaurant.is_force_closed
+                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/35'
+                  : computeStoreOpenStatus(restaurant)
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/35'
-                  : 'bg-rose-500/20 text-rose-400 border-rose-500/35'
+                  : 'bg-amber-500/20 text-amber-400 border-amber-500/35'
               }`}>
-                {restaurant.is_active ? 'Online' : 'Disabled'}
+                {restaurant.is_force_closed
+                  ? 'Force Closed'
+                  : computeStoreOpenStatus(restaurant)
+                  ? 'Online (Open)'
+                  : 'Closed (Branches Off)'}
               </span>
 
               {/* Upload Banner Button */}
@@ -210,18 +216,32 @@ export const TenantManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-700/30 flex flex-col gap-3">
+              <div className="mt-5 pt-3 border-t border-slate-700/30 flex flex-col gap-2.5">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-500">Slug: <code className="text-blue-400 bg-slate-900 px-1 py-0.5 rounded font-mono">{restaurant.slug}</code></span>
                   <span className="text-slate-500">Tenant ID: <code className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded font-mono">#{restaurant.id}</code></span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeRestaurant(restaurant.id)}
-                  className="w-full flex items-center justify-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-xl py-2 text-xs font-bold transition-all"
-                >
-                  <Trash2 size={13} /> Remove Brand
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => updateRestaurantDetails(restaurant.id, { is_force_closed: !restaurant.is_force_closed })}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-extrabold border transition-all ${
+                      restaurant.is_force_closed
+                        ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                        : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30'
+                    }`}
+                  >
+                    <Power size={13} />
+                    {restaurant.is_force_closed ? 'Re-Open Brand' : 'Force Close Brand'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeRestaurant(restaurant.id)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 hover:border-rose-500/40 rounded-xl py-2 text-xs font-bold transition-all"
+                  >
+                    <Trash2 size={13} /> Remove Brand
+                  </button>
+                </div>
               </div>
             </div>
           </div>

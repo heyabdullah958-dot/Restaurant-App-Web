@@ -157,6 +157,8 @@ export interface ApiRestaurant {
   description: string;
   city: string;
   is_active: boolean;
+  is_force_closed?: boolean;
+  is_open?: boolean;
   is_featured: boolean;
   rating: string | number;
   delivery_fee: string | number;

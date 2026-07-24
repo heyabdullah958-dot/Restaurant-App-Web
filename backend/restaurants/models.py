@@ -12,6 +12,7 @@ class Restaurant(models.Model):
     city = models.CharField(max_length=100, db_index=True)
     phone = models.CharField(max_length=20)
     is_active = models.BooleanField(default=True, db_index=True)
+    is_force_closed = models.BooleanField(default=False, help_text="Super-Admin master override to force close the entire brand")
     is_featured = models.BooleanField(default=False, db_index=True)
     opens_at = models.TimeField()
     closes_at = models.TimeField()
@@ -24,6 +25,15 @@ class Restaurant(models.Model):
     loyalty_points_ratio = models.IntegerField(default=100, help_text="Amount in Rupees required to earn 1 loyalty point. Set to 0 to disable.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_open(self):
+        if self.is_force_closed or not self.is_active:
+            return False
+        b_list = self.branches.all()
+        if not b_list.exists():
+            return True
+        return b_list.filter(is_active=True).exists()
 
     def __str__(self):
         return self.name

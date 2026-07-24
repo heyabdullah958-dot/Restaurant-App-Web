@@ -46,6 +46,8 @@ export interface Restaurant {
   city: string;
   phone: string;
   is_active: boolean;
+  is_force_closed?: boolean;
+  is_open?: boolean;
   is_featured: boolean;
   opens_at: string;
   closes_at: string;

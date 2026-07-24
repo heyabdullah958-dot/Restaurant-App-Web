@@ -100,6 +100,17 @@ class AdminRestaurantViewSet(viewsets.ModelViewSet):
             return Restaurant.objects.filter(id=managed_restaurant.id)
         return Restaurant.objects.none()
 
+    def perform_update(self, serializer):
+        user = self.request.user
+        # Non-superusers (branch managers) cannot toggle is_force_closed or master is_active
+        if not user.is_superuser:
+            serializer.save(
+                is_force_closed=serializer.instance.is_force_closed,
+                is_active=serializer.instance.is_active
+            )
+        else:
+            serializer.save()
+
 class AdminMenuCategoryViewSet(viewsets.ModelViewSet):
     serializer_class = MenuCategorySerializer
     permission_classes = [permissions.IsAdminUser]

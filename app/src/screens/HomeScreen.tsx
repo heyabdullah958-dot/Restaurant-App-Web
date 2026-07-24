@@ -51,6 +51,9 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
  */
 const isBrandOpen = (brand: any): boolean => {
   try {
+    // 0. Super-Admin Master Override Check
+    if (brand.is_force_closed === true) return false;
+
     // 1. Branch Availability Check: if branches array exists, at least one branch must be active
     if (brand.branches && Array.isArray(brand.branches) && brand.branches.length > 0) {
       const hasActiveBranch = brand.branches.some((b: any) => b.is_active !== false);

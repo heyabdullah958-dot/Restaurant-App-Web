@@ -103,13 +103,14 @@ class RestaurantSerializer(serializers.ModelSerializer):
     cover_image = AbsoluteImageField(required=False, allow_null=True)
     banner_image = AbsoluteImageField(required=False, allow_null=True)
     branches = BranchSerializer(many=True, read_only=True)
+    is_open = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Restaurant
         fields = (
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
-            'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
-            'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
+            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open',
+            'is_featured', 'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'branches'
         )
@@ -122,13 +123,14 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
     banner_image = AbsoluteImageField(required=False, allow_null=True)
     categories = serializers.SerializerMethodField()
     branches = BranchSerializer(many=True, read_only=True)
+    is_open = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Restaurant
         fields = (
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
-            'description', 'address', 'city', 'phone', 'is_active', 'is_featured',
-            'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
+            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open',
+            'is_featured', 'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'branches', 'categories'
         )

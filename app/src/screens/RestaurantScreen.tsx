@@ -38,6 +38,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Restaurant'
 
 const isRestaurantOpen = (restaurant: any): boolean => {
   try {
+    if (restaurant.is_force_closed === true) return false;
+
     if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
       const hasActiveBranch = restaurant.branches.some((b: any) => b.is_active !== false);
       if (!hasActiveBranch) return false;

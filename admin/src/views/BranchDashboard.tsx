@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAdmin } from '../AdminContext';
+import { useAdmin, computeStoreOpenStatus } from '../AdminContext';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
 
 import { 
@@ -350,7 +350,16 @@ export const BranchDashboard: React.FC = () => {
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                 : 'bg-rose-500/20 text-rose-300 border-rose-500/30 shadow-md'
             }`}>
-              {(currentBranch ? currentBranch.is_active !== false : restaurant.is_active) ? 'Accepting Orders' : 'Offline (Closed)'}
+              {(currentBranch ? currentBranch.is_active !== false : restaurant.is_active) ? 'Branch Active' : 'Branch Offline'}
+            </span>
+            <span className={`px-2.5 py-1.5 rounded-full text-xs font-extrabold border uppercase tracking-wider ${
+              computeStoreOpenStatus(restaurant)
+                ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+            }`}>
+              {restaurant.is_force_closed
+                ? 'Store: Force Closed'
+                : (computeStoreOpenStatus(restaurant) ? 'Store: Open Now' : 'Store: Closed')}
             </span>
           </div>
         </div>

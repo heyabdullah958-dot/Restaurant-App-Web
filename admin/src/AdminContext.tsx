@@ -62,7 +62,7 @@ interface AdminContextProps {
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
   removeRestaurantBanner: (id: number) => Promise<void>;
-  updateRestaurantDetails: (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => Promise<void>;
+  updateRestaurantDetails: (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean; is_force_closed?: boolean }) => Promise<void>;
   updateBranchDetails: (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }) => Promise<void>;
   updateUser: (fields: Partial<User>) => void;
 
@@ -70,8 +70,24 @@ interface AdminContextProps {
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
 
+export function computeStoreOpenStatus(restaurant: Restaurant): boolean {
+  if (restaurant.is_force_closed || restaurant.is_active === false) {
+    return false;
+  }
+  if (!restaurant.branches || restaurant.branches.length === 0) {
+    return true;
+  }
+  return restaurant.branches.some(b => b.is_active !== false);
+}
+
 /** Convert API restaurant shape → internal Restaurant shape */
 function mapApiRestaurant(r: ApiRestaurant): Restaurant {
+  const isForceClosed = r.is_force_closed ?? false;
+  const branches = r.branches || [];
+  const computedIsOpen = r.is_open !== undefined
+    ? r.is_open
+    : (!isForceClosed && r.is_active && (branches.length > 0 ? branches.some(b => b.is_active) : true));
+
   return {
     id: r.id,
     name: r.name,
@@ -80,6 +96,8 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     description: r.description,
     city: r.city,
     is_active: r.is_active,
+    is_force_closed: isForceClosed,
+    is_open: computedIsOpen,
     is_featured: r.is_featured,
     rating: typeof r.rating === 'string' ? parseFloat(r.rating) : r.rating,
     delivery_fee: typeof r.delivery_fee === 'string' ? parseFloat(r.delivery_fee) : r.delivery_fee,
@@ -93,7 +111,7 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     closes_at: r.closes_at,
     phone: r.phone,
     address: r.address || r.city,
-    branches: r.branches || [],
+    branches: branches,
   };
 }
 
@@ -1060,22 +1078,28 @@ function extractArray<T = any>(data: any): T[] {
     }
   };
 
-  const updateRestaurantDetails = async (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => {
+  const updateRestaurantDetails = async (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean; is_force_closed?: boolean }) => {
     setLoading(true);
     try {
       const updated = await updateRestaurant(id, data);
       const mapped = mapApiRestaurant(updated);
       setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...mapped, ...data } : r))
+        prev.map((r) => (r.id === id ? { ...r, ...mapped, ...data, is_open: computeStoreOpenStatus({ ...r, ...mapped, ...data }) } : r))
       );
-      showToast('Branch settings updated successfully! ⚙️', 'success');
+      showToast('Brand settings updated successfully! ⚙️', 'success');
     } catch (err: any) {
       console.error('[updateRestaurantDetails]', err);
-      // Fallback: update local state directly so UI state changes immediately even if server permissions differ
+      // Fallback: update local state directly so UI state changes immediately
       setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, ...data } : r))
+        prev.map((r) => {
+          if (r.id === id) {
+            const nextR = { ...r, ...data };
+            return { ...nextR, is_open: computeStoreOpenStatus(nextR) };
+          }
+          return r;
+        })
       );
-      showToast('Branch status updated locally! ⚙️', 'info');
+      showToast('Brand status updated locally! ⚙️', 'info');
     } finally {
       setLoading(false);
     }
@@ -1090,6 +1114,19 @@ function extractArray<T = any>(data: any): T[] {
       console.error('[updateBranchDetails]', err);
       showToast('Branch settings updated locally! ⚙️', 'info');
     } finally {
+      // Update local restaurant branch state & recompute store status
+      setRestaurants((prev) =>
+        prev.map((r) => {
+          if (r.branches && r.branches.some((b) => b.id === branchId)) {
+            const updatedBranches = r.branches.map((b) =>
+              b.id === branchId ? { ...b, ...data } : b
+            );
+            const nextR = { ...r, branches: updatedBranches };
+            return { ...nextR, is_open: computeStoreOpenStatus(nextR) };
+          }
+          return r;
+        })
+      );
       setLoading(false);
     }
   };

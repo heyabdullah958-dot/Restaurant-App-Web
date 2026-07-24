@@ -1,0 +1,18 @@
+VALID: admin -> admin123
+INVALID (No working password found): manager_seenbanao
+INVALID (No working password found): manager_dineatblue
+INVALID (No working password found): manager_jushhpk
+VALID: manager_jushhpk_johar_town -> admin123
+VALID: manager_jushhpk_dha_phase_1 -> Branch@Jushhp2025!
+VALID: manager_jushhpk_lake_city -> Branch@Jushhp2025!
+VALID: manager_jushhpk_gulberg -> admin123
+VALID: manager_jushhpk_dha -> admin123
+VALID: manager_jushhpk_saddar -> admin123
+INVALID (No working password found): manager_tandooristoppk
+VALID: manager_tandooristoppk_johar_town -> admin123
+VALID: manager_tandooristoppk_lake_city -> admin123
+VALID: manager_tandooristoppk_gt_road_baghbanpura -> admin123
+INVALID (No working password found): manager_sandmelts
+INVALID (No working password found): manager_birdmanfoodspk
+INVALID (No working password found): manager_getafomo
+VALID: manager_getafomo_gulberg_iii -> Branch@Getafo2025!
