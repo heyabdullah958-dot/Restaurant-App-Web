@@ -15,6 +15,7 @@ import {
   Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { Ionicons } from '@expo/vector-icons';

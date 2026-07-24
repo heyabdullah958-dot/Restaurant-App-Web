@@ -169,16 +169,19 @@ function mergeAllRestaurants(apiMapped: Restaurant[], currentState: Restaurant[]
     }
   });
 
-  // Finally overlay fresh API data (always wins for address / name / etc.)
+  // Finally overlay fresh API data (always wins for branches / address / name / store status)
   apiMapped.forEach((r) => {
     const existing = baseMap.get(r.id);
     if (existing) {
-      baseMap.set(r.id, {
+      const mergedBranches = (r.branches && r.branches.length > 0) ? r.branches : existing.branches;
+      const nextR: Restaurant = {
         ...existing,
         ...r,
-        // Prefer the live DB address; only fall back if truly absent
+        branches: mergedBranches,
         address: r.address || existing.address || r.city || existing.city,
-      });
+      };
+      nextR.is_open = computeStoreOpenStatus(nextR);
+      baseMap.set(r.id, nextR);
     } else {
       baseMap.set(r.id, r);
     }
@@ -428,10 +431,11 @@ function extractArray<T = any>(data: any): T[] {
       const rawOrders = extractArray<ApiOrder>(orderData);
 
       const mapped = rawRests.map(mapApiRestaurant);
-      // Pass current restaurant state so manager-toggled is_active is preserved
-      // even when the API omits inactive restaurants from its response.
-      const finalRestaurants = mergeAllRestaurants(mapped, restaurants);
-      setRestaurants(finalRestaurants);
+      let finalRestaurants: Restaurant[] = [];
+      setRestaurants((prev) => {
+        finalRestaurants = mergeAllRestaurants(mapped, prev);
+        return finalRestaurants;
+      });
 
       const apiOrders = rawOrders.map(mapApiOrder);
       if (apiOrders.length > 0) {
@@ -1135,15 +1139,15 @@ function extractArray<T = any>(data: any): T[] {
 
   // 5-second quiet background polling loop for live real-time sync across admin panel
   useEffect(() => {
-    if (!user) return;
-
     const interval = setInterval(() => {
-      loadAppData(false);
-      refreshOrders();
+      if (getToken()) {
+        loadAppData(false);
+        refreshOrders();
+      }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, []);
 
   return (
     <AdminContext.Provider
