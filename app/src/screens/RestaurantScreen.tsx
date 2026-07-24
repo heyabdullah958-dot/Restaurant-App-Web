@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
+  RefreshControl,
 } from 'react-native';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, useFocusEffect, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,14 +74,35 @@ export default function RestaurantScreen() {
     setAlertConfig({ visible: true, title, message, actions });
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
-  // Load details on mount or slug change
+  // Re-fetch when screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchRestaurantDetail(slug));
+    }, [dispatch, slug])
+  );
+
+  // Auto-poll menu details every 10 seconds while on screen
   useEffect(() => {
     dispatch(fetchRestaurantDetail(slug));
+    const intervalId = setInterval(() => {
+      dispatch(fetchRestaurantDetail(slug));
+    }, 10000);
+
     return () => {
+      clearInterval(intervalId);
       dispatch(clearCurrentRestaurant());
     };
+  }, [dispatch, slug]);
+
+  // Pull-to-Refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await dispatch(fetchRestaurantDetail(slug));
+    setRefreshing(false);
   }, [dispatch, slug]);
 
   // Determine active restaurant data from Redux with fallback to local mock data
@@ -283,6 +305,14 @@ export default function RestaurantScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
         stickyHeaderIndices={[1]}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
       >
         <View>
           {/* Cover Image & Header Controls */}

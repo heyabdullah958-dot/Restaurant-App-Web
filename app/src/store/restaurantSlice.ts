@@ -83,7 +83,9 @@ const restaurantSlice = createSlice({
       })
       // Fetch Restaurant Detail
       .addCase(fetchRestaurantDetail.pending, (state) => {
-        state.loading = true;
+        if (!state.currentRestaurant) {
+          state.loading = true;
+        }
         state.error = null;
       })
       .addCase(fetchRestaurantDetail.fulfilled, (state, action) => {
