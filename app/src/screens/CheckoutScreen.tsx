@@ -390,8 +390,14 @@ export default function CheckoutScreen() {
         setIsSubmitting(false);
       } else {
         setIsSubmitting(false);
-        const errMsg = resultAction.payload || 'Failed to place order';
-        showAlert('Checkout Error', String(errMsg));
+        const rawPayload = resultAction.payload;
+        let errMsg = 'Failed to place order';
+        if (typeof rawPayload === 'string') {
+          errMsg = rawPayload;
+        } else if (rawPayload && typeof rawPayload === 'object') {
+          errMsg = (rawPayload as any).message || (rawPayload as any).detail || JSON.stringify(rawPayload);
+        }
+        showAlert('Checkout Error', errMsg);
       }
     } catch (err: any) {
       setIsSubmitting(false);

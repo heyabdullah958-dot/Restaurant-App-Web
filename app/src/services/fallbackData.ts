@@ -73,14 +73,14 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 245,
     categories: [
       {
-        id: 327,
+        id: 1,
         name: "BBQ Specials",
         icon: "flame",
         order: 1,
         is_active: true,
         items: [
           {
-            id: 1278,
+            id: 21,
             name: "Beef Seekh Kebab",
             description: "Four skewered minced beef kebab infused with traditional herbs and cooked over open charcoal.",
             price: 650,
@@ -90,7 +90,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
             preparation_time: 20
           },
           {
-            id: 1279,
+            id: 23,
             name: "Chicken Boti (Plate)",
             description: "Tender boneless chicken chunks marinated in yogurt, lemon, and hot tandoori spices.",
             price: 580,
@@ -126,14 +126,14 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 188,
     categories: [
       {
-        id: 362,
+        id: 2,
         name: "Appetizers",
         icon: "restaurant",
         order: 1,
         is_active: true,
         items: [
           {
-            id: 1424,
+            id: 34,
             name: "Dynamite Shrimp",
             description: "Crispy batter-fried shrimp tossed in our signature creamy, spicy dynamite sauce.",
             price: 950,
@@ -169,36 +169,36 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 412,
     categories: [
       {
-        id: 337,
+        id: 3,
         name: "Appetizer",
         icon: "restaurant",
         order: 1,
         is_active: true,
         items: [
-          { id: 1314, name: "Chicken Doner Fries", description: "Crispy fries topped with sliced chicken doner and sauces", price: 600, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg", is_available: true, is_featured: true, preparation_time: 10 },
-          { id: 1315, name: "Beef Doner Fries", description: "Crispy fries topped with sliced beef doner and signature sauces", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 37, name: "Chicken Doner Fries", description: "Crispy fries topped with sliced chicken doner and sauces", price: 600, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 38, name: "Beef Doner Fries", description: "Crispy fries topped with sliced beef doner and signature sauces", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       },
       {
-        id: 338,
+        id: 4,
         name: "Turkish Specials",
         icon: "restaurant",
         order: 2,
         is_active: true,
         items: [
-          { id: 1316, name: "Chicken Grilled Sandwich", description: "Grilled chicken sandwich Turkish style", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg", is_available: true, is_featured: true, preparation_time: 12 },
-          { id: 1317, name: "Half Dubai Shawaya", description: "Traditional roasted chicken shawaya half portion", price: 1400, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 20 }
+          { id: 39, name: "Chicken Grilled Sandwich", description: "Grilled chicken sandwich Turkish style", price: 750, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg", is_available: true, is_featured: true, preparation_time: 12 },
+          { id: 41, name: "Half Dubai Shawaya", description: "Traditional roasted chicken shawaya half portion", price: 1400, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg", is_available: true, is_featured: false, preparation_time: 20 }
         ]
       },
       {
-        id: 339,
+        id: 5,
         name: "Shawarma",
         icon: "pizza",
         order: 3,
         is_active: true,
         items: [
-          { id: 1324, name: "Chicken Pouch Shawarma", description: "Pocket-style chicken shawarma pocket bread", price: 450, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
-          { id: 1325, name: "Beef Pouch Shawarma", description: "Pocket-style beef shawarma pocket bread", price: 700, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 48, name: "Chicken Pouch Shawarma", description: "Pocket-style chicken shawarma pocket bread", price: 450, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 },
+          { id: 49, name: "Beef Pouch Shawarma", description: "Pocket-style beef shawarma pocket bread", price: 700, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       }
     ]
@@ -226,36 +226,36 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 154,
     categories: [
       {
-        id: 343,
+        id: 6,
         name: "Tandoori Chicken",
         icon: "restaurant",
         order: 1,
         is_active: true,
         items: [
-          { id: 1345, name: "Tandoori Chicken Bone (Cheese Naan Single)", description: "Tandoori chicken (with bone) served with 1 cheese naan", price: 1150, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 15 },
-          { id: 1346, name: "Tandoori Chicken Boneless (Cheese Naan Single)", description: "Boneless tandoori chicken served with 1 cheese naan", price: 1350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 }
+          { id: 70, name: "Tandoori Chicken Bone (Cheese Naan Single)", description: "Tandoori chicken (with bone) served with 1 cheese naan", price: 1150, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 15 },
+          { id: 71, name: "Tandoori Chicken Boneless (Cheese Naan Single)", description: "Boneless tandoori chicken served with 1 cheese naan", price: 1350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 }
         ]
       },
       {
-        id: 344,
+        id: 7,
         name: "Chicken Sajji",
         icon: "restaurant",
         order: 2,
         is_active: true,
         items: [
-          { id: 1353, name: "Quarter Sajji", description: "Slow-roasted quarter chicken sajji", price: 799, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 20 },
-          { id: 1354, name: "Half Sajji", description: "Slow-roasted half chicken sajji", price: 1400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 }
+          { id: 78, name: "Quarter Sajji", description: "Slow-roasted quarter chicken sajji", price: 799, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 20 },
+          { id: 79, name: "Half Sajji", description: "Slow-roasted half chicken sajji", price: 1400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 }
         ]
       },
       {
-        id: 345,
+        id: 8,
         name: "Paratha Roll",
         icon: "pizza",
         order: 3,
         is_active: true,
         items: [
-          { id: 1359, name: "Full Stop Roll", description: "TandooriStopp signature giant roll", price: 650, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 10 },
-          { id: 1360, name: "Tandoori Chicken Roll", description: "Tandoori chicken chunks wrapped in paratha", price: 520, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 84, name: "Full Stop Roll", description: "TandooriStopp signature giant roll", price: 650, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 85, name: "Tandoori Chicken Roll", description: "Tandoori chicken chunks wrapped in paratha", price: 520, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       }
     ]
@@ -283,14 +283,14 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 99,
     categories: [
       {
-        id: 352,
+        id: 9,
         name: "Signature Melts",
         icon: "bread",
         order: 1,
         is_active: true,
         items: [
           {
-            id: 1391,
+            id: 129,
             name: "Chicken Black Pepper Sandwich",
             description: "Shredded chicken in black pepper sauce melted in toasted sourdough.",
             price: 790,
@@ -326,14 +326,14 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 215,
     categories: [
       {
-        id: 358,
+        id: 10,
         name: "Fried Chicken",
         icon: "pizza",
         order: 1,
         is_active: true,
         items: [
           {
-            id: 1415,
+            id: 153,
             name: "Crispy Fried Chicken (2pcs)",
             description: "Spicy double-dreaded crisp fried chicken parts served with garlic dip.",
             price: 720,
@@ -369,14 +369,14 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     total_reviews: 310,
     categories: [
       {
-        id: 359,
+        id: 11,
         name: "Specialty Coffee",
         icon: "cafe",
         order: 1,
         is_active: true,
         items: [
           {
-            id: 1418,
+            id: 156,
             name: "Espresso Double",
             description: "Double shot of premium espresso with sweetened condensed milk and silky microfoam.",
             price: 520,

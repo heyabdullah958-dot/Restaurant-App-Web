@@ -51,16 +51,36 @@ export const placeOrder = createAsyncThunk(
       const errorData = error.response?.data;
       let errMsg = 'Failed to place order';
       if (errorData) {
-        if (typeof errorData === 'string') {
+        const rawJson = JSON.stringify(errorData);
+        if (rawJson.includes('Invalid pk') || rawJson.includes('does not exist')) {
+          errMsg = 'Some items in your cart are no longer available in the menu. Please refresh your cart and select fresh items.';
+        } else if (typeof errorData === 'string') {
           errMsg = errorData;
         } else if (errorData.message) {
-          errMsg = errorData.message;
+          errMsg = String(errorData.message);
         } else if (errorData.detail) {
-          errMsg = errorData.detail;
+          errMsg = String(errorData.detail);
         } else if (typeof errorData === 'object') {
-          errMsg = Object.entries(errorData)
-            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
-            .join('\n');
+          const messages: string[] = [];
+          Object.entries(errorData).forEach(([key, val]) => {
+            if (typeof val === 'string') {
+              messages.push(`${key}: ${val}`);
+            } else if (Array.isArray(val)) {
+              val.forEach((item) => {
+                if (typeof item === 'string') {
+                  messages.push(`${key}: ${item}`);
+                } else if (typeof item === 'object' && item !== null) {
+                  Object.entries(item).forEach(([childKey, childVal]) => {
+                    const childStr = Array.isArray(childVal) ? childVal.join(', ') : String(childVal);
+                    messages.push(`${childKey}: ${childStr}`);
+                  });
+                }
+              });
+            } else if (typeof val === 'object' && val !== null) {
+              messages.push(`${key}: ${JSON.stringify(val)}`);
+            }
+          });
+          errMsg = messages.length > 0 ? messages.join('\n') : 'Failed to place order';
         }
       } else if (error.message && (error.message.includes('Network Error') || error.message.includes('timeout'))) {
         errMsg = 'Server is waking up or connection was slow. Please try placing your order again now.';
