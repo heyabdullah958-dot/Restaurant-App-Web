@@ -90,15 +90,15 @@ def test_manager_workflow():
                 menu_res = requests.get(f"{base_url}/api/restaurants/seenbanao/menu/")
                 if menu_res.status_code == 200:
                     categories = menu_res.json().get("data", [])
-                    found = False
+                    found_item = None
                     for cat in categories:
                         for item in cat.get("items", []):
                             if item["id"] == item_id:
-                                found = True
-                    if not found:
-                        print("SUCCESS: Item successfully hidden from public menu (instant sync confirmed).")
+                                found_item = item
+                    if found_item and found_item.get("is_available") == False:
+                        print("SUCCESS: Item returned in public menu with is_available=False (out-of-stock badge ready).")
                     else:
-                        print("ERROR: Item is still visible in public menu despite is_available=False!")
+                        print("ERROR: Item is_available flag did not sync properly!")
                         
                 print(f"Toggling menu item {item_id} availability back to True...")
                 patch_res2 = requests.patch(
