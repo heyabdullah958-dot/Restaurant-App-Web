@@ -212,6 +212,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loading, setLoading] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+/** Safe helper to extract an array from API responses whether plain array [...] or paginated { results: [...] } */
+function extractArray<T = any>(data: any): T[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.results)) return data.results;
+  return [];
+}
+
   // Restore session from localStorage on mount & listen to browser Back / Forward buttons
   useEffect(() => {
     localStorage.removeItem('foodsphere_admin_mock_user');
@@ -221,6 +229,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!payload || payload.exp * 1000 <= Date.now()) {
         logout();
       } else {
+        const isSuperAdmin = payload.is_superuser === true || payload.username === 'admin';
+        const loggedInUser: User = {
+          id: payload.user_id || 0,
+          username: payload.username || 'admin',
+          email: '',
+          role: isSuperAdmin ? 'super_admin' : 'branch_manager',
+          restaurantId: isSuperAdmin ? undefined : payload.restaurant_id,
+          branchId: isSuperAdmin ? undefined : payload.branch_id,
+        };
+        setUser(loggedInUser);
         loadAppData();
       }
     }
@@ -306,16 +324,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (orders.length === 0) setLoading(true);
     try {
       const [restaurantData, orderData] = await Promise.all([
-        fetchRestaurants().catch(() => ({ results: [], count: 0 })),
+        fetchRestaurants().catch(() => []),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
       ]);
-      const mapped = (restaurantData.results || [])
+      const rawRests = extractArray<ApiRestaurant>(restaurantData);
+      const rawOrders = extractArray<ApiOrder>(orderData);
+
+      const mapped = rawRests
         .map(mapApiRestaurant)
         .filter((r) => isLaunchBrandSlug(r.slug));
       const finalRestaurants = mapped.length > 0 ? mapped : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
       setRestaurants(finalRestaurants);
 
-      const apiOrders = (orderData.results || []).map(mapApiOrder);
+      const apiOrders = rawOrders.map(mapApiOrder);
       if (apiOrders.length > 0) {
         setOrders(apiOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
       }
@@ -433,25 +454,29 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       // 3. Fetch live data from Heroku API
       const [restaurantData, orderData] = await Promise.all([
-        fetchRestaurants().catch(() => ({ results: [], count: 0 })),
+        fetchRestaurants().catch(() => []),
         fetchAllOrders().catch(() => ({ results: [], count: 0 })),
       ]);
 
-      const mappedRestaurants = restaurantData.results.map(mapApiRestaurant);
-      setRestaurants(mappedRestaurants);
+      const rawRests = extractArray<ApiRestaurant>(restaurantData);
+      const rawOrders = extractArray<ApiOrder>(orderData);
+
+      const mappedRestaurants = rawRests.map(mapApiRestaurant);
+      const finalRestaurants = mappedRestaurants.length > 0 ? mappedRestaurants : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      setRestaurants(finalRestaurants);
       setOrders(
-        orderData.results.map(mapApiOrder)
+        rawOrders.map(mapApiOrder)
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       );
 
       const managerRestId = isSuperAdmin
         ? undefined
-        : resolveUserRestaurantId(targetUsername, payload?.restaurant_id, mappedRestaurants);
+        : resolveUserRestaurantId(targetUsername, payload?.restaurant_id, finalRestaurants);
 
-      if (mappedRestaurants.length > 0) {
+      if (finalRestaurants.length > 0) {
         const activeBrandId = isSuperAdmin
-          ? (Number(localStorage.getItem('foodsphere_admin_brand_id')) || mappedRestaurants[0].id)
-          : (managerRestId || mappedRestaurants[0].id);
+          ? (Number(localStorage.getItem('foodsphere_admin_brand_id')) || finalRestaurants[0].id)
+          : (managerRestId || finalRestaurants[0].id);
         setSelectedBrandId(activeBrandId);
         localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
       }
@@ -588,14 +613,28 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Toggle menu item availability
   const toggleMenuAvailability = async (restaurantId: number, categoryId: number, itemId: number) => {
-    let nextState = false;
+    // 1. Find current item availability reliably before async dispatch
+    const restaurantCategories = menuItems[restaurantId] || [];
+    let currentItem: any = null;
+
+    for (const cat of restaurantCategories) {
+      const found = (cat.items || []).find((it: any) => it.id === itemId);
+      if (found) {
+        currentItem = found;
+        break;
+      }
+    }
+
+    const currentAvailability = currentItem ? Boolean(currentItem.is_available) : false;
+    const nextState = !currentAvailability;
+
+    // 2. Optimistic UI update
     setMenuItems((prev) => {
-      const restaurantCategories = prev[restaurantId] || [];
-      const updatedCategories = restaurantCategories.map((category) => {
+      const categories = prev[restaurantId] || [];
+      const updatedCategories = categories.map((category) => {
         if (category.id === categoryId) {
           const updatedItems = category.items.map((item) => {
             if (item.id === itemId) {
-              nextState = !item.is_available;
               return { ...item, is_available: nextState };
             }
             return item;
@@ -607,15 +646,55 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return { ...prev, [restaurantId]: updatedCategories };
     });
 
+    // 3. Persist to Heroku API
     try {
-      await updateMenuItem(itemId, { is_available: nextState });
+      const response = await updateMenuItem(itemId, { is_available: nextState });
+      const serverAvailability = response?.is_available ?? response?.data?.is_available ?? nextState;
+
+      // Sync state with verified server value
+      setMenuItems((prev) => {
+        const categories = prev[restaurantId] || [];
+        const updatedCategories = categories.map((category) => {
+          if (category.id === categoryId) {
+            const updatedItems = category.items.map((item) => {
+              if (item.id === itemId) {
+                return { ...item, is_available: Boolean(serverAvailability) };
+              }
+              return item;
+            });
+            return { ...category, items: updatedItems };
+          }
+          return category;
+        });
+        return { ...prev, [restaurantId]: updatedCategories };
+      });
+
       showToast(
-        `Availability updated: ${nextState ? 'In Stock ✅' : 'Out of Stock ⚠️'}`,
-        nextState ? 'success' : 'info'
+        `Availability updated: ${serverAvailability ? 'In Stock ✅' : 'Out of Stock ⚠️'}`,
+        serverAvailability ? 'success' : 'info'
       );
     } catch (err: any) {
       console.warn('[toggleMenuAvailability] API sync failed:', err);
-      showToast(err.message || 'Failed to update availability on server', 'error');
+
+      // 4. Rollback optimistic update on error
+      setMenuItems((prev) => {
+        const categories = prev[restaurantId] || [];
+        const updatedCategories = categories.map((category) => {
+          if (category.id === categoryId) {
+            const updatedItems = category.items.map((item) => {
+              if (item.id === itemId) {
+                return { ...item, is_available: currentAvailability };
+              }
+              return item;
+            });
+            return { ...category, items: updatedItems };
+          }
+          return category;
+        });
+        return { ...prev, [restaurantId]: updatedCategories };
+      });
+
+      showToast(`Failed to update availability: ${err.message || err}`, 'error');
     }
   };
 
