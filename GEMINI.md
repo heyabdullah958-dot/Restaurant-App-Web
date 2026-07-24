@@ -187,4 +187,8 @@ FoodSphere/
 - Code must be clean, commented, and **handoff-ready** for client's future team
 - **Stock Availability Rules**: `MenuCategorySerializer` in DRF must **ALWAYS** return all menu items (including `is_available = False`). Out-of-stock items MUST remain visible in customer apps with an **"OUT OF STOCK"** badge and disabled button rather than being removed.
 - **Heroku Deployment Command**: Deploy backend updates using `git subtree push --prefix backend heroku main`.
+- **Branch Serializer Invariant**: `RestaurantSerializer` in DRF must **ALWAYS** include `branches = BranchSerializer(many=True, read_only=True)`. List endpoints (`/api/restaurants/`) MUST return nested branch arrays so managers and mobile apps receive branch location/phone/status data.
+- **Admin Dashboard Branch Binding**: In `AdminContext.tsx` and `BranchDashboard.tsx`, branch manager views MUST bind address, phone, and `is_active` status to `currentBranch` (resolved via `resolveUserBranchId`), NEVER to top-level `restaurant.address` / `restaurant.phone` fallbacks.
+- **Primary Admin Hosting (Vercel)**: Live at [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app). Deploy via CLI `npx vercel --token <TOKEN> --scope abdullah-47c1 --yes --prod` and alias `foodsphere-admin.vercel.app`.
+
 
