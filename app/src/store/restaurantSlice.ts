@@ -53,7 +53,9 @@ const restaurantSlice = createSlice({
     builder
       // Fetch Restaurants
       .addCase(fetchRestaurants.pending, (state) => {
-        state.loading = true;
+        if (!state.restaurants || state.restaurants.length === 0) {
+          state.loading = true;
+        }
         state.error = null;
       })
       .addCase(fetchRestaurants.fulfilled, (state, action) => {

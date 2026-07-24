@@ -322,7 +322,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         {/* APP-04 & APP-05: Loading / Empty / Content block */}
-        {loading ? (
+        {loading && filteredRestaurants.length === 0 ? (
           <View style={{ paddingHorizontal: 0 }}>
             {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
           </View>
