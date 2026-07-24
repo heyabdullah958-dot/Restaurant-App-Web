@@ -89,7 +89,7 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     opens_at: r.opens_at,
     closes_at: r.closes_at,
     phone: r.phone,
-    address: r.address,
+    address: r.address || r.city,
   };
 }
 
@@ -125,18 +125,37 @@ export const isSuperAdminUser = (username?: string | null, isSuperuserPayload?: 
   return isSuperuserPayload === true || uname === 'admin';
 };
 
-/** Ensures all 7 restaurant brands remain present in state even if public API excludes inactive ones */
-function mergeAllRestaurants(apiMapped: Restaurant[]): Restaurant[] {
+/**
+ * Ensures all 7 restaurant brands remain present in state even if the public API
+ * excludes inactive ones. Priority order for each field:
+ *   1. Fresh API data (highest confidence)
+ *   2. Last known local state (preserves manager toggles not yet reflected by API)
+ *   3. Static mock fallback (lowest — only used on very first load)
+ */
+function mergeAllRestaurants(apiMapped: Restaurant[], currentState: Restaurant[] = []): Restaurant[] {
+  // Seed from static mock so every brand has a baseline record
   const baseMap = new Map<number, Restaurant>();
   MOCK_RESTAURANTS.forEach((r) => baseMap.set(r.id, r));
 
+  // Layer live local state on top (preserves manager-toggled is_active)
+  currentState.forEach((r) => {
+    const existing = baseMap.get(r.id);
+    if (existing) {
+      baseMap.set(r.id, { ...existing, ...r });
+    } else {
+      baseMap.set(r.id, r);
+    }
+  });
+
+  // Finally overlay fresh API data (always wins for address / name / etc.)
   apiMapped.forEach((r) => {
     const existing = baseMap.get(r.id);
     if (existing) {
       baseMap.set(r.id, {
         ...existing,
         ...r,
-        address: r.address || existing.address || r.city,
+        // Prefer the live DB address; only fall back if truly absent
+        address: r.address || existing.address || r.city || existing.city,
       });
     } else {
       baseMap.set(r.id, r);
@@ -351,7 +370,9 @@ function extractArray<T = any>(data: any): T[] {
       const rawOrders = extractArray<ApiOrder>(orderData);
 
       const mapped = rawRests.map(mapApiRestaurant);
-      const finalRestaurants = mergeAllRestaurants(mapped);
+      // Pass current restaurant state so manager-toggled is_active is preserved
+      // even when the API omits inactive restaurants from its response.
+      const finalRestaurants = mergeAllRestaurants(mapped, restaurants);
       setRestaurants(finalRestaurants);
 
       const apiOrders = rawOrders.map(mapApiOrder);
@@ -480,7 +501,7 @@ function extractArray<T = any>(data: any): T[] {
       const rawOrders = extractArray<ApiOrder>(orderData);
 
       const mappedRestaurants = rawRests.map(mapApiRestaurant);
-      const finalRestaurants = mergeAllRestaurants(mappedRestaurants);
+      const finalRestaurants = mergeAllRestaurants(mappedRestaurants, restaurants);
       setRestaurants(finalRestaurants);
       setOrders(
         rawOrders.map(mapApiOrder)

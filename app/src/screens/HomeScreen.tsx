@@ -45,6 +45,34 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
 };
 
 
+/**
+ * Determines whether a brand is currently within its operating hours.
+ * Falls back to `true` (open) if the hours are missing or malformed,
+ * so customers can still browse. This intentionally IGNORES `is_active`
+ * (the branch accept-orders toggle) — that flag controls order acceptance
+ * for a specific branch, NOT the brand-level storefront status.
+ */
+const isBrandOpen = (brand: any): boolean => {
+  try {
+    const opensAt: string | undefined = brand.opens_at;
+    const closesAt: string | undefined = brand.closes_at;
+    if (!opensAt || !closesAt) return true; // No hours set → assume open
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const [openH, openM] = opensAt.split(':').map(Number);
+    const [closeH, closeM] = closesAt.split(':').map(Number);
+    const openMins = openH * 60 + openM;
+    const closeMins = closeH * 60 + closeM;
+    // Handle overnight ranges (e.g. 22:00 – 02:00)
+    if (closeMins < openMins) {
+      return nowMins >= openMins || nowMins <= closeMins;
+    }
+    return nowMins >= openMins && nowMins <= closeMins;
+  } catch {
+    return true; // Safe default — don't punish brands with bad data
+  }
+};
+
 // Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
@@ -355,9 +383,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                     <Text style={{ fontSize: 40, position: 'absolute', zIndex: 2 }}>{styleData.emoji}</Text>
                   )}
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, zIndex: 10 }}>
-                    {brand.is_active === false && (
+                    {!isBrandOpen(brand) && (
                       <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>OFFLINE (CLOSED)</Text>
+                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>CLOSED</Text>
                       </View>
                     )}
                     <View style={styles.ratingBadge}>
