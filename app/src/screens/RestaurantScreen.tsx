@@ -21,7 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
-import { fetchRestaurantDetail, clearCurrentRestaurant } from '../store/restaurantSlice';
+import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from '../store/restaurantSlice';
 import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
@@ -85,14 +85,17 @@ export default function RestaurantScreen() {
   useFocusEffect(
     useCallback(() => {
       dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurants() as any);
     }, [dispatch, slug])
   );
 
-  // Auto-poll menu details every 10 seconds while on screen
+  // Auto-poll menu & branch details every 10 seconds while on screen
   useEffect(() => {
     dispatch(fetchRestaurantDetail(slug));
+    dispatch(fetchRestaurants() as any);
     const intervalId = setInterval(() => {
       dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurants() as any);
     }, 10000);
 
     return () => {

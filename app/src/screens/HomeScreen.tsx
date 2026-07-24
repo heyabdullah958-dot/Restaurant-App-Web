@@ -128,8 +128,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Auto-location detection removed as requested
-    }, [currentAddress])
+      // Re-fetch live restaurant and branch statuses on focus
+      dispatch(fetchRestaurants() as any);
+
+      // 10-second quiet background polling loop while viewing Home Screen
+      const interval = setInterval(() => {
+        dispatch(fetchRestaurants() as any);
+      }, 10000);
+
+      return () => clearInterval(interval);
+    }, [dispatch])
   );
 
   const handleAllowLocation = async () => {

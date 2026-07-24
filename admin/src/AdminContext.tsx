@@ -417,8 +417,8 @@ function extractArray<T = any>(data: any): T[] {
     return rest.branches[0]?.id;
   };
 
-  const loadAppData = async () => {
-    if (orders.length === 0) setLoading(true);
+  const loadAppData = async (showLoadingSpinner = true) => {
+    if (showLoadingSpinner && orders.length === 0) setLoading(true);
     try {
       const [restaurantData, orderData] = await Promise.all([
         fetchRestaurants().catch(() => []),
@@ -464,7 +464,7 @@ function extractArray<T = any>(data: any): T[] {
     } catch (err) {
       console.warn('[AdminContext] Failed to load app data from server:', err);
     } finally {
-      setLoading(false);
+      if (showLoadingSpinner) setLoading(false);
     }
   };
 
@@ -1102,6 +1102,7 @@ function extractArray<T = any>(data: any): T[] {
       showToast('Brand status updated locally! ⚙️', 'info');
     } finally {
       setLoading(false);
+      loadAppData(false);
     }
   };
 
@@ -1128,16 +1129,18 @@ function extractArray<T = any>(data: any): T[] {
         })
       );
       setLoading(false);
+      loadAppData(false);
     }
   };
 
-  // Polling for live orders (every 10 seconds)
+  // 5-second quiet background polling loop for live real-time sync across admin panel
   useEffect(() => {
     if (!user) return;
 
     const interval = setInterval(() => {
+      loadAppData(false);
       refreshOrders();
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [user]);

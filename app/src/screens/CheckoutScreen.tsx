@@ -15,8 +15,8 @@ import {
   Modal,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { fetchRestaurants } from '../store/restaurantSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
@@ -148,87 +148,93 @@ export default function CheckoutScreen() {
     return restaurants.find((r) => r.id === restaurantId);
   }, [restaurantId, restaurants]);
 
-  // Load branches for selected restaurant
-  React.useEffect(() => {
-    const slugKey = restaurant?.slug || String(restaurantId || 'tandooristoppk');
-    const fallbackMap: Record<string, any[]> = {
-      tandooristoppk: [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
-      ],
-      jushhpk: [
-        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
-        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
-        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
-      ],
-      getafomo: [
-        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
-      ],
-      '4': [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
-      ],
-      '3': [
-        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
-        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
-        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
-      ],
-      '7': [
-        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
-      ],
-      '73': [
-        { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
-        { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
-        { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
-      ],
-      '72': [
-        { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
-        { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
-        { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
-      ],
-      '76': [
-        { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
-      ],
-    };
+  // Load branches for selected restaurant on focus & poll every 10s
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(fetchRestaurants() as any);
 
-    const initialBranches = (restaurant?.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0)
-      ? restaurant.branches
-      : (fallbackMap[slugKey] || fallbackMap['tandooristoppk']);
+      const slugKey = restaurant?.slug || String(restaurantId || 'tandooristoppk');
+      const fallbackMap: Record<string, any[]> = {
+        tandooristoppk: [
+          { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+          { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+          { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
+        ],
+        jushhpk: [
+          { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+          { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+          { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
+        ],
+        getafomo: [
+          { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
+        ],
+        '4': [
+          { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+          { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+          { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
+        ],
+        '3': [
+          { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+          { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+          { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
+        ],
+        '7': [
+          { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
+        ],
+        '73': [
+          { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
+          { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall, Raiwind Road, Lahore', phone: '0324-4441735' },
+          { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura, Lahore', phone: '0326-6811177' },
+        ],
+        '72': [
+          { id: 4, name: 'DHA Phase 1', address: 'F9JW+R3G, Sector H Dha Phase 1, Lahore', phone: '03257217221' },
+          { id: 5, name: 'Johar Town', address: 'Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore', phone: '03269946142' },
+          { id: 6, name: 'Lake City', address: 'C 4-6 plaza Number, business bay, M1, Block M 1 Lake City, Lahore', phone: '03244441735' },
+        ],
+        '76': [
+          { id: 7, name: 'Gulberg III', address: '65, Block D1 Gulberg III, Lahore', phone: '03212784841' },
+        ],
+      };
 
-    setBranches(initialBranches);
-    if (Array.isArray(initialBranches) && initialBranches.length > 0) {
-      const firstActive = initialBranches.find((b: any) => b.is_active !== false);
-      setSelectedBranchId(firstActive ? firstActive.id : null);
-    }
+      const initialBranches = (restaurant?.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0)
+        ? restaurant.branches
+        : (fallbackMap[slugKey] || fallbackMap['tandooristoppk']);
 
-    const targetSlug = restaurant?.slug;
-    const targetUrl = targetSlug 
-      ? `/branches/?restaurant_slug=${targetSlug}` 
-      : (restaurantId ? `/branches/?restaurant_id=${restaurantId}` : '/branches/');
+      setBranches((prev) => (prev.length > 0 ? prev : initialBranches));
 
-    api.get(targetUrl)
-      .then((res: any) => {
-        let list = res?.data?.data || res?.data || [];
-        if (typeof list === 'object' && !Array.isArray(list) && 'results' in list) {
-          list = list.results;
-        }
-        if (Array.isArray(list) && list.length > 0) {
-          setBranches(list);
-          setSelectedBranchId((prev) => {
-            const activePrev = list.find((b: any) => b.id === prev && b.is_active !== false);
-            if (activePrev) return prev;
-            const firstActive = list.find((b: any) => b.is_active !== false);
-            return firstActive ? firstActive.id : null;
+      const fetchLiveBranches = () => {
+        const targetSlug = restaurant?.slug;
+        const targetUrl = targetSlug 
+          ? `/branches/?restaurant_slug=${targetSlug}` 
+          : (restaurantId ? `/branches/?restaurant_id=${restaurantId}` : '/branches/');
+
+        api.get(targetUrl)
+          .then((res: any) => {
+            let list = res?.data?.data || res?.data || [];
+            if (typeof list === 'object' && !Array.isArray(list) && 'results' in list) {
+              list = list.results;
+            }
+            if (Array.isArray(list) && list.length > 0) {
+              setBranches(list);
+              setSelectedBranchId((prev) => {
+                const activePrev = list.find((b: any) => b.id === prev && b.is_active !== false);
+                if (activePrev) return prev;
+                const firstActive = list.find((b: any) => b.is_active !== false);
+                return firstActive ? firstActive.id : null;
+              });
+            }
+          })
+          .catch((e) => {
+            console.warn('Failed to fetch live branches:', e);
           });
-        }
-      })
+      };
 
-      .catch((e) => {
-        console.warn('Failed to fetch live branches, using default branches:', e);
-      });
-  }, [restaurant, restaurantId]);
+      fetchLiveBranches();
+      const interval = setInterval(fetchLiveBranches, 10000);
+
+      return () => clearInterval(interval);
+    }, [dispatch, restaurant, restaurantId])
+  );
 
   const areAllBranchesClosed = useMemo(() => {
     return branches.length > 0 && branches.every((b: any) => b.is_active === false);
