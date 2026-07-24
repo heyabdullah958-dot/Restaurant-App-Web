@@ -69,6 +69,7 @@ const getFallbackFoodImage = (itemName: string, categoryName: string): string =>
 export const MenuManagement: React.FC = () => {
 
   const {
+    user,
     selectedBrandId,
     restaurants,
     menuItems,
@@ -87,7 +88,9 @@ export const MenuManagement: React.FC = () => {
   const [editingItem, setEditingItem] = useState<{ categoryId: number; categoryName: string; item: MenuItem | null } | null>(null);
 
   // Retrieve current restaurant
-  const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+  const isSuper = user?.role === 'super_admin';
+  const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
+  const restaurant = restaurants.find((r) => r.id === managerRestId) || restaurants.find((r) => user?.username?.toLowerCase().includes(r.slug)) || restaurants[0];
   
   if (!restaurant) {
     return (

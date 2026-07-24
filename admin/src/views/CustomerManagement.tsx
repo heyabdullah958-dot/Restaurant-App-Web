@@ -27,8 +27,9 @@ export const CustomerManagement: React.FC = () => {
     setError(null);
     try {
       const data = await fetchCustomers(q);
-      setCustomers(data.results);
-      setTotalCount(data.count);
+      const rawList = Array.isArray(data) ? data : (data?.results || []);
+      setCustomers(rawList);
+      setTotalCount(Array.isArray(data) ? data.length : (data?.count || rawList.length));
     } catch (err: any) {
       setError(err.message || 'Failed to load customers');
       showToast('Failed to load customers from API', 'error');

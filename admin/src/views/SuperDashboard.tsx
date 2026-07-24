@@ -154,18 +154,23 @@ export const SuperDashboard: React.FC = () => {
         {/* Timeframe Selector */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Timeframe:</span>
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-            {(['all', 'today', 'week', 'month'] as const).map((t) => (
+          <div className="inline-flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner max-w-full overflow-x-auto">
+            {[
+              { id: 'today', label: 'Today' },
+              { id: 'week', label: 'Weekly' },
+              { id: 'month', label: 'Monthly' },
+              { id: 'all', label: 'All-Time' }
+            ].map((tf) => (
               <button
-                key={t}
-                onClick={() => setTimeframe(t)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${
-                  timeframe === t
-                    ? 'bg-slate-700 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                key={tf.id}
+                onClick={() => setTimeframe(tf.id as any)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all uppercase tracking-wider whitespace-nowrap ${
+                  timeframe === tf.id
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`}
               >
-                {t === 'all' ? 'All-Time' : t}
+                {tf.label}
               </button>
             ))}
           </div>
@@ -264,7 +269,7 @@ export const SuperDashboard: React.FC = () => {
                             : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                         }`}
                       >
-                        {restaurant.is_active ? 'Active' : 'Disabled'}
+                        {restaurant.is_active ? 'Accepting Orders' : 'Offline (Closed)'}
                       </span>
                     </td>
                     <td className="py-4.5 px-6 text-right font-bold text-white">

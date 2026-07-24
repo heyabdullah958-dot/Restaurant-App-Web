@@ -32,7 +32,9 @@ export const BranchDashboard: React.FC = () => {
   const [isSavingDetails, setIsSavingDetails] = useState(false);
   const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month' | 'all'>('today');
 
-  const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+  const isSuper = user?.role === 'super_admin';
+  const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
+  const restaurant = restaurants.find((r) => r.id === managerRestId) || restaurants.find((r) => user?.username?.toLowerCase().includes(r.slug)) || restaurants[0];
   
   if (!restaurant) {
     return (
@@ -44,6 +46,15 @@ export const BranchDashboard: React.FC = () => {
       </div>
     );
   }
+
+  // Automatically sync modal input fields with live restaurant data
+  React.useEffect(() => {
+    if (restaurant && showEditModal) {
+      setEditPhone(restaurant.phone || '');
+      setEditCity(restaurant.address || restaurant.city || '');
+      setEditIsActive(restaurant.is_active);
+    }
+  }, [restaurant, showEditModal]);
 
   const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
 
@@ -284,7 +295,7 @@ export const BranchDashboard: React.FC = () => {
               )}
               <p className="text-sm text-slate-300 font-semibold mt-1">{restaurant.cuisine_type}</p>
               <div className="flex gap-4 text-xs text-slate-400 mt-2 font-medium">
-                <span className="flex items-center gap-1"><MapPin size={12} /> {restaurant.city}</span>
+                <span className="flex items-center gap-1"><MapPin size={12} /> {restaurant.address || restaurant.city}</span>
                 <span className="flex items-center gap-1"><Phone size={12} /> {restaurant.phone}</span>
               </div>
             </div>
@@ -303,7 +314,7 @@ export const BranchDashboard: React.FC = () => {
               type="button"
               onClick={() => {
                 setEditPhone(restaurant.phone || '');
-                setEditCity(restaurant.city || '');
+                setEditCity(restaurant.address || restaurant.city || '');
                 setEditIsActive(restaurant.is_active);
                 setShowEditModal(true);
               }}
@@ -315,26 +326,26 @@ export const BranchDashboard: React.FC = () => {
             <span className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
               restaurant.is_active
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                : 'bg-rose-500/20 text-rose-300 border-rose-500/30 shadow-md'
             }`}>
-              {restaurant.is_active ? 'Accepting Orders' : 'Branch Suspended'}
+              {restaurant.is_active ? 'Accepting Orders' : 'Offline (Closed)'}
             </span>
           </div>
         </div>
       </div>
 
       {/* Timeframe Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-900 border border-zinc-205 dark:border-slate-800/80 p-4.5 rounded-2xl shadow-premium gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800/80 p-4 rounded-2xl shadow-sm gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="text-xs font-black text-zinc-700 dark:text-slate-200 uppercase tracking-wider">
             Sales Performance Timeframe
           </div>
-          <span className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             Auto-Sync Active (15s)
           </span>
         </div>
-        <div className="flex bg-zinc-100 dark:bg-slate-950 p-1 rounded-xl border border-zinc-200/30 dark:border-slate-800">
+        <div className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-slate-950 p-1 rounded-xl border border-zinc-200 dark:border-slate-800 shadow-inner max-w-full overflow-x-auto">
           {[
             { id: 'today', label: 'Today' },
             { id: 'week', label: 'Weekly' },
@@ -344,10 +355,10 @@ export const BranchDashboard: React.FC = () => {
             <button
               key={tf.id}
               onClick={() => setTimeframe(tf.id as any)}
-              className={`px-4.5 py-2 rounded-lg text-[10px] font-black transition-all uppercase tracking-wider ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all uppercase tracking-wider whitespace-nowrap ${
                 timeframe === tf.id
-                  ? `bg-white dark:bg-slate-800 text-zinc-900 dark:text-white shadow-sm border border-zinc-200/40 dark:border-slate-700/60`
-                  : 'text-zinc-500 hover:text-zinc-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black'
+                  : 'text-zinc-600 dark:text-slate-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-slate-800/60'
               }`}
             >
               {tf.label}
@@ -568,6 +579,7 @@ export const BranchDashboard: React.FC = () => {
                   await updateRestaurantDetails(restaurant.id, {
                     phone: editPhone,
                     city: editCity,
+                    address: editCity,
                     is_active: editIsActive,
                   });
                   setIsSavingDetails(false);

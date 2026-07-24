@@ -46,6 +46,7 @@ export interface Restaurant {
   cover_url?: string;
   banner_url?: string;
   phone?: string;
+  address?: string;
 }
 
 export type OrderStatus = 'pending' | 'received' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';

@@ -106,18 +106,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      const checkLocation = async () => {
-        let { status } = await Location.getForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          // Only show prompt if we don't have an address yet
-          if (!currentAddress) {
-            setShowLocationPrompt(true);
-          }
-        } else {
-          fetchCurrentLocation();
-        }
-      };
-      checkLocation();
+      // Auto-location detection removed as requested
     }, [currentAddress])
   );
 
@@ -365,9 +354,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                   {!(brand.banner_image || brand.cover_image) && (
                     <Text style={{ fontSize: 40, position: 'absolute', zIndex: 2 }}>{styleData.emoji}</Text>
                   )}
-                  <View style={styles.ratingBadge}>
-                    <Ionicons name="star" size={14} color="#FFC107" />
-                    <Text style={styles.ratingText}>{Number(brand.rating).toFixed(1)}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, zIndex: 10 }}>
+                    {brand.is_active === false && (
+                      <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>OFFLINE (CLOSED)</Text>
+                      </View>
+                    )}
+                    <View style={styles.ratingBadge}>
+                      <Ionicons name="star" size={14} color="#FFC107" />
+                      <Text style={styles.ratingText}>{Number(brand.rating).toFixed(1)}</Text>
+                    </View>
                   </View>
                 </LinearGradient>
 

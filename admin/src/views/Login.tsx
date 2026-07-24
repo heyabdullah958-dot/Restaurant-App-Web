@@ -104,7 +104,7 @@ export const Login: React.FC = () => {
             <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
               <span className="block font-bold text-slate-300">Live Branch Manager (Johar Town / Tandoori Stop)</span>
               <span className="block mt-0.5">User: <code className="text-orange-400 font-bold bg-slate-800 px-1 py-0.5 rounded">manager_tandooristoppk_johar_town</code></span>
-              <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">tandooristoppk@2025</code></span>
+              <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">admin123</code></span>
             </div>
           </div>
         </div>

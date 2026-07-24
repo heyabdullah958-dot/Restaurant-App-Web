@@ -73,7 +73,6 @@ const restaurantSlice = createSlice({
           }
         }
         state.restaurants = Array.isArray(list) ? list.filter((r: any) => 
-          r.is_active !== false && 
           ['tandooristoppk', 'jushhpk', 'getafomo'].includes(r.slug)
         ) : [];
       })

@@ -15,11 +15,8 @@ class RestaurantListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        include_all = self.request.query_params.get('all', '').lower() == 'true'
-        if include_all or (self.request.user and self.request.user.is_authenticated and self.request.user.is_staff):
-            queryset = Restaurant.objects.all()
-        else:
-            queryset = Restaurant.objects.filter(is_active=True)
+        # Always return all restaurants so offline restaurants remain visible across UI with is_active=False status
+        queryset = Restaurant.objects.all()
 
         is_featured = self.request.query_params.get('featured')
         city = self.request.query_params.get('city')
@@ -40,7 +37,7 @@ class RestaurantDetailView(generics.RetrieveAPIView):
     GET /api/restaurants/{slug}/
     BUG-07 FIX: prefetch_related('categories__items') reduces N+1 to 3 queries max.
     """
-    queryset = Restaurant.objects.filter(is_active=True).prefetch_related(
+    queryset = Restaurant.objects.all().prefetch_related(
         'branches',
         'categories',
         'categories__items'
@@ -62,7 +59,7 @@ class RestaurantMenuView(generics.GenericAPIView):
             restaurant = Restaurant.objects.prefetch_related(
                 'categories',
                 'categories__items'
-            ).get(slug=slug, is_active=True)
+            ).get(slug=slug)
 
             # Use prefetched categories to avoid extra DB query
             all_cats = list(restaurant.categories.all())

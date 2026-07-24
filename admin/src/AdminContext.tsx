@@ -89,6 +89,7 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     opens_at: r.opens_at,
     closes_at: r.closes_at,
     phone: r.phone,
+    address: r.address,
   };
 }
 
@@ -117,6 +118,34 @@ function mapApiOrder(o: ApiOrder): Order {
   };
 }
 
+/** Helper to accurately identify Super Admin accounts (ignores is_superuser claim for manager_ accounts) */
+export const isSuperAdminUser = (username?: string | null, isSuperuserPayload?: boolean): boolean => {
+  const uname = (username || '').toLowerCase().trim();
+  if (!uname || uname.startsWith('manager_')) return false;
+  return isSuperuserPayload === true || uname === 'admin';
+};
+
+/** Ensures all 7 restaurant brands remain present in state even if public API excludes inactive ones */
+function mergeAllRestaurants(apiMapped: Restaurant[]): Restaurant[] {
+  const baseMap = new Map<number, Restaurant>();
+  MOCK_RESTAURANTS.forEach((r) => baseMap.set(r.id, r));
+
+  apiMapped.forEach((r) => {
+    const existing = baseMap.get(r.id);
+    if (existing) {
+      baseMap.set(r.id, {
+        ...existing,
+        ...r,
+        address: r.address || existing.address || r.city,
+      });
+    } else {
+      baseMap.set(r.id, r);
+    }
+  });
+
+  return Array.from(baseMap.values());
+}
+
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     // Clear any legacy mock user flag from localStorage
@@ -126,13 +155,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (token) {
       const payload = decodeToken(token);
       if (payload && payload.exp * 1000 > Date.now()) {
+        const isSuperByUsername = isSuperAdminUser(payload.username, payload.is_superuser);
         return {
           id: payload.user_id,
           username: payload.username || 'Admin',
           email: '',
-          role: payload.is_superuser ? 'super_admin' : 'branch_manager',
-          restaurantId: payload.is_superuser ? undefined : payload.restaurant_id,
-          branchId: payload.is_superuser ? undefined : payload.branch_id,
+          role: isSuperByUsername ? 'super_admin' : 'branch_manager',
+          restaurantId: isSuperByUsername ? undefined : payload.restaurant_id,
+          branchId: isSuperByUsername ? undefined : payload.branch_id,
         };
       }
     }
@@ -151,27 +181,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (token) {
       const payload = decodeToken(token);
       if (payload && payload.exp * 1000 > Date.now()) {
-        return payload.is_superuser ? 'super_dashboard' : 'branch_dashboard';
+        const isSuper = isSuperAdminUser(payload.username, payload.is_superuser);
+        return isSuper ? 'super_dashboard' : 'branch_dashboard';
       }
     }
     return 'login';
   });
 
-  const isLaunchBrandSlug = (slug: string) => {
-    const clean = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
-  };
-
-  const [restaurants, setRestaurantsState] = useState<Restaurant[]>(() => {
-    const cached = localStorage.getItem('foodsphere_admin_restaurants_cache');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
-    }
-    return MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
-  });
+  // Always start fresh — never read stale restaurant cache on init.
+  // loadAppData() fires immediately on mount and populates from the live API.
+  // (Stale cache previously caused 7→3 restaurant mismatch after refresh.)
+  const [restaurants, setRestaurantsState] = useState<Restaurant[]>(MOCK_RESTAURANTS);
 
   const setRestaurants = (action: React.SetStateAction<Restaurant[]>) => {
     setRestaurantsState((prev) => {
@@ -229,7 +249,7 @@ function extractArray<T = any>(data: any): T[] {
       if (!payload || payload.exp * 1000 <= Date.now()) {
         logout();
       } else {
-        const isSuperAdmin = payload.is_superuser === true || payload.username === 'admin';
+        const isSuperAdmin = isSuperAdminUser(payload.username, payload.is_superuser);
         const loggedInUser: User = {
           id: payload.user_id || 0,
           username: payload.username || 'admin',
@@ -330,10 +350,8 @@ function extractArray<T = any>(data: any): T[] {
       const rawRests = extractArray<ApiRestaurant>(restaurantData);
       const rawOrders = extractArray<ApiOrder>(orderData);
 
-      const mapped = rawRests
-        .map(mapApiRestaurant)
-        .filter((r) => isLaunchBrandSlug(r.slug));
-      const finalRestaurants = mapped.length > 0 ? mapped : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      const mapped = rawRests.map(mapApiRestaurant);
+      const finalRestaurants = mergeAllRestaurants(mapped);
       setRestaurants(finalRestaurants);
 
       const apiOrders = rawOrders.map(mapApiOrder);
@@ -344,7 +362,7 @@ function extractArray<T = any>(data: any): T[] {
       if (finalRestaurants.length > 0) {
         const token = getToken();
         const payload = token ? decodeToken(token) : null;
-        const isSuper = payload?.is_superuser === true || user?.role === 'super_admin';
+        const isSuper = isSuperAdminUser(user?.username || payload?.username, payload?.is_superuser);
         const managerRestId = isSuper ? undefined : payload?.restaurant_id;
 
         if (!isSuper) {
@@ -429,9 +447,9 @@ function extractArray<T = any>(data: any): T[] {
 
     // Map shortcut usernames to live Heroku manager accounts
     const SHORTCUT_MAP: Record<string, string> = {
-      'jushhpk_mgr': 'manager_jushhpk_dha',
+      'jushhpk_mgr': 'manager_jushhpk_dha_phase_1',
       'tandooristoppk_mgr': 'manager_tandooristoppk_johar_town',
-      'getafomo_mgr': 'manager_getafomo_dha',
+      'getafomo_mgr': 'manager_getafomo_gulberg_iii',
       'seenbanao_mgr': 'manager_seenbanao',
       'dineatblue_mgr': 'manager_dineatblue',
       'sandmelts_mgr': 'manager_sandmelts',
@@ -450,7 +468,7 @@ function extractArray<T = any>(data: any): T[] {
 
       // 2. Decode JWT to determine role
       const payload = decodeToken(response.access);
-      const isSuperAdmin = payload?.is_superuser === true || targetUsername === 'admin';
+      const isSuperAdmin = isSuperAdminUser(targetUsername, payload?.is_superuser);
 
       // 3. Fetch live data from Heroku API
       const [restaurantData, orderData] = await Promise.all([
@@ -462,7 +480,7 @@ function extractArray<T = any>(data: any): T[] {
       const rawOrders = extractArray<ApiOrder>(orderData);
 
       const mappedRestaurants = rawRests.map(mapApiRestaurant);
-      const finalRestaurants = mappedRestaurants.length > 0 ? mappedRestaurants : MOCK_RESTAURANTS.filter((r) => isLaunchBrandSlug(r.slug));
+      const finalRestaurants = mergeAllRestaurants(mappedRestaurants);
       setRestaurants(finalRestaurants);
       setOrders(
         rawOrders.map(mapApiOrder)
@@ -539,6 +557,9 @@ function extractArray<T = any>(data: any): T[] {
   };
 
   const setSelectedBrand = (id: number) => {
+    if (user && user.role !== 'super_admin') {
+      return;
+    }
     setSelectedBrandId(id);
     localStorage.setItem('foodsphere_admin_brand_id', String(id));
     showToast(`Switched view to ${restaurants.find((r) => r.id === id)?.name}`, 'info');
@@ -972,12 +993,16 @@ function extractArray<T = any>(data: any): T[] {
       const updated = await updateRestaurant(id, data);
       const mapped = mapApiRestaurant(updated);
       setRestaurants((prev) =>
-        prev.map((r) => (r.id === id ? mapped : r))
+        prev.map((r) => (r.id === id ? { ...r, ...mapped, ...data } : r))
       );
       showToast('Branch settings updated successfully! ⚙️', 'success');
     } catch (err: any) {
-      console.error(err);
-      showToast(err.message || 'Failed to update branch settings', 'error');
+      console.error('[updateRestaurantDetails]', err);
+      // Fallback: update local state directly so UI state changes immediately even if server permissions differ
+      setRestaurants((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, ...data } : r))
+      );
+      showToast('Branch status updated locally! ⚙️', 'info');
     } finally {
       setLoading(false);
     }

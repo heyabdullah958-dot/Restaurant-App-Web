@@ -40,7 +40,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   if (!user) return null;
 
   const isSuper = user.role === 'super_admin';
-  const activeRestaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+  const managerRestId = isSuper ? selectedBrandId : (user.restaurantId || selectedBrandId);
+  const activeRestaurant = restaurants.find((r) => r.id === managerRestId) || restaurants.find((r) => user.username?.toLowerCase().includes(r.slug)) || restaurants[0];
 
   const getFocusBorderColor = () => {
     switch (activeRestaurant?.slug) {
@@ -207,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
               >
                 {restaurants.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.name} {r.is_active ? '' : '(Inactive)'}
+                    {r.name} {!r.is_active ? '(Offline)' : ''}
                   </option>
                 ))}
               </select>
@@ -324,17 +325,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setShowPassModal(true)}
-            className={`w-full flex items-center justify-center gap-2 py-2 px-4 mb-2 rounded-lg text-xs font-semibold border transition-all duration-200 ${
-              isSuper
-                ? 'border-slate-700 hover:bg-slate-800 hover:text-blue-400 hover:border-blue-500/30 text-slate-300'
-                : 'border-zinc-200 dark:border-slate-800 hover:bg-zinc-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 hover:border-zinc-300 dark:hover:border-slate-700 text-zinc-600 dark:text-slate-400'
-            }`}
-          >
-            <Lock size={14} />
-            Update Credentials
-          </button>
+          {/* Update Credentials — Super Admin only */}
+          {isSuper && (
+            <button
+              onClick={() => setShowPassModal(true)}
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-2 rounded-lg text-xs font-semibold border transition-all duration-200 border-slate-700 hover:bg-slate-800 hover:text-blue-400 hover:border-blue-500/30 text-slate-300"
+            >
+              <Lock size={14} />
+              Update Credentials
+            </button>
+          )}
           <button
             onClick={logout}
             className={`w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-xs font-semibold border transition-all duration-200 ${

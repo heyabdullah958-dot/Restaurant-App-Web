@@ -20,6 +20,8 @@ import { fetchRestaurants } from '../store/restaurantSlice';
 import { COLORS, SHADOWS, SPACING } from '../theme';
 import { Ionicons } from '@expo/vector-icons';
 import { FALLBACK_RESTAURANTS } from '../services/fallbackData';
+// Leaflet bundled locally — no CDN needed, works 100% offline on Android WebView
+import { LEAFLET_CSS, LEAFLET_JS } from '../assets/LeafletAssets';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -173,7 +175,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
   const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>('all');
-  const [activeTab, setActiveTab] = useState<'nearby' | 'all'>('nearby');
+
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState<boolean>(false);
 
@@ -228,8 +230,8 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         b.branchName.toLowerCase().includes(q) ||
         b.address.toLowerCase().includes(q);
       return matchesBrand && matchesQuery;
-    }).sort((a, b) => (activeTab === 'nearby' ? a.distanceKm - b.distanceKm : 0));
-  }, [processedBranches, selectedBrandFilter, searchQuery, activeTab]);
+    });
+  }, [processedBranches, selectedBrandFilter, searchQuery]);
 
   const selectedBranch = useMemo(() => {
     return processedBranches.find((b) => b.id === selectedBranchId) || null;
@@ -260,44 +262,47 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     });
   };
 
-  // HTML Leaflet Map Template with CartoDB tiles & robust WebView container styling
+  // HTML Leaflet Map Template — Leaflet is inlined (no CDN) so it works on Android
   const mapHtml = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
       <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+      <!-- Proper mobile viewport to prevent scaling issues on Android WebView -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+      
+      <!-- Leaflet CSS — inlined locally, no CDN request needed -->
+      <style>${LEAFLET_CSS}</style>
+      
       <style>
         * { box-sizing: border-box; }
         html, body {
-          margin: 0; padding: 0; width: 100vw; height: 100vh;
+          margin: 0; padding: 0; width: 100%; height: 100%;
           overflow: hidden; background: #EBF0F5;
           user-select: none; -webkit-user-select: none;
         }
         #map {
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          width: 100vw; height: 100vh;
+          width: 100%; height: 100%;
           z-index: 1; background: #EBF0F5;
         }
 
         /* Pulsing user location GPS dot */
         .user-gps-dot {
-          background: #FF5722;
+          background: #3B82F6;
           border: 3px solid #FFFFFF;
           border-radius: 50%;
-          box-shadow: 0 0 0 10px rgba(255, 87, 34, 0.3);
-          width: 16px;
-          height: 16px;
-          animation: pulse 1.8s infinite;
+          box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.3);
+          width: 18px;
+          height: 18px;
+          animation: pulse 2s infinite;
           box-sizing: border-box;
         }
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0px rgba(255, 87, 34, 0.4); }
-          70% { box-shadow: 0 0 0 14px rgba(255, 87, 34, 0); }
-          100% { box-shadow: 0 0 0 0px rgba(255, 87, 34, 0); }
+          0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.5); }
+          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+          100% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0); }
         }
 
         /* Custom restaurant pin */
@@ -318,27 +323,16 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           white-space: nowrap;
           transition: transform 0.2s ease;
         }
-        .mcd-pin-badge.brand-jushhpk {
-          border-color: #FF6B00;
-        }
-        .mcd-pin-badge.brand-getafomo {
-          border-color: #8E44AD;
-        }
-        .mcd-pin-badge.brand-tandooristoppk {
-          border-color: #E74C3C;
-        }
-        .mcd-pin-badge:active {
-          transform: scale(1.1);
-        }
-        .mcd-pin-emoji {
-          font-size: 16px;
-          line-height: 1;
-        }
-        .mcd-pin-title {
-          font-size: 12px;
-          font-weight: 800;
-          color: #0F172A;
-        }
+        .mcd-pin-badge.brand-jushhpk { border-color: #FF6B00; }
+        .mcd-pin-badge.brand-getafomo { border-color: #8E44AD; }
+        .mcd-pin-badge.brand-tandooristoppk { border-color: #E74C3C; }
+        .mcd-pin-badge.brand-sandmelts { border-color: #F59E0B; }
+        .mcd-pin-badge.brand-seenbanao { border-color: #10B981; }
+        .mcd-pin-badge.brand-dineatblue { border-color: #3B82F6; }
+        
+        .mcd-pin-badge:active { transform: scale(1.1); }
+        .mcd-pin-emoji { font-size: 16px; line-height: 1; }
+        .mcd-pin-title { font-size: 12px; font-weight: 800; color: #0F172A; }
 
         /* Popup Box Styling */
         .leaflet-popup-content-wrapper {
@@ -355,136 +349,176 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           padding: 14px;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .popup-header {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 4px;
-        }
-        .popup-brand {
-          font-size: 11px;
-          font-weight: 800;
-          color: #FF5722;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .popup-title {
-          font-size: 14px;
-          font-weight: 800;
-          color: #0F172A;
-          margin-bottom: 4px;
-        }
-        .popup-address {
-          font-size: 11px;
-          color: #64748B;
-          line-height: 1.3;
-          margin-bottom: 10px;
-        }
+        .popup-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .popup-brand { font-size: 11px; font-weight: 800; color: #FF5722; text-transform: uppercase; letter-spacing: 0.5px; }
+        .popup-title { font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 4px; }
+        .popup-address { font-size: 11px; color: #64748B; line-height: 1.3; margin-bottom: 10px; }
         .popup-btn {
-          display: block;
-          width: 100%;
-          background: #FF5722;
-          color: #FFFFFF;
-          font-weight: 800;
-          font-size: 12px;
-          text-align: center;
-          padding: 9px 0;
-          border-radius: 10px;
-          text-decoration: none;
-          border: none;
-          cursor: pointer;
+          display: block; width: 100%; background: #FF5722; color: #FFFFFF;
+          font-weight: 800; font-size: 12px; text-align: center;
+          padding: 9px 0; border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
         }
       </style>
     </head>
     <body>
       <div id="map"></div>
-      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+      
+      <!-- Leaflet JS — inlined locally, zero network dependency -->
+      <script>${LEAFLET_JS}</script>
+
       <script>
+        // Error handling bridge to React Native
+        window.onerror = function(message, source, lineno, colno, error) {
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+              action: 'LOG',
+              log: 'JS Error: ' + message + ' at line ' + lineno
+            }));
+          }
+          return true;
+        };
+
         var map;
         var markersMap = {};
+        var initAttempts = 0;
 
         function initMap() {
           if (window.mapInitialized) return;
           if (typeof L === 'undefined') {
-            setTimeout(initMap, 100);
+            initAttempts++;
+            if (initAttempts < 30) {
+              setTimeout(initMap, 300); // Retry every 300ms for up to 9 seconds
+            } else {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'LOG', log: 'Leaflet failed to load after 9s' }));
+              }
+            }
             return;
           }
           window.mapInitialized = true;
 
-          map = L.map('map', {
-            zoomControl: false,
-            attributionControl: false
-          }).setView([${userLat}, ${userLng}], 12);
+          try {
+            // CRITICAL: Ensure the map container has real pixel dimensions
+            var container = document.getElementById('map');
+            if (!container || container.offsetWidth === 0 || container.offsetHeight === 0) {
+              window.mapInitialized = false;
+              initAttempts++;
+              if (initAttempts < 30) {
+                setTimeout(initMap, 300);
+              }
+              return;
+            }
 
-          // CartoDB Voyager tiles (never blocks WebViews, crisp design)
-          var tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            maxZoom: 19
-          }).addTo(map);
+            map = L.map('map', {
+              zoomControl: false,
+              attributionControl: false,
+              fadeAnimation: false,
+              zoomAnimation: false
+            }).setView([${userLat}, ${userLng}], 12);
 
-          tileLayer.on('tileerror', function() {
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-          });
+            // CartoDB Voyager as PRIMARY — more reliable on Android WebViews than OSM direct
+            var primaryTileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+            var fallbackTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-          L.control.zoom({ position: 'bottomright' }).addTo(map);
+            var tileLayer = L.tileLayer(primaryTileUrl, {
+              subdomains: 'abcd',
+              maxZoom: 19,
+              crossOrigin: true
+            }).addTo(map);
 
-          // Force Leaflet map resize at multiple intervals
-          map.invalidateSize();
-          setTimeout(function() { map.invalidateSize(); }, 200);
-          setTimeout(function() { map.invalidateSize(); }, 600);
-          setTimeout(function() { map.invalidateSize(); }, 1200);
-
-          // User GPS dot
-          var userMarker = L.marker([${userLat}, ${userLng}], {
-            icon: L.divIcon({
-              className: 'user-gps-container',
-              html: '<div class="user-gps-dot"></div>',
-              iconSize: [16, 16],
-              iconAnchor: [8, 8]
-            })
-          }).addTo(map);
-
-          var branches = ${JSON.stringify(processedBranches)};
-          branches.forEach(function(b) {
-            var pinIcon = L.divIcon({
-              className: 'mcd-pin-container',
-              html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
-                      '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
-                      '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
-                    '</div>',
-              iconAnchor: [40, 20]
-            });
-
-            var marker = L.marker([b.lat, b.lng], { icon: pinIcon }).addTo(map);
-            markersMap[b.id] = marker;
-
-            var popupHtml = '<div class="popup-card">' +
-              '<div class="popup-header"><span class="popup-brand">' + b.brandName + '</span></div>' +
-              '<div class="popup-title">' + b.branchName + '</div>' +
-              '<div class="popup-address">' + b.address + '</div>' +
-              '<button class="popup-btn" onclick="onSelectBranch(\'' + b.id + '\', \'' + b.brandSlug + '\')">🛵 Order From Here</button>' +
-            '</div>';
-
-            marker.bindPopup(popupHtml, { closeButton: false, offset: L.point(0, -10) });
-
-            marker.on('click', function() {
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  action: 'SELECT_BRANCH',
-                  branchId: b.id
-                }));
+            var fallbackAdded = false;
+            tileLayer.on('tileerror', function() {
+              if (!fallbackAdded) {
+                fallbackAdded = true;
+                if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'LOG', log: 'CartoDB tiles failed, switching to OSM fallback' }));
+                }
+                L.tileLayer(fallbackTileUrl, { maxZoom: 19, crossOrigin: true }).addTo(map);
               }
             });
-          });
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // Force Leaflet map resize — staggered for Android WebView layout commit timing
+            function forceResize() {
+              if (map) {
+                map.invalidateSize({ pan: false });
+              }
+            }
+            setTimeout(forceResize, 100);
+            setTimeout(forceResize, 400);
+            setTimeout(forceResize, 900);
+            setTimeout(forceResize, 2000);
+            setTimeout(forceResize, 4000);
+
+            // Notify React Native that map is initialized
+            setTimeout(function() {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'MAP_READY' }));
+              }
+            }, 1000);
+
+            // User GPS dot
+            L.marker([${userLat}, ${userLng}], {
+              icon: L.divIcon({
+                className: 'user-gps-container',
+                html: '<div class="user-gps-dot"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+              })
+            }).addTo(map);
+
+            // Render branches
+            var branches = ${JSON.stringify(processedBranches)};
+            branches.forEach(function(b) {
+              var pinIcon = L.divIcon({
+                className: 'mcd-pin-container',
+                html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
+                        '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
+                        '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
+                      '</div>',
+                iconAnchor: [40, 20]
+              });
+
+              var marker = L.marker([b.lat, b.lng], { icon: pinIcon }).addTo(map);
+              markersMap[b.id] = marker;
+
+              var popupHtml = '<div class="popup-card">' +
+                '<div class="popup-header"><span class="popup-brand">' + b.brandName + '</span></div>' +
+                '<div class="popup-title">' + b.branchName + '</div>' +
+                '<div class="popup-address">' + b.address + '</div>' +
+                '<button class="popup-btn" onclick="onSelectBranch(\'' + b.id + '\', \'' + b.brandSlug + '\')">🛵 Order From Here</button>' +
+              '</div>';
+
+              marker.bindPopup(popupHtml, { closeButton: false, offset: L.point(0, -10) });
+
+              marker.on('click', function() {
+                if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    action: 'SELECT_BRANCH',
+                    branchId: b.id
+                  }));
+                }
+              });
+            });
+            
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'LOG', log: 'Map successfully initialized' }));
+            }
+          } catch (err) {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'LOG', log: 'InitMap Try/Catch Error: ' + err.message }));
+            }
+          }
         }
 
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initMap);
-        } else {
+        // Initialize immediately if ready, otherwise wait
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
           initMap();
+        } else {
+          document.addEventListener('DOMContentLoaded', initMap);
+          window.addEventListener('load', initMap);
         }
-        window.addEventListener('load', initMap);
 
         function onSelectBranch(branchId, brandSlug) {
           if (window.ReactNativeWebView) {
@@ -520,6 +554,15 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         setSelectedBranchId(data.branchId);
       } else if (data.action === 'ORDER_FROM_BRANCH' && data.brandSlug) {
         navigation.navigate('Restaurant', { slug: data.brandSlug });
+      } else if (data.action === 'LOG') {
+        console.log('[WebView Map LOG]', data.log);
+      } else if (data.action === 'MAP_READY') {
+        // Map initialized inside WebView — trigger one final resize from RN side
+        setTimeout(() => {
+          if (webViewRef.current) {
+            webViewRef.current.injectJavaScript('if(window.map){window.map.invalidateSize({pan:false});} true;');
+          }
+        }, 200);
       }
     } catch (e) {
       console.warn('Map WebView message parse error:', e);
@@ -532,15 +575,22 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: mapHtml, baseUrl: 'https://unpkg.com' }}
+        source={{ html: mapHtml }}
         mixedContentMode="always"
-        allowFileAccess={true}
-        allowUniversalAccessFromFileURLs={true}
-        allowFileAccessFromFileURLs={true}
         javaScriptEnabled={true}
         domStorageEnabled={true}
+        androidLayerType="software"
+        scalesPageToFit={false}
         style={styles.map}
         onMessage={handleMessage}
+        onLoad={() => {
+          // After WebView finishes loading, trigger map invalidation
+          setTimeout(() => {
+            if (webViewRef.current) {
+              webViewRef.current.injectJavaScript('if(window.map){window.map.invalidateSize({pan:false});} true;');
+            }
+          }, 800);
+        }}
         startInLoadingState={true}
         renderLoading={() => (
           <View style={[StyleSheet.absoluteFill, styles.centerLoader]}>
@@ -671,24 +721,6 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           style={styles.sheetHeader}
         >
           <View style={styles.sheetHandle} />
-          <View style={styles.tabBar}>
-            <TouchableOpacity
-              onPress={() => setActiveTab('nearby')}
-              style={[styles.tabBtn, activeTab === 'nearby' && styles.tabBtnActive]}
-            >
-              <Text style={[styles.tabText, activeTab === 'nearby' && styles.tabTextActive]}>
-                📍 Nearby Outlets ({filteredBranches.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setActiveTab('all')}
-              style={[styles.tabBtn, activeTab === 'all' && styles.tabBtnActive]}
-            >
-              <Text style={[styles.tabText, activeTab === 'all' && styles.tabTextActive]}>
-                📋 All Locations
-              </Text>
-            </TouchableOpacity>
-          </View>
         </TouchableOpacity>
 
         {/* Branch Cards List */}

@@ -16,12 +16,24 @@ import {
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
-  const { selectedBrandId, restaurants, orders, updateOrderStatus, refreshOrders, setSelectedBrand } = useAdmin();
+  const { user, selectedBrandId, restaurants, orders, updateOrderStatus, refreshOrders, setSelectedBrand } = useAdmin();
   const [filterBrandId, setFilterBrandId] = useState<number | 'all'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Retrieve current restaurant
-  const restaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
+  const isSuper = user?.role === 'super_admin';
+  const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
+  const restaurant = restaurants.find((r) => r.id === managerRestId) || restaurants.find((r) => user?.username?.toLowerCase().includes(r.slug)) || restaurants[0];
+
+  // Derive human-readable branch label from username (e.g. manager_tandooristoppk_lake_city → "Lake City")
+  const branchLabel = (() => {
+    if (!user?.username) return null;
+    // Find slug match in restaurants to know where brand name ends
+    const matchedSlug = restaurants.find((r) => user.username!.toLowerCase().includes(r.slug));
+    if (!matchedSlug) return null;
+    const afterSlug = user.username.toLowerCase().replace('manager_', '').replace(matchedSlug.slug, '').replace(/^_/, '');
+    if (!afterSlug) return null;
+    return afterSlug.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  })();
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
@@ -31,18 +43,57 @@ export const OrderManagement: React.FC = () => {
 
   // Filter orders belonging to selected brand or all launch brands
   const brandOrders = useMemo(() => {
-    if (filterBrandId === 'all') {
-      return orders;
+    if (isSuper) {
+      if (filterBrandId === 'all') {
+        return orders;
+      }
+      const targetRest = restaurants.find((r) => r.id === Number(filterBrandId));
+      if (!targetRest) return orders;
+
+      return orders.filter((o) => 
+        Number(o.restaurant_id) === Number(targetRest.id) ||
+        (o.restaurant_name && targetRest.name && 
+         o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === targetRest.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+      );
     }
-    const targetRest = restaurants.find((r) => r.id === Number(filterBrandId));
+
+    // Branch/Brand Manager Mode
+    const targetRest = restaurant;
     if (!targetRest) return orders;
 
-    return orders.filter((o) => 
+    let restFiltered = orders.filter((o) => 
       Number(o.restaurant_id) === Number(targetRest.id) ||
       (o.restaurant_name && targetRest.name && 
        o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === targetRest.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
     );
-  }, [orders, filterBrandId, restaurants]);
+
+    // Specific Branch filtering
+    if (user?.branchId) {
+      const branchMatch = restFiltered.filter((o) => Number(o.branch_id) === Number(user.branchId));
+      if (branchMatch.length > 0) return branchMatch;
+    }
+
+    // Keyword branch matching fallback
+    const uname = (user?.username || '').toLowerCase();
+    if (uname.includes('lake_city')) {
+      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('lake city'));
+      if (match.length > 0) return match;
+    } else if (uname.includes('johar_town')) {
+      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('johar town'));
+      if (match.length > 0) return match;
+    } else if (uname.includes('baghbanpura') || uname.includes('gt_road')) {
+      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('baghbanpura') || (o.branch_name || '').toLowerCase().includes('gt road'));
+      if (match.length > 0) return match;
+    } else if (uname.includes('dha_phase_1') || uname.includes('dha_1')) {
+      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('dha phase 1') || (o.branch_name || '').toLowerCase().includes('dha'));
+      if (match.length > 0) return match;
+    } else if (uname.includes('gulberg_iii') || uname.includes('gulberg_3')) {
+      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('gulberg'));
+      if (match.length > 0) return match;
+    }
+
+    return restFiltered;
+  }, [orders, filterBrandId, restaurants, isSuper, restaurant, user]);
 
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
@@ -220,29 +271,41 @@ export const OrderManagement: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Brand Filter Selector */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
-            <Store size={14} className="text-blue-400" />
-            <span className="text-slate-400 font-medium">Brand:</span>
-            <select
-              value={filterBrandId}
-              onChange={(e) => {
-                const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
-                setFilterBrandId(val);
-                if (val !== 'all') {
-                  setSelectedBrand(val);
-                }
-              }}
-              className="bg-slate-950 border border-slate-700 text-white font-bold rounded px-2 py-1 outline-none text-xs cursor-pointer focus:border-blue-500"
-            >
-              <option value="all">🌟 All Brands ({orders.length} orders)</option>
-              {restaurants.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Brand Filter Selector (Super Admin) or Branch Badge (Manager) */}
+          {isSuper ? (
+            <div className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs">
+              <Store size={14} className="text-blue-400" />
+              <span className="text-slate-400 font-medium">Brand:</span>
+              <select
+                value={filterBrandId}
+                onChange={(e) => {
+                  const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                  setFilterBrandId(val);
+                  if (val !== 'all') {
+                    setSelectedBrand(val);
+                  }
+                }}
+                className="bg-slate-950 border border-slate-700 text-white font-bold rounded px-2 py-1 outline-none text-xs cursor-pointer focus:border-blue-500"
+              >
+                <option value="all">🌟 All Brands ({orders.length} orders)</option>
+                {restaurants.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl px-3.5 py-2 flex items-center gap-2 text-xs font-bold text-slate-100 shadow-sm">
+              <Store size={14} className="text-orange-400" />
+              <span>{restaurant?.name}</span>
+              {branchLabel && (
+                <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+                  📍 {branchLabel}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Manual Refresh Button */}
           <button

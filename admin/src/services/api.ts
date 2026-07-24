@@ -169,10 +169,11 @@ export interface ApiRestaurant {
   opens_at: string;
   closes_at: string;
   phone?: string;
+  address?: string;
 }
 
 export const fetchRestaurants = () =>
-  apiFetch<{ results: ApiRestaurant[]; count: number }>('/api/restaurants/');
+  apiFetch<{ results: ApiRestaurant[]; count: number }>('/api/restaurants/?all=true');
 
 export const fetchRestaurantMenu = (slug: string) =>
   apiFetch<any>(`/api/restaurants/${slug}/menu/`);
