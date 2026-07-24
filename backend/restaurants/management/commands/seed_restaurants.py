@@ -404,8 +404,10 @@ class Command(BaseCommand):
             name = brand_data["name"]
             slug = slugify(name)
             
+            is_active_brand = slug in ['tandooristoppk', 'jushhpk', 'getafomo']
             restaurant = Restaurant(
                 slug=slug,
+                is_active=is_active_brand,
                 **brand_data
             )
             restaurants_to_create.append(restaurant)
