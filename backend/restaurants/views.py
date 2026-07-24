@@ -15,7 +15,11 @@ class RestaurantListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Restaurant.objects.filter(is_active=True)
+        include_all = self.request.query_params.get('all', '').lower() == 'true'
+        if include_all or (self.request.user and self.request.user.is_authenticated and self.request.user.is_staff):
+            queryset = Restaurant.objects.all()
+        else:
+            queryset = Restaurant.objects.filter(is_active=True)
 
         is_featured = self.request.query_params.get('featured')
         city = self.request.query_params.get('city')
