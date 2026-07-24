@@ -2,13 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     RestaurantListView, RestaurantDetailView, RestaurantMenuView, BranchListView,
-    AdminRestaurantViewSet, AdminMenuCategoryViewSet, AdminMenuItemViewSet
+    AdminRestaurantViewSet, AdminMenuCategoryViewSet, AdminMenuItemViewSet, AdminBranchViewSet
 )
 
 router = DefaultRouter()
 router.register('admin/restaurants', AdminRestaurantViewSet, basename='admin_restaurants')
+router.register('admin/branches', AdminBranchViewSet, basename='admin_branches')
 router.register('admin/menu-categories', AdminMenuCategoryViewSet, basename='admin_categories')
 router.register('admin/menu-items', AdminMenuItemViewSet, basename='admin_items')
+
 
 urlpatterns = [
     path('branches/', BranchListView.as_view(), name='branch_list'),

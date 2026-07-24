@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const BranchDashboard: React.FC = () => {
-  const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails } = useAdmin();
+  const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails, updateBranchDetails } = useAdmin();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Edit Branch Modal state
@@ -36,6 +36,10 @@ export const BranchDashboard: React.FC = () => {
   const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
   const restaurant = restaurants.find((r) => r.id === managerRestId) || restaurants.find((r) => user?.username?.toLowerCase().includes(r.slug)) || restaurants[0];
   
+  const currentBranch = restaurant && (restaurant as any).branches && (restaurant as any).branches.length > 0
+    ? ((restaurant as any).branches.find((b: any) => b.id === user?.branchId) || (restaurant as any).branches[0])
+    : null;
+
   if (!restaurant) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -47,14 +51,21 @@ export const BranchDashboard: React.FC = () => {
     );
   }
 
-  // Automatically sync modal input fields with live restaurant data
+  // Automatically sync modal input fields with live branch/restaurant data
   React.useEffect(() => {
-    if (restaurant && showEditModal) {
-      setEditPhone(restaurant.phone || '');
-      setEditCity(restaurant.address || restaurant.city || '');
-      setEditIsActive(restaurant.is_active);
+    if (showEditModal) {
+      if (currentBranch) {
+        setEditPhone(currentBranch.phone || restaurant.phone || '');
+        setEditCity(currentBranch.address || restaurant.address || restaurant.city || '');
+        setEditIsActive(currentBranch.is_active !== undefined ? currentBranch.is_active : true);
+      } else {
+        setEditPhone(restaurant.phone || '');
+        setEditCity(restaurant.address || restaurant.city || '');
+        setEditIsActive(restaurant.is_active);
+      }
     }
-  }, [restaurant, showEditModal]);
+  }, [restaurant, currentBranch, showEditModal]);
+
 
   const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
 
@@ -576,15 +587,24 @@ export const BranchDashboard: React.FC = () => {
                 disabled={isSavingDetails}
                 onClick={async () => {
                   setIsSavingDetails(true);
-                  await updateRestaurantDetails(restaurant.id, {
-                    phone: editPhone,
-                    city: editCity,
-                    address: editCity,
-                    is_active: editIsActive,
-                  });
+                  if (currentBranch) {
+                    await updateBranchDetails(currentBranch.id, {
+                      phone: editPhone,
+                      address: editCity,
+                      is_active: editIsActive,
+                    });
+                  } else {
+                    await updateRestaurantDetails(restaurant.id, {
+                      phone: editPhone,
+                      city: editCity,
+                      address: editCity,
+                      is_active: true, // Keep restaurant active globally so toggling branch doesn't hide whole brand
+                    });
+                  }
                   setIsSavingDetails(false);
                   setShowEditModal(false);
                 }}
+
                 className="px-4 py-2 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-xl shadow-md transition-all flex items-center gap-1.5"
               >
                 {isSavingDetails ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}

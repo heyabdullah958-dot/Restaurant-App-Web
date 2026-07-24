@@ -199,7 +199,8 @@ export default function CheckoutScreen() {
 
     setBranches(initialBranches);
     if (Array.isArray(initialBranches) && initialBranches.length > 0) {
-      setSelectedBranchId(initialBranches[0].id);
+      const firstActive = initialBranches.find((b: any) => b.is_active !== false) || initialBranches[0];
+      setSelectedBranchId(firstActive.id);
     }
 
     const targetSlug = restaurant?.slug;
@@ -216,11 +217,14 @@ export default function CheckoutScreen() {
         if (Array.isArray(list) && list.length > 0) {
           setBranches(list);
           setSelectedBranchId((prev) => {
-            const exists = list.some((b: any) => b.id === prev);
-            return exists ? prev : list[0].id;
+            const activePrev = list.find((b: any) => b.id === prev && b.is_active !== false);
+            if (activePrev) return prev;
+            const firstActive = list.find((b: any) => b.is_active !== false) || list[0];
+            return firstActive.id;
           });
         }
       })
+
       .catch((e) => {
         console.warn('Failed to fetch live branches, using default branches:', e);
       });
@@ -519,26 +523,36 @@ export default function CheckoutScreen() {
             {/* Specific Branches */}
             {branches.map((b) => {
               const isSelected = selectedBranchId === b.id;
+              const isClosed = b.is_active === false;
               return (
                 <TouchableOpacity 
                   key={b.id}
-                  activeOpacity={0.8}
+                  activeOpacity={isClosed ? 1 : 0.8}
+                  disabled={isClosed}
                   style={[
                     styles.branchCardOption,
-                    isSelected && styles.branchCardSelected
+                    isSelected && styles.branchCardSelected,
+                    isClosed && { opacity: 0.5, backgroundColor: '#f1f5f9' }
                   ]}
-                  onPress={() => setSelectedBranchId(b.id)}
+                  onPress={() => !isClosed && setSelectedBranchId(b.id)}
                 >
                   <Ionicons 
                     name={isSelected ? "radio-button-on" : "radio-button-off"} 
                     size={20} 
-                    color={isSelected ? COLORS.primary : COLORS.gray} 
+                    color={isClosed ? COLORS.gray : (isSelected ? COLORS.primary : COLORS.gray)} 
                   />
                   <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-                    <Text style={styles.branchOptionTitle}>{b.name} Branch</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={[styles.branchOptionTitle, isClosed && { color: COLORS.gray }]}>{b.name} Branch</Text>
+                      {isClosed && (
+                        <View style={{ backgroundColor: '#ef4444', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                          <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#ffffff' }}>CLOSED</Text>
+                        </View>
+                      )}
+                    </View>
                     {!!b.address && <Text style={styles.branchOptionDesc}>{b.address}</Text>}
                   </View>
-                  {isSelected && (
+                  {isSelected && !isClosed && (
                     <View style={styles.selectedCheckBadge}>
                       <Ionicons name="checkmark" size={12} color={COLORS.white} />
                     </View>
@@ -546,6 +560,7 @@ export default function CheckoutScreen() {
                 </TouchableOpacity>
               );
             })}
+
           </View>
 
           {/* Payment Methods */}

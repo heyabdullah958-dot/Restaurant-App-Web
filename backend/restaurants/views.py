@@ -200,10 +200,35 @@ class BranchListView(generics.ListAPIView):
                 'address': b.address,
                 'phone': b.phone,
                 'area_keywords': b.area_keywords,
-                'restaurant_id': b.restaurant_id,
-                'restaurant_name': b.restaurant.name,
-                'restaurant_slug': b.restaurant.slug,
             } for b in qs]
         })
+
+from .serializers import BranchSerializer
+
+class AdminBranchViewSet(viewsets.ModelViewSet):
+
+    serializer_class = BranchSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Branch.objects.all()
+        from config.admin_utils import get_managed_restaurant
+        managed_restaurant = get_managed_restaurant(user)
+        if managed_restaurant:
+            return Branch.objects.filter(restaurant=managed_restaurant)
+        return Branch.objects.none()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            branch = self.get_object()
+            if branch.restaurant != managed_restaurant:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You do not manage this branch.")
+        serializer.save()
 
 

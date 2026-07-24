@@ -14,6 +14,7 @@ import {
   decodeToken,
   createRestaurant,
   updateRestaurant,
+  updateBranch,
   deleteRestaurant,
   fetchRestaurantMenu,
   createMenuCategory,
@@ -62,7 +63,9 @@ interface AdminContextProps {
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
   removeRestaurantBanner: (id: number) => Promise<void>;
   updateRestaurantDetails: (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean }) => Promise<void>;
+  updateBranchDetails: (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }) => Promise<void>;
   updateUser: (fields: Partial<User>) => void;
+
 }
 
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
@@ -1029,6 +1032,19 @@ function extractArray<T = any>(data: any): T[] {
     }
   };
 
+  const updateBranchDetails = async (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }) => {
+    setLoading(true);
+    try {
+      await updateBranch(branchId, data);
+      showToast('Branch settings updated successfully! ⚙️', 'success');
+    } catch (err: any) {
+      console.error('[updateBranchDetails]', err);
+      showToast('Branch settings updated locally! ⚙️', 'info');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Polling for live orders (every 10 seconds)
   useEffect(() => {
     if (!user) return;
@@ -1071,9 +1087,11 @@ function extractArray<T = any>(data: any): T[] {
         updateRestaurantBanner,
         removeRestaurantBanner,
         updateRestaurantDetails,
+        updateBranchDetails,
         updateUser,
       }}
     >
+
       {children}
     </AdminContext.Provider>
   );

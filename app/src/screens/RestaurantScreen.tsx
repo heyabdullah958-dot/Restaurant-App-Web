@@ -36,19 +36,33 @@ type RootStackParamList = {
 type RestaurantScreenRouteProp = RouteProp<RootStackParamList, 'Restaurant'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Restaurant'>;
 
-const isRestaurantOpen = (opensAt: string, closesAt: string): boolean => {
+const isRestaurantOpen = (restaurant: any): boolean => {
   try {
+    if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
+      const hasActiveBranch = restaurant.branches.some((b: any) => b.is_active !== false);
+      if (!hasActiveBranch) return false;
+    } else if (restaurant.is_active === false) {
+      return false;
+    }
+
+    const opensAt = restaurant.opens_at;
+    const closesAt = restaurant.closes_at;
+    if (!opensAt || !closesAt) return true;
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     const [openH, openM] = opensAt.split(':').map(Number);
     const [closeH, closeM] = closesAt.split(':').map(Number);
     const openMinutes = openH * 60 + openM;
     const closeMinutes = closeH * 60 + closeM;
+    if (closeMinutes < openMinutes) {
+      return nowMinutes >= openMinutes || nowMinutes <= closeMinutes;
+    }
     return nowMinutes >= openMinutes && nowMinutes <= closeMinutes;
   } catch {
     return true; // Default to open if error
   }
 };
+
 
 export default function RestaurantScreen() {
   const route = useRoute<RestaurantScreenRouteProp>();
@@ -351,7 +365,7 @@ export default function RestaurantScreen() {
 
             {/* UI-16: Open/Closed status badge */}
             {(() => {
-              const open = isRestaurantOpen(restaurant.opens_at, restaurant.closes_at);
+              const open = isRestaurantOpen(restaurant);
               return (
                 <View style={[styles.openBadge, { backgroundColor: open ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
                   <View style={[styles.openDot, { backgroundColor: open ? COLORS.success : COLORS.danger }]} />
@@ -396,9 +410,10 @@ export default function RestaurantScreen() {
               <View style={styles.infoRow}>
                 <Ionicons name="location-outline" size={14} color={COLORS.gray} />
                 <Text style={styles.moreInfoText} numberOfLines={1}>
-                  {restaurant.address}
+                  {(restaurant as any).branches?.find((b: any) => b.is_active !== false)?.address || restaurant.address}
                 </Text>
               </View>
+
               <View style={[styles.infoRow, { marginTop: 6 }]}>
                 <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
                 <Text style={styles.moreInfoText}>

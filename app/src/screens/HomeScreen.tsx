@@ -46,14 +46,20 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
 
 
 /**
- * Determines whether a brand is currently within its operating hours.
- * Falls back to `true` (open) if the hours are missing or malformed,
- * so customers can still browse. This intentionally IGNORES `is_active`
- * (the branch accept-orders toggle) — that flag controls order acceptance
- * for a specific branch, NOT the brand-level storefront status.
+ * Determines whether a brand is currently open and accepting orders.
+ * A brand is open if at least ONE of its branches is active AND current time is within operating hours.
  */
 const isBrandOpen = (brand: any): boolean => {
   try {
+    // 1. Branch Availability Check: if branches array exists, at least one branch must be active
+    if (brand.branches && Array.isArray(brand.branches) && brand.branches.length > 0) {
+      const hasActiveBranch = brand.branches.some((b: any) => b.is_active !== false);
+      if (!hasActiveBranch) return false;
+    } else if (brand.is_active === false) {
+      return false;
+    }
+
+    // 2. Operating Hours Check
     const opensAt: string | undefined = brand.opens_at;
     const closesAt: string | undefined = brand.closes_at;
     if (!opensAt || !closesAt) return true; // No hours set → assume open
@@ -69,9 +75,10 @@ const isBrandOpen = (brand: any): boolean => {
     }
     return nowMins >= openMins && nowMins <= closeMins;
   } catch {
-    return true; // Safe default — don't punish brands with bad data
+    return true; // Safe default
   }
 };
+
 
 // Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 

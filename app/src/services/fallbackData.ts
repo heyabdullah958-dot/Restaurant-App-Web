@@ -24,6 +24,15 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+export interface Branch {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  is_active: boolean;
+  area_keywords?: string[];
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -47,7 +56,9 @@ export interface Restaurant {
   rating: number;
   total_reviews: number;
   categories?: MenuCategory[];
+  branches?: Branch[];
 }
+
 
 export const FALLBACK_RESTAURANTS: Restaurant[] = [
   {
@@ -167,7 +178,13 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     delivery_fee: 60,
     rating: 4.6,
     total_reviews: 412,
+    branches: [
+      { id: 1, name: "DHA Phase 1 Branch", address: "F9JW+R3G, Sector H Dha Phase 1, Lahore, Pakistan", phone: "03257217221", is_active: true },
+      { id: 2, name: "Johar Town Branch", address: "Block R2, 256 / A, Near Shaukat Khanum Hospital Rd, Johar Town, Lahore", phone: "03269946142", is_active: true },
+      { id: 3, name: "Lake City Branch", address: "C 4-6 plaza Number, business bay, M1, Lake City, Lahore", phone: "03244441735", is_active: true }
+    ],
     categories: [
+
       {
         id: 3,
         name: "Appetizer",
@@ -224,7 +241,13 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     delivery_fee: 90,
     rating: 4.5,
     total_reviews: 154,
+    branches: [
+      { id: 4, name: "Johar Town Branch", address: "PIA Road, Hakim Chowk, Johar Town, Lahore", phone: "0327-4945947", is_active: true },
+      { id: 5, name: "Lake City Branch", address: "Opposite Lake City Mall, Raiwind Road, Lahore", phone: "0324-4441735", is_active: true },
+      { id: 6, name: "Baghbanpura Branch", address: "GT Road, Baghbanpura, Lahore", phone: "0326-6811177", is_active: true }
+    ],
     categories: [
+
       {
         id: 6,
         name: "Tandoori Chicken",
@@ -367,7 +390,11 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     delivery_fee: 100,
     rating: 4.8,
     total_reviews: 310,
+    branches: [
+      { id: 7, name: "Gulberg III Branch", address: "65, Block D1 Gulberg III, Lahore, Pakistan", phone: "03212784841", is_active: true }
+    ],
     categories: [
+
       {
         id: 11,
         name: "Specialty Coffee",

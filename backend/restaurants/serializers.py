@@ -114,7 +114,8 @@ from .models import Restaurant, MenuCategory, MenuItem, Branch
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branch
-        fields = ('id', 'name', 'address', 'phone', 'area_keywords')
+        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords')
+
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):

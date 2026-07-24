@@ -412,6 +412,13 @@ export const fetchBranches = (restaurantId?: number): Promise<any[]> =>
       : '/api/admin/branches/'
   );
 
+export const updateBranch = (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }): Promise<any> =>
+  apiFetch<any>(`/api/admin/branches/${branchId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
+
 export const createManagerAccount = (data: {
   restaurant_id: number;
   branch_id: number;
