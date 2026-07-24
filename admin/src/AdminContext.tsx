@@ -93,6 +93,7 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
     closes_at: r.closes_at,
     phone: r.phone,
     address: r.address || r.city,
+    branches: r.branches || [],
   };
 }
 

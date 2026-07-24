@@ -298,16 +298,21 @@ export const BranchDashboard: React.FC = () => {
             />
             <div>
               <h1 className="text-2xl font-extrabold text-white leading-none">{restaurant.name}</h1>
-              {user?.branchId && (
+              {currentBranch ? (
+                <span className="inline-flex items-center gap-1 mt-1 mb-0.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                  <MapPin size={10} />
+                  {currentBranch.name} Branch
+                </span>
+              ) : user?.branchId ? (
                 <span className="inline-flex items-center gap-1 mt-1 mb-0.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                   <MapPin size={10} />
                   Branch Manager View
                 </span>
-              )}
+              ) : null}
               <p className="text-sm text-slate-300 font-semibold mt-1">{restaurant.cuisine_type}</p>
               <div className="flex gap-4 text-xs text-slate-400 mt-2 font-medium">
-                <span className="flex items-center gap-1"><MapPin size={12} /> {restaurant.address || restaurant.city}</span>
-                <span className="flex items-center gap-1"><Phone size={12} /> {restaurant.phone}</span>
+                <span className="flex items-center gap-1"><MapPin size={12} /> {currentBranch ? (currentBranch.address || currentBranch.name) : (restaurant.address || restaurant.city)}</span>
+                <span className="flex items-center gap-1"><Phone size={12} /> {currentBranch ? currentBranch.phone : restaurant.phone}</span>
               </div>
             </div>
           </div>
@@ -324,9 +329,15 @@ export const BranchDashboard: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                setEditPhone(restaurant.phone || '');
-                setEditCity(restaurant.address || restaurant.city || '');
-                setEditIsActive(restaurant.is_active);
+                if (currentBranch) {
+                  setEditPhone(currentBranch.phone || restaurant.phone || '');
+                  setEditCity(currentBranch.address || restaurant.address || restaurant.city || '');
+                  setEditIsActive(currentBranch.is_active !== undefined ? currentBranch.is_active : true);
+                } else {
+                  setEditPhone(restaurant.phone || '');
+                  setEditCity(restaurant.address || restaurant.city || '');
+                  setEditIsActive(restaurant.is_active);
+                }
                 setShowEditModal(true);
               }}
               className="bg-slate-800/80 hover:bg-slate-800 backdrop-blur-md text-slate-200 hover:text-white px-3 py-1.5 rounded-full text-xs font-bold border border-slate-700 shadow-md flex items-center gap-1.5 transition-all hover:scale-[1.03]"
@@ -335,11 +346,11 @@ export const BranchDashboard: React.FC = () => {
               Branch Settings
             </button>
             <span className={`px-3 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
-              restaurant.is_active
+              (currentBranch ? currentBranch.is_active !== false : restaurant.is_active)
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                 : 'bg-rose-500/20 text-rose-300 border-rose-500/30 shadow-md'
             }`}>
-              {restaurant.is_active ? 'Accepting Orders' : 'Offline (Closed)'}
+              {(currentBranch ? currentBranch.is_active !== false : restaurant.is_active) ? 'Accepting Orders' : 'Offline (Closed)'}
             </span>
           </div>
         </div>

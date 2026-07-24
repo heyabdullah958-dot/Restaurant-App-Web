@@ -26,6 +26,15 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+export interface Branch {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  is_active: boolean;
+  restaurant?: number;
+}
+
 export interface Restaurant {
   id: number;
   name: string;
@@ -47,6 +56,7 @@ export interface Restaurant {
   banner_url?: string;
   phone?: string;
   address?: string;
+  branches?: Branch[];
 }
 
 export type OrderStatus = 'pending' | 'received' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';

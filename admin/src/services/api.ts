@@ -170,6 +170,7 @@ export interface ApiRestaurant {
   closes_at: string;
   phone?: string;
   address?: string;
+  branches?: any[];
 }
 
 export const fetchRestaurants = () =>
