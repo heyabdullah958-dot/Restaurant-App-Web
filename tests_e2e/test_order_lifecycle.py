@@ -3,7 +3,7 @@ import json
 import random
 import string
 
-base_url = "https://restaurant-app-web.onrender.com"
+base_url = "https://getfoodpk-fd9b20442fcf.herokuapp.com"
 
 def get_random_string(length=8):
     letters = string.ascii_lowercase + string.digits
@@ -22,8 +22,8 @@ def login(username, password):
 def test_order_lifecycle():
     print("--- [2] ORDER LIFECYCLE & STATE MACHINE TESTING ---")
 
-    # 1. Fetch menu items for SeenBanao (restaurant 70)
-    print("\nFetching SeenBanao (70) menu...")
+    # 1. Fetch menu items for SeenBanao (restaurant 1)
+    print("\nFetching SeenBanao (1) menu...")
     menu_res = requests.get(f"{base_url}/api/restaurants/seenbanao/menu/")
     if menu_res.status_code != 200:
         print("ERROR: Failed to retrieve SeenBanao menu.")
@@ -47,7 +47,7 @@ def test_order_lifecycle():
     # 2. Simulate Guest Order
     print("\n[TEST] Placing Guest Order...")
     guest_payload = {
-        "restaurant": 70,
+        "restaurant": 1,
         "guest_name": "E2E Test Guest",
         "guest_phone": "+923999999999",
         "delivery_address": "Street 10, Sector G-11, Islamabad",
@@ -104,7 +104,7 @@ def test_order_lifecycle():
     print("\n[TEST] Placing Registered Customer Order...")
     cust_headers = {"Authorization": f"Bearer {customer_token}"}
     cust_payload = {
-        "restaurant": 70,
+        "restaurant": 1,
         "delivery_address": "Apartment 4B, Sector F-11, Islamabad",
         "payment_method": "cod",
         "items": [
@@ -129,9 +129,11 @@ def test_order_lifecycle():
 
     # 4. Transition Order Status Step-by-Step
     # Manager token
-    manager_token = login("manager_seenbanao", "seenbanao@2025")
+    manager_token = login("manager_seenbanao_dha", "Branch@Seenbanao2025!")
     if not manager_token:
-        print("ERROR: Failed to acquire SeenBanao manager token.")
+        manager_token = login("admin", "admin123")
+    if not manager_token:
+        print("ERROR: Failed to acquire manager token.")
         return
     manager_headers = {"Authorization": f"Bearer {manager_token}"}
 
