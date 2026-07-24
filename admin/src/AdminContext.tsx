@@ -363,6 +363,42 @@ function extractArray<T = any>(data: any): T[] {
     return availableRestaurants[0]?.id || 1;
   };
 
+  const resolveUserBranchId = (
+    userOrName: string | User | null | undefined,
+    jwtBranchId: number | undefined,
+    rest: Restaurant | undefined
+  ): number | undefined => {
+    if (jwtBranchId && rest?.branches?.some((b) => Number(b.id) === Number(jwtBranchId))) {
+      return Number(jwtBranchId);
+    }
+    if (!rest || !rest.branches || rest.branches.length === 0) return undefined;
+
+    const uname = typeof userOrName === 'string' ? userOrName.toLowerCase() : (userOrName?.username || '').toLowerCase();
+    
+    if (uname.includes('dha')) {
+      const b = rest.branches.find((br) => br.name.toLowerCase().includes('dha'));
+      if (b) return b.id;
+    }
+    if (uname.includes('johar')) {
+      const b = rest.branches.find((br) => br.name.toLowerCase().includes('johar'));
+      if (b) return b.id;
+    }
+    if (uname.includes('lake')) {
+      const b = rest.branches.find((br) => br.name.toLowerCase().includes('lake'));
+      if (b) return b.id;
+    }
+    if (uname.includes('baghbanpura') || uname.includes('gt_road')) {
+      const b = rest.branches.find((br) => br.name.toLowerCase().includes('baghbanpura') || br.name.toLowerCase().includes('gt road'));
+      if (b) return b.id;
+    }
+    if (uname.includes('gulberg')) {
+      const b = rest.branches.find((br) => br.name.toLowerCase().includes('gulberg'));
+      if (b) return b.id;
+    }
+
+    return rest.branches[0]?.id;
+  };
+
   const loadAppData = async () => {
     if (orders.length === 0) setLoading(true);
     try {
@@ -394,6 +430,13 @@ function extractArray<T = any>(data: any): T[] {
           const activeBrandId = resolveUserRestaurantId(user || payload?.username, managerRestId, finalRestaurants);
           setSelectedBrandId(activeBrandId);
           localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
+
+          // Ensure user.branchId is set when app data finishes loading
+          const currentRest = finalRestaurants.find((r) => r.id === activeBrandId);
+          const resolvedBranchId = resolveUserBranchId(user || payload?.username, payload?.branch_id, currentRest);
+          if (resolvedBranchId) {
+            setUser((prev) => prev ? { ...prev, branchId: resolvedBranchId, restaurantId: activeBrandId } : prev);
+          }
         } else {
           const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
           const exists = savedBrandId && finalRestaurants.some((r) => r.id === Number(savedBrandId));
@@ -524,6 +567,11 @@ function extractArray<T = any>(data: any): T[] {
         localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
       }
 
+      const targetRest = finalRestaurants.find((r) => r.id === managerRestId);
+      const targetBranchId = isSuperAdmin
+        ? undefined
+        : resolveUserBranchId(targetUsername, payload?.branch_id, targetRest);
+
       // 4. Set live user state
       const loggedInUser: User = {
         id: payload?.user_id || 0,
@@ -531,7 +579,7 @@ function extractArray<T = any>(data: any): T[] {
         email: '',
         role: isSuperAdmin ? 'super_admin' : 'branch_manager',
         restaurantId: managerRestId,
-        branchId: isSuperAdmin ? undefined : payload?.branch_id,
+        branchId: targetBranchId,
       };
       setUser(loggedInUser);
       const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';
