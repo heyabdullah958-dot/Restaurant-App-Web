@@ -782,11 +782,11 @@ export const OrderManagement: React.FC = () => {
                                 onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
                                 className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold py-1.5 pl-3 pr-8 rounded-lg text-[10px] transition-all cursor-pointer text-center outline-none select-none"
                               >
-                                <option value="received">Received</option>
-                                <option value="preparing">Preparing</option>
-                                <option value="out_for_delivery">Out For Delivery</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">❌ Cancel Order</option>
+                                <option value="received" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Received</option>
+                                <option value="preparing" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Preparing</option>
+                                <option value="out_for_delivery" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Out For Delivery</option>
+                                <option value="delivered" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Delivered</option>
+                                <option value="cancelled" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>❌ Cancel Order</option>
                               </select>
                             </div>
 
@@ -1049,9 +1049,9 @@ export const OrderManagement: React.FC = () => {
                     onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
                     className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
                   >
-                    <option value="">-- Choose Rider --</option>
+                    <option value="" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>-- Choose Rider --</option>
                     {availableRiders.map((r: any) => (
-                      <option key={r.id} value={r.id}>
+                      <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
                         {r.name} ({r.phone}) — [AVAILABLE]
                       </option>
                     ))}

@@ -214,12 +214,12 @@ export const RiderManagement: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm px-3 py-2 outline-none"
+            className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm px-3 py-2 outline-none cursor-pointer"
           >
-            <option value="ALL">All Statuses</option>
-            <option value="AVAILABLE">Available</option>
-            <option value="ON_DELIVERY">On Delivery</option>
-            <option value="OFFLINE">Offline</option>
+            <option value="ALL" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>All Statuses</option>
+            <option value="AVAILABLE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Available</option>
+            <option value="ON_DELIVERY" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>On Delivery</option>
+            <option value="OFFLINE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Offline</option>
           </select>
         </div>
       </div>
@@ -276,9 +276,15 @@ export const RiderManagement: React.FC = () => {
                             : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30 dark:bg-slate-800'
                         }`}
                       >
-                        <option value="AVAILABLE">🟢 Available</option>
-                        <option value="ON_DELIVERY">🟡 On Delivery</option>
-                        <option value="OFFLINE">🔴 Offline</option>
+                        <option value="AVAILABLE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                          🟢 Available
+                        </option>
+                        <option value="ON_DELIVERY" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                          🟡 On Delivery
+                        </option>
+                        <option value="OFFLINE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                          🔴 Offline
+                        </option>
                       </select>
                     </td>
                     <td className="px-4 py-3">
