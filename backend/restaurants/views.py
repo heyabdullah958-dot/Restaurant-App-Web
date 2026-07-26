@@ -305,6 +305,14 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        
+        # Auto-heal riders stuck on ON_DELIVERY who have 0 active out_for_delivery orders
+        stuck_riders = BranchRider.objects.filter(status='ON_DELIVERY').exclude(
+            orders__status='out_for_delivery'
+        )
+        if stuck_riders.exists():
+            stuck_riders.update(status='AVAILABLE')
+
         qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
         
         branch_id = self.request.query_params.get('branch_id')

@@ -69,6 +69,10 @@ export const RiderManagement: React.FC = () => {
 
   useEffect(() => {
     loadRiders(true);
+    const interval = setInterval(() => {
+      loadRiders(false);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChangeOptimistic = async (rider: Rider, newStatus: 'AVAILABLE' | 'ON_DELIVERY' | 'OFFLINE') => {

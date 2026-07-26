@@ -75,6 +75,40 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        from restaurants.models import BranchRider
+        is_new = self.pk is None
+        old_status = None
+        old_rider_id = None
+
+        if not is_new:
+            try:
+                orig = Order.objects.get(pk=self.pk)
+                old_status = orig.status
+                old_rider_id = orig.rider_id
+            except Order.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        # 1. Auto-release rider if order status transitions to delivered or cancelled
+        if self.status in ['delivered', 'cancelled']:
+            rider_to_check_id = self.rider_id or old_rider_id
+            if rider_to_check_id:
+                has_active = Order.objects.filter(rider_id=rider_to_check_id, status='out_for_delivery').exclude(pk=self.pk).exists()
+                if not has_active:
+                    BranchRider.objects.filter(pk=rider_to_check_id).update(status='AVAILABLE')
+
+        # 2. Handle rider unassignment or reassignment
+        if old_rider_id and old_rider_id != self.rider_id:
+            has_active = Order.objects.filter(rider_id=old_rider_id, status='out_for_delivery').exclude(pk=self.pk).exists()
+            if not has_active:
+                BranchRider.objects.filter(pk=old_rider_id).update(status='AVAILABLE')
+
+        # 3. If assigned rider & order status is out_for_delivery, mark rider ON_DELIVERY
+        if self.rider_id and self.status == 'out_for_delivery':
+            BranchRider.objects.filter(pk=self.rider_id).update(status='ON_DELIVERY')
+
     def __str__(self):
         return f"Order #{self.id or self.pk or 'new'} - {self.restaurant.name} ({self.status})"
 

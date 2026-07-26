@@ -541,6 +541,43 @@ def main():
     prep_order.delete()
     test_rider.delete()
 
+    # 15. Test Auto-Release Rider Status on Order Completion & Cancellation
+    print("\nTesting Automated Rider Release on Order Completion & Cancellation...")
+    auto_rider = BranchRider.objects.create(branch=jt_branch, name="Auto Release Rider", phone="03001112233", vehicle_type="BIKE", status="AVAILABLE")
+    auto_ord = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch, rider=auto_rider,
+        delivery_address="Auto Release Street", subtotal=600.0, total=600.0, status="out_for_delivery"
+    )
+    # Refetched rider status should be ON_DELIVERY due to Order.save()
+    auto_rider.refresh_from_db()
+    st_on_del = auto_rider.status == "ON_DELIVERY"
+
+    # Transition order to delivered
+    auto_ord.status = "delivered"
+    auto_ord.save()
+    auto_rider.refresh_from_db()
+    st_delivered_rel = auto_rider.status == "AVAILABLE"
+
+    # Reset for cancellation test
+    auto_ord.status = "out_for_delivery"
+    auto_ord.save()
+    auto_rider.refresh_from_db()
+
+    auto_ord.status = "cancelled"
+    auto_ord.cancellation_reason = "Customer cancelled order"
+    auto_ord.save()
+    auto_rider.refresh_from_db()
+    st_cancelled_rel = auto_rider.status == "AVAILABLE"
+
+    if st_on_del and st_delivered_rel and st_cancelled_rel:
+        print("  [PASSED] Automated Rider Release: ON_DELIVERY when out for delivery -> AVAILABLE when delivered -> AVAILABLE when cancelled")
+    else:
+        print(f"  [FAILED] Automated Rider Release: On Delivery={st_on_del}, Delivered Rel={st_delivered_rel}, Cancelled Rel={st_cancelled_rel}")
+        all_passed = False
+
+    auto_ord.delete()
+    auto_rider.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:

@@ -14,7 +14,8 @@ import {
   DollarSign,
   RotateCw,
   Store,
-  Bike
+  Bike,
+  Edit3
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
@@ -684,16 +685,25 @@ export const OrderManagement: React.FC = () => {
                                 <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between gap-2">
                                   <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-400 truncate">
                                     <Bike size={14} className="flex-shrink-0" />
-                                    <span className="truncate">{order.rider.name}</span>
-                                    <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>
+                                    <span className="truncate">🚴 Rider: {order.rider.name}</span>
+                                    {order.rider.phone && <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>}
                                   </div>
-                                  <button
-                                    onClick={() => triggerRiderWhatsApp(order)}
-                                    title="Send WhatsApp Dispatch to Rider"
-                                    className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors flex-shrink-0"
-                                  >
-                                    <MessageSquare size={11} /> WhatsApp
-                                  </button>
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    <button
+                                      onClick={() => setAssignRiderModalOrder(order)}
+                                      title="Reassign / Change Rider"
+                                      className="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded flex items-center gap-1 transition-colors"
+                                    >
+                                      <Edit3 size={11} />
+                                    </button>
+                                    <button
+                                      onClick={() => triggerRiderWhatsApp(order)}
+                                      title="Send WhatsApp Dispatch to Rider"
+                                      className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors"
+                                    >
+                                      <MessageSquare size={11} /> WhatsApp
+                                    </button>
+                                  </div>
                                 </div>
                               ) : (
                                 <div className="flex items-center justify-between gap-2">
@@ -701,36 +711,12 @@ export const OrderManagement: React.FC = () => {
                                     <Bike size={12} className="flex-shrink-0" />
                                     <span className="truncate">Unassigned</span>
                                   </div>
-                                  <select
-                                    value=""
-                                    onChange={async (e) => {
-                                      const selectedId = e.target.value ? Number(e.target.value) : null;
-                                      if (!selectedId) return;
-                                      try {
-                                        await assignRiderToOrder(order.id, selectedId);
-                                        showToast('Rider assigned!', 'success');
-                                        fetchRiders().then(r => setRiders(r || [])).catch(() => {});
-                                        refreshOrders();
-                                      } catch (err: any) {
-                                        showToast(err.message || 'Failed to assign rider', 'error');
-                                      }
-                                    }}
-                                    className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[145px] truncate"
+                                  <button
+                                    onClick={() => setAssignRiderModalOrder(order)}
+                                    className="px-2.5 py-1 bg-sky-500/20 hover:bg-sky-500/30 text-sky-400 text-[10px] font-extrabold rounded-md border border-sky-500/30 flex items-center gap-1 transition-colors cursor-pointer"
                                   >
-                                    <option value="">+ Assign Rider...</option>
-                                    {riders
-                                      .filter((r: any) => {
-                                        const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
-                                        const targetBranchId = order.branch_id || user?.branchId;
-                                        const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
-                                        return isAvail && matchesBranch;
-                                      })
-                                      .map((r: any) => (
-                                        <option key={r.id} value={r.id}>
-                                          {r.name} ({r.phone})
-                                        </option>
-                                      ))}
-                                  </select>
+                                    + Assign Rider
+                                  </button>
                                 </div>
                               )}
                             </div>
