@@ -173,6 +173,8 @@ function MainTabs() {
   );
 }
 
+import NotificationToast from './src/components/NotificationToast';
+
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>();
   const navRef = useNavigationContainerRef();
@@ -224,6 +226,7 @@ function AppContent() {
         <Stack.Screen name="Rewards" component={RewardsScreen} />
         <Stack.Screen name="Legal" component={LegalScreen} />
       </Stack.Navigator>
+      <NotificationToast navigationRef={navRef} />
       <StatusBar style="auto" />
     </NavigationContainer>
   );

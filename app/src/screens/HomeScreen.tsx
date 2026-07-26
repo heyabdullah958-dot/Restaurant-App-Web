@@ -25,9 +25,15 @@ import { StatusBar } from 'expo-status-bar';
 import { getImageUrl, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { RestaurantCardSkeleton } from '../components/SkeletonLoader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../services/api';
 import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
+import NotificationModal from '../components/NotificationModal';
+import {
+  loadInAppNotifications,
+  subscribeNotifications,
+  checkOrderStatusUpdates,
+  InAppNotification,
+} from '../services/inAppNotificationService';
 
 
 const { width } = Dimensions.get('window');
@@ -240,6 +246,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
   const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
+  const [showNotifModal, setShowNotifModal] = React.useState(false);
+  const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
+
+  React.useEffect(() => {
+    loadInAppNotifications();
+    const unsub = subscribeNotifications((list) => setNotifications(list));
+    return unsub;
+  }, []);
 
   const checkUnratedDeliveredOrders = React.useCallback(async () => {
     try {
@@ -321,12 +335,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         dispatch(fetchUserProfile() as any);
       }
       checkUnratedDeliveredOrders();
+      checkOrderStatusUpdates();
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
         if (user && !user.is_guest) {
           dispatch(fetchUserProfile() as any);
         }
         checkUnratedDeliveredOrders();
+        checkOrderStatusUpdates();
       }, 5000);
       return () => clearInterval(interval);
     }, [dispatch, user, checkUnratedDeliveredOrders])
@@ -519,6 +535,23 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerIconBtn}
+            onPress={() => setShowNotifModal(true)}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
+            {notifications.filter((n) => !n.read).length > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>
+                  {notifications.filter((n) => !n.read).length > 9
+                    ? '9+'
+                    : notifications.filter((n) => !n.read).length}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.headerIconBtn}
             onPress={() => navigation.navigate('Search')}
             activeOpacity={0.75}
           >
@@ -594,6 +627,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         visible={showLocationPrompt}
         onAllow={handleAllowLocation}
         onDeny={handleDenyLocation}
+      />
+
+      {/* In-App Notification Center Modal */}
+      <NotificationModal
+        visible={showNotifModal}
+        onClose={() => setShowNotifModal(false)}
+        notifications={notifications}
+        navigation={navigation}
       />
     </View>
   );
@@ -807,6 +848,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.light,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: '#ea580c',
+    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+    borderWidth: 1.5,
+    borderColor: COLORS.white,
+  },
+  notifBadgeText: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '800',
   },
   bannerContent: {
     flexDirection: 'row',
