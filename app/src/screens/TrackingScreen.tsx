@@ -72,12 +72,13 @@ export default function TrackingScreen() {
         order: orderId,
         rating: reviewRating,
         comment: reviewComment.trim(),
+        restaurant: restId,
       });
       await AsyncStorage.setItem(`reviewed_order_${orderId}`, 'true');
       setHasSubmittedReview(true);
       Alert.alert('Review Submitted', 'Thank you for your feedback!');
     } catch (e: any) {
-      const errMsg = e.response?.data?.order?.[0] || e.response?.data?.detail || e.message || 'Failed to submit review';
+      const errMsg = e.response?.data?.restaurant?.[0] || e.response?.data?.order?.[0] || e.response?.data?.detail || e.message || 'Failed to submit review';
       Alert.alert('Review Error', String(errMsg));
     } finally {
       setIsSubmittingReview(false);

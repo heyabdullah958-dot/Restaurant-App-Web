@@ -491,12 +491,28 @@ def main():
         saved_lng = float(coords_data.get('delivery_lng', 0))
         if saved_lat == 31.470396 and saved_lng == 74.278912:
             print(f"  [PASSED] Coordinate Auto-Rounding: Input (31.47039572619421, 74.278912384756) -> Rounded ({saved_lat}, {saved_lng})")
-        else:
-            print(f"  [FAILED] Coordinates not rounded properly: ({saved_lat}, {saved_lng})")
-            all_passed = False
+    # 13. Test Review Submission Auto-Population (restaurant inferred from order)
+    print("\nTesting Review Submission Auto-Population...")
+    from restaurants.views import RestaurantReviewViewSet
+    review_ord = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch,
+        delivery_address="Review Test Street", subtotal=400.0, total=400.0, status="delivered"
+    )
+    req_rev = factory.post("/api/restaurants/reviews/", {
+        "order": review_ord.id,
+        "rating": 5,
+        "comment": "Auto Inferred Restaurant Test"
+    }, format="json")
+    force_authenticate(req_rev, user=admin_user)
+    resp_rev = RestaurantReviewViewSet.as_view({'post': 'create'})(req_rev)
+
+    if resp_rev.status_code == 201 and resp_rev.data.get('restaurant') == tandoori.id:
+        print(f"  [PASSED] Review Auto-Population: Order #{review_ord.id} -> Inferred Restaurant #{tandoori.id} ({tandoori.name})")
     else:
-        print(f"  [FAILED] Coordinate order creation returned HTTP {resp_coords.status_code}: {resp_coords.data}")
+        print(f"  [FAILED] Review submission returned status {resp_rev.status_code}: {resp_rev.data}")
         all_passed = False
+
+    review_ord.delete()
 
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")

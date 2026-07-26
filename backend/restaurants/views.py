@@ -467,6 +467,8 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
         if not restaurant_obj:
             raise ValidationError({'restaurant': 'Restaurant is required for review.'})
 
+        data['restaurant'] = restaurant_obj.id
+
         if not order_id and RestaurantReview.objects.filter(user=request.user, restaurant=restaurant_obj, order__isnull=True).exists():
             raise ValidationError({'restaurant': 'You have already submitted a review for this restaurant.'})
 

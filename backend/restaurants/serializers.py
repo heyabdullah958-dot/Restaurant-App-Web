@@ -230,6 +230,10 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 class RestaurantReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
     restaurant_name = serializers.ReadOnlyField(source='restaurant.name')
+    restaurant = serializers.PrimaryKeyRelatedField(
+        queryset=Restaurant.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = RestaurantReview
@@ -248,4 +252,17 @@ class RestaurantReviewSerializer(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+    def validate(self, attrs):
+        order = attrs.get('order')
+        restaurant = attrs.get('restaurant')
+
+        if not restaurant and order and hasattr(order, 'restaurant'):
+            attrs['restaurant'] = order.restaurant
+            restaurant = order.restaurant
+
+        if not restaurant:
+            raise serializers.ValidationError({"restaurant": "This field is required."})
+
+        return super().validate(attrs)
 
