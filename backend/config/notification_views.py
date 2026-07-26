@@ -38,6 +38,66 @@ def get_firebase_app():
         return None
 
 
+def send_post_delivery_push_notification(order):
+    """
+    Automated Push Notification Trigger when order status transitions to DELIVERED.
+    Title: Bon Appétit! 🍕 How was your meal?
+    Body: Your order from {Brand Name} was just delivered! Tell us how everything tasted so we can keep making your experience better. ⭐
+    Data: Deep-linking payload for /order-details/{order_id}?rate=true
+    """
+    brand_name = order.restaurant.name if order.restaurant else "FoodSphere"
+    title = "Bon Appétit! 🍕 How was your meal?"
+    body = f"Your order from {brand_name} was just delivered! Tell us how everything tasted so we can keep making your experience better. ⭐"
+
+    payload_data = {
+        'type': 'ORDER_DELIVERED',
+        'order_id': str(order.id),
+        'screen': 'OrderTracking',
+        'rate': 'true',
+        'restaurant_name': str(brand_name)
+    }
+
+    # Log to AdminAuditLog for notification history tracking
+    try:
+        from config.models import AdminAuditLog
+        AdminAuditLog.objects.create(
+            user=getattr(order, 'user', None),
+            action='create',
+            model_name='Notification',
+            object_id=order.id or 0,
+            object_repr=f"Post-Delivery Push: Order #{order.id}",
+            changes={
+                'title': title,
+                'body': body,
+                'target': f"order_{order.id}",
+                'payload': payload_data
+            },
+        )
+    except Exception as audit_err:
+        logger.error(f"Audit log recording failed for post-delivery notification: {audit_err}")
+
+    app = get_firebase_app()
+    if not app:
+        logger.info(f"[FCM Mock/Prepared] Post-Delivery Push for Order #{order.id}: {title} | {body}")
+        return False
+
+    try:
+        from firebase_admin import messaging
+        topic = f"order_{order.id}"
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            data=payload_data,
+            topic=topic,
+        )
+        response = messaging.send(message)
+        logger.info(f"FCM post-delivery push sent for Order #{order.id}: {response}")
+        return True
+    except Exception as e:
+        logger.error(f"FCM post-delivery push send failed for Order #{order.id}: {e}")
+        return False
+
+
+
 class SendNotificationView(APIView):
     permission_classes = [IsAdminUser]
 

@@ -109,6 +109,16 @@ class Order(models.Model):
         if self.rider_id and self.status == 'out_for_delivery':
             BranchRider.objects.filter(pk=self.rider_id).update(status='ON_DELIVERY')
 
+        # 4. Automated "Post-Delivery Feedback" Push Notification trigger
+        if self.status == 'delivered' and old_status != 'delivered':
+            try:
+                from config.notification_views import send_post_delivery_push_notification
+                send_post_delivery_push_notification(self)
+            except Exception as notif_err:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to dispatch post-delivery push notification: {notif_err}")
+
+
     def __str__(self):
         return f"Order #{self.id or self.pk or 'new'} - {self.restaurant.name} ({self.status})"
 

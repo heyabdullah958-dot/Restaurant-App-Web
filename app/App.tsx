@@ -1,18 +1,21 @@
 import React, { useEffect } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { View, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { store, AppDispatch, RootState } from './src/store';
 import { setupInterceptors } from './src/services/api';
 import { loadSavedToken } from './src/store/userSlice';
+import { setNavigationRef, initPushNotificationListener } from './src/services/notificationService';
 import { COLORS } from './src/theme';
+
 
 import { enableFreeze } from 'react-native-screens';
 
@@ -172,14 +175,36 @@ function MainTabs() {
 
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>();
+  const navRef = useNavigationContainerRef();
 
   useEffect(() => {
     // Load saved auth token from AsyncStorage on app startup
     dispatch(loadSavedToken());
-  }, [dispatch]);
+
+    // Register navigation reference for push notification deep-linking
+    setNavigationRef(navRef);
+    const cleanup = initPushNotificationListener();
+
+    // Check for any pending notification deep-link stored in AsyncStorage
+    AsyncStorage.getItem('pending_deep_link').then((val) => {
+      if (val) {
+        try {
+          const link = JSON.parse(val);
+          AsyncStorage.removeItem('pending_deep_link');
+          if (navRef.isReady() && link?.screen) {
+            navRef.navigate(link.screen, link.params);
+          }
+        } catch (e) {}
+      }
+    });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [dispatch, navRef]);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navRef}>
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{
@@ -203,6 +228,7 @@ function AppContent() {
     </NavigationContainer>
   );
 }
+
 
 export default function App() {
   return (

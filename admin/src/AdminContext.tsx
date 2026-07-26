@@ -43,7 +43,7 @@ interface AdminContextProps {
   selectedBrandId: number;
   loading: boolean;
   toasts: ToastMessage[];
-  showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
+  showToast: (message: string, type?: 'success' | 'info' | 'error', duration?: number) => void;
   removeToast: (id: number) => void;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -286,9 +286,31 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
     return savedBrandId ? Number(savedBrandId) : 1;
   });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const knownOrderIdsRef = useRef<Set<number>>(new Set());
+  // Session Storage persistence helpers for single-trigger order notification tracking
+  const loadNotifiedOrderIdsFromSession = (): Set<number> => {
+    try {
+      const stored = sessionStorage.getItem('foodsphere_notified_order_ids');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return new Set(parsed.map(Number));
+        }
+      }
+    } catch (e) {
+      console.warn('[sessionStorage] Failed to load notified order IDs:', e);
+    }
+    return new Set();
+  };
+
+  const saveNotifiedOrderIdsToSession = (ids: Set<number>) => {
+    try {
+      sessionStorage.setItem('foodsphere_notified_order_ids', JSON.stringify(Array.from(ids)));
+    } catch (e) {
+      console.warn('[sessionStorage] Failed to save notified order IDs:', e);
+    }
+  };
+
+  const knownOrderIdsRef = useRef<Set<number>>(loadNotifiedOrderIdsFromSession());
   const isInitialOrderFetchRef = useRef<boolean>(true);
 
 /** Safe helper to extract an array from API responses whether plain array [...] or paginated { results: [...] } */
@@ -522,25 +544,20 @@ function extractArray<T = any>(data: any): T[] {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBrandId]);
 
-  // Show dynamic toast notifications
-  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
-    const id = Date.now();
+  // Show dynamic toast notifications with individual auto-dismiss timers
+  const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success', duration: number = 4000) => {
+    const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, type }]);
+
+    // Each toast gets its own independent auto-dismiss timer!
+    setTimeout(() => {
+      removeToast(id);
+    }, duration);
   };
 
   const removeToast = (id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
-
-  // Auto-remove toasts after 4 seconds
-  useEffect(() => {
-    if (toasts.length > 0) {
-      const timer = setTimeout(() => {
-        removeToast(toasts[0].id);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [toasts]);
 
   // Auto-polling is handled by the central quiet polling loop using refreshOrdersRef
 
@@ -647,6 +664,9 @@ function extractArray<T = any>(data: any): T[] {
     localStorage.removeItem('foodsphere_admin_orders_cache');
     localStorage.removeItem('foodsphere_admin_restaurants_cache');
     knownOrderIdsRef.current = new Set();
+    try {
+      sessionStorage.removeItem('foodsphere_notified_order_ids');
+    } catch (e) {}
     isInitialOrderFetchRef.current = true;
     setUser(null);
     setOrders([]);
@@ -699,6 +719,7 @@ function extractArray<T = any>(data: any): T[] {
         if (isInitialOrderFetchRef.current) {
           // On initial load, mark all existing orders as known so pre-existing orders do NOT trigger alert popups/sounds
           newOrders.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
+          saveNotifiedOrderIdsToSession(knownOrderIdsRef.current);
           isInitialOrderFetchRef.current = false;
         } else {
           // Identify newly arrived orders in received/pending state that have NEVER been notified
@@ -709,6 +730,7 @@ function extractArray<T = any>(data: any): T[] {
           if (newlyArrived.length > 0) {
             // Immediately mark newly arrived order IDs as known BEFORE playing audio/toast to prevent duplicate triggers
             newlyArrived.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
+            saveNotifiedOrderIdsToSession(knownOrderIdsRef.current);
 
             // Play Web Audio API synthesized chime ONCE per new order batch
             try {
@@ -740,11 +762,13 @@ function extractArray<T = any>(data: any): T[] {
               }
             } catch {}
 
-            showToast(`🔔 ${newlyArrived.length} New Order(s) Received!`, 'info');
+            // Auto-dismiss toast notification after 12 seconds (10-15s requirement)
+            showToast(`🔔 ${newlyArrived.length} New Order(s) Received!`, 'info', 12000);
           }
 
-          // Always add all fetched order IDs to known set
+          // Always add all fetched order IDs to known set & sync with sessionStorage
           newOrders.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
+          saveNotifiedOrderIdsToSession(knownOrderIdsRef.current);
         }
 
         setOrders(

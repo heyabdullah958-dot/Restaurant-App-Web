@@ -578,6 +578,37 @@ def main():
     auto_ord.delete()
     auto_rider.delete()
 
+    # 16. Test Automated Post-Delivery Feedback Push Notification Trigger
+    print("\nTesting Automated Post-Delivery Feedback Push Notification Trigger...")
+    from config.models import AdminAuditLog
+    push_ord = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch,
+        delivery_address="Push Notification Street", subtotal=800.0, total=800.0, status="out_for_delivery"
+    )
+    # Transition status to delivered -> should trigger send_post_delivery_push_notification
+    push_ord.status = "delivered"
+    push_ord.save()
+
+    # Check if notification was recorded in AdminAuditLog
+    notif_log = AdminAuditLog.objects.filter(
+        model_name="Notification",
+        object_repr__contains=f"Post-Delivery Push: Order #{push_ord.id}"
+    ).first()
+
+    if notif_log and "Bon" in notif_log.changes.get("title", ""):
+        print(f"  [PASSED] Automated Post-Delivery Push Triggered for Order #{push_ord.id}")
+        title_safe = notif_log.changes.get('title', '').encode('ascii', 'replace').decode('ascii')
+        body_safe = notif_log.changes.get('body', '').encode('ascii', 'replace').decode('ascii')
+        print(f"           Title: '{title_safe}'")
+        print(f"           Body: '{body_safe}'")
+        print(f"           Payload: {notif_log.changes.get('payload')}")
+    else:
+        print(f"  [FAILED] Post-delivery push audit log not found for Order #{push_ord.id}")
+        all_passed = False
+
+
+    push_ord.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:
@@ -585,3 +616,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

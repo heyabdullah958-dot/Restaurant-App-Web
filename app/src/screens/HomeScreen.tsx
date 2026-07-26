@@ -24,8 +24,11 @@ import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
 import { getImageUrl, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { RestaurantCardSkeleton } from '../components/SkeletonLoader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
+
 
 const { width } = Dimensions.get('window');
 
@@ -236,6 +239,42 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = React.useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
   const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
+  const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
+
+  const checkUnratedDeliveredOrders = React.useCallback(async () => {
+    try {
+      const res = await api.get('/orders/');
+      const results = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      const deliveredOrders = results.filter((o: any) => o.status?.toLowerCase() === 'delivered');
+
+      for (const order of deliveredOrders) {
+        const reviewed = await AsyncStorage.getItem(`reviewed_order_${order.id}`);
+        const dismissed = await AsyncStorage.getItem(`dismissed_feedback_order_${order.id}`);
+        if (reviewed !== 'true' && dismissed !== 'true') {
+          setUnratedOrder(order);
+          return;
+        }
+      }
+      setUnratedOrder(null);
+    } catch (e) {
+      try {
+        const activeOrderId = await AsyncStorage.getItem('foodsphere_guest_active_order_id');
+        if (activeOrderId) {
+          const orderId = Number(activeOrderId);
+          const reviewed = await AsyncStorage.getItem(`reviewed_order_${orderId}`);
+          const dismissed = await AsyncStorage.getItem(`dismissed_feedback_order_${orderId}`);
+          if (reviewed !== 'true' && dismissed !== 'true') {
+            const guestRes = await api.get(`/orders/${orderId}/`);
+            if (guestRes.data?.status?.toLowerCase() === 'delivered') {
+              setUnratedOrder(guestRes.data);
+              return;
+            }
+          }
+        }
+      } catch (guestErr) {}
+      setUnratedOrder(null);
+    }
+  }, []);
 
   const filteredRestaurants = React.useMemo(() => {
     const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
@@ -281,15 +320,18 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       if (user && !user.is_guest) {
         dispatch(fetchUserProfile() as any);
       }
+      checkUnratedDeliveredOrders();
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
         if (user && !user.is_guest) {
           dispatch(fetchUserProfile() as any);
         }
+        checkUnratedDeliveredOrders();
       }, 5000);
       return () => clearInterval(interval);
-    }, [dispatch, user])
+    }, [dispatch, user, checkUnratedDeliveredOrders])
   );
+
 
   const handleAllowLocation = React.useCallback(async () => {
     setShowLocationPrompt(false);
@@ -345,6 +387,61 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     <View>
       <BannerCarousel onPressBanner={handlePressBanner} />
 
+      {unratedOrder && (
+        <View style={styles.feedbackBannerContainer}>
+          <LinearGradient
+            colors={['#166534', '#15803d']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.feedbackBannerGradient}
+          >
+            <View style={styles.feedbackBannerHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <Text style={{ fontSize: 20, marginRight: 8 }}>🍕</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.feedbackBannerTitle}>Bon Appétit! How was your meal?</Text>
+                  <Text style={styles.feedbackBannerSub}>
+                    Rate your recent order from {unratedOrder.restaurant?.name || unratedOrder.restaurant_name || 'FoodSphere'} (#{unratedOrder.id}) ⭐
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={async () => {
+                  await AsyncStorage.setItem(`dismissed_feedback_order_${unratedOrder.id}`, 'true');
+                  setUnratedOrder(null);
+                }}
+                style={styles.feedbackDismissBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close-circle-outline" size={22} color="#bbf7d0" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.feedbackBannerActionRow}>
+              <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Ionicons key={star} name="star" size={16} color="#f59e0b" />
+                ))}
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => {
+                  navigation.navigate('Tracking', {
+                    orderId: unratedOrder.id,
+                    rate: true,
+                    openReviewModal: true,
+                  });
+                }}
+                style={styles.feedbackRateNowBtn}
+              >
+                <Text style={styles.feedbackRateNowText}>Rate Meal ⭐</Text>
+                <Ionicons name="arrow-forward" size={14} color="#166534" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </View>
+      )}
+
       <FlatList
         data={categories}
         renderItem={renderCategoryChipItem}
@@ -360,7 +457,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <Text style={styles.sectionLink}>View All</Text>
       </View>
     </View>
-  ), [handlePressBanner, renderCategoryChipItem]);
+  ), [handlePressBanner, unratedOrder, navigation, renderCategoryChipItem]);
+
 
   const ListEmpty = React.useMemo(() => {
     if (loading && filteredRestaurants.length === 0) {
@@ -839,20 +937,78 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#92400e', // text-amber-800
   },
-  stickyLoginSubtitle: {
-    fontSize: 11,
-    color: '#b45309', // text-amber-700
-    marginTop: 1,
+  stickyLoginText: {
+    fontSize: 12,
+    color: '#92400e',
+    lineHeight: 16,
   },
   stickyLoginBtn: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: 8,
   },
   stickyLoginBtnText: {
     color: COLORS.white,
-    fontSize: 12,
     fontWeight: 'bold',
+    fontSize: 12,
+  },
+  feedbackBannerContainer: {
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#166534',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  feedbackBannerGradient: {
+    padding: SPACING.md,
+    borderRadius: 14,
+  },
+  feedbackBannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  feedbackBannerTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  feedbackBannerSub: {
+    fontSize: 12,
+    color: '#dcfce7',
+    marginTop: 2,
+  },
+  feedbackDismissBtn: {
+    padding: 2,
+    marginLeft: 6,
+  },
+  feedbackBannerActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  feedbackRateNowBtn: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  feedbackRateNowText: {
+    color: '#166534',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });
