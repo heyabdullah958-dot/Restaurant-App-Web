@@ -190,6 +190,31 @@ export default function CheckoutScreen() {
   const restaurantRef = React.useRef(restaurant);
   React.useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
 
+  // Load saved guest info on mount if fields are empty
+  React.useEffect(() => {
+    const loadSavedGuestInfo = async () => {
+      try {
+        const savedName = await AsyncStorage.getItem('@foodsphere_guest_name');
+        const savedPhone = await AsyncStorage.getItem('@foodsphere_guest_phone');
+        const savedAddress = await AsyncStorage.getItem('@foodsphere_guest_address');
+
+        if (savedName && !guestName) {
+          setGuestName(savedName);
+        }
+        if (savedPhone && !guestPhone) {
+          setGuestPhone(savedPhone);
+        }
+        if (savedAddress && !address) {
+          setAddress(savedAddress);
+        }
+      } catch (e) {
+        console.warn('Failed to load saved guest info from AsyncStorage:', e);
+      }
+    };
+
+    loadSavedGuestInfo();
+  }, []);
+
   // Load branches for selected restaurant on focus & poll every 10s
   useFocusEffect(
     React.useCallback(() => {
@@ -197,10 +222,19 @@ export default function CheckoutScreen() {
 
       const currentRestaurant = restaurantRef.current;
       const initialBranches = (currentRestaurant?.branches && Array.isArray(currentRestaurant.branches))
-        ? currentRestaurant.branches
+        ? currentRestaurant.branches.filter((b: any) => 
+            b.is_active !== false && 
+            !b.is_closed && 
+            !b.is_force_closed && 
+            !b.name?.toLowerCase().includes('(closed)') && 
+            !b.name?.toLowerCase().endsWith('closed')
+          )
         : [];
 
       setBranches(initialBranches);
+      if (initialBranches.length > 0) {
+        setSelectedBranchId((prev) => prev && initialBranches.some((b: any) => b.id === prev) ? prev : initialBranches[0].id);
+      }
 
       const fetchLiveBranches = () => {
         const targetSlug = restaurantRef.current?.slug;
@@ -222,12 +256,19 @@ export default function CheckoutScreen() {
               list = list.results;
             }
             if (Array.isArray(list)) {
-              setBranches(list);
+              // Filter out closed, inactive, and dummy branches completely
+              const activeOnly = list.filter((b: any) => 
+                b.is_active !== false && 
+                b.is_closed !== true && 
+                b.is_force_closed !== true && 
+                !b.name?.toLowerCase().includes('(closed)') && 
+                !b.name?.toLowerCase().endsWith('closed')
+              );
+              setBranches(activeOnly);
               setSelectedBranchId((prev) => {
-                const activePrev = list.find((b: any) => b.id === prev && b.is_active !== false);
+                const activePrev = activeOnly.find((b: any) => b.id === prev);
                 if (activePrev) return prev;
-                const firstActive = list.find((b: any) => b.is_active !== false);
-                return firstActive ? firstActive.id : (list.length > 0 ? list[0].id : null);
+                return activeOnly.length > 0 ? activeOnly[0].id : null;
               });
             }
           })
@@ -247,7 +288,7 @@ export default function CheckoutScreen() {
   );
 
   const areAllBranchesClosed = useMemo(() => {
-    return branches.length > 0 && branches.every((b: any) => b.is_active === false);
+    return branches.length === 0;
   }, [branches]);
 
   const deliveryFee = useMemo(() => {
@@ -429,8 +470,12 @@ export default function CheckoutScreen() {
         // Refresh user profile so loyalty points update live
         dispatch(fetchUserProfile());
 
-        // Save delivery address locally for future use
+        // Save delivery address & guest details locally for future checkouts
         try {
+          if (effectiveName) await AsyncStorage.setItem('@foodsphere_guest_name', effectiveName);
+          if (effectivePhone) await AsyncStorage.setItem('@foodsphere_guest_phone', effectivePhone);
+          if (address.trim()) await AsyncStorage.setItem('@foodsphere_guest_address', address.trim());
+
           if (user?.id) {
             await AsyncStorage.setItem(`user_address_${user.id}`, address.trim());
           } else {
@@ -620,43 +665,27 @@ export default function CheckoutScreen() {
               Choose the exact branch that will prepare and deliver your order:
             </Text>
 
-            {/* Specific Branches */}
+            {/* Specific Active Operational Branches */}
             {branches.map((b) => {
-              const isClosed = b.is_active === false;
-              const isSelected = selectedBranchId === b.id && !isClosed;
+              const isSelected = selectedBranchId === b.id;
               return (
                 <TouchableOpacity 
                   key={b.id}
-                  activeOpacity={isClosed ? 1 : 0.8}
-                  disabled={isClosed}
+                  activeOpacity={0.8}
                   style={[
                     styles.branchCardOption,
                     isSelected && styles.branchCardSelected,
-                    isClosed && { opacity: 0.5, backgroundColor: '#f8fafc', borderColor: '#cbd5e1' }
                   ]}
-                  onPress={() => {
-                    if (isClosed) {
-                      showAlert('Branch Closed', `${b.name} Branch is currently closed and not accepting orders.`);
-                    } else {
-                      setSelectedBranchId(b.id);
-                    }
-                  }}
+                  onPress={() => setSelectedBranchId(b.id)}
                 >
                   <Ionicons 
                     name={isSelected ? "radio-button-on" : "radio-button-off"} 
                     size={20} 
-                    color={isClosed ? '#94a3b8' : (isSelected ? COLORS.primary : COLORS.gray)} 
+                    color={isSelected ? COLORS.primary : COLORS.gray} 
                   />
                   <View style={{ flex: 1, marginLeft: SPACING.sm }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 4 }}>
-                      <Text style={[styles.branchOptionTitle, isClosed && { color: '#64748b' }]}>{b.name} Branch</Text>
-                      {isClosed && (
-                        <View style={{ backgroundColor: '#ef4444', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
-                          <Text style={{ fontSize: 10, fontWeight: '900', color: '#ffffff', letterSpacing: 0.5 }}>CLOSED</Text>
-                        </View>
-                      )}
-                    </View>
-                    {!!b.address && <Text style={[styles.branchOptionDesc, isClosed && { color: '#94a3b8' }]}>{b.address}</Text>}
+                    <Text style={styles.branchOptionTitle}>{b.name} Branch</Text>
+                    {!!b.address && <Text style={styles.branchOptionDesc}>{b.address}</Text>}
                   </View>
                   {isSelected && (
                     <View style={styles.selectedCheckBadge}>
@@ -671,7 +700,7 @@ export default function CheckoutScreen() {
               <View style={{ marginTop: 10, padding: 12, backgroundColor: '#fef2f2', borderRadius: 10, borderWidth: 1, borderColor: '#fca5a5', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Ionicons name="alert-circle" size={20} color="#dc2626" />
                 <Text style={{ flex: 1, fontSize: 12, fontWeight: 'bold', color: '#991b1b' }}>
-                  All branches for this restaurant are currently closed and not accepting orders.
+                  No active operational branches are currently accepting orders for this restaurant.
                 </Text>
               </View>
             )}
