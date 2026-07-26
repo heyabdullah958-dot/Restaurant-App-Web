@@ -22,6 +22,7 @@ export const OrderManagement: React.FC = () => {
   const [filterBrandId, setFilterBrandId] = useState<number | 'all'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [mainViewTab, setMainViewTab] = useState<'active' | 'delivered' | 'cancelled' | 'all'>('active');
   const [riders, setRiders] = useState<any[]>([]);
 
   useEffect(() => {
@@ -303,14 +304,6 @@ export const OrderManagement: React.FC = () => {
     icon: React.ReactNode 
   }[] = [
     { 
-      title: 'Pending', 
-      status: 'pending', 
-      color: 'text-rose-400', 
-      border: 'border-l-rose-500',
-      accent: 'bg-rose-500/10 text-rose-400 border-rose-500/20', 
-      icon: <Clock size={15} className="text-rose-400 animate-pulse" /> 
-    },
-    { 
       title: 'Received', 
       status: 'received', 
       color: 'text-indigo-400', 
@@ -333,14 +326,6 @@ export const OrderManagement: React.FC = () => {
       border: 'border-l-sky-500',
       accent: 'bg-sky-500/10 text-sky-400 border-sky-500/20', 
       icon: <ArrowRight size={15} className="animate-pulse" /> 
-    },
-    { 
-      title: 'Delivered', 
-      status: 'delivered', 
-      color: 'text-emerald-400', 
-      border: 'border-l-emerald-500',
-      accent: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', 
-      icon: <CheckCircle size={15} /> 
     },
   ];
 
@@ -528,265 +513,289 @@ export const OrderManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Column Filter Tabs — Allows jumping to Out for Delivery or Delivered instantly */}
-      <div className="flex flex-wrap items-center gap-2 bg-slate-900/60 p-2 rounded-2xl border border-slate-800/80 backdrop-blur-md">
-        <button
-          onClick={() => setSelectedColumnFilter('all')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-            selectedColumnFilter === 'all'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-          }`}
-        >
-          All Columns ({brandOrders.length})
-        </button>
-        {columns.map((col) => {
-          const count = brandOrders.filter((o) => o.status === col.status).length;
-          const isActive = selectedColumnFilter === col.status;
-          return (
+      {/* Sub-Tab Order Navigation Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-2.5 rounded-2xl border border-slate-800 backdrop-blur-md">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setMainViewTab('active')}
+            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${
+              mainViewTab === 'active'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>⚡ Active Orders Board</span>
+            <span className="bg-slate-950/60 px-2 py-0.5 rounded-full text-[10px] font-mono text-blue-300">
+              {brandOrders.filter(o => ['received', 'preparing', 'out_for_delivery'].includes(o.status)).length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setMainViewTab('delivered')}
+            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${
+              mainViewTab === 'delivered'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>📦 Delivered Archive</span>
+            <span className="bg-slate-950/60 px-2 py-0.5 rounded-full text-[10px] font-mono text-emerald-300">
+              {brandOrders.filter(o => o.status === 'delivered').length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setMainViewTab('cancelled')}
+            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${
+              mainViewTab === 'cancelled'
+                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>🛑 Cancelled Audit Log</span>
+            <span className="bg-slate-950/60 px-2 py-0.5 rounded-full text-[10px] font-mono text-rose-300">
+              {brandOrders.filter(o => o.status === 'cancelled').length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setMainViewTab('all')}
+            className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${
+              mainViewTab === 'all'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <span>📊 All Orders History</span>
+            <span className="bg-slate-950/60 px-2 py-0.5 rounded-full text-[10px] font-mono text-purple-300">
+              {brandOrders.length}
+            </span>
+          </button>
+        </div>
+
+        {/* Quick Column Filter within Active view */}
+        {mainViewTab === 'active' && (
+          <div className="flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
             <button
-              key={col.status}
-              onClick={() => setSelectedColumnFilter(col.status)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                isActive
-                  ? `${col.accent} border-current shadow-sm`
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              onClick={() => setSelectedColumnFilter('all')}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                selectedColumnFilter === 'all' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {col.icon}
-              <span>{col.title}</span>
-              <span className="bg-slate-950/40 px-2 py-0.5 rounded-full text-[10px] font-extrabold">{count}</span>
+              All 3 Columns
             </button>
-          );
-        })}
+            {columns.map((c) => (
+              <button
+                key={c.status}
+                onClick={() => setSelectedColumnFilter(c.status)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  selectedColumnFilter === c.status ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {c.title}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Kanban Board Columns Grid */}
-      <div 
-        ref={boardContainerRef}
-        className="flex flex-col lg:flex-row gap-5 items-start overflow-x-auto pb-4 custom-scrollbar"
-      >
-        {filteredColumns.map((col) => {
-          const colOrders = brandOrders
-            .filter((o) => o.status === col.status)
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          
-          return (
-            <div 
-              key={col.status} 
-              id={`column-${col.status}`}
-              className={`${
-                selectedColumnFilter === 'all'
-                  ? 'w-full lg:w-[280px] xl:w-[300px] lg:min-w-[270px] flex-shrink-0'
-                  : 'w-full'
-              } bg-slate-900/40 border border-slate-800/70 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-700`}
-            >
-              {/* Column Header */}
-              <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-slate-800/60">
-                <span className={`font-black text-xs uppercase tracking-wider ${col.color} flex items-center gap-2`}>
-                  {col.icon} {col.title}
-                </span>
-                <span className={`font-black px-2.5 py-0.5 rounded-full text-xs border ${col.accent}`}>
-                  {colOrders.length}
-                </span>
-              </div>
+      {/* VIEW TAB 1: ACTIVE KANBAN BOARD */}
+      {mainViewTab === 'active' && (
+        <div 
+          ref={boardContainerRef}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start overflow-x-auto pb-4 custom-scrollbar"
+        >
+          {filteredColumns.map((col) => {
+            const colOrders = brandOrders
+              .filter((o) => o.status === col.status)
+              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            
+            return (
+              <div 
+                key={col.status} 
+                id={`column-${col.status}`}
+                className="w-full bg-slate-900/40 border border-slate-800/70 rounded-2xl p-4 flex flex-col max-h-[82vh] overflow-hidden backdrop-blur-md shadow-inner transition-all duration-300 hover:border-slate-700"
+              >
+                {/* Column Header */}
+                <div className="flex justify-between items-center mb-4 pb-2.5 border-b border-slate-800/60">
+                  <span className={`font-black text-xs uppercase tracking-wider ${col.color} flex items-center gap-2`}>
+                    {col.icon} {col.title}
+                  </span>
+                  <span className={`font-black px-2.5 py-0.5 rounded-full text-xs border ${col.accent}`}>
+                    {colOrders.length}
+                  </span>
+                </div>
 
-              {/* Column Cards Container */}
-              <div className="flex-1 space-y-3.5 overflow-y-auto pr-1 custom-scrollbar">
-                {colOrders.map((order) => {
-                  return (
-                    <div 
-                      key={order.id} 
-                      className={`bg-slate-950/60 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border} ${
-                        col.status === 'pending' ? 'shadow-rose-500/5 hover:shadow-rose-500/10 hover:border-rose-900' : ''
-                      }`}
-                    >
-                      <div>
-                        {/* Order ID, Brand Badge & Time */}
-                        <div className="flex flex-wrap justify-between items-center gap-1.5 mb-3">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
-                              <ShoppingBag size={11} className="text-slate-400" />
-                              #{order.id}
-                            </span>
-                            {order.restaurant_name && (
-                              <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md">
-                                {order.restaurant_name}
+                {/* Column Cards Container */}
+                <div className="flex-1 space-y-3.5 overflow-y-auto pr-1 custom-scrollbar">
+                  {colOrders.map((order) => {
+                    return (
+                      <div 
+                        key={order.id} 
+                        className={`bg-slate-950/60 border border-slate-900 hover:border-slate-800 p-4 rounded-xl shadow-lg flex flex-col justify-between group hover:-translate-y-0.5 transition-all duration-300 border-l-4 ${col.border}`}
+                      >
+                        <div>
+                          {/* Order ID, Brand Badge & Time */}
+                          <div className="flex flex-wrap justify-between items-center gap-1.5 mb-3">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                <ShoppingBag size={11} className="text-slate-400" />
+                                #{order.id}
                               </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            {order.status === 'pending' && (() => {
-                              const minsPassed = Math.floor((new Date().getTime() - new Date(order.created_at).getTime()) / 60000);
-                              if (minsPassed >= 10) {
-                                return <span className="bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold px-1.5 py-0.5 rounded animate-pulse">🔥 SLA BREACH ({minsPassed}m)</span>;
-                              } else if (minsPassed >= 5) {
-                                return <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[10px] font-bold px-1.5 py-0.5 rounded">⚠️ LATE ({minsPassed}m)</span>;
-                              }
-                              return null;
-                            })()}
-                            <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
-                              <Clock size={10} className="text-slate-500" />
-                              {formatOrderTime(order.created_at)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Customer Info */}
-                        <div className="space-y-1.5 mb-3.5 bg-slate-950/20 p-2.5 rounded-lg border border-slate-900/10">
-                          <span className="block font-black text-xs text-slate-100 flex items-center gap-1">
-                            <User size={11} className="text-slate-500" />
-                            {order.guest_name || order.user_or_guest}
-                          </span>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
-                            <Phone size={10} className="text-slate-500" />
-                            <span>{order.guest_phone || 'N/A'}</span>
-                          </div>
-                          <div className="flex items-start gap-1.5 text-[11px] text-slate-400 leading-relaxed">
-                            <MapPin size={10} className="mt-0.5 flex-shrink-0 text-slate-500" />
-                            <span className="line-clamp-none break-words">{order.delivery_address}</span>
-                          </div>
-                          {order.branch_name && (
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <span className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                                📍 {order.branch_name} Branch
+                              {order.restaurant_name && (
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md">
+                                  {order.restaurant_name}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
+                                <Clock size={10} className="text-slate-500" />
+                                {formatOrderTime(order.created_at)}
                               </span>
                             </div>
-                          )}
-                          
-                          {/* Rider Assignment Control */}
-                          <div className="mt-2 pt-2 border-t border-slate-900/60">
-                            {order.rider ? (
-                              <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-400 truncate">
-                                  <Bike size={14} className="flex-shrink-0" />
-                                  <span className="truncate">{order.rider.name}</span>
-                                  <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>
-                                </div>
-                                <button
-                                  onClick={() => triggerRiderWhatsApp(order)}
-                                  title="Send WhatsApp Dispatch to Rider"
-                                  className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors flex-shrink-0"
-                                >
-                                  <MessageSquare size={11} /> WhatsApp
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 truncate">
-                                  <Bike size={12} className="flex-shrink-0" />
-                                  <span className="truncate">Unassigned</span>
-                                </div>
-                                <select
-                                  value=""
-                                  onChange={async (e) => {
-                                    const selectedId = e.target.value ? Number(e.target.value) : null;
-                                    if (!selectedId) return;
-                                    try {
-                                      await assignRiderToOrder(order.id, selectedId);
-                                      showToast('Rider assigned!', 'success');
-                                      fetchRiders().then(r => setRiders(r || [])).catch(() => {});
-                                      refreshOrders();
-                                    } catch (err: any) {
-                                      showToast(err.message || 'Failed to assign rider', 'error');
-                                    }
-                                  }}
-                                  className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[145px] truncate"
-                                >
-                                  <option value="">+ Assign Rider...</option>
-                                  {riders
-                                    .filter((r: any) => {
-                                      const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
-                                      const targetBranchId = order.branch_id || user?.branchId;
-                                      const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
-                                      return isAvail && matchesBranch;
-                                    })
-                                    .map((r: any) => (
-                                      <option key={r.id} value={r.id}>
-                                        {r.name} ({r.phone})
-                                      </option>
-                                    ))}
-                                </select>
+                          </div>
+
+                          {/* Customer Info */}
+                          <div className="space-y-1.5 mb-3.5 bg-slate-950/20 p-2.5 rounded-lg border border-slate-900/10">
+                            <span className="block font-black text-xs text-slate-100 flex items-center gap-1">
+                              <User size={11} className="text-slate-500" />
+                              {order.guest_name || order.user_or_guest}
+                            </span>
+                            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-semibold">
+                              <Phone size={10} className="text-slate-500" />
+                              <span>{order.guest_phone || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-start gap-1.5 text-[11px] text-slate-400 leading-relaxed">
+                              <MapPin size={10} className="mt-0.5 flex-shrink-0 text-slate-500" />
+                              <span className="line-clamp-none break-words">{order.delivery_address}</span>
+                            </div>
+                            {order.branch_name && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                  📍 {order.branch_name} Branch
+                                </span>
                               </div>
                             )}
+                            
+                            {/* Rider Assignment Control */}
+                            <div className="mt-2 pt-2 border-t border-slate-900/60">
+                              {order.rider ? (
+                                <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-400 truncate">
+                                    <Bike size={14} className="flex-shrink-0" />
+                                    <span className="truncate">{order.rider.name}</span>
+                                    <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>
+                                  </div>
+                                  <button
+                                    onClick={() => triggerRiderWhatsApp(order)}
+                                    title="Send WhatsApp Dispatch to Rider"
+                                    className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors flex-shrink-0"
+                                  >
+                                    <MessageSquare size={11} /> WhatsApp
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 truncate">
+                                    <Bike size={12} className="flex-shrink-0" />
+                                    <span className="truncate">Unassigned</span>
+                                  </div>
+                                  <select
+                                    value=""
+                                    onChange={async (e) => {
+                                      const selectedId = e.target.value ? Number(e.target.value) : null;
+                                      if (!selectedId) return;
+                                      try {
+                                        await assignRiderToOrder(order.id, selectedId);
+                                        showToast('Rider assigned!', 'success');
+                                        fetchRiders().then(r => setRiders(r || [])).catch(() => {});
+                                        refreshOrders();
+                                      } catch (err: any) {
+                                        showToast(err.message || 'Failed to assign rider', 'error');
+                                      }
+                                    }}
+                                    className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[145px] truncate"
+                                  >
+                                    <option value="">+ Assign Rider...</option>
+                                    {riders
+                                      .filter((r: any) => {
+                                        const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
+                                        const targetBranchId = order.branch_id || user?.branchId;
+                                        const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
+                                        return isAvail && matchesBranch;
+                                      })
+                                      .map((r: any) => (
+                                        <option key={r.id} value={r.id}>
+                                          {r.name} ({r.phone})
+                                        </option>
+                                      ))}
+                                  </select>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Items summary list */}
+                          <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-1.5">
+                            {order.items.map((item, idx) => (
+                              <div key={idx} className="flex justify-between items-start text-[11px] text-slate-300">
+                                <span className="flex-1 pr-2 break-words">
+                                  <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
+                                  {item.menu_item_name}
+                                </span>
+                                <span className="font-semibold text-slate-400 ml-2 whitespace-nowrap">Rs.{item.total_price}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
-                        {/* Items summary list */}
-                        <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-1.5">
-                          {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-start text-[11px] text-slate-300">
-                              <span className="flex-1 pr-2 break-words">
-                                <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
-                                {item.menu_item_name}
-                              </span>
-                              <span className="font-semibold text-slate-400 ml-2 whitespace-nowrap">Rs.{item.total_price}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                        {/* Pricing, Payment & Actions */}
+                        <div className="border-t border-slate-900 pt-3">
+                          <div className="flex justify-between items-center mb-3.5 bg-slate-900/20 px-2 py-1.5 rounded-lg">
+                            <span className="text-[11px] uppercase font-black text-slate-400 flex items-center gap-0.5">
+                              <DollarSign size={10} className="text-slate-500" />
+                              {order.payment_method}
+                            </span>
+                            <span className="font-extrabold text-sm text-emerald-400">Rs. {order.total}</span>
+                          </div>
 
-                      {/* Pricing, Payment & Actions */}
-                      <div className="border-t border-slate-900 pt-3">
-                        <div className="flex justify-between items-center mb-3.5 bg-slate-900/20 px-2 py-1.5 rounded-lg">
-                          <span className="text-[11px] uppercase font-black text-slate-400 flex items-center gap-0.5">
-                            <DollarSign size={10} className="text-slate-500" />
-                            {order.payment_method}
-                          </span>
-                          <span className="font-extrabold text-sm text-emerald-400">Rs. {order.total}</span>
-                        </div>
+                          {/* Kanban Action buttons */}
+                          <div className="space-y-2">
+                            {order.status === 'received' && (
+                              <button
+                                onClick={() => handleStatusChange(order, 'preparing')}
+                                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-450 hover:to-orange-450 text-slate-950 font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                              >
+                                🍳 Start Preparing →
+                              </button>
+                            )}
 
-                        {/* Kanban Action buttons & Status Dropdown */}
-                        <div className="space-y-2">
-                          {/* Step 1: Pending -> Received */}
-                          {order.status === 'pending' && (
-                            <button
-                              onClick={() => handleStatusChange(order, 'received')}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 text-white font-black py-2.5 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
-                            >
-                              <CheckCircle size={13} /> Accept Order →
-                            </button>
-                          )}
+                            {order.status === 'preparing' && (
+                              <button
+                                onClick={() => handleStatusChange(order, 'out_for_delivery')}
+                                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                              >
+                                🛵 Dispatch Out For Delivery →
+                              </button>
+                            )}
 
-                          {/* Step 2: Received -> Preparing */}
-                          {order.status === 'received' && (
-                            <button
-                              onClick={() => handleStatusChange(order, 'preparing')}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-450 hover:to-orange-450 text-slate-950 font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
-                            >
-                              🍳 Start Preparing →
-                            </button>
-                          )}
+                            {order.status === 'out_for_delivery' && (
+                              <button
+                                onClick={() => handleStatusChange(order, 'delivered')}
+                                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
+                              >
+                                <CheckCircle size={13} /> Mark Delivered ✅
+                              </button>
+                            )}
 
-                          {/* Step 3: Preparing -> Out for Delivery */}
-                          {order.status === 'preparing' && (
-                            <button
-                              onClick={() => handleStatusChange(order, 'out_for_delivery')}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
-                            >
-                              🛵 Dispatch Out For Delivery →
-                            </button>
-                          )}
-
-                          {/* Step 4: Out for Delivery -> Delivered */}
-                          {order.status === 'out_for_delivery' && (
-                            <button
-                              onClick={() => handleStatusChange(order, 'delivered')}
-                              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
-                            >
-                              <CheckCircle size={13} /> Mark Delivered ✅
-                            </button>
-                          )}
-
-                          {/* Quick Jump Status Dropdown */}
-                          {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                            {/* Quick Jump Status Dropdown */}
                             <div className="w-full relative group/select flex gap-2 items-center">
                               <select 
                                 value={order.status}
                                 onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
                                 className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold py-1.5 pl-3 pr-8 rounded-lg text-[10px] transition-all cursor-pointer text-center outline-none select-none"
                               >
-                                <option value="pending">Pending</option>
                                 <option value="received">Received</option>
                                 <option value="preparing">Preparing</option>
                                 <option value="out_for_delivery">Out For Delivery</option>
@@ -794,68 +803,162 @@ export const OrderManagement: React.FC = () => {
                                 <option value="cancelled">❌ Cancel Order</option>
                               </select>
                             </div>
-                          )}
 
-                          {/* Cancel delivered order safeguard button for super admin */}
-                          {order.status === 'delivered' && isSuper && (
-                            <button
-                              onClick={() => handleStatusChange(order, 'cancelled')}
-                              className="w-full text-center text-[10px] font-bold text-rose-400/80 hover:text-rose-400 hover:underline py-1"
-                            >
-                              ⚠️ Cancel & Refund Order (Super Admin)
-                            </button>
-                          )}
-                          
-                          {/* Rider dispatch via WhatsApp & Print Receipt */}
-                          <div className="flex gap-2">
-                            {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+                            {/* Rider dispatch via WhatsApp & Print Receipt */}
+                            <div className="flex gap-2">
                               <button
                                 onClick={() => triggerRiderWhatsApp(order)}
                                 className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-400 font-extrabold py-1.5 rounded-lg text-[10px] transition-all shadow-sm active:scale-[0.98]"
                               >
                                 <MessageSquare size={11} /> WhatsApp Rider
                               </button>
-                            )}
-                            <button
-                              onClick={() => handlePrintReceipt(order)}
-                              className="px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 rounded-lg text-[10px] transition-all"
-                            >
-                              🖨️ Print
-                            </button>
+                              <button
+                                onClick={() => handlePrintReceipt(order)}
+                                className="px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 rounded-lg text-[10px] transition-all"
+                              >
+                                🖨️ Print
+                              </button>
+                            </div>
                           </div>
-
-                          {order.status === 'delivered' && (
-                            <div className="flex items-center justify-center gap-1.5 text-[11px] font-black text-emerald-400 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                              <CheckCircle size={12} /> COMPLETED
-                            </div>
-                          )}
-
-                          {order.status === 'cancelled' && (
-                            <div className="flex flex-col items-center justify-center gap-0.5 text-[11px] font-black text-rose-400 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                              <span>CANCELLED</span>
-                              {order.cancellation_reason && (
-                                <span className="text-[10px] font-medium text-rose-300/80 italic px-2 text-center">
-                                  "{order.cancellation_reason}"
-                                </span>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
 
-                {colOrders.length === 0 && (
-                  <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-[11px] text-slate-500 font-bold uppercase tracking-wider">
-                    No active orders
-                  </div>
-                )}
+                  {colOrders.length === 0 && (
+                    <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-[11px] text-slate-500 font-bold uppercase tracking-wider">
+                      No active orders
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* VIEW TAB 2: DELIVERED ARCHIVE */}
+      {mainViewTab === 'delivered' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <h2 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <CheckCircle size={16} /> Delivered Orders Archive ({brandOrders.filter(o => o.status === 'delivered').length})
+            </h2>
+            <span className="text-xs text-slate-400">Completed order records</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {brandOrders.filter(o => o.status === 'delivered').map(order => (
+              <div key={order.id} className="bg-slate-950/60 border border-emerald-900/40 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                  <span className="font-extrabold text-xs text-slate-200">#{order.id} {order.restaurant_name && `(${order.restaurant_name})`}</span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">DELIVERED</span>
+                </div>
+                <div className="text-xs space-y-1 text-slate-300">
+                  <p><strong>Customer:</strong> {order.guest_name || order.user_or_guest} ({order.guest_phone || 'N/A'})</p>
+                  <p><strong>Address:</strong> {order.delivery_address}</p>
+                  <p><strong>Total:</strong> Rs. {order.total} ({order.payment_method.toUpperCase()})</p>
+                  {order.rider && <p className="text-sky-400"><strong>Rider:</strong> {order.rider.name} ({order.rider.phone})</p>}
+                </div>
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                  {isSuper && (
+                    <button
+                      onClick={() => handleStatusChange(order, 'cancelled')}
+                      className="text-[10px] font-bold text-rose-400 hover:underline"
+                    >
+                      ⚠️ Refund Order
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handlePrintReceipt(order)}
+                    className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded"
+                  >
+                    🖨️ Print
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {brandOrders.filter(o => o.status === 'delivered').length === 0 && (
+              <div className="col-span-full py-12 text-center text-xs text-slate-500 font-bold border border-dashed border-slate-800 rounded-xl">
+                No delivered orders found in archive.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW TAB 3: CANCELLED LOG */}
+      {mainViewTab === 'cancelled' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <h2 className="text-sm font-bold text-rose-400 flex items-center gap-2">
+              🛑 Cancelled Orders Audit Log ({brandOrders.filter(o => o.status === 'cancelled').length})
+            </h2>
+            <span className="text-xs text-slate-400">Audit logs with cancellation reasons</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {brandOrders.filter(o => o.status === 'cancelled').map(order => (
+              <div key={order.id} className="bg-slate-950/60 border border-rose-900/40 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                  <span className="font-extrabold text-xs text-slate-200">#{order.id} {order.restaurant_name && `(${order.restaurant_name})`}</span>
+                  <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">CANCELLED</span>
+                </div>
+                <div className="text-xs space-y-1 text-slate-300">
+                  <p><strong>Customer:</strong> {order.guest_name || order.user_or_guest} ({order.guest_phone || 'N/A'})</p>
+                  <p><strong>Total Amount:</strong> Rs. {order.total}</p>
+                  <div className="p-2 bg-rose-950/30 border border-rose-900/30 rounded text-[11px] text-rose-300 italic">
+                    "{order.cancellation_reason || 'No reason specified'}"
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {brandOrders.filter(o => o.status === 'cancelled').length === 0 && (
+              <div className="col-span-full py-12 text-center text-xs text-slate-500 font-bold border border-dashed border-slate-800 rounded-xl">
+                No cancelled orders found.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW TAB 4: ALL HISTORY TABLE */}
+      {mainViewTab === 'all' && (
+        <div className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-950 border-b border-slate-800 font-bold uppercase text-slate-400">
+                <tr>
+                  <th className="p-3">Order ID</th>
+                  <th className="p-3">Brand & Branch</th>
+                  <th className="p-3">Customer</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Rider</th>
+                  <th className="p-3">Total</th>
+                  <th className="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                {brandOrders.map(o => (
+                  <tr key={o.id} className="hover:bg-slate-800/40">
+                    <td className="p-3 font-bold text-white">#{o.id}</td>
+                    <td className="p-3">{o.restaurant_name} ({o.branch_name || 'Main'})</td>
+                    <td className="p-3">{o.guest_name || o.user_or_guest} ({o.guest_phone || ''})</td>
+                    <td className="p-3 font-mono font-bold uppercase text-sky-400">{o.status}</td>
+                    <td className="p-3">{o.rider ? o.rider.name : 'Unassigned'}</td>
+                    <td className="p-3 font-bold text-emerald-400">Rs. {o.total}</td>
+                    <td className="p-3 text-right">
+                      <button onClick={() => handlePrintReceipt(o)} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-slate-200 font-bold">🖨️ Print</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Cancellation Reason Requirement Modal */}
       {cancelModalOrder && (

@@ -135,7 +135,7 @@ function mapApiOrder(o: ApiOrder): Order {
     user_or_guest: o.guest_name || 'Guest',
     guest_name: o.guest_name,
     guest_phone: o.guest_phone,
-    status: o.status as OrderStatus,
+    status: (o.status === 'pending' ? 'received' : o.status) as OrderStatus,
     payment_method: o.payment_method as any,
     total: typeof o.total === 'string' ? parseFloat(o.total) : o.total,
     subtotal: typeof o.subtotal === 'string' ? parseFloat(o.subtotal) : (o.subtotal || 0),

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
 import { fetchRiders, createRider, updateRider, deleteRider } from '../services/api';
-import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, Loader2 } from 'lucide-react';
 
 interface Rider {
   id: number;
@@ -55,22 +55,35 @@ export const RiderManagement: React.FC = () => {
     ? rawBranches
     : rawBranches.filter(b => (userBranchId ? b.id === userBranchId : (userRestId ? b.restaurant_id === userRestId : false)));
 
-  const loadRiders = async () => {
-    setLoading(true);
+  const loadRiders = async (showLoadingSpinner: boolean = false) => {
+    if (showLoadingSpinner) setLoading(true);
     try {
       const data = await fetchRiders();
       setRiders(Array.isArray(data) ? data : (data?.results || []));
     } catch (err: any) {
       showToast('Failed to load riders list: ' + (err.message || 'Unknown error'), 'error');
-      setRiders([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadRiders();
+    loadRiders(true);
   }, []);
+
+  const handleStatusChangeOptimistic = async (rider: Rider, newStatus: 'AVAILABLE' | 'ON_DELIVERY' | 'OFFLINE') => {
+    if (rider.status === newStatus) return;
+    const previousRiders = [...riders];
+    setRiders(prev => prev.map(r => r.id === rider.id ? { ...r, status: newStatus } : r));
+    showToast(`Rider '${rider.name}' set to ${newStatus}`, 'info');
+
+    try {
+      await updateRider(rider.id, { status: newStatus });
+    } catch (err: any) {
+      setRiders(previousRiders);
+      showToast('Failed to update status: ' + (err.message || 'Error'), 'error');
+    }
+  };
 
   const handleOpenAdd = () => {
     setEditingRider(null);
@@ -248,21 +261,21 @@ export const RiderManagement: React.FC = () => {
                       {rider.vehicle_type}
                     </td>
                     <td className="px-4 py-3">
-                      {rider.status === 'AVAILABLE' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                          <CheckCircle size={12} /> Available
-                        </span>
-                      )}
-                      {rider.status === 'ON_DELIVERY' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                          <Clock size={12} /> On Delivery
-                        </span>
-                      )}
-                      {rider.status === 'OFFLINE' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-zinc-500/10 text-zinc-400 border border-zinc-500/20">
-                          <XCircle size={12} /> Offline
-                        </span>
-                      )}
+                      <select
+                        value={rider.status}
+                        onChange={(e) => handleStatusChangeOptimistic(rider, e.target.value as any)}
+                        className={`text-xs font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer ${
+                          rider.status === 'AVAILABLE'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 dark:bg-emerald-950/40'
+                            : rider.status === 'ON_DELIVERY'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 dark:bg-amber-950/40'
+                            : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30 dark:bg-slate-800'
+                        }`}
+                      >
+                        <option value="AVAILABLE">🟢 Available</option>
+                        <option value="ON_DELIVERY">🟡 On Delivery</option>
+                        <option value="OFFLINE">🔴 Offline</option>
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       {rider.is_active ? (

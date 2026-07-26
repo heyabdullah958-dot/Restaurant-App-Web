@@ -31,7 +31,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Order.objects.select_related('restaurant').prefetch_related('items__menu_item').order_by('-created_at')
+        queryset = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').order_by('-created_at')
         
         # If user is a branch manager (staff but not superuser), filter by their managed restaurant
         if user.is_authenticated and user.is_staff and not user.is_superuser:
@@ -211,7 +211,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Order.objects.select_related('restaurant', 'branch').prefetch_related('items__menu_item')
+        queryset = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item')
         
         # If the user is a manager (is_staff and not is_superuser), restrict update operations to their managed restaurant/branch
         if user.is_authenticated and user.is_staff:
