@@ -118,6 +118,16 @@ class Order(models.Model):
                 import logging
                 logging.getLogger(__name__).error(f"Failed to dispatch post-delivery push notification: {notif_err}")
 
+        # 5. Automated "Out For Delivery" Push Notification trigger
+        if self.status == 'out_for_delivery' and old_status != 'out_for_delivery':
+            try:
+                from config.notification_views import send_out_for_delivery_push_notification
+                send_out_for_delivery_push_notification(self)
+            except Exception as notif_err:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to dispatch out-for-delivery push notification: {notif_err}")
+
+
 
     def __str__(self):
         return f"Order #{self.id or self.pk or 'new'} - {self.restaurant.name} ({self.status})"

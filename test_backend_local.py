@@ -636,6 +636,37 @@ def main():
         print(f"  [FAILED] Popular Tags HTTP {pop_resp.status_code}, Public Search HTTP {srch_resp.status_code}")
         all_passed = False
 
+    # 18. Test Automated Out For Delivery Push Notification Trigger
+    print("\nTesting Automated Out For Delivery Push Notification Trigger...")
+    out_push_rider = BranchRider.objects.create(branch=jt_branch, name="Out Push Rider", phone="03007776655", vehicle_type="BIKE", status="AVAILABLE")
+    out_push_ord = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch, rider=out_push_rider,
+        delivery_address="Out Push Street", subtotal=900.0, total=900.0, status="preparing"
+    )
+    # Transition status to out_for_delivery -> should trigger send_out_for_delivery_push_notification
+    out_push_ord.status = "out_for_delivery"
+    out_push_ord.save()
+
+    # Check if notification was recorded in AdminAuditLog
+    out_notif_log = AdminAuditLog.objects.filter(
+        model_name="Notification",
+        object_repr__contains=f"Out For Delivery Push: Order #{out_push_ord.id}"
+    ).first()
+
+    if out_notif_log and "Way" in out_notif_log.changes.get("title", ""):
+        print(f"  [PASSED] Automated Out For Delivery Push Triggered for Order #{out_push_ord.id}")
+        title_safe = out_notif_log.changes.get('title', '').encode('ascii', 'replace').decode('ascii')
+        body_safe = out_notif_log.changes.get('body', '').encode('ascii', 'replace').decode('ascii')
+        print(f"           Title: '{title_safe}'")
+        print(f"           Body: '{body_safe}'")
+        print(f"           Payload: {out_notif_log.changes.get('payload')}")
+    else:
+        print(f"  [FAILED] Out for delivery push audit log not found for Order #{out_push_ord.id}")
+        all_passed = False
+
+    out_push_ord.delete()
+    out_push_rider.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:
@@ -643,5 +674,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

@@ -97,6 +97,70 @@ def send_post_delivery_push_notification(order):
         return False
 
 
+def send_out_for_delivery_push_notification(order):
+    """
+    Automated Real-time Push Notification Trigger when order status transitions to OUT_FOR_DELIVERY.
+    Title: 🛵 Your Order is On Its Way!
+    Body: Great news! Your meal from {Brand Name} has been handed over to our delivery partner. Tap to open the app to track your live order or contact your rider directly! 📞
+    Data: Deep-linking payload for /order-tracking/{order_id}
+    """
+    brand_name = order.restaurant.name if order.restaurant else "FoodSphere"
+    title = "🛵 Your Order is On Its Way!"
+    body = f"Great news! Your meal from {brand_name} has been handed over to our delivery partner. Tap to open the app to track your live order or contact your rider directly! 📞"
+
+    rider_name = order.rider.name if getattr(order, 'rider', None) else ""
+    rider_phone = order.rider.phone if getattr(order, 'rider', None) else ""
+
+    payload_data = {
+        'type': 'OUT_FOR_DELIVERY',
+        'order_id': str(order.id),
+        'screen': 'OrderTracking',
+        'restaurant_name': str(brand_name),
+        'rider_name': str(rider_name),
+        'rider_phone': str(rider_phone),
+    }
+
+    # Log to AdminAuditLog for notification history tracking
+    try:
+        from config.models import AdminAuditLog
+        AdminAuditLog.objects.create(
+            user=getattr(order, 'user', None),
+            action='create',
+            model_name='Notification',
+            object_id=order.id or 0,
+            object_repr=f"Out For Delivery Push: Order #{order.id}",
+            changes={
+                'title': title,
+                'body': body,
+                'target': f"order_{order.id}",
+                'payload': payload_data
+            },
+        )
+    except Exception as audit_err:
+        logger.error(f"Audit log recording failed for out for delivery notification: {audit_err}")
+
+    app = get_firebase_app()
+    if not app:
+        logger.info(f"[FCM Mock/Prepared] Out For Delivery Push for Order #{order.id}: {title} | {body}")
+        return False
+
+    try:
+        from firebase_admin import messaging
+        topic = f"order_{order.id}"
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            data=payload_data,
+            topic=topic,
+        )
+        response = messaging.send(message)
+        logger.info(f"FCM out-for-delivery push sent for Order #{order.id}: {response}")
+        return True
+    except Exception as e:
+        logger.error(f"FCM out-for-delivery push send failed for Order #{order.id}: {e}")
+        return False
+
+
+
 
 class SendNotificationView(APIView):
     permission_classes = [IsAdminUser]

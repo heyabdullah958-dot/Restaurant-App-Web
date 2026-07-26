@@ -54,7 +54,23 @@ export const handleNotificationDeepLink = (data: any) => {
 
   const { type, order_id, rate, screen } = data;
 
-  if ((type === 'ORDER_DELIVERED' || screen === 'OrderTracking') && order_id) {
+  if (type === 'OUT_FOR_DELIVERY' && order_id) {
+    const numericOrderId = Number(order_id);
+
+    if (navigationRef && navigationRef.isReady()) {
+      navigationRef.navigate('Tracking', {
+        orderId: numericOrderId,
+      });
+    } else {
+      AsyncStorage.setItem(
+        'pending_deep_link',
+        JSON.stringify({
+          screen: 'Tracking',
+          params: { orderId: numericOrderId },
+        })
+      );
+    }
+  } else if ((type === 'ORDER_DELIVERED' || screen === 'OrderTracking') && order_id) {
     const numericOrderId = Number(order_id);
 
     if (navigationRef && navigationRef.isReady()) {
@@ -74,6 +90,7 @@ export const handleNotificationDeepLink = (data: any) => {
     }
   }
 };
+
 
 /**
  * Subscribes user device to an order notification topic
