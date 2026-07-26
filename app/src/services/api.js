@@ -87,8 +87,14 @@ api.interceptors.response.use(
   (response) => response.data || response,
   async (error) => {
     const originalRequest = error.config || {};
-    const status = error.response ? error.response.status : null;
     const requestUrl = originalRequest.url || '';
+
+    // Infer status code from error.response or error.message
+    let status = error.response ? error.response.status : null;
+    if (!status && error?.message) {
+      if (error.message.includes('403')) status = 403;
+      else if (error.message.includes('401')) status = 401;
+    }
 
     // If request was to a public endpoint, pass error through without triggering auto-refresh / session expiry loops
     if (isPublicUrl(requestUrl)) {
@@ -96,7 +102,7 @@ api.interceptors.response.use(
     }
 
     // 1. Auto-retry on Network Error / Timeout (e.g. Render/Heroku cold start)
-    if (!error.response && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
+    if (!error.response && !status && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
       console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${requestUrl}...`);
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -144,7 +150,6 @@ api.interceptors.response.use(
         console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
         processQueue(refreshError, null);
       } finally {
-
         isRefreshing = false;
       }
 
@@ -153,22 +158,23 @@ api.interceptors.response.use(
       try {
         await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
       } catch (e) {
-        console.error('Error clearing tokens:', e);
+        console.log('Error clearing tokens:', e);
       }
 
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
     } else if (error.response && status !== 401 && status !== 403) {
-      console.warn('API Error Response:', error.response.status, error.response.data);
+      console.log('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
-      console.warn('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
+      console.log('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
     } else {
-      console.warn('API Request Setup Error:', error.message);
+      console.log('API Request Setup Error:', error.message);
     }
     return Promise.reject(error);
   }
 );
 
 export default api;
+
 
