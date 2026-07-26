@@ -425,7 +425,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
             'rider', 'rider_id',
             'guest_name', 'guest_phone',
             'status', 'payment_method',
-            'delivery_address',
+            'delivery_address', 'delivery_lat', 'delivery_lng',
             'subtotal', 'delivery_fee', 'discount', 'total',
             'special_instructions',
             'items',

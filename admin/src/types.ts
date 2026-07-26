@@ -80,12 +80,16 @@ export interface Order {
   restaurant_name: string;
   branch_name?: string;
   branch_id?: number;
+  rider?: any;
+  rider_id?: number | null;
   user_or_guest: string;
   guest_name?: string;
   guest_phone?: string;
   status: OrderStatus;
   payment_method: PaymentMethod;
   delivery_address: string;
+  delivery_lat?: number | null;
+  delivery_lng?: number | null;
   subtotal: number;
   delivery_fee: number;
   discount: number;

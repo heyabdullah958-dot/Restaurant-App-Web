@@ -119,6 +119,15 @@ function mapApiRestaurant(r: ApiRestaurant): Restaurant {
 function mapApiOrder(o: ApiOrder): Order {
   const restId = typeof o.restaurant === 'object' && o.restaurant ? Number((o.restaurant as any).id) : Number(o.restaurant);
   const restName = o.restaurant_name || (typeof o.restaurant === 'object' && o.restaurant ? (o.restaurant as any).name : `Restaurant #${o.restaurant}`);
+  const riderObj = o.rider || null;
+  const riderId = o.rider_id || (riderObj ? riderObj.id : null);
+
+  const parseCoord = (val: any) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+    return isNaN(num) ? null : num;
+  };
+
   return {
     id: o.id,
     restaurant_id: restId,
@@ -133,8 +142,12 @@ function mapApiOrder(o: ApiOrder): Order {
     delivery_fee: typeof o.delivery_fee === 'string' ? parseFloat(o.delivery_fee) : (o.delivery_fee || 0),
     discount: 0,
     delivery_address: o.delivery_address,
+    delivery_lat: parseCoord(o.delivery_lat),
+    delivery_lng: parseCoord(o.delivery_lng),
     branch_name: o.branch_name ?? undefined,
     branch_id: o.branch_id ?? undefined,
+    rider: riderObj,
+    rider_id: riderId,
     created_at: o.created_at,
     items: o.items || [],
   };

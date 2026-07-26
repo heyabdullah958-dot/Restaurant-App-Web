@@ -50,24 +50,39 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
+  // Helper to open rider assignment modal with available riders filtered for this order's branch
+  const openRiderAssignmentModal = (order: Order, autoWhatsApp: boolean = false) => {
+    const targetBranchId = order.branch_id || user?.branchId;
+    const available = riders.filter((r: any) => {
+      const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
+      const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
+      return isAvail && matchesBranch;
+    });
+    setAssignRiderModalOrder(order);
+    setSelectedRiderIdForModal(available.length > 0 ? available[0].id : null);
+    setAutoOpenWhatsAppAfterAssign(autoWhatsApp);
+  };
+
   const handleModalAssignRider = async () => {
     if (!assignRiderModalOrder) return;
     if (!selectedRiderIdForModal) {
-      showToast('Please select a delivery rider first.', 'error');
+      showToast('Please select an available delivery rider first.', 'error');
       return;
     }
     try {
-      await assignRiderToOrder(assignRiderModalOrder.id, selectedRiderIdForModal);
-      showToast('Rider assigned successfully!', 'success');
-      const assignedRiderObj = riders.find(r => r.id === selectedRiderIdForModal);
-      const updatedOrder = {
-        ...assignRiderModalOrder,
-        status: 'out_for_delivery' as OrderStatus,
-        rider: assignedRiderObj,
-        rider_id: selectedRiderIdForModal
-      };
-      refreshOrders();
+      const res: any = await assignRiderToOrder(assignRiderModalOrder.id, selectedRiderIdForModal);
+      showToast('Rider assigned & order dispatched!', 'success');
+      fetchRiders().then(r => setRiders(r || [])).catch(() => {});
+      await refreshOrders();
+
       if (autoOpenWhatsAppAfterAssign) {
+        const assignedRiderObj = riders.find(r => r.id === selectedRiderIdForModal);
+        const updatedOrder = {
+          ...assignRiderModalOrder,
+          status: 'out_for_delivery' as OrderStatus,
+          rider: assignedRiderObj || res?.data?.rider,
+          rider_id: selectedRiderIdForModal
+        };
         triggerRiderWhatsApp(updatedOrder);
       }
       setAssignRiderModalOrder(null);
@@ -331,12 +346,10 @@ export const OrderManagement: React.FC = () => {
 
   // Trigger WhatsApp dispatch pre-filled message directly to assigned rider
   const triggerRiderWhatsApp = (order: any) => {
-    const riderObj = order.rider || riders.find(r => r.id === order.rider_id);
+    const riderObj = order.rider || riders.find(r => r.id === (order.rider_id || order.rider?.id));
     if (!riderObj || !riderObj.phone) {
-      showToast(`Please assign a rider to Order #${order.id} first.`, 'info');
-      setAssignRiderModalOrder(order);
-      setSelectedRiderIdForModal(riders.length > 0 ? riders[0].id : null);
-      setAutoOpenWhatsAppAfterAssign(true);
+      showToast(`Please assign an available rider to Order #${order.id} first.`, 'info');
+      openRiderAssignmentModal(order, true);
       return;
     }
 
@@ -348,20 +361,27 @@ export const OrderManagement: React.FC = () => {
     const name = order.guest_name || order.user_or_guest || 'Customer';
     const phone = order.guest_phone || 'N/A';
     const address = order.delivery_address || 'N/A';
-    const locationLink = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
-    const itemsList = (order.items || []).map((i: any) => `• ${i.quantity || 1}x ${i.name || i.menu_item_name || 'Item'}`).join('\n');
+
+    // Construct Google Maps link: use GPS coordinates if available, otherwise address search link
+    const hasCoords = order.delivery_lat != null && order.delivery_lng != null;
+    const locationLink = hasCoords
+      ? `https://www.google.com/maps/search/?api=1&query=${order.delivery_lat},${order.delivery_lng}`
+      : `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+
+    const itemsList = (order.items || []).map((i: any) => `• ${i.quantity || 1}x ${i.menu_item_name || i.name || 'Item'}`).join('\n');
 
     const message = 
       `🛵 *FOODSPHERE DISPATCH ORDER #${order.id}*\n\n` +
       `*Assigned Rider:* ${riderObj.name} (${riderObj.phone})\n` +
       `*Restaurant:* ${order.restaurant_name || ''}\n` +
-      `*Customer:* ${name}\n` +
-      `*Phone:* ${phone}\n` +
+      `*Branch:* ${order.branch_name || 'Main'} Branch\n\n` +
+      `*Customer Name:* ${name}\n` +
+      `*Customer Phone:* ${phone}\n` +
       `*Delivery Address:* ${address}\n` +
-      `*Map Location:* ${locationLink}\n\n` +
-      `*Items:*\n${itemsList}\n\n` +
-      `*Total Collection Amount:* Rs. ${order.total} (${(order.payment_method || 'COD').toUpperCase()})\n\n` +
-      `Please deliver promptly!`;
+      `*Google Maps Location:* ${locationLink}\n\n` +
+      `*Items Ordered:*\n${itemsList}\n\n` +
+      `*Total Collection:* Rs. ${order.total} (${(order.payment_method || 'COD').toUpperCase()})\n\n` +
+      `Please pick up from kitchen and deliver promptly!`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
@@ -387,9 +407,7 @@ export const OrderManagement: React.FC = () => {
     // Intercept 'out_for_delivery' transition: if no rider assigned, show Rider Assignment Modal
     const hasRider = (order as any).rider || (order as any).rider_id;
     if (newStatus === 'out_for_delivery' && !hasRider) {
-      setAssignRiderModalOrder(order);
-      setSelectedRiderIdForModal(riders.length > 0 ? riders[0].id : null);
-      setAutoOpenWhatsAppAfterAssign(false);
+      openRiderAssignmentModal(order, false);
       return;
     }
 
@@ -637,32 +655,60 @@ export const OrderManagement: React.FC = () => {
                           )}
                           
                           {/* Rider Assignment Control */}
-                          <div className="mt-2 pt-2 border-t border-slate-900/60 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1 text-[11px] font-bold text-sky-400 truncate">
-                              <Bike size={12} className="flex-shrink-0" />
-                              <span className="truncate">{(order as any).rider ? (order as any).rider.name : 'No Rider'}</span>
-                            </div>
-                            <select
-                              value={(order as any).rider?.id || (order as any).rider_id || ''}
-                              onChange={async (e) => {
-                                const selectedId = e.target.value ? Number(e.target.value) : null;
-                                try {
-                                  await assignRiderToOrder(order.id, selectedId);
-                                  showToast(selectedId ? 'Rider assigned!' : 'Rider unassigned.', 'success');
-                                  refreshOrders();
-                                } catch (err: any) {
-                                  showToast(err.message || 'Failed to assign rider', 'error');
-                                }
-                              }}
-                              className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[140px] truncate"
-                            >
-                              <option value="">-- Assign Rider --</option>
-                              {riders.map((r: any) => (
-                                <option key={r.id} value={r.id}>
-                                  {r.name} ({r.phone})
-                                </option>
-                              ))}
-                            </select>
+                          <div className="mt-2 pt-2 border-t border-slate-900/60">
+                            {order.rider ? (
+                              <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-400 truncate">
+                                  <Bike size={14} className="flex-shrink-0" />
+                                  <span className="truncate">{order.rider.name}</span>
+                                  <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>
+                                </div>
+                                <button
+                                  onClick={() => triggerRiderWhatsApp(order)}
+                                  title="Send WhatsApp Dispatch to Rider"
+                                  className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors flex-shrink-0"
+                                >
+                                  <MessageSquare size={11} /> WhatsApp
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 truncate">
+                                  <Bike size={12} className="flex-shrink-0" />
+                                  <span className="truncate">Unassigned</span>
+                                </div>
+                                <select
+                                  value=""
+                                  onChange={async (e) => {
+                                    const selectedId = e.target.value ? Number(e.target.value) : null;
+                                    if (!selectedId) return;
+                                    try {
+                                      await assignRiderToOrder(order.id, selectedId);
+                                      showToast('Rider assigned!', 'success');
+                                      fetchRiders().then(r => setRiders(r || [])).catch(() => {});
+                                      refreshOrders();
+                                    } catch (err: any) {
+                                      showToast(err.message || 'Failed to assign rider', 'error');
+                                    }
+                                  }}
+                                  className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[145px] truncate"
+                                >
+                                  <option value="">+ Assign Rider...</option>
+                                  {riders
+                                    .filter((r: any) => {
+                                      const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
+                                      const targetBranchId = order.branch_id || user?.branchId;
+                                      const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
+                                      return isAvail && matchesBranch;
+                                    })
+                                    .map((r: any) => (
+                                      <option key={r.id} value={r.id}>
+                                        {r.name} ({r.phone})
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -889,26 +935,40 @@ export const OrderManagement: React.FC = () => {
 
             <div>
               <label className="block text-[11px] uppercase tracking-wider font-extrabold text-slate-400 mb-1.5">
-                Select Delivery Rider *
+                Select Available Delivery Rider *
               </label>
-              {riders.length === 0 ? (
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400">
-                  No active riders found for your branch. Please add a rider in Rider Management tab first.
-                </div>
-              ) : (
-                <select
-                  value={selectedRiderIdForModal || ''}
-                  onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
-                >
-                  <option value="">-- Choose Rider --</option>
-                  {riders.map((r: any) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({r.phone}) — [{r.status}]
-                    </option>
-                  ))}
-                </select>
-              )}
+              {(() => {
+                const targetBranchId = assignRiderModalOrder.branch_id || user?.branchId;
+                const availableRiders = riders.filter((r: any) => {
+                  const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
+                  const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
+                  return isAvail && matchesBranch;
+                });
+
+                if (availableRiders.length === 0) {
+                  return (
+                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400 space-y-1">
+                      <p className="font-bold text-amber-400">No AVAILABLE riders found for your branch.</p>
+                      <p className="text-[11px] text-slate-500">Riders marked as OFFLINE or ON_DELIVERY are filtered out. Ensure you have an available rider in Rider Management.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <select
+                    value={selectedRiderIdForModal || ''}
+                    onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
+                  >
+                    <option value="">-- Choose Rider --</option>
+                    {availableRiders.map((r: any) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name} ({r.phone}) — [AVAILABLE]
+                      </option>
+                    ))}
+                  </select>
+                );
+              })()}
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">

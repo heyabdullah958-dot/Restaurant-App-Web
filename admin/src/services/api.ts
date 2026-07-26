@@ -189,6 +189,8 @@ export interface ApiOrder {
   restaurant_name?: string;
   branch_id?: number | null;
   branch_name?: string | null;
+  rider?: any;
+  rider_id?: number | null;
   status: string;
   payment_method: string;
   total: string | number;
@@ -197,6 +199,8 @@ export interface ApiOrder {
   guest_name: string;
   guest_phone: string;
   delivery_address: string;
+  delivery_lat?: number | string | null;
+  delivery_lng?: number | string | null;
   created_at: string;
   updated_at: string;
   items?: any[];
