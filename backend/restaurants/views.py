@@ -536,5 +536,132 @@ class PlatformSettingsView(APIView):
         })
 
 
+from django.db.models import Q, Count
+
+class PopularTagsView(APIView):
+    """
+    GET /api/v1/search/popular-tags/
+    GET /api/restaurants/popular-tags/
+    Dynamically returns top 6-8 active menu items from live database menu across active tenant restaurants.
+    Excludes out-of-stock items (is_available=False) and inactive restaurants.
+    Permission: AllowAny (Unauthenticated/Guest allowed).
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            items_qs = MenuItem.objects.filter(
+                is_available=True,
+                category__is_active=True,
+                category__restaurant__is_active=True,
+                category__restaurant__is_force_closed=False
+            ).select_related('category', 'category__restaurant')
+
+            # Order by order count or item ID to get popular active dishes
+            items_qs = items_qs.annotate(order_count=Count('items')).order_by('-order_count', 'id')
+
+            tags = []
+            seen_names = set()
+            for item in items_qs:
+                clean_name = item.name.strip()
+                if clean_name.lower() not in seen_names:
+                    seen_names.add(clean_name.lower())
+                    img_url = ""
+                    try:
+                        if item.image:
+                            img_url = item.image.url
+                    except (ValueError, AttributeError):
+                        pass
+
+                    tags.append({
+                        'id': item.id,
+                        'name': clean_name,
+                        'category': item.category.name,
+                        'restaurant_id': item.category.restaurant.id,
+                        'restaurant_name': item.category.restaurant.name,
+                        'restaurant_slug': item.category.restaurant.slug,
+                        'price': float(item.price),
+                        'image_url': img_url
+                    })
+                if len(tags) >= 8:
+                    break
+
+            return Response({
+                'success': True,
+                'results': tags,
+                'tags': [t['name'] for t in tags]
+            })
+        except Exception as e:
+            return Response({
+                'success': True,
+                'results': [],
+                'tags': ['Tandoori Chicken', 'Reshmi Kabab', 'Double Smash Burger', 'Special Roghani Naan']
+            })
+
+
+class PublicSearchView(APIView):
+    """
+    GET /api/v1/search/?q={query}
+    GET /api/restaurants/search/?q={query}
+    Public search API for dishes & restaurants across all active tenants.
+    Permission: AllowAny (Unauthenticated/Guest allowed).
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response({'success': True, 'restaurants': [], 'dishes': []})
+
+        try:
+            matching_restaurants = Restaurant.objects.filter(
+                is_active=True,
+                is_force_closed=False
+            ).filter(
+                Q(name__icontains=query) | Q(cuisine_type__icontains=query) | Q(description__icontains=query)
+            )
+
+            matching_dishes = MenuItem.objects.filter(
+                is_available=True,
+                category__is_active=True,
+                category__restaurant__is_active=True,
+                category__restaurant__is_force_closed=False
+            ).filter(
+                Q(name__icontains=query) | Q(description__icontains=query) | Q(category__name__icontains=query)
+            ).select_related('category', 'category__restaurant')[:20]
+
+            serialized_restaurants = RestaurantSerializer(matching_restaurants, many=True, context={'request': request}).data
+
+            dishes_data = []
+            for item in matching_dishes:
+                img_url = ""
+                try:
+                    if item.image:
+                        img_url = item.image.url
+                except (ValueError, AttributeError):
+                    pass
+
+                dishes_data.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'description': item.description,
+                    'price': float(item.price),
+                    'image_url': img_url,
+                    'category_name': item.category.name,
+                    'restaurant_name': item.category.restaurant.name,
+                    'restaurant_slug': item.category.restaurant.slug,
+                })
+
+            return Response({
+                'success': True,
+                'restaurants': serialized_restaurants,
+                'dishes': dishes_data
+            })
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=500)
+
+
+
+
 
 

@@ -5,6 +5,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from config.views import health_check, db_debug, root_view, trigger_seed, init_db
 from config.admin_views import platform_analytics
+from restaurants.views import PopularTagsView, PublicSearchView
+
 
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
@@ -33,6 +35,12 @@ urlpatterns = [
     path('api/seed/', trigger_seed, name='trigger_seed'),
     path('api/init-db/', init_db, name='init_db'),
 
+    # Direct search & v1 aliases (AllowAny)
+    path('api/v1/search/popular-tags/', PopularTagsView.as_view(), name='v1_popular_tags'),
+    path('api/v1/search/', PublicSearchView.as_view(), name='v1_public_search'),
+    path('api/search/popular-tags/', PopularTagsView.as_view(), name='api_popular_tags'),
+    path('api/search/', PublicSearchView.as_view(), name='api_public_search'),
+
     # API App Routes
     path('api/', include('users.urls')),
     path('api/', include('restaurants.urls')),
@@ -40,6 +48,7 @@ urlpatterns = [
     path('api/', include('payments.urls')),
     path('api/', include('promotions.urls')),
 ]
+
 
 # BUG-17 FIX: Serve media files in development
 if settings.DEBUG:

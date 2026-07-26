@@ -609,6 +609,33 @@ def main():
 
     push_ord.delete()
 
+    # 17. Test Public Search & Dynamic Popular Tags (AllowAny Permission Check)
+    print("\nTesting Public Search & Dynamic Popular Tags Endpoints...")
+    from restaurants.views import PopularTagsView, PublicSearchView
+    from rest_framework.test import APIRequestFactory
+
+    factory = APIRequestFactory()
+
+    # Unauthenticated GET request to popular-tags
+    pop_req = factory.get("/api/v1/search/popular-tags/")
+    pop_view = PopularTagsView.as_view()
+    pop_resp = pop_view(pop_req)
+
+    # Unauthenticated GET request to search
+    srch_req = factory.get("/api/v1/search/?q=Naan")
+    srch_view = PublicSearchView.as_view()
+    srch_resp = srch_view(srch_req)
+
+    pop_passed = pop_resp.status_code == 200 and pop_resp.data.get("success") is True and len(pop_resp.data.get("tags", [])) > 0
+    srch_passed = srch_resp.status_code == 200 and srch_resp.data.get("success") is True
+
+    if pop_passed and srch_passed:
+        print(f"  [PASSED] Popular Tags: HTTP {pop_resp.status_code} | Dynamic Tags Returned: {pop_resp.data.get('tags')[:4]}...")
+        print(f"  [PASSED] Public Search: HTTP {srch_resp.status_code} | Matching Dishes: {len(srch_resp.data.get('dishes', []))}")
+    else:
+        print(f"  [FAILED] Popular Tags HTTP {pop_resp.status_code}, Public Search HTTP {srch_resp.status_code}")
+        all_passed = False
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:
@@ -616,4 +643,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

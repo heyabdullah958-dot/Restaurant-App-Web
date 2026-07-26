@@ -31,13 +31,42 @@ type RootStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Search'>;
 
-const POPULAR_SEARCHES = ['Chicken Handi', 'Beef Burger', 'Special Karahi', 'Chicken Doner Fries', 'Dubai Shawaya', 'Sandwich'];
-
 interface MatchingDish {
   item: MenuItem;
   restaurantName: string;
   restaurantSlug: string;
 }
+
+// Helper to derive authentic active items as popular tags if API is unreachable
+const getFallbackPopularTags = (source: any[]): string[] => {
+  const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
+  const src = source && source.length > 0 ? source : FALLBACK_RESTAURANTS;
+  const activeSource = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
+
+  const tags: string[] = [];
+  const seen = new Set<string>();
+
+  activeSource.forEach((r: any) => {
+    const detail = FALLBACK_RESTAURANTS.find((fr) => fr.slug === r.slug) || r;
+    if (detail.categories) {
+      detail.categories.forEach((cat: any) => {
+        if (cat.items) {
+          cat.items.forEach((item: any) => {
+            if (item.is_available !== false && item.name) {
+              const name = item.name.trim();
+              if (!seen.has(name.toLowerCase())) {
+                seen.add(name.toLowerCase());
+                tags.push(name);
+              }
+            }
+          });
+        }
+      });
+    }
+  });
+
+  return tags.length > 0 ? tags.slice(0, 8) : ['Tandoori Chicken', 'Reshmi Kabab', 'Double Smash Burger', 'Special Roghani Naan'];
+};
 
 // Memoized Search Result Components
 const RestaurantResultCard = React.memo(({ restaurant, onPress }: { restaurant: any, onPress: (slug: string) => void }) => (
@@ -88,6 +117,8 @@ const DishResultCard = React.memo(({ dish, onPress }: { dish: MatchingDish, onPr
   </TouchableOpacity>
 ));
 
+import api from '../services/api';
+
 export default function SearchScreen() {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
@@ -96,12 +127,29 @@ export default function SearchScreen() {
   const loading = useSelector((state: RootState) => state.restaurant.loading);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [popularTags, setPopularTags] = useState<string[]>([]);
 
   const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
 
   useEffect(() => {
     dispatch(fetchRestaurants());
-  }, [dispatch]);
+
+    // Dynamically fetch top popular search tags from backend API
+    api.get('/restaurants/popular-tags/')
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.tags) && res.data.tags.length > 0) {
+          setPopularTags(res.data.tags);
+        } else if (res.data && Array.isArray(res.data.results) && res.data.results.length > 0) {
+          setPopularTags(res.data.results.map((r: any) => r.name));
+        } else {
+          setPopularTags(getFallbackPopularTags(restaurants));
+        }
+      })
+      .catch(() => {
+        setPopularTags(getFallbackPopularTags(restaurants));
+      });
+  }, [dispatch, restaurants]);
+
 
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
@@ -240,7 +288,7 @@ export default function SearchScreen() {
           <View style={styles.popularContainer}>
             <Text style={styles.sectionTitle}>Popular Searches</Text>
             <View style={styles.chipsContainer}>
-              {POPULAR_SEARCHES.map((keyword) => (
+              {(popularTags.length > 0 ? popularTags : getFallbackPopularTags(restaurants)).map((keyword) => (
                 <TouchableOpacity activeOpacity={0.75}
                   key={keyword}
                   style={styles.chip}
@@ -252,6 +300,7 @@ export default function SearchScreen() {
               ))}
             </View>
           </View>
+
         </ScrollView>
       ) : (
         <View style={styles.resultsContainer}>
