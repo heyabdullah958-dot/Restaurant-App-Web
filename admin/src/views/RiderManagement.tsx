@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
-import { fetchRiders, createRider, updateRider, deleteRider, fetchRestaurants } from '../services/api';
-import { Bike, Plus, Search, Phone, MessageSquare, Trash2, Edit2, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { fetchRiders, createRider, updateRider, deleteRider } from '../services/api';
+import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface Rider {
   id: number;
@@ -18,7 +18,7 @@ interface Rider {
 }
 
 export const RiderManagement: React.FC = () => {
-  const { showToast, restaurants, selectedBrandId, user } = useAdmin();
+  const { showToast, restaurants } = useAdmin();
   const [riders, setRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -35,8 +35,6 @@ export const RiderManagement: React.FC = () => {
     status: 'AVAILABLE' as 'AVAILABLE' | 'ON_DELIVERY' | 'OFFLINE',
     is_active: true,
   });
-
-  const isSuper = user?.role === 'super_admin';
 
   // Get available branches from restaurants
   const allBranches = restaurants.flatMap(r => 

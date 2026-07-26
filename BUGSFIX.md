@@ -1,6 +1,29 @@
-# 🛠️ FoodSphere Full-Stack Bug Fixes Summary
+# 🛠️ GetFood (FoodSphere) Full-Stack Bug Fixes Summary
+> **Last Updated**: 2026-07-26
 
 This document lists the critical bug fixes implemented in both the React Native / Expo mobile application (`/app`) and the Django REST Framework backend API (`/backend`).
+
+---
+
+## 🔒 Security & Backend Bug Fixes (July 26, 2026)
+
+#### 1. PII Data Leak on Order Retrieval (BLOCK-01 Fix)
+* **Issue**: `GET /api/orders/{id}/` allowed unauthenticated users to guess order IDs and fetch full customer PII (name, phone, delivery address). `GET /api/orders/my-orders/?phone=` also leaked customer history.
+* **Fix implemented**:
+  * Added `tracking_token = models.UUIDField(default=uuid.uuid4, db_index=True)` to `Order` model in `backend/orders/models.py`.
+  * Updated `OrderDetailView` permission check in `backend/orders/views.py`: requires authenticated owner/staff OR matching `?tracking_token=<uuid>`.
+  * Completely removed unauthenticated `?phone=` query param lookup from `MyOrdersListView`.
+
+#### 2. PlatformSettings DB Migration Exception Fix
+* **Issue**: User registration returned `Failed to award welcome bonus: no such table: restaurants_platformsettings`.
+* **Fix implemented**:
+  * Created Django migration `backend/restaurants/migrations/0012_platformsettings.py`.
+  * Applied database migration `python manage.py migrate` establishing `restaurants_platformsettings` table.
+
+#### 3. Guest Order Linkage Registration Payload Fix
+* **Issue**: Integration test `Guest Order Linkage on User Registration` failed with status 400 due to unaccepted `"name"` field in `UserRegisterSerializer`.
+* **Fix implemented**:
+  * Corrected payload in `test_backend_local.py` to match `('username', 'email', 'password', 'phone')` expected schema. Test passed with 100% success.
 
 ---
 

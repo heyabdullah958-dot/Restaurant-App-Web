@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 2026-07-26 GetFood Master Launch-Readiness & Security Hardening (Release v27)
+- **PII Order Endpoint Security (BLOCK-01)**: Enforced owner check and guest `tracking_token` (UUID) authorization on `OrderDetailView`. Unauthenticated `?phone=` history lookups completely eliminated in `MyOrdersListView`.
+- **GetFood Mobile App Rebranding (BLOCK-03)**: Updated app display name, slug, bundle identifier (`com.abdullah958.getfood`), and permission prompts in `app/app.json`.
+- **Store Compliance Legal Pages (BLOCK-04)**: Created hosted legal documents for Cloudflare Pages deployment: `privacy-policy.html` and `terms-of-service.html`.
+- **PlatformSettings Model & Welcome Bonus**: Added `PlatformSettings` singleton model (`restaurants.0012_platformsettings` migration) for global loyalty control and automatic 50 pt welcome bonuses on user registration in `UserRegisterView`.
+- **100% Verified Integration Suite**: Ran `test_backend_local.py` across 11 core subsystems with 100% pass rate.
+
 ## 2026-07-26 System Audit, Security Hardening & Edge-Case Bug Fixes (Release v26)
 - **Price Modifier Tampering Protection**: Re-validated option price modifiers in `OrderCreateSerializer` strictly against `MenuItem.options` stored in DB, ignoring negative client payloads (`-1000`).
 - **Loyalty Points Atomic Balance Check & Double-Spend Safeguard**: Enforced atomic deduction with `User.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(...)`.

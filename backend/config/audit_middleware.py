@@ -28,16 +28,28 @@ class APIAuditMiddleware:
             try:
                 # Sanitize payload
                 payload = {}
-                if request.body:
-                    try:
-                        data = json.loads(request.body.decode('utf-8'))
+                try:
+                    raw_bytes = getattr(request, '_body', None)
+                    if raw_bytes is None and hasattr(request, 'body'):
+                        try:
+                            raw_bytes = request.body
+                        except Exception:
+                            raw_bytes = None
+
+                    if raw_bytes:
+                        data = json.loads(raw_bytes.decode('utf-8'))
                         if isinstance(data, dict):
                             payload = {
                                 k: (v if k not in ['password', 'token', 'secret'] else '***REDACTED***')
                                 for k, v in data.items()
                             }
-                    except Exception:
-                        payload = {'raw_body': 'binary_or_unparseable'}
+                    elif hasattr(request, 'POST') and request.POST:
+                        payload = {
+                            k: (v if k not in ['password', 'token', 'secret'] else '***REDACTED***')
+                            for k, v in request.POST.items()
+                        }
+                except Exception:
+                    payload = {'raw_body': 'binary_or_unparseable'}
 
                 action_map = {
                     'POST': 'create',

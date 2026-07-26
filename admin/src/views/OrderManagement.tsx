@@ -33,6 +33,11 @@ export const OrderManagement: React.FC = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelError, setCancelError] = useState('');
 
+  // Rider Assignment Modal state
+  const [assignRiderModalOrder, setAssignRiderModalOrder] = useState<Order | null>(null);
+  const [selectedRiderIdForModal, setSelectedRiderIdForModal] = useState<number | null>(null);
+  const [autoOpenWhatsAppAfterAssign, setAutoOpenWhatsAppAfterAssign] = useState<boolean>(false);
+
   const confirmCancellation = () => {
     if (!cancelReason.trim()) {
       setCancelError('Please enter a valid cancellation reason for audit logging.');
@@ -42,6 +47,32 @@ export const OrderManagement: React.FC = () => {
       updateOrderStatus(cancelModalOrder.id, 'cancelled', cancelReason.trim());
       setCancelModalOrder(null);
       setCancelReason('');
+    }
+  };
+
+  const handleModalAssignRider = async () => {
+    if (!assignRiderModalOrder) return;
+    if (!selectedRiderIdForModal) {
+      showToast('Please select a delivery rider first.', 'error');
+      return;
+    }
+    try {
+      await assignRiderToOrder(assignRiderModalOrder.id, selectedRiderIdForModal);
+      showToast('Rider assigned successfully!', 'success');
+      const assignedRiderObj = riders.find(r => r.id === selectedRiderIdForModal);
+      const updatedOrder = {
+        ...assignRiderModalOrder,
+        status: 'out_for_delivery' as OrderStatus,
+        rider: assignedRiderObj,
+        rider_id: selectedRiderIdForModal
+      };
+      refreshOrders();
+      if (autoOpenWhatsAppAfterAssign) {
+        triggerRiderWhatsApp(updatedOrder);
+      }
+      setAssignRiderModalOrder(null);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to assign rider', 'error');
     }
   };
 
@@ -300,8 +331,16 @@ export const OrderManagement: React.FC = () => {
 
   // Trigger WhatsApp dispatch pre-filled message directly to assigned rider
   const triggerRiderWhatsApp = (order: any) => {
-    const riderPhone = order.rider?.phone || (riders.find(r => r.id === order.rider_id)?.phone) || '';
-    let targetPhone = riderPhone.replace(/[^0-9]/g, '');
+    const riderObj = order.rider || riders.find(r => r.id === order.rider_id);
+    if (!riderObj || !riderObj.phone) {
+      showToast(`Please assign a rider to Order #${order.id} first.`, 'info');
+      setAssignRiderModalOrder(order);
+      setSelectedRiderIdForModal(riders.length > 0 ? riders[0].id : null);
+      setAutoOpenWhatsAppAfterAssign(true);
+      return;
+    }
+
+    let targetPhone = riderObj.phone.replace(/[^0-9]/g, '');
     if (targetPhone.startsWith('03') && targetPhone.length === 11) {
       targetPhone = '92' + targetPhone.substring(1);
     }
@@ -314,6 +353,7 @@ export const OrderManagement: React.FC = () => {
 
     const message = 
       `🛵 *FOODSPHERE DISPATCH ORDER #${order.id}*\n\n` +
+      `*Assigned Rider:* ${riderObj.name} (${riderObj.phone})\n` +
       `*Restaurant:* ${order.restaurant_name || ''}\n` +
       `*Customer:* ${name}\n` +
       `*Phone:* ${phone}\n` +
@@ -324,9 +364,7 @@ export const OrderManagement: React.FC = () => {
       `Please deliver promptly!`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = targetPhone 
-      ? `https://wa.me/${targetPhone}?text=${encodedMessage}`
-      : `https://wa.me/?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -345,6 +383,16 @@ export const OrderManagement: React.FC = () => {
       setCancelError('');
       return;
     }
+
+    // Intercept 'out_for_delivery' transition: if no rider assigned, show Rider Assignment Modal
+    const hasRider = (order as any).rider || (order as any).rider_id;
+    if (newStatus === 'out_for_delivery' && !hasRider) {
+      setAssignRiderModalOrder(order);
+      setSelectedRiderIdForModal(riders.length > 0 ? riders[0].id : null);
+      setAutoOpenWhatsAppAfterAssign(false);
+      return;
+    }
+
     updateOrderStatus(order.id, newStatus);
     
     // Auto-scroll board to the target column if viewing all columns
@@ -813,6 +861,69 @@ export const OrderManagement: React.FC = () => {
                 className="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black rounded-xl text-xs transition-all shadow-lg active:scale-95"
               >
                 Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rider Assignment Requirement Modal */}
+      {assignRiderModalOrder && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-sm font-black text-white flex items-center gap-2">
+                <Bike className="text-sky-400" size={16} /> Assign Rider to Order #{assignRiderModalOrder.id}
+              </h3>
+              <button
+                onClick={() => setAssignRiderModalOrder(null)}
+                className="text-slate-400 hover:text-white font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-sky-500/10 border border-sky-500/20 rounded-xl p-3 text-xs text-sky-300">
+              Select a delivery rider from your outlet list to assign to this order. The order status will update to <strong>Out for Delivery</strong> and rider status will change to <strong>ON_DELIVERY</strong>.
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-extrabold text-slate-400 mb-1.5">
+                Select Delivery Rider *
+              </label>
+              {riders.length === 0 ? (
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400">
+                  No active riders found for your branch. Please add a rider in Rider Management tab first.
+                </div>
+              ) : (
+                <select
+                  value={selectedRiderIdForModal || ''}
+                  onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
+                >
+                  <option value="">-- Choose Rider --</option>
+                  {riders.map((r: any) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} ({r.phone}) — [{r.status}]
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => setAssignRiderModalOrder(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleModalAssignRider}
+                disabled={!selectedRiderIdForModal}
+                className="px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-50 text-white font-black rounded-xl text-xs transition-all shadow-lg active:scale-95 flex items-center gap-1.5"
+              >
+                <Bike size={14} /> Assign & Dispatch →
               </button>
             </div>
           </div>
