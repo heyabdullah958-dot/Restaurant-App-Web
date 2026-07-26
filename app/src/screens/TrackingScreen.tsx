@@ -20,6 +20,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
+import { addInAppNotification } from '../services/inAppNotificationService';
 import { RootState, AppDispatch } from '../store';
 import { fetchOrderDetails, fetchGuestOrderStatus, fetchOrderTrack, clearCurrentOrder } from '../store/orderSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
@@ -51,6 +52,15 @@ export default function TrackingScreen() {
   const [reviewComment, setReviewComment] = useState<string>('');
   const [hasSubmittedReview, setHasSubmittedReview] = useState<boolean>(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
+
+  // Monotonic step & status tracking refs
+  const maxStepRef = React.useRef<number>(0);
+  const lastTrackedStatusRef = React.useRef<string | null>(null);
+
+  useEffect(() => {
+    maxStepRef.current = 0;
+    lastTrackedStatusRef.current = null;
+  }, [orderId]);
 
   useEffect(() => {
     if (orderId) {
@@ -85,16 +95,21 @@ export default function TrackingScreen() {
     }
   };
 
-  // Determine current active step
+  // Determine current active step (monotonic step advancement)
   const activeStep = useMemo(() => {
-    if (!currentOrder) return 0;
+    if (!currentOrder) return maxStepRef.current;
     const status = currentOrder.status?.toLowerCase();
     if (status === 'cancelled') return -1;
-    if (status === 'received' || status === 'pending' || status === 'accepted') return 0;
-    if (status === 'preparing') return 1;
-    if (status === 'out_for_delivery' || status === 'out for delivery') return 2;
-    if (status === 'delivered') return 4; // All 4 steps completed
-    return 0;
+    let step = 0;
+    if (status === 'received' || status === 'pending' || status === 'accepted') step = 0;
+    else if (status === 'preparing') step = 1;
+    else if (status === 'out_for_delivery' || status === 'out for delivery') step = 2;
+    else if (status === 'delivered') step = 4; // All 4 steps completed
+
+    if (step > maxStepRef.current) {
+      maxStepRef.current = step;
+    }
+    return maxStepRef.current;
   }, [currentOrder]);
 
   // Animation Values
@@ -343,6 +358,51 @@ export default function TrackingScreen() {
     const restObj = restaurants.find((r) => r.id === restId);
     return restObj?.name || currentOrder.restaurant_name || 'Restaurant';
   }, [currentOrder, restaurants]);
+
+  // Trigger top in-app toast notification on status transitions
+  useEffect(() => {
+    if (!currentOrder || !currentOrder.status) return;
+    const status = currentOrder.status.toLowerCase();
+    const orderIdNum = Number(currentOrder.id || orderId);
+    const brandName = restaurantName || 'Restaurant';
+
+    if (lastTrackedStatusRef.current && lastTrackedStatusRef.current !== status) {
+      if (status === 'preparing') {
+        addInAppNotification({
+          title: '👨‍🍳 Kitchen is Cooking!',
+          body: `Your order #${orderIdNum} from ${brandName} is now being prepared in the kitchen.`,
+          type: 'ORDER_STATUS',
+          order_id: orderIdNum,
+          restaurant_name: brandName,
+        });
+      } else if (status === 'out_for_delivery' || status === 'out for delivery') {
+        addInAppNotification({
+          title: '🛵 Your Order is On Its Way!',
+          body: `Great news! Order #${orderIdNum} from ${brandName} has been handed over to our rider. Tap to track!`,
+          type: 'ORDER_STATUS',
+          order_id: orderIdNum,
+          restaurant_name: brandName,
+        });
+      } else if (status === 'delivered') {
+        addInAppNotification({
+          title: '🎉 Order Delivered!',
+          body: `Order #${orderIdNum} from ${brandName} was delivered successfully. Enjoy your meal!`,
+          type: 'ORDER_STATUS',
+          order_id: orderIdNum,
+          restaurant_name: brandName,
+        });
+      } else if (status === 'cancelled') {
+        addInAppNotification({
+          title: '❌ Order Cancelled',
+          body: `Order #${orderIdNum} from ${brandName} has been cancelled.`,
+          type: 'ORDER_STATUS',
+          order_id: orderIdNum,
+          restaurant_name: brandName,
+        });
+      }
+    }
+    lastTrackedStatusRef.current = status;
+  }, [currentOrder?.status, currentOrder?.id, orderId, restaurantName]);
 
 
 

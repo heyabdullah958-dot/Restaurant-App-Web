@@ -336,6 +336,39 @@ export const createPayFastPayment = createAsyncThunk(
   }
 );
 
+const STATUS_RANK_MAP: Record<string, number> = {
+  'pending': 0,
+  'received': 1,
+  'accepted': 1,
+  'preparing': 2,
+  'out_for_delivery': 3,
+  'out for delivery': 3,
+  'delivered': 4,
+  'cancelled': -1,
+};
+
+export const getStatusRank = (status?: string): number => {
+  if (!status) return 0;
+  const s = status.toLowerCase().trim();
+  return STATUS_RANK_MAP[s] ?? 0;
+};
+
+const mergeMonotonicOrder = (existing: any, incoming: any) => {
+  if (!existing || !incoming) return incoming;
+  if (String(existing.id) === String(incoming.id)) {
+    const prevRank = getStatusRank(existing.status);
+    const nextRank = getStatusRank(incoming.status);
+    // Prevent rollback to a lower status rank unless order is cancelled
+    if (nextRank >= 0 && nextRank < prevRank) {
+      return {
+        ...incoming,
+        status: existing.status,
+      };
+    }
+  }
+  return incoming;
+};
+
 const initialState = {
   myOrders: [] as any[],
   currentOrder: null as any | null,
@@ -417,7 +450,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderTrack.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentOrder = action.payload;
+        state.currentOrder = mergeMonotonicOrder(state.currentOrder, action.payload);
       })
       .addCase(fetchOrderTrack.rejected, (state, action) => {
         state.loading = false;
@@ -432,7 +465,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentOrder = action.payload;
+        state.currentOrder = mergeMonotonicOrder(state.currentOrder, action.payload);
       })
       .addCase(fetchOrderDetails.rejected, (state, action) => {
         state.loading = false;
@@ -445,7 +478,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchGuestOrderStatus.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentOrder = action.payload;
+        state.currentOrder = mergeMonotonicOrder(state.currentOrder, action.payload);
       })
       .addCase(fetchGuestOrderStatus.rejected, (state, action) => {
         state.loading = false;

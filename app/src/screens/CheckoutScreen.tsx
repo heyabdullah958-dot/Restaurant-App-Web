@@ -72,6 +72,7 @@ export default function CheckoutScreen() {
 
   // Branch Selection State (null = Auto-Detect)
   const [branches, setBranches] = useState<any[]>([]);
+  const [isLoadingBranches, setIsLoadingBranches] = useState<boolean>(true);
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
 
   // Delivery scheduling states
@@ -231,9 +232,12 @@ export default function CheckoutScreen() {
           )
         : [];
 
-      setBranches(initialBranches);
       if (initialBranches.length > 0) {
+        setBranches(initialBranches);
         setSelectedBranchId((prev) => prev && initialBranches.some((b: any) => b.id === prev) ? prev : initialBranches[0].id);
+        setIsLoadingBranches(false);
+      } else {
+        setIsLoadingBranches(true);
       }
 
       const fetchLiveBranches = () => {
@@ -242,6 +246,7 @@ export default function CheckoutScreen() {
 
         // Strictly enforce restaurant scoping: do NOT make un-scoped API calls
         if (!targetSlug && !targetRestId) {
+          setIsLoadingBranches(false);
           return;
         }
 
@@ -274,6 +279,9 @@ export default function CheckoutScreen() {
           })
           .catch((e) => {
             console.warn('Failed to fetch live branches:', e);
+          })
+          .finally(() => {
+            setIsLoadingBranches(false);
           });
       };
 
@@ -288,8 +296,9 @@ export default function CheckoutScreen() {
   );
 
   const areAllBranchesClosed = useMemo(() => {
+    if (isLoadingBranches) return false;
     return branches.length === 0;
-  }, [branches]);
+  }, [branches, isLoadingBranches]);
 
   const deliveryFee = useMemo(() => {
     if (restaurant && restaurant.delivery_fee) {
