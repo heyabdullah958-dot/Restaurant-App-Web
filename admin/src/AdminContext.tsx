@@ -286,7 +286,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
     return savedBrandId ? Number(savedBrandId) : 1;
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
   // Session Storage persistence helpers for single-trigger order notification tracking
+
   const loadNotifiedOrderIdsFromSession = (): Set<number> => {
     try {
       const stored = sessionStorage.getItem('foodsphere_notified_order_ids');
