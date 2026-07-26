@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { logoutUser } from '../store/userSlice';
+import { logoutUser, fetchUserProfile } from '../store/userSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
@@ -69,28 +69,181 @@ const isBrandOpen = (brand: any): boolean => {
 
 // Shimmering card components are imported from SkeletonLoader for GPU accelerated performance.
 
+// --- MEMOIZED SUB-COMPONENTS FOR 60 FPS PERFORMANCE ---
+
+const BANNERS = [
+  {
+    icon: 'fast-food' as const,
+    title: '3 Brands, One Cart!',
+    subtitle: 'Mix cuisines in a single order.',
+    bg: COLORS.primary,
+  },
+  {
+    icon: 'gift' as const,
+    title: 'Earn Loyalty Points!',
+    subtitle: '1 point per Rs.100 — redeem anytime.',
+    bg: COLORS.accent,
+  },
+  {
+    icon: 'bicycle' as const,
+    title: 'Fast Delivery!',
+    subtitle: 'Hot & fresh at your doorstep.',
+    bg: COLORS.secondary,
+  },
+];
+
+const PROTOTYPE_STYLES: Record<string, { colors: readonly [string, string, ...string[]], emoji?: string }> = {
+  'seenbanao': { colors: ['#3E1F00', '#FF5722'] as const, emoji: '🔥' },
+  'jushhpk': { colors: ['#1A0A00', '#D2691E'] as const, emoji: '🍔' },
+  'dineatblue': { colors: ['#001529', '#0055A4'] as const, emoji: '🐟' },
+  'sandmelts': { colors: ['#FF6B00', '#FF3CAC'] as const, emoji: '🥪🧀' },
+  'tandooristoppk': { colors: ['#FF9900', '#E65100'] as const, emoji: '🍗🔥' },
+  'getafomo': { colors: ['#E0C3FC', '#8EC5FC'] as const, emoji: '☕🍰' },
+  'default': { colors: ['#FF5722', '#E91E63'] as const, emoji: '🍽️' }
+};
+
+// Isolated Banner Carousel — prevents 3.5s auto-rotate from re-rendering the whole HomeScreen & cards
+const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => void }) => {
+  const [bannerIndex, setBannerIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setBannerIndex(prev => (prev + 1) % BANNERS.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const banner = BANNERS[bannerIndex];
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      style={[styles.promoBanner, { backgroundColor: banner.bg }, SHADOWS.medium]}
+      onPress={onPressBanner}
+    >
+      <View style={styles.bannerContent}>
+        <View style={{ flex: 1, paddingRight: SPACING.xs }}>
+          <Text style={styles.bannerTitle}>{banner.title}</Text>
+          <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+          <View style={styles.bannerCTARow}>
+            <Text style={styles.bannerCTAText}>Order Now</Text>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+          </View>
+        </View>
+        <View style={styles.bannerIconWrap}>
+          <Ionicons name={banner.icon} size={72} color="rgba(255,255,255,0.25)" />
+        </View>
+      </View>
+      {/* Dot Indicators */}
+      <View style={styles.bannerDots}>
+        {BANNERS.map((_, i) => (
+          <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
+        ))}
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+// Memoized Category Chip Component
+const CategoryChip = React.memo(({ item, isSelected, onSelect }: { item: typeof categories[0], isSelected: boolean, onSelect: (id: string) => void }) => (
+  <TouchableOpacity
+    style={[
+      styles.categoryChip,
+      isSelected && styles.activeCategoryChip,
+      SHADOWS.small,
+    ]}
+    onPress={() => onSelect(item.id)}
+    activeOpacity={0.75}
+  >
+    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <Text style={{fontSize: 16, marginRight: 6}}>{item.icon}</Text>
+      <Text style={[
+        styles.categoryText,
+        isSelected && styles.activeCategoryText,
+      ]}>
+        {item.name}
+      </Text>
+    </View>
+  </TouchableOpacity>
+));
+
+// Memoized Restaurant Card Component
+const RestaurantCard = React.memo(({ brand, onPress }: { brand: any, onPress: (slug: string) => void }) => {
+  const styleData = PROTOTYPE_STYLES[brand.slug] || PROTOTYPE_STYLES['default'];
+  const isOpen = isBrandOpen(brand);
+
+  return (
+    <TouchableOpacity
+      style={[styles.brandCard, SHADOWS.medium]}
+      activeOpacity={0.95}
+      onPress={() => onPress(brand.slug)}
+    >
+      <LinearGradient 
+        colors={styleData.colors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.brandBand, { alignItems: 'center', justifyContent: 'center' }]}
+      >
+        <Image 
+          source={getImageUrl(brand.banner_image || brand.cover_image)} 
+          style={[StyleSheet.absoluteFill, { opacity: (brand.banner_image || brand.cover_image) ? 0.8 : 0.2 }]} 
+          resizeMode="cover"
+        />
+        {!(brand.banner_image || brand.cover_image) && (
+          <Text style={{ fontSize: 40, position: 'absolute', zIndex: 2 }}>{styleData.emoji}</Text>
+        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, zIndex: 10 }}>
+          {!isOpen && (
+            <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+              <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>CLOSED</Text>
+            </View>
+          )}
+          <View style={styles.ratingBadge}>
+            <Ionicons name="star" size={14} color="#FFC107" />
+            <Text style={styles.ratingText}>{Number(brand.rating || 4.5).toFixed(1)}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.brandDetails}>
+        <View style={styles.brandTitleRow}>
+          <Text style={styles.brandName}>{brand.name}</Text>
+          <View style={styles.deliveryBadge}>
+            <Ionicons name="time-outline" size={12} color={COLORS.gray} />
+            <Text style={styles.deliveryText}>
+              {brand.delivery_time_min}-{brand.delivery_time_max} min
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
+        <Text style={styles.brandTagline} numberOfLines={2}>
+          {brand.description || brand.address}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
-  const { user } = useSelector((state: RootState) => state.user);
-  const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
+  const user = useSelector((state: RootState) => state.user.user);
+  const restaurants = useSelector((state: RootState) => state.restaurant.restaurants);
+  const loading = useSelector((state: RootState) => state.restaurant.loading);
   const insets = useSafeAreaInsets();
 
-  // APP-01: STEP 1 — State add karo
   const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
-
-  // APP-28: Pull-to-refresh state
   const [refreshing, setRefreshing] = React.useState(false);
+  const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
+  const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
 
-  // APP-01: STEP 2 — Filtered list compute karo
   const filteredRestaurants = React.useMemo(() => {
     const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
-    // Use API data if available, otherwise fall back to local data (mirrors SearchScreen pattern)
     const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
     const available = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
 
     if (selectedCategory === 'All') return available;
 
-    // Direct slug match — works even when API omits cuisine_type on list endpoint
     const targetSlug = CATEGORY_SLUG_MAP[selectedCategory];
     if (targetSlug) {
       return available.filter((r: any) => 
@@ -99,17 +252,13 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       );
     }
 
-    // Fallback: string match on cuisine_type / name
     return available.filter((r: any) =>
       r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
       r.name?.toLowerCase().includes(selectedCategory.toLowerCase())
     );
   }, [restaurants, selectedCategory]);
 
-  const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
-  const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
-
-  const fetchCurrentLocation = async () => {
+  const fetchCurrentLocation = React.useCallback(async () => {
     try {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       let reverseGeocode = await Location.reverseGeocodeAsync({
@@ -124,98 +273,127 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     } catch (e) {
       console.log('Location fetch error', e);
     }
-  };
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      // Re-fetch live restaurant and branch statuses on focus
       dispatch(fetchRestaurants() as any);
-
-      // 10-second quiet background polling loop while viewing Home Screen
+      if (user && !user.is_guest) {
+        dispatch(fetchUserProfile() as any);
+      }
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
-      }, 10000);
-
+        if (user && !user.is_guest) {
+          dispatch(fetchUserProfile() as any);
+        }
+      }, 5000);
       return () => clearInterval(interval);
-    }, [dispatch])
+    }, [dispatch, user])
   );
 
-  const handleAllowLocation = async () => {
+  const handleAllowLocation = React.useCallback(async () => {
     setShowLocationPrompt(false);
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       fetchCurrentLocation();
     }
-  };
+  }, [fetchCurrentLocation]);
 
-  const handleDenyLocation = () => {
+  const handleDenyLocation = React.useCallback(() => {
     setShowLocationPrompt(false);
-  };
-
-  // APP-02: STEP 1 — State aur data add karo
-  const [bannerIndex, setBannerIndex] = React.useState(0);
-  const BANNERS = [
-    {
-      icon: 'fast-food' as const,
-      title: '3 Brands, One Cart!',
-      subtitle: 'Mix cuisines in a single order.',
-      bg: COLORS.primary,
-    },
-    {
-      icon: 'gift' as const,
-      title: 'Earn Loyalty Points!',
-      subtitle: '1 point per Rs.100 — redeem anytime.',
-      bg: COLORS.accent,
-    },
-    {
-      icon: 'bicycle' as const,
-      title: 'Fast Delivery!',
-      subtitle: 'Hot & fresh at your doorstep.',
-      bg: COLORS.secondary,
-    },
-  ];
-
-  // APP-02: STEP 2 — Auto-rotate effect add karo
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setBannerIndex(prev => (prev + 1) % BANNERS.length);
-    }, 3500);
-    return () => clearInterval(timer);
   }, []);
 
-  React.useEffect(() => {
-    dispatch(fetchRestaurants());
-  }, [dispatch]);
-
-  // APP-28: Pull-to-refresh handler
   const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
     await dispatch(fetchRestaurants());
     setRefreshing(false);
   }, [dispatch]);
 
-  // APP-01: STEP 3 — renderCategoryChip function REPLACE karo
-  const renderCategoryChip = ({ item }: { item: typeof categories[0] }) => (
-    <TouchableOpacity
-      style={[
-        styles.categoryChip,
-        item.id === selectedCategory && styles.activeCategoryChip,
-        SHADOWS.small,
-      ]}
-      onPress={() => setSelectedCategory(item.id)}
-      activeOpacity={0.75}
-    >
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Text style={{fontSize: 16, marginRight: 6}}>{item.icon}</Text>
-        <Text style={[
-          styles.categoryText,
-          item.id === selectedCategory && styles.activeCategoryText,
-        ]}>
-          {item.name}
-        </Text>
+  const handleSelectCategory = React.useCallback((id: string) => {
+    setSelectedCategory(id);
+  }, []);
+
+  const handlePressBrand = React.useCallback((slug: string) => {
+    navigation.navigate('Restaurant', { slug });
+  }, [navigation]);
+
+  const handlePressBanner = React.useCallback(() => {
+    navigation.navigate('Search');
+  }, [navigation]);
+
+  const renderCategoryChipItem = React.useCallback(({ item }: { item: typeof categories[0] }) => (
+    <CategoryChip 
+      item={item} 
+      isSelected={item.id === selectedCategory} 
+      onSelect={handleSelectCategory} 
+    />
+  ), [selectedCategory, handleSelectCategory]);
+
+  const renderRestaurantItem = React.useCallback(({ item }: { item: any }) => (
+    <RestaurantCard brand={item} onPress={handlePressBrand} />
+  ), [handlePressBrand]);
+
+  const getItemLayout = React.useCallback((_: any, index: number) => ({
+    length: 220,
+    offset: 220 * index,
+    index,
+  }), []);
+
+  const keyExtractor = React.useCallback((item: any) => String(item.id || item.slug), []);
+
+  const ListHeader = React.useMemo(() => (
+    <View>
+      <BannerCarousel onPressBanner={handlePressBanner} />
+
+      <FlatList
+        data={categories}
+        renderItem={renderCategoryChipItem}
+        keyExtractor={(item) => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoriesList}
+        contentContainerStyle={{ paddingRight: SPACING.md }}
+      />
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Explore Brands</Text>
+        <Text style={styles.sectionLink}>View All</Text>
       </View>
-    </TouchableOpacity>
-  );
+    </View>
+  ), [handlePressBanner, renderCategoryChipItem]);
+
+  const ListEmpty = React.useMemo(() => {
+    if (loading && filteredRestaurants.length === 0) {
+      return (
+        <View style={{ paddingHorizontal: 0 }}>
+          {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyStateBox}>
+        <Ionicons name="restaurant-outline" size={60} color={COLORS.lightGray} />
+        <Text style={styles.emptyStateTitle}>
+          {selectedCategory === 'All'
+            ? 'No Restaurants Available'
+            : `No ${selectedCategory} Restaurants`}
+        </Text>
+        <Text style={styles.emptyStateText}>
+          {selectedCategory === 'All'
+            ? 'Check your internet connection and pull down to refresh.'
+            : 'Try another cuisine category.'}
+        </Text>
+        {selectedCategory !== 'All' && (
+          <TouchableOpacity activeOpacity={0.75}
+            style={styles.emptyStateBtn}
+            onPress={() => setSelectedCategory('All')}
+          >
+            <Text style={styles.emptyStateBtnText}>Show All</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }, [loading, filteredRestaurants.length, selectedCategory]);
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
@@ -240,7 +418,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           </TouchableOpacity>
         </View>
 
-        {/* APP-03: Header Search Icon Button */}
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerIconBtn}
@@ -264,9 +441,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
+      <FlatList
+        data={filteredRestaurants}
+        renderItem={renderRestaurantItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={ListEmpty}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={4}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -275,148 +462,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             colors={[COLORS.primary]}
           />
         }
-      >
-        
-        {/* APP-02: STEP 3 — Banner JSX block REPLACE karo */}
-        <TouchableOpacity
-          activeOpacity={0.9}
-          style={[styles.promoBanner, { backgroundColor: BANNERS[bannerIndex].bg }, SHADOWS.medium]}
-          onPress={() => navigation.navigate('Search')}
-        >
-          <View style={styles.bannerContent}>
-            <View style={{ flex: 1, paddingRight: SPACING.xs }}>
-              <Text style={styles.bannerTitle}>{BANNERS[bannerIndex].title}</Text>
-              <Text style={styles.bannerSubtitle}>{BANNERS[bannerIndex].subtitle}</Text>
-              <View style={styles.bannerCTARow}>
-                <Text style={styles.bannerCTAText}>Order Now</Text>
-                <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
-              </View>
-            </View>
-            <View style={styles.bannerIconWrap}>
-              <Ionicons name={BANNERS[bannerIndex].icon} size={72} color="rgba(255,255,255,0.25)" />
-            </View>
-          </View>
-          {/* Dot Indicators */}
-          <View style={styles.bannerDots}>
-            {BANNERS.map((_, i) => (
-              <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
-            ))}
-          </View>
-        </TouchableOpacity>
-
-        {/* Categories Chips */}
-        <FlatList
-          data={categories}
-          renderItem={renderCategoryChip}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoriesList}
-          contentContainerStyle={{ paddingRight: SPACING.md }}
-        />
-
-        {/* Featured Brands Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Explore Brands</Text>
-          <Text style={styles.sectionLink}>View All</Text>
-        </View>
-
-        {/* APP-04 & APP-05: Loading / Empty / Content block */}
-        {loading && filteredRestaurants.length === 0 ? (
-          <View style={{ paddingHorizontal: 0 }}>
-            {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
-          </View>
-        ) : filteredRestaurants.length === 0 ? (
-          <View style={styles.emptyStateBox}>
-            <Ionicons name="restaurant-outline" size={60} color={COLORS.lightGray} />
-            <Text style={styles.emptyStateTitle}>
-              {selectedCategory === 'All'
-                ? 'No Restaurants Available'
-                : `No ${selectedCategory} Restaurants`}
-            </Text>
-            <Text style={styles.emptyStateText}>
-              {selectedCategory === 'All'
-                ? 'Check your internet connection and pull down to refresh.'
-                : 'Try another cuisine category.'}
-            </Text>
-            {selectedCategory !== 'All' && (
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.emptyStateBtn}
-                onPress={() => setSelectedCategory('All')}
-              >
-                <Text style={styles.emptyStateBtnText}>Show All</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ) : (
-          filteredRestaurants.map((brand: any, index: number) => {
-            // Web Prototype matching gradients and emojis
-            const prototypeStyles: Record<string, { colors: readonly [string, string, ...string[]], emoji?: string }> = {
-              'seenbanao': { colors: ['#3E1F00', '#FF5722'] as const, emoji: '🔥' },
-              'jushhpk': { colors: ['#1A0A00', '#D2691E'] as const, emoji: '🍔' },
-              'dineatblue': { colors: ['#001529', '#0055A4'] as const, emoji: '🐟' },
-              'sandmelts': { colors: ['#FF6B00', '#FF3CAC'] as const, emoji: '🥪🧀' },
-              'tandooristoppk': { colors: ['#FF9900', '#E65100'] as const, emoji: '🍗🔥' },
-              'getafomo': { colors: ['#E0C3FC', '#8EC5FC'] as const, emoji: '☕🍰' },
-              'default': { colors: ['#FF5722', '#E91E63'] as const, emoji: '🍽️' }
-            };
-
-            const styleData = prototypeStyles[brand.slug] || prototypeStyles['default'];
-            
-            return (
-              <TouchableOpacity
-                key={brand.id}
-                style={[styles.brandCard, SHADOWS.medium]}
-                activeOpacity={0.95}
-                onPress={() => navigation.navigate('Restaurant', { slug: brand.slug })}
-              >
-                <LinearGradient 
-                  colors={styleData.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={[styles.brandBand, { alignItems: 'center', justifyContent: 'center' }]}
-                >
-                  <Image 
-                    source={getImageUrl(brand.banner_image || brand.cover_image)} 
-                    style={[StyleSheet.absoluteFill, { opacity: (brand.banner_image || brand.cover_image) ? 0.8 : 0.2 }]} 
-                    resizeMode="cover"
-                  />
-                  {!(brand.banner_image || brand.cover_image) && (
-                    <Text style={{ fontSize: 40, position: 'absolute', zIndex: 2 }}>{styleData.emoji}</Text>
-                  )}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, zIndex: 10 }}>
-                    {!isBrandOpen(brand) && (
-                      <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>CLOSED</Text>
-                      </View>
-                    )}
-                    <View style={styles.ratingBadge}>
-                      <Ionicons name="star" size={14} color="#FFC107" />
-                      <Text style={styles.ratingText}>{Number(brand.rating).toFixed(1)}</Text>
-                    </View>
-                  </View>
-                </LinearGradient>
-
-                <View style={styles.brandDetails}>
-                  <View style={styles.brandTitleRow}>
-                    <Text style={styles.brandName}>{brand.name}</Text>
-                    <View style={styles.deliveryBadge}>
-                      <Ionicons name="time-outline" size={12} color={COLORS.gray} />
-                      <Text style={styles.deliveryText}>
-                        {brand.delivery_time_min}-{brand.delivery_time_max} min
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
-                  <Text style={styles.brandTagline} numberOfLines={2}>
-                    {brand.description || brand.address}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
+      />
 
       {/* Guest Login Banner */}
       {user?.is_guest && (

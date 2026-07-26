@@ -16,9 +16,97 @@ import {
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
-  const { user, selectedBrandId, restaurants, orders, updateOrderStatus, refreshOrders, setSelectedBrand } = useAdmin();
+  const { user, selectedBrandId, restaurants, orders, updateOrderStatus, refreshOrders, setSelectedBrand, showToast } = useAdmin();
   const [filterBrandId, setFilterBrandId] = useState<number | 'all'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Cancellation Modal state & safeguards
+  const [cancelModalOrder, setCancelModalOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelError, setCancelError] = useState('');
+
+  const confirmCancellation = () => {
+    if (!cancelReason.trim()) {
+      setCancelError('Please enter a valid cancellation reason for audit logging.');
+      return;
+    }
+    if (cancelModalOrder) {
+      updateOrderStatus(cancelModalOrder.id, 'cancelled', cancelReason.trim());
+      setCancelModalOrder(null);
+      setCancelReason('');
+    }
+  };
+
+  const exportCSV = (orderList: Order[]) => {
+    const headers = ['Order ID', 'Date', 'Customer', 'Phone', 'Address', 'Status', 'Total', 'Payment'];
+    const rows = orderList.map(o => [
+      `#${o.id}`,
+      new Date(o.created_at).toLocaleString(),
+      `"${o.guest_name || 'Guest'}"`,
+      `"${o.guest_phone || ''}"`,
+      `"${(o.delivery_address || '').replace(/"/g, '""')}"`,
+      o.status,
+      o.total,
+      o.payment_method
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `orders_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrintReceipt = (order: Order) => {
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (!printWindow) return;
+    const itemsHtml = (order.items || []).map((i: any) => `
+      <tr>
+        <td style="padding: 4px 0;">${i.quantity || 1}x ${i.name || i.menu_item_name || 'Item'}</td>
+        <td style="text-align: right; padding: 4px 0;">Rs. ${i.price || 0}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Receipt #${order.id}</title>
+          <style>
+            body { font-family: monospace; width: 280px; margin: 0 auto; padding: 10px; font-size: 12px; }
+            h2 { text-align: center; margin: 5px 0; font-size: 16px; }
+            .divider { border-bottom: 1px dashed #000; margin: 8px 0; }
+            table { width: 100%; border-collapse: collapse; }
+            .total { font-weight: bold; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <h2>GetFood Receipt</h2>
+          <div style="text-align: center;">Order #${order.id}</div>
+          <div style="text-align: center; font-size: 10px;">${new Date(order.created_at).toLocaleString()}</div>
+          <div class="divider"></div>
+          <div>Customer: ${order.guest_name}</div>
+          <div>Phone: ${order.guest_phone}</div>
+          <div>Address: ${order.delivery_address}</div>
+          <div class="divider"></div>
+          <table>${itemsHtml}</table>
+          <div class="divider"></div>
+          <table>
+            <tr class="total">
+              <td>Total</td>
+              <td style="text-align: right;">Rs. ${order.total}</td>
+            </tr>
+          </table>
+          <div class="divider"></div>
+          <div style="text-align: center; font-size: 10px; margin-top: 10px;">Thank you for ordering with GetFood!</div>
+          <script>window.onload = function() { window.print(); window.close(); }</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   const isSuper = user?.role === 'super_admin';
   const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
@@ -91,9 +179,19 @@ export const OrderManagement: React.FC = () => {
       const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('gulberg'));
       if (match.length > 0) return match;
     }
+    let finalOrders = restFiltered;
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      finalOrders = finalOrders.filter(o => 
+        o.id.toString().includes(term) ||
+        (o.guest_name || '').toLowerCase().includes(term) ||
+        (o.guest_phone || '').includes(term) ||
+        (o.delivery_address || '').toLowerCase().includes(term)
+      );
+    }
 
-    return restFiltered;
-  }, [orders, filterBrandId, restaurants, isSuper, restaurant, user]);
+    return finalOrders;
+  }, [orders, filterBrandId, restaurants, isSuper, restaurant, user, searchTerm]);
 
   const formatOrderTime = (createdAt: string) => {
     const date = new Date(createdAt);
@@ -218,8 +316,18 @@ export const OrderManagement: React.FC = () => {
 
   const boardContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleStatusChange = (orderId: number, newStatus: OrderStatus) => {
-    updateOrderStatus(orderId, newStatus);
+  const handleStatusChange = (order: Order, newStatus: OrderStatus) => {
+    if (newStatus === 'cancelled') {
+      if (order.status === 'delivered' && user?.role !== 'super_admin') {
+        showToast('Only Super Admin can cancel an order that has already been delivered.', 'error');
+        return;
+      }
+      setCancelModalOrder(order);
+      setCancelReason('');
+      setCancelError('');
+      return;
+    }
+    updateOrderStatus(order.id, newStatus);
     
     // Auto-scroll board to the target column if viewing all columns
     if (selectedColumnFilter === 'all') {
@@ -306,6 +414,23 @@ export const OrderManagement: React.FC = () => {
               )}
             </div>
           )}
+
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search #ID, name, phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-slate-900 border border-slate-700 text-white text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-blue-500 w-44"
+          />
+
+          {/* Export CSV Button */}
+          <button
+            onClick={() => exportCSV(brandOrders)}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold px-3 py-2 rounded-xl transition-all"
+          >
+            Export CSV
+          </button>
 
           {/* Manual Refresh Button */}
           <button
@@ -406,10 +531,21 @@ export const OrderManagement: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
-                            <Clock size={10} className="text-slate-500" />
-                            {formatOrderTime(order.created_at)}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {order.status === 'pending' && (() => {
+                              const minsPassed = Math.floor((new Date().getTime() - new Date(order.created_at).getTime()) / 60000);
+                              if (minsPassed >= 10) {
+                                return <span className="bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold px-1.5 py-0.5 rounded animate-pulse">🔥 SLA BREACH ({minsPassed}m)</span>;
+                              } else if (minsPassed >= 5) {
+                                return <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[10px] font-bold px-1.5 py-0.5 rounded">⚠️ LATE ({minsPassed}m)</span>;
+                              }
+                              return null;
+                            })()}
+                            <span className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold bg-slate-900/40 px-2 py-0.5 rounded border border-slate-900/20">
+                              <Clock size={10} className="text-slate-500" />
+                              {formatOrderTime(order.created_at)}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Customer Info */}
@@ -464,7 +600,7 @@ export const OrderManagement: React.FC = () => {
                           {/* Step 1: Pending -> Received */}
                           {order.status === 'pending' && (
                             <button
-                              onClick={() => handleStatusChange(order.id, 'received')}
+                              onClick={() => handleStatusChange(order, 'received')}
                               className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 text-white font-black py-2.5 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                             >
                               <CheckCircle size={13} /> Accept Order →
@@ -474,7 +610,7 @@ export const OrderManagement: React.FC = () => {
                           {/* Step 2: Received -> Preparing */}
                           {order.status === 'received' && (
                             <button
-                              onClick={() => handleStatusChange(order.id, 'preparing')}
+                              onClick={() => handleStatusChange(order, 'preparing')}
                               className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-450 hover:to-orange-450 text-slate-950 font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                             >
                               🍳 Start Preparing →
@@ -484,7 +620,7 @@ export const OrderManagement: React.FC = () => {
                           {/* Step 3: Preparing -> Out for Delivery */}
                           {order.status === 'preparing' && (
                             <button
-                              onClick={() => handleStatusChange(order.id, 'out_for_delivery')}
+                              onClick={() => handleStatusChange(order, 'out_for_delivery')}
                               className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                             >
                               🛵 Dispatch Out For Delivery →
@@ -494,7 +630,7 @@ export const OrderManagement: React.FC = () => {
                           {/* Step 4: Out for Delivery -> Delivered */}
                           {order.status === 'out_for_delivery' && (
                             <button
-                              onClick={() => handleStatusChange(order.id, 'delivered')}
+                              onClick={() => handleStatusChange(order, 'delivered')}
                               className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                             >
                               <CheckCircle size={13} /> Mark Delivered ✅
@@ -503,10 +639,10 @@ export const OrderManagement: React.FC = () => {
 
                           {/* Quick Jump Status Dropdown */}
                           {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                            <div className="w-full relative group/select">
+                            <div className="w-full relative group/select flex gap-2 items-center">
                               <select 
                                 value={order.status}
-                                onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                                onChange={(e) => handleStatusChange(order, e.target.value as OrderStatus)}
                                 className="w-full appearance-none bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold py-1.5 pl-3 pr-8 rounded-lg text-[10px] transition-all cursor-pointer text-center outline-none select-none"
                               >
                                 <option value="pending">Pending</option>
@@ -514,24 +650,38 @@ export const OrderManagement: React.FC = () => {
                                 <option value="preparing">Preparing</option>
                                 <option value="out_for_delivery">Out For Delivery</option>
                                 <option value="delivered">Delivered</option>
+                                <option value="cancelled">❌ Cancel Order</option>
                               </select>
-                              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500 group-hover/select:text-slate-300 transition-colors">
-                                <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                                </svg>
-                              </div>
                             </div>
                           )}
-                          
-                          {/* Rider dispatch via WhatsApp */}
-                          {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+
+                          {/* Cancel delivered order safeguard button for super admin */}
+                          {order.status === 'delivered' && isSuper && (
                             <button
-                              onClick={() => triggerRiderWhatsApp(order)}
-                              className="w-full flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-400 font-extrabold py-1.5 rounded-lg text-[10px] transition-all shadow-sm active:scale-[0.98]"
+                              onClick={() => handleStatusChange(order, 'cancelled')}
+                              className="w-full text-center text-[10px] font-bold text-rose-400/80 hover:text-rose-400 hover:underline py-1"
                             >
-                              <MessageSquare size={11} /> WhatsApp Rider
+                              ⚠️ Cancel & Refund Order (Super Admin)
                             </button>
                           )}
+                          
+                          {/* Rider dispatch via WhatsApp & Print Receipt */}
+                          <div className="flex gap-2">
+                            {order.status !== 'pending' && order.status !== 'delivered' && order.status !== 'cancelled' && (
+                              <button
+                                onClick={() => triggerRiderWhatsApp(order)}
+                                className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-400 font-extrabold py-1.5 rounded-lg text-[10px] transition-all shadow-sm active:scale-[0.98]"
+                              >
+                                <MessageSquare size={11} /> WhatsApp Rider
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handlePrintReceipt(order)}
+                              className="px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold py-1.5 rounded-lg text-[10px] transition-all"
+                            >
+                              🖨️ Print
+                            </button>
+                          </div>
 
                           {order.status === 'delivered' && (
                             <div className="flex items-center justify-center gap-1.5 text-[11px] font-black text-emerald-400 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
@@ -540,8 +690,13 @@ export const OrderManagement: React.FC = () => {
                           )}
 
                           {order.status === 'cancelled' && (
-                            <div className="flex items-center justify-center gap-1.5 text-[11px] font-black text-rose-400 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                              CANCELLED
+                            <div className="flex flex-col items-center justify-center gap-0.5 text-[11px] font-black text-rose-400 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                              <span>CANCELLED</span>
+                              {order.cancellation_reason && (
+                                <span className="text-[10px] font-medium text-rose-300/80 italic px-2 text-center">
+                                  "{order.cancellation_reason}"
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -560,6 +715,63 @@ export const OrderManagement: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Cancellation Reason Requirement Modal */}
+      {cancelModalOrder && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-sm font-black text-white flex items-center gap-2">
+                <span className="text-rose-500">🛑</span> Cancel Order #{cancelModalOrder.id}
+              </h3>
+              <button
+                onClick={() => setCancelModalOrder(null)}
+                className="text-slate-400 hover:text-white font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-xs text-rose-300">
+              <strong>Mandatory Audit Requirement:</strong> Enter the reason for cancelling this order (e.g. "Customer requested cancellation", "Out of stock item"). This reason will be logged with your Manager ID.
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-extrabold text-slate-400 mb-1.5">
+                Cancellation Reason *
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => {
+                  setCancelReason(e.target.value);
+                  if (cancelError) setCancelError('');
+                }}
+                placeholder="Type cancellation reason here..."
+                className="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 text-white rounded-xl p-3 text-xs outline-none min-h-[90px]"
+              />
+              {cancelError && (
+                <p className="text-rose-400 text-[11px] mt-1 font-bold">{cancelError}</p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => setCancelModalOrder(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={confirmCancellation}
+                className="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black rounded-xl text-xs transition-all shadow-lg active:scale-95"
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

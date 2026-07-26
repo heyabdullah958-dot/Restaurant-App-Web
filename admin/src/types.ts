@@ -91,6 +91,7 @@ export interface Order {
   discount: number;
   total: number;
   special_instructions?: string;
+  cancellation_reason?: string;
   created_at: string;
   items: OrderItemDetail[];
 }

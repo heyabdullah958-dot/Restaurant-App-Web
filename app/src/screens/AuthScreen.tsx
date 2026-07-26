@@ -206,6 +206,10 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
     if (!username.trim()) {
       errors.username = 'Username is required';
+    } else if (/\s/.test(username.trim())) {
+      errors.username = 'Username cannot contain spaces (e.g. hakubaku)';
+    } else if (!/^[a-zA-Z0-9_@+.-]+$/.test(username.trim())) {
+      errors.username = 'Username can only contain letters, numbers, and @/./+/-/_';
     }
 
     if (activeTab === 'register') {
@@ -228,7 +232,6 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
-      showAlert('Validation Error', 'Please correct the errors in the form before proceeding.');
       return;
     }
 

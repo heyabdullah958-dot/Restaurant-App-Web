@@ -81,8 +81,11 @@ export default function OrdersScreen() {
   // Status mapping to colors and human-readable names
   const getStatusDetails = (status: string) => {
     switch (status?.toLowerCase()) {
+      case 'pending':
+        return { label: 'Pending', color: COLORS.warning };
       case 'received':
-        return { label: 'Received', color: COLORS.warning };
+      case 'accepted':
+        return { label: 'Accepted', color: COLORS.warning };
       case 'preparing':
         return { label: 'Preparing', color: COLORS.secondary };
       case 'out_for_delivery':
@@ -90,6 +93,8 @@ export default function OrdersScreen() {
         return { label: 'Out for Delivery', color: COLORS.accent };
       case 'delivered':
         return { label: 'Delivered', color: COLORS.success };
+      case 'cancelled':
+        return { label: 'Cancelled', color: COLORS.danger };
       default:
         return { label: status || 'Pending', color: COLORS.gray };
     }

@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'orders',
     'users',
     'payments',
+    'promotions',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'config.audit_middleware.APIAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

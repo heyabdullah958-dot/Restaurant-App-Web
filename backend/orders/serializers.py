@@ -32,19 +32,22 @@ class OrderCreateItemSerializer(serializers.Serializer):
 
 class OrderCreateSerializer(serializers.ModelSerializer):
     items = OrderCreateItemSerializer(many=True, write_only=True)
+    use_loyalty_points = serializers.BooleanField(required=False, default=False, write_only=True)
+    points_to_redeem = serializers.IntegerField(required=False, default=0, min_value=0, write_only=True)
 
     class Meta:
         model = Order
         fields = (
             'id', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
-            'items', 'subtotal', 'delivery_fee', 'discount', 'total'
+            'items', 'subtotal', 'delivery_fee', 'discount', 'total',
+            'use_loyalty_points', 'points_to_redeem'
         )
         read_only_fields = ('id', 'subtotal', 'delivery_fee', 'discount', 'total')
 
     def validate(self, attrs):
         """
-        BUG-04/09/10: Validate guest fields, item availability, and min order amount.
+        BUG-04/09/10: Validate guest fields, item availability, min order amount, and loyalty redemption.
         """
         request = self.context.get('request')
 
@@ -70,6 +73,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # Must have at least one item
         if not attrs.get('items'):
             raise serializers.ValidationError("Order must have at least one menu item.")
+
+        # Validate loyalty points redemption
+        use_loyalty = attrs.get('use_loyalty_points', False)
+        pts_to_redeem = attrs.get('points_to_redeem', 0)
+        if use_loyalty or pts_to_redeem > 0:
+            if is_guest_or_anon:
+                raise serializers.ValidationError(
+                    "Loyalty points can only be redeemed by registered accounts. Please log in or register."
+                )
+            user_pts = getattr(request.user, 'loyalty_points', 0)
+            if pts_to_redeem > user_pts:
+                raise serializers.ValidationError(
+                    f"You only have {user_pts} loyalty points available (requested {pts_to_redeem})."
+                )
 
         # BUG-09: Validate each item is currently available
         restaurant = attrs.get('restaurant')
@@ -111,10 +128,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         BUG-04: Wrapped in transaction.atomic() — if any step fails, entire order rolls back.
         BUG-05: Loyalty points updated using atomic F() expression — no race condition.
-        BUG-11: Loyalty points only awarded to registered (non-guest) users.
+        BUG-11: Loyalty points awarded & redeemed for registered (non-guest) users.
         """
         with transaction.atomic():
             items_data = validated_data.pop('items')
+            use_loyalty = validated_data.pop('use_loyalty_points', False)
+            pts_to_redeem = validated_data.pop('points_to_redeem', 0)
             restaurant = validated_data['restaurant']
 
             request = self.context.get('request')
@@ -162,9 +181,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 })
 
             delivery_fee = restaurant.delivery_fee
-            discount = 0
+            discount = Decimal('0.00')
+            actual_pts_redeemed = 0
+
+            # Process Loyalty Points Redemption
+            if user and not user.is_guest and (use_loyalty or pts_to_redeem > 0):
+                avail_pts = user.loyalty_points
+                # Max points to redeem is limited by available points and subtotal
+                actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(subtotal))
+                if actual_pts_redeemed > 0:
+                    discount = Decimal(actual_pts_redeemed)
+
             total = subtotal + delivery_fee - discount
-            total = round(total, 2)
+            total = max(Decimal('0.00'), round(total, 2))
+
             # Create the Order record
             order = Order.objects.create(
                 user=user,
@@ -174,6 +204,22 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 total=total,
                 **validated_data
             )
+
+            # Deduct redeemed points atomically if redeemed
+            if user and not user.is_guest and actual_pts_redeemed > 0:
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                User.objects.filter(pk=user.pk).update(
+                    loyalty_points=F('loyalty_points') - actual_pts_redeemed
+                )
+                from users.models import LoyaltyTransaction
+                LoyaltyTransaction.objects.create(
+                    user=user,
+                    order=order,
+                    points=actual_pts_redeemed,
+                    transaction_type='redeemed',
+                    description=f"Redeemed {actual_pts_redeemed} points for Rs. {actual_pts_redeemed} discount on Order #{order.id}"
+                )
 
             # If branch was not explicitly selected by customer, auto-assign based on delivery address / lat lng
             if not order.branch:
@@ -192,8 +238,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             for item in order_items_to_create:
                 OrderItem.objects.create(order=order, **item)
 
-            # BUG-11 + BUG-05: Award loyalty points ONLY to registered (non-guest) users
-            # Using F() expression for atomic update — no race condition
+            # BUG-11 + BUG-05: Award loyalty points ONLY to registered (non-guest) users on net paid total
             if user and not user.is_guest:
                 ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
                 if ratio > 0:

@@ -1,6 +1,7 @@
 {
   "expo": {
-    "name": "FoodSphere",
+    "name": "GetFood",
+    "displayName": "GetFood",
     "slug": "app",
     "version": "1.0.4",
     "orientation": "portrait",
@@ -8,10 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.abdullah958.foodsphere"
+      "bundleIdentifier": "com.abdullah958.getfood"
     },
     "android": {
-      "package": "com.abdullah958.foodsphere",
+      "package": "com.abdullah958.getfood",
       "versionCode": 6,
       "adaptiveIcon": {
         "backgroundColor": "#FF6B35",
@@ -55,7 +56,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow FoodSphere to use your location to find nearby restaurants."
+          "locationAlwaysAndWhenInUsePermission": "Allow GetFood to use your location to find nearby restaurants."
         }
       ]
     ],

@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   centerLoader: {
-    justify: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.light,
   },

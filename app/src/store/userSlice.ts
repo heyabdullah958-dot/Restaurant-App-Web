@@ -101,6 +101,35 @@ export const loadSavedToken = createAsyncThunk<
   }
 );
 
+const formatDRFErrorMessage = (error: any, fallback: string): string => {
+  if (error.response && error.response.data) {
+    const data = error.response.data;
+    if (typeof data === 'string') return data;
+    if (data.message) return data.message;
+    if (data.detail) return data.detail;
+    if (data.error) return data.error;
+    
+    // DRF Field errors e.g. { username: ["Enter a valid username..."], email: [...] }
+    if (typeof data === 'object') {
+      const keys = Object.keys(data);
+      if (keys.length > 0) {
+        const parts: string[] = [];
+        keys.forEach((key) => {
+          const val = data[key];
+          const prefix = key === 'non_field_errors' || key === 'detail' ? '' : `${key.charAt(0).toUpperCase() + key.slice(1)}: `;
+          if (Array.isArray(val)) {
+            parts.push(`${prefix}${val.join(' ')}`);
+          } else if (typeof val === 'string') {
+            parts.push(`${prefix}${val}`);
+          }
+        });
+        if (parts.length > 0) return parts.join('\n');
+      }
+    }
+  }
+  return error.message || fallback;
+};
+
 export const loginUser = createAsyncThunk<
   { user: UserProfile; token: string; refreshToken: string },
   { username: string; password: string },
@@ -148,7 +177,7 @@ export const loginUser = createAsyncThunk<
       
       return { user, token, refreshToken };
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Login failed';
+      const message = formatDRFErrorMessage(error, 'Login failed');
       return rejectWithValue(message);
     }
   }
@@ -187,7 +216,7 @@ export const registerUser = createAsyncThunk<
       
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Registration failed';
+      const message = formatDRFErrorMessage(error, 'Registration failed');
       return rejectWithValue(message);
     }
   }

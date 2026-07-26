@@ -14,6 +14,11 @@ import { setupInterceptors } from './src/services/api';
 import { loadSavedToken } from './src/store/userSlice';
 import { COLORS } from './src/theme';
 
+import { enableFreeze } from 'react-native-screens';
+
+// Enable freeze on unfocused screens for 60 FPS transition performance
+enableFreeze(true);
+
 // Set up response interceptors to catch 401 errors globally
 setupInterceptors(store);
 

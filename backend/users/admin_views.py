@@ -218,6 +218,7 @@ class AdminManagerCreateView(APIView):
             password=password,
             is_staff=True,
             is_active=True,
+            must_change_password=True,
         )
         
         # Add to restaurant manager group (preserve existing group-based auth)
@@ -240,6 +241,7 @@ class AdminManagerCreateView(APIView):
             'restaurant': restaurant.name,
             'branch': branch.name,
             'notification_email': notification_email,
+            'must_change_password': True,
             'message': f'Manager account created. Save the password — it is shown only once.'
         }, status=201)
 
@@ -316,6 +318,7 @@ class AdminManagerListView(APIView):
                 'id': u.id,
                 'username': u.username,
                 'email': u.email or '',
+                'must_change_password': u.must_change_password,
                 'restaurant_name': restaurant.name,
                 'restaurant_id': restaurant.id,
                 'branch_name': (u.manager_profile.branch.name 
@@ -337,6 +340,7 @@ class AdminManagerChangePasswordView(APIView):
     permission_classes = [IsSuperUser]
 
     def post(self, request, pk):
+        from django.utils import timezone
         try:
             user = User.objects.get(pk=pk, is_staff=True, is_superuser=False)
         except User.DoesNotExist:
@@ -347,9 +351,42 @@ class AdminManagerChangePasswordView(APIView):
             return Response({'error': 'Password is required.'}, status=400)
 
         user.set_password(new_password)
+        user.must_change_password = True
+        user.password_changed_at = timezone.now()
         user.save()
 
         return Response({
             'success': True,
             'message': f"Password for {user.username} has been changed successfully!"
         })
+
+
+class UserFirstPasswordChangeView(APIView):
+    """
+    POST /api/users/change-password/
+    Authenticated manager changes their temporary password on first login.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from django.utils import timezone
+        user = request.user
+        old_password = request.data.get('old_password', '').strip()
+        new_password = request.data.get('new_password', '').strip()
+
+        if not new_password or len(new_password) < 6:
+            return Response({'error': 'New password must be at least 6 characters long.'}, status=400)
+
+        if not user.check_password(old_password):
+            return Response({'error': 'Incorrect current password.'}, status=400)
+
+        user.set_password(new_password)
+        user.must_change_password = False
+        user.password_changed_at = timezone.now()
+        user.save()
+
+        return Response({
+            'success': True,
+            'message': 'Password updated successfully. You may now continue using the dashboard.'
+        })
+

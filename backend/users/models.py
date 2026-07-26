@@ -6,6 +6,8 @@ class User(AbstractUser):
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
     loyalty_points = models.IntegerField(default=0)
     is_guest = models.BooleanField(default=False, db_index=True)
+    must_change_password = models.BooleanField(default=False)
+    password_changed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         if self.is_guest:

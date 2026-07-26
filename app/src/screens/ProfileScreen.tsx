@@ -242,13 +242,23 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           </Text>
 
           {!user?.is_guest && (
-            <View style={styles.loyaltySummary}>
-              <Ionicons name="ribbon" size={20} color={COLORS.primary} />
-              <Text style={styles.loyaltyText}>
-                Loyalty Points:{' '}
-                <Text style={styles.pointsHighlight}>{user?.loyalty_points || 0}</Text>
-              </Text>
-            </View>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Rewards')}
+              style={[styles.loyaltySummary, { justifyContent: 'space-between', width: '100%' }]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="ribbon" size={20} color={COLORS.primary} />
+                <Text style={styles.loyaltyText}>
+                  Loyalty Points:{' '}
+                  <Text style={styles.pointsHighlight}>{user?.loyalty_points || 0}</Text>
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, color: COLORS.primary, fontWeight: 'bold', marginRight: 2 }}>History</Text>
+                <Ionicons name="chevron-forward" size={14} color={COLORS.primary} />
+              </View>
+            </TouchableOpacity>
           )}
         </View>
 

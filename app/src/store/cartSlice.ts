@@ -96,6 +96,19 @@ const cartSlice = createSlice({
       state.totalAmount = 0;
     },
   },
+  extraReducers: (builder) => {
+    const resetCartState = (state: any) => {
+      state.items = [];
+      state.restaurantId = null;
+      state.totalQuantity = 0;
+      state.totalAmount = 0;
+    };
+    builder
+      .addCase('user/login/pending', resetCartState)
+      .addCase('user/register/pending', resetCartState)
+      .addCase('user/guestLogin/pending', resetCartState)
+      .addCase('user/logout/fulfilled', resetCartState);
+  },
 });
 
 export const { addItemToCart, removeItemFromCart, updateQuantity, clearCart } = cartSlice.actions;

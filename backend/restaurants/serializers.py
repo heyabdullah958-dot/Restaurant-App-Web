@@ -43,6 +43,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField(read_only=True)
     # POST/PATCH ke liye writable ImageField
     image = serializers.ImageField(required=False, allow_null=True)
+    is_available = serializers.SerializerMethodField()
 
     class Meta:
         model = MenuItem
@@ -51,6 +52,23 @@ class MenuItemSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         return build_absolute_image_url(obj.image, self.context)
+
+    def get_is_available(self, obj):
+        if not obj.is_available:
+            return False
+        request = self.context.get('request') if self.context else None
+        branch_id = None
+        if request:
+            branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
+        if not branch_id and self.context:
+            branch_id = self.context.get('branch_id')
+            
+        if branch_id:
+            from .models import BranchMenuItemAvailability
+            override = BranchMenuItemAvailability.objects.filter(branch_id=branch_id, menu_item=obj).first()
+            if override:
+                return override.is_available
+        return True
 
 
 class MenuCategorySerializer(serializers.ModelSerializer):

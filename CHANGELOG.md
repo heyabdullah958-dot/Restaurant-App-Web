@@ -36,4 +36,14 @@
 - Expanded `MOCK_MANAGERS` in `ManagerManagement.tsx` to list all 10 branch manager accounts across all branches of Tandoori Stop, Jush, and Get A Fomo.
 - Built and verified production bundle (`npm run build` -> `dist/assets/index-DW_z81fs.js`).
 
+## 2026-07-26 Manager & Super Admin Security & Accountability Governance Updates
+- **Purge Orders Endpoint Lockdown**: Secured `POST /api/orders/purge-all/` behind `IsSuperUser` permission. Branch managers attempting to purge orders now receive HTTP 403 Forbidden.
+- **API Audit Logging Middleware**: Created `APIAuditMiddleware` (`backend/config/audit_middleware.py`) to automatically record staff API mutations (POST, PUT, PATCH, DELETE) in `AdminAuditLog` with client IP, user, endpoint, and sanitized request body.
+- **Daily EOD Cash Register**: Created `BranchCashRegister` model and `BranchCashRegisterView` / `VerifyCashRegisterView` endpoints (`/api/orders/cash-register/`) allowing Branch Managers to log end-of-day COD cash collected vs turned over, with Super Admin confirmation.
+- **Order Cancellation Safeguards**: Implemented mandatory `cancellation_reason` validation and `cancelled_by` user recording on order cancellation. Blocked non-superusers from cancelling `delivered` orders.
+- **Auth & Session Security**: Added `must_change_password` and `password_changed_at` fields to `User` model, updated JWT token payload, and created `/api/users/change-password/` endpoint for mandatory first-login password updates.
+- **React Admin UI Upgrades**: Integrated Cancellation Reason Modal in `OrderManagement.tsx` and updated `AdminContext.tsx` status handlers.
+- **Automated Verification**: Ran expanded integration test suite in `test_backend_local.py` with 100% pass rate.
+
+
 

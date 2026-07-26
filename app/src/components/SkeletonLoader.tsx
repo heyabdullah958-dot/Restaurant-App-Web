@@ -84,6 +84,58 @@ export const RestaurantCardSkeleton: React.FC = () => (
   </View>
 );
 
+export const MenuItemSkeleton: React.FC = () => (
+  <View style={[styles.cardSkeleton, { padding: 12, flexDirection: 'row', alignItems: 'center' }]}>
+    <View style={{ flex: 1, marginRight: 12 }}>
+      <SkeletonBox width="70%" height={16} style={{ marginBottom: 8 }} />
+      <SkeletonBox width="90%" height={12} style={{ marginBottom: 8 }} />
+      <SkeletonBox width="35%" height={14} />
+    </View>
+    <SkeletonBox width={80} height={80} borderRadius={12} />
+  </View>
+);
+
+export const OrderCardSkeleton: React.FC = () => (
+  <View style={[styles.cardSkeleton, { padding: 16 }]}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+      <SkeletonBox width="50%" height={18} />
+      <SkeletonBox width="25%" height={18} borderRadius={12} />
+    </View>
+    <SkeletonBox width="75%" height={12} style={{ marginBottom: 8 }} />
+    <SkeletonBox width="40%" height={12} style={{ marginBottom: 12 }} />
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <SkeletonBox width="30%" height={16} />
+      <SkeletonBox width="25%" height={32} borderRadius={8} />
+    </View>
+  </View>
+);
+
+export const SearchResultSkeleton: React.FC = () => (
+  <View style={[styles.cardSkeleton, { padding: 12, flexDirection: 'row', alignItems: 'center' }]}>
+    <SkeletonBox width={60} height={60} borderRadius={8} style={{ marginRight: 12 }} />
+    <View style={{ flex: 1 }}>
+      <SkeletonBox width="60%" height={16} style={{ marginBottom: 6 }} />
+      <SkeletonBox width="40%" height={12} />
+    </View>
+  </View>
+);
+
+export const RewardCardSkeleton: React.FC = () => (
+  <View style={[styles.cardSkeleton, { padding: 16 }]}>
+    <SkeletonBox width="40%" height={14} style={{ marginBottom: 8 }} />
+    <SkeletonBox width="80%" height={24} style={{ marginBottom: 12 }} />
+    <SkeletonBox width="100%" height={8} borderRadius={4} />
+  </View>
+);
+
+export const TrackingStatusSkeleton: React.FC = () => (
+  <View style={[styles.cardSkeleton, { padding: 20, alignItems: 'center' }]}>
+    <SkeletonBox width={100} height={100} borderRadius={50} style={{ marginBottom: 16 }} />
+    <SkeletonBox width="60%" height={20} style={{ marginBottom: 8 }} />
+    <SkeletonBox width="40%" height={14} />
+  </View>
+);
+
 const styles = StyleSheet.create({
   cardSkeleton: {
     backgroundColor: COLORS.white,
@@ -100,3 +152,4 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
+

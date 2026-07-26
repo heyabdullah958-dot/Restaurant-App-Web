@@ -50,6 +50,14 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     special_instructions = models.TextField(blank=True, null=True)
+    cancellation_reason = models.TextField(blank=True, null=True, help_text="Reason recorded if order is cancelled.")
+    cancelled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cancelled_orders'
+    )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,3 +75,51 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.menu_item.name} for Order #{self.order.id or self.order.pk or 'new'}"
+
+class BranchCashRegister(models.Model):
+    """
+    Daily EOD (End of Day) Cash Reconciliation register for branch managers.
+    Tracks total COD cash collected vs turned over to Super Admin.
+    """
+    branch = models.ForeignKey(
+        'restaurants.Branch',
+        on_delete=models.CASCADE,
+        related_name='cash_registers'
+    )
+    date = models.DateField(db_index=True)
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='submitted_cash_registers'
+    )
+    total_orders_count = models.IntegerField(default=0)
+    total_cod_collected = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_cod_handed_over = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    discrepancy_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_verified_by_admin = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_cash_registers'
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('branch', 'date')
+        verbose_name = 'Branch Cash Register'
+        verbose_name_plural = 'Branch Cash Registers'
+        ordering = ['-date']
+
+    def save(self, *args, **kwargs):
+        self.discrepancy_amount = self.total_cod_handed_over - self.total_cod_collected
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"CashRegister ({self.branch.name} - {self.date}): Collected Rs. {self.total_cod_collected}, Handed Over Rs. {self.total_cod_handed_over}"
+

@@ -244,3 +244,48 @@ class AdminBranchViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
+class BranchItemAvailabilityView(generics.GenericAPIView):
+    """
+    POST /api/restaurants/branch-item-availability/
+    Allows branch managers or super admins to override is_available per branch.
+    Payload: { "branch_id": 1, "menu_item_id": 5, "is_available": false }
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        branch_id = request.data.get('branch_id')
+        menu_item_id = request.data.get('menu_item_id')
+        is_available = request.data.get('is_available', True)
+
+        if not branch_id or not menu_item_id:
+            return Response({'error': 'branch_id and menu_item_id are required.'}, status=400)
+
+        from .models import Branch, MenuItem, BranchMenuItemAvailability
+        try:
+            branch = Branch.objects.get(id=branch_id)
+            menu_item = MenuItem.objects.get(id=menu_item_id)
+        except (Branch.DoesNotExist, MenuItem.DoesNotExist):
+            return Response({'error': 'Branch or MenuItem not found.'}, status=404)
+
+        user = request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_branch
+            managed_branch = get_managed_branch(user)
+            if not managed_branch or managed_branch.id != branch.id:
+                return Response({'error': 'You do not manage this branch.'}, status=403)
+
+        override, created = BranchMenuItemAvailability.objects.update_or_create(
+            branch=branch,
+            menu_item=menu_item,
+            defaults={'is_available': is_available}
+        )
+
+        return Response({
+            'success': True,
+            'branch_id': branch.id,
+            'menu_item_id': menu_item.id,
+            'is_available': override.is_available
+        })
+
+
+

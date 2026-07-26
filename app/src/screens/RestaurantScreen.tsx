@@ -4,6 +4,8 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  FlatList,
+  Platform,
   TouchableOpacity,
   Image,
   SafeAreaView,
@@ -48,9 +50,105 @@ const isRestaurantOpen = (restaurant: any): boolean => {
     
     return restaurant.is_active !== false;
   } catch {
-    return true; // Default to open if error
+    return true;
   }
 };
+
+
+// Memoized Menu Item Card component for zero frame drop menu scrolling
+const MenuItemCard = React.memo(({ 
+  item, 
+  quantity, 
+  showCategoryName,
+  onAddToCart, 
+  onIncrement, 
+  onDecrement 
+}: {
+  item: MenuItem & { categoryName?: string };
+  quantity: number;
+  showCategoryName: boolean;
+  onAddToCart: (item: MenuItem) => void;
+  onIncrement: (item: MenuItem, qty: number) => void;
+  onDecrement: (item: MenuItem, qty: number) => void;
+}) => {
+  const isOutOfStock = item.is_available === false;
+
+  return (
+    <View style={[styles.menuItemCard, isOutOfStock && { opacity: 0.65 }]}>
+      <View style={styles.menuItemTextContent}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={[styles.itemName, isOutOfStock && { color: COLORS.gray }]}>{item.name}</Text>
+          {isOutOfStock && (
+            <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+              <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
+            </View>
+          )}
+        </View>
+        {showCategoryName && item.categoryName && (
+          <Text style={styles.itemCategoryName}>{item.categoryName}</Text>
+        )}
+        <Text style={styles.itemDescription} numberOfLines={2}>
+          {item.description}
+        </Text>
+        <Text style={[styles.itemPrice, isOutOfStock && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
+        
+        {item.preparation_time > 0 && (
+          <Text style={styles.itemPrepTime}>
+            ⏱️ Ready in {item.preparation_time} mins
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.menuItemImageContainer}>
+        {(item.image_url || item.image) ? (
+          <Image source={getImageUrl(item.image_url || item.image)} style={styles.itemImage} />
+        ) : (
+          <View style={styles.itemImagePlaceholder}>
+            <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
+            <Text style={{ fontSize: 9, color: COLORS.primary, marginTop: 2, opacity: 0.7 }}>
+              No Image
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.quantitySelectorContainer}>
+          {isOutOfStock ? (
+            <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+              <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
+            </View>
+          ) : quantity > 0 && !item.options?.has_variants ? (
+            <View style={styles.quantityRow}>
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.quantityBtn}
+                onPress={() => onDecrement(item, quantity)}
+              >
+                <Ionicons name="remove" size={16} color={COLORS.white} />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{quantity}</Text>
+              <TouchableOpacity activeOpacity={0.75}
+                style={styles.quantityBtn}
+                onPress={() => onIncrement(item, quantity)}
+              >
+                <Ionicons name="add" size={16} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.addButton}
+              activeOpacity={0.8}
+              onPress={() => onAddToCart(item)}
+            >
+              <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
+              <Text style={styles.addButtonText}>
+                {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+});
 
 
 export default function RestaurantScreen() {
@@ -59,7 +157,8 @@ export default function RestaurantScreen() {
   const dispatch = useDispatch<AppDispatch>();
   const { slug } = route.params;
 
-  const { currentRestaurant, loading } = useSelector((state: RootState) => state.restaurant);
+  const currentRestaurant = useSelector((state: RootState) => state.restaurant.currentRestaurant);
+  const loading = useSelector((state: RootState) => state.restaurant.loading);
   const cart = useSelector((state: RootState) => state.cart);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -73,110 +172,24 @@ export default function RestaurantScreen() {
     actions?: any[];
   }>({ visible: false, title: '', message: '' });
 
-  const showAlert = (title: string, message: string, actions?: any[]) => {
+  const showAlert = useCallback((title: string, message: string, actions?: any[]) => {
     setAlertConfig({ visible: true, title, message, actions });
-  };
+  }, []);
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
+  const hideAlert = useCallback(() => setAlertConfig(prev => ({ ...prev, visible: false })), []);
 
-  // Re-fetch when screen gains focus
-  useFocusEffect(
-    useCallback(() => {
-      dispatch(fetchRestaurantDetail(slug));
-      dispatch(fetchRestaurants() as any);
-    }, [dispatch, slug])
-  );
-
-  // Auto-poll menu & branch details every 10 seconds while on screen
-  useEffect(() => {
-    dispatch(fetchRestaurantDetail(slug));
-    dispatch(fetchRestaurants() as any);
-    const intervalId = setInterval(() => {
-      dispatch(fetchRestaurantDetail(slug));
-      dispatch(fetchRestaurants() as any);
-    }, 10000);
-
-    return () => {
-      clearInterval(intervalId);
-      dispatch(clearCurrentRestaurant());
-    };
-  }, [dispatch, slug]);
-
-  // Pull-to-Refresh handler
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await dispatch(fetchRestaurantDetail(slug));
-    setRefreshing(false);
-  }, [dispatch, slug]);
-
-  // Determine active restaurant data from Redux with fallback to local mock data
   const restaurant: Restaurant | null = useMemo(() => {
     if (currentRestaurant && currentRestaurant.slug === slug) {
       return currentRestaurant;
     }
-    // Return local fallback data for robust offline & prototype testing
     const localFallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
     return localFallback || null;
   }, [currentRestaurant, slug]);
 
-  // Set default category to 'All' or first available when restaurant loads
-  useEffect(() => {
-    if (restaurant && restaurant.categories && restaurant.categories.length > 0) {
-      setSelectedCategory('All');
-    }
-  }, [restaurant]);
-
-  // List of active categories
-  const categoriesList = useMemo(() => {
-    if (!restaurant || !restaurant.categories) return [];
-    return restaurant.categories.filter((cat) => cat.is_active);
-  }, [restaurant]);
-
-  // Filtered menu items to display
-  const menuItems = useMemo(() => {
-    if (!restaurant || !restaurant.categories) return [];
-    
-    if (selectedCategory === 'All') {
-      // Flatten all items from active categories
-      return restaurant.categories
-        .filter((cat) => cat.is_active)
-        .flatMap((cat) => cat.items.map(item => ({ ...item, categoryName: cat.name })));
-    }
-    
-    const matchedCategory = restaurant.categories.find(
-      (cat) => cat.name === selectedCategory && cat.is_active
-    );
-    
-    return matchedCategory ? matchedCategory.items.map(item => ({ ...item, categoryName: matchedCategory.name })) : [];
-  }, [restaurant, selectedCategory]);
-
-  if (loading && !restaurant) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Preparing menu...</Text>
-      </View>
-    );
-  }
-
-  if (!restaurant) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color={COLORS.danger} />
-          <Text style={styles.errorTitle}>Restaurant Not Found</Text>
-          <TouchableOpacity activeOpacity={0.75} style={styles.errorButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.errorButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Cart helper functions
-  const confirmAddVariantToCart = (item: MenuItem, variant: any) => {
+  const confirmAddVariantToCart = useCallback((item: MenuItem | null, variant: any) => {
+    if (!restaurant || !item) return;
     const itemToAdd = {
       id: item.id,
       name: `${item.name} (${variant.name})`,
@@ -199,33 +212,96 @@ export default function RestaurantScreen() {
             text: 'Yes, Reset',
             onPress: () => {
               hideAlert();
-              dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+              dispatch(
+                addItemToCart({
+                  item: itemToAdd,
+                  restaurantId: restaurant.id,
+                })
+              );
               setSelectedItemForOptions(null);
             },
           },
         ]
       );
     } else {
-      dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+      dispatch(
+        addItemToCart({
+          item: itemToAdd,
+          restaurantId: restaurant.id,
+        })
+      );
       setSelectedItemForOptions(null);
     }
-  };
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
 
-  const handleAddToCart = (item: MenuItem) => {
-    if (item.is_available === false) {
-      showAlert('Item Out of Stock', 'Sorry, this dish is currently out of stock at this restaurant branch.');
-      return;
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurants() as any);
+    }, [dispatch, slug])
+  );
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurants() as any);
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+      dispatch(clearCurrentRestaurant());
+    };
+  }, [dispatch, slug]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await dispatch(fetchRestaurantDetail(slug));
+    setRefreshing(false);
+  }, [dispatch, slug]);
+
+  useEffect(() => {
+    if (restaurant && restaurant.categories && restaurant.categories.length > 0) {
+      setSelectedCategory('All');
     }
+  }, [restaurant]);
 
-    // If the item has variants, open the options selection modal
-    if (item.options?.has_variants && item.options?.variants?.length > 0) {
+  const categoriesList = useMemo(() => {
+    if (!restaurant || !restaurant.categories) return [];
+    return restaurant.categories.filter((cat) => cat.is_active);
+  }, [restaurant]);
+
+  const menuItems = useMemo(() => {
+    if (!restaurant || !restaurant.categories) return [];
+    
+    if (selectedCategory === 'All') {
+      return restaurant.categories
+        .filter((cat) => cat.is_active)
+        .flatMap((cat) => cat.items.map(item => ({ ...item, categoryName: cat.name })));
+    }
+    
+    const matchedCategory = restaurant.categories.find(
+      (cat) => cat.name === selectedCategory && cat.is_active
+    );
+    
+    return matchedCategory ? matchedCategory.items.map(item => ({ ...item, categoryName: matchedCategory.name })) : [];
+  }, [restaurant, selectedCategory]);
+
+  // Fast O(1) quantity lookup map for high FPS list updates
+  const cartQuantityMap = useMemo(() => {
+    const map: Record<number, number> = {};
+    if (!restaurant || cart.restaurantId !== restaurant.id) return map;
+    for (const item of cart.items) {
+      map[item.id] = (map[item.id] || 0) + item.quantity;
+    }
+    return map;
+  }, [cart, restaurant]);
+
+  const handleAddToCart = useCallback((item: MenuItem) => {
+    if (!restaurant) return;
+    if (item.options?.has_variants && item.options.variants && item.options.variants.length > 0) {
       setSelectedItemForOptions(item);
       setSelectedVariant(item.options.variants[0]);
-      return;
-    }
-
-    // If adding an item from a different restaurant, show confirmation to reset cart
-    if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
+    } else if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
       showAlert(
         'Reset Cart?',
         'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
@@ -265,9 +341,9 @@ export default function RestaurantScreen() {
         })
       );
     }
-  };
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
 
-  const handleIncrement = (item: MenuItem, currentQty: number) => {
+  const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
     dispatch(
       updateQuantity({
         id: item.id,
@@ -275,9 +351,9 @@ export default function RestaurantScreen() {
         quantity: currentQty + 1,
       })
     );
-  };
+  }, [dispatch]);
 
-  const handleDecrement = (item: MenuItem, currentQty: number) => {
+  const handleDecrement = useCallback((item: MenuItem, currentQty: number) => {
     if (currentQty <= 1) {
       dispatch(
         removeItemFromCart({
@@ -294,23 +370,214 @@ export default function RestaurantScreen() {
         })
       );
     }
-  };
+  }, [dispatch]);
 
-  const getItemQuantity = (itemId: number) => {
-    if (cart.restaurantId !== restaurant.id) return 0;
-    const cartItem = cart.items.find((i: any) => i.id === itemId);
-    return cartItem ? cartItem.quantity : 0;
-  };
+  const renderMenuItem = useCallback(({ item }: { item: MenuItem & { categoryName?: string } }) => (
+    <MenuItemCard
+      item={item}
+      quantity={cartQuantityMap[item.id] || 0}
+      showCategoryName={selectedCategory === 'All'}
+      onAddToCart={handleAddToCart}
+      onIncrement={handleIncrement}
+      onDecrement={handleDecrement}
+    />
+  ), [cartQuantityMap, selectedCategory, handleAddToCart, handleIncrement, handleDecrement]);
+
+  const keyExtractor = useCallback((item: MenuItem) => String(item.id), []);
+
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: 120,
+    offset: 120 * index,
+    index,
+  }), []);
+
+  if (loading && !restaurant) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Preparing menu...</Text>
+      </View>
+    );
+  }
+
+  if (!restaurant) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color={COLORS.danger} />
+          <Text style={styles.errorTitle}>Restaurant Not Found</Text>
+          <TouchableOpacity activeOpacity={0.75} style={styles.errorButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.errorButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const isOpen = isRestaurantOpen(restaurant);
+
+  const ListHeaderComponent = (
+    <View>
+      <View style={styles.coverContainer}>
+        <Image 
+          source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} 
+          style={styles.coverImage} 
+        />
+        <View style={styles.coverOverlay} />
+
+        <View style={styles.headerButtonsRow}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.circleButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
+          </TouchableOpacity>
+          
+          <View style={styles.headerRightButtons}>
+            <TouchableOpacity activeOpacity={0.75} style={styles.circleButton}>
+              <Ionicons name="share-outline" size={20} color={COLORS.dark} />
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.75} style={[styles.circleButton, { marginLeft: SPACING.sm }]}>
+              <Ionicons name="heart-outline" size={20} color={COLORS.dark} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.infoCard}>
+        <View style={styles.logoContainer}>
+          <Image source={getImageUrl(restaurant.logo)} style={styles.logoImage} />
+        </View>
+        
+        <Text style={styles.restaurantName}>{restaurant.name}</Text>
+        <Text style={styles.cuisineText}>{restaurant.cuisine_type}</Text>
+
+        <View style={[styles.openBadge, { backgroundColor: isOpen ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
+          <View style={[styles.openDot, { backgroundColor: isOpen ? COLORS.success : COLORS.danger }]} />
+          <Text style={[styles.openText, { color: isOpen ? COLORS.success : COLORS.danger }]}>
+            {isOpen ? 'Open Now' : 'Currently Closed'}
+          </Text>
+        </View>
+        
+        {restaurant.description ? (
+          <Text style={styles.descriptionText}>{restaurant.description}</Text>
+        ) : null}
+
+        <View style={styles.specsContainer}>
+          <View style={styles.specItem}>
+            <Ionicons name="star" size={16} color={COLORS.warning} />
+            <Text style={styles.specValue}>{Number(restaurant.rating).toFixed(1)}</Text>
+            <Text style={styles.specLabel}>({restaurant.total_reviews}+ reviews)</Text>
+          </View>
+          <View style={styles.specDivider} />
+          <View style={styles.specItem}>
+            <Ionicons name="time" size={16} color={COLORS.primary} />
+            <Text style={styles.specValue}>
+              {restaurant.delivery_time_min}-{restaurant.delivery_time_max}
+            </Text>
+            <Text style={styles.specLabel}>mins</Text>
+          </View>
+          <View style={styles.specDivider} />
+          <View style={styles.specItem}>
+            <Ionicons name="bicycle" size={16} color={COLORS.success} />
+            <Text style={styles.specValue}>
+              {Number(restaurant.delivery_fee) === 0 ? 'Free' : `Rs. ${Number(restaurant.delivery_fee)}`}
+            </Text>
+            <Text style={styles.specLabel}>delivery</Text>
+          </View>
+        </View>
+
+        <View style={styles.moreInfoSection}>
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={14} color={COLORS.gray} />
+            <Text style={styles.moreInfoText} numberOfLines={1}>
+              {(restaurant as any).branches?.find((b: any) => b.is_active !== false)?.address || restaurant.address}
+            </Text>
+          </View>
+
+          <View style={[styles.infoRow, { marginTop: 6 }]}>
+            <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
+            <Text style={styles.moreInfoText}>
+              Working hours: {restaurant.opens_at && restaurant.closes_at ? `${restaurant.opens_at.slice(0, 5)} - ${restaurant.closes_at.slice(0, 5)}` : 'Closed / N/A'}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {categoriesList.length > 0 && (
+        <View style={[styles.tabsContainer, styles.tabsSticky]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScrollContent}
+          >
+            <TouchableOpacity activeOpacity={0.75}
+              style={[
+                styles.tabButton,
+                selectedCategory === 'All' && styles.tabButtonActive,
+              ]}
+              onPress={() => setSelectedCategory('All')}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  selectedCategory === 'All' && styles.tabButtonTextActive,
+                ]}
+              >
+                All Dishes
+              </Text>
+            </TouchableOpacity>
+
+            {categoriesList.map((cat) => (
+              <TouchableOpacity activeOpacity={0.75}
+                key={cat.id}
+                style={[
+                  styles.tabButton,
+                  selectedCategory === cat.name && styles.tabButtonActive,
+                ]}
+                onPress={() => setSelectedCategory(cat.name)}
+              >
+                <Text
+                  style={[
+                    styles.tabButtonText,
+                    selectedCategory === cat.name && styles.tabButtonTextActive,
+                  ]}
+                >
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      <Text style={[styles.menuSectionHeader, { paddingHorizontal: SPACING.md, marginTop: SPACING.md }]}>
+        {selectedCategory === 'All' ? 'Menu' : selectedCategory}
+      </Text>
+    </View>
+  );
+
+  const ListEmptyComponent = (
+    <View style={styles.emptyMenu}>
+      <Ionicons name="fast-food-outline" size={48} color={COLORS.lightGray} />
+      <Text style={styles.emptyMenuText}>No items available in this category</Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       
-      {/* Scrollable Content */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
+      <FlatList
+        data={menuItems}
+        renderItem={renderMenuItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={styles.scrollContainer}
-        stickyHeaderIndices={[1]}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -319,256 +586,8 @@ export default function RestaurantScreen() {
             tintColor={COLORS.primary}
           />
         }
-      >
-        <View>
-          {/* Cover Image & Header Controls */}
-          <View style={styles.coverContainer}>
-            <Image 
-              source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} 
-              style={styles.coverImage} 
-            />
-            <View style={styles.coverOverlay} />
+      />
 
-            {/* Floating Header buttons */}
-            <View style={styles.headerButtonsRow}>
-              <TouchableOpacity activeOpacity={0.75} style={styles.circleButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
-              </TouchableOpacity>
-              
-              <View style={styles.headerRightButtons}>
-                <TouchableOpacity activeOpacity={0.75} style={styles.circleButton}>
-                  <Ionicons name="share-outline" size={20} color={COLORS.dark} />
-                </TouchableOpacity>
-                <TouchableOpacity activeOpacity={0.75} style={[styles.circleButton, { marginLeft: SPACING.sm }]}>
-                  <Ionicons name="heart-outline" size={20} color={COLORS.dark} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-
-          {/* Restaurant Details Info Card */}
-          <View style={styles.infoCard}>
-            <View style={styles.logoContainer}>
-              <Image source={getImageUrl(restaurant.logo)} style={styles.logoImage} />
-            </View>
-            
-            <Text style={styles.restaurantName}>{restaurant.name}</Text>
-            <Text style={styles.cuisineText}>{restaurant.cuisine_type}</Text>
-
-            {/* UI-16: Open/Closed status badge */}
-            {(() => {
-              const open = isRestaurantOpen(restaurant);
-              return (
-                <View style={[styles.openBadge, { backgroundColor: open ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)' }]}>
-                  <View style={[styles.openDot, { backgroundColor: open ? COLORS.success : COLORS.danger }]} />
-                  <Text style={[styles.openText, { color: open ? COLORS.success : COLORS.danger }]}>
-                    {open ? 'Open Now' : 'Currently Closed'}
-                  </Text>
-                </View>
-              );
-            })()}
-            
-            {restaurant.description ? (
-              <Text style={styles.descriptionText}>{restaurant.description}</Text>
-            ) : null}
-
-            {/* Ratings & Quick Specs Row */}
-            <View style={styles.specsContainer}>
-              <View style={styles.specItem}>
-                <Ionicons name="star" size={16} color={COLORS.warning} />
-                <Text style={styles.specValue}>{Number(restaurant.rating).toFixed(1)}</Text>
-                <Text style={styles.specLabel}>({restaurant.total_reviews}+ reviews)</Text>
-              </View>
-              <View style={styles.specDivider} />
-              <View style={styles.specItem}>
-                <Ionicons name="time" size={16} color={COLORS.primary} />
-                <Text style={styles.specValue}>
-                  {restaurant.delivery_time_min}-{restaurant.delivery_time_max}
-                </Text>
-                <Text style={styles.specLabel}>mins</Text>
-              </View>
-              <View style={styles.specDivider} />
-              <View style={styles.specItem}>
-                <Ionicons name="bicycle" size={16} color={COLORS.success} />
-                <Text style={styles.specValue}>
-                  {Number(restaurant.delivery_fee) === 0 ? 'Free' : `Rs. ${Number(restaurant.delivery_fee)}`}
-                </Text>
-                <Text style={styles.specLabel}>delivery</Text>
-              </View>
-            </View>
-
-            {/* Address & Hours Detail Info */}
-            <View style={styles.moreInfoSection}>
-              <View style={styles.infoRow}>
-                <Ionicons name="location-outline" size={14} color={COLORS.gray} />
-                <Text style={styles.moreInfoText} numberOfLines={1}>
-                  {(restaurant as any).branches?.find((b: any) => b.is_active !== false)?.address || restaurant.address}
-                </Text>
-              </View>
-
-              <View style={[styles.infoRow, { marginTop: 6 }]}>
-                <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
-                <Text style={styles.moreInfoText}>
-                  Working hours: {restaurant.opens_at && restaurant.closes_at ? `${restaurant.opens_at.slice(0, 5)} - ${restaurant.closes_at.slice(0, 5)}` : 'Closed / N/A'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Category Tabs Selector (Sticky Index 1) */}
-        <View style={[styles.tabsContainer, styles.tabsSticky, styles.stickyTabs, categoriesList.length === 0 && { height: 0, paddingVertical: 0, borderBottomWidth: 0 }]}>
-          {categoriesList.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.tabsScrollContent}
-            >
-              <TouchableOpacity activeOpacity={0.75}
-                style={[
-                  styles.tabButton,
-                  selectedCategory === 'All' && styles.tabButtonActive,
-                ]}
-                onPress={() => setSelectedCategory('All')}
-              >
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    selectedCategory === 'All' && styles.tabButtonTextActive,
-                  ]}
-                >
-                  All Dishes
-                </Text>
-              </TouchableOpacity>
-
-              {categoriesList.map((cat) => (
-                <TouchableOpacity activeOpacity={0.75}
-                  key={cat.id}
-                  style={[
-                    styles.tabButton,
-                    selectedCategory === cat.name && styles.tabButtonActive,
-                  ]}
-                  onPress={() => setSelectedCategory(cat.name)}
-                >
-                  <Text
-                    style={[
-                      styles.tabButtonText,
-                      selectedCategory === cat.name && styles.tabButtonTextActive,
-                    ]}
-                  >
-                    {cat.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-        </View>
-
-        {/* Menu Items List */}
-        <View style={styles.menuContainer}>
-          <Text style={styles.menuSectionHeader}>
-            {selectedCategory === 'All' ? 'Menu' : selectedCategory}
-          </Text>
-          
-          {menuItems.map((item: MenuItem & { categoryName?: string }) => {
-            const quantity = getItemQuantity(item.id);
-            const isOutOfStock = item.is_available === false;
-            return (
-              <View key={item.id} style={[styles.menuItemCard, isOutOfStock && { opacity: 0.65 }]}>
-                <View style={styles.menuItemTextContent}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={[styles.itemName, isOutOfStock && { color: COLORS.gray }]}>{item.name}</Text>
-                    {isOutOfStock && (
-                      <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-                        <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
-                      </View>
-                    )}
-                  </View>
-                  {selectedCategory === 'All' && item.categoryName && (
-                    <Text style={styles.itemCategoryName}>{item.categoryName}</Text>
-                  )}
-                  <Text style={styles.itemDescription} numberOfLines={2}>
-                    {item.description}
-                  </Text>
-                  <Text style={[styles.itemPrice, isOutOfStock && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
-                  
-                  {item.preparation_time > 0 && (
-                    <Text style={styles.itemPrepTime}>
-                      ⏱️ Ready in {item.preparation_time} mins
-                    </Text>
-                  )}
-                </View>
-
-                <View style={styles.menuItemImageContainer}>
-                  {/* FIX 2A: Prefer image_url (absolute Cloudinary URL from backend serializer)
-                      over image (raw Cloudinary storage path). When using Cloudinary storage,
-                      item.image is a path like `menu_items/xyz.jpg`, not a full URL.
-                      item.image_url is the correctly computed `https://res.cloudinary.com/...` URL. */}
-                  {(item.image_url || item.image) ? (
-                    <Image source={getImageUrl(item.image_url || item.image)} style={styles.itemImage} />
-                  ) : (
-                    <View style={styles.itemImagePlaceholder}>
-                      <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
-                      <Text style={{ fontSize: 9, color: COLORS.primary, marginTop: 2, opacity: 0.7 }}>
-                        No Image
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Quantity Selector overlay / add button */}
-                  <View 
-                    style={styles.quantitySelectorContainer}
-                  >
-                    {isOutOfStock ? (
-                      <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-                        <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
-                      </View>
-                    ) : quantity > 0 && !item.options?.has_variants ? (
-                      <View 
-                        style={styles.quantityRow}
-                      >
-                        <TouchableOpacity activeOpacity={0.75}
-                          style={styles.quantityBtn}
-                          onPress={() => handleDecrement(item, quantity)}
-                        >
-                          <Ionicons name="remove" size={16} color={COLORS.white} />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{quantity}</Text>
-                        <TouchableOpacity activeOpacity={0.75}
-                          style={styles.quantityBtn}
-                          onPress={() => handleIncrement(item, quantity)}
-                        >
-                          <Ionicons name="add" size={16} color={COLORS.white} />
-                        </TouchableOpacity>
-                      </View>
-                    ) : (
-                      <TouchableOpacity
-                        style={styles.addButton}
-                        activeOpacity={0.8}
-                        onPress={() => handleAddToCart(item)}
-                      >
-                        <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
-                        <Text style={styles.addButtonText}>
-                          {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              </View>
-            );
-          })}
-
-          {menuItems.length === 0 && (
-            <View style={styles.emptyMenu}>
-              <Ionicons name="fast-food-outline" size={48} color={COLORS.lightGray} />
-              <Text style={styles.emptyMenuText}>No items available in this category</Text>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Sticky Bottom Cart Bar */}
       {cart.restaurantId === restaurant.id && cart.totalQuantity > 0 && (
         <View style={styles.bottomCartBar}>
           <TouchableOpacity

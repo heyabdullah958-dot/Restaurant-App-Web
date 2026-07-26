@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { guestLogin } from './userSlice';
+import { guestLogin, loginUser, registerUser, logoutUser } from './userSlice';
 
 export const placeOrder = createAsyncThunk(
   'order/placeOrder',
@@ -281,9 +281,37 @@ const orderSlice = createSlice({
     clearActiveOrder(state) {
       state.activeOrder = null;
     },
+    resetOrders(state) {
+      state.myOrders = [];
+      state.currentOrder = null;
+      state.activeOrder = null;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
+      // Reset state on auth boundary changes (security: prevent cross-account data leak)
+      .addCase(loginUser.pending, (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
+      .addCase(guestLogin.pending, (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
       // Place Order
       .addCase(placeOrder.pending, (state) => {
         state.loading = true;
@@ -327,5 +355,5 @@ const orderSlice = createSlice({
   },
 });
 
-export const { clearCurrentOrder, clearActiveOrder } = orderSlice.actions;
+export const { clearCurrentOrder, clearActiveOrder, resetOrders } = orderSlice.actions;
 export default orderSlice.reducer;

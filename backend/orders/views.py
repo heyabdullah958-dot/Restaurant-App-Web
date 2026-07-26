@@ -233,6 +233,58 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         
         return queryset
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        user = request.user
+        new_status = request.data.get('status')
+
+        # Safeguard 1: Blocking branch managers from cancelling delivered orders & Loyalty Point Reversals
+        if new_status == 'cancelled' and instance.status != 'cancelled':
+            cancellation_reason = request.data.get('cancellation_reason', '').strip()
+            if not cancellation_reason:
+                return Response(
+                    {'error': 'cancellation_reason is required when cancelling an order.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if instance.status == 'delivered' and not getattr(user, 'is_superuser', False):
+                return Response(
+                    {'error': 'Only Super Admin can cancel an order that has already been delivered.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            instance.cancellation_reason = cancellation_reason
+            instance.cancelled_by = user
+
+            # Loyalty reversal engine
+            if instance.user and not instance.user.is_guest:
+                from users.models import LoyaltyTransaction, User
+                from django.db.models import F
+                existing_txs = list(LoyaltyTransaction.objects.filter(order=instance))
+                for tx in existing_txs:
+                    if tx.transaction_type == 'redeemed':
+                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') + tx.points)
+                        LoyaltyTransaction.objects.create(
+                            user=instance.user,
+                            order=instance,
+                            points=tx.points,
+                            transaction_type='earned',
+                            description=f"Refunded {tx.points} pts for cancelled Order #{instance.id}"
+                        )
+                    elif tx.transaction_type == 'earned':
+                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') - tx.points)
+                        LoyaltyTransaction.objects.create(
+                            user=instance.user,
+                            order=instance,
+                            points=tx.points,
+                            transaction_type='redeemed',
+                            description=f"Reverted {tx.points} earned pts for cancelled Order #{instance.id}"
+                        )
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 
 class MyOrdersListView(generics.ListAPIView):
     """
@@ -262,9 +314,11 @@ class MyOrdersListView(generics.ListAPIView):
 class PurgeOrdersView(APIView):
     """
     POST /api/orders/purge-all/
-    Purge all orders from database (IsAdminUser only).
+    Purge all orders from database (Super Admin only).
     """
-    permission_classes = [permissions.IsAdminUser]
+    def get_permissions(self):
+        from users.admin_views import IsSuperUser
+        return [IsSuperUser()]
 
     def post(self, request):
         from payments.models import Payment
@@ -274,4 +328,5 @@ class PurgeOrdersView(APIView):
             'success': True,
             'message': f'Successfully purged all {count} order(s) and associated payments.'
         }, status=status.HTTP_200_OK)
+
 

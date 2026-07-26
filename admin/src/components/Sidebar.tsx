@@ -9,7 +9,9 @@ import {
   X,
   Bell,
   Users,
-  Lock
+  Lock,
+  Tag,
+  Zap
 } from 'lucide-react';
 import { changeOwnPassword, updateUserProfile } from '../services/api';
 
@@ -273,6 +275,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <Bell size={18} />
                   Notifications
+                </button>
+                <button
+                  onClick={() => { setView('promo_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'promo_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Tag size={18} />
+                  Promo Codes
+                </button>
+                <button
+                  onClick={() => { setView('flash_deal_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'flash_deal_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Zap size={18} />
+                  Flash Deals
                 </button>
               </>
             ) : (

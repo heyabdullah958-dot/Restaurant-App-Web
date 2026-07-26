@@ -39,43 +39,88 @@ interface MatchingDish {
   restaurantSlug: string;
 }
 
+// Memoized Search Result Components
+const RestaurantResultCard = React.memo(({ restaurant, onPress }: { restaurant: any, onPress: (slug: string) => void }) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={styles.restaurantRowCard}
+    onPress={() => onPress(restaurant.slug)}
+  >
+    <Image
+      source={getImageUrl(restaurant.logo)}
+      style={styles.restaurantRowLogo}
+    />
+    <View style={styles.restaurantRowInfo}>
+      <Text style={styles.restaurantRowName}>{restaurant.name}</Text>
+      <Text style={styles.restaurantRowCuisine}>{restaurant.cuisine_type}</Text>
+      <View style={styles.restaurantRowMeta}>
+        <Ionicons name="star" size={12} color={COLORS.warning} />
+        <Text style={styles.restaurantRowRating}>
+          {Number(restaurant.rating || 4.5).toFixed(1)}
+        </Text>
+        <View style={styles.dividerDot} />
+        <Text style={styles.restaurantRowDelivery}>
+          {restaurant.delivery_time_min}-{restaurant.delivery_time_max} mins
+        </Text>
+      </View>
+    </View>
+    <Ionicons name="chevron-forward" size={20} color={COLORS.lightGray} />
+  </TouchableOpacity>
+));
+
+const DishResultCard = React.memo(({ dish, onPress }: { dish: MatchingDish, onPress: (slug: string) => void }) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={styles.dishRowCard}
+    onPress={() => onPress(dish.restaurantSlug)}
+  >
+    <View style={styles.dishTextContent}>
+      <Text style={styles.dishName}>{dish.item.name}</Text>
+      <Text style={styles.dishRestaurantName}>from {dish.restaurantName}</Text>
+      <Text style={styles.dishDescription} numberOfLines={2}>
+        {dish.item.description}
+      </Text>
+      <Text style={styles.dishPrice}>Rs. {dish.item.price}</Text>
+    </View>
+    {(dish.item.image_url || dish.item.image) && (
+      <Image source={getImageUrl(dish.item.image_url || dish.item.image)} style={styles.dishImage} />
+    )}
+  </TouchableOpacity>
+));
+
 export default function SearchScreen() {
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { restaurants, loading } = useSelector((state: RootState) => state.restaurant);
+  const restaurants = useSelector((state: RootState) => state.restaurant.restaurants);
+  const loading = useSelector((state: RootState) => state.restaurant.loading);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  // APP-19: Recent Searches state & logic
   const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
 
-  // Ensure restaurants list is populated
   useEffect(() => {
     dispatch(fetchRestaurants());
   }, [dispatch]);
 
-  // Simulate API search latency or real-time query fetching
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
       setIsSearching(true);
       const timer = setTimeout(() => {
         setIsSearching(false);
-      }, 300); // 300ms debounce
+      }, 300);
       return () => clearTimeout(timer);
     } else {
       setIsSearching(false);
     }
   }, [searchQuery]);
 
-  // Get active source of restaurants (API state or local fallback)
   const activeSource = useMemo(() => {
     const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
     const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
     return src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
   }, [restaurants]);
 
-  // Filter matching restaurants and dishes
   const { matchingRestaurants, matchingDishes } = useMemo(() => {
     if (!searchQuery.trim()) {
       return { matchingRestaurants: [], matchingDishes: [] };
@@ -83,20 +128,15 @@ export default function SearchScreen() {
 
     const query = searchQuery.toLowerCase().trim();
 
-    // 1. Filter Restaurants matching name or cuisine type
     const matchedRest = activeSource.filter(
       (r) =>
         r.name.toLowerCase().includes(query) ||
         r.cuisine_type.toLowerCase().includes(query) ||
-        r.description.toLowerCase().includes(query)
+        (r.description && r.description.toLowerCase().includes(query))
     );
 
-    // 2. Filter Dishes (menu items) matching name or description
     const matchedDishes: MatchingDish[] = [];
     activeSource.forEach((r) => {
-      // Use categories inside restaurant details
-      // If the restaurant in the store list doesn't have categories (e.g. from general list API),
-      // we check if we can match it from the FALLBACK_RESTAURANTS which has nested categories.
       const restaurantDetail = FALLBACK_RESTAURANTS.find((fr) => fr.slug === r.slug) || r;
       
       if (restaurantDetail.categories) {
@@ -105,7 +145,7 @@ export default function SearchScreen() {
             cat.items.forEach((item: any) => {
               if (
                 item.name.toLowerCase().includes(query) ||
-                item.description.toLowerCase().includes(query)
+                (item.description && item.description.toLowerCase().includes(query))
               ) {
                 matchedDishes.push({
                   item,
@@ -125,18 +165,17 @@ export default function SearchScreen() {
     };
   }, [searchQuery, activeSource]);
 
-  React.useEffect(() => {
-    if (searchQuery.trim().length > 2) {
-      setRecentSearches(prev => {
-        const updated = [searchQuery.trim(), ...prev.filter(s => s !== searchQuery.trim())].slice(0, 5);
-        return updated;
-      });
-    }
-  }, [matchingRestaurants, matchingDishes]);
-
-  const handlePopularSearchPress = (keyword: string) => {
+  const handlePopularSearchPress = React.useCallback((keyword: string) => {
     setSearchQuery(keyword);
-  };
+    setRecentSearches(prev => {
+      const updated = [keyword.trim(), ...prev.filter(s => s !== keyword.trim())].slice(0, 5);
+      return updated;
+    });
+  }, []);
+
+  const handleSelectRestaurant = React.useCallback((slug: string) => {
+    navigation.navigate('Restaurant', { slug });
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -248,34 +287,11 @@ export default function SearchScreen() {
                 <View style={styles.resultsSection}>
                   <Text style={styles.resultsSectionTitle}>Restaurants</Text>
                   {matchingRestaurants.map((restaurant) => (
-                    <TouchableOpacity
+                    <RestaurantResultCard
                       key={restaurant.id}
-                      activeOpacity={0.8}
-                      style={styles.restaurantRowCard}
-                      onPress={() =>
-                        navigation.navigate('Restaurant', { slug: restaurant.slug })
-                      }
-                    >
-                      <Image
-                        source={getImageUrl(restaurant.logo)}
-                        style={styles.restaurantRowLogo}
-                      />
-                      <View style={styles.restaurantRowInfo}>
-                        <Text style={styles.restaurantRowName}>{restaurant.name}</Text>
-                        <Text style={styles.restaurantRowCuisine}>{restaurant.cuisine_type}</Text>
-                        <View style={styles.restaurantRowMeta}>
-                          <Ionicons name="star" size={12} color={COLORS.warning} />
-                          <Text style={styles.restaurantRowRating}>
-                            {Number(restaurant.rating).toFixed(1)}
-                          </Text>
-                          <View style={styles.dividerDot} />
-                          <Text style={styles.restaurantRowDelivery}>
-                            {restaurant.delivery_time_min}-{restaurant.delivery_time_max} mins
-                          </Text>
-                        </View>
-                      </View>
-                      <Ionicons name="chevron-forward" size={20} color={COLORS.lightGray} />
-                    </TouchableOpacity>
+                      restaurant={restaurant}
+                      onPress={handleSelectRestaurant}
+                    />
                   ))}
                 </View>
               )}
@@ -284,27 +300,12 @@ export default function SearchScreen() {
               {matchingDishes.length > 0 && (
                 <View style={[styles.resultsSection, { marginTop: SPACING.md }]}>
                   <Text style={styles.resultsSectionTitle}>Dishes & Items</Text>
-                  {matchingDishes.map(({ item, restaurantName, restaurantSlug }) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      activeOpacity={0.8}
-                      style={styles.dishRowCard}
-                      onPress={() =>
-                        navigation.navigate('Restaurant', { slug: restaurantSlug })
-                      }
-                    >
-                      <View style={styles.dishTextContent}>
-                        <Text style={styles.dishName}>{item.name}</Text>
-                        <Text style={styles.dishRestaurantName}>from {restaurantName}</Text>
-                        <Text style={styles.dishDescription} numberOfLines={2}>
-                          {item.description}
-                        </Text>
-                        <Text style={styles.dishPrice}>Rs. {item.price}</Text>
-                      </View>
-                      {item.image && (
-                        <Image source={getImageUrl(item.image_url || item.image)} style={styles.dishImage} />
-                      )}
-                    </TouchableOpacity>
+                  {matchingDishes.map((dish) => (
+                    <DishResultCard
+                      key={dish.item.id}
+                      dish={dish}
+                      onPress={handleSelectRestaurant}
+                    />
                   ))}
                 </View>
               )}

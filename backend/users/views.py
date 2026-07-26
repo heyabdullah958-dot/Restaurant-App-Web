@@ -47,6 +47,9 @@ class UserRegisterView(APIView):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            if user.phone:
+                from orders.models import Order
+                Order.objects.filter(user__isnull=True, guest_phone=user.phone).update(user=user)
             tokens = get_tokens_for_user(user)
             return Response({
                 'success': True,

@@ -43,10 +43,11 @@ export default function TrackingScreen() {
   const activeStep = useMemo(() => {
     if (!currentOrder) return 0;
     const status = currentOrder.status?.toLowerCase();
-    if (status === 'received') return 0;
+    if (status === 'cancelled') return -1;
+    if (status === 'received' || status === 'pending' || status === 'accepted') return 0;
     if (status === 'preparing') return 1;
     if (status === 'out_for_delivery' || status === 'out for delivery') return 2;
-    if (status === 'delivered') return 4; // All 4 steps (0, 1, 2, 3) completed
+    if (status === 'delivered') return 4; // All 4 steps completed
     return 0;
   }, [currentOrder]);
 
@@ -144,6 +145,23 @@ export default function TrackingScreen() {
   }, [activeStep]);
 
   const renderStatusAnimation = () => {
+    // 0. CANCELLED STAGE
+    if (activeStep === -1) {
+      return (
+        <View style={[styles.animCard, { borderColor: COLORS.danger, borderWidth: 1, backgroundColor: '#fff5f5' }]}>
+          <View style={[styles.animIconBg, { backgroundColor: '#fee2e2' }]}>
+            <Ionicons name="close-circle" size={40} color={COLORS.danger} />
+          </View>
+          <Text style={[styles.animTitle, { color: COLORS.danger }]}>Order Cancelled</Text>
+          <Text style={[styles.animDesc, { color: COLORS.dark, fontWeight: '500' }]}>
+            {currentOrder?.cancellation_reason 
+              ? `Reason: ${currentOrder.cancellation_reason}` 
+              : 'This order was cancelled by the branch manager or system.'}
+          </Text>
+        </View>
+      );
+    }
+
     // 1. RECEIVED STAGE
     if (activeStep === 0) {
       return (

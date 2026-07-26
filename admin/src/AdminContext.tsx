@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { User, Restaurant, Order, MenuCategory, OrderStatus } from './types';
 import { MOCK_MENU_ITEMS, MOCK_RESTAURANTS } from './mockData';
 import {
@@ -49,7 +49,7 @@ interface AdminContextProps {
   logout: () => void;
   setView: (view: string) => void;
   setSelectedBrand: (id: number) => void;
-  updateOrderStatus: (orderId: number, newStatus: OrderStatus) => void;
+  updateOrderStatus: (orderId: number, newStatus: OrderStatus, cancellationReason?: string) => void;
   toggleMenuAvailability: (restaurantId: number, categoryId: number, itemId: number) => void;
   onboardNewRestaurant: (newRestaurant: Omit<Restaurant, 'id' | 'rating' | 'logo_url' | 'cover_url' | 'banner_url'>) => void;
   removeRestaurant: (id: number) => Promise<void>;
@@ -71,13 +71,13 @@ interface AdminContextProps {
 const AdminContext = createContext<AdminContextProps | undefined>(undefined);
 
 export function computeStoreOpenStatus(restaurant: Restaurant): boolean {
-  if (restaurant.is_force_closed || restaurant.is_active === false) {
+  if (restaurant.is_force_closed) {
     return false;
   }
-  if (!restaurant.branches || restaurant.branches.length === 0) {
-    return true;
+  if (restaurant.branches && restaurant.branches.length > 0) {
+    return restaurant.branches.some(b => b.is_active !== false);
   }
-  return restaurant.branches.some(b => b.is_active !== false);
+  return restaurant.is_active !== false;
 }
 
 /** Convert API restaurant shape → internal Restaurant shape */
@@ -472,9 +472,15 @@ function extractArray<T = any>(data: any): T[] {
     }
   };
 
-  // Load menu dynamically when brand switches
+  // Load menu dynamically when brand switches.
+  // IMPORTANT: Only depend on selectedBrandId (NOT restaurants) to avoid an infinite
+  // loop where setRestaurants → new restaurants ref → this effect fires → loadMenu →
+  // (potentially) setMenuItems → re-render → repeat.
+  const restaurantsRef = useRef(restaurants);
+  useEffect(() => { restaurantsRef.current = restaurants; }, [restaurants]);
+
   useEffect(() => {
-    const selectedRest = restaurants.find((r) => r.id === selectedBrandId);
+    const selectedRest = restaurantsRef.current.find((r) => r.id === selectedBrandId);
     if (selectedRest) {
       const loadMenu = async () => {
         try {
@@ -498,7 +504,8 @@ function extractArray<T = any>(data: any): T[] {
       };
       loadMenu();
     }
-  }, [selectedBrandId, restaurants]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBrandId]);
 
   // Show dynamic toast notifications
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -680,21 +687,51 @@ function extractArray<T = any>(data: any): T[] {
       if (orderData && Array.isArray(orderData.results)) {
         const newOrders = orderData.results.map(mapApiOrder);
 
-        // Look for newly added pending orders compared to our local state
-        const currentPendingIds = new Set(orders.filter((o) => o.status === 'pending').map((o) => o.id));
-        const newlyArrivedPending = newOrders.filter((o) => o.status === 'pending' && !currentPendingIds.has(o.id));
+        // Look for newly added pending/received orders compared to our local state
+        const currentIncomingIds = new Set(
+          orders
+            .filter((o: Order) => o.status === 'pending' || o.status === 'received')
+            .map((o: Order) => o.id)
+        );
+        const newlyArrived = newOrders.filter(
+          (o: Order) => (o.status === 'pending' || o.status === 'received') && !currentIncomingIds.has(o.id)
+        );
 
-        if (newlyArrivedPending.length > 0) {
-          // Play notification sound
+        if (newlyArrived.length > 0) {
+          // Play Web Audio API synthesized chime
           try {
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav');
-            audio.play().catch(() => {});
+            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioCtx) {
+              const ctx = new AudioCtx();
+              const now = ctx.currentTime;
+              const osc1 = ctx.createOscillator();
+              const gain1 = ctx.createGain();
+              osc1.type = 'sine';
+              osc1.frequency.setValueAtTime(880, now);
+              gain1.gain.setValueAtTime(0.3, now);
+              gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+              osc1.connect(gain1);
+              gain1.connect(ctx.destination);
+              osc1.start(now);
+              osc1.stop(now + 0.4);
+
+              const osc2 = ctx.createOscillator();
+              const gain2 = ctx.createGain();
+              osc2.type = 'sine';
+              osc2.frequency.setValueAtTime(1760, now + 0.15);
+              gain2.gain.setValueAtTime(0.4, now + 0.15);
+              gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+              osc2.connect(gain2);
+              gain2.connect(ctx.destination);
+              osc2.start(now + 0.15);
+              osc2.stop(now + 0.6);
+            }
           } catch {}
-          showToast(`🔔 ${newlyArrivedPending.length} New Order(s) Received!`, 'info');
+          showToast(`🔔 ${newlyArrived.length} New Order(s) Received!`, 'info');
         }
 
         setOrders(
-          newOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          newOrders.sort((a: Order, b: Order) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         );
       }
     } catch (err) {
@@ -703,7 +740,7 @@ function extractArray<T = any>(data: any): T[] {
   };
 
   // Update order status — syncs to API with toast and background refresh
-  const updateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
+  const updateOrderStatus = async (orderId: number, newStatus: OrderStatus, cancellationReason?: string) => {
     // Optimistic UI update
     setOrders((prev) => {
       const updated = prev.map((order) => {
@@ -717,7 +754,7 @@ function extractArray<T = any>(data: any): T[] {
 
     // Sync to API
     try {
-      await apiUpdateOrderStatus(orderId, newStatus);
+      await apiUpdateOrderStatus(orderId, newStatus, cancellationReason);
       showToast(`Order #${orderId} → ${newStatus.replace('_', ' ').toUpperCase()}`, 'success');
       refreshOrders();
     } catch (err: any) {
@@ -1087,13 +1124,14 @@ function extractArray<T = any>(data: any): T[] {
     try {
       const updated = await updateRestaurant(id, data);
       const mapped = mapApiRestaurant(updated);
+      // Optimistic local update — immediately reflect in UI without a full reload
       setRestaurants((prev) =>
         prev.map((r) => (r.id === id ? { ...r, ...mapped, ...data, is_open: computeStoreOpenStatus({ ...r, ...mapped, ...data }) } : r))
       );
       showToast('Brand settings updated successfully! ⚙️', 'success');
     } catch (err: any) {
       console.error('[updateRestaurantDetails]', err);
-      // Fallback: update local state directly so UI state changes immediately
+      // Fallback local update so UI reflects toggle even if API fails
       setRestaurants((prev) =>
         prev.map((r) => {
           if (r.id === id) {
@@ -1106,7 +1144,9 @@ function extractArray<T = any>(data: any): T[] {
       showToast('Brand status updated locally! ⚙️', 'info');
     } finally {
       setLoading(false);
-      loadAppData(false);
+      // NOTE: Do NOT call loadAppData(false) here — it causes a setState cascade
+      // and triggers the infinite re-render loop. The local setRestaurants above
+      // already updates the UI immediately. The 5s background poll will sync from server.
     }
   };
 
@@ -1119,7 +1159,9 @@ function extractArray<T = any>(data: any): T[] {
       console.error('[updateBranchDetails]', err);
       showToast('Branch settings updated locally! ⚙️', 'info');
     } finally {
-      // Update local restaurant branch state & recompute store status
+      // Immediately update local branch state & recompute derived store open status.
+      // Do NOT call loadAppData(false) — that triggers a setState cascade causing
+      // the infinite re-render loop. The 5s background poll will sync from server.
       setRestaurants((prev) =>
         prev.map((r) => {
           if (r.branches && r.branches.some((b) => b.id === branchId)) {
@@ -1133,20 +1175,29 @@ function extractArray<T = any>(data: any): T[] {
         })
       );
       setLoading(false);
-      loadAppData(false);
     }
   };
 
-  // 5-second quiet background polling loop for live real-time sync across admin panel
+  // Keep stable refs to the latest versions of these async functions so the
+  // setInterval closure below never captures a stale copy from an earlier render.
+  const loadAppDataRef = useRef(loadAppData);
+  const refreshOrdersRef = useRef(refreshOrders);
+  useEffect(() => { loadAppDataRef.current = loadAppData; });
+  useEffect(() => { refreshOrdersRef.current = refreshOrders; });
+
+  // 5-second quiet background polling loop for live real-time sync across admin panel.
+  // Uses refs so the interval callback always calls the latest version of each function,
+  // eliminating stale-closure bugs without adding them to the dependency array.
   useEffect(() => {
     const interval = setInterval(() => {
       if (getToken()) {
-        loadAppData(false);
-        refreshOrders();
+        loadAppDataRef.current(false);
+        refreshOrdersRef.current();
       }
     }, 5000);
 
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

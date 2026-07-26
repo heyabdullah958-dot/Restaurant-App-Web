@@ -22,7 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart } from '../store/cartSlice';
-import { guestLogin, updateUserProfile } from '../store/userSlice';
+import { guestLogin, updateUserProfile, fetchUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomAlertModal from '../components/CustomAlertModal';
@@ -83,6 +83,9 @@ export default function CheckoutScreen() {
   // Temporary picker states
   const [tempDate, setTempDate] = useState('Today');
   const [tempTime, setTempTime] = useState('ASAP (Immediate)');
+
+  // Loyalty Points Redemption State
+  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,12 +152,20 @@ export default function CheckoutScreen() {
     return restaurants.find((r) => r.id === restaurantId);
   }, [restaurantId, restaurants]);
 
+  // Keep a stable ref to the latest restaurant object so the polling closure
+  // can always read current branch data without being listed as a dependency.
+  // Listing `restaurant` (an object) as a useFocusEffect dependency would cause
+  // the callback to be recreated on every background poll (since Redux gives it a
+  // new reference each time), triggering setBranches → re-render → loop.
+  const restaurantRef = React.useRef(restaurant);
+  React.useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
+
   // Load branches for selected restaurant on focus & poll every 10s
   useFocusEffect(
     React.useCallback(() => {
       dispatch(fetchRestaurants() as any);
 
-      const slugKey = restaurant?.slug || String(restaurantId || 'tandooristoppk');
+      const slugKey = restaurantRef.current?.slug || String(restaurantId || 'tandooristoppk');
       const fallbackMap: Record<string, any[]> = {
         tandooristoppk: [
           { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk, Johar Town, Lahore', phone: '0327-4945947' },
@@ -197,14 +208,15 @@ export default function CheckoutScreen() {
         ],
       };
 
-      const initialBranches = (restaurant?.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0)
-        ? restaurant.branches
+      const currentRestaurant = restaurantRef.current;
+      const initialBranches = (currentRestaurant?.branches && Array.isArray(currentRestaurant.branches) && currentRestaurant.branches.length > 0)
+        ? currentRestaurant.branches
         : (fallbackMap[slugKey] || fallbackMap['tandooristoppk']);
 
       setBranches((prev) => (prev.length > 0 ? prev : initialBranches));
 
       const fetchLiveBranches = () => {
-        const targetSlug = restaurant?.slug;
+        const targetSlug = restaurantRef.current?.slug;
         const targetUrl = targetSlug 
           ? `/branches/?restaurant_slug=${targetSlug}` 
           : (restaurantId ? `/branches/?restaurant_id=${restaurantId}` : '/branches/');
@@ -234,7 +246,10 @@ export default function CheckoutScreen() {
       const interval = setInterval(fetchLiveBranches, 10000);
 
       return () => clearInterval(interval);
-    }, [dispatch, restaurant, restaurantId])
+    // IMPORTANT: `restaurant` intentionally excluded from deps — it is accessed via
+    // restaurantRef.current to avoid recreating the interval on every background poll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, restaurantId])
   );
 
   const areAllBranchesClosed = useMemo(() => {
@@ -249,8 +264,12 @@ export default function CheckoutScreen() {
   }, [restaurant]);
 
   const subtotal = totalAmount;
-  const discount = 0; // Loyalty or promo discounts can be calculated here
-  const finalTotal = subtotal + deliveryFee - discount;
+
+  // Loyalty points redemption calculations
+  const availablePoints = (user && !user.is_guest) ? (user.loyalty_points || 0) : 0;
+  const maxRedeemablePoints = Math.min(availablePoints, Math.floor(subtotal));
+  const discount = useLoyaltyPoints ? maxRedeemablePoints : 0;
+  const finalTotal = Math.max(0, subtotal + deliveryFee - discount);
 
   // Potential loyalty points earned (1 point per 100 Rs spent)
   const loyaltyPointsEarned = Math.floor(finalTotal / 100);
@@ -327,6 +346,8 @@ export default function CheckoutScreen() {
       special_instructions: finalInstructions || undefined,
       guest_name: effectiveName,
       guest_phone: effectivePhone,
+      use_loyalty_points: useLoyaltyPoints,
+      points_to_redeem: useLoyaltyPoints ? maxRedeemablePoints : 0,
     };
 
     try {
@@ -345,6 +366,9 @@ export default function CheckoutScreen() {
       if (placeOrder.fulfilled.match(resultAction)) {
         const createdOrder = resultAction.payload;
         const orderId = createdOrder.id;
+
+        // Refresh user profile so loyalty points update live
+        dispatch(fetchUserProfile());
 
         // Save delivery address locally for future use
         try {
@@ -595,6 +619,50 @@ export default function CheckoutScreen() {
 
           </View>
 
+          {/* Loyalty Points Redemption Box */}
+          {isAuthenticated && !user?.is_guest && availablePoints > 0 && (
+            <View style={[styles.sectionCard, { backgroundColor: '#fffdf5', borderColor: '#ffe0b2', borderWidth: 1 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 8 }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,152,0,0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
+                    <Ionicons name="sparkles" size={22} color={COLORS.secondary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.sectionTitle, { fontSize: 15, marginBottom: 2 }]}>Redeem Loyalty Points</Text>
+                    <Text style={{ fontSize: 12, color: COLORS.gray }}>
+                      Balance: <Text style={{ fontWeight: 'bold', color: COLORS.secondary }}>{availablePoints} pts</Text> (Rs. {availablePoints} value)
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setUseLoyaltyPoints(!useLoyaltyPoints)}
+                  style={{
+                    backgroundColor: useLoyaltyPoints ? COLORS.secondary : COLORS.lightGray,
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                >
+                  <Ionicons name={useLoyaltyPoints ? "checkmark-circle" : "add-circle-outline"} size={16} color={useLoyaltyPoints ? COLORS.white : COLORS.dark} />
+                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: useLoyaltyPoints ? COLORS.white : COLORS.dark }}>
+                    {useLoyaltyPoints ? 'Applied' : 'Use Points'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {useLoyaltyPoints && (
+                <View style={{ marginTop: 10, padding: 10, backgroundColor: 'rgba(255,152,0,0.1)', borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,152,0,0.25)' }}>
+                  <Text style={{ fontSize: 12, color: COLORS.dark, fontWeight: '600' }}>
+                    🎉 Redeeming <Text style={{ fontWeight: 'bold', color: COLORS.secondary }}>{maxRedeemablePoints} points</Text> for an instant <Text style={{ fontWeight: 'bold', color: COLORS.success }}>Rs. {maxRedeemablePoints}</Text> discount!
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
           {/* Payment Methods */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Payment Method</Text>
@@ -682,8 +750,10 @@ export default function CheckoutScreen() {
 
             {discount > 0 && (
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>Discount</Text>
-                <Text style={[styles.priceValue, styles.discountText]}>
+                <Text style={[styles.priceLabel, { color: COLORS.success, fontWeight: '600' }]}>
+                  Loyalty Discount ({discount} pts)
+                </Text>
+                <Text style={[styles.priceValue, { color: COLORS.success, fontWeight: 'bold' }]}>
                   -Rs. {discount.toFixed(2)}
                 </Text>
               </View>

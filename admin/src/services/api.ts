@@ -205,11 +205,55 @@ export interface ApiOrder {
 export const fetchAllOrders = () =>
   apiFetch<{ results: ApiOrder[]; count: number }>('/api/orders/?page_size=100');
 
-export const updateOrderStatus = (orderId: number, status: string) =>
+export const updateOrderStatus = (orderId: number, status: string, cancellation_reason?: string) =>
   apiFetch<ApiOrder>(`/api/orders/${orderId}/`, {
     method: 'PATCH',
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, cancellation_reason }),
   });
+
+// ─── CASH REGISTER ────────────────────────────────────────────────────────────
+
+export interface ApiCashRegister {
+  id: number;
+  branch_id: number;
+  branch_name: string;
+  restaurant_name: string;
+  date: string;
+  submitted_by: string;
+  total_orders_count: number;
+  total_cod_collected: string;
+  total_cod_handed_over: string;
+  discrepancy_amount: string;
+  is_verified_by_admin: boolean;
+  verified_by?: string;
+  verified_at?: string;
+  notes?: string;
+}
+
+export const fetchCashRegisters = (date?: string, branchId?: number) => {
+  const params = new URLSearchParams();
+  if (date) params.append('date', date);
+  if (branchId) params.append('branch_id', String(branchId));
+  return apiFetch<ApiCashRegister[]>(`/api/orders/cash-register/?${params.toString()}`);
+};
+
+export const submitCashRegister = (branch_id: number, date: string, total_cod_handed_over: number, notes?: string) =>
+  apiFetch<any>('/api/orders/cash-register/', {
+    method: 'POST',
+    body: JSON.stringify({ branch_id, date, total_cod_handed_over, notes }),
+  });
+
+export const verifyCashRegister = (id: number) =>
+  apiFetch<any>(`/api/orders/cash-register/${id}/verify/`, {
+    method: 'POST',
+  });
+
+export const changeFirstPassword = (old_password: string, new_password: string) =>
+  apiFetch<any>('/api/users/change-password/', {
+    method: 'POST',
+    body: JSON.stringify({ old_password, new_password }),
+  });
+
 
 // ─── ANALYTICS ────────────────────────────────────────────────────────────────
 
@@ -487,3 +531,26 @@ export const getFullImageUrl = (path: string | null | undefined): string => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${BASE_URL}${cleanPath}`;
 };
+
+// ─── PROMOTIONS & MANAGEMENT ──────────────────────────────────────────────────
+
+export const fetchCoupons = () => apiFetch<any[]>('/api/coupons/active/');
+export const createCoupon = (data: any) => apiFetch<any>('/api/coupons/', { method: 'POST', body: JSON.stringify(data) });
+export const updateCoupon = (id: number, data: any) => apiFetch<any>(`/api/coupons/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteCoupon = (id: number) => apiFetch<any>(`/api/coupons/${id}/`, { method: 'DELETE' });
+
+export const fetchFlashDeals = () => apiFetch<any[]>('/api/deals/active/');
+export const createFlashDeal = (data: any) => apiFetch<any>('/api/deals/', { method: 'POST', body: JSON.stringify(data) });
+export const updateFlashDeal = (id: number, data: any) => apiFetch<any>(`/api/deals/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteFlashDeal = (id: number) => apiFetch<any>(`/api/deals/${id}/`, { method: 'DELETE' });
+
+export const fetchReviews = () => apiFetch<any[]>('/api/admin/reviews/');
+
+export const fetchRiders = () => apiFetch<any[]>('/api/admin/riders/');
+export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { method: 'POST', body: JSON.stringify(data) });
+export const updateRider = (id: number, data: any) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteRider = (id: number) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'DELETE' });
+
+export const updateBranchStock = (branchId: number, itemId: number, is_in_stock: boolean) => 
+  apiFetch<any>(`/api/admin/branches/${branchId}/stock/`, { method: 'POST', body: JSON.stringify({ item_id: itemId, is_in_stock }) });
+

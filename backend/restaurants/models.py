@@ -89,6 +89,19 @@ class MenuItem(models.Model):
     def __str__(self):
         return f"{self.category.name} - {self.name}"
 
+class BranchMenuItemAvailability(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='item_availabilities')
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='branch_availabilities')
+    is_available = models.BooleanField(default=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('branch', 'menu_item')
+        verbose_name_plural = 'Branch Menu Item Availabilities'
+
+    def __str__(self):
+        return f"{self.branch.name} — {self.menu_item.name} (Available: {self.is_available})"
+
 
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
