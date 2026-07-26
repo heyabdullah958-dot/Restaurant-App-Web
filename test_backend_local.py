@@ -667,6 +667,42 @@ def main():
     out_push_ord.delete()
     out_push_rider.delete()
 
+    # 19. Test Universal Live Order Status Tracking Endpoint & Sync
+    print("\nTesting Universal Live Order Status Tracking Endpoint & Sync...")
+    from orders.views import OrderTrackView
+    track_ord = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch,
+        delivery_address="Live Track Street", subtotal=1100.0, total=1100.0, status="received"
+    )
+
+    track_req = factory.get(f"/api/orders/{track_ord.id}/track/")
+    track_view = OrderTrackView.as_view()
+    track_resp = track_view(track_req, pk=track_ord.id)
+
+    track_passed = (
+        track_resp.status_code == 200 and 
+        track_resp.data.get("success") is True and 
+        track_resp.data.get("data", {}).get("status") == "received"
+    )
+
+    # Transition order status to preparing and verify track endpoint returns updated status immediately
+    track_ord.status = "preparing"
+    track_ord.save()
+
+    track_resp2 = track_view(track_req, pk=track_ord.id)
+    track_passed2 = (
+        track_resp2.status_code == 200 and 
+        track_resp2.data.get("data", {}).get("status") == "preparing"
+    )
+
+    if track_passed and track_passed2:
+        print(f"  [PASSED] Live Order Track Endpoint: HTTP {track_resp.status_code} | Initial: {track_resp.data['data']['status']} -> Updated: {track_resp2.data['data']['status']}")
+    else:
+        print(f"  [FAILED] Live Track HTTP {track_resp.status_code}, Status 1: {track_resp.data.get('data', {}).get('status')}, Status 2: {track_resp2.data.get('data', {}).get('status')}")
+        all_passed = False
+
+    track_ord.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:

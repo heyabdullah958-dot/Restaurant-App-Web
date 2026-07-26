@@ -108,29 +108,67 @@ export const placeOrder = createAsyncThunk(
   }
 );
 
+export const fetchOrderTrack = createAsyncThunk(
+  'order/fetchOrderTrack',
+  async ({ orderId, token }: { orderId?: number; token?: string }, { rejectWithValue }) => {
+    try {
+      let url = orderId ? `/orders/${orderId}/track/` : `/orders/track/`;
+      if (token) {
+        url += (url.includes('?') ? '&' : '?') + `token=${token}`;
+      }
+      const response = await api.get(url);
+      const resData = response.data || response;
+      const order = resData.data || resData;
+      return order;
+    } catch (error: any) {
+      if (orderId) {
+        try {
+          const fallbackRes = await api.get(`/orders/${orderId}/`);
+          const fbData = fallbackRes.data || fallbackRes;
+          return fbData.data || fbData;
+        } catch (e: any) {}
+      }
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to fetch live order tracking';
+      if (errorData) {
+        if (typeof errorData === 'string') errMsg = errorData;
+        else if (errorData.message) errMsg = errorData.message;
+        else if (errorData.detail) errMsg = errorData.detail;
+      }
+      return rejectWithValue(errMsg);
+    }
+  }
+);
+
 export const fetchOrderDetails = createAsyncThunk(
   'order/fetchOrderDetails',
   async (orderId: number, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/orders/${orderId}/`);
-      return response.data || response;
+      const response = await api.get(`/orders/${orderId}/track/`);
+      const resData = response.data || response;
+      return resData.data || resData;
     } catch (error: any) {
-      const errorData = error.response?.data;
-      let errMsg = 'Failed to fetch order details';
-      if (errorData) {
-        if (typeof errorData === 'string') {
-          errMsg = errorData;
-        } else if (errorData.message) {
-          errMsg = errorData.message;
-        } else if (errorData.detail) {
-          errMsg = errorData.detail;
-        } else if (typeof errorData === 'object') {
-          errMsg = Object.entries(errorData)
-            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
-            .join('\n');
+      try {
+        const fallbackRes = await api.get(`/orders/${orderId}/`);
+        return fallbackRes.data || fallbackRes;
+      } catch (fbErr: any) {
+        const errorData = error.response?.data || fbErr.response?.data;
+        let errMsg = 'Failed to fetch order details';
+        if (errorData) {
+          if (typeof errorData === 'string') {
+            errMsg = errorData;
+          } else if (errorData.message) {
+            errMsg = errorData.message;
+          } else if (errorData.detail) {
+            errMsg = errorData.detail;
+          } else if (typeof errorData === 'object') {
+            errMsg = Object.entries(errorData)
+              .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+              .join('\n');
+          }
         }
+        return rejectWithValue(errMsg);
       }
-      return rejectWithValue(errMsg);
     }
   }
 );
@@ -140,7 +178,8 @@ export const fetchGuestOrderStatus = createAsyncThunk(
   async (token: string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/orders/track/?token=${token}`);
-      return response.data || response;
+      const resData = response.data || response;
+      return resData.data || resData;
     } catch (error: any) {
       const errorData = error.response?.data;
       let errMsg = 'Failed to fetch guest order status';
@@ -368,6 +407,23 @@ const orderSlice = createSlice({
       .addCase(placeOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      // Fetch Live Order Track (Silent Background Refresh — prevents UI spinner flicker on polling)
+      .addCase(fetchOrderTrack.pending, (state) => {
+        if (!state.currentOrder) {
+          state.loading = true;
+        }
+        state.error = null;
+      })
+      .addCase(fetchOrderTrack.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentOrder = action.payload;
+      })
+      .addCase(fetchOrderTrack.rejected, (state, action) => {
+        state.loading = false;
+        if (!state.currentOrder) {
+          state.error = action.payload as string;
+        }
       })
       // Fetch Order Details
       .addCase(fetchOrderDetails.pending, (state) => {

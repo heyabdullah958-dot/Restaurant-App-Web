@@ -21,7 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 import { RootState, AppDispatch } from '../store';
-import { fetchOrderDetails, fetchGuestOrderStatus, clearCurrentOrder } from '../store/orderSlice';
+import { fetchOrderDetails, fetchGuestOrderStatus, fetchOrderTrack, clearCurrentOrder } from '../store/orderSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 
 const { width } = Dimensions.get('window');
@@ -302,51 +302,39 @@ export default function TrackingScreen() {
     return null;
   };
 
+  const fetchLiveTrack = React.useCallback(() => {
+    if (orderId || guestToken) {
+      dispatch(fetchOrderTrack({ orderId: orderId ? Number(orderId) : undefined, token: guestToken || undefined }));
+    }
+  }, [dispatch, orderId, guestToken]);
+
   // Fetch order details on mount or ID change
   useEffect(() => {
-    if (isAuthenticated && orderId) {
-      dispatch(fetchOrderDetails(orderId));
-    } else if (guestToken) {
-      dispatch(fetchGuestOrderStatus(guestToken));
-    } else if (orderId) {
-      dispatch(fetchOrderDetails(orderId));
-    }
+    fetchLiveTrack();
 
     return () => {
       // Cleanup current order in store on unmount
       dispatch(clearCurrentOrder());
     };
-  }, [dispatch, orderId, isAuthenticated, guestToken]);
+  }, [fetchLiveTrack, dispatch]);
 
   // Set up polling (refreshes order status every 3 seconds while active)
   useEffect(() => {
     const status = currentOrder?.status?.toLowerCase();
-    if (!orderId || status === 'delivered' || status === 'cancelled') {
+    if ((!orderId && !guestToken) || status === 'delivered' || status === 'cancelled') {
       return;
     }
 
     const interval = setInterval(() => {
-      if (isAuthenticated) {
-        dispatch(fetchOrderDetails(orderId));
-      } else if (guestToken) {
-        dispatch(fetchGuestOrderStatus(guestToken));
-      } else {
-        dispatch(fetchOrderDetails(orderId));
-      }
+      fetchLiveTrack();
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [dispatch, orderId, currentOrder?.status, isAuthenticated, guestToken]);
+  }, [fetchLiveTrack, orderId, guestToken, currentOrder?.status]);
 
   const onRefresh = React.useCallback(() => {
-    if (isAuthenticated && orderId) {
-      dispatch(fetchOrderDetails(orderId));
-    } else if (guestToken) {
-      dispatch(fetchGuestOrderStatus(guestToken));
-    } else if (orderId) {
-      dispatch(fetchOrderDetails(orderId));
-    }
-  }, [dispatch, orderId, isAuthenticated, guestToken]);
+    fetchLiveTrack();
+  }, [fetchLiveTrack]);
 
   // Look up restaurant name from restaurant list
   const restaurantName = useMemo(() => {

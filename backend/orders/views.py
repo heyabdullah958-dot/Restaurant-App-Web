@@ -194,6 +194,37 @@ https://foodsphere-admin.pages.dev
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class OrderTrackView(APIView):
+    """
+    GET /api/orders/<pk>/track/ or GET /api/v1/orders/<pk>/track/
+    Universal Live Order Status Tracking Endpoint.
+    Allows any customer (authenticated or guest) to query live status, step, rider details,
+    estimated time, and restaurant/branch info for Order #<pk> without authorization restrictions.
+    """
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk=None):
+        token = request.query_params.get('token') or request.query_params.get('tracking_token')
+        
+        try:
+            if pk:
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(pk=pk)
+            elif token:
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(tracking_token=token)
+            else:
+                return Response({'success': False, 'message': 'order_id or token required'}, status=status.HTTP_400_BAD_REQUEST)
+        except Order.DoesNotExist:
+            return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = OrderDetailSerializer(order).data
+        return Response({
+            'success': True,
+            'message': 'Live tracking data fetched',
+            'data': data
+        }, status=status.HTTP_200_OK)
+
+
 class OrderDetailView(generics.RetrieveUpdateAPIView):
     """
     GET /api/orders/{id}/ - Retrieve order details.
@@ -310,6 +341,32 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
+        # Broadcast live status update to order-specific topic
+        try:
+            from config.notification_views import get_firebase_app
+            app = get_firebase_app()
+            if app:
+                from firebase_admin import messaging
+                topic = f"order_{instance.id}"
+                message = messaging.Message(
+                    notification=messaging.Notification(
+                        title=f"Order #{instance.id} Status: {instance.get_status_display()}",
+                        body=f"Your order status from {instance.restaurant.name} has been updated to {instance.get_status_display()}."
+                    ),
+                    data={
+                        'type': 'ORDER_STATUS_UPDATE',
+                        'order_id': str(instance.id),
+                        'status': instance.status,
+                        'screen': 'OrderTracking'
+                    },
+                    topic=topic,
+                )
+                messaging.send(message)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to send order status broadcast for Order #{instance.id}: {e}")
+
         return Response(serializer.data)
 
 
