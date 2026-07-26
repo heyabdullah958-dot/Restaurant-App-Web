@@ -18,7 +18,11 @@ interface Rider {
 }
 
 export const RiderManagement: React.FC = () => {
-  const { showToast, restaurants } = useAdmin();
+  const { showToast, restaurants, user } = useAdmin();
+  const isSuper = user?.role === 'super_admin' || user?.username === 'admin';
+  const userBranchId = user?.branchId;
+  const userRestId = user?.restaurantId;
+
   const [riders, setRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -36,8 +40,8 @@ export const RiderManagement: React.FC = () => {
     is_active: true,
   });
 
-  // Get available branches from restaurants
-  const allBranches = (Array.isArray(restaurants) ? restaurants : []).flatMap(r => 
+  // Get available branches from restaurants, scoped strictly to user tenant
+  const rawBranches = (Array.isArray(restaurants) ? restaurants : []).flatMap(r => 
     (r && Array.isArray(r.branches) ? r.branches : []).map(b => ({
       id: b.id,
       name: b.name,
@@ -45,6 +49,10 @@ export const RiderManagement: React.FC = () => {
       restaurant_name: r.name
     }))
   );
+
+  const allBranches = isSuper
+    ? rawBranches
+    : rawBranches.filter(b => (userBranchId ? b.id === userBranchId : (userRestId ? b.restaurant_id === userRestId : false)));
 
   const loadRiders = async () => {
     setLoading(true);
@@ -65,11 +73,12 @@ export const RiderManagement: React.FC = () => {
 
   const handleOpenAdd = () => {
     setEditingRider(null);
+    const defaultBranchId = allBranches.length > 0 ? allBranches[0].id : (userBranchId || 0);
     setFormData({
       name: '',
       phone: '',
       vehicle_type: 'BIKE',
-      branch: allBranches.length > 0 ? allBranches[0].id : 0,
+      branch: defaultBranchId,
       status: 'AVAILABLE',
       is_active: true,
     });
@@ -333,19 +342,27 @@ export const RiderManagement: React.FC = () => {
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-slate-400 mb-1">
                   Assigned Branch
                 </label>
-                <select
-                  required
-                  value={formData.branch}
-                  onChange={(e) => setFormData({ ...formData, branch: Number(e.target.value) })}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:border-blue-500"
-                >
-                  <option value={0} disabled>Select Branch...</option>
-                  {allBranches.map(b => (
-                    <option key={b.id} value={b.id}>
-                      {b.restaurant_name} — {b.name}
-                    </option>
-                  ))}
-                </select>
+                {allBranches.length <= 1 || !isSuper ? (
+                  <div className="w-full px-3 py-2 bg-zinc-100 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm font-bold text-zinc-800 dark:text-slate-200">
+                    {allBranches.length > 0
+                      ? `${allBranches[0].restaurant_name} — ${allBranches[0].name}`
+                      : 'My Managed Branch'}
+                  </div>
+                ) : (
+                  <select
+                    required
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:border-blue-500"
+                  >
+                    <option value={0} disabled>Select Branch...</option>
+                    {allBranches.map(b => (
+                      <option key={b.id} value={b.id}>
+                        {b.restaurant_name} — {b.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

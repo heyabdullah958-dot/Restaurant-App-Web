@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RestaurantListView, RestaurantDetailView, RestaurantMenuView, BranchListView,
     AdminRestaurantViewSet, AdminMenuCategoryViewSet, AdminMenuItemViewSet, AdminBranchViewSet,
-    AdminBranchRiderViewSet, BranchItemAvailabilityView, RestaurantReviewViewSet, PlatformSettingsView
+    AdminBranchRiderViewSet, BranchItemAvailabilityView, RestaurantReviewViewSet, PlatformSettingsView, MyBranchView
 )
 
 router = DefaultRouter()
@@ -16,6 +16,7 @@ router.register('reviews', RestaurantReviewViewSet, basename='restaurant_reviews
 
 
 urlpatterns = [
+    path('admin/my-branch/', MyBranchView.as_view(), name='my_branch'),
     path('branches/', BranchListView.as_view(), name='branch_list'),
     path('restaurants/platform-settings/', PlatformSettingsView.as_view(), name='platform_settings'),
     path('restaurants/branch-item-availability/', BranchItemAvailabilityView.as_view(), name='branch_item_availability'),

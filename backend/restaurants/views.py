@@ -228,7 +228,6 @@ from .models import BranchRider
 from .serializers import BranchRiderSerializer
 
 class AdminBranchViewSet(viewsets.ModelViewSet):
-
     serializer_class = BranchSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -236,7 +235,10 @@ class AdminBranchViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return Branch.objects.all()
-        from config.admin_utils import get_managed_restaurant
+        from config.admin_utils import get_managed_restaurant, get_managed_branch
+        managed_branch = get_managed_branch(user)
+        if managed_branch:
+            return Branch.objects.filter(id=managed_branch.id)
         managed_restaurant = get_managed_restaurant(user)
         if managed_restaurant:
             return Branch.objects.filter(restaurant=managed_restaurant)
@@ -245,13 +247,46 @@ class AdminBranchViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         if not user.is_superuser:
-            from config.admin_utils import get_managed_restaurant
-            managed_restaurant = get_managed_restaurant(user)
+            from config.admin_utils import get_managed_restaurant, get_managed_branch
             branch = self.get_object()
-            if branch.restaurant != managed_restaurant:
+            managed_branch = get_managed_branch(user)
+            if managed_branch and branch != managed_branch:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You do not manage this branch.")
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_branch and (not managed_restaurant or branch.restaurant != managed_restaurant):
                 from rest_framework.exceptions import PermissionDenied
                 raise PermissionDenied("You do not manage this branch.")
         serializer.save()
+
+
+class MyBranchView(APIView):
+    """
+    GET /api/restaurants/admin/my-branch/
+    Returns ONLY the single Branch object assigned to the logged in Branch Manager.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.is_superuser:
+            first_branch = Branch.objects.first()
+            if not first_branch:
+                return Response({'detail': 'No branches configured.'}, status=404)
+            return Response(BranchSerializer(first_branch, context={'request': request}).data)
+
+        from config.admin_utils import get_managed_branch, get_managed_restaurant
+        managed_branch = get_managed_branch(user)
+        if managed_branch:
+            return Response(BranchSerializer(managed_branch, context={'request': request}).data)
+
+        managed_restaurant = get_managed_restaurant(user)
+        if managed_restaurant:
+            first_branch = Branch.objects.filter(restaurant=managed_restaurant).first()
+            if first_branch:
+                return Response(BranchSerializer(first_branch, context={'request': request}).data)
+
+        return Response({'detail': 'No branch assigned to your user account.'}, status=404)
 
 
 class AdminBranchRiderViewSet(viewsets.ModelViewSet):

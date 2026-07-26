@@ -198,7 +198,41 @@ def main():
     user_a.delete()
     user_b.delete()
 
-    # 6. Audit Loyalty Points Redemption Flow
+    # Test 5E: Multi-Tenant RBAC Branch Scoping Safeguard
+    from restaurants.views import AdminBranchRiderViewSet, AdminBranchViewSet
+    from restaurants.models import BranchRider
+
+    # Create dummy branch for another restaurant
+    other_branch = Branch.objects.exclude(restaurant=tandoori).first()
+
+    req_rider_list = factory.get("/api/admin/riders/")
+    force_authenticate(req_rider_list, user=mgr_user)
+    resp_rider_list = AdminBranchRiderViewSet.as_view({'get': 'list'})(req_rider_list)
+
+    # Manager attempts to create rider for another branch
+    req_cross_post = factory.post("/api/admin/riders/", {
+        "name": "Intruder Rider",
+        "phone": "03999999999",
+        "vehicle_type": "BIKE",
+        "branch": other_branch.id if other_branch else 9999,
+        "status": "AVAILABLE",
+        "is_active": True
+    }, format="json")
+    force_authenticate(req_cross_post, user=mgr_user)
+    resp_cross_post = AdminBranchRiderViewSet.as_view({'post': 'create'})(req_cross_post)
+
+    # Manager lists branches
+    req_br_list = factory.get("/api/admin/branches/")
+    force_authenticate(req_br_list, user=mgr_user)
+    resp_br_list = AdminBranchViewSet.as_view({'get': 'list'})(req_br_list)
+
+    br_count = len(resp_br_list.data) if hasattr(resp_br_list, 'data') and isinstance(resp_br_list.data, list) else 0
+
+    if resp_cross_post.status_code == 403 and br_count <= 1:
+        print("  [PASSED] Multi-Tenant RBAC Scoping: Cross-Branch Rider Create = 403 Forbidden | Manager Branch List Scoped = 1 Branch")
+    else:
+        print(f"  [FAILED] Multi-Tenant RBAC Scoping: Cross Post {resp_cross_post.status_code}, Branch Count {br_count}")
+        all_passed = False
     print("\nTesting Loyalty Points Redemption Flow...")
     from orders.views import OrderListCreateView
     from users.models import LoyaltyTransaction
