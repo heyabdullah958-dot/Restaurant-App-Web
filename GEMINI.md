@@ -157,6 +157,7 @@ FoodSphere/
 | In-App Notification Center & Top Toast | ✅ Completed (`inAppNotificationService.ts` & `NotificationToast.tsx`) | Done |
 | Monotonic Order Status Engine & Live Track | ✅ Completed (`OrderTrackView` & monotonic status merging in Redux) | Done |
 | Branch Loading Race Condition Fix | ✅ Completed (Suppressed false branch closed alerts on Checkout) | Done |
+| Dispatch Modal Rider Hydration Fix | ✅ Completed (Active live API query fetch & multi-type branch matching) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -192,6 +193,7 @@ FoodSphere/
 14. **Branch-Specific Stock Override:** `BranchMenuItemAvailability` model allows branch managers to set items out-of-stock for their specific branch (`POST /api/restaurants/branch-item-availability/`).
 15. **Monotonic Order Status Engine Invariant:** Redux `orderSlice.ts` and `TrackingScreen.tsx` MUST use monotonic rank ordering (`getStatusRank`) to ensure polling/refetching data NEVER rolls back an order's status to a previous stage.
 16. **Universal Live Track API:** Endpoint `GET /api/v1/orders/<pk>/track/` is unauthenticated (`AllowAny`) to support guest and user real-time order tracking without login header race conditions.
+17. **Dispatch Modal Rider Hydration Invariant:** Assign Rider modal MUST perform an active live API fetch (`fetchRiders({ branch_id, status: 'AVAILABLE', is_active: true })`) upon opening, using multi-type branch comparison (`Number(r.branch) === Number(targetBranchId)` || slug || name) to prevent stale cached rider state.
 
 ---
 
