@@ -16,16 +16,34 @@ const api = axios.create({
   timeout: 90000, // 90 seconds to allow Render cold-starts (45-60s) to complete
 });
 
+export const isPublicUrl = (url) => {
+  if (!url) return false;
+  const publicPatterns = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/guest',
+    '/auth/refresh',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/users/login',
+    '/users/register',
+    '/users/guest',
+    '/token',
+    '/search/',
+    '/popular-tags',
+    '/platform-settings'
+  ];
+  return publicPatterns.some(pattern => url.toLowerCase().includes(pattern));
+};
+
 // Request interceptor to attach JWT auth token
 api.interceptors.request.use(
   async (config) => {
-    // Do not attach token for public auth endpoints to avoid 401 on login with expired tokens
-    const publicAuthUrls = ['/auth/login/', '/auth/register/', '/auth/guest/', '/auth/forgot-password/', '/auth/reset-password-confirm/'];
-    const isPublicUrl = config.url && publicAuthUrls.some(url => config.url.endsWith(url));
-
-    if (isPublicUrl) {
+    // Do not attach token for public auth/search endpoints to avoid 401/403 on login/refresh with expired tokens
+    if (isPublicUrl(config.url)) {
       delete api.defaults.headers.common['Authorization'];
       delete config.headers['Authorization'];
+      delete config.headers['authorization'];
     } else if (!config.headers['Authorization']) {
       try {
         const token = await AsyncStorage.getItem('auth_token');
@@ -43,7 +61,7 @@ api.interceptors.request.use(
   }
 );
 
-// Store reference to dispatch actions (e.g., logout on 401) without circular imports
+// Store reference to dispatch actions (e.g., logout on 401/403) without circular imports
 let storeInstance = null;
 
 export const setupInterceptors = (store) => {
@@ -64,22 +82,29 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Response interceptor to unwrap data and handle 401 & Network Errors / Cold Starts globally
+// Response interceptor to unwrap data and handle 401/403 & Network Errors / Cold Starts globally
 api.interceptors.response.use(
   (response) => response.data || response,
   async (error) => {
     const originalRequest = error.config || {};
+    const status = error.response ? error.response.status : null;
+    const requestUrl = originalRequest.url || '';
 
-    // 1. Auto-retry on Network Error / Timeout (e.g. Render backend waking up from cold start)
+    // If request was to a public endpoint, pass error through without triggering auto-refresh / session expiry loops
+    if (isPublicUrl(requestUrl)) {
+      return Promise.reject(error);
+    }
+
+    // 1. Auto-retry on Network Error / Timeout (e.g. Render/Heroku cold start)
     if (!error.response && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
-      console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${originalRequest.url}...`);
+      console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${requestUrl}...`);
       await new Promise(resolve => setTimeout(resolve, 2000));
       return api(originalRequest);
     }
 
-    // 2. Handle 401 Unauthorized globally
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    // 2. Handle 401 Unauthorized & 403 Forbidden globally for protected requests
+    if ((status === 401 || status === 403) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -100,10 +125,13 @@ api.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem('refresh_token');
         if (refreshToken) {
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
-          const response = await axios.post(refreshUrl, { refresh: refreshToken });
+          // Standalone axios call without default headers for token refresh
+          const response = await axios.post(refreshUrl, { refresh: refreshToken }, {
+            headers: { 'Content-Type': 'application/json' }
+          });
           
-          if (response.data && (response.data.access || response.data.data?.access)) {
-            const newAccessToken = response.data.access || response.data.data.access;
+          const newAccessToken = response.data?.access || response.data?.data?.access;
+          if (newAccessToken) {
             await AsyncStorage.setItem('auth_token', newAccessToken);
             api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -113,21 +141,24 @@ api.interceptors.response.use(
           }
         }
       } catch (refreshError) {
-        console.error('Failed to refresh token:', refreshError);
+        console.warn('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
         processQueue(refreshError, null);
       } finally {
         isRefreshing = false;
       }
 
-      console.log('Unauthorized request — session expired. Logging out...');
+      console.log('[API Interceptor] Unauthorized/Forbidden request — session expired. Purging tokens and resetting state...');
       delete api.defaults.headers.common['Authorization'];
-      AsyncStorage.removeItem('auth_token').catch((e) => console.error(e));
-      AsyncStorage.removeItem('refresh_token').catch((e) => console.error(e));
+      try {
+        await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
+      } catch (e) {
+        console.error('Error clearing tokens:', e);
+      }
 
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
-    } else if (error.response) {
+    } else if (error.response && status !== 401 && status !== 403) {
       console.warn('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
       console.warn('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
@@ -139,3 +170,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

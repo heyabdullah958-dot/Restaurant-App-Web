@@ -56,12 +56,14 @@ async function performTokenRefresh(): Promise<string> {
 }
 
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
+  const isAuthEndpoint = endpoint.includes('/api/auth/') || endpoint.includes('/api/token/');
+  const token = isAuthEndpoint ? null : getToken();
   let method = options.method || 'GET';
   const headers: Record<string, string> = {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
+
 
   if (options.body instanceof FormData) {
     if (method === 'PATCH' || method === 'PUT') {

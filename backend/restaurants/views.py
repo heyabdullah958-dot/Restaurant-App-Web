@@ -546,7 +546,9 @@ class PopularTagsView(APIView):
     Excludes out-of-stock items (is_available=False) and inactive restaurants.
     Permission: AllowAny (Unauthenticated/Guest allowed).
     """
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
+
 
     def get(self, request):
         try:
@@ -606,7 +608,9 @@ class PublicSearchView(APIView):
     Public search API for dishes & restaurants across all active tenants.
     Permission: AllowAny (Unauthenticated/Guest allowed).
     """
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
+
 
     def get(self, request):
         query = request.query_params.get('q', '').strip()

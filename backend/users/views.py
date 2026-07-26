@@ -37,11 +37,21 @@ def get_tokens_for_user(user):
     }
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
+
+from rest_framework_simplejwt.views import TokenRefreshView
+
+class CustomTokenRefreshView(TokenRefreshView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
 
 
 class UserRegisterView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
+
 
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
@@ -81,8 +91,10 @@ class UserRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GuestAuthView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
     throttle_classes = [GuestAuthThrottle]
+
 
     def post(self, request):
         # Create a unique guest user
@@ -142,9 +154,11 @@ class LoyaltyHistoryView(APIView):
 from rest_framework_simplejwt.exceptions import TokenError
 
 class LogoutView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+
         try:
             refresh_token = request.data.get('refresh')
             if not refresh_token:
@@ -203,9 +217,11 @@ class ChangeOwnPasswordView(APIView):
 
 
 class ForgotPasswordView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email address is required.'}, status=400)
@@ -264,9 +280,11 @@ The FoodSphere Team
 
 
 class ResetPasswordConfirmView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
         new_password = request.data.get('password')

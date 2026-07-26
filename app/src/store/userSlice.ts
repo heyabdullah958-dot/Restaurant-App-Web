@@ -56,7 +56,9 @@ export const loadSavedToken = createAsyncThunk<
           const PROD_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
           const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
-          const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken });
+          const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken }, {
+            headers: { 'Content-Type': 'application/json' }
+          });
           
           const newAccessToken = refreshResponse.data?.access || refreshResponse.data?.data?.access;
           if (newAccessToken) {
@@ -65,7 +67,7 @@ export const loadSavedToken = createAsyncThunk<
             console.log('Successfully refreshed token proactively on app launch');
           }
         } catch (refreshErr) {
-          console.warn('Proactive token refresh attempt on app launch:', refreshErr);
+          console.log('[loadSavedToken] Proactive token refresh failed — token will be validated via profile fetch');
         }
       }
       
@@ -94,12 +96,14 @@ export const loadSavedToken = createAsyncThunk<
     } catch (error: any) {
       // If profile fails, clean up token
       delete api.defaults.headers.common['Authorization'];
-      await AsyncStorage.removeItem('auth_token').catch(() => {});
-      await AsyncStorage.removeItem('refresh_token').catch(() => {});
+      try {
+        await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
+      } catch (e) {}
       return rejectWithValue(error.message || 'Session expired');
     }
   }
 );
+
 
 const formatDRFErrorMessage = (error: any, fallback: string): string => {
   if (error.response && error.response.data) {
