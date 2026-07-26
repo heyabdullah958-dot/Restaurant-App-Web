@@ -233,6 +233,41 @@ def main():
     else:
         print(f"  [FAILED] Multi-Tenant RBAC Scoping: Cross Post {resp_cross_post.status_code}, Branch Count {br_count}")
         all_passed = False
+
+    # Test 5F: Duplicate Rider Phone Validation (Race Condition Defense)
+    # Create first rider
+    req_r1 = factory.post("/api/admin/riders/", {
+        "name": "Rider One",
+        "phone": "03009876543",
+        "vehicle_type": "BIKE",
+        "branch": jt_branch.id,
+        "status": "AVAILABLE",
+        "is_active": True
+    }, format="json")
+    force_authenticate(req_r1, user=mgr_user)
+    resp_r1 = AdminBranchRiderViewSet.as_view({'post': 'create'})(req_r1)
+
+    # Attempt duplicate rider creation with exact same phone number
+    req_r2 = factory.post("/api/admin/riders/", {
+        "name": "Rider Duplicate",
+        "phone": "03009876543",
+        "vehicle_type": "BIKE",
+        "branch": jt_branch.id,
+        "status": "AVAILABLE",
+        "is_active": True
+    }, format="json")
+    force_authenticate(req_r2, user=mgr_user)
+    resp_r2 = AdminBranchRiderViewSet.as_view({'post': 'create'})(req_r2)
+
+    if resp_r1.status_code in (200, 201) and resp_r2.status_code == 400:
+        print("  [PASSED] Duplicate Rider Defense: Primary creation = 201 Created | Duplicate phone submission = 400 Bad Request")
+    else:
+        print(f"  [FAILED] Duplicate Rider Defense: R1 Code {resp_r1.status_code}, R2 Code {resp_r2.status_code}")
+        all_passed = False
+
+    # Clean up test rider
+    if resp_r1.status_code in (200, 201) and hasattr(resp_r1, 'data') and 'id' in resp_r1.data:
+        BranchRider.objects.filter(id=resp_r1.data['id']).delete()
     print("\nTesting Loyalty Points Redemption Flow...")
     from orders.views import OrderListCreateView
     from users.models import LoyaltyTransaction

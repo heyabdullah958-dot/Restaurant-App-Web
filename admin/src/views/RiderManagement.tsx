@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
 import { fetchRiders, createRider, updateRider, deleteRider } from '../services/api';
-import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 
 interface Rider {
   id: number;
@@ -27,6 +27,7 @@ export const RiderManagement: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Modal State
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -100,11 +101,14 @@ export const RiderManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!formData.name.trim() || !formData.phone.trim() || !formData.branch) {
       showToast('Please fill in rider name, phone, and select a branch.', 'error');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (editingRider) {
         await updateRider(editingRider.id, formData);
@@ -117,6 +121,8 @@ export const RiderManagement: React.FC = () => {
       loadRiders();
     } catch (err: any) {
       showToast(err.message || 'Failed to save rider', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -414,16 +420,21 @@ export const RiderManagement: React.FC = () => {
               <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-slate-800">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-slate-800 text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-slate-800"
+                  className="px-4 py-2 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-slate-800 text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-slate-800 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingRider ? 'Save Changes' : 'Create Rider'}
+                  {isSubmitting && <Loader2 className="animate-spin" size={14} />}
+                  {isSubmitting
+                    ? (editingRider ? 'Saving...' : 'Creating...')
+                    : (editingRider ? 'Save Changes' : 'Create Rider')}
                 </button>
               </div>
             </form>

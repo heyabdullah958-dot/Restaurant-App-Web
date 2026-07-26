@@ -96,6 +96,7 @@ class BranchRider(models.Model):
 
     class Meta:
         ordering = ['branch', 'name']
+        unique_together = ('branch', 'phone')
 
     def __str__(self):
         return f"{self.name} ({self.branch.name}) — {self.status}"

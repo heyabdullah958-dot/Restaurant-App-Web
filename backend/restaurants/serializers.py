@@ -140,6 +140,19 @@ class BranchRiderSerializer(serializers.ModelSerializer):
     class Meta:
         model = BranchRider
         fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'created_at')
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=BranchRider.objects.all(),
+                fields=['branch', 'phone'],
+                message="A rider with this phone number already exists for this branch."
+            )
+        ]
+
+    def validate_phone(self, value):
+        cleaned = value.strip()
+        if not cleaned:
+            raise serializers.ValidationError("Phone number cannot be blank.")
+        return cleaned
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
