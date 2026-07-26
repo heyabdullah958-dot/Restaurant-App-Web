@@ -54,14 +54,14 @@ FoodSphere/
 │   │   ├── /screens      # Home, Restaurant, Cart, Checkout, Tracking, Rewards, Profile
 │   │   ├── /components   # Shared UI components
 │   │   ├── /navigation   # Stack & Tab navigators
-│   │   ├── /store        # Redux Toolkit state management
-│   │   ├── /services     # API calls (axios setup)
+│   │   ├── /store        # Redux Toolkit state management (user, cart, order, restaurant slices)
+│   │   ├── /services     # API calls (axios setup with auth token refresh & session handling)
 │   │   └── /assets       # Images, icons, fonts
 │   └── package.json
 │
 ├── /backend              # Django REST Framework API
 │   ├── /apps (internal structure)
-│   │   ├── /restaurants  # Restaurant config, menu, category models
+│   │   ├── /restaurants  # Restaurant config, menu, category models, branch overrides
 │   │   ├── /orders       # Order placement, status tracking (atomic save, F() expressions)
 │   │   ├── /users        # Auth, profiles, loyalty points manual adjustment
 │   │   └── /payments     # Stripe, PayFast, COD logic
@@ -92,6 +92,11 @@ FoodSphere/
 - **Push Notification UI**: [NotificationCenter.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/views/NotificationCenter.tsx) — templates and targeted topic-based FCM dispatch.
 - **Customer Points Control**: [CustomerManagement.tsx](file:///d:/sitesdata/Resturent%20App/admin/src/views/CustomerManagement.tsx) — handles searching user profiles and adjusting loyalty rewards.
 
+### 📱 Mobile App (React Native)
+- **API Service Layer**: [api.js](file:///d:/sitesdata/Resturent%20App/app/src/services/api.js) — handles JWT storage, bearer headers, 401 interception, and token refresh logic.
+- **Auth & Session Reducer**: [userSlice.ts](file:///d:/sitesdata/Resturent%20App/app/src/store/userSlice.ts) — manages auth tokens, login, guest login, profile updates, and `sessionExpired` state.
+- **Cart & Order Slices**: [cartSlice.ts](file:///d:/sitesdata/Resturent%20App/app/src/store/cartSlice.ts) & [orderSlice.ts](file:///d:/sitesdata/Resturent%20App/app/src/store/orderSlice.ts) — multi-restaurant cart isolation and state purging on logout/session expiry.
+
 ### 🐍 Backend API (Django)
 - **Analytics APIs**: [analytics_views.py](file:///d:/sitesdata/Resturent%20App/backend/config/analytics_views.py) — consolidates platform summaries, 30d graphs, and active tenant breakdown.
 - **FCM Push Notification Views**: [notification_views.py](file:///d:/sitesdata/Resturent%20App/backend/config/notification_views.py) — endpoint that connects backend to Google Firebase API.
@@ -113,7 +118,7 @@ FoodSphere/
 | **Payments** | Stripe + PayFast + Cash on Delivery |
 | **Notifications** | Firebase Cloud Messaging (FCM) |
 | **Hosting (Websites)** | Cloudflare Pages |
-| **Hosting (Admin Dashboard)** | Cloudflare Pages |
+| **Hosting (Admin Dashboard)** | Cloudflare Pages & Vercel (Backup/Primary) |
 | **Hosting (Backend)** | Heroku (Primary: https://getfoodpk-fd9b20442fcf.herokuapp.com) / Render (Backup) |
 
 ---
@@ -129,6 +134,7 @@ FoodSphere/
 - [x] 7 fully responsive websites (live on Cloudflare Pages)
 - [x] Full GitHub repository access
 - [x] Automated integration testing suite (`test_backend.py`)
+- [x] Session & Auth Lifecycle Protection (Cross-user state leak isolation)
 
 ---
 
@@ -146,13 +152,14 @@ FoodSphere/
 | Tandoori Stop Asset Upload | ✅ Completed (41 Menu Items + Logo linked to Cloudinary) | Done |
 | Branch Manager Settings Modal | ✅ Completed (Interactive contact & status modal) | Done |
 | Heroku 24/7 Deployment | ✅ Completed (Live on getfoodpk-fd9b20442fcf.herokuapp.com) | Done |
+| Session & State Leak Security Audit | ✅ Completed (Wired `sessionExpired` & Redux Purging across slices) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
 ### 🔗 Deployed Prototypes
 
-#### ⛅️ Cloudflare Pages (Active)
-- **admin panel website:** [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev)
+#### ⛅️ Cloudflare Pages & Vercel (Active)
+- **admin panel website:** [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app) (Backup: [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev))
 - **seenbanao website:** [https://seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev)
 - **dineatblue website:** [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev)
 - **jushhpk website:** [https://jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev)
@@ -161,38 +168,34 @@ FoodSphere/
 - **birdmanfoodspk website:** [https://birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev)
 - **getafomo website:** [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev)
 
-
-
 ---
 
-## 🔑 Key Architecture Decisions
+## 🔑 Key Architecture Decisions & Technical Invariants
 
-1. **Multi-tenant backend:** Single Django instance serving all restaurants — new brands added via database, not code changes
-2. **Unified API:** One set of endpoints, restaurant_id as parameter
-3. **Modular websites:** Each website is an independent React app — can be deployed/updated independently
-4. **Guest ordering:** No account required to place an order (JWT guest token)
+1. **Multi-tenant backend:** Single Django instance serving all restaurants — new brands added via database, not code changes.
+2. **Unified API:** One set of endpoints, `restaurant_id` as parameter.
+3. **Modular websites:** Each website is an independent React app — can be deployed/updated independently.
+4. **Guest ordering:** No account required to place an order (JWT guest token).
+5. **Session Expiry & State Reset Invariant:** Whenever HTTP 401 occurs (or user logs out), Redux state across `userSlice`, `cartSlice`, and `orderSlice` MUST be purged completely (`sessionExpired` / `logout`). User A's cart or order data MUST NEVER leak to User B on shared devices.
 6. **Mobile Fallback & Database Primary Keys:** Static fallback data in `app/src/services/fallbackData.ts` and component fallback maps match live Heroku PostgreSQL primary keys in Django (`seenbanao`: 1, `dineatblue`: 2, `jushhpk`: 3, `tandooristoppk`: 4, `sandmelts`: 5, `birdmanfoodspk`: 6, `getafomo`: 7). Render backup uses offset keys (70-76).
+7. **Stock Availability Rules:** `MenuCategorySerializer` in DRF must **ALWAYS** return all menu items (including `is_available = False`). Out-of-stock items MUST remain visible in customer apps with an **"OUT OF STOCK"** badge and disabled button rather than being removed.
+8. **Heroku Deployment Command:** Deploy backend updates using `git subtree push --prefix backend heroku main`.
+9. **Branch Serializer Invariant:** `RestaurantSerializer` in DRF must **ALWAYS** include `branches = BranchSerializer(many=True, read_only=True)`. List endpoints (`/api/restaurants/`) MUST return nested branch arrays so managers and mobile apps receive branch location/phone/status data.
+10. **Admin Dashboard Branch Binding:** In `AdminContext.tsx` and `BranchDashboard.tsx`, branch manager views MUST bind address, phone, and `is_active` status to `currentBranch` (resolved via `resolveUserBranchId`), NEVER to top-level `restaurant.address` / `restaurant.phone` fallbacks.
+11. **Primary Admin Hosting (Vercel):** Live at [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app). Deploy via CLI `npx vercel --token <TOKEN> --scope abdullah-47c1 --yes --prod` and alias `foodsphere-admin.vercel.app`.
+12. **Price Modifier DB Verification Invariant:** `OrderCreateSerializer` in DRF MUST ALWAYS re-verify `selected_options` against `MenuItem.options` stored in database to prevent negative price injection attack vectors.
+13. **Loyalty Cancellation Reversal Invariant:** When an order status is updated to `cancelled`, any redeemed loyalty points MUST be refunded to the user's loyalty balance (`F('loyalty_points') + points`), and any earned points reverted.
+14. **Branch-Specific Stock Override:** `BranchMenuItemAvailability` model allows branch managers to set items out-of-stock for their specific branch (`POST /api/restaurants/branch-item-availability/`).
 
 ---
 
 ## 📞 Important Notes for AI Assistants
 
-- Always maintain **multi-tenant** thinking — every feature must work for N restaurants, not just 7
-- **Loyalty points** are a core feature — not an afterthought
-- **COD is the primary payment method** — Stripe/PayFast are secondary
-- App UX must feel as polished as **FoodPanda / Talabat**
-- Backend must have **separate admin access per restaurant owner**
-- All 7 websites are **static-first** (no backend dependency) with form submission via Formspree
-- **getafomo** requires Instagram feed integration — plan for this early
-- Code must be clean, commented, and **handoff-ready** for client's future team
-- **Stock Availability Rules**: `MenuCategorySerializer` in DRF must **ALWAYS** return all menu items (including `is_available = False`). Out-of-stock items MUST remain visible in customer apps with an **"OUT OF STOCK"** badge and disabled button rather than being removed.
-- **Heroku Deployment Command**: Deploy backend updates using `git subtree push --prefix backend heroku main`.
-- **Branch Serializer Invariant**: `RestaurantSerializer` in DRF must **ALWAYS** include `branches = BranchSerializer(many=True, read_only=True)`. List endpoints (`/api/restaurants/`) MUST return nested branch arrays so managers and mobile apps receive branch location/phone/status data.
-- **Admin Dashboard Branch Binding**: In `AdminContext.tsx` and `BranchDashboard.tsx`, branch manager views MUST bind address, phone, and `is_active` status to `currentBranch` (resolved via `resolveUserBranchId`), NEVER to top-level `restaurant.address` / `restaurant.phone` fallbacks.
-- **Primary Admin Hosting (Vercel)**: Live at [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app). Deploy via CLI `npx vercel --token <TOKEN> --scope abdullah-47c1 --yes --prod` and alias `foodsphere-admin.vercel.app`.
-- **Price Modifier DB Verification Invariant**: `OrderCreateSerializer` in DRF MUST ALWAYS re-verify `selected_options` against `MenuItem.options` stored in database to prevent negative price injection attack vectors.
-- **Loyalty Cancellation Reversal Invariant**: When an order status is updated to `cancelled`, any redeemed loyalty points MUST be refunded to the user's loyalty balance (`F('loyalty_points') + points`), and any earned points reverted.
-- **Branch-Specific Stock Override**: `BranchMenuItemAvailability` model allows branch managers to set items out-of-stock for their specific branch (`POST /api/restaurants/branch-item-availability/`).
-
-
-
+- Always maintain **multi-tenant** thinking — every feature must work for N restaurants, not just 7.
+- **Loyalty points** are a core feature — not an afterthought.
+- **COD is the primary payment method** — Stripe/PayFast are secondary.
+- App UX must feel as polished as **FoodPanda / Talabat**.
+- Backend must have **separate admin access per restaurant owner**.
+- All 7 websites are **static-first** (no backend dependency) with form submission via Formspree.
+- **getafomo** requires Instagram feed integration — plan for this early.
+- Code must be clean, commented, and **handoff-ready** for client's future team.

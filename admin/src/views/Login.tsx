@@ -32,9 +32,9 @@ export const Login: React.FC = () => {
       <div className="w-full max-w-md bg-slate-800/80 backdrop-blur-md border border-slate-700/60 p-8 rounded-2xl shadow-2xl relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-blue-600 to-orange-500 rounded-2xl shadow-xl mb-4 font-extrabold text-white text-2xl">
-            FS
+            GF
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">FoodSphere Workspace</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">GetFood Workspace</h2>
           <p className="text-sm text-slate-400 mt-1.5">Sign in to control your dining networks</p>
         </div>
 

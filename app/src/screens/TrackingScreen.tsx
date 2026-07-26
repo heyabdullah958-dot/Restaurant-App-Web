@@ -10,13 +10,18 @@ import {
   Animated,
   Easing,
   Dimensions,
+  Linking,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 import { RootState, AppDispatch } from '../store';
-import { fetchOrderDetails, clearCurrentOrder } from '../store/orderSlice';
+import { fetchOrderDetails, fetchGuestOrderStatus, clearCurrentOrder } from '../store/orderSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 
 const { width } = Dimensions.get('window');
@@ -36,8 +41,48 @@ export default function TrackingScreen() {
   // Retrieve orderId from navigation params or default to activeOrder from store
   const { activeOrder, currentOrder, loading, error } = useSelector((state: RootState) => state.order);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
   
   const orderId = route.params?.orderId || activeOrder?.id;
+  const [guestToken, setGuestToken] = useState<string | null>(null);
+
+  // Review prompt state
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>('');
+  const [hasSubmittedReview, setHasSubmittedReview] = useState<boolean>(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (orderId) {
+      AsyncStorage.getItem(`order_token_${orderId}`).then((token) => {
+        if (token) setGuestToken(token);
+      });
+      AsyncStorage.getItem(`reviewed_order_${orderId}`).then((val) => {
+        if (val === 'true') setHasSubmittedReview(true);
+      });
+    }
+  }, [orderId]);
+
+  const handleSubmitReview = async () => {
+    if (!orderId || !currentOrder) return;
+    setIsSubmittingReview(true);
+    try {
+      const restId = currentOrder.restaurant?.id || currentOrder.restaurant;
+      await api.post(`/restaurants/${restId}/reviews/`, {
+        order: orderId,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+      });
+      await AsyncStorage.setItem(`reviewed_order_${orderId}`, 'true');
+      setHasSubmittedReview(true);
+      Alert.alert('Review Submitted', 'Thank you for your feedback!');
+    } catch (e: any) {
+      const errMsg = e.response?.data?.order?.[0] || e.response?.data?.detail || e.message || 'Failed to submit review';
+      Alert.alert('Review Error', String(errMsg));
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   // Determine current active step
   const activeStep = useMemo(() => {
@@ -258,7 +303,11 @@ export default function TrackingScreen() {
 
   // Fetch order details on mount or ID change
   useEffect(() => {
-    if (orderId) {
+    if (isAuthenticated && orderId) {
+      dispatch(fetchOrderDetails(orderId));
+    } else if (guestToken) {
+      dispatch(fetchGuestOrderStatus(guestToken));
+    } else if (orderId) {
       dispatch(fetchOrderDetails(orderId));
     }
 
@@ -266,7 +315,7 @@ export default function TrackingScreen() {
       // Cleanup current order in store on unmount
       dispatch(clearCurrentOrder());
     };
-  }, [dispatch, orderId]);
+  }, [dispatch, orderId, isAuthenticated, guestToken]);
 
   // Set up polling (refreshes order status every 3 seconds while active)
   useEffect(() => {
@@ -276,17 +325,27 @@ export default function TrackingScreen() {
     }
 
     const interval = setInterval(() => {
-      dispatch(fetchOrderDetails(orderId));
+      if (isAuthenticated) {
+        dispatch(fetchOrderDetails(orderId));
+      } else if (guestToken) {
+        dispatch(fetchGuestOrderStatus(guestToken));
+      } else {
+        dispatch(fetchOrderDetails(orderId));
+      }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [dispatch, orderId, currentOrder?.status]);
+  }, [dispatch, orderId, currentOrder?.status, isAuthenticated, guestToken]);
 
   const onRefresh = React.useCallback(() => {
-    if (orderId) {
+    if (isAuthenticated && orderId) {
+      dispatch(fetchOrderDetails(orderId));
+    } else if (guestToken) {
+      dispatch(fetchGuestOrderStatus(guestToken));
+    } else if (orderId) {
       dispatch(fetchOrderDetails(orderId));
     }
-  }, [dispatch, orderId]);
+  }, [dispatch, orderId, isAuthenticated, guestToken]);
 
   // Look up restaurant name from restaurant list
   const restaurantName = useMemo(() => {
@@ -414,6 +473,39 @@ export default function TrackingScreen() {
         {/* Foodpanda Style Status Animation */}
         {renderStatusAnimation()}
 
+        {/* Rider Contact Card */}
+        {currentOrder?.rider && (
+          <View style={styles.riderCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <View style={styles.riderAvatar}>
+                <Ionicons name="person" size={22} color={COLORS.primary} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.riderTitle}>🛵 Delivery Rider Assigned</Text>
+                <Text style={styles.riderName}>{currentOrder.rider.name || 'Assigned Rider'}</Text>
+              </View>
+            </View>
+            {currentOrder.rider.phone ? (
+              <View style={styles.riderButtons}>
+                <TouchableOpacity
+                  style={styles.riderCallBtn}
+                  onPress={() => Linking.openURL(`tel:${currentOrder.rider.phone}`)}
+                >
+                  <Ionicons name="call" size={16} color="#ffffff" />
+                  <Text style={styles.riderBtnText}>Call Rider</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.riderWABtn}
+                  onPress={() => Linking.openURL(`https://wa.me/${currentOrder.rider.phone.replace(/^0/, '92').replace(/\+/g, '')}`)}
+                >
+                  <Ionicons name="logo-whatsapp" size={16} color="#ffffff" />
+                  <Text style={styles.riderBtnText}>WhatsApp</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+        )}
+
         {/* Stepper Stepper Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Order Status</Text>
@@ -509,6 +601,70 @@ export default function TrackingScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Order Review Prompt Card */}
+        {currentOrder?.status?.toLowerCase() === 'delivered' && (
+          <View style={[styles.card, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1 }]}>
+            <Text style={[styles.cardTitle, { color: '#166534', borderBottomColor: '#bbf7d0' }]}>
+              ⭐ Rate Your Meal Experience
+            </Text>
+            {hasSubmittedReview ? (
+              <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                <Ionicons name="checkmark-circle" size={36} color="#166534" />
+                <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#166534', marginTop: 4 }}>
+                  Thank you for your review!
+                </Text>
+                <Text style={{ fontSize: 12, color: '#15803d', textAlign: 'center', marginTop: 2 }}>
+                  Your feedback helps us continuously improve our food quality and delivery speed.
+                </Text>
+              </View>
+            ) : (
+              <View>
+                <Text style={{ fontSize: 13, color: '#166534', marginBottom: 10 }}>
+                  How was your food and delivery from {restaurantName}?
+                </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity key={star} onPress={() => setReviewRating(star)}>
+                      <Ionicons
+                        name={star <= reviewRating ? "star" : "star-outline"}
+                        size={32}
+                        color={star <= reviewRating ? "#f59e0b" : "#94a3b8"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TextInput
+                  style={{ backgroundColor: '#ffffff', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#cbd5e1', fontSize: 13, minHeight: 60, color: COLORS.dark }}
+                  placeholder="Write a comment about your food quality or delivery experience..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  numberOfLines={2}
+                  value={reviewComment}
+                  onChangeText={setReviewComment}
+                />
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  disabled={isSubmittingReview}
+                  onPress={handleSubmitReview}
+                  style={{
+                    backgroundColor: '#166534',
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    marginTop: 10,
+                  }}
+                >
+                  {isSubmittingReview ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 14 }}>Submit Review</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Order Items */}
         <View style={styles.card}>
@@ -1222,5 +1378,60 @@ const styles = StyleSheet.create({
     height: 2,
     width: 60,
     backgroundColor: COLORS.lightGray,
+  },
+  riderCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
+  },
+  riderAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,87,34,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  riderTitle: {
+    color: '#94a3b8',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  riderName: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  riderButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  riderCallBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#2563eb',
+    borderRadius: 10,
+    paddingVertical: 10,
+  },
+  riderWABtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#25D366',
+    borderRadius: 10,
+    paddingVertical: 10,
+  },
+  riderBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: 'bold',
   },
 });

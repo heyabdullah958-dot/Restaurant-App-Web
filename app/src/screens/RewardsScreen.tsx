@@ -231,7 +231,7 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
             <View style={styles.pointsContainer}>
               <Text style={styles.pointsLabel}>Available Balance</Text>
               <Text style={styles.pointsValue}>{points}</Text>
-              <Text style={styles.pointsUnit}>FoodSphere Points</Text>
+              <Text style={styles.pointsUnit}>GetFood Points</Text>
             </View>
 
             {/* Progress Bar Container */}

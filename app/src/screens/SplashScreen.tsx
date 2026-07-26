@@ -87,7 +87,7 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
         {/* Animated Brand Name */}
         <Animated.View style={{ opacity: textOpacity }}>
           <Text style={styles.brandName}>
-            Food<Text style={styles.brandHighlight}>Sphere</Text>
+            Get<Text style={styles.brandHighlight}>Food</Text>
           </Text>
         </Animated.View>
 

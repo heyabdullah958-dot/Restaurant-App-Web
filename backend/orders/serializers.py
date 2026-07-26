@@ -3,8 +3,9 @@ from rest_framework import serializers
 from django.db import transaction
 from django.db.models import F
 from .models import Order, OrderItem
-from restaurants.models import MenuItem, Restaurant
-from restaurants.serializers import RestaurantSerializer, build_absolute_image_url
+from restaurants.models import MenuItem, Restaurant, BranchRider
+from restaurants.serializers import RestaurantSerializer, build_absolute_image_url, BranchRiderSerializer
+from promotions.models import Coupon, CouponUsage
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -34,24 +35,25 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     items = OrderCreateItemSerializer(many=True, write_only=True)
     use_loyalty_points = serializers.BooleanField(required=False, default=False, write_only=True)
     points_to_redeem = serializers.IntegerField(required=False, default=0, min_value=0, write_only=True)
+    coupon_code = serializers.CharField(required=False, allow_blank=True, allow_null=True, write_only=True)
 
     class Meta:
         model = Order
         fields = (
-            'id', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
+            'id', 'tracking_token', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
             'items', 'subtotal', 'delivery_fee', 'discount', 'total',
-            'use_loyalty_points', 'points_to_redeem'
+            'use_loyalty_points', 'points_to_redeem', 'coupon_code'
         )
-        read_only_fields = ('id', 'subtotal', 'delivery_fee', 'discount', 'total')
+        read_only_fields = ('id', 'tracking_token', 'subtotal', 'delivery_fee', 'discount', 'total')
 
     def validate(self, attrs):
         """
-        BUG-04/09/10: Validate guest fields, item availability, min order amount, and loyalty redemption.
+        Validate guest fields, operating hours, distance radius, coupon validity, min order amount, and loyalty redemption.
         """
         request = self.context.get('request')
 
-        # Require phone for all users (either via payload or existing user profile)
+        # Require phone for all users
         is_guest_or_anon = (
             not request or
             not request.user or
@@ -74,6 +76,21 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         if not attrs.get('items'):
             raise serializers.ValidationError("Order must have at least one menu item.")
 
+        restaurant = attrs.get('restaurant')
+
+        # Task 3: Operating Hours Enforcement
+        if restaurant:
+            if getattr(restaurant, 'is_force_closed', False) or not getattr(restaurant, 'is_active', True):
+                raise serializers.ValidationError(f"{restaurant.name} is currently closed.")
+            opens_at = getattr(restaurant, 'opens_at', None)
+            closes_at = getattr(restaurant, 'closes_at', None)
+            if opens_at and closes_at:
+                from django.utils import timezone
+                now_time = timezone.localtime().time()
+                is_currently_open = (opens_at <= now_time <= closes_at) if opens_at <= closes_at else (now_time >= opens_at or now_time <= closes_at)
+                if not is_currently_open:
+                    raise serializers.ValidationError(f"{restaurant.name} is currently closed and not accepting orders.")
+
         # Validate loyalty points redemption
         use_loyalty = attrs.get('use_loyalty_points', False)
         pts_to_redeem = attrs.get('points_to_redeem', 0)
@@ -88,8 +105,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"You only have {user_pts} loyalty points available (requested {pts_to_redeem})."
                 )
 
-        # BUG-09: Validate each item is currently available
-        restaurant = attrs.get('restaurant')
         items = attrs.get('items', [])
         for item_data in items:
             menu_item = item_data['menu_item']
@@ -99,29 +114,28 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"Please remove it from your cart and try again."
                 )
 
-        # BUG-10: Validate minimum order amount
-        if restaurant and restaurant.min_order_amount > 0:
-            subtotal = 0
-            for item in items:
-                menu_item = item['menu_item']
-                item_price = menu_item.price
-                selected_opts = item.get('selected_options', [])
-                
-                # Re-validate option price modifiers against DB menu_item.options
-                db_options = menu_item.options or []
-                price_modifier_sum = Decimal('0.00')
-                for opt in selected_opts:
-                    if isinstance(opt, dict) and opt.get('name'):
-                        matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
-                        if matched_db_opt:
-                            try:
-                                mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
-                                price_modifier_sum += Decimal(str(max(0.0, mod_val)))
-                            except (ValueError, TypeError):
-                                pass
-                item_price += price_modifier_sum
-                subtotal += item_price * item['quantity']
+        # Minimum order amount validation
+        subtotal = Decimal('0.00')
+        for item in items:
+            menu_item = item['menu_item']
+            item_price = menu_item.price
+            selected_opts = item.get('selected_options', [])
+            
+            db_options = menu_item.options or []
+            price_modifier_sum = Decimal('0.00')
+            for opt in selected_opts:
+                if isinstance(opt, dict) and opt.get('name'):
+                    matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
+                    if matched_db_opt:
+                        try:
+                            mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
+                            price_modifier_sum += Decimal(str(max(0.0, mod_val)))
+                        except (ValueError, TypeError):
+                            pass
+            item_price += price_modifier_sum
+            subtotal += item_price * item['quantity']
 
+        if restaurant and restaurant.min_order_amount > 0:
             if subtotal < restaurant.min_order_amount:
                 raise serializers.ValidationError(
                     f"Minimum order amount for {restaurant.name} is "
@@ -129,37 +143,102 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"Your subtotal is Rs. {subtotal:.0f}."
                 )
 
+        # Task 2: Delivery Radius Enforcement
+        delivery_lat = attrs.get('delivery_lat')
+        delivery_lng = attrs.get('delivery_lng')
+        branch = attrs.get('branch')
+        if delivery_lat is not None and delivery_lng is not None and restaurant:
+            if not branch:
+                from config.admin_utils import resolve_branch_for_order
+                branch = resolve_branch_for_order(
+                    restaurant,
+                    attrs.get('delivery_address', ''),
+                    delivery_lat,
+                    delivery_lng
+                )
+            if branch:
+                b_lat = branch.latitude
+                b_lng = branch.longitude
+                if b_lat is None or b_lng is None:
+                    from config.admin_utils import BRANCH_COORDINATES
+                    b_name_lower = branch.name.lower().strip()
+                    coords = BRANCH_COORDINATES.get(b_name_lower)
+                    if not coords:
+                        for key, val in BRANCH_COORDINATES.items():
+                            if key in b_name_lower:
+                                coords = val
+                                break
+                    if coords:
+                        b_lat, b_lng = coords[0], coords[1]
+                if b_lat is not None and b_lng is not None:
+                    from config.admin_utils import haversine_distance
+                    dist_km = haversine_distance(delivery_lat, delivery_lng, b_lat, b_lng)
+                    max_radius = float(branch.delivery_radius_km) if branch.delivery_radius_km else 10.0
+                    if dist_km > max_radius:
+                        raise serializers.ValidationError(
+                            f"Delivery address is outside our service area for {branch.name} "
+                            f"({dist_km:.1f} km away, maximum radius is {max_radius:.1f} km)."
+                        )
+
+        # Task 4: Coupon Validation
+        coupon_code = attrs.get('coupon_code')
+        if coupon_code:
+            from promotions.models import Coupon, CouponUsage
+            try:
+                coupon = Coupon.objects.get(code__iexact=str(coupon_code).strip())
+            except Coupon.DoesNotExist:
+                raise serializers.ValidationError("Invalid promo code.")
+
+            if not coupon.is_valid():
+                raise serializers.ValidationError("Promo code is expired or inactive.")
+
+            if coupon.usage_limit > 0 and coupon.times_used >= coupon.usage_limit:
+                raise serializers.ValidationError("Promo code usage limit has been reached.")
+
+            if coupon.restaurant and restaurant and coupon.restaurant != restaurant:
+                raise serializers.ValidationError(f"Promo code is not valid for {restaurant.name}.")
+
+            if subtotal < coupon.min_subtotal:
+                raise serializers.ValidationError(
+                    f"Minimum subtotal of Rs. {coupon.min_subtotal:.0f} required to use promo code '{coupon.code}'."
+                )
+
+            if not is_guest_or_anon and request and request.user:
+                user_usage_count = CouponUsage.objects.filter(coupon=coupon, user=request.user).count()
+                if user_usage_count >= coupon.per_user_limit:
+                    raise serializers.ValidationError("You have already used this promo code the maximum allowed times.")
+
+            attrs['_validated_coupon'] = coupon
+
         return attrs
 
     def create(self, validated_data):
-        """
-        BUG-04: Wrapped in transaction.atomic() — if any step fails, entire order rolls back.
-        BUG-05: Loyalty points updated using atomic F() expression — no race condition.
-        BUG-11: Loyalty points awarded & redeemed for registered (non-guest) users.
-        """
         with transaction.atomic():
             items_data = validated_data.pop('items')
             use_loyalty = validated_data.pop('use_loyalty_points', False)
             pts_to_redeem = validated_data.pop('points_to_redeem', 0)
+            coupon = validated_data.pop('_validated_coupon', None)
+            coupon_code_param = validated_data.pop('coupon_code', None)
             restaurant = validated_data['restaurant']
+
+            if not coupon and coupon_code_param:
+                coupon = Coupon.objects.filter(code__iexact=str(coupon_code_param).strip(), is_active=True).first()
 
             request = self.context.get('request')
             user = None
             if request and request.user and request.user.is_authenticated:
                 user = request.user
-                # Save phone number to user profile if missing or if guest
                 if (user.is_guest or not user.phone) and validated_data.get('guest_phone'):
                     user.phone = validated_data.get('guest_phone', '')
                     user.save()
 
-            subtotal = 0
+            subtotal = Decimal('0.00')
             order_items_to_create = []
 
             for item_data in items_data:
                 menu_item = item_data['menu_item']
                 quantity = item_data['quantity']
 
-                # Validate item belongs to the correct restaurant
                 if menu_item.category.restaurant != restaurant:
                     raise serializers.ValidationError(
                         f"Menu item '{menu_item.name}' does not belong to restaurant '{restaurant.name}'."
@@ -202,22 +281,44 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 })
 
             delivery_fee = restaurant.delivery_fee
-            discount = Decimal('0.00')
-            actual_pts_redeemed = 0
 
-            # Process Loyalty Points Redemption
+            # Coupon discount calculation
+            coupon_discount = Decimal('0.00')
+            if coupon:
+                if coupon.discount_type == 'percentage':
+                    coupon_discount = subtotal * (coupon.discount_value / Decimal('100.00'))
+                    if coupon.max_discount:
+                        coupon_discount = min(coupon_discount, coupon.max_discount)
+                else:
+                    coupon_discount = coupon.discount_value
+                coupon_discount = min(coupon_discount, subtotal)
+
+                # Atomic increment of times_used
+                updated = Coupon.objects.filter(
+                    pk=coupon.pk,
+                    is_active=True,
+                    times_used__lt=F('usage_limit')
+                ).update(times_used=F('times_used') + 1)
+
+                if updated == 0 and coupon.usage_limit > 0:
+                    raise serializers.ValidationError("Coupon usage limit has been reached.")
+
+            # Loyalty Points Redemption
+            loyalty_discount = Decimal('0.00')
+            actual_pts_redeemed = 0
             if user and not user.is_guest and (use_loyalty or pts_to_redeem > 0):
                 user.refresh_from_db()
                 avail_pts = user.loyalty_points
-                # Max points to redeem is limited by available points and subtotal
-                actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(subtotal))
+                rem_subtotal = max(Decimal('0.00'), subtotal - coupon_discount)
+                actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(rem_subtotal))
                 if actual_pts_redeemed > 0:
-                    discount = Decimal(actual_pts_redeemed)
+                    loyalty_discount = Decimal(actual_pts_redeemed)
 
+            discount = coupon_discount + loyalty_discount
             total = subtotal + delivery_fee - discount
             total = max(Decimal('0.00'), round(total, 2))
 
-            # Create the Order record
+            # Create Order
             order = Order.objects.create(
                 user=user,
                 subtotal=subtotal,
@@ -227,7 +328,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 **validated_data
             )
 
-            # Deduct redeemed points atomically if redeemed
+            # Record CouponUsage
+            if coupon:
+                from promotions.models import CouponUsage
+                CouponUsage.objects.create(
+                    coupon=coupon,
+                    user=user if user and not user.is_guest else None,
+                    order=order
+                )
+
+            # Deduct loyalty points if redeemed
             if user and not user.is_guest and actual_pts_redeemed > 0:
                 from django.contrib.auth import get_user_model
                 User = get_user_model()
@@ -246,7 +356,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     description=f"Redeemed {actual_pts_redeemed} points for Rs. {actual_pts_redeemed} discount on Order #{order.id}"
                 )
 
-            # If branch was not explicitly selected by customer, auto-assign based on delivery address / lat lng
+            # Auto-assign branch if not provided
             if not order.branch:
                 from config.admin_utils import resolve_branch_for_order
                 assigned_branch = resolve_branch_for_order(
@@ -259,11 +369,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     order.branch = assigned_branch
                     order.save(update_fields=['branch'])
 
-            # Create all OrderItem records
+            # Create OrderItems
             for item in order_items_to_create:
                 OrderItem.objects.create(order=order, **item)
 
-            # BUG-11 + BUG-05: Award loyalty points ONLY to registered (non-guest) users on net paid total
+            # Award loyalty points on net paid total
             if user and not user.is_guest:
                 ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
                 if ratio > 0:
@@ -271,7 +381,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     if earned_points > 0:
                         from django.contrib.auth import get_user_model
                         User = get_user_model()
-                        # BUG-05: Atomic F() update — safe under concurrent load
                         User.objects.filter(pk=user.pk).update(
                             loyalty_points=F('loyalty_points') + earned_points
                         )
@@ -293,7 +402,8 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+        fields = ('id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+        read_only_fields = ('id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
 
     def get_restaurant_logo(self, obj):
         return build_absolute_image_url(obj.restaurant.logo, self.context)
@@ -303,6 +413,8 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
     branch_name = serializers.SerializerMethodField()
     branch_id = serializers.SerializerMethodField()
+    rider = BranchRiderSerializer(read_only=True)
+    rider_id = serializers.PrimaryKeyRelatedField(queryset=BranchRider.objects.all(), source='rider', required=False, allow_null=True)
     items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
@@ -310,6 +422,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'restaurant', 'restaurant_name',
             'branch_id', 'branch_name',
+            'rider', 'rider_id',
             'guest_name', 'guest_phone',
             'status', 'payment_method',
             'delivery_address',
@@ -326,18 +439,19 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         return obj.branch.id if obj.branch else None
 
 
-
 class OrderDetailSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     restaurant = RestaurantSerializer(read_only=True)
+    rider = BranchRiderSerializer(read_only=True)
 
     class Meta:
         model = Order
         fields = (
-            'id', 'restaurant', 'guest_name', 'guest_phone', 'status', 'payment_method',
+            'id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'status', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
+        read_only_fields = ('id', 'tracking_token')
 
     def validate(self, attrs):
         # State transition validation (lock delivered orders / block invalid cancellations)
@@ -357,7 +471,6 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        # Propagate request context for absolute image/logo URL resolution
         request = self.context.get('request')
         if request:
             ret['restaurant'] = RestaurantSerializer(

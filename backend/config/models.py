@@ -35,3 +35,31 @@ class AdminAuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.action} on {self.model_name} #{self.object_id}"
+
+
+class PlatformSettings(models.Model):
+    loyalty_points_per_dollar = models.IntegerField(default=10)
+    loyalty_point_value_usd = models.DecimalField(max_digits=5, decimal_places=4, default=0.01)
+    welcome_bonus_points = models.IntegerField(default=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Platform Settings'
+        verbose_name_plural = 'Platform Settings'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Platform Settings"
+

@@ -11,7 +11,8 @@ import {
   Users,
   Lock,
   Tag,
-  Zap
+  Zap,
+  Bike
 } from 'lucide-react';
 import { changeOwnPassword, updateUserProfile } from '../services/api';
 
@@ -171,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             <div className="flex items-center gap-2.5">
               {isSuper ? (
                 <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
-                  FS
+                  GF
                 </div>
               ) : (
                 <div className={`w-9 h-9 rounded-lg ${getBrandBgColor()} flex items-center justify-center font-bold text-white shadow-lg`}>
@@ -180,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
               )}
               <div>
                 <h3 className="font-bold tracking-tight text-sm">
-                  {isSuper ? 'FoodSphere HQ' : activeRestaurant?.name}
+                  {isSuper ? 'GetFood HQ' : activeRestaurant?.name}
                 </h3>
                 <span className={`text-[10px] uppercase font-bold tracking-wider ${isSuper ? 'text-blue-400' : 'text-zinc-400'}`}>
                   {isSuper ? 'Super-Admin Console' : 'VIP Tenant Panel'}
@@ -268,6 +269,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   Manager Accounts
                 </button>
                 <button
+                  onClick={() => { setView('rider_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'rider_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Bike size={18} />
+                  Riders Fleet
+                </button>
+                <button
                   onClick={() => { setView('notification_center'); setIsOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
                     activeView === 'notification_center' ? activeLinkClass : inactiveLinkClass
@@ -315,6 +325,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <ClipboardList size={18} />
                   Live Order Board
+                </button>
+                <button
+                  onClick={() => { setView('rider_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'rider_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Bike size={18} />
+                  Branch Riders
                 </button>
                 <button
                   onClick={() => { setView('menu_management'); setIsOpen(false); }}

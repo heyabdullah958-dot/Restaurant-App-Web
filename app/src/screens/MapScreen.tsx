@@ -596,7 +596,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           <View style={[StyleSheet.absoluteFill, styles.centerLoader]}>
             <ActivityIndicator size="large" color={COLORS.primary} />
             <Text style={{ marginTop: 10, color: COLORS.gray, fontWeight: '600', fontSize: 12 }}>
-              Loading FoodSphere Map...
+              Loading GetFood Map...
             </Text>
           </View>
         )}

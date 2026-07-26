@@ -297,18 +297,19 @@ def main():
         delivery_address="Guest Street", subtotal=300.0, total=300.0, status="received"
     )
 
+    import time
+    test_user_name = f"linked_user_{int(time.time())}"
     reg_payload = {
-        "username": "linked_user_test",
-        "email": "linker@test.com",
+        "username": test_user_name,
+        "email": f"{test_user_name}@test.com",
         "password": "Password123!",
-        "phone": guest_phone,
-        "name": "Linked User Test"
+        "phone": guest_phone
     }
     req_reg = factory.post("/api/users/register/", reg_payload, format="json")
     resp_reg = UserRegisterView.as_view()(req_reg)
 
     guest_ord.refresh_from_db()
-    if resp_reg.status_code == 201 and guest_ord.user is not None and guest_ord.user.username == "linked_user_test":
+    if resp_reg.status_code == 201 and guest_ord.user is not None and guest_ord.user.username == test_user_name:
         print(f"  [PASSED] Guest Order Auto-Linkage: Guest order #{guest_ord.id} linked to new user '{guest_ord.user.username}'")
     else:
         print(f"  [FAILED] Guest Order Linkage status {resp_reg.status_code}, Order user={guest_ord.user}")

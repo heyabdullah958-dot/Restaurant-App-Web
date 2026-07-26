@@ -436,6 +436,22 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
           </TouchableOpacity>
 
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => Linking.openURL('https://foodsphere-admin.pages.dev/privacy-policy.html')}>
+            <View style={styles.actionLeft}>
+              <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.dark} />
+              <Text style={styles.actionLabel}>Privacy Policy</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+          </TouchableOpacity>
+
+          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => Linking.openURL('https://foodsphere-admin.pages.dev/terms-of-service.html')}>
+            <View style={styles.actionLeft}>
+              <Ionicons name="document-text-outline" size={22} color={COLORS.dark} />
+              <Text style={styles.actionLabel}>Terms of Service</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+          </TouchableOpacity>
+
           {/* Logout Button */}
           <TouchableOpacity activeOpacity={0.75} style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
             <View style={styles.actionLeft}>
@@ -564,8 +580,8 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                 style={styles.supportOption}
                 onPress={() => {
                   setShowSupportModal(false);
-                  Linking.openURL('mailto:support@foodsphere.com?subject=FoodSphere Inquiry').catch(() => {
-                    showAlert('Email Error', 'Could not open mail client. Please contact support@foodsphere.com.');
+                  Linking.openURL('mailto:support@getfood.pk?subject=GetFood Inquiry').catch(() => {
+                    showAlert('Email Error', 'Could not open mail client. Please contact support@getfood.pk.');
                   });
                 }}
               >

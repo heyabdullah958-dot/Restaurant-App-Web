@@ -8,7 +8,7 @@ class CouponValidateView(views.APIView):
     permission_classes = [permissions.AllowAny]
     
     def post(self, request, *args, **kwargs):
-        serializer = CouponValidateSerializer(data=request.data)
+        serializer = CouponValidateSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         
         code = serializer.validated_data['code']

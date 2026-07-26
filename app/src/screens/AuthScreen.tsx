@@ -13,6 +13,7 @@ import {
   Dimensions,
   Modal,
   Image,
+  Linking,
 } from 'react-native';
 import CustomAlertModal from '../components/CustomAlertModal';
 import { useDispatch, useSelector } from 'react-redux';
@@ -114,10 +115,10 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       dispatch(updateUserProfile({ 
         username: `User_${phone.slice(-4)}`, 
         phone: phone.trim(),
-        email: `phone_user_${phone.slice(-4)}@foodsphere.com`,
+        email: `phone_user_${phone.slice(-4)}@getfood.pk`,
         is_guest: false
       }));
-      showAlert('Success', 'Phone verification successful! Welcome to FoodSphere.');
+      showAlert('Success', 'Phone verification successful! Welcome to GetFood.');
     }
   };
 
@@ -245,7 +246,10 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
         phone: phone.trim() 
       }));
       if (registerUser.fulfilled.match(result)) {
-        showAlert('Registration Successful', 'Welcome to FoodSphere!');
+        showAlert(
+          '🎉 Welcome to FoodSphere!',
+          "Your account has been created successfully! You've received bonus loyalty points credited to your wallet. Start ordering to earn more rewards!"
+        );
       }
     }
   };
@@ -269,7 +273,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             <Ionicons name="restaurant" size={32} color={COLORS.white} />
           </View>
           <Text style={styles.titleText}>
-            Food<Text style={{ color: COLORS.primary }}>Sphere</Text>
+            Get<Text style={{ color: COLORS.primary }}>Food</Text>
           </Text>
           <Text style={styles.subtitleText}>Sign in to access 3 premium dining spots</Text>
         </View>
@@ -550,6 +554,18 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
             <Ionicons name="arrow-forward" size={16} color={COLORS.primary} style={{ marginLeft: 5 }} />
           </TouchableOpacity>
+
+          {/* Legal Links Footer */}
+          <View style={{ marginTop: 24, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', flexWrap: 'wrap' }}>
+            <Text style={{ fontSize: 12, color: COLORS.gray }}>By continuing, you agree to our </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { uri: 'https://foodsphere-admin.pages.dev/terms-of-service.html', title: 'Terms of Service' })}>
+              <Text style={{ fontSize: 12, color: COLORS.primary, fontWeight: '600', textDecorationLine: 'underline' }}>Terms of Service</Text>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 12, color: COLORS.gray }}> and </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { uri: 'https://foodsphere-admin.pages.dev/privacy-policy.html', title: 'Privacy Policy' })}>
+              <Text style={{ fontSize: 12, color: COLORS.primary, fontWeight: '600', textDecorationLine: 'underline' }}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
 
         </View>
 

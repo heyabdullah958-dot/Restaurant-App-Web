@@ -38,3 +38,37 @@
 - **Self-corrections used**: 1/3 (Resolved JSX closing bracket error in `HomeScreen.tsx` instantly)
 - **Confidence score**: 100% (Verified 0 TypeScript errors with `npx tsc --noEmit`, memoization boundaries, and FlatList windowing)
 
+---
+
+## Phase 3 — Guest Tracking Token Persistence & In-App Legal WebView — 2026-07-26
+- **What was done**:
+  1. Saved `tracking_token` to `AsyncStorage` (`guest_tracking_token` and `order_token_${orderId}`) upon order placement completion in `CheckoutScreen.tsx`.
+  2. Created `fetchGuestOrderStatus` Redux thunk calling `/api/orders/track/?token=<uuid>` in `orderSlice.ts`.
+  3. Configured guest tracking polling in `TrackingScreen.tsx` to utilize `fetchGuestOrderStatus(guestToken)` for guest users.
+  4. Created `LegalScreen.tsx` rendering `react-native-webview` for Terms of Service and Privacy Policy URLs. Registered `Legal` route in `App.tsx` and updated footer touchables in `AuthScreen.tsx`.
+- **Files modified**:
+  - `app/src/screens/CheckoutScreen.tsx`
+  - `app/src/store/orderSlice.ts`
+  - `app/src/screens/TrackingScreen.tsx`
+  - `app/src/screens/LegalScreen.tsx` [NEW]
+  - `app/App.tsx`
+  - `app/src/screens/AuthScreen.tsx`
+- **Issues encountered & resolved**: `StyleSheet.absoluteFillObject` error resolved by switching to `StyleSheet.absoluteFill`. Verified 0 TypeScript compilation errors with `npx tsc --noEmit`.
+- **Self-corrections used**: 1/3
+
+---
+
+## Phase 4 — Real-Time Web Audio Chime, Loyalty Points UI & Checkout Hotfix — 2026-07-26
+- **What was done**:
+  1. Integrated Web Audio API synthesized dual-tone bell chime (`880Hz` + `1760Hz`) in `AdminContext.tsx` triggered when new orders with status `pending` or `received` arrive during live 5s polling.
+  2. Fixed `Property 'availablePoints' doesn't exist` crash in `CheckoutScreen.tsx` by declaring top-level scope variables `availablePoints` and `maxRedeemablePoints`.
+  3. Added **Redeem Loyalty Points Card** with 1-tap **"Use Points / Applied"** toggle button in `CheckoutScreen.tsx` and updated order summary display to show explicit loyalty discounts (`-Rs. X`).
+  4. Made Loyalty Points banner interactive in `ProfileScreen.tsx` with a `History >` button linking to `RewardsScreen.tsx`.
+- **Files modified**:
+  - `admin/src/AdminContext.tsx`
+  - `app/src/screens/CheckoutScreen.tsx`
+  - `app/src/screens/ProfileScreen.tsx`
+  - `app/src/screens/RewardsScreen.tsx`
+- **Confidence score**: 100% (Verified 0 TypeScript compilation errors and 100% test pass rate in local audit suite)
+
+

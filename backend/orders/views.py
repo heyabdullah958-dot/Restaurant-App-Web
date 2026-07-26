@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Order
@@ -195,7 +196,10 @@ https://foodsphere-admin.pages.dev
 
 class OrderDetailView(generics.RetrieveUpdateAPIView):
     """
-    GET /api/orders/{id}/ - Retrieve order details (AllowAny).
+    GET /api/orders/{id}/ - Retrieve order details.
+    Allows access only if:
+      (a) request.user is authenticated and owns the order (order.user == request.user or request.user.is_staff), OR
+      (b) request query parameter ?tracking_token=<uuid> matches order.tracking_token.
     PATCH /api/orders/{id}/ - Update order status (IsAdminUser).
     """
     serializer_class = OrderDetailSerializer
@@ -209,10 +213,6 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         user = self.request.user
         queryset = Order.objects.select_related('restaurant', 'branch').prefetch_related('items__menu_item')
         
-        # If superuser or customer GET request (order tracking by order ID), allow retrieval
-        if self.request.method == 'GET':
-            return queryset
-            
         # If the user is a manager (is_staff and not is_superuser), restrict update operations to their managed restaurant/branch
         if user.is_authenticated and user.is_staff:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
@@ -228,10 +228,24 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                 return queryset
             return Order.objects.none()
             
-        if user.is_authenticated:
-            return queryset.filter(user=user)
-        
         return queryset
+
+    def get_object(self):
+        obj = super().get_object()
+        request = self.request
+        user = request.user
+
+        if request.method == 'GET':
+            tracking_token = request.query_params.get('tracking_token', '').strip()
+            is_owner_or_staff = user.is_authenticated and (
+                (obj.user and obj.user == user) or user.is_staff
+            )
+            has_valid_token = bool(tracking_token and str(obj.tracking_token) == tracking_token)
+
+            if not (is_owner_or_staff or has_valid_token):
+                raise PermissionDenied("You do not have permission to view this order.")
+
+        return obj
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -306,22 +320,13 @@ class MyOrdersListView(generics.ListAPIView):
     BUG-08 FIX: select_related('restaurant') — no N+1 per order row.
     """
     serializer_class = OrderListSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_authenticated:
-            return Order.objects.filter(
-                user=user
-            ).select_related('restaurant').order_by('-created_at')
-            
-        guest_phone = self.request.query_params.get('phone', '')
-        if guest_phone:
-            return Order.objects.filter(
-                guest_phone=guest_phone
-            ).select_related('restaurant').order_by('-created_at')
-            
-        return Order.objects.none()
+        return Order.objects.filter(
+            user=user
+        ).select_related('restaurant').order_by('-created_at')
 
 
 class PurgeOrdersView(APIView):
@@ -341,5 +346,56 @@ class PurgeOrdersView(APIView):
             'success': True,
             'message': f'Successfully purged all {count} order(s) and associated payments.'
         }, status=status.HTTP_200_OK)
+
+
+class OrderAssignRiderView(APIView):
+    """
+    POST /api/orders/{id}/assign-rider/
+    Assigns a BranchRider to an Order.
+    Payload: { "rider_id": 5 } or { "rider_id": null }
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        rider_id = request.data.get('rider_id')
+        if rider_id is None and 'rider' in request.data:
+            rider_id = request.data.get('rider')
+
+        if rider_id is None or rider_id == 0 or rider_id == '':
+            order.rider = None
+            order.save(update_fields=['rider'])
+            return Response({
+                'success': True,
+                'message': 'Rider unassigned from order.',
+                'data': AdminOrderListSerializer(order).data
+            })
+
+        from restaurants.models import BranchRider
+        try:
+            rider = BranchRider.objects.get(pk=rider_id)
+        except BranchRider.DoesNotExist:
+            return Response({'error': 'Rider not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not rider.is_active:
+            return Response({'error': 'Rider is inactive.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.rider = rider
+        if order.status == 'preparing':
+            order.status = 'out_for_delivery'
+        order.save(update_fields=['rider', 'status'])
+
+        rider.status = 'ON_DELIVERY'
+        rider.save(update_fields=['status'])
+
+        return Response({
+            'success': True,
+            'message': f'Order #{order.id} assigned to rider {rider.name}.',
+            'data': AdminOrderListSerializer(order).data
+        })
 
 

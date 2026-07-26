@@ -1,7 +1,10 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets, status
 from rest_framework.response import Response
-from .models import Restaurant
-from .serializers import RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer, AdminMenuCategorySerializer
+from .models import Restaurant, RestaurantReview
+from .serializers import (
+    RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer,
+    AdminMenuCategorySerializer, RestaurantReviewSerializer
+)
 
 
 class RestaurantListView(generics.ListAPIView):
@@ -212,10 +215,16 @@ class BranchListView(generics.ListAPIView):
                 'phone': b.phone,
                 'is_active': b.is_active,
                 'area_keywords': b.area_keywords,
+                'latitude': float(b.latitude) if b.latitude is not None else None,
+                'longitude': float(b.longitude) if b.longitude is not None else None,
+                'delivery_radius_km': float(b.delivery_radius_km) if b.delivery_radius_km is not None else 10.0,
+                'is_currently_open': BranchSerializer(b, context={'request': request}).data.get('is_currently_open', True),
             } for b in qs]
         })
 
 from .serializers import BranchSerializer
+from .models import BranchRider
+from .serializers import BranchRiderSerializer
 
 class AdminBranchViewSet(viewsets.ModelViewSet):
 
@@ -241,6 +250,56 @@ class AdminBranchViewSet(viewsets.ModelViewSet):
             if branch.restaurant != managed_restaurant:
                 from rest_framework.exceptions import PermissionDenied
                 raise PermissionDenied("You do not manage this branch.")
+        serializer.save()
+
+
+class AdminBranchRiderViewSet(viewsets.ModelViewSet):
+    serializer_class = BranchRiderSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
+        
+        branch_id = self.request.query_params.get('branch_id')
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        status_param = self.request.query_params.get('status')
+
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant, get_managed_branch
+            managed_branch = get_managed_branch(user)
+            if managed_branch:
+                qs = qs.filter(branch=managed_branch)
+            else:
+                managed_restaurant = get_managed_restaurant(user)
+                if managed_restaurant:
+                    qs = qs.filter(branch__restaurant=managed_restaurant)
+                else:
+                    return BranchRider.objects.none()
+
+        if branch_id:
+            qs = qs.filter(branch_id=branch_id)
+        if restaurant_id:
+            qs = qs.filter(branch__restaurant_id=restaurant_id)
+        if status_param:
+            qs = qs.filter(status__iexact=status_param)
+
+        return qs
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_branch, get_managed_restaurant
+            managed_branch = get_managed_branch(user)
+            branch = serializer.validated_data.get('branch')
+            if managed_branch and branch != managed_branch:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You can only add riders for your managed branch.")
+            elif not managed_branch:
+                managed_restaurant = get_managed_restaurant(user)
+                if not managed_restaurant or branch.restaurant != managed_restaurant:
+                    from rest_framework.exceptions import PermissionDenied
+                    raise PermissionDenied("You can only add riders for branches of your managed restaurant.")
         serializer.save()
 
 
@@ -286,6 +345,140 @@ class BranchItemAvailabilityView(generics.GenericAPIView):
             'menu_item_id': menu_item.id,
             'is_available': override.is_available
         })
+
+
+class RestaurantReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = RestaurantReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        qs = RestaurantReview.objects.all().select_related('restaurant', 'user', 'order')
+
+        slug = self.kwargs.get('slug')
+        restaurant_id = self.kwargs.get('restaurant_id')
+
+        param_restaurant = self.request.query_params.get('restaurant')
+        param_slug = self.request.query_params.get('restaurant_slug')
+        param_id = self.request.query_params.get('restaurant_id')
+
+        if slug:
+            qs = qs.filter(restaurant__slug=slug)
+        elif restaurant_id:
+            qs = qs.filter(restaurant_id=restaurant_id)
+        elif param_slug:
+            qs = qs.filter(restaurant__slug=param_slug)
+        elif param_id:
+            qs = qs.filter(restaurant_id=param_id)
+        elif param_restaurant:
+            if str(param_restaurant).isdigit():
+                qs = qs.filter(restaurant_id=int(param_restaurant))
+            else:
+                qs = qs.filter(restaurant__slug=param_restaurant)
+
+        return qs.order_by('-created_at')
+
+    def create(self, request, *args, **kwargs):
+        from rest_framework.exceptions import ValidationError
+        from orders.models import Order
+
+        data = request.data.copy()
+        order_id = data.get('order')
+        restaurant_input = data.get('restaurant')
+        slug = self.kwargs.get('slug')
+        restaurant_id = self.kwargs.get('restaurant_id')
+
+        order_obj = None
+        restaurant_obj = None
+
+        if order_id:
+            try:
+                order_obj = Order.objects.get(id=order_id)
+            except Order.DoesNotExist:
+                raise ValidationError({'order': 'Order not found.'})
+
+            if order_obj.user and order_obj.user != request.user:
+                raise ValidationError({'order': 'You can only review your own orders.'})
+
+            if order_obj.status != 'delivered':
+                raise ValidationError({'order': 'You can only review delivered orders.'})
+
+            if RestaurantReview.objects.filter(order=order_obj).exists():
+                raise ValidationError({'order': 'You have already reviewed this order.'})
+
+            restaurant_obj = order_obj.restaurant
+
+        if not restaurant_obj:
+            if restaurant_input:
+                if isinstance(restaurant_input, int) or (isinstance(restaurant_input, str) and str(restaurant_input).isdigit()):
+                    restaurant_obj = Restaurant.objects.filter(id=int(restaurant_input)).first()
+                else:
+                    restaurant_obj = Restaurant.objects.filter(slug=restaurant_input).first()
+            elif slug:
+                restaurant_obj = Restaurant.objects.filter(slug=slug).first()
+            elif restaurant_id:
+                restaurant_obj = Restaurant.objects.filter(id=restaurant_id).first()
+
+        if not restaurant_obj:
+            raise ValidationError({'restaurant': 'Restaurant is required for review.'})
+
+        if not order_id and RestaurantReview.objects.filter(user=request.user, restaurant=restaurant_obj, order__isnull=True).exists():
+            raise ValidationError({'restaurant': 'You have already submitted a review for this restaurant.'})
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, restaurant=restaurant_obj, order=order_obj)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class PlatformSettingsView(APIView):
+    """
+    GET /api/restaurants/platform-settings/
+    PATCH /api/restaurants/platform-settings/
+    Allows viewing platform settings for any caller, and updating for superusers.
+    """
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'PUT', 'POST']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
+    def get(self, request):
+        settings_obj = PlatformSettings.get_settings()
+        return Response({
+            'success': True,
+            'data': {
+                'loyalty_earn_rate_pkr': settings_obj.loyalty_earn_rate_pkr,
+                'loyalty_point_value_pkr': settings_obj.loyalty_point_value_pkr,
+                'welcome_bonus_points': settings_obj.welcome_bonus_points,
+                'updated_at': settings_obj.updated_at,
+            }
+        })
+
+    def patch(self, request):
+        if not request.user.is_superuser:
+            return Response({'success': False, 'message': 'Superuser permission required.'}, status=403)
+
+        settings_obj = PlatformSettings.get_settings()
+        data = request.data
+        if 'loyalty_earn_rate_pkr' in data and data['loyalty_earn_rate_pkr'] is not None:
+            settings_obj.loyalty_earn_rate_pkr = int(data['loyalty_earn_rate_pkr'])
+        if 'loyalty_point_value_pkr' in data and data['loyalty_point_value_pkr'] is not None:
+            settings_obj.loyalty_point_value_pkr = int(data['loyalty_point_value_pkr'])
+        if 'welcome_bonus_points' in data and data['welcome_bonus_points'] is not None:
+            settings_obj.welcome_bonus_points = int(data['welcome_bonus_points'])
+
+        settings_obj.save()
+        return Response({
+            'success': True,
+            'message': 'Platform settings updated successfully',
+            'data': {
+                'loyalty_earn_rate_pkr': settings_obj.loyalty_earn_rate_pkr,
+                'loyalty_point_value_pkr': settings_obj.loyalty_point_value_pkr,
+                'welcome_bonus_points': settings_obj.welcome_bonus_points,
+                'updated_at': settings_obj.updated_at,
+            }
+        })
+
 
 
 

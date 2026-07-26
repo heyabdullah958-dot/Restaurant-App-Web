@@ -14,6 +14,7 @@ import { CustomerManagement } from './views/CustomerManagement';
 import { ManagerManagement } from './views/ManagerManagement';
 import { PromoManagement } from './views/PromoManagement';
 import { FlashDealManagement } from './views/FlashDealManagement';
+import { RiderManagement } from './views/RiderManagement';
 import { Menu, Sun, Moon, Bell, ArrowLeft } from 'lucide-react';
 import './index.css';
 
@@ -54,6 +55,8 @@ const MainLayout: React.FC = () => {
         return <OrderManagement />;
       case 'menu_management':
         return <MenuManagement />;
+      case 'rider_management':
+        return <RiderManagement />;
       case 'notification_center':
         return <NotificationCenter />;
       case 'customer_management':

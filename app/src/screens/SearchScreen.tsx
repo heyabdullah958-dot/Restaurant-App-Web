@@ -258,7 +258,7 @@ export default function SearchScreen() {
           {isSearching || loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={COLORS.primary} />
-              <Text style={styles.loadingText}>Searching for food sphere...</Text>
+              <Text style={styles.loadingText}>Searching GetFood...</Text>
             </View>
           ) : matchingRestaurants.length === 0 && matchingDishes.length === 0 ? (
             <View style={styles.emptyState}>

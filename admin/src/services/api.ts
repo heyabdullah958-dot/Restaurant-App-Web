@@ -550,7 +550,12 @@ export const fetchRiders = () => apiFetch<any[]>('/api/admin/riders/');
 export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { method: 'POST', body: JSON.stringify(data) });
 export const updateRider = (id: number, data: any) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteRider = (id: number) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'DELETE' });
+export const assignRiderToOrder = (orderId: number, riderId: number | null) => 
+  apiFetch<any>(`/api/orders/${orderId}/assign-rider/`, { method: 'POST', body: JSON.stringify({ rider_id: riderId }) });
 
 export const updateBranchStock = (branchId: number, itemId: number, is_in_stock: boolean) => 
   apiFetch<any>(`/api/admin/branches/${branchId}/stock/`, { method: 'POST', body: JSON.stringify({ item_id: itemId, is_in_stock }) });
+
+export const fetchPlatformSettings = () => apiFetch<any>('/api/restaurants/platform-settings/');
+export const updatePlatformSettings = (data: any) => apiFetch<any>('/api/restaurants/platform-settings/', { method: 'PATCH', body: JSON.stringify(data) });
 

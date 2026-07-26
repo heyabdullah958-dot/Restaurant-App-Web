@@ -50,6 +50,24 @@ class UserRegisterView(APIView):
             if user.phone:
                 from orders.models import Order
                 Order.objects.filter(user__isnull=True, guest_phone=user.phone).update(user=user)
+            
+            # Award Welcome Bonus Loyalty Points
+            try:
+                from restaurants.models import PlatformSettings
+                ps = PlatformSettings.get_settings()
+                if ps.welcome_bonus_points > 0:
+                    User.objects.filter(pk=user.pk).update(loyalty_points=ps.welcome_bonus_points)
+                    user.refresh_from_db()
+                    LoyaltyTransaction.objects.create(
+                        user=user,
+                        points=ps.welcome_bonus_points,
+                        transaction_type='earned',
+                        description=f'Welcome Bonus for registering on GetFood ({ps.welcome_bonus_points} pts)'
+                    )
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to award welcome bonus: {e}")
+
             tokens = get_tokens_for_user(user)
             return Response({
                 'success': True,

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant, MenuCategory, MenuItem, Branch
+from .models import Restaurant, MenuCategory, MenuItem, Branch, BranchRider, RestaurantReview
 
 
 def build_absolute_image_url(image_field, context):
@@ -111,9 +111,35 @@ class AbsoluteImageField(serializers.ImageField):
 
 
 class BranchSerializer(serializers.ModelSerializer):
+    is_currently_open = serializers.SerializerMethodField()
+
     class Meta:
         model = Branch
-        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords')
+        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords', 'latitude', 'longitude', 'delivery_radius_km', 'is_currently_open')
+
+    def get_is_currently_open(self, obj):
+        restaurant = obj.restaurant
+        if getattr(restaurant, 'is_force_closed', False) or not getattr(restaurant, 'is_active', True) or not obj.is_active:
+            return False
+        opens_at = getattr(restaurant, 'opens_at', None)
+        closes_at = getattr(restaurant, 'closes_at', None)
+        if not opens_at or not closes_at:
+            return True
+        from django.utils import timezone
+        now_time = timezone.localtime().time()
+        if opens_at <= closes_at:
+            return opens_at <= now_time <= closes_at
+        return now_time >= opens_at or now_time <= closes_at
+
+
+class BranchRiderSerializer(serializers.ModelSerializer):
+    branch_name = serializers.ReadOnlyField(source='branch.name')
+    restaurant_id = serializers.ReadOnlyField(source='branch.restaurant.id')
+    restaurant_name = serializers.ReadOnlyField(source='branch.restaurant.name')
+
+    class Meta:
+        model = BranchRider
+        fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'created_at')
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -122,17 +148,30 @@ class RestaurantSerializer(serializers.ModelSerializer):
     banner_image = AbsoluteImageField(required=False, allow_null=True)
     branches = BranchSerializer(many=True, read_only=True)
     is_open = serializers.BooleanField(read_only=True)
+    is_currently_open = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = (
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
-            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open',
+            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open', 'is_currently_open',
             'is_featured', 'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'branches'
         )
 
+    def get_is_currently_open(self, obj):
+        if getattr(obj, 'is_force_closed', False) or not getattr(obj, 'is_active', True):
+            return False
+        opens_at = getattr(obj, 'opens_at', None)
+        closes_at = getattr(obj, 'closes_at', None)
+        if not opens_at or not closes_at:
+            return True
+        from django.utils import timezone
+        now_time = timezone.localtime().time()
+        if opens_at <= closes_at:
+            return opens_at <= now_time <= closes_at
+        return now_time >= opens_at or now_time <= closes_at
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
@@ -142,16 +181,30 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
     categories = serializers.SerializerMethodField()
     branches = BranchSerializer(many=True, read_only=True)
     is_open = serializers.BooleanField(read_only=True)
+    is_currently_open = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = (
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
-            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open',
+            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open', 'is_currently_open',
             'is_featured', 'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'branches', 'categories'
         )
+
+    def get_is_currently_open(self, obj):
+        if getattr(obj, 'is_force_closed', False) or not getattr(obj, 'is_active', True):
+            return False
+        opens_at = getattr(obj, 'opens_at', None)
+        closes_at = getattr(obj, 'closes_at', None)
+        if not opens_at or not closes_at:
+            return True
+        from django.utils import timezone
+        now_time = timezone.localtime().time()
+        if opens_at <= closes_at:
+            return opens_at <= now_time <= closes_at
+        return now_time >= opens_at or now_time <= closes_at
 
     def get_categories(self, obj):
         # Use prefetched categories to avoid extra database query
@@ -159,3 +212,27 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         active_cats = [cat for cat in all_cats if cat.is_active]
         active_cats.sort(key=lambda c: (c.order, c.name))
         return MenuCategorySerializer(active_cats, many=True, context=self.context).data
+
+
+class RestaurantReviewSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    restaurant_name = serializers.ReadOnlyField(source='restaurant.name')
+
+    class Meta:
+        model = RestaurantReview
+        fields = (
+            'id', 'restaurant', 'restaurant_name', 'order', 'user', 'user_name',
+            'rating', 'comment', 'created_at'
+        )
+        read_only_fields = ('id', 'user', 'created_at')
+
+    def get_user_name(self, obj):
+        if obj.user:
+            return obj.user.get_full_name() or obj.user.username
+        return 'Anonymous'
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+

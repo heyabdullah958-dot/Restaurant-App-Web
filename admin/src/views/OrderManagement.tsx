@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
 import type { Order, OrderStatus } from '../types';
+import { fetchRiders, assignRiderToOrder } from '../services/api';
 import { 
   ArrowRight, 
   MapPin, 
@@ -12,7 +13,8 @@ import {
   ShoppingBag,
   DollarSign,
   RotateCw,
-  Store
+  Store,
+  Bike
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
@@ -20,6 +22,11 @@ export const OrderManagement: React.FC = () => {
   const [filterBrandId, setFilterBrandId] = useState<number | 'all'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [riders, setRiders] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchRiders().then(res => setRiders(res || [])).catch(() => {});
+  }, []);
 
   // Cancellation Modal state & safeguards
   const [cancelModalOrder, setCancelModalOrder] = useState<Order | null>(null);
@@ -291,24 +298,35 @@ export const OrderManagement: React.FC = () => {
     },
   ];
 
-  // Trigger WhatsApp dispatch pre-filled message directly to rider +92 300 0000000
-  const triggerRiderWhatsApp = (order: Order) => {
-    const name = order.guest_name || order.user_or_guest;
+  // Trigger WhatsApp dispatch pre-filled message directly to assigned rider
+  const triggerRiderWhatsApp = (order: any) => {
+    const riderPhone = order.rider?.phone || (riders.find(r => r.id === order.rider_id)?.phone) || '';
+    let targetPhone = riderPhone.replace(/[^0-9]/g, '');
+    if (targetPhone.startsWith('03') && targetPhone.length === 11) {
+      targetPhone = '92' + targetPhone.substring(1);
+    }
+
+    const name = order.guest_name || order.user_or_guest || 'Customer';
     const phone = order.guest_phone || 'N/A';
-    const address = order.delivery_address;
+    const address = order.delivery_address || 'N/A';
     const locationLink = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+    const itemsList = (order.items || []).map((i: any) => `• ${i.quantity || 1}x ${i.name || i.menu_item_name || 'Item'}`).join('\n');
 
     const message = 
-      `Rider Bhai, ye order deliver karna hai:\n` +
-      `Restaurant: ${order.restaurant_name}\n` +
-      `Order ID: #${order.id}\n` +
-      `Naam: ${name}\n` +
-      `Phone: ${phone}\n` +
-      `Address: ${address}\n` +
-      `Location Link: ${locationLink}`;
+      `🛵 *FOODSPHERE DISPATCH ORDER #${order.id}*\n\n` +
+      `*Restaurant:* ${order.restaurant_name || ''}\n` +
+      `*Customer:* ${name}\n` +
+      `*Phone:* ${phone}\n` +
+      `*Delivery Address:* ${address}\n` +
+      `*Map Location:* ${locationLink}\n\n` +
+      `*Items:*\n${itemsList}\n\n` +
+      `*Total Collection Amount:* Rs. ${order.total} (${(order.payment_method || 'COD').toUpperCase()})\n\n` +
+      `Please deliver promptly!`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/923000000000?text=${encodedMessage}`;
+    const whatsappUrl = targetPhone 
+      ? `https://wa.me/${targetPhone}?text=${encodedMessage}`
+      : `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -569,6 +587,35 @@ export const OrderManagement: React.FC = () => {
                               </span>
                             </div>
                           )}
+                          
+                          {/* Rider Assignment Control */}
+                          <div className="mt-2 pt-2 border-t border-slate-900/60 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1 text-[11px] font-bold text-sky-400 truncate">
+                              <Bike size={12} className="flex-shrink-0" />
+                              <span className="truncate">{(order as any).rider ? (order as any).rider.name : 'No Rider'}</span>
+                            </div>
+                            <select
+                              value={(order as any).rider?.id || (order as any).rider_id || ''}
+                              onChange={async (e) => {
+                                const selectedId = e.target.value ? Number(e.target.value) : null;
+                                try {
+                                  await assignRiderToOrder(order.id, selectedId);
+                                  showToast(selectedId ? 'Rider assigned!' : 'Rider unassigned.', 'success');
+                                  refreshOrders();
+                                } catch (err: any) {
+                                  showToast(err.message || 'Failed to assign rider', 'error');
+                                }
+                              }}
+                              className="bg-slate-900 text-slate-200 text-[10px] font-bold px-2 py-1 rounded border border-slate-800 outline-none cursor-pointer max-w-[140px] truncate"
+                            >
+                              <option value="">-- Assign Rider --</option>
+                              {riders.map((r: any) => (
+                                <option key={r.id} value={r.id}>
+                                  {r.name} ({r.phone})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
 
                         {/* Items summary list */}

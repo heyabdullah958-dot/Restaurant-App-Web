@@ -3,7 +3,18 @@ Config App Admin — FoodSphere
 Registers the AdminAuditLog model with the Django admin site.
 """
 from django.contrib import admin
-from .models import AdminAuditLog
+from .models import AdminAuditLog, PlatformSettings
+
+
+@admin.register(PlatformSettings)
+class PlatformSettingsAdmin(admin.ModelAdmin):
+    list_display = ('loyalty_points_per_dollar', 'loyalty_point_value_usd', 'welcome_bonus_points', 'updated_at')
+
+    def has_add_permission(self, request):
+        return not PlatformSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(AdminAuditLog)

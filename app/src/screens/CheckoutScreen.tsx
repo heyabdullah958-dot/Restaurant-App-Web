@@ -87,6 +87,19 @@ export default function CheckoutScreen() {
   // Loyalty Points Redemption State
   const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
 
+  // Promo Code State
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discount: number;
+    discount_type: string;
+    discount_value: number;
+  } | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+
+  // Location Coordinates State
+  const [customerCoords, setCustomerCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -105,6 +118,18 @@ export default function CheckoutScreen() {
 
   const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
+  const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   const handleDetectLocation = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -116,6 +141,11 @@ export default function CheckoutScreen() {
       setIsDetectingLocation(true);
       let location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
+      });
+
+      setCustomerCoords({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
       });
       
       let reverseGeocode = await Location.reverseGeocodeAsync({
@@ -265,11 +295,46 @@ export default function CheckoutScreen() {
 
   const subtotal = totalAmount;
 
-  // Loyalty points redemption calculations
+  const handleApplyPromoCode = async () => {
+    if (!promoCodeInput.trim()) {
+      showAlert('Promo Code Required', 'Please enter a valid promo code.');
+      return;
+    }
+    setIsValidatingPromo(true);
+    try {
+      const response: any = await api.post('/coupons/validate/', {
+        code: promoCodeInput.trim(),
+        subtotal: subtotal,
+        restaurant_id: restaurantId,
+      });
+      const data = response.data || response;
+      if (data && data.valid) {
+        setAppliedPromo({
+          code: data.code,
+          discount: parseFloat(data.discount || 0),
+          discount_type: data.discount_type,
+          discount_value: parseFloat(data.discount_value || 0),
+        });
+        showAlert('Coupon Applied!', `Promo code '${data.code}' applied! Discount: Rs. ${parseFloat(data.discount || 0).toFixed(2)}.`);
+      } else {
+        showAlert('Invalid Promo', data.message || 'Coupon code is invalid or expired.');
+      }
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.non_field_errors?.[0] || err.response?.data?.detail || err.message || 'Failed to validate promo code.';
+      showAlert('Promo Code Error', String(errorMsg));
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  // Loyalty points & promo coupon redemption calculations
   const availablePoints = (user && !user.is_guest) ? (user.loyalty_points || 0) : 0;
-  const maxRedeemablePoints = Math.min(availablePoints, Math.floor(subtotal));
-  const discount = useLoyaltyPoints ? maxRedeemablePoints : 0;
-  const finalTotal = Math.max(0, subtotal + deliveryFee - discount);
+  const promoDiscount = appliedPromo ? appliedPromo.discount : 0;
+  const remSubtotal = Math.max(0, subtotal - promoDiscount);
+  const maxRedeemablePoints = Math.min(availablePoints, Math.floor(remSubtotal));
+  const loyaltyDiscount = useLoyaltyPoints ? maxRedeemablePoints : 0;
+  const totalDiscount = promoDiscount + loyaltyDiscount;
+  const finalTotal = Math.max(0, subtotal + deliveryFee - totalDiscount);
 
   // Potential loyalty points earned (1 point per 100 Rs spent)
   const loyaltyPointsEarned = Math.floor(finalTotal / 100);
@@ -301,6 +366,23 @@ export default function CheckoutScreen() {
     if (!selectedBranch || selectedBranch.is_active === false) {
       showAlert('Branch Closed', 'The selected branch is currently closed and not accepting orders. Please select an active branch.');
       return;
+    }
+
+    // Client-side Haversine distance radius check
+    if (customerCoords && selectedBranch) {
+      const bLat = selectedBranch.latitude ? parseFloat(selectedBranch.latitude) : null;
+      const bLng = selectedBranch.longitude ? parseFloat(selectedBranch.longitude) : null;
+      const maxRadius = selectedBranch.delivery_radius_km ? parseFloat(selectedBranch.delivery_radius_km) : 10.0;
+      if (bLat !== null && bLng !== null) {
+        const dist = calculateHaversineDistance(customerCoords.latitude, customerCoords.longitude, bLat, bLng);
+        if (dist > maxRadius) {
+          showAlert(
+            'Outside Delivery Radius',
+            `Your location is ${dist.toFixed(1)} km away from ${selectedBranch.name} branch, which only delivers up to ${maxRadius.toFixed(1)} km. Please select a closer address or branch.`
+          );
+          return;
+        }
+      }
     }
 
     if (!items || items.length === 0) {
@@ -343,11 +425,14 @@ export default function CheckoutScreen() {
       items: orderItems,
       payment_method: paymentMethod,
       delivery_address: address.trim(),
+      delivery_lat: customerCoords?.latitude,
+      delivery_lng: customerCoords?.longitude,
       special_instructions: finalInstructions || undefined,
       guest_name: effectiveName,
       guest_phone: effectivePhone,
       use_loyalty_points: useLoyaltyPoints,
       points_to_redeem: useLoyaltyPoints ? maxRedeemablePoints : 0,
+      coupon_code: appliedPromo ? appliedPromo.code : undefined,
     };
 
     try {
@@ -366,6 +451,16 @@ export default function CheckoutScreen() {
       if (placeOrder.fulfilled.match(resultAction)) {
         const createdOrder = resultAction.payload;
         const orderId = createdOrder.id;
+
+        const token = createdOrder?.tracking_token;
+        if (token) {
+          try {
+            await AsyncStorage.setItem('guest_tracking_token', token);
+            await AsyncStorage.setItem(`order_token_${orderId}`, token);
+          } catch (e) {
+            console.error('Failed to save guest tracking token:', e);
+          }
+        }
 
         // Refresh user profile so loyalty points update live
         dispatch(fetchUserProfile());
@@ -619,6 +714,64 @@ export default function CheckoutScreen() {
 
           </View>
 
+          {/* Promo Coupon Code Box */}
+          <View style={[styles.sectionCard, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Ionicons name="pricetag" size={18} color="#166534" />
+              <Text style={[styles.sectionTitle, { fontSize: 15, marginBottom: 0, color: '#166534' }]}>
+                Have a Promo Code?
+              </Text>
+            </View>
+            {appliedPromo ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#dcfce7', padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#86efac' }}>
+                <View>
+                  <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#15803d' }}>
+                    Code '{appliedPromo.code}' Applied!
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#166534' }}>
+                    Discount Saved: Rs. {appliedPromo.discount.toFixed(2)}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setAppliedPromo(null)}
+                  style={{ backgroundColor: '#ef4444', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 }}
+                >
+                  <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: 'bold' }}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                <TextInput
+                  style={[styles.input, { flex: 1, marginBottom: 0, textTransform: 'uppercase', fontWeight: 'bold' }]}
+                  placeholder="Enter promo code (e.g. WELCOME10)"
+                  placeholderTextColor={COLORS.gray}
+                  value={promoCodeInput}
+                  onChangeText={setPromoCodeInput}
+                  autoCapitalize="characters"
+                />
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  disabled={isValidatingPromo}
+                  onPress={handleApplyPromoCode}
+                  style={{
+                    backgroundColor: COLORS.primary,
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 10,
+                  }}
+                >
+                  {isValidatingPromo ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 13 }}>Apply</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
           {/* Loyalty Points Redemption Box */}
           {isAuthenticated && !user?.is_guest && availablePoints > 0 && (
             <View style={[styles.sectionCard, { backgroundColor: '#fffdf5', borderColor: '#ffe0b2', borderWidth: 1 }]}>
@@ -748,13 +901,24 @@ export default function CheckoutScreen() {
               <Text style={styles.priceValue}>Rs. {deliveryFee.toFixed(2)}</Text>
             </View>
 
-            {discount > 0 && (
+            {appliedPromo && (
               <View style={styles.priceRow}>
                 <Text style={[styles.priceLabel, { color: COLORS.success, fontWeight: '600' }]}>
-                  Loyalty Discount ({discount} pts)
+                  Promo Discount ({appliedPromo.code})
                 </Text>
                 <Text style={[styles.priceValue, { color: COLORS.success, fontWeight: 'bold' }]}>
-                  -Rs. {discount.toFixed(2)}
+                  -Rs. {promoDiscount.toFixed(2)}
+                </Text>
+              </View>
+            )}
+
+            {useLoyaltyPoints && loyaltyDiscount > 0 && (
+              <View style={styles.priceRow}>
+                <Text style={[styles.priceLabel, { color: COLORS.success, fontWeight: '600' }]}>
+                  Loyalty Discount ({loyaltyDiscount} pts)
+                </Text>
+                <Text style={[styles.priceValue, { color: COLORS.success, fontWeight: 'bold' }]}>
+                  -Rs. {loyaltyDiscount.toFixed(2)}
                 </Text>
               </View>
             )}

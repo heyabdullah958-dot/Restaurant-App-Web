@@ -1,12 +1,54 @@
 import React from 'react';
 import { useAdmin } from '../AdminContext';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
-import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight, Clock } from 'lucide-react';
+import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight, Clock, Settings, Save, CheckCircle } from 'lucide-react';
+import { fetchPlatformSettings, updatePlatformSettings } from '../services/api';
 
 export const SuperDashboard: React.FC = () => {
   const { restaurants, orders, setSelectedBrand, setView, selectedBrandId } = useAdmin();
   const [scope, setScope] = React.useState<'all' | 'selected'>('all');
   const [timeframe, setTimeframe] = React.useState<'all' | 'today' | 'week' | 'month'>('all');
+
+  const [platformSettings, setPlatformSettings] = React.useState<{
+    loyalty_earn_rate_pkr: number;
+    loyalty_point_value_pkr: number;
+    welcome_bonus_points: number;
+  }>({
+    loyalty_earn_rate_pkr: 100,
+    loyalty_point_value_pkr: 1,
+    welcome_bonus_points: 50,
+  });
+  const [isSavingSettings, setIsSavingSettings] = React.useState(false);
+  const [settingsMsg, setSettingsMsg] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetchPlatformSettings()
+      .then((res: any) => {
+        if (res?.data) {
+          setPlatformSettings({
+            loyalty_earn_rate_pkr: res.data.loyalty_earn_rate_pkr ?? 100,
+            loyalty_point_value_pkr: res.data.loyalty_point_value_pkr ?? 1,
+            welcome_bonus_points: res.data.welcome_bonus_points ?? 50,
+          });
+        }
+      })
+      .catch((err) => console.warn('Failed to load platform settings:', err));
+  }, []);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    setSettingsMsg(null);
+    try {
+      await updatePlatformSettings(platformSettings);
+      setSettingsMsg('Platform settings updated successfully!');
+      setTimeout(() => setSettingsMsg(null), 4000);
+    } catch (err: any) {
+      setSettingsMsg(err.message || 'Failed to update settings');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   const selectedBrand = restaurants.find(r => r.id === selectedBrandId) || restaurants[0];
 
@@ -298,6 +340,93 @@ export const SuperDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Super Admin Platform Settings Card */}
+      <div className="bg-slate-800 border border-slate-700/60 rounded-2xl shadow-sm overflow-hidden mt-6">
+        <div className="p-6 border-b border-slate-700/60 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+              <Settings size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-white text-base">Global Platform Settings</h3>
+              <p className="text-xs text-slate-400">Configure global loyalty points calculation and welcome bonus</p>
+            </div>
+          </div>
+          {settingsMsg && (
+            <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <CheckCircle size={14} />
+              {settingsMsg}
+            </div>
+          )}
+        </div>
+        <form onSubmit={handleSaveSettings} className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">
+              Earn Rate (PKR per 1 Pt)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                value={platformSettings.loyalty_earn_rate_pkr}
+                onChange={(e) => setPlatformSettings({ ...platformSettings, loyalty_earn_rate_pkr: Number(e.target.value) })}
+                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                required
+              />
+              <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-semibold">PKR / Pt</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">Default: 100 PKR spent = 1 Point earned</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">
+              Point Redemption Value (PKR)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                value={platformSettings.loyalty_point_value_pkr}
+                onChange={(e) => setPlatformSettings({ ...platformSettings, loyalty_point_value_pkr: Number(e.target.value) })}
+                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                required
+              />
+              <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-semibold">PKR / Pt</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">Default: 1 Point = 1 PKR discount</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-300 mb-2">
+              Registration Welcome Bonus
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={platformSettings.welcome_bonus_points}
+                onChange={(e) => setPlatformSettings({ ...platformSettings, welcome_bonus_points: Number(e.target.value) })}
+                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                required
+              />
+              <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-semibold">Points</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">Loyalty points credited on sign up</p>
+          </div>
+
+          <div className="md:col-span-3 flex justify-end pt-2">
+            <button
+              type="submit"
+              disabled={isSavingSettings}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold text-xs py-2.5 px-5 rounded-xl transition-all shadow-sm"
+            >
+              <Save size={15} />
+              {isSavingSettings ? 'Saving Settings...' : 'Save Settings'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Recent Orders Table */}

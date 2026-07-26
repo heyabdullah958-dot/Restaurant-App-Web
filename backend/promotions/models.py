@@ -14,6 +14,7 @@ class Coupon(AuditLogMixin, models.Model):
     valid_from = models.DateTimeField()
     valid_to = models.DateTimeField()
     usage_limit = models.IntegerField(default=100)
+    times_used = models.IntegerField(default=0, db_index=True)
     per_user_limit = models.IntegerField(default=1)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -27,6 +27,7 @@ import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from 
 import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
+import api from '../services/api';
 
 type RootStackParamList = {
   Home: undefined;
@@ -40,14 +41,14 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Restaurant'
 
 const isRestaurantOpen = (restaurant: any): boolean => {
   try {
-    // 0. Super-Admin Master Override Check
     if (restaurant.is_force_closed === true) return false;
+    if (restaurant.is_active === false) return false;
+    if (restaurant.is_currently_open === false) return false;
 
-    // 1. Derived Branch Status Check: Open as long as at least ONE branch is active
     if (restaurant.branches && Array.isArray(restaurant.branches) && restaurant.branches.length > 0) {
-      return restaurant.branches.some((b: any) => b.is_active !== false);
+      return restaurant.branches.some((b: any) => b.is_active !== false && b.is_currently_open !== false);
     }
-    
+
     return restaurant.is_active !== false;
   } catch {
     return true;
@@ -60,6 +61,7 @@ const MenuItemCard = React.memo(({
   item, 
   quantity, 
   showCategoryName,
+  isClosed,
   onAddToCart, 
   onIncrement, 
   onDecrement 
@@ -67,22 +69,28 @@ const MenuItemCard = React.memo(({
   item: MenuItem & { categoryName?: string };
   quantity: number;
   showCategoryName: boolean;
+  isClosed?: boolean;
   onAddToCart: (item: MenuItem) => void;
   onIncrement: (item: MenuItem, qty: number) => void;
   onDecrement: (item: MenuItem, qty: number) => void;
 }) => {
   const isOutOfStock = item.is_available === false;
+  const isUnavailable = isOutOfStock || isClosed;
 
   return (
-    <View style={[styles.menuItemCard, isOutOfStock && { opacity: 0.65 }]}>
+    <View style={[styles.menuItemCard, isUnavailable && { opacity: 0.65 }]}>
       <View style={styles.menuItemTextContent}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={[styles.itemName, isOutOfStock && { color: COLORS.gray }]}>{item.name}</Text>
-          {isOutOfStock && (
+          <Text style={[styles.itemName, isUnavailable && { color: COLORS.gray }]}>{item.name}</Text>
+          {isOutOfStock ? (
             <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
               <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
             </View>
-          )}
+          ) : isClosed ? (
+            <View style={{ backgroundColor: '#f1f5f9', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+              <Text style={{ color: '#64748b', fontSize: 10, fontWeight: '700' }}>CLOSED</Text>
+            </View>
+          ) : null}
         </View>
         {showCategoryName && item.categoryName && (
           <Text style={styles.itemCategoryName}>{item.categoryName}</Text>
@@ -90,7 +98,7 @@ const MenuItemCard = React.memo(({
         <Text style={styles.itemDescription} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={[styles.itemPrice, isOutOfStock && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
+        <Text style={[styles.itemPrice, isUnavailable && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
         
         {item.preparation_time > 0 && (
           <Text style={styles.itemPrepTime}>
@@ -112,7 +120,11 @@ const MenuItemCard = React.memo(({
         )}
 
         <View style={styles.quantitySelectorContainer}>
-          {isOutOfStock ? (
+          {isClosed ? (
+            <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+              <Text style={[styles.addButtonText, { fontSize: 11 }]}>CLOSED</Text>
+            </View>
+          ) : isOutOfStock ? (
             <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
               <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
             </View>
@@ -253,9 +265,30 @@ export default function RestaurantScreen() {
     };
   }, [dispatch, slug]);
 
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (slug) {
+      api.get(`/restaurants/${slug}/reviews/`)
+        .then((res: any) => {
+          const list = res?.data?.data || res?.data || [];
+          setReviews(Array.isArray(list) ? list : (list.results || []));
+        })
+        .catch(() => setReviews([]));
+    }
+  }, [slug]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await dispatch(fetchRestaurantDetail(slug));
+    if (slug) {
+      api.get(`/restaurants/${slug}/reviews/`)
+        .then((res: any) => {
+          const list = res?.data?.data || res?.data || [];
+          setReviews(Array.isArray(list) ? list : (list.results || []));
+        })
+        .catch(() => {});
+    }
     setRefreshing(false);
   }, [dispatch, slug]);
 
@@ -298,6 +331,10 @@ export default function RestaurantScreen() {
 
   const handleAddToCart = useCallback((item: MenuItem) => {
     if (!restaurant) return;
+    if (!isRestaurantOpen(restaurant)) {
+      showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
+      return;
+    }
     if (item.options?.has_variants && item.options.variants && item.options.variants.length > 0) {
       setSelectedItemForOptions(item);
       setSelectedVariant(item.options.variants[0]);
@@ -344,6 +381,10 @@ export default function RestaurantScreen() {
   }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
 
   const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
+    if (restaurant && !isRestaurantOpen(restaurant)) {
+      showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
+      return;
+    }
     dispatch(
       updateQuantity({
         id: item.id,
@@ -351,7 +392,7 @@ export default function RestaurantScreen() {
         quantity: currentQty + 1,
       })
     );
-  }, [dispatch]);
+  }, [restaurant, dispatch, showAlert]);
 
   const handleDecrement = useCallback((item: MenuItem, currentQty: number) => {
     if (currentQty <= 1) {
@@ -372,16 +413,19 @@ export default function RestaurantScreen() {
     }
   }, [dispatch]);
 
+  const isOpen = restaurant ? isRestaurantOpen(restaurant) : true;
+
   const renderMenuItem = useCallback(({ item }: { item: MenuItem & { categoryName?: string } }) => (
     <MenuItemCard
       item={item}
       quantity={cartQuantityMap[item.id] || 0}
       showCategoryName={selectedCategory === 'All'}
+      isClosed={!isOpen}
       onAddToCart={handleAddToCart}
       onIncrement={handleIncrement}
       onDecrement={handleDecrement}
     />
-  ), [cartQuantityMap, selectedCategory, handleAddToCart, handleIncrement, handleDecrement]);
+  ), [cartQuantityMap, selectedCategory, isOpen, handleAddToCart, handleIncrement, handleDecrement]);
 
   const keyExtractor = useCallback((item: MenuItem) => String(item.id), []);
 
@@ -414,10 +458,16 @@ export default function RestaurantScreen() {
     );
   }
 
-  const isOpen = isRestaurantOpen(restaurant);
-
   const ListHeaderComponent = (
     <View>
+      {!isOpen && (
+        <View style={{ backgroundColor: '#dc2626', paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Ionicons name="time" size={20} color="#ffffff" />
+          <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 13, letterSpacing: 0.5 }}>
+            CLOSED NOW — STORE IS CURRENTLY CLOSED FOR ORDERS
+          </Text>
+        </View>
+      )}
       <View style={styles.coverContainer}>
         <Image 
           source={getImageUrl(restaurant.banner_image || restaurant.cover_image)} 
@@ -499,6 +549,29 @@ export default function RestaurantScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Customer Reviews Preview */}
+        {reviews.length > 0 && (
+          <View style={styles.reviewsCardSection}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Text style={styles.reviewsSectionTitle}>⭐ Customer Reviews ({reviews.length})</Text>
+              <Text style={{ fontSize: 12, color: COLORS.primary, fontWeight: '700' }}>
+                {Number(restaurant.rating).toFixed(1)} ★ Average
+              </Text>
+            </View>
+            {reviews.slice(0, 3).map((rev: any, idx: number) => (
+              <View key={rev.id || idx} style={styles.reviewItemRow}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <Text style={styles.reviewAuthor}>{rev.user_name || rev.username || 'Verified Customer'}</Text>
+                  <Text style={styles.reviewRatingStars}>{'⭐'.repeat(Math.min(5, Math.max(1, rev.rating || 5)))}</Text>
+                </View>
+                {rev.comment ? (
+                  <Text style={styles.reviewCommentText}>"{rev.comment}"</Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {categoriesList.length > 0 && (
@@ -1249,5 +1322,37 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  reviewsCardSection: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.lightGray,
+  },
+  reviewsSectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  reviewItemRow: {
+    backgroundColor: '#f8fafc',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  reviewAuthor: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+  },
+  reviewRatingStars: {
+    fontSize: 11,
+  },
+  reviewCommentText: {
+    fontSize: 12,
+    color: COLORS.gray,
+    fontStyle: 'italic',
   },
 });

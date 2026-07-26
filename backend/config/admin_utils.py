@@ -89,13 +89,17 @@ def resolve_branch_for_order(restaurant, delivery_address, delivery_lat=None, de
             min_dist = float('inf')
             
             for branch in branches:
-                b_name_lower = branch.name.lower().strip()
-                coords = BRANCH_COORDINATES.get(b_name_lower)
-                if not coords:
-                    for key, val in BRANCH_COORDINATES.items():
-                        if key in b_name_lower:
-                            coords = val
-                            break
+                coords = None
+                if branch.latitude is not None and branch.longitude is not None:
+                    coords = (float(branch.latitude), float(branch.longitude))
+                else:
+                    b_name_lower = branch.name.lower().strip()
+                    coords = BRANCH_COORDINATES.get(b_name_lower)
+                    if not coords:
+                        for key, val in BRANCH_COORDINATES.items():
+                            if key in b_name_lower:
+                                coords = val
+                                break
                 if coords:
                     dist = haversine_distance(cust_lat, cust_lng, coords[0], coords[1])
                     if dist < min_dist:

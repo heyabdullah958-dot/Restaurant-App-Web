@@ -7,11 +7,18 @@ export const placeOrder = createAsyncThunk(
   'order/placeOrder',
   async (orderData: {
     restaurant: number;
+    branch?: number;
     guest_name?: string;
     guest_phone?: string;
-    items: Array<{ menu_item: number; quantity: number; special_notes?: string }>;
+    items: Array<{ menu_item: number; quantity: number; special_notes?: string; selected_options?: any[] }>;
     payment_method: string;
     delivery_address: string;
+    delivery_lat?: number;
+    delivery_lng?: number;
+    special_instructions?: string;
+    use_loyalty_points?: boolean;
+    points_to_redeem?: number;
+    coupon_code?: string;
   }, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.post('/orders/', orderData);
@@ -110,6 +117,33 @@ export const fetchOrderDetails = createAsyncThunk(
     } catch (error: any) {
       const errorData = error.response?.data;
       let errMsg = 'Failed to fetch order details';
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errMsg = errorData;
+        } else if (errorData.message) {
+          errMsg = errorData.message;
+        } else if (errorData.detail) {
+          errMsg = errorData.detail;
+        } else if (typeof errorData === 'object') {
+          errMsg = Object.entries(errorData)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+            .join('\n');
+        }
+      }
+      return rejectWithValue(errMsg);
+    }
+  }
+);
+
+export const fetchGuestOrderStatus = createAsyncThunk(
+  'order/fetchGuestOrderStatus',
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/orders/track/?token=${token}`);
+      return response.data || response;
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      let errMsg = 'Failed to fetch guest order status';
       if (errorData) {
         if (typeof errorData === 'string') {
           errMsg = errorData;
@@ -312,6 +346,16 @@ const orderSlice = createSlice({
         state.currentOrder = null;
         state.activeOrder = null;
       })
+      .addCase('user/logout', (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
+      .addCase('user/sessionExpired', (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
       // Place Order
       .addCase(placeOrder.pending, (state) => {
         state.loading = true;
@@ -335,6 +379,19 @@ const orderSlice = createSlice({
         state.currentOrder = action.payload;
       })
       .addCase(fetchOrderDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch Guest Order Status
+      .addCase(fetchGuestOrderStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGuestOrderStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentOrder = action.payload;
+      })
+      .addCase(fetchGuestOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

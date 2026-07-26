@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,7 +8,12 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,6 +72,57 @@ export default function OrderConfirmationScreen() {
   const scaleValue = useRef(new Animated.Value(0.3)).current;
   const opacityValue = useRef(new Animated.Value(0)).current;
   const contentOpacity = useRef(new Animated.Value(0)).current;
+
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [restaurantId, setRestaurantId] = useState<number | null>(null);
+  const [restaurantName, setRestaurantName] = useState<string>('Restaurant');
+
+  // Review prompt state
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>('');
+  const [hasSubmittedReview, setHasSubmittedReview] = useState<boolean>(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (orderId) {
+      AsyncStorage.getItem(`reviewed_order_${orderId}`).then((val) => {
+        if (val === 'true') setHasSubmittedReview(true);
+      });
+
+      api.get(`/orders/${orderId}/`)
+        .then((res: any) => {
+          const data = res?.data?.data || res?.data;
+          if (data) {
+            setOrderStatus(data.status);
+            const rId = data.restaurant?.id || data.restaurant;
+            const rName = data.restaurant?.name || data.restaurant_name || 'Restaurant';
+            if (rId) setRestaurantId(rId);
+            if (rName) setRestaurantName(rName);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [orderId]);
+
+  const handleSubmitReview = async () => {
+    if (!orderId || !restaurantId) return;
+    setIsSubmittingReview(true);
+    try {
+      await api.post(`/restaurants/${restaurantId}/reviews/`, {
+        order: orderId,
+        rating: reviewRating,
+        comment: reviewComment.trim(),
+      });
+      await AsyncStorage.setItem(`reviewed_order_${orderId}`, 'true');
+      setHasSubmittedReview(true);
+      Alert.alert('Review Submitted', 'Thank you for your feedback!');
+    } catch (e: any) {
+      const errMsg = e.response?.data?.order?.[0] || e.response?.data?.detail || e.message || 'Failed to submit review';
+      Alert.alert('Review Error', String(errMsg));
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     Animated.sequence([
@@ -171,6 +227,71 @@ export default function OrderConfirmationScreen() {
                   You earned <Text style={styles.rewardsHighlight}>{loyaltyPointsEarned} points</Text> on this order. Use them for discounts next time!
                 </Text>
               </View>
+            </View>
+          )}
+
+          {/* Order Review Prompt Card (Visible when delivered) */}
+          {orderStatus?.toLowerCase() === 'delivered' && (
+            <View style={[styles.infoCard, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1, marginBottom: SPACING.md }]}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#166534', marginBottom: 8 }}>
+                ⭐ Rate Your Meal Experience
+              </Text>
+              {hasSubmittedReview ? (
+                <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                  <Ionicons name="checkmark-circle" size={36} color="#166534" />
+                  <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#166534', marginTop: 4 }}>
+                    Thank you for your review!
+                  </Text>
+                  <Text style={{ fontSize: 12, color: '#15803d', textAlign: 'center', marginTop: 2 }}>
+                    Your feedback helps us continuously improve our food quality and delivery speed.
+                  </Text>
+                </View>
+              ) : (
+                <View style={{ width: '100%' }}>
+                  <Text style={{ fontSize: 13, color: '#166534', marginBottom: 10, textAlign: 'center' }}>
+                    How was your food and delivery from {restaurantName}?
+                  </Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 14 }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <TouchableOpacity key={star} onPress={() => setReviewRating(star)}>
+                        <Ionicons
+                          name={star <= reviewRating ? "star" : "star-outline"}
+                          size={32}
+                          color={star <= reviewRating ? "#f59e0b" : "#94a3b8"}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <TextInput
+                    style={{ backgroundColor: '#ffffff', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#cbd5e1', fontSize: 13, minHeight: 60, color: COLORS.dark, width: '100%' }}
+                    placeholder="Write a comment about your food quality or delivery experience..."
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    numberOfLines={2}
+                    value={reviewComment}
+                    onChangeText={setReviewComment}
+                  />
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    disabled={isSubmittingReview}
+                    onPress={handleSubmitReview}
+                    style={{
+                      backgroundColor: '#166534',
+                      paddingVertical: 12,
+                      borderRadius: 10,
+                      alignItems: 'center',
+                      marginTop: 10,
+                      width: '100%',
+                    }}
+                  >
+                    {isSubmittingReview ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                      <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 14 }}>Submit Review</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           )}
 

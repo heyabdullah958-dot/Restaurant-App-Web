@@ -275,7 +275,7 @@ export const guestLogin = createAsyncThunk<
         id: 9999,
         username: 'Guest User',
         name: 'Guest User',
-        email: 'guest@foodsphere.pk',
+        email: 'guest@getfood.pk',
         phone: '',
         is_guest: true,
         addresses: [],

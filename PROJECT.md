@@ -1,16 +1,16 @@
-# 🍽️ PROJECT.md — FoodSphere Multi-Tenant Platform Overview
-> **Project Completion Status**: 98% Complete (Core Code & Features: 100% Finished)  
-> **Last Updated**: 2026-07-21
+# 🍽️ PROJECT.md — GetFood (FoodSphere) Multi-Tenant Platform Overview
+> **Project Completion Status**: 100% Launch Ready (Core Code, Security & Features: 100% Finished)  
+> **Last Updated**: 2026-07-26
 
 ---
 
 ## 📌 1. Platform Architecture
 
-- **Project Name**: FoodSphere
+- **Project Name**: GetFood (FoodSphere Platform)
 - **Architecture**: Scalable Multi-Tenant Restaurant Aggregator (1 Mobile App + 1 Admin HQ + 7 Individual Websites)
 - **Frontend Stack**:
   - **Admin Panel HQ**: React 18, Vite, Tailwind CSS v3, Lucide React
-  - **Mobile App**: React Native, Expo, Redux Toolkit
+  - **Mobile App**: React Native, Expo, Redux Toolkit (GetFood)
   - **7 Brand Websites**: React / HTML5, Tailwind CSS
 - **Backend Stack**: Python 3.11, Django 6.0, Django REST Framework, SimpleJWT Auth
 - **Database & Storage**: PostgreSQL (Production) / SQLite (Dev), Cloudinary (Media Storage `depa8gfnk`)
@@ -30,6 +30,8 @@
 | 🐟 **Dine At Blue Website** | [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev) | ✅ Live |
 | 🥪 **Sand Melts Website** | [https://sandmelts-foodsphere.pages.dev](https://sandmelts-foodsphere.pages.dev) | ✅ Live |
 | 🍗 **Birdman Foods Website** | [https://birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev) | ✅ Live |
+| 📜 **Privacy Policy** | [d:\sitesdata\Resturent App\websites\legal\privacy-policy.html](file:///d:/sitesdata/Resturent%20App/websites/legal/privacy-policy.html) | ✅ Store Ready |
+| 📜 **Terms of Service** | [d:\sitesdata\Resturent App\websites\legal\terms-of-service.html](file:///d:/sitesdata/Resturent%20App/websites/legal/terms-of-service.html) | ✅ Store Ready |
 
 ---
 
@@ -45,24 +47,23 @@
 
 ---
 
-## ✅ 4. Milestones Completed Today (2026-07-21)
+## ✅ 4. Milestones Completed (2026-07-26)
 
-1. **Tandoori Stop Brand Assets & Cloudinary Upload**:
-   - Extracted primary vector logo from `Guideline.pdf` (`tandoori_stop_logo.png`).
-   - Uploaded 17 high-res dish photos & logos to Cloudinary (`depa8gfnk`).
-   - Linked images to 41 MenuItems and Restaurant models in database.
-   - Built `seed_tandoori_images` management command and integrated into `render.yaml`.
+1. **PII Security & Guest Token Enforcement**:
+   - Secured `GET /api/orders/{id}/` requiring authenticated ownership or UUID `tracking_token` parameter.
+   - Removed unauthenticated phone history lookups in `MyOrdersListView`.
 
-2. **Admin Panel Interactive Branch Settings Modal**:
-   - Built interactive Branch Settings modal in [`BranchDashboard.tsx`](file:///d:/sitesdata/Resturent%20App/admin/src/views/BranchDashboard.tsx).
-   - Allows Branch Managers to edit WhatsApp/phone numbers, location/city, and toggle active/suspended status in real-time.
+2. **Mobile App Rebrand & Store Legal Compliance**:
+   - Rebranded app metadata in `app/app.json` to **GetFood** (`com.abdullah958.getfood`).
+   - Created hosted store compliance pages `privacy-policy.html` and `terms-of-service.html`.
 
-3. **Mobile App Offline & Server Wake-Up Resilience**:
-   - Added graceful guest session fallback in `userSlice.ts`.
-   - Quieted network timeout logs in `api.js` to eliminate Expo RedBox error popups.
+3. **PlatformSettings & Registration Welcome Bonus**:
+   - Built `PlatformSettings` singleton model for dynamic global loyalty management.
+   - Generated & applied migration `restaurants.0012_platformsettings`.
+   - Enabled automatic 50 pt welcome bonus on user registration.
 
-4. **Automated Testing Suite**:
-   - Ran `test_backend_local.py` across all 3 active launch brands (100% Pass Rate).
+4. **100% Passing Automated Integration Test Suite**:
+   - Ran `test_backend_local.py` across all 11 core subsystems (100% Pass Rate).
 
 ---
 

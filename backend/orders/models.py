@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -37,6 +38,20 @@ class Order(models.Model):
         blank=True,
         related_name='orders',
         help_text="Auto-assigned branch based on customer delivery area."
+    )
+    rider = models.ForeignKey(
+        'restaurants.BranchRider',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='orders',
+        help_text="Assigned rider for delivery."
+    )
+    tracking_token = models.UUIDField(
+        default=uuid.uuid4,
+        db_index=True,
+        editable=False,
+        help_text="Secure token for guest order tracking. Returned at order creation and stored client-side."
     )
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)

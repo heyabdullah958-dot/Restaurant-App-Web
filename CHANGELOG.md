@@ -1,4 +1,24 @@
 
+# Changelog
+
+## 2026-07-26 System Audit, Security Hardening & Edge-Case Bug Fixes (Release v26)
+- **Price Modifier Tampering Protection**: Re-validated option price modifiers in `OrderCreateSerializer` strictly against `MenuItem.options` stored in DB, ignoring negative client payloads (`-1000`).
+- **Loyalty Points Atomic Balance Check & Double-Spend Safeguard**: Enforced atomic deduction with `User.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(...)`.
+- **Order Cancellation Loyalty Reversals**: Automatically refunded redeemed points to user balance (`F('loyalty_points') + points`) and reverted earned points on order cancellation in `OrderDetailView`.
+- **Branch-Specific Out-of-Stock Override System**: Created `BranchMenuItemAvailability` model and `BranchItemAvailabilityView` endpoint (`POST /api/restaurants/branch-item-availability/`), updating `MenuItemSerializer` to check branch overrides.
+- **Order Status State Machine Matrix**: Implemented strict transition matrix validation in `OrderDetailView.update()` preventing invalid state jumps (e.g. `delivered` -> `preparing`).
+- **Guest Order Auto-Linkage on Registration**: Automatically linked past guest orders matching phone number on new user account creation in `UserRegisterView`.
+- **Real-Time Web Audio Chime in Admin Panel**: Integrated Web Audio API synthesized dual-tone bell chime (`880Hz` + `1760Hz`) triggered on new incoming orders (`pending`/`received`) during 5s polling loop in `AdminContext.tsx`.
+- **Mobile App Render Hotfix**: Resolved `Property 'availablePoints' doesn't exist` crash on `CheckoutScreen.tsx`.
+- **Production Heroku Release v26**: Successfully deployed to production Heroku (`https://getfoodpk-fd9b20442fcf.herokuapp.com`) applying migrations `orders.0008`, `promotions.0001`, `restaurants.0009`, and `users.0004`.
+- **Automated Verification**: Expanded `test_backend_local.py` to 11 test suites with 100% pass rate.
+
+## 2026-07-26 Phase 1 Gap & Phase 2 Business Logic Implementation
+- **Phase 1 Gap — Assigned Rider Contact**: Added interactive Delivery Rider Contact Card to `TrackingScreen.tsx` with one-tap `tel:` call and `wa.me` WhatsApp messaging for assigned riders.
+- **P2-A — Platform Settings Super-Admin Control**: Created `PlatformSettingsView` DRF endpoint (`GET` & `PATCH /api/restaurants/platform-settings/`) and built dark-themed Global Platform Settings management UI in `SuperDashboard.tsx` for real-time control over loyalty earn rates, redemption values, and welcome bonuses.
+- **P2-B — Customer Ratings & Reviews Integration**: Connected backend `RestaurantReviewViewSet` to mobile app `RestaurantScreen.tsx` (displaying customer ratings and comments) and added post-delivery rating prompt card in `TrackingScreen.tsx` (persisted per order via `AsyncStorage`).
+- **P2-C — Registration Welcome Bonus Exposing**: Configured registration welcome bonus notification toast on `AuthScreen.tsx` and verified point transaction logs on `RewardsScreen.tsx`.
+
 ## 2026-07-24 Out-of-Stock Item Propagation Fix
 - Updated `MenuCategorySerializer` in Django REST Framework to return all menu items (including `is_available = False`).
 - Updated Mobile App (`RestaurantScreen.tsx`) to render out-of-stock items with a red **"OUT OF STOCK"** badge, reduced card opacity, and a disabled button.

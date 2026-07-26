@@ -37,6 +37,7 @@ import CheckoutScreen from './src/screens/CheckoutScreen';
 import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
 import TrackingScreen from './src/screens/TrackingScreen';
 import RewardsScreen from './src/screens/RewardsScreen';
+import LegalScreen from './src/screens/LegalScreen';
 
 // Type declarations for Stack Navigator
 type RootStackParamList = {
@@ -50,6 +51,7 @@ type RootStackParamList = {
   OrderConfirmation: { orderId: number; loyaltyPointsEarned?: number };
   Tracking: { orderId: number };
   Rewards: undefined;
+  Legal: { uri: string; title?: string };
 };
 
 type MainTabParamList = {
@@ -195,6 +197,7 @@ function AppContent() {
         <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
         <Stack.Screen name="Tracking" component={TrackingScreen} />
         <Stack.Screen name="Rewards" component={RewardsScreen} />
+        <Stack.Screen name="Legal" component={LegalScreen} />
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
