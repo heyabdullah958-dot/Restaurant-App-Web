@@ -561,8 +561,17 @@ export const fetchReviews = async () => {
   return Array.isArray(data) ? data : (data?.results || []);
 };
 
-export const fetchRiders = async () => {
-  const data = await apiFetch<any>('/api/admin/riders/');
+export const fetchRiders = async (params?: { branch_id?: number | string; status?: string; is_active?: boolean }) => {
+  let url = '/api/admin/riders/';
+  if (params) {
+    const query = new URLSearchParams();
+    if (params.branch_id) query.append('branch_id', String(params.branch_id));
+    if (params.status) query.append('status', params.status);
+    if (params.is_active !== undefined) query.append('is_active', String(params.is_active));
+    const queryString = query.toString();
+    if (queryString) url += `?${queryString}`;
+  }
+  const data = await apiFetch<any>(url);
   return Array.isArray(data) ? data : (data?.results || []);
 };
 export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { method: 'POST', body: JSON.stringify(data) });

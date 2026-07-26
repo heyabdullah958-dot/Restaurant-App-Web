@@ -15,7 +15,8 @@ import {
   RotateCw,
   Store,
   Bike,
-  Edit3
+  Edit3,
+  Loader2
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
@@ -37,6 +38,8 @@ export const OrderManagement: React.FC = () => {
 
   // Rider Assignment Modal state
   const [assignRiderModalOrder, setAssignRiderModalOrder] = useState<Order | null>(null);
+  const [modalRiders, setModalRiders] = useState<any[]>([]);
+  const [isLoadingModalRiders, setIsLoadingModalRiders] = useState<boolean>(false);
   const [selectedRiderIdForModal, setSelectedRiderIdForModal] = useState<number | null>(null);
   const [autoOpenWhatsAppAfterAssign, setAutoOpenWhatsAppAfterAssign] = useState<boolean>(false);
 
@@ -52,17 +55,57 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
-  // Helper to open rider assignment modal with available riders filtered for this order's branch
+  // Helper to open rider assignment modal with active live API rider fetch
+  const loadAvailableRidersForModal = async (order: Order) => {
+    setIsLoadingModalRiders(true);
+    try {
+      const targetBranchId = order.branch_id || (order as any).branch?.id || (order as any).branch || user?.branchId;
+      
+      // Active Live API Call - Direct backend query for available riders
+      let fetched = await fetchRiders({ 
+        branch_id: targetBranchId || undefined, 
+        status: 'AVAILABLE', 
+        is_active: true 
+      });
+
+      if (!Array.isArray(fetched) || fetched.length === 0) {
+        // Fallback: fetch without branch_id filter in case backend scope requires client filter
+        fetched = await fetchRiders({ status: 'AVAILABLE', is_active: true });
+      }
+
+      // Robust multi-type branch comparison helper
+      const filtered = (fetched || []).filter((r: any) => {
+        const isAvail = String(r.status || '').toUpperCase() === 'AVAILABLE' && r.is_active !== false;
+        if (!isAvail) return false;
+        
+        if (!targetBranchId) return true; // Superadmin or un-scoped order matches all
+
+        const riderBranchId = typeof r.branch === 'object' ? r.branch?.id : r.branch;
+        const riderBranchSlug = typeof r.branch === 'object' ? r.branch?.slug : r.branch_slug;
+        const riderBranchName = typeof r.branch === 'object' ? r.branch?.name : r.branch_name;
+
+        const matchesId = Number(riderBranchId) === Number(targetBranchId);
+        const matchesSlug = String(riderBranchSlug || '').toLowerCase() === String(targetBranchId).toLowerCase();
+        const matchesName = String(riderBranchName || '').toLowerCase() === String(targetBranchId).toLowerCase();
+
+        return matchesId || matchesSlug || matchesName;
+      });
+
+      setModalRiders(filtered);
+      setSelectedRiderIdForModal(filtered.length > 0 ? filtered[0].id : null);
+    } catch (err) {
+      console.warn('Failed to load riders for modal:', err);
+      setModalRiders([]);
+      setSelectedRiderIdForModal(null);
+    } finally {
+      setIsLoadingModalRiders(false);
+    }
+  };
+
   const openRiderAssignmentModal = (order: Order, autoWhatsApp: boolean = false) => {
-    const targetBranchId = order.branch_id || user?.branchId;
-    const available = riders.filter((r: any) => {
-      const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
-      const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
-      return isAvail && matchesBranch;
-    });
     setAssignRiderModalOrder(order);
-    setSelectedRiderIdForModal(available.length > 0 ? available[0].id : null);
     setAutoOpenWhatsAppAfterAssign(autoWhatsApp);
+    loadAvailableRidersForModal(order);
   };
 
   const handleModalAssignRider = async () => {
@@ -78,7 +121,7 @@ export const OrderManagement: React.FC = () => {
       await refreshOrders();
 
       if (autoOpenWhatsAppAfterAssign) {
-        const assignedRiderObj = riders.find(r => r.id === selectedRiderIdForModal);
+        const assignedRiderObj = modalRiders.find(r => r.id === selectedRiderIdForModal) || riders.find(r => r.id === selectedRiderIdForModal);
         const updatedOrder = {
           ...assignRiderModalOrder,
           status: 'out_for_delivery' as OrderStatus,
@@ -1026,38 +1069,30 @@ export const OrderManagement: React.FC = () => {
               <label className="block text-[11px] uppercase tracking-wider font-extrabold text-slate-400 mb-1.5">
                 Select Available Delivery Rider *
               </label>
-              {(() => {
-                const targetBranchId = assignRiderModalOrder.branch_id || user?.branchId;
-                const availableRiders = riders.filter((r: any) => {
-                  const isAvail = r.status === 'AVAILABLE' && r.is_active !== false;
-                  const matchesBranch = !targetBranchId || Number(r.branch) === Number(targetBranchId);
-                  return isAvail && matchesBranch;
-                });
-
-                if (availableRiders.length === 0) {
-                  return (
-                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400 space-y-1">
-                      <p className="font-bold text-amber-400">No AVAILABLE riders found for your branch.</p>
-                      <p className="text-[11px] text-slate-500">Riders marked as OFFLINE or ON_DELIVERY are filtered out. Ensure you have an available rider in Rider Management.</p>
-                    </div>
-                  );
-                }
-
-                return (
-                  <select
-                    value={selectedRiderIdForModal || ''}
-                    onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
-                  >
-                    <option value="" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>-- Choose Rider --</option>
-                    {availableRiders.map((r: any) => (
-                      <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
-                        {r.name} ({r.phone}) — [AVAILABLE]
-                      </option>
-                    ))}
-                  </select>
-                );
-              })()}
+              {isLoadingModalRiders ? (
+                <div className="flex items-center justify-center p-6 text-sky-400 space-x-2 bg-slate-950 border border-slate-800 rounded-xl">
+                  <Loader2 className="animate-spin" size={18} />
+                  <span className="text-xs font-bold">Fetching available riders for branch...</span>
+                </div>
+              ) : modalRiders.length === 0 ? (
+                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center text-xs text-slate-400 space-y-1">
+                  <p className="font-bold text-amber-400">No AVAILABLE riders found for your branch.</p>
+                  <p className="text-[11px] text-slate-500">Riders marked as OFFLINE or ON_DELIVERY are filtered out. Ensure you have an available rider in Rider Management.</p>
+                </div>
+              ) : (
+                <select
+                  value={selectedRiderIdForModal || ''}
+                  onChange={(e) => setSelectedRiderIdForModal(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
+                >
+                  <option value="" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>-- Choose Rider --</option>
+                  {modalRiders.map((r: any) => (
+                    <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                      {r.name} ({r.phone}) — [{r.status || 'AVAILABLE'}]
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">

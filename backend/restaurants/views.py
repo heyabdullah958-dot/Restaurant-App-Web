@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import generics, permissions, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -318,6 +319,7 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
         branch_id = self.request.query_params.get('branch_id')
         restaurant_id = self.request.query_params.get('restaurant_id')
         status_param = self.request.query_params.get('status')
+        is_active_param = self.request.query_params.get('is_active')
 
         if not user.is_superuser:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
@@ -332,11 +334,22 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                     return BranchRider.objects.none()
 
         if branch_id:
-            qs = qs.filter(branch_id=branch_id)
+            if str(branch_id).isdigit():
+                qs = qs.filter(branch_id=int(branch_id))
+            else:
+                qs = qs.filter(Q(branch__slug=branch_id) | Q(branch__name__iexact=branch_id))
         if restaurant_id:
-            qs = qs.filter(branch__restaurant_id=restaurant_id)
+            if str(restaurant_id).isdigit():
+                qs = qs.filter(branch__restaurant_id=int(restaurant_id))
+            else:
+                qs = qs.filter(branch__restaurant__slug=restaurant_id)
         if status_param:
             qs = qs.filter(status__iexact=status_param)
+        if is_active_param is not None:
+            if is_active_param.lower() in ['true', '1']:
+                qs = qs.filter(is_active=True)
+            elif is_active_param.lower() in ['false', '0']:
+                qs = qs.filter(is_active=False)
 
         return qs
 
