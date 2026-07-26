@@ -37,8 +37,8 @@ export const RiderManagement: React.FC = () => {
   });
 
   // Get available branches from restaurants
-  const allBranches = restaurants.flatMap(r => 
-    (r.branches || []).map(b => ({
+  const allBranches = (Array.isArray(restaurants) ? restaurants : []).flatMap(r => 
+    (r && Array.isArray(r.branches) ? r.branches : []).map(b => ({
       id: b.id,
       name: b.name,
       restaurant_id: r.id,
@@ -50,9 +50,10 @@ export const RiderManagement: React.FC = () => {
     setLoading(true);
     try {
       const data = await fetchRiders();
-      setRiders(data || []);
+      setRiders(Array.isArray(data) ? data : (data?.results || []));
     } catch (err: any) {
       showToast('Failed to load riders list: ' + (err.message || 'Unknown error'), 'error');
+      setRiders([]);
     } finally {
       setLoading(false);
     }
@@ -129,7 +130,8 @@ export const RiderManagement: React.FC = () => {
     return clean;
   };
 
-  const filteredRiders = riders.filter(r => {
+  const safeRiders = Array.isArray(riders) ? riders : [];
+  const filteredRiders = safeRiders.filter(r => {
     const matchesSearch = 
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.phone.includes(searchQuery) ||

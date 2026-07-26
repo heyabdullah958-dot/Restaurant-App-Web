@@ -534,19 +534,31 @@ export const getFullImageUrl = (path: string | null | undefined): string => {
 
 // ─── PROMOTIONS & MANAGEMENT ──────────────────────────────────────────────────
 
-export const fetchCoupons = () => apiFetch<any[]>('/api/coupons/active/');
+export const fetchCoupons = async () => {
+  const data = await apiFetch<any>('/api/coupons/active/');
+  return Array.isArray(data) ? data : (data?.results || []);
+};
 export const createCoupon = (data: any) => apiFetch<any>('/api/coupons/', { method: 'POST', body: JSON.stringify(data) });
 export const updateCoupon = (id: number, data: any) => apiFetch<any>(`/api/coupons/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteCoupon = (id: number) => apiFetch<any>(`/api/coupons/${id}/`, { method: 'DELETE' });
 
-export const fetchFlashDeals = () => apiFetch<any[]>('/api/deals/active/');
+export const fetchFlashDeals = async () => {
+  const data = await apiFetch<any>('/api/deals/active/');
+  return Array.isArray(data) ? data : (data?.results || []);
+};
 export const createFlashDeal = (data: any) => apiFetch<any>('/api/deals/', { method: 'POST', body: JSON.stringify(data) });
 export const updateFlashDeal = (id: number, data: any) => apiFetch<any>(`/api/deals/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteFlashDeal = (id: number) => apiFetch<any>(`/api/deals/${id}/`, { method: 'DELETE' });
 
-export const fetchReviews = () => apiFetch<any[]>('/api/admin/reviews/');
+export const fetchReviews = async () => {
+  const data = await apiFetch<any>('/api/admin/reviews/');
+  return Array.isArray(data) ? data : (data?.results || []);
+};
 
-export const fetchRiders = () => apiFetch<any[]>('/api/admin/riders/');
+export const fetchRiders = async () => {
+  const data = await apiFetch<any>('/api/admin/riders/');
+  return Array.isArray(data) ? data : (data?.results || []);
+};
 export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { method: 'POST', body: JSON.stringify(data) });
 export const updateRider = (id: number, data: any) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteRider = (id: number) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'DELETE' });
