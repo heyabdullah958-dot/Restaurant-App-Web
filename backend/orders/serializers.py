@@ -36,6 +36,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     use_loyalty_points = serializers.BooleanField(required=False, default=False, write_only=True)
     points_to_redeem = serializers.IntegerField(required=False, default=0, min_value=0, write_only=True)
     coupon_code = serializers.CharField(required=False, allow_blank=True, allow_null=True, write_only=True)
+    delivery_lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True, coerce_to_string=False)
+    delivery_lng = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True, coerce_to_string=False)
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict):
+            data = data.copy()
+            for coord_key in ('delivery_lat', 'delivery_lng'):
+                val = data.get(coord_key)
+                if val is not None and isinstance(val, (float, int, str)):
+                    try:
+                        data[coord_key] = round(float(val), 6)
+                    except (ValueError, TypeError):
+                        pass
+        return super().to_internal_value(data)
 
     class Meta:
         model = Order

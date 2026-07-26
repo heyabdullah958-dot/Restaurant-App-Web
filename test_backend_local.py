@@ -465,6 +465,39 @@ def main():
 
     state_ord.delete()
 
+    # 12. Test High-Precision Coordinate Auto-Rounding (lat/lng > 6 decimal places)
+    print("\nTesting High-Precision Coordinate Auto-Rounding...")
+    payload_coords = {
+        "restaurant": tandoori.id,
+        "branch": jt_branch.id,
+        "guest_name": "Coords Tester",
+        "guest_phone": "03001239999",
+        "payment_method": "cod",
+        "delivery_address": "High Precision Street, Johar Town",
+        "delivery_lat": 31.47039572619421,
+        "delivery_lng": 74.278912384756,
+        "items": [
+            {
+                "menu_item": menu_item.id,
+                "quantity": 1
+            }
+        ]
+    }
+    req_coords = factory.post("/api/orders/", payload_coords, format="json")
+    resp_coords = OrderListCreateView.as_view()(req_coords)
+    if resp_coords.status_code == 201:
+        coords_data = resp_coords.data.get('data', resp_coords.data)
+        saved_lat = float(coords_data.get('delivery_lat', 0))
+        saved_lng = float(coords_data.get('delivery_lng', 0))
+        if saved_lat == 31.470396 and saved_lng == 74.278912:
+            print(f"  [PASSED] Coordinate Auto-Rounding: Input (31.47039572619421, 74.278912384756) -> Rounded ({saved_lat}, {saved_lng})")
+        else:
+            print(f"  [FAILED] Coordinates not rounded properly: ({saved_lat}, {saved_lng})")
+            all_passed = False
+    else:
+        print(f"  [FAILED] Coordinate order creation returned HTTP {resp_coords.status_code}: {resp_coords.data}")
+        all_passed = False
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:
