@@ -153,6 +153,10 @@ FoodSphere/
 | Branch Manager Settings Modal | ✅ Completed (Interactive contact & status modal) | Done |
 | Heroku 24/7 Deployment | ✅ Completed (Live on getfoodpk-fd9b20442fcf.herokuapp.com) | Done |
 | Session & State Leak Security Audit | ✅ Completed (Wired `sessionExpired` & Redux Purging across slices) | Done |
+| Dynamic Popular Searches Engine | ✅ Completed (Live `/api/v1/search/popular-tags/` endpoint) | Done |
+| In-App Notification Center & Top Toast | ✅ Completed (`inAppNotificationService.ts` & `NotificationToast.tsx`) | Done |
+| Monotonic Order Status Engine & Live Track | ✅ Completed (`OrderTrackView` & monotonic status merging in Redux) | Done |
+| Branch Loading Race Condition Fix | ✅ Completed (Suppressed false branch closed alerts on Checkout) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -186,6 +190,8 @@ FoodSphere/
 12. **Price Modifier DB Verification Invariant:** `OrderCreateSerializer` in DRF MUST ALWAYS re-verify `selected_options` against `MenuItem.options` stored in database to prevent negative price injection attack vectors.
 13. **Loyalty Cancellation Reversal Invariant:** When an order status is updated to `cancelled`, any redeemed loyalty points MUST be refunded to the user's loyalty balance (`F('loyalty_points') + points`), and any earned points reverted.
 14. **Branch-Specific Stock Override:** `BranchMenuItemAvailability` model allows branch managers to set items out-of-stock for their specific branch (`POST /api/restaurants/branch-item-availability/`).
+15. **Monotonic Order Status Engine Invariant:** Redux `orderSlice.ts` and `TrackingScreen.tsx` MUST use monotonic rank ordering (`getStatusRank`) to ensure polling/refetching data NEVER rolls back an order's status to a previous stage.
+16. **Universal Live Track API:** Endpoint `GET /api/v1/orders/<pk>/track/` is unauthenticated (`AllowAny`) to support guest and user real-time order tracking without login header race conditions.
 
 ---
 
