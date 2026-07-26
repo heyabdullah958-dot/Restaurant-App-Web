@@ -268,6 +268,32 @@ def main():
     # Clean up test rider
     if resp_r1.status_code in (200, 201) and hasattr(resp_r1, 'data') and 'id' in resp_r1.data:
         BranchRider.objects.filter(id=resp_r1.data['id']).delete()
+
+    # Test 5G: Checkout Branch Scoping & Multi-Tenant Isolation
+    from restaurants.views import BranchListView
+    req_unscoped = factory.get("/api/branches/")
+    resp_unscoped = BranchListView.as_view()(req_unscoped)
+    unscoped_data = resp_unscoped.data.get('data', []) if hasattr(resp_unscoped, 'data') else []
+
+    jushh_rest = Restaurant.objects.get(slug="jushhpk")
+    tandoori_rest = Restaurant.objects.get(slug="tandooristoppk")
+
+    req_jushh = factory.get(f"/api/branches/?restaurant_id={jushh_rest.id}")
+    resp_jushh = BranchListView.as_view()(req_jushh)
+    jushh_branches = resp_jushh.data.get('data', []) if hasattr(resp_jushh, 'data') else []
+
+    req_tandoori = factory.get(f"/api/branches/?restaurant_id={tandoori_rest.id}")
+    resp_tandoori = BranchListView.as_view()(req_tandoori)
+    tandoori_branches = resp_tandoori.data.get('data', []) if hasattr(resp_tandoori, 'data') else []
+
+    jushh_valid = len(jushh_branches) > 0 and all(b.get('id') in [br.id for br in jushh_rest.branches.all()] for b in jushh_branches)
+    tandoori_valid = len(tandoori_branches) > 0 and all(b.get('id') in [br.id for br in tandoori_rest.branches.all()] for b in tandoori_branches)
+
+    if len(unscoped_data) == 0 and jushh_valid and tandoori_valid:
+        print("  [PASSED] Checkout Branch Scoping: Un-scoped request = 0 branches | JushhPK scoped = JushhPK only | TandooriStoppk scoped = TandooriStoppk only")
+    else:
+        print(f"  [FAILED] Checkout Branch Scoping: Unscoped={len(unscoped_data)}, JushhValid={jushh_valid}, TandooriValid={tandoori_valid}")
+        all_passed = False
     print("\nTesting Loyalty Points Redemption Flow...")
     from orders.views import OrderListCreateView
     from users.models import LoyaltyTransaction

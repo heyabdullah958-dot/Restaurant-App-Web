@@ -194,19 +194,29 @@ from .models import Branch
 class BranchListView(generics.ListAPIView):
     """
     GET /api/branches/
-    Lists all branches for a restaurant with live is_active status. Optional filter: ?restaurant_id=1 or ?restaurant_slug=tandooristoppk
+    Lists all branches for a specific restaurant with live is_active status.
+    Requires ?restaurant_id=1, ?restaurant_slug=tandooristoppk, or ?all=true.
+    If no filter is provided, returns empty list [] to prevent tenant leakage.
     """
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
     def get(self, request):
-        qs = Branch.objects.all().select_related('restaurant')
         restaurant_id = request.query_params.get('restaurant_id')
         restaurant_slug = request.query_params.get('restaurant_slug')
+        show_all = request.query_params.get('all') in ('true', '1')
+
+        qs = Branch.objects.all().select_related('restaurant')
         if restaurant_id:
             qs = qs.filter(restaurant_id=restaurant_id)
         elif restaurant_slug:
             qs = qs.filter(restaurant__slug=restaurant_slug)
+        elif not show_all:
+            return Response({
+                'success': True,
+                'data': []
+            })
+
         return Response({
             'success': True,
             'data': [{
