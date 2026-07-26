@@ -293,7 +293,7 @@ export default function OrdersScreen() {
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.75}
             style={{ marginTop: SPACING.md }}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('Main', { screen: 'Home' })}
           >
             <Text style={{ color: COLORS.gray, fontSize: 13 }}>Continue as Guest</Text>
           </TouchableOpacity>
@@ -355,7 +355,7 @@ export default function OrdersScreen() {
               </Text>
               <TouchableOpacity activeOpacity={0.75}
                 style={styles.browseButton}
-                onPress={() => navigation.navigate('Home')}
+                onPress={() => navigation.navigate('Main', { screen: 'Home' })}
               >
                 <Text style={styles.browseButtonText}>Browse Restaurants</Text>
               </TouchableOpacity>

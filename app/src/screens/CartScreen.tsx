@@ -147,14 +147,14 @@ export default function CartScreen() {
           </Text>
           <TouchableOpacity activeOpacity={0.75}
             style={styles.browseButton}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('Main', { screen: 'Home' })}
           >
             <Ionicons name="restaurant-outline" size={16} color={COLORS.white} style={{ marginRight: 6 }} />
             <Text style={styles.browseButtonText}>Browse Restaurants</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.75}
             style={styles.browseSecondary}
-            onPress={() => navigation.navigate('Search')}
+            onPress={() => navigation.navigate('Main', { screen: 'Search' })}
           >
             <Text style={styles.browseSecondaryText}>🔍 Search for a specific dish</Text>
           </TouchableOpacity>

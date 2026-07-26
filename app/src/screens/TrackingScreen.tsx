@@ -462,7 +462,7 @@ export default function TrackingScreen() {
         </Text>
         <TouchableOpacity activeOpacity={0.75}
           style={styles.actionBtn}
-          onPress={() => navigation.navigate('Orders')}
+          onPress={() => navigation.navigate('Main', { screen: 'Orders' })}
         >
           <Text style={styles.actionBtnText}>Go to Order History</Text>
         </TouchableOpacity>

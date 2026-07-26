@@ -376,7 +376,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [navigation]);
 
   const handlePressBanner = React.useCallback(() => {
-    navigation.navigate('Search');
+    navigation.navigate('Main', { screen: 'Search' });
   }, [navigation]);
 
   const renderCategoryChipItem = React.useCallback(({ item }: { item: typeof categories[0] }) => (
@@ -552,7 +552,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
           <TouchableOpacity
             style={styles.headerIconBtn}
-            onPress={() => navigation.navigate('Search')}
+            onPress={() => navigation.navigate('Main', { screen: 'Search' })}
             activeOpacity={0.75}
           >
             <Ionicons name="search-outline" size={22} color={COLORS.dark} />
