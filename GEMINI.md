@@ -158,6 +158,7 @@ FoodSphere/
 | Monotonic Order Status Engine & Live Track | ✅ Completed (`OrderTrackView` & monotonic status merging in Redux) | Done |
 | Branch Loading Race Condition Fix | ✅ Completed (Suppressed false branch closed alerts on Checkout) | Done |
 | Dispatch Modal Rider Hydration Fix | ✅ Completed (Active live API query fetch & multi-type branch matching) | Done |
+| Tenant & Branch Scoped Order ID Overhaul | ✅ Completed (Human-readable `display_order_id` TS-LC-1001 & data migration) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -194,6 +195,7 @@ FoodSphere/
 15. **Monotonic Order Status Engine Invariant:** Redux `orderSlice.ts` and `TrackingScreen.tsx` MUST use monotonic rank ordering (`getStatusRank`) to ensure polling/refetching data NEVER rolls back an order's status to a previous stage.
 16. **Universal Live Track API:** Endpoint `GET /api/v1/orders/<pk>/track/` is unauthenticated (`AllowAny`) to support guest and user real-time order tracking without login header race conditions.
 17. **Dispatch Modal Rider Hydration Invariant:** Assign Rider modal MUST perform an active live API fetch (`fetchRiders({ branch_id, status: 'AVAILABLE', is_active: true })`) upon opening, using multi-type branch comparison (`Number(r.branch) === Number(targetBranchId)` || slug || name) to prevent stale cached rider state.
+18. **Tenant & Branch-Scoped Order ID Invariant:** `Order.display_order_id` MUST be populated upon order creation in the format `{BRAND_CODE}-{BRANCH_CODE}-{SEQUENCE}` (e.g., `TS-LC-1001`, `JK-JT-1001`). Sequence counters MUST be scoped per branch/tenant starting at 1001. All UI components (Admin Kanban, Order Receipts, Dispatch Modals, Customer Tracking) MUST display `order.display_order_id || `#${order.id}``.
 
 ---
 
