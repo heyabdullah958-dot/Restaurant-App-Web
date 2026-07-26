@@ -514,6 +514,33 @@ def main():
 
     review_ord.delete()
 
+    # 14. Test Rider Details Sanitization in Order Tracking (Omitted during Received/Preparing, visible on Out For Delivery)
+    print("\nTesting Rider Contact Sanitization on Order Tracking...")
+    from restaurants.models import BranchRider
+    test_rider = BranchRider.objects.create(branch=jt_branch, name="Test Sanitized Rider", phone="03009998877", vehicle_type="bike", status="AVAILABLE")
+    prep_order = Order.objects.create(
+        user=admin_user, restaurant=tandoori, branch=jt_branch, rider=test_rider,
+        delivery_address="Rider Sanitization Street", subtotal=500.0, total=500.0, status="preparing"
+    )
+    from orders.serializers import OrderDetailSerializer
+    prep_data = OrderDetailSerializer(prep_order).data
+    
+    prep_rider_hidden = (prep_data.get('rider') is None)
+    
+    prep_order.status = "out_for_delivery"
+    prep_order.save()
+    out_data = OrderDetailSerializer(prep_order).data
+    out_rider_visible = (out_data.get('rider') is not None and out_data['rider'].get('name') == "Test Sanitized Rider")
+
+    if prep_rider_hidden and out_rider_visible:
+        print(f"  [PASSED] Rider Sanitization: Preparing status -> rider is NULL | Out For Delivery status -> rider visible ({test_rider.name})")
+    else:
+        print(f"  [FAILED] Rider Sanitization: Prep hidden={prep_rider_hidden}, Out visible={out_rider_visible}")
+        all_passed = False
+
+    prep_order.delete()
+    test_rider.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:

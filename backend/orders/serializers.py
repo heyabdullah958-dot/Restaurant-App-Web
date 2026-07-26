@@ -491,4 +491,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                 instance.restaurant,
                 context={'request': request}
             ).data
+        # Backend Serializer Protection: Omit rider details unless order status is out_for_delivery or delivered
+        if instance.status not in ['out_for_delivery', 'delivered']:
+            ret['rider'] = None
         return ret

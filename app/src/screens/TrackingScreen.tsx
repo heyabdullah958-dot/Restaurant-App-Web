@@ -474,8 +474,8 @@ export default function TrackingScreen() {
         {/* Foodpanda Style Status Animation */}
         {renderStatusAnimation()}
 
-        {/* Rider Contact Card */}
-        {currentOrder?.rider && (
+        {/* Rider Contact Card — Only visible when order is Out For Delivery or Delivered */}
+        {currentOrder?.rider && (currentOrder.status?.toLowerCase() === 'out_for_delivery' || currentOrder.status?.toLowerCase() === 'out for delivery' || currentOrder.status?.toLowerCase() === 'delivered') && (
           <View style={styles.riderCard}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
               <View style={styles.riderAvatar}>
