@@ -141,9 +141,10 @@ api.interceptors.response.use(
           }
         }
       } catch (refreshError) {
-        console.warn('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
+        console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
         processQueue(refreshError, null);
       } finally {
+
         isRefreshing = false;
       }
 
