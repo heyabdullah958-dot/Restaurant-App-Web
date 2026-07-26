@@ -318,6 +318,57 @@ def main():
         guest_ord.user.delete()
     guest_ord.delete()
 
+    # 10. Test Price Modifier Tampering Protection
+    print("\nTesting Price Modifier Tampering Protection...")
+    menu_item_tamper = MenuItem.objects.filter(category__restaurant=tandoori, is_available=True).first()
+    original_item_price = float(menu_item_tamper.price)
+    tamper_payload = {
+        "restaurant": tandoori.id,
+        "branch": jt_branch.id,
+        "guest_name": "Tamper Tester",
+        "guest_phone": "03001112233",
+        "payment_method": "cod",
+        "delivery_address": "Tamper Street, Johar Town",
+        "items": [
+            {
+                "menu_item": menu_item_tamper.id,
+                "quantity": 1,
+                "selected_options": [{"name": "Fake Discount", "price_modifier": -1000.0}]
+            }
+        ]
+    }
+    req_tamper = factory.post("/api/orders/", tamper_payload, format="json")
+    resp_tamper = OrderListCreateView.as_view()(req_tamper)
+    if resp_tamper.status_code == 201:
+        tamper_ord_data = resp_tamper.data.get('data', resp_tamper.data)
+        tamper_subtotal = float(tamper_ord_data.get('subtotal', 0))
+        if tamper_subtotal >= original_item_price:
+            print(f"  [PASSED] Price Tampering Protection: Negative modifier -1000 ignored | Computed Subtotal: Rs. {tamper_subtotal}")
+        else:
+            print(f"  [FAILED] Subtotal tampered to Rs. {tamper_subtotal}")
+            all_passed = False
+    else:
+        print(f"  [FAILED] Price Tampering Test request failed: {resp_tamper.status_code}")
+        all_passed = False
+
+    # 11. Test Order Status State Machine Transition Validation
+    print("\nTesting Order Status State Machine Transition Matrix...")
+    state_ord = Order.objects.create(
+        user=None, restaurant=tandoori, branch=jt_branch,
+        delivery_address="State Street", subtotal=500.0, total=500.0, status="delivered"
+    )
+    req_invalid_transition = factory.patch(f"/api/orders/{state_ord.id}/", {"status": "preparing"}, format="json")
+    force_authenticate(req_invalid_transition, user=mgr_user)
+    resp_invalid_transition = OrderDetailView.as_view()(req_invalid_transition, pk=state_ord.id)
+
+    if resp_invalid_transition.status_code == 400:
+        print("  [PASSED] Order Status State Machine: Delivered -> Preparing blocked with HTTP 400 Bad Request")
+    else:
+        print(f"  [FAILED] Disallowed state transition returned status {resp_invalid_transition.status_code}")
+        all_passed = False
+
+    state_ord.delete()
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:

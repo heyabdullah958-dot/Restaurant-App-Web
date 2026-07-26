@@ -103,16 +103,23 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         if restaurant and restaurant.min_order_amount > 0:
             subtotal = 0
             for item in items:
-                item_price = item['menu_item'].price
+                menu_item = item['menu_item']
+                item_price = menu_item.price
                 selected_opts = item.get('selected_options', [])
-                price_modifier_sum = 0
+                
+                # Re-validate option price modifiers against DB menu_item.options
+                db_options = menu_item.options or []
+                price_modifier_sum = Decimal('0.00')
                 for opt in selected_opts:
-                    if isinstance(opt, dict):
-                        try:
-                            price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
-                        except (ValueError, TypeError):
-                            pass
-                item_price += Decimal(price_modifier_sum)
+                    if isinstance(opt, dict) and opt.get('name'):
+                        matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
+                        if matched_db_opt:
+                            try:
+                                mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
+                                price_modifier_sum += Decimal(str(max(0.0, mod_val)))
+                            except (ValueError, TypeError):
+                                pass
+                item_price += price_modifier_sum
                 subtotal += item_price * item['quantity']
 
             if subtotal < restaurant.min_order_amount:
@@ -160,14 +167,28 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
                 unit_price = menu_item.price
                 selected_opts = item_data.get('selected_options', [])
-                price_modifier_sum = 0
+                db_options = menu_item.options or []
+                price_modifier_sum = Decimal('0.00')
+                sanitized_selected_options = []
+
                 for opt in selected_opts:
-                    if isinstance(opt, dict):
-                        try:
-                            price_modifier_sum += float(opt.get('price_modifier', 0) or 0)
-                        except (ValueError, TypeError):
-                            pass
-                unit_price += Decimal(price_modifier_sum)
+                    if isinstance(opt, dict) and opt.get('name'):
+                        matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
+                        if matched_db_opt:
+                            try:
+                                mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
+                                mod_dec = Decimal(str(max(0.0, mod_val)))
+                                price_modifier_sum += mod_dec
+                                sanitized_selected_options.append({
+                                    'name': opt.get('name'),
+                                    'price_modifier': float(mod_dec)
+                                })
+                            except (ValueError, TypeError):
+                                sanitized_selected_options.append(opt)
+                        else:
+                            sanitized_selected_options.append(opt)
+
+                unit_price += price_modifier_sum
                 total_price = unit_price * quantity
                 subtotal += total_price
 
@@ -177,7 +198,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     'unit_price': unit_price,
                     'total_price': total_price,
                     'special_notes': item_data.get('special_notes', ''),
-                    'selected_options': selected_opts
+                    'selected_options': sanitized_selected_options
                 })
 
             delivery_fee = restaurant.delivery_fee
@@ -186,6 +207,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
             # Process Loyalty Points Redemption
             if user and not user.is_guest and (use_loyalty or pts_to_redeem > 0):
+                user.refresh_from_db()
                 avail_pts = user.loyalty_points
                 # Max points to redeem is limited by available points and subtotal
                 actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(subtotal))
@@ -209,9 +231,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if user and not user.is_guest and actual_pts_redeemed > 0:
                 from django.contrib.auth import get_user_model
                 User = get_user_model()
-                User.objects.filter(pk=user.pk).update(
+                updated_count = User.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(
                     loyalty_points=F('loyalty_points') - actual_pts_redeemed
                 )
+                if updated_count == 0:
+                    raise serializers.ValidationError("Insufficient loyalty points balance.")
+                    
                 from users.models import LoyaltyTransaction
                 LoyaltyTransaction.objects.create(
                     user=user,

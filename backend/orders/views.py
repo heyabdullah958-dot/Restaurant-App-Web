@@ -239,6 +239,19 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         user = request.user
         new_status = request.data.get('status')
 
+        # Safeguard: Order status state machine transition matrix validation
+        if new_status and new_status != instance.status and not getattr(user, 'is_superuser', False):
+            INVALID_TRANSITIONS = {
+                'delivered': ['pending', 'received', 'preparing', 'out_for_delivery'],
+                'cancelled': ['pending', 'received', 'preparing', 'out_for_delivery', 'delivered'],
+            }
+            disallowed = INVALID_TRANSITIONS.get(instance.status, [])
+            if new_status in disallowed:
+                return Response(
+                    {'error': f"Cannot transition order from '{instance.status}' to '{new_status}'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         # Safeguard 1: Blocking branch managers from cancelling delivered orders & Loyalty Point Reversals
         if new_status == 'cancelled' and instance.status != 'cancelled':
             cancellation_reason = request.data.get('cancellation_reason', '').strip()

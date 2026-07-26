@@ -190,5 +190,9 @@ FoodSphere/
 - **Branch Serializer Invariant**: `RestaurantSerializer` in DRF must **ALWAYS** include `branches = BranchSerializer(many=True, read_only=True)`. List endpoints (`/api/restaurants/`) MUST return nested branch arrays so managers and mobile apps receive branch location/phone/status data.
 - **Admin Dashboard Branch Binding**: In `AdminContext.tsx` and `BranchDashboard.tsx`, branch manager views MUST bind address, phone, and `is_active` status to `currentBranch` (resolved via `resolveUserBranchId`), NEVER to top-level `restaurant.address` / `restaurant.phone` fallbacks.
 - **Primary Admin Hosting (Vercel)**: Live at [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app). Deploy via CLI `npx vercel --token <TOKEN> --scope abdullah-47c1 --yes --prod` and alias `foodsphere-admin.vercel.app`.
+- **Price Modifier DB Verification Invariant**: `OrderCreateSerializer` in DRF MUST ALWAYS re-verify `selected_options` against `MenuItem.options` stored in database to prevent negative price injection attack vectors.
+- **Loyalty Cancellation Reversal Invariant**: When an order status is updated to `cancelled`, any redeemed loyalty points MUST be refunded to the user's loyalty balance (`F('loyalty_points') + points`), and any earned points reverted.
+- **Branch-Specific Stock Override**: `BranchMenuItemAvailability` model allows branch managers to set items out-of-stock for their specific branch (`POST /api/restaurants/branch-item-availability/`).
+
 
 
