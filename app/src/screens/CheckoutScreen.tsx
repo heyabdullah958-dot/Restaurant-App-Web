@@ -501,7 +501,7 @@ export default function CheckoutScreen() {
         if (paymentMethod === 'cod') {
           await dispatch(confirmCODPayment(orderId));
           showAlert('Success', 'Order placed successfully! Cash on Delivery confirmed.', [
-             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId, loyaltyPointsEarned, branchName }); } }
+             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId: createdOrder.display_order_id || orderId, loyaltyPointsEarned, branchName }); } }
           ]);
         } else if (paymentMethod === 'stripe') {
           const stripeResult = await dispatch(createStripeIntent(orderId));

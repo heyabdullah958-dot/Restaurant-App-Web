@@ -441,7 +441,7 @@ export const BranchDashboard: React.FC = () => {
               {[...brandOrders].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 3).map((order) => (
                 <div key={order.id} className="flex justify-between items-start text-xs border-b border-zinc-100 dark:border-slate-700/40 pb-3">
                   <div>
-                    <span className="font-bold text-zinc-800 dark:text-slate-200">Order #{order.id}</span>
+                    <span className="font-bold text-zinc-800 dark:text-slate-200">Order {order.display_order_id || `#${order.id}`}</span>
                     <span className="block text-zinc-500 dark:text-slate-400 text-[10px] mt-0.5">{order.user_or_guest}</span>
                     <span className="block font-medium text-zinc-400 dark:text-slate-500 text-[10px] mt-1">
                       {formatOrderTime(order.created_at)}

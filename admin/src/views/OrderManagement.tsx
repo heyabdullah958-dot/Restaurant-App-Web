@@ -171,7 +171,7 @@ export const OrderManagement: React.FC = () => {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Receipt #${order.id}</title>
+          <title>Receipt ${order.display_order_id || `#${order.id}`}</title>
           <style>
             body { font-family: monospace; width: 280px; margin: 0 auto; padding: 10px; font-size: 12px; }
             h2 { text-align: center; margin: 5px 0; font-size: 16px; }
@@ -182,7 +182,7 @@ export const OrderManagement: React.FC = () => {
         </head>
         <body>
           <h2>GetFood Receipt</h2>
-          <div style="text-align: center;">Order #${order.id}</div>
+          <div style="text-align: center;">Order ${order.display_order_id || `#${order.id}`}</div>
           <div style="text-align: center; font-size: 10px;">${new Date(order.created_at).toLocaleString()}</div>
           <div class="divider"></div>
           <div>Customer: ${order.guest_name}</div>
@@ -399,8 +399,9 @@ export const OrderManagement: React.FC = () => {
 
     const itemsList = (order.items || []).map((i: any) => `• ${i.quantity || 1}x ${i.menu_item_name || i.name || 'Item'}`).join('\n');
 
+    const orderLabel = order.display_order_id || `#${order.id}`;
     const message = 
-      `🛵 *FOODSPHERE DISPATCH ORDER #${order.id}*\n\n` +
+      `🛵 *FOODSPHERE DISPATCH ORDER ${orderLabel}*\n\n` +
       `*Assigned Rider:* ${riderObj.name} (${riderObj.phone})\n` +
       `*Restaurant:* ${order.restaurant_name || ''}\n` +
       `*Branch:* ${order.branch_name || 'Main'} Branch\n\n` +
@@ -684,7 +685,7 @@ export const OrderManagement: React.FC = () => {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-extrabold text-xs text-slate-200 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
                                 <ShoppingBag size={11} className="text-slate-400" />
-                                #{order.id}
+                                {order.display_order_id || `#${order.id}`}
                               </span>
                               {order.restaurant_name && (
                                 <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md">
@@ -880,7 +881,7 @@ export const OrderManagement: React.FC = () => {
             {brandOrders.filter(o => o.status === 'delivered').map(order => (
               <div key={order.id} className="bg-slate-950/60 border border-emerald-900/40 p-4 rounded-xl space-y-3">
                 <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                  <span className="font-extrabold text-xs text-slate-200">#{order.id} {order.restaurant_name && `(${order.restaurant_name})`}</span>
+                  <span className="font-extrabold text-xs text-slate-200">{order.display_order_id || `#${order.id}`} {order.restaurant_name && `(${order.restaurant_name})`}</span>
                   <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">DELIVERED</span>
                 </div>
                 <div className="text-xs space-y-1 text-slate-300">
@@ -931,7 +932,7 @@ export const OrderManagement: React.FC = () => {
             {brandOrders.filter(o => o.status === 'cancelled').map(order => (
               <div key={order.id} className="bg-slate-950/60 border border-rose-900/40 p-4 rounded-xl space-y-3">
                 <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                  <span className="font-extrabold text-xs text-slate-200">#{order.id} {order.restaurant_name && `(${order.restaurant_name})`}</span>
+                  <span className="font-extrabold text-xs text-slate-200">{order.display_order_id || `#${order.id}`} {order.restaurant_name && `(${order.restaurant_name})`}</span>
                   <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">CANCELLED</span>
                 </div>
                 <div className="text-xs space-y-1 text-slate-300">
@@ -1051,7 +1052,7 @@ export const OrderManagement: React.FC = () => {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-black text-white flex items-center gap-2">
-                <Bike className="text-sky-400" size={16} /> Assign Rider to Order #{assignRiderModalOrder.id}
+                <Bike className="text-sky-400" size={16} /> Assign Rider to Order {assignRiderModalOrder.display_order_id || `#${assignRiderModalOrder.id}`}
               </h3>
               <button
                 onClick={() => setAssignRiderModalOrder(null)}

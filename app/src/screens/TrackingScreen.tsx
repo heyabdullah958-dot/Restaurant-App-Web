@@ -364,13 +364,14 @@ export default function TrackingScreen() {
     if (!currentOrder || !currentOrder.status) return;
     const status = currentOrder.status.toLowerCase();
     const orderIdNum = Number(currentOrder.id || orderId);
+    const orderLabel = currentOrder.display_order_id || `#${orderIdNum}`;
     const brandName = restaurantName || 'Restaurant';
 
     if (lastTrackedStatusRef.current && lastTrackedStatusRef.current !== status) {
       if (status === 'preparing') {
         addInAppNotification({
           title: '👨‍🍳 Kitchen is Cooking!',
-          body: `Your order #${orderIdNum} from ${brandName} is now being prepared in the kitchen.`,
+          body: `Your order ${orderLabel} from ${brandName} is now being prepared in the kitchen.`,
           type: 'ORDER_STATUS',
           order_id: orderIdNum,
           restaurant_name: brandName,
@@ -378,7 +379,7 @@ export default function TrackingScreen() {
       } else if (status === 'out_for_delivery' || status === 'out for delivery') {
         addInAppNotification({
           title: '🛵 Your Order is On Its Way!',
-          body: `Great news! Order #${orderIdNum} from ${brandName} has been handed over to our rider. Tap to track!`,
+          body: `Great news! Order ${orderLabel} from ${brandName} has been handed over to our rider. Tap to track!`,
           type: 'ORDER_STATUS',
           order_id: orderIdNum,
           restaurant_name: brandName,
@@ -386,7 +387,7 @@ export default function TrackingScreen() {
       } else if (status === 'delivered') {
         addInAppNotification({
           title: '🎉 Order Delivered!',
-          body: `Order #${orderIdNum} from ${brandName} was delivered successfully. Enjoy your meal!`,
+          body: `Order ${orderLabel} from ${brandName} was delivered successfully. Enjoy your meal!`,
           type: 'ORDER_STATUS',
           order_id: orderIdNum,
           restaurant_name: brandName,
@@ -394,7 +395,7 @@ export default function TrackingScreen() {
       } else if (status === 'cancelled') {
         addInAppNotification({
           title: '❌ Order Cancelled',
-          body: `Order #${orderIdNum} from ${brandName} has been cancelled.`,
+          body: `Order ${orderLabel} from ${brandName} has been cancelled.`,
           type: 'ORDER_STATUS',
           order_id: orderIdNum,
           restaurant_name: brandName,
@@ -479,7 +480,7 @@ export default function TrackingScreen() {
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Order Tracking</Text>
-          <Text style={styles.headerSubtitle}>Order #{orderId}</Text>
+          <Text style={styles.headerSubtitle}>Order {currentOrder?.display_order_id || (orderId ? `#${orderId}` : '')}</Text>
         </View>
         <TouchableOpacity activeOpacity={0.75} onPress={onRefresh} style={styles.refreshButton}>
           <Ionicons name="refresh-outline" size={22} color={COLORS.primary} />

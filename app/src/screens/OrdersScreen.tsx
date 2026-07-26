@@ -224,7 +224,7 @@ export default function OrdersScreen() {
 
         {/* Card Price/Total info */}
         <View style={styles.cardBody}>
-          <Text style={styles.orderNum}>Order #{item?.id}</Text>
+          <Text style={styles.orderNum}>Order {item?.display_order_id || `#${item?.id}`}</Text>
           <Text style={styles.orderAmount}>Rs. {parseFloat(item?.total || 0).toFixed(2)}</Text>
         </View>
 
@@ -232,7 +232,7 @@ export default function OrdersScreen() {
         <View style={styles.cardActions}>
           <TouchableOpacity activeOpacity={0.75}
             style={styles.detailBtn}
-            onPress={() => navigation.navigate('Tracking', { orderId: item.id })}
+            onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id })}
           >
             <Ionicons name="information-circle-outline" size={18} color={COLORS.dark} />
             <Text style={styles.detailBtnText}>Details</Text>

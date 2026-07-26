@@ -54,7 +54,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'tracking_token', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
+            'id', 'display_order_id', 'tracking_token', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
             'items', 'subtotal', 'delivery_fee', 'discount', 'total',
             'use_loyalty_points', 'points_to_redeem', 'coupon_code'
@@ -416,8 +416,8 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
-        read_only_fields = ('id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+        fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+        read_only_fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
 
     def get_restaurant_logo(self, obj):
         return build_absolute_image_url(obj.restaurant.logo, self.context)
@@ -434,7 +434,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'restaurant', 'restaurant_name',
+            'id', 'display_order_id', 'restaurant', 'restaurant_name',
             'branch_id', 'branch_name',
             'rider', 'rider_id',
             'guest_name', 'guest_phone',
@@ -461,11 +461,11 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'status', 'payment_method',
+            'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'status', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
-        read_only_fields = ('id', 'tracking_token')
+        read_only_fields = ('id', 'display_order_id', 'tracking_token')
 
     def validate(self, attrs):
         # State transition validation (lock delivered orders / block invalid cancellations)

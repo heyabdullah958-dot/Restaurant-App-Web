@@ -209,7 +209,11 @@ class OrderTrackView(APIView):
         
         try:
             if pk:
-                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(pk=pk)
+                from django.db.models import Q
+                query = Q(display_order_id__iexact=str(pk).strip())
+                if str(pk).isdigit():
+                    query |= Q(pk=int(pk))
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(query)
             elif token:
                 order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(tracking_token=token)
             else:

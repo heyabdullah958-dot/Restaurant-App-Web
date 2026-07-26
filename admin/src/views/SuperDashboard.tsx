@@ -461,7 +461,7 @@ export const SuperDashboard: React.FC = () => {
               {filteredOrders.slice(0, 15).map((order) => (
                 <tr key={order.id} className="hover:bg-slate-700/20 transition-colors">
                   <td className="py-4.5 px-6 font-bold text-slate-200">
-                    #{order.id}
+                    {order.display_order_id || `#${order.id}`}
                   </td>
                   <td className="py-4.5 px-6 font-semibold text-white">
                     {order.restaurant_name}

@@ -156,6 +156,7 @@ export const checkOrderStatusUpdates = async () => {
 
     for (const order of ordersList) {
       const orderId = Number(order.id);
+      const orderLabel = order.display_order_id || `#${orderId}`;
       const currentStatus = (order.status || '').toLowerCase();
       const prevStatus = trackedStatusMap[orderId];
       const brandName = order.restaurant_name || order.restaurant?.name || 'FoodSphere';
@@ -164,7 +165,7 @@ export const checkOrderStatusUpdates = async () => {
         if (currentStatus === 'preparing') {
           await addInAppNotification({
             title: '👨‍🍳 Kitchen is Cooking!',
-            body: `Your order #${orderId} from ${brandName} is now being prepared in the kitchen.`,
+            body: `Your order ${orderLabel} from ${brandName} is now being prepared in the kitchen.`,
             type: 'ORDER_STATUS',
             order_id: orderId,
             restaurant_name: brandName,
@@ -172,7 +173,7 @@ export const checkOrderStatusUpdates = async () => {
         } else if (currentStatus === 'out_for_delivery') {
           await addInAppNotification({
             title: '🛵 Your Order is On Its Way!',
-            body: `Great news! Order #${orderId} from ${brandName} has been handed over to our rider. Tap to track!`,
+            body: `Great news! Order ${orderLabel} from ${brandName} has been handed over to our rider. Tap to track!`,
             type: 'ORDER_STATUS',
             order_id: orderId,
             restaurant_name: brandName,
@@ -180,7 +181,7 @@ export const checkOrderStatusUpdates = async () => {
         } else if (currentStatus === 'delivered') {
           await addInAppNotification({
             title: '🍕 Order Delivered — Bon Appétit!',
-            body: `Order #${orderId} from ${brandName} was delivered. Tap to rate your meal! ⭐`,
+            body: `Order ${orderLabel} from ${brandName} was delivered. Tap to rate your meal! ⭐`,
             type: 'ORDER_STATUS',
             order_id: orderId,
             restaurant_name: brandName,
@@ -188,7 +189,7 @@ export const checkOrderStatusUpdates = async () => {
         } else if (currentStatus === 'cancelled') {
           await addInAppNotification({
             title: '❌ Order Cancelled',
-            body: `Order #${orderId} from ${brandName} was cancelled.`,
+            body: `Order ${orderLabel} from ${brandName} was cancelled.`,
             type: 'ORDER_STATUS',
             order_id: orderId,
             restaurant_name: brandName,

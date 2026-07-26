@@ -76,6 +76,7 @@ export interface OrderItemDetail {
 
 export interface Order {
   id: number;
+  display_order_id?: string;
   restaurant_id: number;
   restaurant_name: string;
   branch_name?: string;

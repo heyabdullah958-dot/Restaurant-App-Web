@@ -54,6 +54,13 @@ class Order(models.Model):
     )
     guest_name = models.CharField(max_length=100, blank=True, null=True)
     guest_phone = models.CharField(max_length=20, blank=True, null=True)
+    display_order_id = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Tenant and branch scoped human-readable order ID (e.g., TS-LC-1001)."
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received', db_index=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod', db_index=True)
     delivery_address = models.TextField()
@@ -75,11 +82,69 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def generate_display_order_id(self):
+        brand_map = {
+            'seenbanao': 'SB',
+            'dineatblue': 'DB',
+            'jushhpk': 'JK',
+            'tandooristoppk': 'TS',
+            'sandmelts': 'SM',
+            'birdmanfoodspk': 'BM',
+            'getafomo': 'GF',
+        }
+        
+        branch_map = {
+            'johar town': 'JT',
+            'lake city': 'LC',
+            'dha phase 1': 'DHA1',
+            'gt road baghbanpura': 'GTR',
+            'gulberg iii': 'G3',
+        }
+
+        brand_code = 'FS'
+        if self.restaurant:
+            handle = (self.restaurant.handle or '').lower().replace(' ', '')
+            name = (self.restaurant.name or '').lower().replace(' ', '')
+            brand_code = brand_map.get(handle) or brand_map.get(name)
+            if not brand_code:
+                words = [w for w in (self.restaurant.name or '').split() if w]
+                brand_code = ''.join([w[0].upper() for w in words[:3]]) or 'FS'
+
+        branch_code = 'MAIN'
+        if self.branch:
+            bname = (self.branch.name or '').strip().lower()
+            branch_code = branch_map.get(bname)
+            if not branch_code:
+                words = [w for w in (self.branch.name or '').split() if w]
+                branch_code = ''.join([w[0].upper() for w in words[:3]]) or 'MAIN'
+
+        if self.branch_id:
+            existing_orders = Order.objects.filter(branch_id=self.branch_id).exclude(display_order_id='').exclude(display_order_id__isnull=True)
+        elif self.restaurant_id:
+            existing_orders = Order.objects.filter(restaurant_id=self.restaurant_id).exclude(display_order_id='').exclude(display_order_id__isnull=True)
+        else:
+            existing_orders = Order.objects.none()
+
+        max_seq = 1000
+        for ord_obj in existing_orders.only('display_order_id', 'id'):
+            if ord_obj.display_order_id:
+                parts = ord_obj.display_order_id.split('-')
+                if parts and parts[-1].isdigit():
+                    val = int(parts[-1])
+                    if val > max_seq:
+                        max_seq = val
+
+        next_seq = max_seq + 1
+        return f"{brand_code}-{branch_code}-{next_seq}"
+
     def save(self, *args, **kwargs):
         from restaurants.models import BranchRider
         is_new = self.pk is None
         old_status = None
         old_rider_id = None
+
+        if not self.display_order_id:
+            self.display_order_id = self.generate_display_order_id()
 
         if not is_new:
             try:
@@ -130,7 +195,9 @@ class Order(models.Model):
 
 
     def __str__(self):
-        return f"Order #{self.id or self.pk or 'new'} - {self.restaurant.name} ({self.status})"
+        disp = self.display_order_id or f"#{self.id or self.pk or 'new'}"
+        rname = self.restaurant.name if self.restaurant else 'Unknown'
+        return f"Order {disp} - {rname} ({self.status})"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
@@ -142,7 +209,8 @@ class OrderItem(models.Model):
     selected_options = models.JSONField(default=list, blank=True)
 
     def __str__(self):
-        return f"{self.quantity} x {self.menu_item.name} for Order #{self.order.id or self.order.pk or 'new'}"
+        disp = self.order.display_order_id or f"#{self.order.id or self.order.pk or 'new'}"
+        return f"{self.quantity} x {self.menu_item.name} for Order {disp}"
 
 class BranchCashRegister(models.Model):
     """
