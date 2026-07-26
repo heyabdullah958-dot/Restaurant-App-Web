@@ -288,6 +288,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const knownOrderIdsRef = useRef<Set<number>>(new Set());
+  const isInitialOrderFetchRef = useRef<boolean>(true);
 
 /** Safe helper to extract an array from API responses whether plain array [...] or paginated { results: [...] } */
 function extractArray<T = any>(data: any): T[] {
@@ -540,15 +542,7 @@ function extractArray<T = any>(data: any): T[] {
     }
   }, [toasts]);
 
-  // Auto-polling for new orders every 5 seconds for real-time responsiveness
-  useEffect(() => {
-    if (activeView !== 'login') {
-      const interval = setInterval(() => {
-        refreshOrders();
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [activeView]);
+  // Auto-polling is handled by the central quiet polling loop using refreshOrdersRef
 
   // ─── Real JWT Login ────────────────────────────────────────────────────────
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -652,6 +646,8 @@ function extractArray<T = any>(data: any): T[] {
     localStorage.removeItem('foodsphere_admin_mock_user');
     localStorage.removeItem('foodsphere_admin_orders_cache');
     localStorage.removeItem('foodsphere_admin_restaurants_cache');
+    knownOrderIdsRef.current = new Set();
+    isInitialOrderFetchRef.current = true;
     setUser(null);
     setOrders([]);
     setRestaurants([]);
@@ -700,47 +696,55 @@ function extractArray<T = any>(data: any): T[] {
       if (orderData && Array.isArray(orderData.results)) {
         const newOrders = orderData.results.map(mapApiOrder);
 
-        // Look for newly added pending/received orders compared to our local state
-        const currentIncomingIds = new Set(
-          orders
-            .filter((o: Order) => o.status === 'pending' || o.status === 'received')
-            .map((o: Order) => o.id)
-        );
-        const newlyArrived = newOrders.filter(
-          (o: Order) => (o.status === 'pending' || o.status === 'received') && !currentIncomingIds.has(o.id)
-        );
+        if (isInitialOrderFetchRef.current) {
+          // On initial load, mark all existing orders as known so pre-existing orders do NOT trigger alert popups/sounds
+          newOrders.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
+          isInitialOrderFetchRef.current = false;
+        } else {
+          // Identify newly arrived orders in received/pending state that have NEVER been notified
+          const newlyArrived = newOrders.filter(
+            (o: Order) => (o.status === 'pending' || o.status === 'received') && !knownOrderIdsRef.current.has(o.id)
+          );
 
-        if (newlyArrived.length > 0) {
-          // Play Web Audio API synthesized chime
-          try {
-            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-            if (AudioCtx) {
-              const ctx = new AudioCtx();
-              const now = ctx.currentTime;
-              const osc1 = ctx.createOscillator();
-              const gain1 = ctx.createGain();
-              osc1.type = 'sine';
-              osc1.frequency.setValueAtTime(880, now);
-              gain1.gain.setValueAtTime(0.3, now);
-              gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-              osc1.connect(gain1);
-              gain1.connect(ctx.destination);
-              osc1.start(now);
-              osc1.stop(now + 0.4);
+          if (newlyArrived.length > 0) {
+            // Immediately mark newly arrived order IDs as known BEFORE playing audio/toast to prevent duplicate triggers
+            newlyArrived.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
 
-              const osc2 = ctx.createOscillator();
-              const gain2 = ctx.createGain();
-              osc2.type = 'sine';
-              osc2.frequency.setValueAtTime(1760, now + 0.15);
-              gain2.gain.setValueAtTime(0.4, now + 0.15);
-              gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-              osc2.connect(gain2);
-              gain2.connect(ctx.destination);
-              osc2.start(now + 0.15);
-              osc2.stop(now + 0.6);
-            }
-          } catch {}
-          showToast(`🔔 ${newlyArrived.length} New Order(s) Received!`, 'info');
+            // Play Web Audio API synthesized chime ONCE per new order batch
+            try {
+              const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+              if (AudioCtx) {
+                const ctx = new AudioCtx();
+                const now = ctx.currentTime;
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(880, now);
+                gain1.gain.setValueAtTime(0.3, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.4);
+
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1760, now + 0.15);
+                gain2.gain.setValueAtTime(0.4, now + 0.15);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.15);
+                osc2.stop(now + 0.6);
+              }
+            } catch {}
+
+            showToast(`🔔 ${newlyArrived.length} New Order(s) Received!`, 'info');
+          }
+
+          // Always add all fetched order IDs to known set
+          newOrders.forEach((o: Order) => knownOrderIdsRef.current.add(o.id));
         }
 
         setOrders(
