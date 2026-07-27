@@ -19,6 +19,8 @@ class Command(BaseCommand):
         # Ensure all existing restaurants have 24/7 operating hours so availability is strictly governed by branch toggles
         Restaurant.objects.all().update(opens_at=datetime.time(0, 0), closes_at=datetime.time(23, 59, 59))
 
+        self.seed_promo_coupons()
+
         if options.get('force'):
             self.stdout.write('Force flag detected. Clearing existing restaurant data...')
             Restaurant.objects.all().delete()
@@ -460,14 +462,17 @@ class Command(BaseCommand):
         created_items = MenuItem.objects.bulk_create(items_to_create)
         self.stdout.write(f"Seeded {len(created_items)} menu items.")
         
-        # Seed default platform promo codes
+        self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands and menu items.'))
+
+    def seed_promo_coupons(self):
         from promotions.models import Coupon
+        from restaurants.models import Restaurant
         from django.utils import timezone
         from datetime import timedelta
         now = timezone.now()
         valid_to = now + timedelta(days=180)
 
-        Coupon.objects.get_or_create(
+        c1, created1 = Coupon.objects.get_or_create(
             code='WELCOME10',
             defaults={
                 'discount_type': 'percentage',
@@ -482,7 +487,7 @@ class Command(BaseCommand):
             }
         )
 
-        Coupon.objects.get_or_create(
+        c2, created2 = Coupon.objects.get_or_create(
             code='GETFOOD50',
             defaults={
                 'discount_type': 'flat',
@@ -496,7 +501,7 @@ class Command(BaseCommand):
             }
         )
 
-        tandoori_rest = restaurant_map.get('tandooristoppk')
+        tandoori_rest = Restaurant.objects.filter(slug__iexact='tandooristoppk').first() or Restaurant.objects.filter(name__icontains='tandoori').first()
         if tandoori_rest:
             Coupon.objects.get_or_create(
                 code='TANDOORI20',
@@ -514,4 +519,4 @@ class Command(BaseCommand):
                 }
             )
 
-        self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands, menu items, and default promo coupons.'))
+        self.stdout.write(self.style.SUCCESS('Promo coupons seeded successfully.'))
