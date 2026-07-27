@@ -465,6 +465,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands and menu items.'))
 
     def seed_promo_coupons(self):
+        from decimal import Decimal
         from promotions.models import Coupon
         from restaurants.models import Restaurant
         from django.utils import timezone
