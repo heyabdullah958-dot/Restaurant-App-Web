@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Building2, Store, Calendar, Users, Percent, ShieldCheck } from 'lucide-react';
+import { Tag, Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Building2, Store, ShieldCheck } from 'lucide-react';
 import { fetchCoupons, createCoupon, updateCoupon, deleteCoupon, fetchRestaurantsList, fetchBranches } from '../services/api';
 
 export const PromoManagement: React.FC = () => {
