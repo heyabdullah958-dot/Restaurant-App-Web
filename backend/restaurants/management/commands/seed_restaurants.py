@@ -460,4 +460,58 @@ class Command(BaseCommand):
         created_items = MenuItem.objects.bulk_create(items_to_create)
         self.stdout.write(f"Seeded {len(created_items)} menu items.")
         
-        self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands and menu items.'))
+        # Seed default platform promo codes
+        from promotions.models import Coupon
+        from django.utils import timezone
+        from datetime import timedelta
+        now = timezone.now()
+        valid_to = now + timedelta(days=180)
+
+        Coupon.objects.get_or_create(
+            code='WELCOME10',
+            defaults={
+                'discount_type': 'percentage',
+                'discount_value': Decimal('10.00'),
+                'min_subtotal': Decimal('100.00'),
+                'max_discount': Decimal('150.00'),
+                'valid_from': now,
+                'valid_to': valid_to,
+                'usage_limit': 500,
+                'per_user_limit': 2,
+                'is_active': True
+            }
+        )
+
+        Coupon.objects.get_or_create(
+            code='GETFOOD50',
+            defaults={
+                'discount_type': 'flat',
+                'discount_value': Decimal('50.00'),
+                'min_subtotal': Decimal('200.00'),
+                'valid_from': now,
+                'valid_to': valid_to,
+                'usage_limit': 200,
+                'per_user_limit': 1,
+                'is_active': True
+            }
+        )
+
+        tandoori_rest = restaurant_map.get('tandooristoppk')
+        if tandoori_rest:
+            Coupon.objects.get_or_create(
+                code='TANDOORI20',
+                defaults={
+                    'discount_type': 'percentage',
+                    'discount_value': Decimal('20.00'),
+                    'min_subtotal': Decimal('300.00'),
+                    'max_discount': Decimal('250.00'),
+                    'restaurant': tandoori_rest,
+                    'valid_from': now,
+                    'valid_to': valid_to,
+                    'usage_limit': 100,
+                    'per_user_limit': 1,
+                    'is_active': True
+                }
+            )
+
+        self.stdout.write(self.style.SUCCESS('Successfully seeded restaurant brands, menu items, and default promo coupons.'))
