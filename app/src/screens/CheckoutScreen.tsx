@@ -320,6 +320,8 @@ export default function CheckoutScreen() {
         code: promoCodeInput.trim(),
         subtotal: subtotal,
         restaurant_id: restaurantId,
+        branch_id: selectedBranchId,
+        guest_phone: guestPhone ? guestPhone.trim() : undefined,
       });
       const data = response.data || response;
       if (data && data.valid) {

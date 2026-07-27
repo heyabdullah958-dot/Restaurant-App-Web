@@ -1,32 +1,23 @@
+Ôªø# üêõ BUGS.md ‚Äî GetFood Platform Bug Log
 
-## Phase 1 ó Fix Bug 4 (MapScreen crash) ó 2026-07-17
-- What was done: Moved early return block below hook declarations to comply with React Hooks rules.
-- Files modified: app/src/screens/MapScreen.tsx
-- Root cause (if bug fix): Hooks were declared conditionally after an early return.
-- Solution applied: Moved the early return block containing the loadingLocation view below all hook calls, keeping it before the main render return.
-- Self-corrections used: 0/3
-- Confidence: 100%
+## Resolved Bugs Log
 
-## Phase 2 ó Fix Bug 1 (Guest profile shown after Google Sign-In) ó 2026-07-17
-- What was done: Overrode is_guest flag from backend response in updateUserProfile dispatch.
-- Files modified: app/src/screens/AuthScreen.tsx
-- Root cause (if bug fix): Backend guestLogin token sets is_guest=true, which was not overridden in subsequent profile update.
-- Solution applied: Added is_guest: false property to the payload in handleSelectGoogleAccount and handleVerifyOtp.
-- Self-corrections used: 0/3
-- Confidence: 100%
+### Bug #1: HTTP 404 Error on Save Coupon in Admin Panel (Resolved 2026-07-27)
+- **Symptom**: Clicking 'Save Coupon' in the Super Admin Promo Code modal triggered a browser alert popup: HTTP 404.
+- **Root Cause**: admin/src/services/api.ts called POST /api/coupons/, but backend/promotions/urls.py only contained /api/coupons/validate/ and /api/coupons/active/ without any list/create/update/delete CRUD views registered.
+- **Fix Applied**:
+  - Implemented CouponListCreateView and CouponDetailView in backend/promotions/views.py.
+  - Registered path('coupons/', ...) and path('coupons/<int:pk>/', ...) in backend/promotions/urls.py.
+  - Updated admin/src/services/api.ts to call /api/coupons/ with optional scope filtering.
+  - Verified with test_promo_engine.py (100% Pass Rate).
 
-## Phase 3 ó Fix Bug 3 (CafÈ / Burgers category shows empty) ó 2026-07-17
-- What was done: Mirrored local fallback pattern for HomeScreen category filters.
-- Files modified: app/src/screens/HomeScreen.tsx
-- Root cause (if bug fix): filteredRestaurants useMemo returned empty array when API offline/slow, without falling back to local static data.
-- Solution applied: Imported FALLBACK_RESTAURANTS and applied the fallback logic similar to SearchScreen.
-- Self-corrections used: 0/3
-- Confidence: 100%
+---
 
-## Phase 4 ó Fix Bug 2 (Search popular chips showing irrelevant terms) ó 2026-07-17
-- What was done: Removed inactive terms and updated POPULAR_SEARCHES list.
-- Files modified: app/src/screens/SearchScreen.tsx
-- Root cause (if bug fix): Hardcoded search chips included Seafood and Melt which matched no active brands.
-- Solution applied: Updated the constant POPULAR_SEARCHES to only contain words known to match active brands and dishes.
-- Self-corrections used: 0/3
-- Confidence: 100%
+### Bug #2: Missing Branch Scoping on Promo Code Model & Validation (Resolved 2026-07-27)
+- **Symptom**: Promos could only be global or scoped to a restaurant, preventing individual branches from running localized promo campaigns.
+- **Root Cause**: Coupon model in backend/promotions/models.py only had a restaurant ForeignKey, missing a branch ForeignKey.
+- **Fix Applied**:
+  - Added branch ForeignKey to Coupon model and generated migration promotions.0003_coupon_branch.
+  - Updated CouponValidateSerializer and OrderCreateSerializer to enforce branch-specific validation.
+  - Added Scope Selector UI in admin/src/views/PromoManagement.tsx allowing Global, Specific Restaurant, or Specific Branch configuration.
+

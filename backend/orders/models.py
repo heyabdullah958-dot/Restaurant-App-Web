@@ -103,7 +103,7 @@ class Order(models.Model):
 
         brand_code = 'FS'
         if self.restaurant:
-            handle = (self.restaurant.handle or '').lower().replace(' ', '')
+            handle = (getattr(self.restaurant, 'handle', None) or '').lower().replace(' ', '')
             name = (self.restaurant.name or '').lower().replace(' ', '')
             brand_code = brand_map.get(handle) or brand_map.get(name)
             if not brand_code:

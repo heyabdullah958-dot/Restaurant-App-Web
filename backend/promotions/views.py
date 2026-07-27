@@ -33,13 +33,41 @@ class CouponValidateView(views.APIView):
             'discount_value': coupon.discount_value,
         })
 
+class CouponListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = CouponSerializer
+
+    def get_queryset(self):
+        qs = Coupon.objects.all().order_by('-created_at')
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        branch_id = self.request.query_params.get('branch_id')
+        if restaurant_id:
+            qs = qs.filter(restaurant_id=restaurant_id)
+        if branch_id:
+            qs = qs.filter(branch_id=branch_id)
+        return qs
+
+class CouponDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.AllowAny]
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+
 class ActiveCouponsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = CouponSerializer
     
     def get_queryset(self):
         now = timezone.now()
-        return Coupon.objects.filter(is_active=True, valid_from__lte=now, valid_to__gte=now)
+        qs = Coupon.objects.filter(is_active=True, valid_from__lte=now, valid_to__gte=now)
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        branch_id = self.request.query_params.get('branch_id')
+        if restaurant_id:
+            from django.db.models import Q
+            qs = qs.filter(Q(restaurant_id=restaurant_id) | Q(restaurant__isnull=True))
+        if branch_id:
+            from django.db.models import Q
+            qs = qs.filter(Q(branch_id=branch_id) | Q(branch__isnull=True))
+        return qs
 
 class ActiveFlashDealsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]

@@ -212,6 +212,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if coupon.restaurant and restaurant and coupon.restaurant != restaurant:
                 raise serializers.ValidationError(f"Promo code is not valid for {restaurant.name}.")
 
+            branch = attrs.get('branch')
+            if coupon.branch and branch and coupon.branch != branch:
+                raise serializers.ValidationError(f"Promo code is not valid for branch '{branch.name}'.")
+
             if subtotal < coupon.min_subtotal:
                 raise serializers.ValidationError(
                     f"Minimum subtotal of Rs. {coupon.min_subtotal:.0f} required to use promo code '{coupon.code}'."
@@ -221,6 +225,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 user_usage_count = CouponUsage.objects.filter(coupon=coupon, user=request.user).count()
                 if user_usage_count >= coupon.per_user_limit:
                     raise serializers.ValidationError("You have already used this promo code the maximum allowed times.")
+            elif attrs.get('guest_phone'):
+                phone = str(attrs.get('guest_phone')).strip()
+                phone_usage_count = CouponUsage.objects.filter(coupon=coupon, order__guest_phone=phone).count()
+                if phone_usage_count >= coupon.per_user_limit:
+                    raise serializers.ValidationError("This phone number has already used this promo code the maximum allowed times.")
 
             attrs['_validated_coupon'] = coupon
 

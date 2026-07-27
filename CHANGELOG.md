@@ -73,4 +73,10 @@
 - **Automated Verification**: Ran expanded integration test suite in `test_backend_local.py` with 100% pass rate.
 
 
-
+## [100% Launch Ready - Universal SaaS Promo Code Engine Overhaul] - 2026-07-27
+### Added & Fixed
+- **Fixed HTTP 404 Modal Save Error**: Built full CRUD endpoints (`GET/POST` at `/api/coupons/` and `GET/PATCH/DELETE` at `/api/coupons/<pk>/`) in Django DRF `promotions/views.py` & `urls.py`.
+- **Tenant & Branch-Scoped Promo Scoping**: Added `branch` ForeignKey to `Coupon` model (`promotions.0003_coupon_branch`) and built a Scope Selector in Admin Panel (`Global`, `Specific Restaurant/Tenant`, `Specific Branch`).
+- **Enterprise SaaS Controls**: Added Percentage (%) vs. Flat (Rs.) options, Max Discount Cap (Rs.), Min Subtotal, Max Total Redemptions (`usage_limit`), Max Redemptions Per User (`per_user_limit`), and Start/Expiry date fields across Admin UI and backend validation.
+- **Universal Checkout Validation Interceptor**: Updated mobile app `CheckoutScreen.tsx` to pass `branch_id` and `guest_phone` in `/coupons/validate/`, and updated `OrderCreateSerializer` to enforce tenant, branch, subtotal, date range, and per-user usage limits.
+- **Automated Verification**: Created `test_promo_engine.py` (100% passing) and verified clean execution of `test_backend_local.py`.

@@ -465,6 +465,11 @@ export const fetchBranches = (restaurantId?: number): Promise<any[]> =>
       : '/api/admin/branches/'
   );
 
+export const fetchRestaurantsList = async (): Promise<any[]> => {
+  const data = await apiFetch<any>('/api/restaurants/');
+  return Array.isArray(data) ? data : (data?.results || []);
+};
+
 export const updateBranch = (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }): Promise<any> =>
   apiFetch<any>(`/api/admin/branches/${branchId}/`, {
     method: 'PATCH',
@@ -540,8 +545,16 @@ export const getFullImageUrl = (path: string | null | undefined): string => {
 
 // ─── PROMOTIONS & MANAGEMENT ──────────────────────────────────────────────────
 
-export const fetchCoupons = async () => {
-  const data = await apiFetch<any>('/api/coupons/active/');
+export const fetchCoupons = async (params?: { restaurant_id?: number; branch_id?: number }) => {
+  let url = '/api/coupons/';
+  if (params) {
+    const searchParams = new URLSearchParams();
+    if (params.restaurant_id) searchParams.append('restaurant_id', String(params.restaurant_id));
+    if (params.branch_id) searchParams.append('branch_id', String(params.branch_id));
+    const qs = searchParams.toString();
+    if (qs) url += `?${qs}`;
+  }
+  const data = await apiFetch<any>(url);
   return Array.isArray(data) ? data : (data?.results || []);
 };
 export const createCoupon = (data: any) => apiFetch<any>('/api/coupons/', { method: 'POST', body: JSON.stringify(data) });
