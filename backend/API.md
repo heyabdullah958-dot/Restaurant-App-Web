@@ -127,11 +127,19 @@ Authorization: Bearer <access_token>
 
 #### `GET /api/orders/{id}/`
 - **Description:** Get specific order status and details (for tracking progress).
+- **Response:** Order details containing `display_order_id` (e.g., `TS-LC-1001`).
+
+#### `GET /api/v1/orders/{pk}/track/`
+- **Description:** Universal unauthenticated live tracking endpoint. Supports lookup by `display_order_id` (e.g., `TS-LC-1001`), numeric ID (`pk`), or `?token=<uuid>`.
 
 #### `GET /api/orders/my-orders/`
 - **Description:** Get authenticated user's order history.
 
-### 5. Payments (`/api/payments/`)
+### 5. Fleet & Admin Dispatch (`/api/admin/riders/`)
+#### `GET /api/admin/riders/?branch_id={id_or_slug}&status=AVAILABLE&is_active=true`
+- **Description:** Active query endpoint to retrieve available branch riders for dispatch modals. Accepts numeric branch IDs, branch slugs (e.g., `johar-town`), or branch names.
+
+### 6. Payments (`/api/payments/`)
 #### `POST /api/payments/cod/confirm/`
 - **Description:** Confirm Cash on Delivery checkout.
 - **Body:** `{ "order_id": 42 }`
