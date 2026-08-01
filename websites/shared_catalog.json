@@ -1,0 +1,1910 @@
+{
+  "seenbanao": {
+    "slug": "seenbanao",
+    "category_count": 8,
+    "item_count": 33,
+    "categories": [
+      {
+        "id": 1,
+        "name": "STARTER",
+        "order": 1,
+        "items": [
+          {
+            "id": 1,
+            "name": "Fries",
+            "description": "Classic crispy golden french fries",
+            "price": 250.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 2,
+            "name": "Bucket Fries",
+            "description": "Family portion of crispy golden fries",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 3,
+            "name": "BBQ Loaded Fries",
+            "description": "Fries loaded with cheese and BBQ chicken",
+            "price": 750.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 4,
+            "name": "BBQ Grill Tenders (4pcs)",
+            "description": "Flame-grilled tender chicken strips",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 5,
+            "name": "Nablets (6pcs)",
+            "description": "Deep-fried breaded nuggets",
+            "price": 520.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 6,
+            "name": "Butter Nablets (6pcs)",
+            "description": "Creamy butter-coated chicken nuggets",
+            "price": 650.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 7,
+            "name": "Butter Kabab (4pcs)",
+            "description": "Rich butter-tossed seekh kababs",
+            "price": 999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 8,
+            "name": "Butter Malai Boti (5pcs)",
+            "description": "Butter-basted creamy malai botis",
+            "price": 650.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "K ROLLS",
+        "order": 2,
+        "items": [
+          {
+            "id": 9,
+            "name": "Brotien Kabab Roll Beef",
+            "description": "High protein beef kabab rolled in soft flatbread",
+            "price": 650.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "P ROLLS",
+        "order": 3,
+        "items": [
+          {
+            "id": 10,
+            "name": "Chicken Paratha Roll",
+            "description": "Classic chicken boti roll in paratha",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 11,
+            "name": "Malai Boti Paratha Roll",
+            "description": "Creamy malai boti roll in paratha",
+            "price": 520.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 12,
+            "name": "Shish Taouk Paratha Roll",
+            "description": "Turkish style shish taouk in paratha",
+            "price": 990.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 13,
+            "name": "Chicken Kabab Roll",
+            "description": "Chicken seekh kabab roll in paratha",
+            "price": 400.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 14,
+            "name": "Adana Kabab Roll",
+            "description": "Spiced Turkish Adana kabab roll in paratha",
+            "price": 990.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "P SLICES",
+        "order": 4,
+        "items": [
+          {
+            "id": 15,
+            "name": "Chicken Slices",
+            "description": "Succulent chicken slices with special sauce",
+            "price": 590.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 16,
+            "name": "Malai Boti Slices",
+            "description": "Creamy malai boti slices in signature bread",
+            "price": 690.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "SEEN BOWLS",
+        "order": 5,
+        "items": [
+          {
+            "id": 17,
+            "name": "Rice with Adana Kabab (1pc)",
+            "description": "Turkish rice bowl served with 1pc Adana kabab (Solo)",
+            "price": 550.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 18,
+            "name": "Rice with Shish Taouk (2pcs)",
+            "description": "Turkish rice bowl served with 2pcs Shish Taouk (Solo)",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 19,
+            "name": "Rice with Adana Kabab (2pcs)",
+            "description": "Turkish rice bowl served with 2pcs Adana kabab (Combo)",
+            "price": 900.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 20,
+            "name": "Rice with Shish Taouk (4pcs)",
+            "description": "Turkish rice bowl served with 4pcs Shish Taouk (Combo)",
+            "price": 950.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "BBQ SPECIAL",
+        "order": 6,
+        "items": [
+          {
+            "id": 21,
+            "name": "Kabab (4pcs)",
+            "description": "Flame-grilled chicken seekh kababs",
+            "price": 650.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 22,
+            "name": "Tikka (5pcs)",
+            "description": "Classic fire-grilled chicken tikka pieces",
+            "price": 490.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 23,
+            "name": "Malai Boti (5pcs)",
+            "description": "Creamy, melt-in-mouth chicken malai boti",
+            "price": 550.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 24,
+            "name": "Shish Taouk (5pcs)",
+            "description": "Turkish style grilled chicken skewers",
+            "price": 800.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 25,
+            "name": "Shish Taouk Abiad (5pcs)",
+            "description": "White spice marinade shish taouk",
+            "price": 900.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 26,
+            "name": "Beef Adana Kabab (4pcs)",
+            "description": "Authentic grilled Turkish beef Adana kababs",
+            "price": 1050.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "name": "DRINKS",
+        "order": 7,
+        "items": [
+          {
+            "id": 27,
+            "name": "Water",
+            "description": "Chilled mineral water",
+            "price": 80.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 28,
+            "name": "Soft Drinks",
+            "description": "Coke, Sprite or Fanta",
+            "price": 120.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 29,
+            "name": "Seen Special Flavor Drink",
+            "description": "SEEN signature refreshing beverage",
+            "price": 250.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "name": "ADD ONS",
+        "order": 8,
+        "items": [
+          {
+            "id": 30,
+            "name": "Puri Paratha",
+            "description": "Flaky, deep-fried puri paratha",
+            "price": 150.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 31,
+            "name": "Dips",
+            "description": "SEEN special garlic/mint dip",
+            "price": 80.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 32,
+            "name": "Rice",
+            "description": "Extra portion of aromatic Turkish rice",
+            "price": 200.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 33,
+            "name": "Cheese Slice",
+            "description": "Extra slice of cheddar cheese",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "dineatblue": {
+    "slug": "dineatblue",
+    "category_count": 2,
+    "item_count": 3,
+    "categories": [
+      {
+        "id": 9,
+        "name": "SPECIALS",
+        "order": 1,
+        "items": [
+          {
+            "id": 34,
+            "name": "Mix Seafood Grill",
+            "description": "Grilled fish, prawns, calamari served with garlic butter",
+            "price": 2450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 35,
+            "name": "Fish & Chips",
+            "description": "Crispy battered fish fillet served with tartar sauce",
+            "price": 950.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "name": "DRINKS",
+        "order": 2,
+        "items": [
+          {
+            "id": 36,
+            "name": "Blue Lagoon Mocktail",
+            "description": "Refreshing blue curacao drink",
+            "price": 350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "jushhpk": {
+    "slug": "jushhpk",
+    "category_count": 6,
+    "item_count": 33,
+    "categories": [
+      {
+        "id": 11,
+        "name": "APPETIZER",
+        "order": 1,
+        "items": [
+          {
+            "id": 37,
+            "name": "Chicken Doner Fries",
+            "description": "Crispy fries topped with sliced chicken doner and sauces",
+            "price": 600.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 38,
+            "name": "Beef Doner Fries",
+            "description": "Crispy fries topped with sliced beef doner and signature sauces",
+            "price": 750.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "name": "TURKISH SPECIALS",
+        "order": 2,
+        "items": [
+          {
+            "id": 39,
+            "name": "Chicken Grilled Sandwich",
+            "description": "Grilled chicken sandwich Turkish style",
+            "price": 750.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 40,
+            "name": "Beef Grilled Sandwich",
+            "description": "Grilled beef sandwich Turkish style",
+            "price": 950.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 41,
+            "name": "Half Dubai Shawaya",
+            "description": "Traditional roasted chicken shawaya half portion",
+            "price": 1400.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 42,
+            "name": "Full Dubai Shawaya",
+            "description": "Traditional roasted chicken shawaya full portion",
+            "price": 2500.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 43,
+            "name": "Add-on Rice",
+            "description": "Spiced Arabic rice serving for Shawaya",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 44,
+            "name": "Chicken Turkish Wrap",
+            "description": "Spiced chicken doner wrapped in soft flatbread",
+            "price": 600.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 45,
+            "name": "Beef Turkish Wrap",
+            "description": "Premium beef doner wrapped in soft flatbread",
+            "price": 900.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 46,
+            "name": "Chicken Turkish Doner",
+            "description": "Traditional Turkish chicken doner in pita bread",
+            "price": 850.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 47,
+            "name": "Beef Turkish Doner",
+            "description": "Traditional Turkish beef doner in pita bread",
+            "price": 1100.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "name": "SHAWARMA",
+        "order": 3,
+        "items": [
+          {
+            "id": 48,
+            "name": "Chicken Pouch Shawarma",
+            "description": "Pocket-style chicken shawarma pocket bread",
+            "price": 450.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 49,
+            "name": "Beef Pouch Shawarma",
+            "description": "Pocket-style beef shawarma pocket bread",
+            "price": 700.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 50,
+            "name": "Chicken Shawarma",
+            "description": "Classic Lebanese chicken shawarma wrap",
+            "price": 550.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 51,
+            "name": "Beef Shawarma",
+            "description": "Classic Lebanese beef shawarma wrap",
+            "price": 750.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 52,
+            "name": "Charcoal Shawarma Chicken",
+            "description": "Charcoal grilled chicken shawarma wrapped in flatbread",
+            "price": 750.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 53,
+            "name": "Chicken Shawarma Platter",
+            "description": "Deconstructed chicken shawarma served on a platter",
+            "price": 900.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 54,
+            "name": "Chicken Shawarma Platter (with cheese)",
+            "description": "Deconstructed chicken shawarma topped with melted cheese",
+            "price": 1000.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "name": "DESSERTS",
+        "order": 4,
+        "items": [
+          {
+            "id": 55,
+            "name": "Lotus Can Dessert",
+            "description": "Creamy Lotus Biscoff dessert served in a signature can",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 56,
+            "name": "Red Velvet Can Dessert",
+            "description": "Rich red velvet cake layered in a signature can",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 57,
+            "name": "Nutella Can Dessert",
+            "description": "Decadent Nutella chocolate dessert in a signature can",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "name": "ADD ONS",
+        "order": 5,
+        "items": [
+          {
+            "id": 58,
+            "name": "Cheese",
+            "description": "Extra melted cheese portion",
+            "price": 90.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 59,
+            "name": "Dip",
+            "description": "Signature Jushh garlic or spicy dip",
+            "price": 90.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 60,
+            "name": "Tortilla Bread",
+            "description": "Extra soft tortilla flatbread",
+            "price": 90.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 61,
+            "name": "Pita Bread",
+            "description": "Extra Lebanese pita pocket bread",
+            "price": 60.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 62,
+            "name": "Plain Fries",
+            "description": "Golden salted french fries side",
+            "price": 150.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "name": "BEVERAGES",
+        "order": 6,
+        "items": [
+          {
+            "id": 63,
+            "name": "Water",
+            "description": "Mineral water bottle",
+            "price": 80.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 64,
+            "name": "Soft Drink",
+            "description": "Chilled regular soft drink",
+            "price": 150.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 65,
+            "name": "Blueberry Mojito",
+            "description": "Refreshing blueberry mocktail",
+            "price": 290.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 66,
+            "name": "Strawberry Mojito",
+            "description": "Refreshing strawberry mocktail",
+            "price": 290.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 67,
+            "name": "Green Apple Mojito",
+            "description": "Refreshing green apple mocktail",
+            "price": 290.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 68,
+            "name": "Peach Mojito",
+            "description": "Refreshing peach mocktail",
+            "price": 290.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 69,
+            "name": "Lemon Mojito",
+            "description": "Refreshing lemon mint mocktail",
+            "price": 290.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "tandooristoppk": {
+    "slug": "tandooristoppk",
+    "category_count": 12,
+    "item_count": 59,
+    "categories": [
+      {
+        "id": 17,
+        "name": "TANDOORI CHICKEN",
+        "order": 1,
+        "items": [
+          {
+            "id": 70,
+            "name": "Tandoori Chicken Bone (Cheese Naan Single)",
+            "description": "Tandoori chicken (with bone) served with 1 cheese naan",
+            "price": 1150.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1288_IMG_7585.JPG_xhiffo",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 71,
+            "name": "Tandoori Chicken Boneless (Cheese Naan Single)",
+            "description": "Boneless tandoori chicken served with 1 cheese naan",
+            "price": 1350.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1289_IMG_7585.JPG_cxjp6v",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 72,
+            "name": "Tandoori Chicken Bone (Cheese Naan Double)",
+            "description": "Tandoori chicken (with bone) served with 2 cheese naans",
+            "price": 1950.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1290_IMG_7589.JPG_ylld2e",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 73,
+            "name": "Tandoori Chicken Boneless (Cheese Naan Double)",
+            "description": "Boneless tandoori chicken served with 2 cheese naans",
+            "price": 2299.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1291_IMG_7589.JPG_of3jsh",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 74,
+            "name": "Tandoori Chicken Bone (With Rice)",
+            "description": "Tandoori chicken (with bone) served with aromatic rice",
+            "price": 980.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1292_IMG_7586.JPG_vjhc9h",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 75,
+            "name": "Tandoori Chicken Boneless (With Rice)",
+            "description": "Boneless tandoori chicken served with aromatic rice",
+            "price": 780.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1293_IMG_7586.JPG_jazoj8",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 76,
+            "name": "Tandoori Chicken Bone (Plain)",
+            "description": "Traditional flame-grilled tandoori chicken (with bone)",
+            "price": 750.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1294_IMG_7590.JPG_ree9bg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 77,
+            "name": "Tandoori Chicken Boneless (Plain)",
+            "description": "Traditional flame-grilled boneless tandoori chicken",
+            "price": 899.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1295_IMG_7590.JPG_edtoye",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "name": "CHICKEN SAJJI",
+        "order": 2,
+        "items": [
+          {
+            "id": 78,
+            "name": "Quarter Sajji",
+            "description": "Slow-roasted quarter chicken sajji",
+            "price": 799.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1296_IMG_7587.JPG_cbsi5z",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 79,
+            "name": "Half Sajji",
+            "description": "Slow-roasted half chicken sajji",
+            "price": 1400.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1297_IMG_7587.JPG_s9a0wa",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 80,
+            "name": "Full Sajji",
+            "description": "Slow-roasted full chicken sajji",
+            "price": 2500.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1298_IMG_7587.JPG_ozqr4i",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 81,
+            "name": "Peri Peri Quarter Sajji",
+            "description": "Spiced peri peri quarter chicken sajji",
+            "price": 900.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1299_IMG_7587.JPG_ia9lxc",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 82,
+            "name": "Peri Peri Half Sajji",
+            "description": "Spiced peri peri half chicken sajji",
+            "price": 1600.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1300_IMG_7587.JPG_iyvbn9",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 83,
+            "name": "Peri Peri Full Sajji",
+            "description": "Spiced peri peri full chicken sajji",
+            "price": 2900.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1301_IMG_7587.JPG_irp4qj",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 19,
+        "name": "PARATHA ROLL",
+        "order": 3,
+        "items": [
+          {
+            "id": 87,
+            "name": "Chicken Paratha Roll",
+            "description": "Classic chicken paratha roll",
+            "price": 499.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1305_IMG_7588.JPG_h1xhsz",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 84,
+            "name": "Full Stop Roll",
+            "description": "TandooriStopp signature giant roll",
+            "price": 650.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1302_IMG_7591.JPG_veizgo",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 85,
+            "name": "Tandoori Chicken Roll",
+            "description": "Tandoori chicken chunks wrapped in paratha",
+            "price": 520.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1303_IMG_7591.JPG_kooigy",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 86,
+            "name": "Malai Boti Roll",
+            "description": "Creamy malai boti wrapped in paratha",
+            "price": 550.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1304_IMG_7592.JPG_fupdwk",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "name": "TAWA CHICKEN",
+        "order": 4,
+        "items": [
+          {
+            "id": 88,
+            "name": "Tawa Chicken",
+            "description": "Spicy stir-fried tawa chicken piece",
+            "price": 750.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 89,
+            "name": "Tawa Chicken Platter with 2 Roti (Single Serving)",
+            "description": "Single serving of stir-fried tawa chicken platter",
+            "price": 800.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 90,
+            "name": "Tawa Chicken Platter with 4 Roti (Double Serving)",
+            "description": "Double serving of stir-fried tawa chicken platter",
+            "price": 1400.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "name": "BBQ",
+        "order": 5,
+        "items": [
+          {
+            "id": 95,
+            "name": "Seekh Kabab (Per Seekh)",
+            "description": "Single seekh of spiced chicken seekh kabab",
+            "price": 250.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1313_IMG_7578.JPG_cilvdf",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 93,
+            "name": "Tikka Boti (Per Seekh)",
+            "description": "Single seekh of classic tikka boti",
+            "price": 400.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1311_IMG_7583.JPG_khkxj9",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 91,
+            "name": "Malai Boti (Per Seekh)",
+            "description": "Single seekh of creamy grilled malai boti",
+            "price": 450.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1309_IMG_7584.JPG_sxoyyb",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 92,
+            "name": "Malai Boti (Per KG)",
+            "description": "One KG of creamy grilled malai boti",
+            "price": 2200.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 94,
+            "name": "Tikka Boti (Per KG)",
+            "description": "One KG of classic tikka boti",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 96,
+            "name": "Seekh Kabab (Per KG)",
+            "description": "One KG of spiced chicken seekh kabab",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 22,
+        "name": "HANDI",
+        "order": 6,
+        "items": [
+          {
+            "id": 97,
+            "name": "Nawabi Handi Boneless",
+            "description": "Rich royal Nawabi handi boneless serving",
+            "price": 2200.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 98,
+            "name": "Shahi Kabab Masala Handi Boneless",
+            "description": "Spiced shahi kabab masala handi boneless",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 99,
+            "name": "Mughlai Cheese Handi Boneless",
+            "description": "Creamy Mughlai cheese handi boneless",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 100,
+            "name": "Reshmi Handi Boneless",
+            "description": "Velvety reshmi handi boneless",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 101,
+            "name": "Sha Jahani Handi Boneless",
+            "description": "Royal spice mix Sha Jahani handi boneless",
+            "price": 1999.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "name": "KARAHI",
+        "order": 7,
+        "items": [
+          {
+            "id": 102,
+            "name": "Chicken Karahi (Half)",
+            "description": "Traditional wok chicken karahi half portion",
+            "price": 1300.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 103,
+            "name": "Chicken Karahi (Full)",
+            "description": "Traditional wok chicken karahi full portion",
+            "price": 2500.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 104,
+            "name": "Chicken White Karahi (Half)",
+            "description": "Creamy white chicken karahi half portion",
+            "price": 1500.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 105,
+            "name": "Chicken White Karahi (Full)",
+            "description": "Creamy white chicken karahi full portion",
+            "price": 2700.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 106,
+            "name": "Chicken Kabab Masala (Half)",
+            "description": "Chicken kabab masala half portion",
+            "price": 1350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 107,
+            "name": "Chicken Kabab Masala (Full)",
+            "description": "Chicken kabab masala full portion",
+            "price": 2600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "name": "FAMILY PLATTER",
+        "order": 8,
+        "items": [
+          {
+            "id": 108,
+            "name": "Family Tandoori Platter",
+            "description": "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos",
+            "price": 7000.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "name": "ADD ONS",
+        "order": 9,
+        "items": [
+          {
+            "id": 114,
+            "name": "Salad",
+            "description": "Fresh seasonal salad",
+            "price": 350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 115,
+            "name": "Raita",
+            "description": "Yogurt herb raita dip",
+            "price": 70.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 111,
+            "name": "Cheese Naan",
+            "description": "Naan stuffed with melted cheese",
+            "price": 500.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1329_IMG_7581.JPG_p8inf5",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 109,
+            "name": "Roghni Naan",
+            "description": "Fluffy sesame roghni naan",
+            "price": 200.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1327_IMG_7582.JPG_xohvv8",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 110,
+            "name": "Butter Naan",
+            "description": "Buttery flatbread naan",
+            "price": 350.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1328_IMG_7582.JPG_ds5jeq",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 113,
+            "name": "Plain Roti",
+            "description": "Hot whole wheat roti",
+            "price": 30.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1331_IMG_7582.JPG_f1ie9j",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 116,
+            "name": "Puri Paratha",
+            "description": "Flaky deep-fried puri paratha",
+            "price": 270.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1334_IMG_7580.JPG_cr8hod",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 112,
+            "name": "Rice",
+            "description": "Extra serving of aromatic rice",
+            "price": 350.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1330_IMG_7579.JPG_nsb0dw",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "name": "MOJITOS",
+        "order": 10,
+        "items": [
+          {
+            "id": 117,
+            "name": "Blueberry Mojito",
+            "description": "Blueberry refreshing mocktail",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1335_IMG_7576.JPG_ncny4r",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 118,
+            "name": "Strawberry Mojito",
+            "description": "Strawberry refreshing mocktail",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1336_IMG_7576.JPG_ihc3zw",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 119,
+            "name": "Peach Mojito",
+            "description": "Peach refreshing mocktail",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1337_IMG_7576.JPG_ssjsaq",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 120,
+            "name": "Apple Mojito",
+            "description": "Apple refreshing mocktail",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1338_IMG_7576.JPG_b0buvx",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 27,
+        "name": "SUNDAE",
+        "order": 11,
+        "items": [
+          {
+            "id": 121,
+            "name": "Oreo Sundae",
+            "description": "Oreo cookies and vanilla ice cream sundae",
+            "price": 400.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 122,
+            "name": "Lotus Three Sundae",
+            "description": "Lotus Biscoff crumbs and sauce sundae",
+            "price": 400.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 123,
+            "name": "Nutella Sundae",
+            "description": "Nutella chocolate fudge sundae",
+            "price": 400.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 28,
+        "name": "DRINKS",
+        "order": 12,
+        "items": [
+          {
+            "id": 124,
+            "name": "Water (Small)",
+            "description": "Chilled mineral water",
+            "price": 80.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 125,
+            "name": "Soft Drink (300ml)",
+            "description": "Carbonated soft drink regular",
+            "price": 120.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 126,
+            "name": "Soft Drink (Tin)",
+            "description": "Carbonated soft drink tin can",
+            "price": 150.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 127,
+            "name": "Fresh Lime",
+            "description": "Zesty fresh lime soda",
+            "price": 350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 128,
+            "name": "Mint Margaritas",
+            "description": "Minty blended ice margarita",
+            "price": 300.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1346_IMG_7577.JPG_faehdg",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "sandmelts": {
+    "slug": "sandmelts",
+    "category_count": 6,
+    "item_count": 24,
+    "categories": [
+      {
+        "id": 29,
+        "name": "STEAK SANDWICHES",
+        "order": 1,
+        "items": [
+          {
+            "id": 129,
+            "name": "Chicken Black Pepper Sandwich",
+            "description": "Iceberg, black pepper, onions, mushrooms, Garlic Mayo, melted cheese",
+            "price": 900.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 130,
+            "name": "Beef Black Pepper Sandwich",
+            "description": "Iceberg, black pepper, onions, mushrooms, Garlic Mayo, melted cheese",
+            "price": 1300.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 131,
+            "name": "Chicken Fajita Cheese Steak",
+            "description": "Spicy Fajita Chicken, Capsicum, Onion, Tomato, Olives, Honey Mustard, melted Cheese",
+            "price": 900.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 132,
+            "name": "Beef Fajita Cheese Steak",
+            "description": "Spicy Fajita Beef, Capsicum, Onion, Tomato, Olives, Honey Mustard, melted Cheese",
+            "price": 1300.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 133,
+            "name": "Chicken Jalapeno Cheese Steak",
+            "description": "Iceberg, grilled onions, Green Pepper, jalapenos, creamy Jalapeno, melted cheese",
+            "price": 900.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 134,
+            "name": "Beef Jalapeno Cheese Steak",
+            "description": "Iceberg, grilled onions, Green Pepper, jalapenos, creamy Jalapeno, melted cheese",
+            "price": 1300.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 30,
+        "name": "LOADED FRIES",
+        "order": 2,
+        "items": [
+          {
+            "id": 135,
+            "name": "Saucy Fries",
+            "description": "All natural potatoes, homemade sauces, jalapenos and olives",
+            "price": 500.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 136,
+            "name": "Chicken Steak Fries",
+            "description": "Diced chicken, jalapenos, bell peppers, olives, signature sauces",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 137,
+            "name": "Beef Steak Fries",
+            "description": "Beef steak chunks, olives, jalapenos, signature sauces",
+            "price": 750.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 31,
+        "name": "NEWYORK RICE",
+        "order": 3,
+        "items": [
+          {
+            "id": 138,
+            "name": "Chicken Steak Rice",
+            "description": "Boneless chicken steak pcs with signature sauces & steamed rice",
+            "price": 600.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 139,
+            "name": "Beef Steak Rice",
+            "description": "Boneless beef steak pcs with signature sauces & steamed rice",
+            "price": 750.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 32,
+        "name": "TORTILLA GRABS",
+        "order": 4,
+        "items": [
+          {
+            "id": 140,
+            "name": "Chicken Grab",
+            "description": "Crispy fried chicken, Fries, Iceberg, homemade zesty sauces",
+            "price": 800.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 141,
+            "name": "Beef Grab",
+            "description": "Juicy beef steak chunks, fries, grilled capsicum, onion, Iceberg",
+            "price": 1200.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 33,
+        "name": "BEVERAGES",
+        "order": 5,
+        "items": [
+          {
+            "id": 142,
+            "name": "Water",
+            "description": "Chilled mineral water",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 143,
+            "name": "Can",
+            "description": "Soft drink can",
+            "price": 150.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 144,
+            "name": "Coffee",
+            "description": "Brewed hot coffee",
+            "price": 350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 34,
+        "name": "ADD ONS",
+        "order": 6,
+        "items": [
+          {
+            "id": 145,
+            "name": "Garlic Sauce",
+            "description": "Premium garlic sauce dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 146,
+            "name": "Jalapeno Sauce",
+            "description": "Creamy jalapeno dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 147,
+            "name": "Honey Mustard Sauce",
+            "description": "Sweet honey mustard dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 148,
+            "name": "Mint Sauce",
+            "description": "Cool mint dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 149,
+            "name": "Chipotle Sauce",
+            "description": "Smoky chipotle dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 150,
+            "name": "Green Atomic Sauce",
+            "description": "Spicy green atomic dressing",
+            "price": 100.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 151,
+            "name": "Jalapeno",
+            "description": "Extra jalapeno slices portion",
+            "price": 80.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 152,
+            "name": "Black Olives",
+            "description": "Extra black olives portion",
+            "price": 80.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "birdmanfoodspk": {
+    "slug": "birdmanfoodspk",
+    "category_count": 1,
+    "item_count": 3,
+    "categories": [
+      {
+        "id": 35,
+        "name": "CHICKEN SPECIALS",
+        "order": 1,
+        "items": [
+          {
+            "id": 153,
+            "name": "Crispy Fried Chicken (2pcs)",
+            "description": "Golden, crunchy, juice hand-breaded fried chicken",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 154,
+            "name": "Flame Grilled Burger",
+            "description": "Juicy grilled chicken breast with classic dressing",
+            "price": 590.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 155,
+            "name": "Hot Wings (6pcs)",
+            "description": "Spicy buffalo wings served with ranch dip",
+            "price": 380.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  },
+  "getafomo": {
+    "slug": "getafomo",
+    "category_count": 2,
+    "item_count": 5,
+    "categories": [
+      {
+        "id": 36,
+        "name": "ARTISANAL COFFEE",
+        "order": 1,
+        "items": [
+          {
+            "id": 158,
+            "name": "Hazelnut Cappuccino",
+            "description": "Hot cappuccino infused with aromatic hazelnut syrup",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 157,
+            "name": "Spanish Latte Chilled",
+            "description": "Sweetened condensed milk mixed with bold espresso and ice",
+            "price": 490.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 156,
+            "name": "Espresso Double",
+            "description": "Strong double shot of premium arabica coffee",
+            "price": 350.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      },
+      {
+        "id": 37,
+        "name": "BAKERY",
+        "order": 2,
+        "items": [
+          {
+            "id": 159,
+            "name": "Butter Croissant",
+            "description": "Flaky French butter croissant freshly baked",
+            "price": 280.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 160,
+            "name": "Chocolate Fudge Slice",
+            "description": "Decadent slice of chocolate fudge cake",
+            "price": 450.0,
+            "image": null,
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          }
+        ]
+      }
+    ]
+  }
+}
