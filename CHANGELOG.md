@@ -1,6 +1,17 @@
 
 # Changelog
 
+## 2026-08-01 Sales Engine Overhaul, Universal Order Mode & Live SLA Monitoring (Release v48)
+- **Universal Order Mode Engine**: Implemented order mode toggle (Delivery / Takeaway / Dine-In) across `HomeScreen`, `CartScreen`, and `CheckoutScreen`. Dine-In orders populate `table_number` and bypass delivery address requirements & delivery fees. Added Dine-In/Takeaway badges to `OrderManagement` Kanban.
+- **App Promo Code Engine (`CartScreen.tsx`)**: Added promo code text input field with live DRF validation hitting `POST /api/coupons/validate/`, discount preview, error shake animation, applied promo chip, and dynamic subtotal reduction.
+- **1-Tap Reorder API Endpoint**: Created `ReorderView` (`POST /api/orders/<pk>/reorder/`) in `orders/views.py` returning past order payload with DB stock availability verification and `unavailable_items` segregation.
+- **Persistent Search & History (`SearchScreen.tsx`)**: Saved recent searches to `AsyncStorage` (`@getfood_recent_searches`) with clear button and `onSubmitEditing` keyboard search handler.
+- **Admin Live SLA Monitoring Timers (`OrderManagement.tsx`)**: Implemented live elapsed time calculation badges on active order cards (`<15m` green, `15-30m` amber, `>30m` overdue pulsing red).
+- **SuperDashboard Today vs. Yesterday Growth Trends (`SuperDashboard.tsx`)**: Added automated sales & order count trend indicators (`▲ +X% vs yesterday`) comparing same-window performance.
+- **GetFood App Rebrand Configuration**: Updated `app.json` name, slug, splash screen color, and cleaned up remaining hardcoded brand strings across `AuthScreen.tsx` and `HomeScreen.tsx`.
+- **Backend Clean Review Model Integration**: Integrated `RestaurantReview` model and `RestaurantReviewSerializer` across `orders/views.py` (`OrderReviewView`, `RestaurantReviewsView`) resolving Django schema check clashes.
+- **Heroku v48 Deployment**: Successfully deployed to production Heroku (`https://getfoodpk-fd9b20442fcf.herokuapp.com`) applying migrations `orders.0013`, `promotions.0004`, and `restaurants.0014`.
+
 ## 2026-07-26 GetFood Master Launch-Readiness & Security Hardening (Release v27)
 - **PII Order Endpoint Security (BLOCK-01)**: Enforced owner check and guest `tracking_token` (UUID) authorization on `OrderDetailView`. Unauthenticated `?phone=` history lookups completely eliminated in `MyOrdersListView`.
 - **GetFood Mobile App Rebranding (BLOCK-03)**: Updated app display name, slug, bundle identifier (`com.abdullah958.getfood`), and permission prompts in `app/app.json`.

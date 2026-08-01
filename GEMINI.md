@@ -159,6 +159,13 @@ FoodSphere/
 | Branch Loading Race Condition Fix | ✅ Completed (Suppressed false branch closed alerts on Checkout) | Done |
 | Dispatch Modal Rider Hydration Fix | ✅ Completed (Active live API query fetch & multi-type branch matching) | Done |
 | Tenant & Branch Scoped Order ID Overhaul | ✅ Completed (Human-readable `display_order_id` TS-LC-1001 & data migration) | Done |
+| Universal Order Mode Engine (Dine-In/Takeaway) | ✅ Completed (Order mode toggle, table_number, delivery fee bypass) | Done |
+| Cart Promo Code Input Engine & Validation | ✅ Completed (`CartScreen.tsx` input + `/coupons/validate/` API discount preview) | Done |
+| 1-Tap Reorder API Endpoint | ✅ Completed (`POST /api/orders/<pk>/reorder/` with stock availability check) | Done |
+| Persistent Search & History | ✅ Completed (`AsyncStorage` `@getfood_recent_searches` with clear & submit handlers) | Done |
+| Admin Live SLA Monitoring Timers | ✅ Completed (`OrderManagement.tsx` <15m green, 15-30m amber, >30m overdue pulse) | Done |
+| SuperDashboard Today vs Yesterday Trends | ✅ Completed (`SuperDashboard.tsx` sales & order count growth indicators) | Done |
+| GetFood App Rebrand Configuration | ✅ Completed (`app.json`, `AuthScreen`, `HomeScreen` branding updated) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -196,6 +203,9 @@ FoodSphere/
 16. **Universal Live Track API:** Endpoint `GET /api/v1/orders/<pk>/track/` is unauthenticated (`AllowAny`) to support guest and user real-time order tracking without login header race conditions.
 17. **Dispatch Modal Rider Hydration Invariant:** Assign Rider modal MUST perform an active live API fetch (`fetchRiders({ branch_id, status: 'AVAILABLE', is_active: true })`) upon opening, using multi-type branch comparison (`Number(r.branch) === Number(targetBranchId)` || slug || name) to prevent stale cached rider state.
 18. **Tenant & Branch-Scoped Order ID Invariant:** `Order.display_order_id` MUST be populated upon order creation in the format `{BRAND_CODE}-{BRANCH_CODE}-{SEQUENCE}` (e.g., `TS-LC-1001`, `JK-JT-1001`). Sequence counters MUST be scoped per branch/tenant starting at 1001. All UI components (Admin Kanban, Order Receipts, Dispatch Modals, Customer Tracking) MUST display `order.display_order_id || `#${order.id}``.
+19. **Universal Order Mode Invariant:** `Order.order_type` MUST support `DELIVERY`, `TAKEAWAY`, and `DINE_IN`. Dine-In orders MUST populate `table_number` and bypass delivery address requirements & delivery fees.
+20. **Reorder Engine Invariant:** `ReorderView` (`POST /api/orders/<pk>/reorder/`) MUST validate item stock availability against current DB state and segregate out-of-stock items into an `unavailable_items` list.
+21. **Persistent Search & App Rebrand Invariant:** App Expo configuration MUST be named `GetFood` in `app.json`. Recent search history MUST be persisted locally via `AsyncStorage` (`@getfood_recent_searches`).
 
 ---
 
