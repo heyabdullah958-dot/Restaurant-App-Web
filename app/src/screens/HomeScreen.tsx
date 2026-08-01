@@ -555,7 +555,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.feedbackBannerTitle}>Bon Appétit! How was your meal?</Text>
                   <Text style={styles.feedbackBannerSub}>
-                    Rate your recent order from {unratedOrder.restaurant?.name || unratedOrder.restaurant_name || 'FoodSphere'} (#{unratedOrder.id}) ⭐
+                    Rate your recent order from {unratedOrder.restaurant?.name || unratedOrder.restaurant_name || 'GetFood'} (#{unratedOrder.id}) ⭐
                   </Text>
                 </View>
               </View>

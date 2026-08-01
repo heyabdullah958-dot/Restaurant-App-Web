@@ -1,3 +1,32 @@
 {
-  "expo": {}
+  "expo": {
+    "name": "GetFood",
+    "slug": "getfood-pk",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./app/src/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./app/src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E8364E"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.getfood.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./app/src/assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.getfood.app"
+    },
+    "web": {
+      "favicon": "./app/src/assets/favicon.png"
+    }
+  }
 }

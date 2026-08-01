@@ -321,6 +321,32 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
+  const renderSLABadge = (createdAt: string, status: string) => {
+    if (!['received', 'preparing', 'out_for_delivery'].includes(status)) {
+      return null;
+    }
+    const elapsedMins = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000);
+    if (elapsedMins < 15) {
+      return (
+        <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-2 py-0.5 rounded flex items-center gap-1">
+          ⏱️ {elapsedMins}m elapsed
+        </span>
+      );
+    } else if (elapsedMins <= 30) {
+      return (
+        <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded flex items-center gap-1">
+          ⚠️ {elapsedMins}m elapsed
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-[10px] font-black uppercase tracking-wider bg-red-500/30 border border-red-500/60 text-red-300 px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
+          🚨 {elapsedMins}m OVERDUE!
+        </span>
+      );
+    }
+  };
+
   if (!restaurant && restaurants.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -705,6 +731,7 @@ export const OrderManagement: React.FC = () => {
                                 <Clock size={10} className="text-slate-500" />
                                 {formatOrderTime(order.created_at)}
                               </span>
+                              {renderSLABadge(order.created_at, order.status)}
                             </div>
                           </div>
 

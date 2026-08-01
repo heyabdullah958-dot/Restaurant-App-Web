@@ -3,7 +3,12 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Order
-from .serializers import OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer, AdminOrderListSerializer
+from restaurants.models import RestaurantReview
+from restaurants.serializers import RestaurantReviewSerializer
+from .serializers import (
+    OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer,
+    AdminOrderListSerializer
+)
 
 
 
@@ -460,3 +465,109 @@ class OrderAssignRiderView(APIView):
         })
 
 
+class ReorderView(APIView):
+    """
+    POST /api/orders/<pk>/reorder/
+    Returns a structured cart payload from a past order for 1-tap reorder.
+    Validates item availability against current DB state.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            order = Order.objects.prefetch_related(
+                'items__menu_item'
+            ).get(pk=pk, user=request.user)
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        available_items = []
+        unavailable_items = []
+
+        for item in order.items.all():
+            mi = item.menu_item
+            if not mi.is_available:
+                unavailable_items.append({
+                    'menu_item_id': mi.id,
+                    'name': mi.name,
+                    'reason': 'out_of_stock',
+                })
+            else:
+                available_items.append({
+                    'menu_item_id': mi.id,
+                    'name': mi.name,
+                    'quantity': item.quantity,
+                    'price': float(mi.price),
+                    'image': mi.image or '',
+                    'selected_options': item.selected_options or [],
+                })
+
+        return Response({
+            'restaurant_id': order.restaurant_id,
+            'restaurant_name': order.restaurant.name,
+            'items': available_items,
+            'unavailable_items': unavailable_items,
+        })
+
+
+class OrderReviewView(APIView):
+    """
+    POST /api/orders/<pk>/review/ — Submit review for a delivered order.
+    GET  /api/orders/<pk>/review/ — Get review for an order.
+    Only allowed for delivered orders. One review per order.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if order.status != 'delivered':
+            return Response(
+                {'error': 'Reviews can only be submitted for delivered orders.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if hasattr(order, 'review') and order.review is not None:
+            return Response(
+                {'error': 'A review has already been submitted for this order.'},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        serializer = RestaurantReviewSerializer(data={
+            **request.data,
+            'order': pk,
+            'restaurant': order.restaurant_id,
+        })
+        if serializer.is_valid():
+            review = serializer.save(
+                user=request.user if request.user.is_authenticated else None
+            )
+            return Response(RestaurantReviewSerializer(review).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk)
+            if not hasattr(order, 'review') or order.review is None:
+                return Response({'error': 'Review not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(RestaurantReviewSerializer(order.review).data)
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class RestaurantReviewsView(generics.ListAPIView):
+    """
+    GET /api/restaurants/<slug>/reviews/
+    Paginated list of reviews for a restaurant (most recent first).
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RestaurantReviewSerializer
+
+    def get_queryset(self):
+        slug = self.kwargs.get('slug')
+        return RestaurantReview.objects.filter(
+            restaurant__slug=slug
+        ).select_related('order', 'user').order_by('-created_at')

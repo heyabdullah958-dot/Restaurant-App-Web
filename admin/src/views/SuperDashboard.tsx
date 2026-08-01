@@ -128,6 +128,30 @@ export const SuperDashboard: React.FC = () => {
   const totalOrders = filteredOrders.length;
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+  const endOfYesterday = new Date(startOfToday);
+
+  const yesterdayFilteredOrders = (scope === 'selected' && selectedBrand ? orders.filter(o => 
+    Number(o.restaurant_id) === Number(selectedBrand.id) ||
+    (o.restaurant_name && selectedBrand.name && 
+     o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === selectedBrand.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  ) : orders).filter(o => {
+    const d = new Date(o.created_at);
+    return d >= startOfYesterday && d < endOfYesterday;
+  });
+
+  const yesterdayRevenue = yesterdayFilteredOrders.reduce((sum, o) => sum + o.total, 0);
+  const yesterdayOrderCount = yesterdayFilteredOrders.length;
+
+  const salesTrend = yesterdayRevenue > 0
+    ? Math.round(((totalRevenue - yesterdayRevenue) / yesterdayRevenue) * 100)
+    : 0;
+
+  const ordersTrend = yesterdayOrderCount > 0
+    ? Math.round(((totalOrders - yesterdayOrderCount) / yesterdayOrderCount) * 100)
+    : 0;
+
   // Metrics data
   const stats = [
     {
@@ -135,7 +159,11 @@ export const SuperDashboard: React.FC = () => {
       value: `Rs. ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: <DollarSign className="text-blue-500" size={20} />,
       bgColor: 'bg-blue-500/10',
-      change: `${timeframe === 'all' ? 'All-time' : timeframe === 'today' ? "Today's" : timeframe === 'week' ? "This week's" : "This month's"} sales summary`,
+      change: timeframe === 'today' ? (
+        <span className={salesTrend >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+          {salesTrend >= 0 ? `▲ +${salesTrend}%` : `▼ ${salesTrend}%`} vs yesterday (Rs. {yesterdayRevenue.toFixed(0)})
+        </span>
+      ) : `${timeframe === 'all' ? 'All-time' : timeframe === 'week' ? "This week's" : "This month's"} sales summary`,
     },
     {
       title: 'Active Restaurant Brands',
@@ -149,7 +177,11 @@ export const SuperDashboard: React.FC = () => {
       value: totalOrders.toLocaleString(),
       icon: <ClipboardCheck className="text-violet-500" size={20} />,
       bgColor: 'bg-violet-500/10',
-      change: `${timeframe === 'all' ? 'All-time' : timeframe === 'today' ? "Today's" : timeframe === 'week' ? "This week's" : "This month's"} order count`,
+      change: timeframe === 'today' ? (
+        <span className={ordersTrend >= 0 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+          {ordersTrend >= 0 ? `▲ +${ordersTrend}%` : `▼ ${ordersTrend}%`} vs yesterday ({yesterdayOrderCount} orders)
+        </span>
+      ) : `${timeframe === 'all' ? 'All-time' : timeframe === 'week' ? "This week's" : "This month's"} order count`,
     },
     {
       title: 'Avg Order Value (AOV)',

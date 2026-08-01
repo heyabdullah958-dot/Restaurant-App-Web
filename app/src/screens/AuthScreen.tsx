@@ -255,7 +255,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       }));
       if (registerUser.fulfilled.match(result)) {
         showAlert(
-          '🎉 Welcome to FoodSphere!',
+          '🎉 Welcome to GetFood!',
           "Your account has been created successfully! You've received bonus loyalty points credited to your wallet. Start ordering to earn more rewards!"
         );
       }

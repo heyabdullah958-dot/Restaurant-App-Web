@@ -298,6 +298,7 @@ class Challenger2OperationsTestCase(APITestCase):
             valid_from=timezone.now() - timedelta(days=1),
             valid_to=timezone.now() + timedelta(days=1),
             usage_limit=3,
+            per_user_limit=10,
             times_used=0,
             is_active=True
         )

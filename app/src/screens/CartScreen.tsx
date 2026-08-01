@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   PanResponder,
   Animated,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,6 +27,7 @@ import { updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlic
 import { placeOrder } from '../store/orderSlice';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { getImageUrl } from '../services/fallbackData';
+import api from '../services/api';
 
 type RootStackParamList = {
   Home: undefined;
@@ -79,6 +81,60 @@ export default function CartScreen() {
   const cart = useSelector((state: RootState) => state.cart);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discount: number;
+    discount_type: string;
+  } | null>(null);
+  const [promoError, setPromoError] = useState('');
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  const shakePromoInput = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setPromoError('');
+    try {
+      const res = await api.post('/coupons/validate/', {
+        code: promoCode.trim().toUpperCase(),
+        subtotal: cart.totalAmount,
+        restaurant_id: cart.restaurantId,
+      });
+      setAppliedPromo({
+        code: res.data.code,
+        discount: parseFloat(res.data.discount),
+        discount_type: res.data.discount_type,
+      });
+      setPromoCode('');
+      setPromoError('');
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.code?.[0] ||
+        'Invalid or expired promo code.';
+      setPromoError(msg);
+      shakePromoInput();
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoError('');
+  };
+
   React.useEffect(() => {
     dispatch(fetchRestaurants());
   }, [dispatch]);
@@ -123,8 +179,15 @@ export default function CartScreen() {
     );
   };
 
+  const promoDiscount = appliedPromo ? appliedPromo.discount : 0;
+  const deliveryFee = activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0;
+  const grandTotal = Math.max(0, cart.totalAmount - promoDiscount + deliveryFee);
+
   const handleProceedToCheckout = () => {
-    navigation.navigate('Checkout');
+    navigation.navigate('Checkout', {
+      coupon_code: appliedPromo?.code || null,
+      discount_amount: promoDiscount,
+    });
   };
 
   if (cart.items.length === 0) {
@@ -230,6 +293,51 @@ export default function CartScreen() {
           })}
         </View>
 
+        {/* Promo Code Section */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionHeader}>Promo Code</Text>
+          {appliedPromo ? (
+            <View style={styles.promoAppliedRow}>
+              <View style={styles.promoAppliedBadge}>
+                <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
+                <Text style={styles.promoAppliedCode}>{appliedPromo.code}</Text>
+                <Text style={styles.promoAppliedSaving}>— Rs. {appliedPromo.discount.toFixed(0)} saved!</Text>
+              </View>
+              <TouchableOpacity activeOpacity={0.75} onPress={handleRemovePromo} style={styles.promoRemoveBtn}>
+                <Ionicons name="close" size={18} color={COLORS.danger} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Animated.View style={[styles.promoInputRow, { transform: [{ translateX: shakeAnim }] }]}>
+              <TextInput
+                style={styles.promoInput}
+                placeholder="Enter promo code"
+                placeholderTextColor={COLORS.gray}
+                value={promoCode}
+                onChangeText={(t) => { setPromoCode(t.toUpperCase()); setPromoError(''); }}
+                autoCapitalize="characters"
+                returnKeyType="done"
+                onSubmitEditing={handleApplyPromo}
+              />
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.promoApplyBtn, (!promoCode.trim() || promoLoading) && { opacity: 0.5 }]}
+                onPress={handleApplyPromo}
+                disabled={!promoCode.trim() || promoLoading}
+              >
+                {promoLoading ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  <Text style={styles.promoApplyText}>Apply</Text>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+          {!!promoError && (
+            <Text style={styles.promoErrorText}>{promoError}</Text>
+          )}
+        </View>
+
         {/* Bill Summary */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Bill Summary</Text>
@@ -242,18 +350,22 @@ export default function CartScreen() {
             <Text style={styles.billValue}>
               {activeRestaurant && Number(activeRestaurant.delivery_fee) === 0
                 ? '🎉 Free!'
-                : `Rs. ${activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0}`}
+                : `Rs. ${deliveryFee}`}
             </Text>
           </View>
-          <View style={styles.billRow}>
-            <Text style={[styles.billLabel, { color: COLORS.success }]}>Discount</Text>
-            <Text style={[styles.billValue, { color: COLORS.success }]}>— Rs. 0</Text>
-          </View>
+          {promoDiscount > 0 && (
+            <View style={styles.billRow}>
+              <Text style={[styles.billLabel, { color: COLORS.success }]}>
+                Promo ({appliedPromo?.code})
+              </Text>
+              <Text style={[styles.billValue, { color: COLORS.success, fontWeight: '700' }]}>
+                — Rs. {promoDiscount.toFixed(0)}
+              </Text>
+            </View>
+          )}
           <View style={[styles.billRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>
-              Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
-            </Text>
+            <Text style={styles.totalValue}>Rs. {grandTotal.toFixed(0)}</Text>
           </View>
           {/* Loyalty Points Earn Preview */}
           <View style={styles.loyaltyHint}>
@@ -261,7 +373,7 @@ export default function CartScreen() {
             <Text style={styles.loyaltyHintText}>
               You'll earn{' '}
               <Text style={{ fontWeight: 'bold' }}>
-                {Math.floor((cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)) / 100)}
+                {Math.floor(grandTotal / 100)}
               </Text>{' '}
               loyalty points on this order!
             </Text>
@@ -277,9 +389,7 @@ export default function CartScreen() {
           onPress={handleProceedToCheckout}
         >
           <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
-          <Text style={styles.checkoutBtnAmount}>
-            Rs. {cart.totalAmount + (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0)}
-          </Text>
+          <Text style={styles.checkoutBtnAmount}>Rs. {grandTotal.toFixed(0)}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -567,6 +677,76 @@ const styles = StyleSheet.create({
     color: COLORS.secondary,
     marginLeft: 6,
     flex: 1,
+    fontWeight: '500',
+  },
+  // Promo Code styles
+  promoInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  promoInput: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: COLORS.lightGray,
+    borderRadius: 10,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1,
+    color: COLORS.dark,
+    backgroundColor: COLORS.neutral50,
+  },
+  promoApplyBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 11,
+    borderRadius: 10,
+    minWidth: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  promoApplyText: {
+    color: COLORS.white,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  promoAppliedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,196,140,0.08)',
+    borderRadius: 10,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0,196,140,0.25)',
+  },
+  promoAppliedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 6,
+  },
+  promoAppliedCode: {
+    fontWeight: '700',
+    color: COLORS.success,
+    fontSize: 13,
+    letterSpacing: 0.8,
+  },
+  promoAppliedSaving: {
+    fontSize: 12,
+    color: COLORS.success,
+    fontWeight: '500',
+  },
+  promoRemoveBtn: {
+    padding: 4,
+  },
+  promoErrorText: {
+    color: COLORS.danger,
+    fontSize: 12,
+    marginTop: 6,
     fontWeight: '500',
   },
 });

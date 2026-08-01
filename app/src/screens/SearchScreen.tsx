@@ -22,6 +22,7 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { FALLBACK_RESTAURANTS, getImageUrl, Restaurant, MenuItem } from '../services/fallbackData';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   Home: undefined;
@@ -134,6 +135,18 @@ export default function SearchScreen() {
   useEffect(() => {
     dispatch(fetchRestaurants());
 
+    // Load persisted recent searches from AsyncStorage
+    AsyncStorage.getItem('@getfood_recent_searches').then(saved => {
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) setRecentSearches(parsed);
+        } catch (e) {
+          // ignore parse error
+        }
+      }
+    });
+
     // Dynamically fetch top popular search tags from backend API
     api.get('/restaurants/popular-tags/')
       .then((res) => {
@@ -213,12 +226,24 @@ export default function SearchScreen() {
     };
   }, [searchQuery, activeSource]);
 
-  const handlePopularSearchPress = React.useCallback((keyword: string) => {
-    setSearchQuery(keyword);
+  const saveRecentSearch = React.useCallback(async (keyword: string) => {
+    const trimmed = keyword.trim();
+    if (!trimmed) return;
     setRecentSearches(prev => {
-      const updated = [keyword.trim(), ...prev.filter(s => s !== keyword.trim())].slice(0, 5);
+      const updated = [trimmed, ...prev.filter(s => s !== trimmed)].slice(0, 10);
+      AsyncStorage.setItem('@getfood_recent_searches', JSON.stringify(updated)).catch(() => {});
       return updated;
     });
+  }, []);
+
+  const handlePopularSearchPress = React.useCallback((keyword: string) => {
+    setSearchQuery(keyword);
+    saveRecentSearch(keyword);
+  }, [saveRecentSearch]);
+
+  const handleClearRecentSearches = React.useCallback(async () => {
+    setRecentSearches([]);
+    await AsyncStorage.removeItem('@getfood_recent_searches').catch(() => {});
   }, []);
 
   const handleSelectRestaurant = React.useCallback((slug: string) => {
@@ -249,6 +274,7 @@ export default function SearchScreen() {
             placeholderTextColor={COLORS.gray}
             autoFocus
             returnKeyType="search"
+            onSubmitEditing={() => saveRecentSearch(searchQuery)}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity activeOpacity={0.75} onPress={() => setSearchQuery('')} style={styles.clearButton}>
@@ -266,7 +292,7 @@ export default function SearchScreen() {
             <View style={styles.recentContainer}>
               <View style={styles.recentHeader}>
                 <Text style={styles.sectionTitle}>Recent Searches</Text>
-                <TouchableOpacity activeOpacity={0.75} onPress={() => setRecentSearches([])}>
+                <TouchableOpacity activeOpacity={0.75} onPress={handleClearRecentSearches}>
                   <Text style={{ color: COLORS.gray, fontSize: 12 }}>Clear</Text>
                 </TouchableOpacity>
               </View>

@@ -266,4 +266,3 @@ class BranchCashRegister(models.Model):
 
     def __str__(self):
         return f"CashRegister ({self.branch.name} - {self.date}): Collected Rs. {self.total_cod_collected}, Handed Over Rs. {self.total_cod_handed_over}"
-
