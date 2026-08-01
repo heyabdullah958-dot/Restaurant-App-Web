@@ -316,9 +316,19 @@ const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand:
               <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>CLOSED</Text>
             </View>
           )}
-          {isDineInAvailable && (
+          {fulfillmentMode === 'DINE_IN' && isDineInAvailable && (
             <View style={{ backgroundColor: 'rgba(124, 58, 237, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
               <Text style={{ fontSize: 10, fontWeight: '800', color: '#FFFFFF' }}>🍽️ DINE-IN</Text>
+            </View>
+          )}
+          {fulfillmentMode === 'TAKEAWAY' && (
+            <View style={{ backgroundColor: 'rgba(234, 88, 12, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: '#FFFFFF' }}>🛍️ TAKEAWAY</Text>
+            </View>
+          )}
+          {fulfillmentMode === 'DELIVERY' && (
+            <View style={{ backgroundColor: 'rgba(37, 99, 235, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: '#FFFFFF' }}>🛵 DELIVERY</Text>
             </View>
           )}
           <View style={styles.ratingBadge}>
@@ -341,9 +351,19 @@ const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand:
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2, marginBottom: 4 }}>
           <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
-          {isDineInAvailable && (
+          {fulfillmentMode === 'DINE_IN' && isDineInAvailable && (
             <View style={{ backgroundColor: '#f3e8ff', borderWidth: 1, borderColor: '#ddd6fe', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
               <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#7c3aed' }}>🍽️ Dine-In Available</Text>
+            </View>
+          )}
+          {fulfillmentMode === 'TAKEAWAY' && (
+            <View style={{ backgroundColor: '#ffedd5', borderWidth: 1, borderColor: '#fed7aa', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+              <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#c2410c' }}>🛍️ Self Pickup</Text>
+            </View>
+          )}
+          {fulfillmentMode === 'DELIVERY' && (
+            <View style={{ backgroundColor: '#dbeafe', borderWidth: 1, borderColor: '#bfdbfe', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+              <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#1d4ed8' }}>🛵 Delivery Available</Text>
             </View>
           )}
         </View>
