@@ -14,7 +14,7 @@
             "name": "Fries",
             "description": "Classic crispy golden french fries",
             "price": 250.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -24,7 +24,7 @@
             "name": "Bucket Fries",
             "description": "Family portion of crispy golden fries",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -34,7 +34,7 @@
             "name": "BBQ Loaded Fries",
             "description": "Fries loaded with cheese and BBQ chicken",
             "price": 750.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -44,7 +44,7 @@
             "name": "BBQ Grill Tenders (4pcs)",
             "description": "Flame-grilled tender chicken strips",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -54,7 +54,7 @@
             "name": "Nablets (6pcs)",
             "description": "Deep-fried breaded nuggets",
             "price": 520.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -64,7 +64,7 @@
             "name": "Butter Nablets (6pcs)",
             "description": "Creamy butter-coated chicken nuggets",
             "price": 650.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -74,7 +74,7 @@
             "name": "Butter Kabab (4pcs)",
             "description": "Rich butter-tossed seekh kababs",
             "price": 999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -84,7 +84,7 @@
             "name": "Butter Malai Boti (5pcs)",
             "description": "Butter-basted creamy malai botis",
             "price": 650.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -101,7 +101,7 @@
             "name": "Brotien Kabab Roll Beef",
             "description": "High protein beef kabab rolled in soft flatbread",
             "price": 650.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -118,7 +118,7 @@
             "name": "Chicken Paratha Roll",
             "description": "Classic chicken boti roll in paratha",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -128,7 +128,7 @@
             "name": "Malai Boti Paratha Roll",
             "description": "Creamy malai boti roll in paratha",
             "price": 520.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -138,7 +138,7 @@
             "name": "Shish Taouk Paratha Roll",
             "description": "Turkish style shish taouk in paratha",
             "price": 990.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -148,7 +148,7 @@
             "name": "Chicken Kabab Roll",
             "description": "Chicken seekh kabab roll in paratha",
             "price": 400.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -158,7 +158,7 @@
             "name": "Adana Kabab Roll",
             "description": "Spiced Turkish Adana kabab roll in paratha",
             "price": 990.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -175,7 +175,7 @@
             "name": "Chicken Slices",
             "description": "Succulent chicken slices with special sauce",
             "price": 590.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -185,7 +185,7 @@
             "name": "Malai Boti Slices",
             "description": "Creamy malai boti slices in signature bread",
             "price": 690.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -202,7 +202,7 @@
             "name": "Rice with Adana Kabab (1pc)",
             "description": "Turkish rice bowl served with 1pc Adana kabab (Solo)",
             "price": 550.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -212,7 +212,7 @@
             "name": "Rice with Shish Taouk (2pcs)",
             "description": "Turkish rice bowl served with 2pcs Shish Taouk (Solo)",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -222,7 +222,7 @@
             "name": "Rice with Adana Kabab (2pcs)",
             "description": "Turkish rice bowl served with 2pcs Adana kabab (Combo)",
             "price": 900.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -232,7 +232,7 @@
             "name": "Rice with Shish Taouk (4pcs)",
             "description": "Turkish rice bowl served with 4pcs Shish Taouk (Combo)",
             "price": 950.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -249,7 +249,7 @@
             "name": "Kabab (4pcs)",
             "description": "Flame-grilled chicken seekh kababs",
             "price": 650.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -259,7 +259,7 @@
             "name": "Tikka (5pcs)",
             "description": "Classic fire-grilled chicken tikka pieces",
             "price": 490.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -269,7 +269,7 @@
             "name": "Malai Boti (5pcs)",
             "description": "Creamy, melt-in-mouth chicken malai boti",
             "price": 550.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -279,7 +279,7 @@
             "name": "Shish Taouk (5pcs)",
             "description": "Turkish style grilled chicken skewers",
             "price": 800.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -289,7 +289,7 @@
             "name": "Shish Taouk Abiad (5pcs)",
             "description": "White spice marinade shish taouk",
             "price": 900.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -299,7 +299,7 @@
             "name": "Beef Adana Kabab (4pcs)",
             "description": "Authentic grilled Turkish beef Adana kababs",
             "price": 1050.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -316,7 +316,7 @@
             "name": "Water",
             "description": "Chilled mineral water",
             "price": 80.0,
-            "image": null,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -326,7 +326,7 @@
             "name": "Soft Drinks",
             "description": "Coke, Sprite or Fanta",
             "price": 120.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -336,7 +336,7 @@
             "name": "Seen Special Flavor Drink",
             "description": "SEEN signature refreshing beverage",
             "price": 250.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -353,7 +353,7 @@
             "name": "Puri Paratha",
             "description": "Flaky, deep-fried puri paratha",
             "price": 150.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -363,7 +363,7 @@
             "name": "Dips",
             "description": "SEEN special garlic/mint dip",
             "price": 80.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -373,7 +373,7 @@
             "name": "Rice",
             "description": "Extra portion of aromatic Turkish rice",
             "price": 200.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -383,7 +383,7 @@
             "name": "Cheese Slice",
             "description": "Extra slice of cheddar cheese",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -407,7 +407,7 @@
             "name": "Mix Seafood Grill",
             "description": "Grilled fish, prawns, calamari served with garlic butter",
             "price": 2450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -417,7 +417,7 @@
             "name": "Fish & Chips",
             "description": "Crispy battered fish fillet served with tartar sauce",
             "price": 950.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -434,7 +434,7 @@
             "name": "Blue Lagoon Mocktail",
             "description": "Refreshing blue curacao drink",
             "price": 350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -659,7 +659,7 @@
             "name": "Lotus Can Dessert",
             "description": "Creamy Lotus Biscoff dessert served in a signature can",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -669,7 +669,7 @@
             "name": "Red Velvet Can Dessert",
             "description": "Rich red velvet cake layered in a signature can",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -679,7 +679,7 @@
             "name": "Nutella Can Dessert",
             "description": "Decadent Nutella chocolate dessert in a signature can",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -696,7 +696,7 @@
             "name": "Cheese",
             "description": "Extra melted cheese portion",
             "price": 90.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -716,7 +716,7 @@
             "name": "Tortilla Bread",
             "description": "Extra soft tortilla flatbread",
             "price": 90.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -736,7 +736,7 @@
             "name": "Plain Fries",
             "description": "Golden salted french fries side",
             "price": 150.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1038,7 +1038,7 @@
             "name": "Tawa Chicken",
             "description": "Spicy stir-fried tawa chicken piece",
             "price": 750.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1048,7 +1048,7 @@
             "name": "Tawa Chicken Platter with 2 Roti (Single Serving)",
             "description": "Single serving of stir-fried tawa chicken platter",
             "price": 800.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1058,7 +1058,7 @@
             "name": "Tawa Chicken Platter with 4 Roti (Double Serving)",
             "description": "Double serving of stir-fried tawa chicken platter",
             "price": 1400.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1105,7 +1105,7 @@
             "name": "Malai Boti (Per KG)",
             "description": "One KG of creamy grilled malai boti",
             "price": 2200.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1115,7 +1115,7 @@
             "name": "Tikka Boti (Per KG)",
             "description": "One KG of classic tikka boti",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1125,7 +1125,7 @@
             "name": "Seekh Kabab (Per KG)",
             "description": "One KG of spiced chicken seekh kabab",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1142,7 +1142,7 @@
             "name": "Nawabi Handi Boneless",
             "description": "Rich royal Nawabi handi boneless serving",
             "price": 2200.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1152,7 +1152,7 @@
             "name": "Shahi Kabab Masala Handi Boneless",
             "description": "Spiced shahi kabab masala handi boneless",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1162,7 +1162,7 @@
             "name": "Mughlai Cheese Handi Boneless",
             "description": "Creamy Mughlai cheese handi boneless",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1172,7 +1172,7 @@
             "name": "Reshmi Handi Boneless",
             "description": "Velvety reshmi handi boneless",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1182,7 +1182,7 @@
             "name": "Sha Jahani Handi Boneless",
             "description": "Royal spice mix Sha Jahani handi boneless",
             "price": 1999.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1199,7 +1199,7 @@
             "name": "Chicken Karahi (Half)",
             "description": "Traditional wok chicken karahi half portion",
             "price": 1300.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1209,7 +1209,7 @@
             "name": "Chicken Karahi (Full)",
             "description": "Traditional wok chicken karahi full portion",
             "price": 2500.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1219,7 +1219,7 @@
             "name": "Chicken White Karahi (Half)",
             "description": "Creamy white chicken karahi half portion",
             "price": 1500.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1229,7 +1229,7 @@
             "name": "Chicken White Karahi (Full)",
             "description": "Creamy white chicken karahi full portion",
             "price": 2700.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1239,7 +1239,7 @@
             "name": "Chicken Kabab Masala (Half)",
             "description": "Chicken kabab masala half portion",
             "price": 1350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1249,7 +1249,7 @@
             "name": "Chicken Kabab Masala (Full)",
             "description": "Chicken kabab masala full portion",
             "price": 2600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1266,7 +1266,7 @@
             "name": "Family Tandoori Platter",
             "description": "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos",
             "price": 7000.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1283,7 +1283,7 @@
             "name": "Salad",
             "description": "Fresh seasonal salad",
             "price": 350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1293,7 +1293,7 @@
             "name": "Raita",
             "description": "Yogurt herb raita dip",
             "price": 70.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1417,7 +1417,7 @@
             "name": "Oreo Sundae",
             "description": "Oreo cookies and vanilla ice cream sundae",
             "price": 400.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1427,7 +1427,7 @@
             "name": "Lotus Three Sundae",
             "description": "Lotus Biscoff crumbs and sauce sundae",
             "price": 400.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1437,7 +1437,7 @@
             "name": "Nutella Sundae",
             "description": "Nutella chocolate fudge sundae",
             "price": 400.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1454,7 +1454,7 @@
             "name": "Water (Small)",
             "description": "Chilled mineral water",
             "price": 80.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1464,7 +1464,7 @@
             "name": "Soft Drink (300ml)",
             "description": "Carbonated soft drink regular",
             "price": 120.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1474,7 +1474,7 @@
             "name": "Soft Drink (Tin)",
             "description": "Carbonated soft drink tin can",
             "price": 150.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1484,7 +1484,7 @@
             "name": "Fresh Lime",
             "description": "Zesty fresh lime soda",
             "price": 350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1518,7 +1518,7 @@
             "name": "Chicken Black Pepper Sandwich",
             "description": "Iceberg, black pepper, onions, mushrooms, Garlic Mayo, melted cheese",
             "price": 900.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1528,7 +1528,7 @@
             "name": "Beef Black Pepper Sandwich",
             "description": "Iceberg, black pepper, onions, mushrooms, Garlic Mayo, melted cheese",
             "price": 1300.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1538,7 +1538,7 @@
             "name": "Chicken Fajita Cheese Steak",
             "description": "Spicy Fajita Chicken, Capsicum, Onion, Tomato, Olives, Honey Mustard, melted Cheese",
             "price": 900.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1548,7 +1548,7 @@
             "name": "Beef Fajita Cheese Steak",
             "description": "Spicy Fajita Beef, Capsicum, Onion, Tomato, Olives, Honey Mustard, melted Cheese",
             "price": 1300.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1558,7 +1558,7 @@
             "name": "Chicken Jalapeno Cheese Steak",
             "description": "Iceberg, grilled onions, Green Pepper, jalapenos, creamy Jalapeno, melted cheese",
             "price": 900.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1568,7 +1568,7 @@
             "name": "Beef Jalapeno Cheese Steak",
             "description": "Iceberg, grilled onions, Green Pepper, jalapenos, creamy Jalapeno, melted cheese",
             "price": 1300.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1585,7 +1585,7 @@
             "name": "Saucy Fries",
             "description": "All natural potatoes, homemade sauces, jalapenos and olives",
             "price": 500.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1595,7 +1595,7 @@
             "name": "Chicken Steak Fries",
             "description": "Diced chicken, jalapenos, bell peppers, olives, signature sauces",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1605,7 +1605,7 @@
             "name": "Beef Steak Fries",
             "description": "Beef steak chunks, olives, jalapenos, signature sauces",
             "price": 750.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1622,7 +1622,7 @@
             "name": "Chicken Steak Rice",
             "description": "Boneless chicken steak pcs with signature sauces & steamed rice",
             "price": 600.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1632,7 +1632,7 @@
             "name": "Beef Steak Rice",
             "description": "Boneless beef steak pcs with signature sauces & steamed rice",
             "price": 750.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1649,7 +1649,7 @@
             "name": "Chicken Grab",
             "description": "Crispy fried chicken, Fries, Iceberg, homemade zesty sauces",
             "price": 800.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1659,7 +1659,7 @@
             "name": "Beef Grab",
             "description": "Juicy beef steak chunks, fries, grilled capsicum, onion, Iceberg",
             "price": 1200.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1676,7 +1676,7 @@
             "name": "Water",
             "description": "Chilled mineral water",
             "price": 100.0,
-            "image": null,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1686,7 +1686,7 @@
             "name": "Can",
             "description": "Soft drink can",
             "price": 150.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1696,7 +1696,7 @@
             "name": "Coffee",
             "description": "Brewed hot coffee",
             "price": 350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1713,7 +1713,7 @@
             "name": "Garlic Sauce",
             "description": "Premium garlic sauce dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1723,7 +1723,7 @@
             "name": "Jalapeno Sauce",
             "description": "Creamy jalapeno dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1733,7 +1733,7 @@
             "name": "Honey Mustard Sauce",
             "description": "Sweet honey mustard dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1743,7 +1743,7 @@
             "name": "Mint Sauce",
             "description": "Cool mint dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1753,7 +1753,7 @@
             "name": "Chipotle Sauce",
             "description": "Smoky chipotle dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1763,7 +1763,7 @@
             "name": "Green Atomic Sauce",
             "description": "Spicy green atomic dressing",
             "price": 100.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1773,7 +1773,7 @@
             "name": "Jalapeno",
             "description": "Extra jalapeno slices portion",
             "price": 80.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1783,7 +1783,7 @@
             "name": "Black Olives",
             "description": "Extra black olives portion",
             "price": 80.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1807,7 +1807,7 @@
             "name": "Crispy Fried Chicken (2pcs)",
             "description": "Golden, crunchy, juice hand-breaded fried chicken",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1817,7 +1817,7 @@
             "name": "Flame Grilled Burger",
             "description": "Juicy grilled chicken breast with classic dressing",
             "price": 590.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1827,7 +1827,7 @@
             "name": "Hot Wings (6pcs)",
             "description": "Spicy buffalo wings served with ranch dip",
             "price": 380.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1851,7 +1851,7 @@
             "name": "Hazelnut Cappuccino",
             "description": "Hot cappuccino infused with aromatic hazelnut syrup",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1861,7 +1861,7 @@
             "name": "Spanish Latte Chilled",
             "description": "Sweetened condensed milk mixed with bold espresso and ice",
             "price": 490.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1871,7 +1871,7 @@
             "name": "Espresso Double",
             "description": "Strong double shot of premium arabica coffee",
             "price": 350.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1888,7 +1888,7 @@
             "name": "Butter Croissant",
             "description": "Flaky French butter croissant freshly baked",
             "price": 280.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1898,7 +1898,7 @@
             "name": "Chocolate Fudge Slice",
             "description": "Decadent slice of chocolate fudge cake",
             "price": 450.0,
-            "image": null,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
