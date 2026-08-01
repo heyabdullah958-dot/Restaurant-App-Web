@@ -178,8 +178,8 @@ const DineInBannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () 
 
   React.useEffect(() => {
     let isMounted = true;
-    // Fetch live flash deals configured for Dine-In only
-    api.get('/promotions/flash-deals/?is_dine_in_only=true')
+    // Fetch live active flash deals (universal & dine-in)
+    api.get('/promotions/flash-deals/')
       .then((res: any) => {
         const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
         if (isMounted && data.length > 0) {

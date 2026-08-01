@@ -20,6 +20,7 @@ export const FlashDealManagement: React.FC = () => {
     start_time: new Date().toISOString().slice(0, 16),
     end_time: new Date(Date.now() + 24 * 3600000).toISOString().slice(0, 16),
     is_active: true,
+    is_dine_in_only: false,
   });
 
   const loadDeals = async () => {
@@ -94,6 +95,7 @@ export const FlashDealManagement: React.FC = () => {
               start_time: new Date().toISOString().slice(0, 16),
               end_time: new Date(Date.now() + 24 * 3600000).toISOString().slice(0, 16),
               is_active: true,
+              is_dine_in_only: false,
             });
             setShowModal(true);
           }}
@@ -125,15 +127,22 @@ export const FlashDealManagement: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-bold text-slate-900 dark:text-white text-lg">{deal.title}</h3>
-                    {deal.is_active ? (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium">
-                        <CheckCircle2 size={12} /> Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-400 font-medium">
-                        <XCircle size={12} /> Inactive
-                      </span>
-                    )}
+                    <div className="flex flex-col items-end gap-1">
+                      {deal.is_active ? (
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium">
+                          <CheckCircle2 size={12} /> Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-400 font-medium">
+                          <XCircle size={12} /> Inactive
+                        </span>
+                      )}
+                      {deal.is_dine_in_only && (
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 font-bold">
+                          🍽️ Dine-In Only
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs text-slate-500 mb-3">{deal.description || 'No description provided.'}</p>
                   <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-1">
@@ -157,6 +166,7 @@ export const FlashDealManagement: React.FC = () => {
                         start_time: new Date(deal.start_time).toISOString().slice(0, 16),
                         end_time: new Date(deal.end_time).toISOString().slice(0, 16),
                         is_active: deal.is_active,
+                        is_dine_in_only: !!deal.is_dine_in_only,
                       });
                       setShowModal(true);
                     }}
@@ -229,6 +239,18 @@ export const FlashDealManagement: React.FC = () => {
                     className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
                   />
                 </div>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="is_dine_in_only"
+                  checked={formData.is_dine_in_only}
+                  onChange={(e) => setFormData({ ...formData, is_dine_in_only: e.target.checked })}
+                  className="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500 cursor-pointer"
+                />
+                <label htmlFor="is_dine_in_only" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  🍽️ Dine-In Exclusive Deal
+                </label>
               </div>
               <div>
                 <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Image Banner URL</label>
