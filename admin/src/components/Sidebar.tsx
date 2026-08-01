@@ -97,7 +97,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      console.error('[Update Credentials Error]', err);
       setModalError(err.message || 'Failed to update credentials. Please try again.');
     } finally {
       setLoadingModal(false);

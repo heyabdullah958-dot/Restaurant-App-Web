@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 from config.views import health_check, db_debug, root_view, trigger_seed, init_db
 from config.admin_views import platform_analytics
 from restaurants.views import PopularTagsView, PublicSearchView
+from promotions.views import ActiveFlashDealsView
 
 
 from django.contrib.auth.views import PasswordChangeView
@@ -38,6 +39,8 @@ urlpatterns = [
     # Direct search & v1 aliases (AllowAny)
     path('api/v1/search/popular-tags/', PopularTagsView.as_view(), name='v1_popular_tags'),
     path('api/v1/search/', PublicSearchView.as_view(), name='v1_public_search'),
+    path('api/v1/promotions/flash-deals/', ActiveFlashDealsView.as_view(), name='v1_flash_deals'),
+    path('api/promotions/flash-deals/', ActiveFlashDealsView.as_view(), name='api_flash_deals'),
     path('api/search/popular-tags/', PopularTagsView.as_view(), name='api_popular_tags'),
     path('api/search/', PublicSearchView.as_view(), name='api_public_search'),
 

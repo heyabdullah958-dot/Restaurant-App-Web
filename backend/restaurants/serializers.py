@@ -115,7 +115,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Branch
-        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'area_keywords', 'latitude', 'longitude', 'delivery_radius_km', 'is_currently_open')
+        fields = ('id', 'restaurant', 'name', 'address', 'phone', 'is_active', 'is_dine_in_enabled', 'area_keywords', 'latitude', 'longitude', 'delivery_radius_km', 'is_currently_open')
 
     def get_is_currently_open(self, obj):
         restaurant = obj.restaurant
@@ -167,7 +167,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = (
             'id', 'name', 'slug', 'cuisine_type', 'logo', 'cover_image', 'banner_image',
-            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_open', 'is_currently_open',
+            'description', 'address', 'city', 'phone', 'is_active', 'is_force_closed', 'is_dine_in_enabled', 'is_open', 'is_currently_open',
             'is_featured', 'opens_at', 'closes_at', 'delivery_time_min', 'delivery_time_max',
             'min_order_amount', 'delivery_fee', 'rating', 'total_reviews',
             'loyalty_points_ratio', 'branches'

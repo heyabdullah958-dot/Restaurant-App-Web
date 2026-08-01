@@ -20,6 +20,15 @@ export const SuperDashboard: React.FC = () => {
   });
   const [isSavingSettings, setIsSavingSettings] = React.useState(false);
   const [settingsMsg, setSettingsMsg] = React.useState<string | null>(null);
+  const settingsTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (settingsTimerRef.current) {
+        clearTimeout(settingsTimerRef.current);
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     fetchPlatformSettings()
@@ -32,7 +41,7 @@ export const SuperDashboard: React.FC = () => {
           });
         }
       })
-      .catch((err) => console.warn('Failed to load platform settings:', err));
+      .catch(() => {});
   }, []);
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -42,7 +51,10 @@ export const SuperDashboard: React.FC = () => {
     try {
       await updatePlatformSettings(platformSettings);
       setSettingsMsg('Platform settings updated successfully!');
-      setTimeout(() => setSettingsMsg(null), 4000);
+      if (settingsTimerRef.current) {
+        clearTimeout(settingsTimerRef.current);
+      }
+      settingsTimerRef.current = setTimeout(() => setSettingsMsg(null), 4000);
     } catch (err: any) {
       setSettingsMsg(err.message || 'Failed to update settings');
     } finally {
@@ -158,7 +170,7 @@ export const SuperDashboard: React.FC = () => {
         </div>
         <span className="flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black px-3.5 py-1.5 rounded-full uppercase tracking-wider">
           <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-          Auto-Sync Active (15s)
+          Auto-Sync Active (5s)
         </span>
       </div>
 

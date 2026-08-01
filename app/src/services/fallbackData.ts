@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { API_BASE_URL } from './api';
 
 export interface MenuItem {
   id: number;
@@ -428,9 +429,7 @@ export const getImageUrl = (path: string | null) => {
     return { uri: path };
   }
   // Remove /api if present at the end of the base URL
-  const PROD_API_URL = 'https://restaurant-app-web.onrender.com/api';
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
-  const base = apiUrl.replace(/\/api\/?$/, '');
+  const base = API_BASE_URL.replace(/\/api\/?$/, '');
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return { uri: `${base}${cleanPath}` };
 };

@@ -5,8 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // NOTE: process.env.EXPO_PUBLIC_API_URL only loads correctly when running via QR code scan (Metro bundler).
 // When running Expo Go without QR (direct local), env vars don't inject — so we hardcode the production URL here.
 import { Platform } from 'react-native';
-const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+export const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -51,7 +51,7 @@ api.interceptors.request.use(
           config.headers['Authorization'] = `Bearer ${token}`;
         }
       } catch (err) {
-        console.error('Error fetching token from AsyncStorage:', err);
+        if (__DEV__) console.error('Error fetching token from AsyncStorage:', err);
       }
     }
     return config;
@@ -104,7 +104,7 @@ api.interceptors.response.use(
     // 1. Auto-retry on Network Error / Timeout (e.g. Render/Heroku cold start)
     if (!error.response && !status && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
-      console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${requestUrl}...`);
+      if (__DEV__) console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${requestUrl}...`);
       await new Promise(resolve => setTimeout(resolve, 2000));
       return api(originalRequest);
     }
@@ -147,29 +147,29 @@ api.interceptors.response.use(
           }
         }
       } catch (refreshError) {
-        console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
+        if (__DEV__) console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
         processQueue(refreshError, null);
       } finally {
         isRefreshing = false;
       }
 
-      console.log('[API Interceptor] Unauthorized/Forbidden request — session expired. Purging tokens and resetting state...');
+      if (__DEV__) console.log('[API Interceptor] Unauthorized/Forbidden request — session expired. Purging tokens and resetting state...');
       delete api.defaults.headers.common['Authorization'];
       try {
         await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
       } catch (e) {
-        console.log('Error clearing tokens:', e);
+        if (__DEV__) console.log('Error clearing tokens:', e);
       }
 
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
     } else if (error.response && status !== 401 && status !== 403) {
-      console.log('API Error Response:', error.response.status, error.response.data);
+      if (__DEV__) console.log('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
-      console.log('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
+      if (__DEV__) console.log('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
     } else {
-      console.log('API Request Setup Error:', error.message);
+      if (__DEV__) console.log('API Request Setup Error:', error.message);
     }
     return Promise.reject(error);
   }

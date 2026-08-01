@@ -39,7 +39,6 @@ export const PromoManagement: React.FC = () => {
       setRestaurants(Array.isArray(restsData) ? restsData : []);
       setBranches(Array.isArray(branchesData) ? branchesData : []);
     } catch (err) {
-      console.warn('Failed to load initial promo management data:', err);
       setCoupons([]);
     } finally {
       setLoading(false);

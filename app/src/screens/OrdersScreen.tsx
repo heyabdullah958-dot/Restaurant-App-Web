@@ -20,6 +20,7 @@ import { fetchMyOrders, fetchOrderDetails } from '../store/orderSlice';
 import { addItemToCart } from '../store/cartSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import CustomAlertModal from '../components/CustomAlertModal';
+import { API_BASE_URL } from '../services/api';
 
 export default function OrdersScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -106,9 +107,7 @@ export default function OrdersScreen() {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    const PROD_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
-    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
-    const domain = apiBaseUrl.replace('/api', '');
+    const domain = API_BASE_URL.replace('/api', '');
     return `${domain}${imagePath}`;
   };
 

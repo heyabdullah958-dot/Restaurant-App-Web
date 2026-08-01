@@ -15,6 +15,8 @@ export interface CartState {
   restaurantId: number | null;
   totalQuantity: number;
   totalAmount: number;
+  fulfillmentMode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN';
+  tableNumber: string;
 }
 
 const initialState: CartState = {
@@ -22,12 +24,20 @@ const initialState: CartState = {
   restaurantId: null,
   totalQuantity: 0,
   totalAmount: 0,
+  fulfillmentMode: 'DELIVERY',
+  tableNumber: '',
 };
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    setFulfillmentMode(state, action: PayloadAction<'DELIVERY' | 'TAKEAWAY' | 'DINE_IN'>) {
+      state.fulfillmentMode = action.payload;
+    },
+    setTableNumber(state, action: PayloadAction<string>) {
+      state.tableNumber = action.payload;
+    },
     addItemToCart(state, action: PayloadAction<{ item: CartItem; restaurantId: number }>) {
       const { item, restaurantId } = action.payload;
       
@@ -102,6 +112,8 @@ const cartSlice = createSlice({
       state.restaurantId = null;
       state.totalQuantity = 0;
       state.totalAmount = 0;
+      state.fulfillmentMode = 'DELIVERY';
+      state.tableNumber = '';
     };
     builder
       .addCase('user/login/pending', resetCartState)
@@ -113,5 +125,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addItemToCart, removeItemFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { setFulfillmentMode, setTableNumber, addItemToCart, removeItemFromCart, updateQuantity, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

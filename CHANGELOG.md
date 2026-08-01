@@ -80,3 +80,32 @@
 - **Enterprise SaaS Controls**: Added Percentage (%) vs. Flat (Rs.) options, Max Discount Cap (Rs.), Min Subtotal, Max Total Redemptions (`usage_limit`), Max Redemptions Per User (`per_user_limit`), and Start/Expiry date fields across Admin UI and backend validation.
 - **Universal Checkout Validation Interceptor**: Updated mobile app `CheckoutScreen.tsx` to pass `branch_id` and `guest_phone` in `/coupons/validate/`, and updated `OrderCreateSerializer` to enforce tenant, branch, subtotal, date range, and per-user usage limits.
 - **Automated Verification**: Created `test_promo_engine.py` (100% passing) and verified clean execution of `test_backend_local.py`.
+
+## [Tenant & Branch-Scoped Order ID Overhaul] - 2026-07-27
+- **Human-Readable Order IDs**: Replaced sequential global database primary key display with tenant & branch-scoped `display_order_id` in format `{BRAND_CODE}-{BRANCH_CODE}-{SEQUENCE}` (e.g. `TS-LC-1001`, `JK-JT-1001`).
+- **Automated Data Migration**: Generated and executed Django migration `orders.0012_populate_display_order_ids` to retroactively assign tenant-branch scoped IDs to all past orders.
+- **Full UI Binding**: Updated Admin Kanban, Receipts, Dispatch Modals, and Mobile App (OrdersScreen, TrackingScreen, CheckoutScreen) to display `order.display_order_id || #${order.id}`.
+
+## [Dispatch Rider Hydration & Branch Filtering Fix] - 2026-07-27
+- **Active API Rider Hydration**: Updated Admin Dispatch Rider modal (`OrderManagement.tsx`) to perform active live fetch on open (`fetchRiders({ branch_id, status: 'AVAILABLE', is_active: true })`).
+- **Multi-Type Branch Filtering**: Supported numerical ID and slug branch filtering (`Number(r.branch) === Number(targetBranchId)`) to resolve string/integer type mismatch crashes.
+
+## [Promo Code Auto-Seeding & Release Pipeline] - 2026-07-27
+- **Default Promo Seeding**: Integrated default promotional codes (`WELCOME50`, `TANDOORI20`, `JUSH10`) into `seed_restaurants` management command and release deployment pipeline.
+
+## [Universal Top Bar Order Mode Toggle & Scoped Dine-In Feature] - 2026-07-29
+- **Top Header Fulfillment Switcher**: Built a Segmented Control switch (`🛵 Delivery` | `🛍️ Takeaway` | `🍽️ Dine-In`) at the top of the mobile app Home Screen (`HomeScreen.tsx`).
+- **Elimination of White UI Flash Glitch**:
+  - Implemented `isTabSwitching` micro-transition state overlay rendering 3 `RestaurantCardSkeleton` placeholders during tab switches to prevent layout container height collapse and white blank flashes.
+  - Unified hero banners into `<HeroBannerSection>` to preserve container layout dimensions across mode changes.
+  - Enforced `minHeight: Dimensions.get('window').height - 180` and uniform `#f8fafc` background styling across scroll containers.
+  - Disabled `removeClippedSubviews` on `<FlatList>` to prevent native view tree tearing.
+- **Dynamic Hero Banner Re-render**: Linked `fulfillmentMode` to `ListHeader`'s `useMemo` dependency array and added `extraData={fulfillmentMode}` on `<FlatList>`.
+- **Live Dine-In Flash Deal API Fetching**: Updated `DineInBannerCarousel` to query `/promotions/flash-deals/?is_dine_in_only=true` for active in-house promotional deals with fallback rotation.
+- **Restaurant Card Dine-In Badging & Filtering**: Added prominent `🍽️ DINE-IN` badge overlay and `🍽️ Dine-In Available` pill tags on restaurant card previews when `is_dine_in_enabled !== false`.
+- **Backend Schema & Serializer Updates**:
+  - `Order` Model (`orders.0013_order_order_type_order_table_number`): Added `order_type` choices (`DELIVERY`, `TAKEAWAY`, `DINE_IN`) and `table_number` field.
+  - `Restaurant` & `Branch` Models (`restaurants.0014_branch_is_dine_in_enabled_and_more`): Added `is_dine_in_enabled` toggle field.
+  - `FlashDeal` & `Coupon` Models (`promotions.0004_coupon_is_dine_in_only_flashdeal_is_dine_in_only`): Added `is_dine_in_only` toggle.
+- **Checkout & Order Flow Adaptation**: Bypassed delivery address requirements and distance radius checks for Dine-In/Takeaway orders in `CheckoutScreen.tsx`, set `delivery_fee = 0`, and included `table_number` in the order payload.
+- **Admin HQ Live Board Integration**: Added prominent 🍽️ **Dine-In** badges (with Table #) and 🛍️ **Takeaway** badges on Kanban cards in `OrderManagement.tsx`, and added Dine-In toggles in `BranchDashboard.tsx` and `FlashDealManagement.tsx`.

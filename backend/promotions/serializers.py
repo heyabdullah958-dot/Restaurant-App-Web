@@ -54,7 +54,7 @@ class CouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = [
             'id', 'code', 'discount_type', 'discount_value', 'min_subtotal', 'max_discount',
-            'restaurant', 'restaurant_name', 'branch', 'branch_name',
+            'restaurant', 'restaurant_name', 'branch', 'branch_name', 'is_dine_in_only',
             'valid_from', 'valid_to', 'usage_limit', 'times_used', 'per_user_limit',
             'is_active', 'created_at'
         ]

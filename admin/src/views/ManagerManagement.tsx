@@ -129,7 +129,6 @@ export const ManagerManagement: React.FC = () => {
       const filtered = data.filter((m: Manager) => isLaunchBrand(m.restaurant_name));
       setManagers(filtered);
     } catch (err: any) {
-      console.error('[Load Managers Failed]', err);
       showToast('Failed to load manager accounts. Using offline mocks.', 'error');
       setManagers(MOCK_MANAGERS.filter(m => isLaunchBrand(m.restaurant_name)));
     } finally {
@@ -171,7 +170,6 @@ export const ManagerManagement: React.FC = () => {
       const data = await fetchBranches(restaurantId);
       setBranches(data);
     } catch (err: any) {
-      console.error('[Fetch Branches Failed]', err);
       showToast('Failed to load branches for selected restaurant.', 'error');
       setBranches(MOCK_BRANCHES.filter((b) => b.restaurant_id === restaurantId));
     } finally {
@@ -260,7 +258,6 @@ export const ManagerManagement: React.FC = () => {
       showToast('Manager account created successfully!', 'success');
       loadManagers();
     } catch (err: any) {
-      console.error('[Create Manager Failed]', err);
       showToast(err.message || 'Failed to create manager account.', 'error');
     } finally {
       setCreating(false);
@@ -292,7 +289,6 @@ export const ManagerManagement: React.FC = () => {
       setSelectedManager(null);
       setNewPassword('');
     } catch (err: any) {
-      console.error('[Change Password Failed]', err);
       showToast(err.message || 'Failed to update manager password.', 'error');
     } finally {
       setUpdating(false);

@@ -66,7 +66,7 @@ export const loadInAppNotifications = async (): Promise<InAppNotification[]> => 
     notifyListeners();
     return cachedNotifications;
   } catch (err) {
-    console.log('[InAppNotificationService] Error loading notifications:', err);
+    if (__DEV__) console.log('[InAppNotificationService] Error loading notifications:', err);
     return cachedNotifications;
   }
 };
@@ -101,7 +101,7 @@ export const addInAppNotification = async (notifData: {
     notifyListeners();
     triggerToast(newNotif);
   } catch (err) {
-    console.log('[InAppNotificationService] Error adding notification:', err);
+    if (__DEV__) console.log('[InAppNotificationService] Error adding notification:', err);
   }
 };
 
@@ -111,7 +111,7 @@ export const markAllNotificationsRead = async () => {
     await AsyncStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(cachedNotifications));
     notifyListeners();
   } catch (err) {
-    console.log('[InAppNotificationService] Error marking read:', err);
+    if (__DEV__) console.log('[InAppNotificationService] Error marking read:', err);
   }
 };
 
@@ -121,7 +121,7 @@ export const markNotificationRead = async (id: string) => {
     await AsyncStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(cachedNotifications));
     notifyListeners();
   } catch (err) {
-    console.log('[InAppNotificationService] Error marking notification read:', err);
+    if (__DEV__) console.log('[InAppNotificationService] Error marking notification read:', err);
   }
 };
 
@@ -131,7 +131,7 @@ export const clearAllNotifications = async () => {
     await AsyncStorage.removeItem(NOTIF_STORAGE_KEY);
     notifyListeners();
   } catch (err) {
-    console.log('[InAppNotificationService] Error clearing notifications:', err);
+    if (__DEV__) console.log('[InAppNotificationService] Error clearing notifications:', err);
   }
 };
 

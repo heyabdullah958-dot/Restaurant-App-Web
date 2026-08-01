@@ -83,7 +83,11 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
   const handleGoogleLogin = () => {
-    setGoogleModalVisible(true);
+    if (__DEV__) {
+      setGoogleModalVisible(true);
+    } else {
+      showAlert('Notice', 'Google Sign-In is only available in development mode.');
+    }
   };
 
   const handleSendOtp = () => {
@@ -97,13 +101,17 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       setOtpSent(true);
       showAlert(
         '🔑 OTP Code Dispatched',
-        `A secure 4-digit verification code has been sent to ${phone}.\n\n(Use standard test code: 1234)`,
+        `A secure 4-digit verification code has been sent to ${phone}.${__DEV__ ? '\n\n(Use standard test code: 1234)' : ''}`,
         [{ text: 'OK' }]
       );
     }, 1500);
   };
 
   const handleVerifyOtp = async () => {
+    if (!__DEV__) {
+      showAlert('Verification Failed', 'Invalid verification code.');
+      return;
+    }
     if (otpCode !== '1234') {
       showAlert('Verification Failed', 'Invalid verification code. Please enter the code sent to your phone (1234).');
       return;
@@ -353,7 +361,7 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
                     <Ionicons name="key-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter verification code (1234)"
+                      placeholder={__DEV__ ? "Enter verification code (1234)" : "Enter verification code"}
                       keyboardType="number-pad"
                       maxLength={4}
                       value={otpCode}
@@ -622,98 +630,100 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       </Modal>
 
       {/* Google Account Selector Modal */}
-      <Modal
-        visible={googleModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setGoogleModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, SHADOWS.medium]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sign in with Google</Text>
-              <TouchableOpacity activeOpacity={0.75} onPress={() => setGoogleModalVisible(false)}>
-                <Ionicons name="close" size={24} color={COLORS.dark} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              <Text style={styles.forgotIntro}>
-                Select an account to log in securely or type your own Gmail below to simulate a real OAuth sign-in.
-              </Text>
-
-              {/* Account 1 */}
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.googleAccountItem}
-                onPress={() => handleSelectGoogleAccount('abdullah.hey958@gmail.com', 'Abdullah Hey')}
-              >
-                <View style={styles.googleAvatar}>
-                  <Text style={styles.googleAvatarText}>A</Text>
-                </View>
-                <View style={styles.googleAccountText}>
-                  <Text style={styles.googleAccountName}>Abdullah Hey</Text>
-                  <Text style={styles.googleAccountEmail}>abdullah.hey958@gmail.com</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
-              </TouchableOpacity>
-
-              {/* Account 2 */}
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.googleAccountItem}
-                onPress={() => handleSelectGoogleAccount('heyabdullah958@gmail.com', 'Hey Abdullah')}
-              >
-                <View style={[styles.googleAvatar, { backgroundColor: '#FF5722' }]}>
-                  <Text style={styles.googleAvatarText}>H</Text>
-                </View>
-                <View style={styles.googleAccountText}>
-                  <Text style={styles.googleAccountName}>Hey Abdullah</Text>
-                  <Text style={styles.googleAccountEmail}>heyabdullah958@gmail.com</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
-              </TouchableOpacity>
-
-              {/* Custom Selector Input */}
-              <View style={styles.googleCustomInputWrapper}>
-                <Text style={styles.fieldLabel}>Use Another Account</Text>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your Display Name"
-                    value={customGoogleName}
-                    onChangeText={setCustomGoogleName}
-                  />
-                </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your Gmail address"
-                    keyboardType="email-address"
-                    value={customGoogleEmail}
-                    onChangeText={setCustomGoogleEmail}
-                    autoCapitalize="none"
-                  />
-                </View>
-                
-                <TouchableOpacity activeOpacity={0.9}
-                  style={styles.modalSaveBtn}
-                  onPress={() => {
-                    if (!customGoogleEmail.trim() || !validateEmail(customGoogleEmail.trim())) {
-                      showAlert('Error', 'Please enter a valid Gmail address.');
-                      return;
-                    }
-                    const name = customGoogleName.trim() || customGoogleEmail.split('@')[0];
-                    handleSelectGoogleAccount(customGoogleEmail.trim(), name);
-                  }}
-                >
-                  <Text style={styles.modalSaveBtnText}>Continue with Custom Gmail</Text>
+      {__DEV__ && (
+        <Modal
+          visible={googleModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setGoogleModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, SHADOWS.medium]}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Sign in with Google</Text>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => setGoogleModalVisible(false)}>
+                  <Ionicons name="close" size={24} color={COLORS.dark} />
                 </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalBody}>
+                <Text style={styles.forgotIntro}>
+                  Select an account to log in securely or type your own Gmail below to simulate a real OAuth sign-in.
+                </Text>
+
+                {/* Account 1 */}
+                <TouchableOpacity activeOpacity={0.75}
+                  style={styles.googleAccountItem}
+                  onPress={() => handleSelectGoogleAccount('abdullah.hey958@gmail.com', 'Abdullah Hey')}
+                >
+                  <View style={styles.googleAvatar}>
+                    <Text style={styles.googleAvatarText}>A</Text>
+                  </View>
+                  <View style={styles.googleAccountText}>
+                    <Text style={styles.googleAccountName}>Abdullah Hey</Text>
+                    <Text style={styles.googleAccountEmail}>abdullah.hey958@gmail.com</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
+                </TouchableOpacity>
+
+                {/* Account 2 */}
+                <TouchableOpacity activeOpacity={0.75}
+                  style={styles.googleAccountItem}
+                  onPress={() => handleSelectGoogleAccount('heyabdullah958@gmail.com', 'Hey Abdullah')}
+                >
+                  <View style={[styles.googleAvatar, { backgroundColor: '#FF5722' }]}>
+                    <Text style={styles.googleAvatarText}>H</Text>
+                  </View>
+                  <View style={styles.googleAccountText}>
+                    <Text style={styles.googleAccountName}>Hey Abdullah</Text>
+                    <Text style={styles.googleAccountEmail}>heyabdullah958@gmail.com</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />
+                </TouchableOpacity>
+
+                {/* Custom Selector Input */}
+                <View style={styles.googleCustomInputWrapper}>
+                  <Text style={styles.fieldLabel}>Use Another Account</Text>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your Display Name"
+                      value={customGoogleName}
+                      onChangeText={setCustomGoogleName}
+                    />
+                  </View>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your Gmail address"
+                      keyboardType="email-address"
+                      value={customGoogleEmail}
+                      onChangeText={setCustomGoogleEmail}
+                      autoCapitalize="none"
+                    />
+                  </View>
+                  
+                  <TouchableOpacity activeOpacity={0.9}
+                    style={styles.modalSaveBtn}
+                    onPress={() => {
+                      if (!customGoogleEmail.trim() || !validateEmail(customGoogleEmail.trim())) {
+                        showAlert('Error', 'Please enter a valid Gmail address.');
+                        return;
+                      }
+                      const name = customGoogleName.trim() || customGoogleEmail.split('@')[0];
+                      handleSelectGoogleAccount(customGoogleEmail.trim(), name);
+                    }}
+                  >
+                    <Text style={styles.modalSaveBtnText}>Continue with Custom Gmail</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
 
       {/* Custom Alert Modal */}
       <CustomAlertModal

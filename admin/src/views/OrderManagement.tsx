@@ -94,7 +94,6 @@ export const OrderManagement: React.FC = () => {
       setModalRiders(filtered);
       setSelectedRiderIdForModal(filtered.length > 0 ? filtered[0].id : null);
     } catch (err) {
-      console.warn('Failed to load riders for modal:', err);
       setModalRiders([]);
       setSelectedRiderIdForModal(null);
     } finally {
@@ -256,26 +255,21 @@ export const OrderManagement: React.FC = () => {
     // Specific Branch filtering
     if (user?.branchId) {
       const branchMatch = restFiltered.filter((o) => Number(o.branch_id) === Number(user.branchId));
-      if (branchMatch.length > 0) return branchMatch;
+      return branchMatch;
     }
 
     // Keyword branch matching fallback
     const uname = (user?.username || '').toLowerCase();
     if (uname.includes('lake_city')) {
-      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('lake city'));
-      if (match.length > 0) return match;
+      return restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('lake city'));
     } else if (uname.includes('johar_town')) {
-      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('johar town'));
-      if (match.length > 0) return match;
+      return restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('johar town'));
     } else if (uname.includes('baghbanpura') || uname.includes('gt_road')) {
-      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('baghbanpura') || (o.branch_name || '').toLowerCase().includes('gt road'));
-      if (match.length > 0) return match;
+      return restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('baghbanpura') || (o.branch_name || '').toLowerCase().includes('gt road'));
     } else if (uname.includes('dha_phase_1') || uname.includes('dha_1')) {
-      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('dha phase 1') || (o.branch_name || '').toLowerCase().includes('dha'));
-      if (match.length > 0) return match;
+      return restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('dha phase 1') || (o.branch_name || '').toLowerCase().includes('dha'));
     } else if (uname.includes('gulberg_iii') || uname.includes('gulberg_3')) {
-      const match = restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('gulberg'));
-      if (match.length > 0) return match;
+      return restFiltered.filter((o) => (o.branch_name || '').toLowerCase().includes('gulberg'));
     }
     let finalOrders = restFiltered;
     if (searchTerm.trim()) {
@@ -690,6 +684,19 @@ export const OrderManagement: React.FC = () => {
                               {order.restaurant_name && (
                                 <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-md">
                                   {order.restaurant_name}
+                                </span>
+                              )}
+                              {order.order_type === 'DINE_IN' ? (
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-purple-500/20 border border-purple-500/40 text-purple-300 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                  🍽️ Dine-In {order.table_number ? `(Table #${order.table_number})` : ''}
+                                </span>
+                              ) : order.order_type === 'TAKEAWAY' ? (
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                  🛍️ Takeaway
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                  🛵 Delivery
                                 </span>
                               )}
                             </div>

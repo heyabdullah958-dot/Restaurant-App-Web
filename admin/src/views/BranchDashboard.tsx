@@ -373,7 +373,7 @@ export const BranchDashboard: React.FC = () => {
           </div>
           <span className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Auto-Sync Active (15s)
+            Auto-Sync Active (5s)
           </span>
         </div>
         <div className="inline-flex items-center gap-1 bg-zinc-100 dark:bg-slate-950 p-1 rounded-xl border border-zinc-200 dark:border-slate-800 shadow-inner max-w-full overflow-x-auto">

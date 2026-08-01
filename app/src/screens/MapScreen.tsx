@@ -197,7 +197,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           setUserLocation(loc);
         }
       } catch (error) {
-        console.warn('Location request error:', error);
+        if (__DEV__) console.warn('Location request error:', error);
       } finally {
         setLoadingLocation(false);
       }
@@ -258,7 +258,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     if (!phoneNumber) return;
     const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
     Linking.openURL(`tel:${cleanPhone}`).catch((err) => {
-      console.warn('Could not open phone dialer:', err);
+      if (__DEV__) console.warn('Could not open phone dialer:', err);
     });
   };
 
@@ -555,7 +555,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       } else if (data.action === 'ORDER_FROM_BRANCH' && data.brandSlug) {
         navigation.navigate('Restaurant', { slug: data.brandSlug });
       } else if (data.action === 'LOG') {
-        console.log('[WebView Map LOG]', data.log);
+        if (__DEV__) console.log('[WebView Map LOG]', data.log);
       } else if (data.action === 'MAP_READY') {
         // Map initialized inside WebView — trigger one final resize from RN side
         setTimeout(() => {
@@ -565,7 +565,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         }, 200);
       }
     } catch (e) {
-      console.warn('Map WebView message parse error:', e);
+      if (__DEV__) console.warn('Map WebView message parse error:', e);
     }
   };
 

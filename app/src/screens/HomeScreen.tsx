@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { fetchRestaurants } from '../store/restaurantSlice';
+import { setFulfillmentMode } from '../store/cartSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
@@ -28,6 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
 import NotificationModal from '../components/NotificationModal';
+import api from '../services/api';
 import {
   loadInAppNotifications,
   subscribeNotifications,
@@ -153,6 +155,108 @@ const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => voi
   );
 });
 
+const DINE_IN_FALLBACK_BANNERS = [
+  {
+    icon: 'restaurant-outline' as const,
+    title: 'Exclusive Dine-In Offers',
+    subtitle: 'Flat 15% OFF when you eat in at DHA Phase 1 & Johar Town!',
+    bg: '#7c3aed',
+    tag: 'DINE-IN EXCLUSIVE',
+  },
+  {
+    icon: 'wine-outline' as const,
+    title: 'Table Service Perks',
+    subtitle: 'Complimentary Welcome Drinks & Free Dessert over Rs.1500!',
+    bg: '#4c1d95',
+    tag: 'TABLE SERVICE SPECIAL',
+  },
+];
+
+const DineInBannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => void }) => {
+  const [bannerIndex, setBannerIndex] = React.useState(0);
+  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    // Fetch live flash deals configured for Dine-In only
+    api.get('/promotions/flash-deals/?is_dine_in_only=true')
+      .then((res: any) => {
+        const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+        if (isMounted && data.length > 0) {
+          setFlashDeals(data);
+        }
+      })
+      .catch((err: any) => {
+        // Safe fallback
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  const activeBanners = React.useMemo(() => {
+    if (flashDeals.length > 0) {
+      return flashDeals.map((deal: any) => ({
+        icon: 'restaurant-outline' as const,
+        title: deal.title || deal.name || 'Exclusive Dine-In Deal',
+        subtitle: deal.description || `${deal.discount_value}% OFF on Dine-In orders!`,
+        bg: '#6d28d9',
+        tag: deal.tag || 'DINE-IN EXCLUSIVE',
+      }));
+    }
+    return DINE_IN_FALLBACK_BANNERS;
+  }, [flashDeals]);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setBannerIndex(prev => (prev + 1) % activeBanners.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [activeBanners.length]);
+
+  const banner = activeBanners[bannerIndex] || activeBanners[0];
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      style={[styles.promoBanner, { backgroundColor: banner.bg }, SHADOWS.medium]}
+      onPress={onPressBanner}
+    >
+      <View style={styles.bannerContent}>
+        <View style={{ flex: 1, paddingRight: SPACING.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+            <View style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: '#fef08a', letterSpacing: 0.5 }}>
+                🍽️ {banner.tag || 'DINE-IN EXCLUSIVE'}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.bannerTitle}>{banner.title}</Text>
+          <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+          <View style={styles.bannerCTARow}>
+            <Text style={styles.bannerCTAText}>Explore Dine-In Deals</Text>
+            <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+          </View>
+        </View>
+        <View style={styles.bannerIconWrap}>
+          <Ionicons name={banner.icon || 'restaurant-outline'} size={72} color="rgba(255,255,255,0.25)" />
+        </View>
+      </View>
+      <View style={styles.bannerDots}>
+        {activeBanners.map((_, i) => (
+          <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
+        ))}
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+// Unified Hero Banner Container — smooth transition between Delivery/Takeaway and Dine-In without container unmounting
+const HeroBannerSection = React.memo(({ fulfillmentMode, onPressBanner }: { fulfillmentMode: string, onPressBanner: () => void }) => {
+  if (fulfillmentMode === 'DINE_IN') {
+    return <DineInBannerCarousel onPressBanner={onPressBanner} />;
+  }
+  return <BannerCarousel onPressBanner={onPressBanner} />;
+});
+
 // Memoized Category Chip Component
 const CategoryChip = React.memo(({ item, isSelected, onSelect }: { item: typeof categories[0], isSelected: boolean, onSelect: (id: string) => void }) => (
   <TouchableOpacity
@@ -176,14 +280,19 @@ const CategoryChip = React.memo(({ item, isSelected, onSelect }: { item: typeof 
   </TouchableOpacity>
 ));
 
-// Memoized Restaurant Card Component
-const RestaurantCard = React.memo(({ brand, onPress }: { brand: any, onPress: (slug: string) => void }) => {
+// Memoized Restaurant Card Component with Dine-In Badges
+const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand: any, fulfillmentMode: string, onPress: (slug: string) => void }) => {
   const styleData = PROTOTYPE_STYLES[brand.slug] || PROTOTYPE_STYLES['default'];
   const isOpen = isBrandOpen(brand);
+  const isDineInAvailable = brand.is_dine_in_enabled !== false;
 
   return (
     <TouchableOpacity
-      style={[styles.brandCard, SHADOWS.medium]}
+      style={[
+        styles.brandCard, 
+        SHADOWS.medium,
+        fulfillmentMode === 'DINE_IN' && { borderColor: '#c084fc', borderWidth: 1.5 }
+      ]}
       activeOpacity={0.95}
       onPress={() => onPress(brand.slug)}
     >
@@ -207,6 +316,11 @@ const RestaurantCard = React.memo(({ brand, onPress }: { brand: any, onPress: (s
               <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#FFFFFF' }}>CLOSED</Text>
             </View>
           )}
+          {isDineInAvailable && (
+            <View style={{ backgroundColor: 'rgba(124, 58, 237, 0.9)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: '#FFFFFF' }}>🍽️ DINE-IN</Text>
+            </View>
+          )}
           <View style={styles.ratingBadge}>
             <Ionicons name="star" size={14} color="#FFC107" />
             <Text style={styles.ratingText}>{Number(brand.rating || 4.5).toFixed(1)}</Text>
@@ -224,7 +338,16 @@ const RestaurantCard = React.memo(({ brand, onPress }: { brand: any, onPress: (s
             </Text>
           </View>
         </View>
-        <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2, marginBottom: 4 }}>
+          <Text style={styles.brandCuisine}>{brand.cuisine_type}</Text>
+          {isDineInAvailable && (
+            <View style={{ backgroundColor: '#f3e8ff', borderWidth: 1, borderColor: '#ddd6fe', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+              <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#7c3aed' }}>🍽️ Dine-In Available</Text>
+            </View>
+          )}
+        </View>
+
         <Text style={styles.brandTagline} numberOfLines={2}>
           {brand.description || brand.address}
         </Text>
@@ -239,6 +362,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const user = useSelector((state: RootState) => state.user.user);
   const restaurants = useSelector((state: RootState) => state.restaurant.restaurants);
   const loading = useSelector((state: RootState) => state.restaurant.loading);
+  const fulfillmentMode = useSelector((state: RootState) => state.cart.fulfillmentMode || 'DELIVERY');
   const insets = useSafeAreaInsets();
 
   const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
@@ -248,6 +372,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
+  const [isTabSwitching, setIsTabSwitching] = React.useState(false);
+
+  const handleSwitchFulfillmentMode = React.useCallback((mode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN') => {
+    if (mode === fulfillmentMode) return;
+    setIsTabSwitching(true);
+    dispatch(setFulfillmentMode(mode));
+    setTimeout(() => {
+      setIsTabSwitching(false);
+    }, 120);
+  }, [dispatch, fulfillmentMode]);
 
   React.useEffect(() => {
     loadInAppNotifications();
@@ -293,7 +427,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const filteredRestaurants = React.useMemo(() => {
     const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
     const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
-    const available = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
+    let available = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
+
+    if (fulfillmentMode === 'DINE_IN') {
+      available = available.filter((r: any) => r.is_dine_in_enabled !== false);
+    }
 
     if (selectedCategory === 'All') return available;
 
@@ -309,7 +447,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       r.cuisine_type?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
       r.name?.toLowerCase().includes(selectedCategory.toLowerCase())
     );
-  }, [restaurants, selectedCategory]);
+  }, [restaurants, selectedCategory, fulfillmentMode]);
 
   const fetchCurrentLocation = React.useCallback(async () => {
     try {
@@ -324,7 +462,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         setCurrentAddress(formattedAddress);
       }
     } catch (e) {
-      console.log('Location fetch error', e);
+      if (__DEV__) console.log('Location fetch error', e);
     }
   }, []);
 
@@ -388,8 +526,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   ), [selectedCategory, handleSelectCategory]);
 
   const renderRestaurantItem = React.useCallback(({ item }: { item: any }) => (
-    <RestaurantCard brand={item} onPress={handlePressBrand} />
-  ), [handlePressBrand]);
+    <RestaurantCard brand={item} fulfillmentMode={fulfillmentMode} onPress={handlePressBrand} />
+  ), [fulfillmentMode, handlePressBrand]);
 
   const getItemLayout = React.useCallback((_: any, index: number) => ({
     length: 220,
@@ -401,7 +539,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const ListHeader = React.useMemo(() => (
     <View>
-      <BannerCarousel onPressBanner={handlePressBanner} />
+      <HeroBannerSection fulfillmentMode={fulfillmentMode} onPressBanner={handlePressBanner} />
 
       {unratedOrder && (
         <View style={styles.feedbackBannerContainer}>
@@ -469,17 +607,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       />
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Explore Brands</Text>
+        <Text style={styles.sectionTitle}>
+          {fulfillmentMode === 'DINE_IN' ? '🍽️ Dine-In Restaurants' : 'Explore Brands'}
+        </Text>
         <Text style={styles.sectionLink}>View All</Text>
       </View>
     </View>
-  ), [handlePressBanner, unratedOrder, navigation, renderCategoryChipItem]);
+  ), [fulfillmentMode, handlePressBanner, unratedOrder, navigation, renderCategoryChipItem]);
 
 
   const ListEmpty = React.useMemo(() => {
-    if (loading && filteredRestaurants.length === 0) {
+    if ((loading || isTabSwitching) && filteredRestaurants.length === 0) {
       return (
-        <View style={{ paddingHorizontal: 0 }}>
+        <View style={{ paddingHorizontal: 0, minHeight: 400 }}>
           {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
         </View>
       );
@@ -507,7 +647,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         )}
       </View>
     );
-  }, [loading, filteredRestaurants.length, selectedCategory]);
+  }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory]);
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
@@ -572,28 +712,72 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      <FlatList
-        data={filteredRestaurants}
-        renderItem={renderRestaurantItem}
-        keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
-        ListHeaderComponent={ListHeader}
-        ListEmptyComponent={ListEmpty}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        initialNumToRender={4}
-        maxToRenderPerBatch={5}
-        windowSize={5}
-        removeClippedSubviews={Platform.OS === 'android'}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
+      {/* Universal Top Bar Fulfillment Switcher (Delivery / Takeaway / Dine-In) */}
+      <View style={styles.fulfillmentSegmentContainer}>
+        <TouchableOpacity
+          style={[styles.segmentBtn, fulfillmentMode === 'DELIVERY' && styles.segmentBtnActive]}
+          onPress={() => handleSwitchFulfillmentMode('DELIVERY')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.segmentText, fulfillmentMode === 'DELIVERY' && styles.segmentTextActive]}>🛵 Delivery</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.segmentBtn, fulfillmentMode === 'TAKEAWAY' && styles.segmentBtnActive]}
+          onPress={() => handleSwitchFulfillmentMode('TAKEAWAY')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.segmentText, fulfillmentMode === 'TAKEAWAY' && styles.segmentTextActive]}>🛍️ Takeaway</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.segmentBtn, fulfillmentMode === 'DINE_IN' && styles.segmentBtnActive]}
+          onPress={() => handleSwitchFulfillmentMode('DINE_IN')}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.segmentText, fulfillmentMode === 'DINE_IN' && styles.segmentTextActive]}>🍽️ Dine-In</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+        {isTabSwitching ? (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {ListHeader}
+            <View style={{ gap: 12 }}>
+              <RestaurantCardSkeleton />
+              <RestaurantCardSkeleton />
+              <RestaurantCardSkeleton />
+            </View>
+          </ScrollView>
+        ) : (
+          <FlatList
+            data={filteredRestaurants}
+            extraData={fulfillmentMode}
+            renderItem={renderRestaurantItem}
+            keyExtractor={keyExtractor}
+            getItemLayout={getItemLayout}
+            ListHeaderComponent={ListHeader}
+            ListEmptyComponent={ListEmpty}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={6}
+            maxToRenderPerBatch={6}
+            windowSize={7}
+            removeClippedSubviews={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={COLORS.primary}
+                colors={[COLORS.primary]}
+              />
+            }
           />
-        }
-      />
+        )}
+      </View>
 
       {/* Guest Login Banner */}
       {user?.is_guest && (
@@ -699,6 +883,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: SPACING.md,
     paddingBottom: 100,
+    minHeight: Dimensions.get('window').height - 180,
+    backgroundColor: '#f8fafc',
   },
   promoBanner: {
     backgroundColor: COLORS.primary,
@@ -1071,5 +1257,40 @@ const styles = StyleSheet.create({
     color: '#166534',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  fulfillmentSegmentContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xs,
+    borderRadius: 12,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9,
+  },
+  segmentBtnActive: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  segmentText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  segmentTextActive: {
+    color: '#0f172a',
+    fontWeight: '800',
   },
 });

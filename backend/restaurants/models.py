@@ -1,8 +1,11 @@
+import logging
 from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg, Count
+
+logger = logging.getLogger(__name__)
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
@@ -27,6 +30,7 @@ class Restaurant(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     total_reviews = models.IntegerField(default=0)
     loyalty_points_ratio = models.IntegerField(default=100, help_text="Amount in Rupees required to earn 1 loyalty point. Set to 0 to disable.")
+    is_dine_in_enabled = models.BooleanField(default=True, help_text="Enable Dine-In orders for this restaurant.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -60,6 +64,7 @@ class Branch(models.Model):
     address = models.TextField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
+    is_dine_in_enabled = models.BooleanField(default=True, help_text="Enable Dine-In orders for this branch.")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     delivery_radius_km = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
@@ -199,7 +204,7 @@ def create_restaurant_manager_auth(sender, instance, created, **kwargs):
                     pass
             group.permissions.set(perms)
         except Exception as e:
-            print(f"Error setting manager permissions: {e}")
+            logger.error(f"Error setting manager permissions: {e}")
 
         # 3. Create Manager User
         user, user_created = User.objects.get_or_create(

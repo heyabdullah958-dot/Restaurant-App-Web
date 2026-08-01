@@ -25,15 +25,15 @@ export const placeOrder = createAsyncThunk(
       const data = response.data || response;
       // Validate we got a real order back (must have an id)
       if (!data || !data.id) {
-        console.error('[placeOrder] Backend returned no order id. Response:', JSON.stringify(data));
+        if (__DEV__) console.error('[placeOrder] Backend returned no order id. Response:', JSON.stringify(data));
         return rejectWithValue('Order creation failed — no order ID returned from server.');
       }
-      console.log('[placeOrder] Order created successfully:', data.id, 'Restaurant:', data.restaurant);
+      if (__DEV__) console.log('[placeOrder] Order created successfully:', data.id, 'Restaurant:', data.restaurant);
       return data;
     } catch (error: any) {
       const status = error.response?.status ? `${error.response.status}` : 'Network/Timeout';
       const detailMsg = error.response?.data ? JSON.stringify(error.response.data) : (error.message || 'Unknown network error');
-      console.error(`[placeOrder] Error (${status}):`, detailMsg);
+      if (__DEV__) console.error(`[placeOrder] Error (${status}):`, detailMsg);
 
       // Handle HTTP 429 Throttling rate limits
       if (error.response?.status === 429 || JSON.stringify(error.response?.data || '').includes('throttled')) {
@@ -53,13 +53,13 @@ export const placeOrder = createAsyncThunk(
             if (!retryData || !retryData.id) {
               return rejectWithValue('Order retry failed — no order ID returned from server.');
             }
-            console.log('[placeOrder] Retry succeeded. Order:', retryData.id);
+            if (__DEV__) console.log('[placeOrder] Retry succeeded. Order:', retryData.id);
             return retryData;
           } else {
             return rejectWithValue('Guest session expired. Please tap Place Order again.');
           }
         } catch (retryErr: any) {
-          console.error('[placeOrder] Retry failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
+          if (__DEV__) console.error('[placeOrder] Retry failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
           return rejectWithValue('Session expired. Please try placing your order again.');
         }
       }

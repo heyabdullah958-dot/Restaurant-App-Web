@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../AdminContext';
-import { Lock, User as UserIcon, ShieldAlert } from 'lucide-react';
+import { Lock, User as UserIcon } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const { login, loading } = useAdmin();
@@ -88,26 +88,6 @@ export const Login: React.FC = () => {
             {loading || isSubmitting ? 'Authenticating Workspace...' : 'Access Console'}
           </button>
         </form>
-
-        {/* Active Accounts Box */}
-        <div className="mt-8 pt-6 border-t border-slate-700/50">
-          <div className="flex gap-2 items-center text-xs font-semibold text-blue-400 mb-3">
-            <ShieldAlert size={14} />
-            <span>HQ Workspace Credentials</span>
-          </div>
-          <div className="grid grid-cols-1 gap-3 text-[11px] text-slate-400">
-            <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
-              <span className="block font-bold text-slate-300">Super-Admin HQ Console</span>
-              <span className="block mt-0.5">User: <code className="text-blue-400 font-bold bg-slate-800 px-1 py-0.5 rounded">admin</code></span>
-              <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">admin123</code></span>
-            </div>
-            <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/30">
-              <span className="block font-bold text-slate-300">Live Branch Manager (Johar Town / Tandoori Stop)</span>
-              <span className="block mt-0.5">User: <code className="text-orange-400 font-bold bg-slate-800 px-1 py-0.5 rounded">manager_tandooristoppk_johar_town</code></span>
-              <span>Pass: <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded">admin123</code></span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -20,9 +20,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[React ErrorBoundary caught error]:', error, errorInfo);
-  }
+  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {}
 
   private handleReset = () => {
     try {
@@ -32,9 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
       localStorage.removeItem('foodsphere_admin_view');
       localStorage.removeItem('foodsphere_admin_brand_id');
       sessionStorage.clear();
-    } catch (e) {
-      console.error('Failed to clear storage:', e);
-    }
+    } catch (e) {}
     window.location.href = '/';
   };
 

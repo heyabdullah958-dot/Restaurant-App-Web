@@ -75,7 +75,14 @@ class ActiveFlashDealsView(generics.ListAPIView):
     
     def get_queryset(self):
         now = timezone.now()
-        return FlashDeal.objects.filter(is_active=True, start_time__lte=now, end_time__gte=now)
+        qs = FlashDeal.objects.filter(is_active=True, start_time__lte=now, end_time__gte=now)
+        is_dine_in_only = self.request.query_params.get('is_dine_in_only')
+        if is_dine_in_only is not None:
+            if is_dine_in_only.lower() in ['true', '1']:
+                qs = qs.filter(is_dine_in_only=True)
+            elif is_dine_in_only.lower() in ['false', '0']:
+                qs = qs.filter(is_dine_in_only=False)
+        return qs
 
 class FlashDealDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]

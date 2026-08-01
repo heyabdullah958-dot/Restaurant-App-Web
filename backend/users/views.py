@@ -1,5 +1,8 @@
+import logging
 import uuid
 import secrets
+
+logger = logging.getLogger(__name__)
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -264,7 +267,7 @@ The FoodSphere Team
             )
             email_sent = True
         except Exception as e:
-            print(f"SMTP Failed, could not send email to {email}: {e}")
+            logger.error(f"SMTP Failed, could not send email to {email}: {e}")
             email_sent = False
 
         response_data = {

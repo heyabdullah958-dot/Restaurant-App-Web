@@ -25,7 +25,6 @@ export const FlashDealManagement: React.FC = () => {
       const data = await fetchFlashDeals();
       setDeals(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.warn('Failed to load flash deals:', err);
       setDeals([]);
     } finally {
       setLoading(false);

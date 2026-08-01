@@ -120,7 +120,7 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
         dispatch(updateUserProfile({ loyalty_points: loyaltyData.loyalty_points }));
       }
     } catch (error) {
-      console.error('Failed to fetch loyalty history:', error);
+      if (__DEV__) console.error('Failed to fetch loyalty history:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);

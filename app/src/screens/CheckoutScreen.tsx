@@ -48,7 +48,7 @@ export default function CheckoutScreen() {
   const navigation = useNavigation<any>();
 
   // Fetch state from store
-  const { items, restaurantId, totalAmount } = useSelector((state: RootState) => state.cart);
+  const { items, restaurantId, totalAmount, fulfillmentMode, tableNumber } = useSelector((state: RootState) => state.cart);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
@@ -57,6 +57,7 @@ export default function CheckoutScreen() {
 
   // Form states
   const [address, setAddress] = useState(user?.addresses?.[0] || '');
+  const [tableNumberInput, setTableNumberInput] = useState(tableNumber || '');
   const [instructions, setInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'stripe' | 'payfast'>('cod');
   
@@ -209,7 +210,7 @@ export default function CheckoutScreen() {
           setAddress(savedAddress);
         }
       } catch (e) {
-        console.warn('Failed to load saved guest info from AsyncStorage:', e);
+        if (__DEV__) console.warn('Failed to load saved guest info from AsyncStorage:', e);
       }
     };
 
@@ -278,7 +279,7 @@ export default function CheckoutScreen() {
             }
           })
           .catch((e) => {
-            console.warn('Failed to fetch live branches:', e);
+            if (__DEV__) console.warn('Failed to fetch live branches:', e);
           })
           .finally(() => {
             setIsLoadingBranches(false);
@@ -301,11 +302,14 @@ export default function CheckoutScreen() {
   }, [branches, isLoadingBranches]);
 
   const deliveryFee = useMemo(() => {
+    if (fulfillmentMode === 'DINE_IN' || fulfillmentMode === 'TAKEAWAY') {
+      return 0;
+    }
     if (restaurant && restaurant.delivery_fee) {
       return parseFloat(restaurant.delivery_fee);
     }
     return 150; // Fallback delivery fee
-  }, [restaurant]);
+  }, [restaurant, fulfillmentMode]);
 
   const subtotal = totalAmount;
 
@@ -356,25 +360,26 @@ export default function CheckoutScreen() {
   const loyaltyPointsEarned = Math.floor(finalTotal / 100);
 
   const handlePlaceOrder = async () => {
-    const effectiveName = guestName.trim() || ((user?.name && !user.name.startsWith('guest_')) ? user.name : '');
-    if (!effectiveName || effectiveName.startsWith('guest_')) {
-      showAlert('Required Field', 'Please enter your full name for delivery.');
+    // 1. Validation checks
+    const effectivePhone = guestPhone ? guestPhone.trim() : (user?.phone || '');
+    if (!effectivePhone) {
+      showAlert('Phone Number Required', 'Please provide a contact phone number so our team can reach you.');
       return;
     }
 
-    const effectivePhone = guestPhone.trim() || user?.phone || '';
-    if (!effectivePhone || effectivePhone.length < 10) {
-      showAlert('Required Field', 'Please enter a valid contact phone number (at least 10 digits).');
+    const effectiveName = guestName ? guestName.trim() : (user?.name || user?.username || 'Guest Customer');
+    if (isGuestMode && !effectiveName) {
+      showAlert('Name Required', 'Please provide your full name for order reference.');
       return;
     }
 
-    if (!address.trim()) {
-      showAlert('Required Field', 'Please enter a delivery address.');
+    if (fulfillmentMode === 'DELIVERY' && !address.trim()) {
+      showAlert('Delivery Address Required', 'Please provide a valid delivery address.');
       return;
     }
 
     if (!selectedBranchId) {
-      showAlert('Branch Required', 'Please select an open branch to prepare and deliver your order.');
+      showAlert('Branch Required', 'Please select an open branch to prepare your order.');
       return;
     }
 
@@ -384,8 +389,8 @@ export default function CheckoutScreen() {
       return;
     }
 
-    // Client-side Haversine distance radius check
-    if (customerCoords && selectedBranch) {
+    // Client-side Haversine distance radius check (Delivery only)
+    if (fulfillmentMode === 'DELIVERY' && customerCoords && selectedBranch) {
       const bLat = selectedBranch.latitude ? parseFloat(selectedBranch.latitude) : null;
       const bLng = selectedBranch.longitude ? parseFloat(selectedBranch.longitude) : null;
       const maxRadius = selectedBranch.delivery_radius_km ? parseFloat(selectedBranch.delivery_radius_km) : 10.0;
@@ -435,12 +440,22 @@ export default function CheckoutScreen() {
         : schedulePrefix;
     }
 
+    let finalAddress = address.trim();
+    if (fulfillmentMode === 'DINE_IN') {
+      const tbl = tableNumberInput.trim() || 'N/A';
+      finalAddress = finalAddress || `Dine-In (Table #${tbl}) - ${selectedBranch?.name || 'In-House'}`;
+    } else if (fulfillmentMode === 'TAKEAWAY') {
+      finalAddress = finalAddress || `Takeaway Pickup - ${selectedBranch?.name || 'Counter'}`;
+    }
+
     const orderData: any = {
       restaurant: restaurantId,
       branch: selectedBranchId || undefined,
       items: orderItems,
       payment_method: paymentMethod,
-      delivery_address: address.trim(),
+      order_type: fulfillmentMode,
+      table_number: fulfillmentMode === 'DINE_IN' ? (tableNumberInput.trim() || 'N/A') : undefined,
+      delivery_address: finalAddress,
       delivery_lat: customerCoords?.latitude != null ? Number(customerCoords.latitude.toFixed(6)) : undefined,
       delivery_lng: customerCoords?.longitude != null ? Number(customerCoords.longitude.toFixed(6)) : undefined,
       special_instructions: finalInstructions || undefined,
@@ -457,7 +472,7 @@ export default function CheckoutScreen() {
         try {
           await dispatch(guestLogin()).unwrap();
         } catch (e) {
-          console.warn('Guest login error in checkout, proceeding with guest payload:', e);
+          if (__DEV__) console.warn('Guest login error in checkout, proceeding with guest payload:', e);
         }
       }
 
@@ -474,7 +489,7 @@ export default function CheckoutScreen() {
             await AsyncStorage.setItem('guest_tracking_token', token);
             await AsyncStorage.setItem(`order_token_${orderId}`, token);
           } catch (e) {
-            console.error('Failed to save guest tracking token:', e);
+            if (__DEV__) console.error('Failed to save guest tracking token:', e);
           }
         }
 
@@ -494,7 +509,7 @@ export default function CheckoutScreen() {
           }
           dispatch(updateUserProfile({ name: effectiveName, phone: effectivePhone, addresses: [address.trim()] }));
         } catch (e) {
-          console.error('Failed to save delivery address on checkout:', e);
+          if (__DEV__) console.error('Failed to save delivery address on checkout:', e);
         }
 
         const branchName = createdOrder.branch_name || createdOrder.branch?.name;

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import type { User, Restaurant, Order, MenuCategory, OrderStatus } from './types';
-import { MOCK_MENU_ITEMS, MOCK_RESTAURANTS } from './mockData';
+import type { User, Restaurant, Order, MenuCategory, OrderStatus, MenuItemOptions } from './types';
 import {
   loginAdmin,
   logoutAdmin,
@@ -58,7 +57,7 @@ interface AdminContextProps {
   removeMenuCategory: (id: number) => Promise<void>;
   addMenuItem: (categoryId: number, data: any) => Promise<void>;
   removeMenuItem: (categoryId: number, itemId: number) => Promise<void>;
-  updateItemOptions: (categoryId: number, itemId: number, options: any[]) => Promise<void>;
+  updateItemOptions: (categoryId: number, itemId: number, options: MenuItemOptions | any) => Promise<void>;
   editMenuItem: (categoryId: number, itemId: number, data: any) => Promise<void>;
   updateRestaurantBanner: (id: number, file: File) => Promise<void>;
   removeRestaurantBanner: (id: number) => Promise<void>;
@@ -168,9 +167,7 @@ export const isSuperAdminUser = (username?: string | null, isSuperuserPayload?: 
  *   3. Static mock fallback (lowest — only used on very first load)
  */
 function mergeAllRestaurants(apiMapped: Restaurant[], currentState: Restaurant[] = []): Restaurant[] {
-  // Seed from static mock so every brand has a baseline record
   const baseMap = new Map<number, Restaurant>();
-  MOCK_RESTAURANTS.forEach((r) => baseMap.set(r.id, r));
 
   // Layer live local state on top (preserves manager-toggled is_active)
   currentState.forEach((r) => {
@@ -248,7 +245,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Always start fresh — never read stale restaurant cache on init.
   // loadAppData() fires immediately on mount and populates from the live API.
   // (Stale cache previously caused 7→3 restaurant mismatch after refresh.)
-  const [restaurants, setRestaurantsState] = useState<Restaurant[]>(MOCK_RESTAURANTS);
+  const [restaurants, setRestaurantsState] = useState<Restaurant[]>([]);
 
   const setRestaurants = (action: React.SetStateAction<Restaurant[]>) => {
     setRestaurantsState((prev) => {
@@ -281,7 +278,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
-  const [menuItems, setMenuItems] = useState<Record<number, MenuCategory[]>>(MOCK_MENU_ITEMS);
+  const [menuItems, setMenuItems] = useState<Record<number, MenuCategory[]>>({});
   const [selectedBrandId, setSelectedBrandId] = useState<number>(() => {
     const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
     return savedBrandId ? Number(savedBrandId) : 1;
@@ -300,18 +297,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return new Set(parsed.map(Number));
         }
       }
-    } catch (e) {
-      console.warn('[sessionStorage] Failed to load notified order IDs:', e);
-    }
+    } catch (e) {}
     return new Set();
   };
 
   const saveNotifiedOrderIdsToSession = (ids: Set<number>) => {
     try {
       sessionStorage.setItem('foodsphere_notified_order_ids', JSON.stringify(Array.from(ids)));
-    } catch (e) {
-      console.warn('[sessionStorage] Failed to save notified order IDs:', e);
-    }
+    } catch (e) {}
   };
 
   const knownOrderIdsRef = useRef<Set<number>>(loadNotifiedOrderIdsFromSession());
@@ -506,9 +499,7 @@ function extractArray<T = any>(data: any): T[] {
           setSelectedBrandId(exists ? Number(savedBrandId) : finalRestaurants[0].id);
         }
       }
-    } catch (err) {
-      console.warn('[AdminContext] Failed to load app data from server:', err);
-    } finally {
+    } catch (err) {} finally {
       if (showLoadingSpinner) setLoading(false);
     }
   };
@@ -539,9 +530,7 @@ function extractArray<T = any>(data: any): T[] {
               [selectedRest.id]: mappedCategories,
             }));
           }
-        } catch (err) {
-          console.warn('[loadMenu] Failed to load menu:', err);
-        }
+        } catch (err) {}
       };
       loadMenu();
     }
@@ -568,22 +557,7 @@ function extractArray<T = any>(data: any): T[] {
   // ─── Real JWT Login ────────────────────────────────────────────────────────
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
-    let targetUsername = username.trim();
-
-    // Map shortcut usernames to live Heroku manager accounts
-    const SHORTCUT_MAP: Record<string, string> = {
-      'jushhpk_mgr': 'manager_jushhpk_dha_phase_1',
-      'tandooristoppk_mgr': 'manager_tandooristoppk_johar_town',
-      'getafomo_mgr': 'manager_getafomo_gulberg_iii',
-      'seenbanao_mgr': 'manager_seenbanao',
-      'dineatblue_mgr': 'manager_dineatblue',
-      'sandmelts_mgr': 'manager_sandmelts',
-      'birdmanfoodspk_mgr': 'manager_birdmanfoodspk',
-    };
-
-    if (SHORTCUT_MAP[targetUsername]) {
-      targetUsername = SHORTCUT_MAP[targetUsername];
-    }
+    const targetUsername = username.trim();
 
     try {
       // 1. Authenticate against Heroku REST API and get JWT tokens
@@ -646,7 +620,6 @@ function extractArray<T = any>(data: any): T[] {
       return true;
 
     } catch (err: any) {
-      console.error('[Login Error]', err);
       showToast(err.message || 'Invalid username or password. Please check your credentials.', 'error');
       return false;
     } finally {
@@ -657,9 +630,7 @@ function extractArray<T = any>(data: any): T[] {
   const logout = () => {
     const refresh = getRefreshToken();
     if (refresh) {
-      logoutAdmin(refresh).catch((err) => {
-        console.warn('[Logout API failed]', err);
-      });
+      logoutAdmin(refresh).catch(() => {});
     }
     clearTokens();
     localStorage.removeItem('foodsphere_admin_view');
@@ -779,9 +750,7 @@ function extractArray<T = any>(data: any): T[] {
           newOrders.sort((a: Order, b: Order) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         );
       }
-    } catch (err) {
-      console.warn('[refreshOrders] Failed:', err);
-    }
+    } catch (err) {}
   };
 
   // Update order status — syncs to API with toast and background refresh
@@ -803,7 +772,6 @@ function extractArray<T = any>(data: any): T[] {
       showToast(`Order #${orderId} → ${newStatus.replace('_', ' ').toUpperCase()}`, 'success');
       refreshOrders();
     } catch (err: any) {
-      console.warn('[updateOrderStatus] API sync failed:', err);
       showToast(`Failed to update Order #${orderId} on server: ${err.message || err}`, 'error');
       refreshOrders();
     }
@@ -872,7 +840,6 @@ function extractArray<T = any>(data: any): T[] {
         serverAvailability ? 'success' : 'info'
       );
     } catch (err: any) {
-      console.warn('[toggleMenuAvailability] API sync failed:', err);
 
       // 4. Rollback optimistic update on error
       setMenuItems((prev) => {
@@ -918,7 +885,6 @@ function extractArray<T = any>(data: any): T[] {
       showToast(`Restaurant "${newRestaurant.name}" onboarded! 🚀`, 'success');
       setView('super_dashboard');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to onboard restaurant', 'error');
     } finally {
       setLoading(false);
@@ -936,7 +902,6 @@ function extractArray<T = any>(data: any): T[] {
       setRestaurants((prev) => prev.filter((r) => r.id !== id));
       showToast('Restaurant brand removed successfully', 'info');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to remove restaurant', 'error');
     } finally {
       setLoading(false);
@@ -962,7 +927,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast(`Category "${name}" created successfully!`, 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to create category', 'error');
     } finally {
       setLoading(false);
@@ -983,7 +947,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast('Category deleted successfully', 'info');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to delete category', 'error');
     } finally {
       setLoading(false);
@@ -1026,7 +989,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast(`Item "${data.name}" added to menu! ✅`, 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to add item', 'error');
     } finally {
       setLoading(false);
@@ -1056,7 +1018,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast('Item deleted from menu', 'info');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to delete item', 'error');
     } finally {
       setLoading(false);
@@ -1064,7 +1025,7 @@ function extractArray<T = any>(data: any): T[] {
   };
 
   // Update item options/variants (sizes, spice levels, toppings…)
-  const updateItemOptions = async (categoryId: number, itemId: number, options: any[]) => {
+  const updateItemOptions = async (categoryId: number, itemId: number, options: MenuItemOptions | any) => {
     try {
       await updateMenuItemOptions(itemId, options);
       setMenuItems((prev) => {
@@ -1084,7 +1045,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast('Item options saved! ✅', 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to save options', 'error');
     }
   };
@@ -1118,7 +1078,6 @@ function extractArray<T = any>(data: any): T[] {
       });
       showToast('Item updated successfully! ✅', 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to update item', 'error');
     } finally {
       setLoading(false);
@@ -1139,7 +1098,6 @@ function extractArray<T = any>(data: any): T[] {
       );
       showToast('Banner image updated successfully! 🖼️', 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to update banner image', 'error');
     } finally {
       setLoading(false);
@@ -1157,7 +1115,6 @@ function extractArray<T = any>(data: any): T[] {
       );
       showToast('Banner image removed! 🗑️', 'success');
     } catch (err: any) {
-      console.error(err);
       showToast(err.message || 'Failed to remove banner image', 'error');
     } finally {
       setLoading(false);
@@ -1175,7 +1132,6 @@ function extractArray<T = any>(data: any): T[] {
       );
       showToast('Brand settings updated successfully! ⚙️', 'success');
     } catch (err: any) {
-      console.error('[updateRestaurantDetails]', err);
       // Fallback local update so UI reflects toggle even if API fails
       setRestaurants((prev) =>
         prev.map((r) => {
@@ -1201,7 +1157,6 @@ function extractArray<T = any>(data: any): T[] {
       await updateBranch(branchId, data);
       showToast('Branch settings updated successfully! ⚙️', 'success');
     } catch (err: any) {
-      console.error('[updateBranchDetails]', err);
       showToast('Branch settings updated locally! ⚙️', 'info');
     } finally {
       // Immediately update local branch state & recompute derived store open status.

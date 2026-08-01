@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Platform } from 'react-native';
-import api from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
@@ -53,8 +53,6 @@ export const loadSavedToken = createAsyncThunk<
       // Proactively attempt token refresh on launch if refreshToken exists
       if (refreshToken) {
         try {
-          const PROD_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
-          const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PROD_API_URL;
           const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
           const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken }, {
             headers: { 'Content-Type': 'application/json' }
@@ -64,10 +62,10 @@ export const loadSavedToken = createAsyncThunk<
           if (newAccessToken) {
             await AsyncStorage.setItem('auth_token', newAccessToken);
             activeToken = newAccessToken;
-            console.log('Successfully refreshed token proactively on app launch');
+            if (__DEV__) console.log('Successfully refreshed token proactively on app launch');
           }
         } catch (refreshErr) {
-          console.log('[loadSavedToken] Proactive token refresh failed — token will be validated via profile fetch');
+          if (__DEV__) console.log('[loadSavedToken] Proactive token refresh failed — token will be validated via profile fetch');
         }
       }
       
@@ -160,7 +158,7 @@ export const loginUser = createAsyncThunk<
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', refreshToken);
       } catch (err) {
-        console.error('Failed to save token to AsyncStorage:', err);
+        if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
       }
       
       // Fetch user profile info
@@ -215,7 +213,7 @@ export const registerUser = createAsyncThunk<
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', tokens.refresh);
       } catch (err) {
-        console.error('Failed to save token to AsyncStorage:', err);
+        if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
       }
       
       return { user, token, refreshToken: tokens.refresh };
@@ -268,12 +266,12 @@ export const guestLogin = createAsyncThunk<
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', tokens.refresh);
       } catch (err) {
-        console.error('Failed to save token to AsyncStorage:', err);
+        if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
       }
       
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
-      console.warn('Backend guest auth throttled or offline. Using local session state.');
+      if (__DEV__) console.warn('Backend guest auth throttled or offline. Using local session state.');
       delete api.defaults.headers.common['Authorization'];
       const fallbackUser: UserProfile = {
         id: 9999,
@@ -360,7 +358,7 @@ export const logoutUser = createAsyncThunk<
       await AsyncStorage.removeItem('auth_token');
       await AsyncStorage.removeItem('refresh_token');
     } catch (err) {
-      console.error('Failed to remove token from AsyncStorage:', err);
+      if (__DEV__) console.error('Failed to remove token from AsyncStorage:', err);
     }
     dispatch(logout());
   }

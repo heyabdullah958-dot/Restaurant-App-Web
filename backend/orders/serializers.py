@@ -36,8 +36,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     use_loyalty_points = serializers.BooleanField(required=False, default=False, write_only=True)
     points_to_redeem = serializers.IntegerField(required=False, default=0, min_value=0, write_only=True)
     coupon_code = serializers.CharField(required=False, allow_blank=True, allow_null=True, write_only=True)
+    delivery_address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     delivery_lat = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True, coerce_to_string=False)
     delivery_lng = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True, coerce_to_string=False)
+    order_type = serializers.CharField(required=False, default='DELIVERY')
+    table_number = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def to_internal_value(self, data):
         if isinstance(data, dict):
@@ -55,7 +58,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 'display_order_id', 'tracking_token', 'restaurant', 'branch', 'guest_name', 'guest_phone', 'payment_method',
-            'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
+            'order_type', 'table_number', 'delivery_address', 'delivery_lat', 'delivery_lng', 'special_instructions',
             'items', 'subtotal', 'delivery_fee', 'discount', 'total',
             'use_loyalty_points', 'points_to_redeem', 'coupon_code'
         )
@@ -304,6 +307,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 })
 
             delivery_fee = restaurant.delivery_fee
+            ord_type = validated_data.get('order_type', 'DELIVERY')
+            if ord_type in ['DINE_IN', 'TAKEAWAY']:
+                delivery_fee = Decimal('0.00')
+
+            if ord_type == 'DINE_IN' and not validated_data.get('delivery_address'):
+                tbl = validated_data.get('table_number') or 'N/A'
+                br_obj = validated_data.get('branch')
+                br_title = br_obj.name if br_obj else restaurant.name
+                validated_data['delivery_address'] = f"Dine-In (Table #{tbl}) - {br_title}"
+            elif ord_type == 'TAKEAWAY' and not validated_data.get('delivery_address'):
+                br_obj = validated_data.get('branch')
+                br_title = br_obj.name if br_obj else restaurant.name
+                validated_data['delivery_address'] = f"Takeaway Pickup - {br_title}"
 
             # Coupon discount calculation
             coupon_discount = Decimal('0.00')
@@ -367,17 +383,34 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 updated_count = User.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(
                     loyalty_points=F('loyalty_points') - actual_pts_redeemed
                 )
-                if updated_count == 0:
-                    raise serializers.ValidationError("Insufficient loyalty points balance.")
-                    
-                from users.models import LoyaltyTransaction
-                LoyaltyTransaction.objects.create(
-                    user=user,
-                    order=order,
-                    points=actual_pts_redeemed,
-                    transaction_type='redeemed',
-                    description=f"Redeemed {actual_pts_redeemed} points for Rs. {actual_pts_redeemed} discount on Order #{order.id}"
-                )
+                if updated_count > 0:
+                    from users.models import LoyaltyTransaction
+                    LoyaltyTransaction.objects.create(
+                        user=user,
+                        order=order,
+                        points=-actual_pts_redeemed,
+                        transaction_type='redeemed',
+                        description=f"Redeemed on Order #{order.id}"
+                    )
+
+            # Calculate and award earned loyalty points if configured
+            ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
+            if ratio and ratio > 0 and user and not user.is_guest:
+                earned_points = int(subtotal // ratio)
+                if earned_points > 0:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    User.objects.filter(pk=user.pk).update(
+                        loyalty_points=F('loyalty_points') + earned_points
+                    )
+                    from users.models import LoyaltyTransaction
+                    LoyaltyTransaction.objects.create(
+                        user=user,
+                        order=order,
+                        points=earned_points,
+                        transaction_type='earned',
+                        description=f"Points earned on Order #{order.id} (Ratio: 1 point per Rs. {ratio})"
+                    )
 
             # Auto-assign branch if not provided
             if not order.branch:
@@ -396,26 +429,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             for item in order_items_to_create:
                 OrderItem.objects.create(order=order, **item)
 
-            # Award loyalty points on net paid total
-            if user and not user.is_guest:
-                ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
-                if ratio > 0:
-                    earned_points = int(total // ratio)
-                    if earned_points > 0:
-                        from django.contrib.auth import get_user_model
-                        User = get_user_model()
-                        User.objects.filter(pk=user.pk).update(
-                            loyalty_points=F('loyalty_points') + earned_points
-                        )
-                        from users.models import LoyaltyTransaction
-                        LoyaltyTransaction.objects.create(
-                            user=user,
-                            order=order,
-                            points=earned_points,
-                            transaction_type='earned',
-                            description=f"Points earned on Order #{order.id} (Ratio: 1 point per Rs. {ratio})"
-                        )
-
             return order
 
 
@@ -425,8 +438,8 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
-        read_only_fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'status', 'total', 'created_at')
+        fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'order_type', 'table_number', 'status', 'total', 'created_at')
+        read_only_fields = ('id', 'display_order_id', 'tracking_token', 'restaurant', 'restaurant_name', 'restaurant_logo', 'order_type', 'table_number', 'status', 'total', 'created_at')
 
     def get_restaurant_logo(self, obj):
         return build_absolute_image_url(obj.restaurant.logo, self.context)
@@ -447,6 +460,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
             'branch_id', 'branch_name',
             'rider', 'rider_id',
             'guest_name', 'guest_phone',
+            'order_type', 'table_number',
             'status', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng',
             'subtotal', 'delivery_fee', 'discount', 'total',
@@ -470,7 +484,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'status', 'payment_method',
+            'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'order_type', 'table_number', 'status', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )

@@ -11,6 +11,12 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     )
+
+    ORDER_TYPES = (
+        ('DELIVERY', 'Delivery'),
+        ('TAKEAWAY', 'Takeaway'),
+        ('DINE_IN', 'Dine-In'),
+    )
     
     PAYMENT_METHODS = (
         ('cod', 'Cash on Delivery'),
@@ -61,6 +67,8 @@ class Order(models.Model):
         db_index=True,
         help_text="Tenant and branch scoped human-readable order ID (e.g., TS-LC-1001)."
     )
+    order_type = models.CharField(max_length=20, choices=ORDER_TYPES, default='DELIVERY', db_index=True)
+    table_number = models.CharField(max_length=30, blank=True, null=True, help_text="Table number for Dine-In orders.")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received', db_index=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cod', db_index=True)
     delivery_address = models.TextField()

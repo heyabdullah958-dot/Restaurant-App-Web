@@ -246,8 +246,8 @@ export const MenuManagement: React.FC = () => {
                       )}
 
                       <span className="block text-sm font-extrabold text-zinc-950 dark:text-white mt-2">
-                        {item.options?.has_variants && item.options?.variants?.length > 0
-                          ? `From Rs. ${Math.min(...item.options.variants.map((v: any) => Number(v.price))).toLocaleString()}`
+                        {item.options?.has_variants && (item.options?.variants?.length ?? 0) > 0
+                          ? `From Rs. ${Math.min(...(item.options?.variants || []).map((v: any) => Number(v.price))).toLocaleString()}`
                           : `Rs. ${Number(item.price).toLocaleString()}`}
                       </span>
                     </div>

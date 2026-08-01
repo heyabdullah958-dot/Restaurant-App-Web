@@ -16,7 +16,7 @@ export const initPushNotificationListener = () => {
     try {
       Notifications = require('expo-notifications');
     } catch (e) {
-      console.log('[NotificationService] expo-notifications fallback mode');
+      if (__DEV__) console.log('[NotificationService] expo-notifications fallback mode');
     }
 
     if (Notifications) {
@@ -33,7 +33,7 @@ export const initPushNotificationListener = () => {
           const data = response.notification.request.content.data;
           handleNotificationDeepLink(data);
         } catch (err) {
-          console.warn('[NotificationService] Error handling notification tap:', err);
+          if (__DEV__) console.warn('[NotificationService] Error handling notification tap:', err);
         }
       });
 
@@ -42,7 +42,7 @@ export const initPushNotificationListener = () => {
       };
     }
   } catch (err) {
-    console.warn('[NotificationService] Setup error:', err);
+    if (__DEV__) console.warn('[NotificationService] Setup error:', err);
   }
 };
 
@@ -98,8 +98,8 @@ export const handleNotificationDeepLink = (data: any) => {
 export const subscribeToOrderTopic = async (orderId: number) => {
   try {
     await AsyncStorage.setItem(`subscribed_topic_order_${orderId}`, 'true');
-    console.log(`[NotificationService] Subscribed to order topic: order_${orderId}`);
+    if (__DEV__) console.log(`[NotificationService] Subscribed to order topic: order_${orderId}`);
   } catch (e) {
-    console.warn(`[NotificationService] Failed to subscribe to topic order_${orderId}:`, e);
+    if (__DEV__) console.warn(`[NotificationService] Failed to subscribe to topic order_${orderId}:`, e);
   }
 };

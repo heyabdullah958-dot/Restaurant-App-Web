@@ -764,28 +764,6 @@ export default function TrackingScreen() {
           </View>
         </View>
 
-        {/* Live Testing Guide */}
-        <View style={[styles.card, styles.testingGuideCard]}>
-          <Text style={styles.guideTitle}>💡 Live Testing Guide</Text>
-          <Text style={styles.guideText}>
-            This order is connected to the live backend. To test the status update flow:
-          </Text>
-          <View style={styles.guideSteps}>
-            <Text style={styles.guideStep}>
-              1. Open the Admin Panel at <Text style={styles.guideCode}>https://getfoodpk-fd9b20442fcf.herokuapp.com/admin/</Text> and log in.
-            </Text>
-            <Text style={styles.guideStep}>
-              2. Go to the <Text style={styles.guideBold}>Orders</Text> section and select Order <Text style={styles.guideBold}>#{orderId}</Text>.
-            </Text>
-            <Text style={styles.guideStep}>
-              3. Update the status field from <Text style={styles.guideBold}>Received</Text> to <Text style={styles.guideBold}>Preparing</Text> or <Text style={styles.guideBold}>Out for Delivery</Text> and save.
-            </Text>
-            <Text style={styles.guideStep}>
-              4. Watch the order status in the app automatically update in real-time!
-            </Text>
-          </View>
-        </View>
-
         {/* Close Button / Go to History */}
         <TouchableOpacity activeOpacity={0.75}
           style={styles.doneBtn}
@@ -1337,47 +1315,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 8,
     fontWeight: 'bold',
-  },
-  testingGuideCard: {
-    backgroundColor: 'rgba(255, 87, 34, 0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 87, 34, 0.15)',
-    padding: SPACING.md,
-    borderRadius: 12,
-    marginBottom: SPACING.md,
-  },
-  guideTitle: {
-    ...FONTS.subtitle,
-    fontSize: 15,
-    color: COLORS.primary,
-    fontWeight: 'bold',
-    marginBottom: SPACING.xs,
-  },
-  guideText: {
-    ...FONTS.body,
-    fontSize: 13,
-    color: COLORS.dark,
-    lineHeight: 18,
-    marginBottom: SPACING.sm,
-  },
-  guideSteps: {
-    paddingLeft: 4,
-  },
-  guideStep: {
-    ...FONTS.caption,
-    fontSize: 11.5,
-    color: COLORS.gray,
-    lineHeight: 16,
-    marginBottom: 6,
-  },
-  guideCode: {
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    color: COLORS.dark,
-  },
-  guideBold: {
-    fontWeight: 'bold',
-    color: COLORS.dark,
   },
   mapPlaceholder: {
     height: 200,
