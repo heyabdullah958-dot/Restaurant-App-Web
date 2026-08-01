@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { useAdmin } from '../AdminContext';
 import { fetchFlashDeals, createFlashDeal, updateFlashDeal, deleteFlashDeal } from '../services/api';
 
 export const FlashDealManagement: React.FC = () => {
+  const { showToast } = useAdmin();
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [editingDeal, setEditingDeal] = useState<any | null>(null);
 
@@ -24,7 +27,8 @@ export const FlashDealManagement: React.FC = () => {
     try {
       const data = await fetchFlashDeals();
       setDeals(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch (err: any) {
+      showToast('Failed to load flash deals.', 'error');
       setDeals([]);
     } finally {
       setLoading(false);
@@ -37,17 +41,22 @@ export const FlashDealManagement: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
       if (editingDeal) {
         await updateFlashDeal(editingDeal.id, formData);
+        showToast('Flash deal updated successfully!', 'success');
       } else {
         await createFlashDeal(formData);
+        showToast('Flash deal created successfully!', 'success');
       }
       setShowModal(false);
       setEditingDeal(null);
       loadDeals();
     } catch (err: any) {
-      alert(err.message || 'Error saving flash deal');
+      showToast(err.message || 'Error saving flash deal', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -55,9 +64,10 @@ export const FlashDealManagement: React.FC = () => {
     if (!confirm('Are you sure you want to delete this flash deal?')) return;
     try {
       await deleteFlashDeal(id);
+      showToast('Flash deal deleted successfully!', 'success');
       loadDeals();
     } catch (err: any) {
-      alert(err.message || 'Error deleting flash deal');
+      showToast(err.message || 'Error deleting flash deal', 'error');
     }
   };
 
@@ -240,9 +250,11 @@ export const FlashDealManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-lg font-medium transition"
                 >
-                  Save Deal
+                  {saving && <Loader2 size={16} className="animate-spin" />}
+                  <span>{saving ? 'Saving...' : 'Save Deal'}</span>
                 </button>
               </div>
             </form>

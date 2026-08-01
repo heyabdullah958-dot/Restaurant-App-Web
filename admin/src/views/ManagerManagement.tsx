@@ -52,17 +52,29 @@ interface CreatedManagerCredentials {
   notification_email: string;
 }
 
+const WHITELISTED_USERNAMES = [
+  'manager_tandooristoppk_johar_town',
+  'manager_tandooristoppk_lake_city',
+  'manager_tandooristoppk_gt_road_baghbanpura',
+  'manager_jushhpk_dha_phase_1',
+  'manager_jushhpk_johar_town',
+  'manager_jushhpk_lake_city',
+  'manager_getafomo_gulberg_iii'
+];
+
+const isLaunchBrand = (str: string) => {
+  const clean = (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
+};
+
 const MOCK_BRANCHES: Branch[] = [
   { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk', phone: '0327-4945947', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
-  { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall', phone: '', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
+  { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall', phone: '0324-4441735', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
   { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura', phone: '0326-6811177', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
-  { id: 4, name: 'Johar Town', address: 'Johar Town, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 5, name: 'DHA', address: 'DHA, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 6, name: 'Gulberg', address: 'Gulberg, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 7, name: 'Saddar', address: 'Saddar, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 8, name: 'Johar Town', address: 'Johar Town, Lahore', phone: '', is_active: true, restaurant_id: 7, restaurant_name: 'GetAFomo' },
-  { id: 9, name: 'DHA', address: 'DHA, Lahore', phone: '', is_active: true, restaurant_id: 7, restaurant_name: 'GetAFomo' },
-  { id: 10, name: 'Gulberg', address: 'Gulberg, Lahore', phone: '', is_active: true, restaurant_id: 7, restaurant_name: 'GetAFomo' },
+  { id: 4, name: 'DHA Phase 1', address: 'DHA Phase 1, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
+  { id: 5, name: 'Johar Town', address: 'Johar Town, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
+  { id: 6, name: 'Lake City', address: 'Lake City, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
+  { id: 7, name: 'Gulberg III', address: 'Gulberg III, Lahore', phone: '', is_active: true, restaurant_id: 7, restaurant_name: 'GetAFomo' },
 ];
 
 const MOCK_MANAGERS: Manager[] = [
@@ -71,16 +83,13 @@ const MOCK_MANAGERS: Manager[] = [
   { id: 3, username: 'manager_tandooristoppk_lake_city', email: 'manager2@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'Lake City', branch_id: 2, notification_email: 'manager2@tandooristoppk.com' },
   { id: 4, username: 'manager_tandooristoppk_gt_road_baghbanpura', email: 'manager3@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'GT Road Baghbanpura', branch_id: 3, notification_email: 'manager3@tandooristoppk.com' },
 
-  // Jush Branches (4)
-  { id: 5, username: 'manager_jushhpk_johar_town', email: 'manager@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Johar Town', branch_id: 4, notification_email: 'manager@jushhpk.com' },
-  { id: 6, username: 'manager_jushhpk_dha', email: 'manager.dha@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'DHA', branch_id: 5, notification_email: 'manager.dha@jushhpk.com' },
-  { id: 7, username: 'manager_jushhpk_gulberg', email: 'manager.gulberg@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Gulberg', branch_id: 6, notification_email: 'manager.gulberg@jushhpk.com' },
-  { id: 8, username: 'manager_jushhpk_saddar', email: 'manager.saddar@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Saddar', branch_id: 7, notification_email: 'manager.saddar@jushhpk.com' },
+  // Jush Branches (3)
+  { id: 5, username: 'manager_jushhpk_dha_phase_1', email: 'manager.dha@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'DHA Phase 1', branch_id: 4, notification_email: 'manager.dha@jushhpk.com' },
+  { id: 6, username: 'manager_jushhpk_johar_town', email: 'manager@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Johar Town', branch_id: 5, notification_email: 'manager@jushhpk.com' },
+  { id: 7, username: 'manager_jushhpk_lake_city', email: 'manager.lake@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Lake City', branch_id: 6, notification_email: 'manager.lake@jushhpk.com' },
 
-  // GetAFomo Branches (3)
-  { id: 9, username: 'manager_getafomo_johar_town', email: 'manager@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Johar Town', branch_id: 8, notification_email: 'manager@getafomo.com' },
-  { id: 10, username: 'manager_getafomo_dha', email: 'manager.dha@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'DHA', branch_id: 9, notification_email: 'manager.dha@getafomo.com' },
-  { id: 11, username: 'manager_getafomo_gulberg', email: 'manager.gulberg@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Gulberg', branch_id: 10, notification_email: 'manager.gulberg@getafomo.com' },
+  // GetAFomo Branches (1)
+  { id: 8, username: 'manager_getafomo_gulberg_iii', email: 'manager.gulberg@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Gulberg III', branch_id: 7, notification_email: 'manager.gulberg@getafomo.com' },
 ];
 
 export const ManagerManagement: React.FC = () => {
@@ -109,16 +118,15 @@ export const ManagerManagement: React.FC = () => {
 
   const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
 
-  const isLaunchBrand = (str: string) => {
-    const clean = (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
+  const isWhitelistedManager = (m: Manager) => {
+    return WHITELISTED_USERNAMES.includes(m.username);
   };
 
   const loadManagers = async () => {
     setLoading(true);
     if (isMock) {
       setTimeout(() => {
-        setManagers(MOCK_MANAGERS.filter(m => isLaunchBrand(m.restaurant_name)));
+        setManagers(MOCK_MANAGERS.filter(isWhitelistedManager));
         setLoading(false);
       }, 500);
       return;
@@ -126,11 +134,11 @@ export const ManagerManagement: React.FC = () => {
 
     try {
       const data = await fetchAllManagers();
-      const filtered = data.filter((m: Manager) => isLaunchBrand(m.restaurant_name));
-      setManagers(filtered);
+      const filtered = data.filter((m: Manager) => isWhitelistedManager(m) || WHITELISTED_USERNAMES.some(w => m.username.includes(w)));
+      setManagers(filtered.length > 0 ? filtered : MOCK_MANAGERS);
     } catch (err: any) {
       showToast('Failed to load manager accounts. Using offline mocks.', 'error');
-      setManagers(MOCK_MANAGERS.filter(m => isLaunchBrand(m.restaurant_name)));
+      setManagers(MOCK_MANAGERS);
     } finally {
       setLoading(false);
     }

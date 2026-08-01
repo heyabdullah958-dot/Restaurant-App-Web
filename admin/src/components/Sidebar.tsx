@@ -157,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-40 w-64 flex flex-col justify-between border-r shadow-sm transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed md:sticky top-0 left-0 h-screen max-h-screen z-40 w-64 flex flex-col justify-between border-r shadow-sm transition-transform duration-300 md:translate-x-0 overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } ${
           isSuper 
@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         }`}
       >
         {/* Top Branding Section */}
-        <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-0.5">
+        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto custom-scrollbar pr-0.5 pb-4">
           <div className={`p-6 border-b flex justify-between items-center ${isSuper ? 'border-slate-800' : 'border-zinc-100 dark:border-slate-800'}`}>
             <div className="flex items-center gap-2.5">
               {isSuper ? (

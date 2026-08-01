@@ -69,6 +69,17 @@ class ActiveCouponsView(generics.ListAPIView):
             qs = qs.filter(Q(branch_id=branch_id) | Q(branch__isnull=True))
         return qs
 
+class FlashDealListCreateView(generics.ListCreateAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = FlashDealSerializer
+
+    def get_queryset(self):
+        qs = FlashDeal.objects.all().order_by('-created_at')
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        if restaurant_id:
+            qs = qs.filter(restaurant_id=restaurant_id)
+        return qs
+
 class ActiveFlashDealsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = FlashDealSerializer
@@ -84,7 +95,8 @@ class ActiveFlashDealsView(generics.ListAPIView):
                 qs = qs.filter(is_dine_in_only=False)
         return qs
 
-class FlashDealDetailView(generics.RetrieveAPIView):
+class FlashDealDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = FlashDeal.objects.all()
     serializer_class = FlashDealSerializer
+
