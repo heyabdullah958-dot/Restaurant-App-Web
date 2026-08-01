@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2, UploadCloud, Info, RefreshCw, Link as LinkIcon } from 'lucide-react';
 import { useAdmin } from '../AdminContext';
 import { fetchFlashDeals, createFlashDeal, updateFlashDeal, deleteFlashDeal } from '../services/api';
 
@@ -10,6 +10,11 @@ export const FlashDealManagement: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [editingDeal, setEditingDeal] = useState<any | null>(null);
+  
+  // Image Upload States
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -22,6 +27,74 @@ export const FlashDealManagement: React.FC = () => {
     is_active: true,
     is_dine_in_only: false,
   });
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return;
+
+    // 1. Validate File Format
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showToast('Invalid file format. Only JPG, PNG, and WEBP are supported.', 'error');
+      return;
+    }
+
+    // 2. Validate File Size (Max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      showToast('File size exceeds 2MB limit. Please select a smaller image.', 'error');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Attempt direct Cloudinary upload preset first
+      const body = new FormData();
+      body.append('file', file);
+      body.append('upload_preset', 'foodsphere_preset');
+
+      const res = await fetch('https://api.cloudinary.com/v1_1/depa8gfnk/image/upload', {
+        method: 'POST',
+        body,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.secure_url) {
+          setFormData(prev => ({ ...prev, image: data.secure_url }));
+          showToast('Banner uploaded to Cloudinary successfully!', 'success');
+          setUploadingImage(false);
+          return;
+        }
+      }
+
+      // Fallback: Read file as Data URL string if unsigned upload fails
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setFormData(prev => ({ ...prev, image: reader.result as string }));
+          showToast('Banner image loaded successfully!', 'success');
+        }
+        setUploadingImage(false);
+      };
+      reader.onerror = () => {
+        showToast('Failed to read image file.', 'error');
+        setUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      // Fallback to FileReader
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setFormData(prev => ({ ...prev, image: reader.result as string }));
+          showToast('Banner image loaded successfully!', 'success');
+        }
+        setUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const loadDeals = async () => {
     setLoading(true);
@@ -253,14 +326,109 @@ export const FlashDealManagement: React.FC = () => {
                 </label>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1">Image Banner URL</label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm"
-                  placeholder="https://res.cloudinary.com/..."
-                />
+                <label className="block text-xs font-semibold uppercase text-slate-500 mb-1.5">
+                  Deal Banner Image
+                </label>
+
+                {/* Recommended Resolution Guidelines Badge */}
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2.5 mb-3 flex items-start gap-2 text-amber-600 dark:text-amber-400 text-[11px] font-medium">
+                  <Info size={14} className="mt-0.5 shrink-0" />
+                  <div>
+                    <span className="font-bold">Recommended Specs:</span> 1200 x 600 px (2:1 aspect ratio) • Max size: 2MB (JPG, PNG, WEBP).
+                  </div>
+                </div>
+
+                {/* File Dropzone or Preview Card */}
+                {formData.image ? (
+                  <div className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-slate-900 group">
+                    <img src={formData.image} alt="Deal Banner Preview" className="w-full h-36 object-cover" />
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-950/80 text-white text-[10px] font-bold tracking-wider uppercase border border-slate-700">
+                      2:1 Aspect Ratio Preview
+                    </div>
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                      <label className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold cursor-pointer transition shadow-lg">
+                        <RefreshCw size={14} /> Replace
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleImageUpload(e.target.files[0]);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition shadow-lg"
+                      >
+                        <Trash2 size={14} /> Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                    onDragLeave={() => setDragActive(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragActive(false);
+                      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        handleImageUpload(e.dataTransfer.files[0]);
+                      }
+                    }}
+                    className={`border-2 border-dashed rounded-xl p-5 text-center transition-all cursor-pointer relative ${
+                      dragActive ? 'border-amber-500 bg-amber-500/10' : 'border-slate-300 dark:border-slate-700 hover:border-amber-500/50'
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleImageUpload(e.target.files[0]);
+                        }
+                      }}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    />
+                    {uploadingImage ? (
+                      <div className="flex flex-col items-center justify-center py-3">
+                        <Loader2 size={24} className="animate-spin text-amber-500 mb-2" />
+                        <span className="text-xs text-slate-400 font-medium">Uploading image banner...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-2">
+                        <UploadCloud size={28} className="text-amber-500 mb-1.5 text-center mx-auto" />
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                          Drag & drop banner image here, or <span className="text-amber-500 underline">browse</span>
+                        </span>
+                        <span className="text-[10px] text-slate-400 mt-1">Supports JPG, PNG, WEBP up to 2MB</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Collapsible Manual URL Fallback Input */}
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="text-[11px] font-semibold text-slate-400 hover:text-amber-500 flex items-center gap-1 transition"
+                  >
+                    <LinkIcon size={12} /> {showUrlInput ? 'Hide URL input' : 'Or paste image URL directly'}
+                  </button>
+                  {showUrlInput && (
+                    <input
+                      type="url"
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      className="w-full mt-1.5 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-xs outline-none focus:border-amber-500"
+                      placeholder="https://res.cloudinary.com/..."
+                    />
+                  )}
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <button
