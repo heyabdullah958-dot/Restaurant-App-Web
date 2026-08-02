@@ -10,14 +10,16 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --fire1: #FF4500;
-      --fire2: #FF8C00;
-      --fire3: #FFC300;
-      --dark: #0A0500;
-      --dark2: #120800;
-      --charcoal: #1A1000;
+      --crimson: #AD1F23;
+      --vivid-orange: #EC4F24;
+      --fire1: #AD1F23;
+      --fire2: #EC4F24;
+      --fire3: #FF7D40;
+      --dark: #0E0709;
+      --dark2: #170C0F;
+      --charcoal: #211216;
       --white: #FFFFFF;
-      --muted: rgba(255,255,255,0.6);
+      --muted: rgba(255, 255, 255, 0.7);
     }
     html { scroll-behavior: smooth; }
     body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
@@ -52,7 +54,7 @@
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
-      background: radial-gradient(ellipse at 60% 50%, rgba(255,69,0,0.18) 0%, transparent 60%),
+      background: radial-gradient(ellipse at 60% 50%, rgba(236,79,36,0.22) 0%, transparent 60%),
                   linear-gradient(160deg, var(--dark) 0%, var(--dark2) 50%, #1F0A00 100%);
       display: flex; align-items: center;
       padding: 120px 5% 80px;
@@ -198,7 +200,7 @@
     /* ── BRANCHES ── */
     .branches-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
     .branch-card {
-      background: rgba(255,69,0,0.06); border: 1px solid rgba(255,69,0,0.18);
+      background: rgba(255,69,0,0.06); border: 1px solid rgba(236,79,36,0.22);
       border-radius: 16px; padding: 28px; transition: all 0.3s;
     }
     .branch-card:hover { border-color: rgba(255,69,0,0.4); background: rgba(255,69,0,0.1); }
@@ -525,10 +527,13 @@
 
   <!-- NAV -->
   <nav id="navbar">
-    <div class="logo-wrap">
-      <div class="logo-main"><span>TANDOORI STOP</span></div>
-      <div class="logo-sub">Last Stop 📍</div>
-    </div>
+    <a href="#home" class="logo-wrap" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Logo" style="height:44px; width:auto; object-fit:contain;" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+      <div>
+        <div class="logo-main" style="font-size:18px; font-weight:900; letter-spacing:1px; color:#FFFFFF;">TANDOORI <span style="color:var(--vivid-orange);">STOP</span></div>
+        <div class="logo-sub" style="font-size:9px; color:rgba(255,255,255,0.6); letter-spacing:2px; text-transform:uppercase;">Lahore's Finest Tandoori</div>
+      </div>
+    </a>
     <ul class="nav-links">
       <li><a href="#home">Home</a></li>
       <li><a href="#menu">Menu</a></li>
