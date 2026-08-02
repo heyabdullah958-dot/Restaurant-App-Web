@@ -544,6 +544,155 @@
       color: #FFFFFF;
     }
 
+  
+    /* Modern Gallery & Lightbox Preview Styling */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 36px;
+    }
+    .gallery-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      height: 240px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #120A0D;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .gallery-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: var(--vivid-orange, #EC4F24);
+      box-shadow: 0 16px 40px rgba(236, 79, 36, 0.25);
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .gallery-card:hover img {
+      transform: scale(1.1);
+    }
+    .gallery-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 2;
+    }
+    .gallery-overlay-meta {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+    .gallery-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+    }
+    .gallery-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 2px;
+    }
+
+    /* Lightbox Modal */
+    #lightbox-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    #lightbox-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .lightbox-content {
+      position: relative;
+      max-width: 720px;
+      width: 100%;
+      background: #1A0E12;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    #lightbox-modal.active .lightbox-content {
+      transform: scale(1);
+    }
+    .lightbox-img-wrap {
+      height: 380px;
+      width: 100%;
+      background: #0D0608;
+      position: relative;
+    }
+    .lightbox-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .lightbox-body {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lightbox-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #FFFFFF;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+    .lightbox-close:hover {
+      background: var(--vivid-orange, #EC4F24);
+      transform: scale(1.1);
+    }
+
   </style>
 </head>
 <body>
@@ -1250,5 +1399,23 @@ const menuData = {
   <a href="#home" class="back-top" id="backTop" aria-label="Back to top">↑</a>
 <script>window.BRAND_SLUG = "jushhpk";</script>
 <script src="live_catalog.js?v=20260802_v5"></script>
+
+  <!-- Lightbox Modal Preview -->
+  <div id="lightbox-modal" onclick="closeLightbox(event)">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="" />
+      </div>
+      <div class="lightbox-body">
+        <div>
+          <div class="lightbox-title" id="lightbox-title">Item Preview</div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.6);" id="lightbox-desc">Freshly prepared in our kitchen</div>
+        </div>
+        <a href="#order" class="btn-fire" onclick="closeLightbox()" style="padding:10px 20px; font-size:13px;">🔥 Order Now</a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
