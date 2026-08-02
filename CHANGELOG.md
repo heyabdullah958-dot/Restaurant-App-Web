@@ -1,6 +1,12 @@
 
 # Changelog
 
+## 2026-08-02 Local Asset Cross-Verification & Multi-Tenant Catalog Mapping
+- **Local Folder Asset Audit**: Audited `Tandoori stop` and `Jush Menu Pics` directory files, cross-verifying images, logos, banners, and menu items across multi-tenant brand entities (`seenbanao`: 1, `dineatblue`: 2, `jushhpk`: 3, `tandooristoppk`: 4, `sandmelts`: 5, `birdmanfoodspk`: 6, `getafomo`: 7).
+- **Multi-Tenant Database & Cloudinary Binding**: Verified `upload_tandoori_stop_assets.py` asset mapping (41 menu items + logo/cover/banner bound to Cloudinary CDN) and synced DRF backend database models (`Restaurant`, `MenuCategory`, `MenuItem`).
+- **Website Live Catalog Synchronization (`live_catalog.js`)**: Updated `websites/live_catalog.js` and `websites/shared_catalog.json` covering 160 menu items across 37 categories for all 7 brand websites with dynamic backend API fetching (`/api/restaurants/:slug/menu/`) and zero missing images.
+- **Frontend Fallback Image Engine**: Configured `fix_website_product_images.py` CDN fallback rules (`CATEGORY_CDN_FALLBACKS`) and `onError` image handlers ensuring 100% display readiness for client demo.
+
 ## 2026-08-01 Sales Engine Overhaul, Universal Order Mode & Live SLA Monitoring (Release v48)
 - **Universal Order Mode Engine**: Implemented order mode toggle (Delivery / Takeaway / Dine-In) across `HomeScreen`, `CartScreen`, and `CheckoutScreen`. Dine-In orders populate `table_number` and bypass delivery address requirements & delivery fees. Added Dine-In/Takeaway badges to `OrderManagement` Kanban.
 - **App Promo Code Engine (`CartScreen.tsx`)**: Added promo code text input field with live DRF validation hitting `POST /api/coupons/validate/`, discount preview, error shake animation, applied promo chip, and dynamic subtotal reduction.
