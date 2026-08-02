@@ -16,28 +16,7 @@ import { PromoManagement } from './views/PromoManagement';
 import { FlashDealManagement } from './views/FlashDealManagement';
 import { RiderManagement } from './views/RiderManagement';
 import { Menu, Sun, Moon, Bell, ArrowLeft } from 'lucide-react';
-import './index.css';
-
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {
-  state: {hasError: boolean, error?: Error} = { hasError: false, error: undefined };
-  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (import.meta.env.DEV) console.error('[FoodSphere] Render crash:', error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', padding:'40px', textAlign:'center', fontFamily:'Inter, system-ui, sans-serif'}}>
-          <div style={{fontSize:'48px', marginBottom:'16px'}}>⚠️</div>
-          <h2 style={{color:'#e2e8f0', marginBottom:'8px'}}>Something went wrong</h2>
-          <p style={{color:'#94a3b8', marginBottom:'24px', maxWidth:'400px'}}>{this.state.error?.message || 'An unexpected error occurred'}</p>
-          <button onClick={() => { this.setState({hasError: false}); window.location.hash = '#branch_dashboard'; window.location.reload(); }} style={{padding:'10px 24px', background:'#3b82f6', color:'white', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'14px'}}>Return to Dashboard</button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const MainLayout: React.FC = () => {
   const { user, activeView, loading, restaurants, selectedBrandId } = useAdmin();
@@ -192,7 +171,9 @@ const MainLayout: React.FC = () => {
               <SkeletonLoader type="table" />
             </div>
           ) : (
-            renderView()
+            <ErrorBoundary key={activeView} viewName={activeView}>
+              {renderView()}
+            </ErrorBoundary>
           )}
         </main>
       </div>

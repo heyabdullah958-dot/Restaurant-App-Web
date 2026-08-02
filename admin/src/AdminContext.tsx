@@ -318,6 +318,59 @@ function extractArray<T = any>(data: any): T[] {
   return [];
 }
 
+// ─── DEEP EQUALITY GUARDS TO PREVENT REACT ERROR #310 (INFINITE RE-RENDERS) ────
+const isEqualOrders = (prev: Order[], next: Order[]): boolean => {
+  if (prev === next) return true;
+  if (!prev || !next || prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (
+      p.id !== n.id ||
+      p.status !== n.status ||
+      p.total !== n.total ||
+      (p as any).updated_at !== (n as any).updated_at ||
+      (p as any).rider_id !== (n as any).rider_id ||
+      (p as any).rider?.id !== (n as any).rider?.id
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const isEqualRestaurants = (prev: Restaurant[], next: Restaurant[]): boolean => {
+  if (prev === next) return true;
+  if (!prev || !next || prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (
+      p.id !== n.id ||
+      p.is_active !== n.is_active ||
+      p.phone !== n.phone ||
+      p.address !== n.address ||
+      (p as any).branches?.length !== (n as any).branches?.length
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const isEqualUser = (prev: User | null, next: User | null): boolean => {
+  if (prev === next) return true;
+  if (!prev && !next) return true;
+  if (!prev || !next) return false;
+  return (
+    prev.id === next.id &&
+    prev.username === next.username &&
+    prev.role === next.role &&
+    prev.restaurantId === next.restaurantId &&
+    prev.branchId === next.branchId
+  );
+};
+
   // Restore session from localStorage on mount & listen to browser Back / Forward buttons
   useEffect(() => {
     localStorage.removeItem('foodsphere_admin_mock_user');
@@ -336,19 +389,22 @@ function extractArray<T = any>(data: any): T[] {
           restaurantId: isSuperAdmin ? undefined : payload.restaurant_id,
           branchId: isSuperAdmin ? undefined : payload.branch_id,
         };
-        setUser(loggedInUser);
+        setUser((prev) => isEqualUser(prev, loggedInUser) ? prev : loggedInUser);
         loadAppData();
       }
     }
   }, []);
 
-  // Listen to browser native Back (←) and Forward (→) button events
+  const activeViewRef = useRef(activeView);
+  useEffect(() => { activeViewRef.current = activeView; }, [activeView]);
+
+  // Listen to browser native Back (←) and Forward (→) button events safely without re-subscriptions
   useEffect(() => {
     const handlePopState = (event?: PopStateEvent | HashChangeEvent | Event) => {
       const hashView = window.location.hash.replace('#', '');
       const stateView = (event as PopStateEvent)?.state?.view;
       const targetView = hashView || stateView || localStorage.getItem('foodsphere_admin_view');
-      if (targetView && targetView !== activeView) {
+      if (targetView && targetView !== activeViewRef.current) {
         setActiveView(targetView);
         localStorage.setItem('foodsphere_admin_view', targetView);
       }
@@ -361,7 +417,7 @@ function extractArray<T = any>(data: any): T[] {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handlePopState);
     };
-  }, [activeView]);
+  }, []);
 
   // Keep location hash in sync with activeView
   useEffect(() => {
@@ -468,12 +524,14 @@ function extractArray<T = any>(data: any): T[] {
       let finalRestaurants: Restaurant[] = [];
       setRestaurants((prev) => {
         finalRestaurants = mergeAllRestaurants(mapped, prev);
+        if (isEqualRestaurants(prev, finalRestaurants)) return prev;
         return finalRestaurants;
       });
 
       const apiOrders = rawOrders.map(mapApiOrder);
       if (apiOrders.length > 0) {
-        setOrders(apiOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+        const sortedOrders = apiOrders.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setOrders((prev) => isEqualOrders(prev, sortedOrders) ? prev : sortedOrders);
       }
       
       if (finalRestaurants.length > 0) {
@@ -484,19 +542,23 @@ function extractArray<T = any>(data: any): T[] {
 
         if (!isSuper) {
           const activeBrandId = resolveUserRestaurantId(user || payload?.username, managerRestId, finalRestaurants);
-          setSelectedBrandId(activeBrandId);
+          setSelectedBrandId((prev) => prev === activeBrandId ? prev : activeBrandId);
           localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
 
           // Ensure user.branchId is set when app data finishes loading
           const currentRest = finalRestaurants.find((r) => r.id === activeBrandId);
           const resolvedBranchId = resolveUserBranchId(user || payload?.username, payload?.branch_id, currentRest);
           if (resolvedBranchId) {
-            setUser((prev) => prev ? { ...prev, branchId: resolvedBranchId, restaurantId: activeBrandId } : prev);
+            setUser((prev) => {
+              if (prev && prev.branchId === resolvedBranchId && prev.restaurantId === activeBrandId) return prev;
+              return prev ? { ...prev, branchId: resolvedBranchId, restaurantId: activeBrandId } : prev;
+            });
           }
         } else {
           const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
           const exists = savedBrandId && finalRestaurants.some((r) => r.id === Number(savedBrandId));
-          setSelectedBrandId(exists ? Number(savedBrandId) : finalRestaurants[0].id);
+          const targetBrandId = exists ? Number(savedBrandId) : finalRestaurants[0].id;
+          setSelectedBrandId((prev) => prev === targetBrandId ? prev : targetBrandId);
         }
       }
     } catch (err) {} finally {
@@ -504,10 +566,7 @@ function extractArray<T = any>(data: any): T[] {
     }
   };
 
-  // Load menu dynamically when brand switches.
-  // IMPORTANT: Only depend on selectedBrandId (NOT restaurants) to avoid an infinite
-  // loop where setRestaurants → new restaurants ref → this effect fires → loadMenu →
-  // (potentially) setMenuItems → re-render → repeat.
+  // Load menu dynamically when brand switches with state guard
   const restaurantsRef = useRef(restaurants);
   useEffect(() => { restaurantsRef.current = restaurants; }, [restaurants]);
 
@@ -525,16 +584,21 @@ function extractArray<T = any>(data: any): T[] {
                 image: getFullImageUrl(item.image_url || item.image),
               })),
             }));
-            setMenuItems((prev) => ({
-              ...prev,
-              [selectedRest.id]: mappedCategories,
-            }));
+            setMenuItems((prev) => {
+              const current = prev[selectedRest.id];
+              if (JSON.stringify(current) === JSON.stringify(mappedCategories)) {
+                return prev;
+              }
+              return {
+                ...prev,
+                [selectedRest.id]: mappedCategories,
+              };
+            });
           }
         } catch (err) {}
       };
       loadMenu();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBrandId]);
 
   // Show dynamic toast notifications with individual auto-dismiss timers
@@ -746,9 +810,8 @@ function extractArray<T = any>(data: any): T[] {
           saveNotifiedOrderIdsToSession(knownOrderIdsRef.current);
         }
 
-        setOrders(
-          newOrders.sort((a: Order, b: Order) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        );
+        const sortedOrders = newOrders.sort((a: Order, b: Order) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setOrders((prev) => isEqualOrders(prev, sortedOrders) ? prev : sortedOrders);
       }
     } catch (err) {}
   };

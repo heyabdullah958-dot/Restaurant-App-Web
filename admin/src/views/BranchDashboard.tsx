@@ -54,15 +54,13 @@ export const BranchDashboard: React.FC = () => {
   // Automatically sync modal input fields with live branch/restaurant data
   React.useEffect(() => {
     if (showEditModal) {
-      if (currentBranch) {
-        setEditPhone(currentBranch.phone || restaurant.phone || '');
-        setEditCity(currentBranch.address || restaurant.address || restaurant.city || '');
-        setEditIsActive(currentBranch.is_active !== undefined ? currentBranch.is_active : true);
-      } else {
-        setEditPhone(restaurant.phone || '');
-        setEditCity(restaurant.address || restaurant.city || '');
-        setEditIsActive(restaurant.is_active);
-      }
+      const targetPhone = currentBranch ? (currentBranch.phone || restaurant.phone || '') : (restaurant.phone || '');
+      const targetCity = currentBranch ? (currentBranch.address || restaurant.address || restaurant.city || '') : (restaurant.address || restaurant.city || '');
+      const targetActive = currentBranch ? (currentBranch.is_active !== undefined ? currentBranch.is_active : true) : restaurant.is_active;
+
+      setEditPhone((prev) => prev === targetPhone ? prev : targetPhone);
+      setEditCity((prev) => prev === targetCity ? prev : targetCity);
+      setEditIsActive((prev) => prev === targetActive ? prev : targetActive);
     }
   }, [restaurant, currentBranch, showEditModal]);
 
