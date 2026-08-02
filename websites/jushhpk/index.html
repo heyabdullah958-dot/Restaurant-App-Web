@@ -670,6 +670,7 @@
               <select name="branch" class="f-input f-select">
                 <option>Johar Town, R2</option>
                 <option>Lake City Business Bay</option>
+                <option>DHA Phase 1</option>
               </select>
             </div>
             <div>
@@ -717,48 +718,213 @@
 
   <script>
     const menuData = {
-      appetizer: [
-        { name: "Chicken Doner Fries", price: 600, desc: "Crispy fries topped with sliced chicken doner and sauces", emoji: "🍟", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg" },
-        { name: "Beef Doner Fries", price: 750, desc: "Crispy fries topped with sliced beef doner and signature sauces", emoji: "🍟", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg" }
-      ],
-      turkish: [
-        { name: "Chicken Grilled Sandwich", price: 750, desc: "Grilled chicken sandwich Turkish style", emoji: "🥪", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg" },
-        { name: "Beef Grilled Sandwich", price: 950, desc: "Grilled beef sandwich Turkish style", emoji: "🥪", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg" },
-        { name: "Half Dubai Shawaya", price: 1400, desc: "Traditional roasted chicken shawaya half portion", emoji: "🍗", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg" },
-        { name: "Full Dubai Shawaya", price: 2500, desc: "Traditional roasted chicken shawaya full portion", emoji: "🍗", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg" },
-        { name: "Add-on Rice", price: 300, desc: "Spiced Arabic rice serving for Shawaya", emoji: "🍚", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg" },
-        { name: "Chicken Turkish Wrap", price: 600, desc: "Spiced chicken doner wrapped in soft flatbread", emoji: "🌯", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg" },
-        { name: "Beef Turkish Wrap", price: 900, desc: "Premium beef doner wrapped in soft flatbread", emoji: "🌯", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg" },
-        { name: "Chicken Turkish Doner", price: 850, desc: "Traditional Turkish chicken doner in pita bread", emoji: "🥙", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg" },
-        { name: "Beef Turkish Doner", price: 1100, desc: "Traditional Turkish beef doner in pita bread", emoji: "🥙", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg" }
-      ],
-      shawarma: [
-        { name: "Chicken Pouch Shawarma", price: 450, desc: "Pocket-style chicken shawarma pocket bread", emoji: "🥟", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg" },
-        { name: "Beef Pouch Shawarma", price: 700, desc: "Pocket-style beef shawarma pocket bread", emoji: "🥟", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg" },
-        { name: "Chicken Shawarma", price: 550, desc: "Classic Lebanese chicken shawarma wrap", emoji: "🌯", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg" },
-        { name: "Beef Shawarma", price: 750, desc: "Classic Lebanese beef shawarma wrap", emoji: "🌯", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg" },
-        { name: "Charcoal Shawarma Chicken", price: 750, desc: "Charcoal grilled chicken shawarma wrapped in flatbread", emoji: "🌯", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg" },
-        { name: "Chicken Shawarma Platter", price: 900, desc: "Deconstructed chicken shawarma served on a platter", emoji: "🍽️", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg" },
-        { name: "Chicken Shawarma Platter (with cheese)", price: 1000, desc: "Deconstructed chicken shawarma topped with melted cheese", emoji: "🍽️", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg" }
-      ],
-      desserts: [
-        { name: "Lotus Can Dessert", price: 600, desc: "Creamy Lotus Biscoff dessert served in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Red Velvet Can Dessert", price: 600, desc: "Rich red velvet cake layered in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Nutella Can Dessert", price: 600, desc: "Decadent Nutella chocolate dessert in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Cheese Add-on", price: 90, desc: "Extra melted cheese portion", emoji: "🧀", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Dip Add-on", price: 90, desc: "Signature Jushh garlic or spicy dip", emoji: "🏺", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg" },
-        { name: "Tortilla Bread", price: 90, desc: "Extra soft tortilla flatbread", emoji: "🫓", image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Pita Bread", price: 60, desc: "Extra Lebanese pita pocket bread", emoji: "🫓", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg" },
-        { name: "Plain Fries", price: 150, desc: "Golden salted french fries side", emoji: "🍟", image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80" },
-        { name: "Water", price: 80, desc: "Mineral water bottle", emoji: "🥤", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg" },
-        { name: "Soft Drink", price: 150, desc: "Chilled regular soft drink", emoji: "🥤", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg" },
-        { name: "Blueberry Mojito", price: 290, desc: "Refreshing blueberry mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg" },
-        { name: "Strawberry Mojito", price: 290, desc: "Refreshing strawberry mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg" },
-        { name: "Green Apple Mojito", price: 290, desc: "Refreshing green apple mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg" },
-        { name: "Peach Mojito", price: 290, desc: "Refreshing peach mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg" },
-        { name: "Lemon Mojito", price: 290, desc: "Refreshing lemon mint mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg" }
-      ]
-    };
+    "appetizer": [
+        {
+            "name": "Chicken Doner Fries",
+            "price": 600,
+            "desc": "Crispy fries topped with sliced chicken doner and sauces",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg"
+        },
+        {
+            "name": "Beef Doner Fries",
+            "price": 750,
+            "desc": "Crispy fries topped with sliced beef doner and signature sauces",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg"
+        }
+    ],
+    "turkish": [
+        {
+            "name": "Chicken Grilled Sandwich",
+            "price": 750,
+            "desc": "Grilled chicken sandwich Turkish style",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg"
+        },
+        {
+            "name": "Beef Grilled Sandwich",
+            "price": 950,
+            "desc": "Grilled beef sandwich Turkish style",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg"
+        },
+        {
+            "name": "Half Dubai Shawaya",
+            "price": 1400,
+            "desc": "Traditional roasted chicken shawaya half portion",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg"
+        },
+        {
+            "name": "Full Dubai Shawaya",
+            "price": 2500,
+            "desc": "Traditional roasted chicken shawaya full portion",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg"
+        },
+        {
+            "name": "Add-on Rice",
+            "price": 300,
+            "desc": "Spiced Arabic rice serving for Shawaya",
+            "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Chicken Turkish Wrap",
+            "price": 600,
+            "desc": "Spiced chicken doner wrapped in soft flatbread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
+        },
+        {
+            "name": "Beef Turkish Wrap",
+            "price": 900,
+            "desc": "Premium beef doner wrapped in soft flatbread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
+        },
+        {
+            "name": "Chicken Turkish Doner",
+            "price": 850,
+            "desc": "Traditional Turkish chicken doner in pita bread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg"
+        },
+        {
+            "name": "Beef Turkish Doner",
+            "price": 1100,
+            "desc": "Traditional Turkish beef doner in pita bread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg"
+        }
+    ],
+    "shawarma": [
+        {
+            "name": "Chicken Pouch Shawarma",
+            "price": 450,
+            "desc": "Pocket-style chicken shawarma pocket bread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg"
+        },
+        {
+            "name": "Beef Pouch Shawarma",
+            "price": 700,
+            "desc": "Pocket-style beef shawarma pocket bread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg"
+        },
+        {
+            "name": "Chicken Shawarma",
+            "price": 550,
+            "desc": "Classic Lebanese chicken shawarma wrap",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
+        },
+        {
+            "name": "Beef Shawarma",
+            "price": 750,
+            "desc": "Classic Lebanese beef shawarma wrap",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
+        },
+        {
+            "name": "Charcoal Shawarma Chicken",
+            "price": 750,
+            "desc": "Charcoal grilled chicken shawarma wrapped in flatbread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg"
+        },
+        {
+            "name": "Chicken Shawarma Platter",
+            "price": 900,
+            "desc": "Deconstructed chicken shawarma served on a platter",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
+        },
+        {
+            "name": "Chicken Shawarma Platter (with cheese)",
+            "price": 1000,
+            "desc": "Deconstructed chicken shawarma topped with melted cheese",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
+        }
+    ],
+    "desserts": [
+        {
+            "name": "Lotus Can Dessert",
+            "price": 600,
+            "desc": "Creamy Lotus Biscoff dessert served in a signature can",
+            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Red Velvet Can Dessert",
+            "price": 600,
+            "desc": "Rich red velvet cake layered in a signature can",
+            "image": "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Nutella Can Dessert",
+            "price": 600,
+            "desc": "Decadent Nutella chocolate dessert in a signature can",
+            "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Cheese Add-on",
+            "price": 90,
+            "desc": "Extra melted cheese portion",
+            "image": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Dip Add-on",
+            "price": 90,
+            "desc": "Signature Jushh garlic or spicy dip",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg"
+        },
+        {
+            "name": "Tortilla Bread",
+            "price": 90,
+            "desc": "Extra soft tortilla flatbread",
+            "image": "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Pita Bread",
+            "price": 60,
+            "desc": "Extra Lebanese pita pocket bread",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg"
+        },
+        {
+            "name": "Plain Fries",
+            "price": 150,
+            "desc": "Golden salted french fries side",
+            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Water",
+            "price": 80,
+            "desc": "Mineral water bottle",
+            "image": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Soft Drink",
+            "price": 150,
+            "desc": "Chilled regular soft drink",
+            "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Blueberry Mojito",
+            "price": 290,
+            "desc": "Refreshing blueberry mocktail",
+            "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Strawberry Mojito",
+            "price": 290,
+            "desc": "Refreshing strawberry mocktail",
+            "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Green Apple Mojito",
+            "price": 290,
+            "desc": "Refreshing green apple mocktail",
+            "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Peach Mojito",
+            "price": 290,
+            "desc": "Refreshing peach mocktail",
+            "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80"
+        },
+        {
+            "name": "Lemon Mojito",
+            "price": 290,
+            "desc": "Refreshing lemon mint mocktail",
+            "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80"
+        }
+    ]
+};
 
     let cart = {};
 
@@ -945,6 +1111,6 @@
   <!-- Back to Top Button -->
   <a href="#home" class="back-top" id="backTop" aria-label="Back to top">↑</a>
 <script>window.BRAND_SLUG = "jushhpk";</script>
-<script src="live_catalog.js?v=20260802_v3" defer></script>
+<script src="live_catalog.js?v=20260802_v5"></script>
 </body>
 </html>
