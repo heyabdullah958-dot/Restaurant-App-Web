@@ -507,6 +507,43 @@
       border: 1px solid rgba(255,255,255,0.3);
     }
 
+  
+    /* Dynamic Variant Selector Styling */
+    .variant-selector-wrap {
+      margin: 8px 0 12px;
+    }
+    .variant-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #F59E0B;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .variant-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .variant-select:focus, .variant-select:hover {
+      border-color: #F59E0B;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .variant-select option {
+      background: #18181b;
+      color: #FFFFFF;
+    }
+
   </style>
 </head>
 <body>
@@ -948,6 +985,23 @@ const menuData = {
 
     let cart = {};
 
+    
+    function onCardVariantChange(selectEl, baseItemName) {
+      const selectedOption = selectEl.options[selectEl.selectedIndex];
+      const variantName = selectedOption.value;
+      const price = parseInt(selectedOption.getAttribute('data-price'), 10);
+      
+      const comboBody = selectEl.closest('.combo-body');
+      if (comboBody) {
+        const priceEl = comboBody.querySelector('.combo-price');
+        const btnEl = comboBody.querySelector('.order-btn');
+        const fullName = `${baseItemName} (${variantName})`;
+        
+        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
+        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\'")}', ${price})`);
+      }
+    }
+
     function renderMenu(category = 'all') {
       const container = document.getElementById('menu-grid-container');
       if (!container) return;
@@ -977,17 +1031,35 @@ const menuData = {
         const imgSrc = item.image || fallbackImg;
         const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='${fallbackImg}';" />`;
 
+        
+        let variantHtml = '';
+        let initialPrice = item.price;
+        let initialName = item.name;
+
+        if (item.variants && item.variants.length > 0) {
+          initialPrice = item.variants[0].price;
+          initialName = `${item.name} (${item.variants[0].name})`;
+          variantHtml = `
+            <div class="variant-selector-wrap">
+              <label class="variant-label">Select Option / Variant:</label>
+              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\'")}')">
+                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
+              </select>
+            </div>`;
+        }
+
         card.innerHTML = `
           <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">
-            ${!JUSH_REAL_SET.has(item.name) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
+            ${!JUSH_REAL_SET.has(item.name) && !JUSH_REAL_SET.has(initialName) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
             ${imgContent}
           </div>
           <div class="combo-body">
             <div class="combo-name">${item.name}</div>
             <div class="combo-includes">${item.desc}</div>
+            ${variantHtml}
             <div class="combo-foot">
-              <span class="combo-price">Rs. ${item.price.toLocaleString()}</span>
-              <button class="order-btn" onclick="addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price})">Order</button>
+              <span class="combo-price">Rs. ${initialPrice.toLocaleString()}</span>
+              <button class="order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\'")}', ${initialPrice})">Order</button>
             </div>
           </div>
         `;

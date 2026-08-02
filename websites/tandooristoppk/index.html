@@ -533,6 +533,43 @@
       border: 1px solid rgba(255,255,255,0.3);
     }
 
+  
+    /* Dynamic Variant Selector Styling */
+    .variant-selector-wrap {
+      margin: 10px 0 14px;
+    }
+    .variant-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--vivid-orange, #EC4F24);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .variant-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .variant-select:focus, .variant-select:hover {
+      border-color: var(--vivid-orange, #EC4F24);
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .variant-select option {
+      background: #181114;
+      color: #FFFFFF;
+    }
+
   </style>
 </head>
 <body>
@@ -832,48 +869,165 @@
     const TS_REAL_SET = new Set(["Tandoori Chicken Bone (Cheese Naan Double)", "Seekh Kabab (Per Seekh)", "Tandoori Chicken Bone (With Rice)", "Tikka Boti (Per Seekh)", "Tandoori Chicken Boneless (With Rice)", "Blueberry Mojito", "Butter Naan", "Peach Mojito", "Plain Roti", "Roghni Naan", "Tandoori Chicken Bone (Cheese Naan Single)", "Peri Peri Quarter Sajji", "Tandoori Chicken Boneless", "Chicken Paratha Roll", "Mint Margaritas", "Full Sajji", "Tandoori Chicken Boneless (Cheese Naan Single)", "Full Stop Roll", "Strawberry Mojito", "Puri Paratha", "Malai Boti (Per Seekh)", "Tandoori Chicken Boneless (Cheese Naan Double)", "Peri Peri Full Sajji", "Apple Mojito", "Tandoori Chicken Roll", "Cheese Naan", "Peri Peri Half Sajji", "Tandoori Chicken Bone", "Quarter Sajji", "Malai Boti Roll", "Rice", "Half Sajji"]);
 const menuData = {
       tandoori: [
-        { name: "Tandoori Chicken Bone (Cheese Naan Single)", price: 1150, desc: "Tandoori chicken (with bone) served with 1 cheese naan", emoji: "🍗" , image: "./images/IMG_7585.JPG.jpeg" },
-        { name: "Tandoori Chicken Boneless (Cheese Naan Single)", price: 1350, desc: "Boneless tandoori chicken served with 1 cheese naan", emoji: "🍗" , image: "./images/IMG_7585.JPG.jpeg" },
-        { name: "Tandoori Chicken Bone (Cheese Naan Double)", price: 1950, desc: "Tandoori chicken (with bone) served with 2 cheese naans", emoji: "🍗" , image: "./images/IMG_7589.JPG.jpeg" },
-        { name: "Tandoori Chicken Boneless (Cheese Naan Double)", price: 2299, desc: "Boneless tandoori chicken served with 2 cheese naans", emoji: "🍗" , image: "./images/IMG_7589.JPG.jpeg" },
-        { name: "Tandoori Chicken Bone (With Rice)", price: 980, desc: "Tandoori chicken (with bone) served with aromatic rice", emoji: "🍗" , image: "./images/IMG_7586.JPG.jpeg" },
-        { name: "Tandoori Chicken Boneless (With Rice)", price: 780, desc: "Boneless tandoori chicken served with aromatic rice", emoji: "🍗" , image: "./images/IMG_7586.JPG.jpeg" },
-        { name: "Tandoori Chicken Bone", price: 750, desc: "Traditional flame-grilled tandoori chicken (with bone)", emoji: "🍗" , image: "./images/IMG_7590.JPG.jpeg" },
-        { name: "Tandoori Chicken Boneless", price: 899, desc: "Traditional flame-grilled boneless tandoori chicken", emoji: "🍗" , image: "./images/IMG_7590.JPG.jpeg" },
-        { name: "Quarter Sajji", price: 799, desc: "Slow-roasted quarter chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" },
-        { name: "Half Sajji", price: 1400, desc: "Slow-roasted half chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" },
-        { name: "Full Sajji", price: 2500, desc: "Slow-roasted full chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" },
-        { name: "Peri Peri Quarter Sajji", price: 900, desc: "Spiced peri peri quarter chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" },
-        { name: "Peri Peri Half Sajji", price: 1600, desc: "Spiced peri peri half chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" },
-        { name: "Peri Peri Full Sajji", price: 2900, desc: "Spiced peri peri full chicken sajji", emoji: "🍗" , image: "./images/IMG_7587.JPG.jpeg" }
+        { 
+          name: "Traditional Chicken Sajji", 
+          price: 799, 
+          desc: "Slow-roasted traditional chicken sajji seasoned with secret tandoori spices.", 
+          emoji: "🍗", 
+          image: "./images/IMG_7587.JPG.jpeg",
+          variants: [
+            { name: "Quarter Sajji", price: 799 },
+            { name: "Half Sajji", price: 1400 },
+            { name: "Full Sajji", price: 2500 }
+          ]
+        },
+        { 
+          name: "Peri Peri Chicken Sajji", 
+          price: 900, 
+          desc: "Flame-grilled spicy peri peri chicken sajji.", 
+          emoji: "🍗", 
+          image: "./images/IMG_7587.JPG.jpeg",
+          variants: [
+            { name: "Quarter Sajji", price: 900 },
+            { name: "Half Sajji", price: 1600 },
+            { name: "Full Sajji", price: 2900 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Cheese Naan Single)", 
+          price: 1150, 
+          desc: "Flame-grilled tandoori chicken served with 1 cheese naan", 
+          emoji: "🍗", 
+          image: "./images/IMG_7585.JPG.jpeg",
+          variants: [
+            { name: "Bone (Cheese Naan Single)", price: 1150 },
+            { name: "Boneless (Cheese Naan Single)", price: 1350 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Cheese Naan Double)", 
+          price: 1950, 
+          desc: "Flame-grilled tandoori chicken served with 2 cheese naans", 
+          emoji: "🍗", 
+          image: "./images/IMG_7589.JPG.jpeg",
+          variants: [
+            { name: "Bone (Cheese Naan Double)", price: 1950 },
+            { name: "Boneless (Cheese Naan Double)", price: 2299 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (With Rice)", 
+          price: 780, 
+          desc: "Flame-grilled tandoori chicken served with aromatic rice", 
+          emoji: "🍗", 
+          image: "./images/IMG_7586.JPG.jpeg",
+          variants: [
+            { name: "Boneless (With Rice)", price: 780 },
+            { name: "Bone (With Rice)", price: 980 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Plain)", 
+          price: 750, 
+          desc: "Traditional flame-grilled tandoori chicken piece", 
+          emoji: "🍗", 
+          image: "./images/IMG_7590.JPG.jpeg",
+          variants: [
+            { name: "Bone (Plain)", price: 750 },
+            { name: "Boneless (Plain)", price: 899 }
+          ]
+        }
       ],
       tawa: [
         { name: "Tawa Chicken", price: 750, desc: "Spicy stir-fried tawa chicken piece", emoji: "🍳" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Tawa Chicken Platter with 2 Roti (Single Serving)", price: 800, desc: "Single serving of stir-fried tawa chicken platter", emoji: "🍳" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Tawa Chicken Platter with 4 Roti (Double Serving)", price: 1400, desc: "Double serving of stir-fried tawa chicken platter", emoji: "🍳" , image: "./images/tandoori_stop_logo.png" },
+        { 
+          name: "Tawa Chicken Platter", 
+          price: 800, 
+          desc: "Stir-fried tawa chicken platter served with hot roti", 
+          emoji: "🍳", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Single Serving (2 Roti)", price: 800 },
+            { name: "Double Serving (4 Roti)", price: 1400 }
+          ]
+        },
+        { 
+          name: "Chicken Karahi", 
+          price: 1300, 
+          desc: "Traditional wok chicken karahi cooked in fresh tomatoes & spices", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1300 },
+            { name: "Full Portion", price: 2500 }
+          ]
+        },
+        { 
+          name: "Chicken White Karahi", 
+          price: 1500, 
+          desc: "Creamy white chicken karahi cooked in cream & green chilies", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1500 },
+            { name: "Full Portion", price: 2700 }
+          ]
+        },
+        { 
+          name: "Chicken Kabab Masala", 
+          price: 1350, 
+          desc: "Spiced chicken kabab masala wok", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1350 },
+            { name: "Full Portion", price: 2600 }
+          ]
+        },
         { name: "Nawabi Handi Boneless (2-Person)", price: 2200, desc: "Rich royal Nawabi handi boneless serving", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
         { name: "Shahi Kabab Masala Handi Boneless (2-Person)", price: 1999, desc: "Spiced shahi kabab masala handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
         { name: "Mughlai Cheese Handi Boneless (2-Person)", price: 1999, desc: "Creamy Mughlai cheese handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
         { name: "Reshmi Handi Boneless (2-Person)", price: 1999, desc: "Velvety reshmi handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Sha Jahani Handi Boneless (2-Person)", price: 1999, desc: "Royal spice mix Sha Jahani handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken Karahi (Half)", price: 1300, desc: "Traditional wok chicken karahi half portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken Karahi (Full)", price: 2500, desc: "Traditional wok chicken karahi full portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken White Karahi (Half)", price: 1500, desc: "Creamy white chicken karahi half portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken White Karahi (Full)", price: 2700, desc: "Creamy white chicken karahi full portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken Kabab Masala (Half)", price: 1350, desc: "Chicken kabab masala half portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Chicken Kabab Masala (Full)", price: 2600, desc: "Chicken kabab masala full portion", emoji: "🥘" , image: "./images/tandoori_stop_logo.png" }
+        { name: "Sha Jahani Handi Boneless (2-Person)", price: 1999, desc: "Royal spice mix Sha Jahani handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" }
       ],
       bbq: [
+        { 
+          name: "Malai Boti", 
+          price: 450, 
+          desc: "Creamy flame-grilled malai boti", 
+          emoji: "🍢", 
+          image: "./images/IMG_7584.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 450 },
+            { name: "Per KG", price: 2200 }
+          ]
+        },
+        { 
+          name: "Tikka Boti", 
+          price: 400, 
+          desc: "Classic flame-grilled tikka boti", 
+          emoji: "🍢", 
+          image: "./images/IMG_7583.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 400 },
+            { name: "Per KG", price: 1999 }
+          ]
+        },
+        { 
+          name: "Seekh Kabab", 
+          price: 250, 
+          desc: "Spiced chicken seekh kabab", 
+          emoji: "🍢", 
+          image: "./images/IMG_7578.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 250 },
+            { name: "Per KG", price: 1999 }
+          ]
+        },
         { name: "Full Stop Roll", price: 650, desc: "TandooriStopp signature giant roll", emoji: "🌯" , image: "./images/IMG_7591.JPG.jpeg" },
         { name: "Tandoori Chicken Roll", price: 520, desc: "Tandoori chicken chunks wrapped in paratha", emoji: "🌯" , image: "./images/IMG_7591.JPG.jpeg" },
         { name: "Malai Boti Roll", price: 550, desc: "Creamy malai boti wrapped in paratha", emoji: "🌯" , image: "./images/IMG_7592.JPG.jpeg" },
-        { name: "Chicken Paratha Roll", price: 499, desc: "Classic chicken paratha roll", emoji: "🌯" , image: "./images/IMG_7588.JPG.jpeg" },
-        { name: "Malai Boti (Per Seekh)", price: 450, desc: "Single seekh of creamy grilled malai boti", emoji: "🍢" , image: "./images/IMG_7584.JPG.jpeg" },
-        { name: "Malai Boti (Per KG)", price: 2200, desc: "One KG of creamy grilled malai boti", emoji: "🍢" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Tikka Boti (Per Seekh)", price: 400, desc: "Single seekh of classic tikka boti", emoji: "🍢" , image: "./images/IMG_7583.JPG.jpeg" },
-        { name: "Tikka Boti (Per KG)", price: 1999, desc: "One KG of classic tikka boti", emoji: "🍢" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Seekh Kabab (Per Seekh)", price: 250, desc: "Single seekh of spiced chicken seekh kabab", emoji: "🍢" , image: "./images/IMG_7578.JPG.jpeg" },
-        { name: "Seekh Kabab (Per KG)", price: 1999, desc: "One KG of spiced chicken seekh kabab", emoji: "🍢" , image: "./images/tandoori_stop_logo.png" }
+        { name: "Chicken Paratha Roll", price: 499, desc: "Classic chicken paratha roll", emoji: "🌯" , image: "./images/IMG_7588.JPG.jpeg" }
       ],
       platters: [
         { name: "Family Tandoori Platter", price: 7000, desc: "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos", emoji: "👪" , image: "./images/tandoori_stop_logo.png" },
@@ -901,6 +1055,23 @@ const menuData = {
     };
 
     let cart = {};
+
+    
+    function onCardVariantChange(selectEl, baseItemName) {
+      const selectedOption = selectEl.options[selectEl.selectedIndex];
+      const variantName = selectedOption.value;
+      const price = parseInt(selectedOption.getAttribute('data-price'), 10);
+      
+      const cardBody = selectEl.closest('.card-body');
+      if (cardBody) {
+        const priceEl = cardBody.querySelector('.card-price');
+        const btnEl = cardBody.querySelector('.order-btn');
+        const fullName = `${baseItemName} (${variantName})`;
+        
+        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
+        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\'")}', ${price})`);
+      }
+    }
 
     function renderMenu(category = 'all') {
       const container = document.getElementById('menu-grid-container');
@@ -935,17 +1106,35 @@ const menuData = {
           ? `<img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" /><span style="display:none;font-size:50px;">${item.emoji || '🍗'}</span>`
           : item.emoji || '🍗';
 
+        
+        let variantHtml = '';
+        let initialPrice = item.price;
+        let initialName = item.name;
+
+        if (item.variants && item.variants.length > 0) {
+          initialPrice = item.variants[0].price;
+          initialName = `${item.name} (${item.variants[0].name})`;
+          variantHtml = `
+            <div class="variant-selector-wrap">
+              <label class="variant-label">Select Option / Size:</label>
+              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\'")}')">
+                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
+              </select>
+            </div>`;
+        }
+
         card.innerHTML = `
           <div class="card-img ${item.image ? '' : bgClass}" style="position:relative;">
-            ${!TS_REAL_SET.has(item.name) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
+            ${!TS_REAL_SET.has(item.name) && !TS_REAL_SET.has(initialName) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
             ${imgHtml}
           </div>
           <div class="card-body">
             <div class="card-name">${item.name}</div>
             <div class="card-desc">${item.desc}</div>
+            ${variantHtml}
             <div class="card-foot">
-              <div class="card-price">Rs. ${item.price.toLocaleString()}</div>
-              <button class="order-btn" onclick="addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price})">Order</button>
+              <div class="card-price" id="price-card-${idx}">Rs. ${initialPrice.toLocaleString()}</div>
+              <button class="order-btn" id="btn-card-${idx}" onclick="addToOrderForm('${initialName.replace(/'/g, "\'")}', ${initialPrice})">Order</button>
             </div>
           </div>
         `;
