@@ -1185,38 +1185,72 @@
     });
 
     // Handle WhatsApp Order Submission
-    function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
       
-      const name = form.name.value;
-      const phone = form.phone.value;
-      const address = form.address.value;
-      const order = form.order.value;
-      const note = form.note ? form.note.value : '';
+      const name = form.name ? form.name.value : 'Customer';
+      const phone = form.phone ? form.phone.value : '';
+      const branch = form.branch ? form.branch.value : '';
+      const address = form.address ? form.address.value : '';
+      const orderStr = form.order ? form.order.value : '';
       
+      const cartItems = [];
+      if (typeof cart === 'object' && Object.keys(cart).length > 0) {
+        for (const itemKey in cart) {
+          if (cart[itemKey] > 0) {
+            cartItems.push({ name: itemKey, qty: cart[itemKey] });
+          }
+        }
+      } else if (orderStr) {
+        orderStr.split(',').forEach(p => {
+          const match = p.trim().match(/^(\d+)x?\s+(.+)$/);
+          if (match) {
+            cartItems.push({ name: match[2].trim(), qty: parseInt(match[1], 10) });
+          } else if (p.trim()) {
+            cartItems.push({ name: p.trim(), qty: 1 });
+          }
+        });
+      }
+
+      // Submit payload directly to central Django REST API (/api/orders/)
+      if (typeof window.submitWebOrder === 'function') {
+        try {
+          await window.submitWebOrder({
+            brandSlug: 'seenbanao',
+            branchName: branch,
+            guestName: name,
+            guestPhone: phone,
+            deliveryAddress: address,
+            cartItems: cartItems
+          });
+        } catch (err) {
+          console.warn('[FoodSphere Order] API submit error:', err);
+        }
+      }
+
+      // Dual Action: Open WhatsApp Order Confirmation
       const message = `Assalam o Alaikum! I want to place an order from Seen Banao Website 🛵\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
                       `• *Phone:* ${phone}\n` +
-                      `• *Address:* ${address}\n\n` +
+                      `• *Address:* ${address}\n` +
+                      (branch ? `• *Branch:* ${branch}\n\n` : '\n') +
                       `*Order Details:*\n` +
-                      `${order}\n\n` +
-                      (note.trim() ? `*Instructions:* ${note}\n\n` : '') +
+                      `${orderStr}\n\n` +
                       `*Payment Method:* Cash on Delivery (COD)`;
                       
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/923019899619?text=${encodedMessage}`;
       
-      // Open WhatsApp in new tab
       window.open(whatsappUrl, '_blank');
       
-      // Show success message on UI
       form.style.display = 'none';
       const successDiv = document.getElementById('form-success');
       if (successDiv) {
         successDiv.style.display = 'block';
       }
+    }
     }
 
     function filterMenu(category, element) {

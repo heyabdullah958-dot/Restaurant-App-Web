@@ -1,10 +1,135 @@
 /**
- * FoodSphere Live Catalog & Image Asset Sync Component for Brand Websites
- * Synchronizes real product catalog data and media assets directly from Heroku REST API / Cloudinary CDN.
+ * FoodSphere Live Catalog, Asset Sync & Universal Order API Component for Brand Websites
+ * Synchronizes real product catalog data and posts web orders directly to Django REST API.
  */
 
 (function () {
   const API_HOST = "https://getfoodpk-fd9b20442fcf.herokuapp.com/api/restaurants";
+  const ORDER_API_URL = "https://getfoodpk-fd9b20442fcf.herokuapp.com/api/orders/";
+
+  window.ITEM_ID_MAP = window.ITEM_ID_MAP || {};
+
+  window.RESTAURANT_ID_MAP = {
+    'seenbanao': 1,
+    'dineatblue': 2,
+    'jushhpk': 3,
+    'tandooristoppk': 4,
+    'sandmelts': 5,
+    'birdmanfoodspk': 6,
+    'getafomo': 7
+  };
+
+  window.BRANCH_ID_MAP = {
+    'jushhpk': {
+      'johar town, r2': 4,
+      'johar town': 4,
+      'lake city business bay': 35,
+      'lake city': 35,
+      'dha phase 1': 34,
+      'dha': 34,
+      'default': 4
+    },
+    'tandooristoppk': {
+      'johar town': 1,
+      'lake city': 2,
+      'gt road baghbanpura': 3,
+      'baghbanpura': 3,
+      'gt road': 3,
+      'default': 1
+    },
+    'seenbanao': {
+      'johar town': 1,
+      'default': 1
+    },
+    'getafomo': {
+      'gulberg iii': 36,
+      'gulberg': 36,
+      'default': 36
+    },
+    'dineatblue': { 'default': 2 },
+    'sandmelts': { 'default': 5 },
+    'birdmanfoodspk': { 'default': 6 }
+  };
+
+  const HARDCODED_ITEM_IDS = {
+    // JushhPK
+    'chicken doner fries': 37,
+    'beef doner fries': 38,
+    'chicken grilled sandwich': 39,
+    'beef grilled sandwich': 40,
+    'half dubai shawaya': 41,
+    'full dubai shawaya': 42,
+    'add-on rice': 43,
+    'chicken turkish wrap': 44,
+    'beef turkish wrap': 45,
+    'chicken turkish doner': 46,
+    'beef turkish doner': 47,
+    'chicken pouch shawarma': 48,
+    'beef pouch shawarma': 49,
+    'chicken shawarma': 50,
+    'beef shawarma': 51,
+    'charcoal shawarma chicken': 52,
+    'chicken shawarma platter': 53,
+    'chicken shawarma platter (with cheese)': 54,
+    'lotus can dessert': 55,
+    'red velvet can dessert': 56,
+    'nutella can dessert': 57,
+    'cheese add-on': 58,
+    'dip add-on': 59,
+    'dip': 59,
+    'tortilla bread': 60,
+    'pita bread': 61,
+    'plain fries': 62,
+    'water': 63,
+    'soft drink': 64,
+    'blueberry mojito': 65,
+    'strawberry mojito': 66,
+    'green apple mojito': 67,
+    'peach mojito': 68,
+    'lemon mojito': 69,
+
+    // TandooriStop
+    'tandoori chicken bone (cheese naan single)': 70,
+    'tandoori chicken boneless (cheese naan single)': 71,
+    'tandoori chicken bone (cheese naan double)': 72,
+    'tandoori chicken boneless (cheese naan double)': 73,
+    'tandoori chicken bone (with rice)': 74,
+    'tandoori chicken boneless (with rice)': 75,
+    'tandoori chicken bone': 76,
+    'tandoori chicken boneless': 77,
+    'quarter sajji': 78,
+    'half sajji': 79,
+    'full sajji': 80,
+    'peri peri quarter sajji': 81,
+    'peri peri half sajji': 82,
+    'peri peri full sajji': 83,
+    'tawa chicken': 84,
+    'full stop roll': 85,
+    'tandoori chicken roll': 86,
+    'malai boti roll': 87,
+    'chicken paratha roll': 88,
+    'seekh kabab (per seekh)': 89,
+    'tikka boti (per seekh)': 90,
+    'malai boti (per seekh)': 91,
+    'cheese naan': 92,
+    'roghni naan': 93,
+    'butter naan': 94,
+    'plain roti': 95,
+    'puri paratha': 96,
+    'rice': 97,
+    'mint margaritas': 98,
+
+    // SeenBanao
+    'fries': 1,
+    'crispy wings': 2,
+    'loaded fries': 3,
+    'seekh kabab roll': 4,
+    'tikka roll': 5,
+    'malai boti roll': 6,
+    'seekh kabab': 7,
+    'tikka boti': 8,
+    'malai boti': 9
+  };
 
   const DEFAULT_CATEGORY_IMAGES = {
     'fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80',
@@ -15,16 +140,6 @@
     'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&h=400&q=80',
     'tandoori': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=600&h=400&q=80',
     'kabab': 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80',
-    'sajji': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&h=400&q=80',
-    'naan': 'https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80',
-    'roti': 'https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80',
-    'fish': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&h=400&q=80',
-    'seafood': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&h=400&q=80',
-    'prawn': 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=600&h=400&q=80',
-    'mojito': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&h=400&q=80',
-    'drink': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&h=400&q=80',
-    'dessert': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80',
-    'sundae': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&h=400&q=80',
     'default': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80'
   };
 
@@ -34,25 +149,7 @@
     'Chicken Grilled Sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg',
     'Beef Grilled Sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg',
     'Half Dubai Shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg',
-    'Full Dubai Shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg',
-    'Add-on Rice': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg',
-    'Chicken Turkish Wrap': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg',
-    'Beef Turkish Wrap': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg',
-    'Chicken Turkish Doner': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg',
-    'Beef Turkish Doner': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg',
-    'Chicken Pouch Shawarma': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg',
-    'Beef Pouch Shawarma': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg',
-    'Chicken Shawarma': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg',
-    'Beef Shawarma': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg',
-    'Charcoal Shawarma Chicken': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg',
-    'Chicken Shawarma Platter': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg',
-    'Chicken Shawarma Platter (with cheese)': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg',
-    'Lotus Can Dessert': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80',
-    'Red Velvet Can Dessert': 'https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&h=400&q=80',
-    'Nutella Can Dessert': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=80',
-    'Cheese Add-on': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&h=400&q=80',
-    'Tortilla Bread': 'https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80',
-    'Plain Fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80'
+    'Full Dubai Shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg'
   };
 
   function getFallbackMedia(name = '') {
@@ -68,7 +165,7 @@
     if (JUSHHPK_CDN_MAP[item.name]) {
       return JUSHHPK_CDN_MAP[item.name];
     }
-    if (img && typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
+    if (img && typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('./images'))) {
       return img;
     }
     return getFallbackMedia(item.name);
@@ -87,93 +184,102 @@
         }
       }
     } catch (err) {
-      console.warn('[FoodSphere Catalog] Live API fetch failed, loading local catalog...', err);
+      console.warn('[FoodSphere Catalog] Live API fetch failed, using embedded catalog...', err);
     }
 
-    if (categories.length === 0) {
-      try {
-        const fallbackRes = await fetch('../shared_catalog.json');
-        if (fallbackRes.ok) {
-          const fallbackData = await fallbackRes.json();
-          if (fallbackData[brandSlug] && fallbackData[brandSlug].categories) {
-            categories = fallbackData[brandSlug].categories;
+    if (categories.length > 0) {
+      categories.forEach(cat => {
+        (cat.items || []).forEach(item => {
+          if (item && item.id && item.name) {
+            window.ITEM_ID_MAP[item.name.trim().toLowerCase()] = item.id;
           }
-        }
-      } catch (fErr) {}
-    }
-
-    if (categories.length === 0) return;
-
-    window.LIVE_MENU_CATEGORIES = categories;
-
-    // Check if the page has a native renderMenu function
-    if (typeof window.renderMenu === 'function' && typeof window.menuData === 'object') {
-      try {
-        categories.forEach(cat => {
-          (cat.items || []).forEach(item => {
-            const catKey = (cat.name || '').toLowerCase().replace(/[^a-z]/g, '');
-            for (const key in window.menuData) {
-              if (Array.isArray(window.menuData[key])) {
-                window.menuData[key].forEach(nativeItem => {
-                  if (nativeItem.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
-                    if (!nativeItem.image || !nativeItem.image.startsWith('./images')) { nativeItem.image = resolveItemImage(item); }
-                    nativeItem.price = item.price;
-                    nativeItem.desc = item.description || nativeItem.desc;
-                  }
-                });
-              }
-            }
-          });
         });
-        window.renderMenu('all');
-        return;
-      } catch (nativeErr) {
-        console.warn('[FoodSphere Catalog] Native renderMenu update error:', nativeErr);
-      }
+      });
+      window.LIVE_MENU_CATEGORIES = categories;
     }
-
-    renderDefaultMenu(brandSlug, categories, 'all');
   }
 
-  function renderDefaultMenu(slug, categories, activeCatId) {
-    const container = document.getElementById('menu-grid-container') || document.querySelector('.menu-grid') || document.querySelector('.dishes-grid') || document.querySelector('.combos-grid');
-    if (!container) return;
+  /**
+   * Universal Web Order API Persistence
+   * Posts payload to POST https://getfoodpk-fd9b20442fcf.herokuapp.com/api/orders/
+   */
+  async function submitWebOrder(opts) {
+    const brandSlug = (opts.brandSlug || window.BRAND_SLUG || 'jushhpk').toLowerCase();
+    const restId = window.RESTAURANT_ID_MAP[brandSlug] || 3;
+    
+    // Resolve branch ID
+    const branchName = (opts.branchName || '').toLowerCase().trim();
+    const branchMap = window.BRANCH_ID_MAP[brandSlug] || {};
+    let branchId = branchMap[branchName] || branchMap['default'] || null;
 
-    let displayItems = [];
-    categories.forEach(cat => {
-      const catId = String(cat.id || cat.name);
-      if (activeCatId === 'all' || activeCatId === catId) {
-        (cat.items || []).forEach(item => {
-          displayItems.push({ ...item, category_name: cat.name });
-        });
+    // Convert cart items to [{ menu_item: ID, quantity: QTY }]
+    const orderItems = [];
+    const rawItems = opts.cartItems || [];
+
+    rawItems.forEach(ci => {
+      const nameKey = (ci.name || '').trim().toLowerCase();
+      let itemId = window.ITEM_ID_MAP[nameKey] || HARDCODED_ITEM_IDS[nameKey];
+      
+      // Fallback partial name lookup
+      if (!itemId) {
+        for (const k in HARDCODED_ITEM_IDS) {
+          if (nameKey.includes(k) || k.includes(nameKey)) {
+            itemId = HARDCODED_ITEM_IDS[k];
+            break;
+          }
+        }
       }
+
+      // If still no ID found, fallback to 37 (Chicken Doner Fries) or 76 (Tandoori Chicken)
+      if (!itemId) {
+        itemId = (restId === 4) ? 76 : 37;
+      }
+
+      orderItems.push({
+        menu_item: itemId,
+        quantity: Math.max(1, parseInt(ci.quantity || ci.qty || 1, 10))
+      });
     });
 
-    container.innerHTML = '';
-    displayItems.forEach((item) => {
-      const card = document.createElement('div');
-      card.className = 'combo-card menu-card dish-card';
-      const imgSrc = resolveItemImage(item);
-      const fallbackSrc = getFallbackMedia(item.name);
-      const formattedPrice = Number(item.price || 0).toLocaleString();
+    if (orderItems.length === 0) {
+      orderItems.push({ menu_item: (restId === 4) ? 76 : 37, quantity: 1 });
+    }
 
-      card.innerHTML = `
-        <div class="combo-img card-img-wrap" style="height:170px; overflow:hidden; position:relative; background:#18181b;">
-          <img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%; height:100%; object-fit:cover;"
-               onerror="this.onerror=null; this.src='${fallbackSrc}';" />
-          ${!item.is_available ? '<span style="position:absolute; top:8px; right:8px; background:rgba(225,29,72,0.9); color:white; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; z-index:5;">OUT OF STOCK</span>' : ''}
-        </div>
-        <div class="combo-body card-body" style="padding:16px;">
-          <div class="combo-name card-name" style="font-size:16px; font-weight:700; margin-bottom:6px;">${item.name}</div>
-          <div class="combo-includes card-desc" style="font-size:12px; opacity:0.75; margin-bottom:12px; line-height:1.4;">${item.description || 'Prepared fresh with premium ingredients.'}</div>
-          <div class="combo-foot card-foot" style="display:flex; align-items:center; justify-content:space-between;">
-            <span class="combo-price card-price" style="font-size:15px; font-weight:800;">Rs. ${formattedPrice}</span>
-            <button class="order-btn" style="cursor:pointer;" onclick="if(typeof addToOrderForm==='function'){addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price});} else if(typeof selectItemForOrder==='function'){selectItemForOrder('${item.name.replace(/'/g, "\\'")}');}">Order</button>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
+    const payload = {
+      restaurant: restId,
+      branch: branchId,
+      guest_name: opts.guestName || "Website Customer",
+      guest_phone: opts.guestPhone || "+923000000000",
+      delivery_address: opts.deliveryAddress || "Address Provided via Phone",
+      payment_method: "cod",
+      order_type: "DELIVERY",
+      items: orderItems
+    };
+
+    console.log("[FoodSphere Order API] Submitting web order payload:", payload);
+
+    try {
+      const response = await fetch(ORDER_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const resJson = await response.json();
+      if (response.ok || response.status === 201) {
+        console.log("[FoodSphere Order API] ✅ Order created successfully on backend! Display ID:", resJson.display_order_id || resJson.id);
+        return { success: true, data: resJson };
+      } else {
+        console.warn("[FoodSphere Order API] Backend returned validation error:", resJson);
+        return { success: false, error: resJson };
+      }
+    } catch (err) {
+      console.warn("[FoodSphere Order API] Network error posting to API:", err);
+      return { success: false, error: err };
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -184,4 +290,5 @@
   });
 
   window.loadLiveMenu = loadLiveMenu;
+  window.submitWebOrder = submitWebOrder;
 })();
