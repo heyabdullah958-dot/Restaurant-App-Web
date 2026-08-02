@@ -43,7 +43,7 @@ def inject_catalog():
             content = f.read()
 
         # Check if already injected
-        script_tag = f'<script>window.BRAND_SLUG = "{slug}";</script>\n<script src="live_catalog.js" defer></script>'
+        script_tag = f'<script>window.BRAND_SLUG = "{slug}";</script>\n<script src="live_catalog.js?v=20260802_v3" defer></script>'
         if "window.BRAND_SLUG" not in content:
             # Inject before </body>
             if "</body>" in content:
