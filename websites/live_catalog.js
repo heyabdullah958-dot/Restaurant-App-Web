@@ -290,5 +290,36 @@
   });
 
   window.loadLiveMenu = loadLiveMenu;
+
+  /**
+   * Universal Order Form Reset Engine
+   * Clears cart state, resets form fields, hides success screen, and shows order form for sequential orders.
+   */
+  function resetOrderForm() {
+    console.log("[FoodSphere Order API] Resetting order form state for new order...");
+    const form = document.getElementById('order-form') || document.querySelector('form[action*="formspree"]') || document.querySelector('form');
+    const successDiv = document.getElementById('form-success');
+    
+    if (form) {
+      form.reset();
+      form.style.display = 'block';
+    }
+    if (successDiv) {
+      successDiv.style.display = 'none';
+    }
+    
+    if (typeof window.cart === 'object' && window.cart !== null) {
+      for (const k in window.cart) delete window.cart[k];
+    }
+    if (typeof window.preorderCart === 'object' && window.preorderCart !== null) {
+      for (const k in window.preorderCart) delete window.preorderCart[k];
+    }
+    
+    const textareas = document.querySelectorAll('textarea[name="order"], #order-textarea, #requests-textarea, textarea[name="requests"], textarea[name="note"]');
+    textareas.forEach(ta => { if (ta) ta.value = ''; });
+  }
+
+  window.resetOrderForm = resetOrderForm;
+
   window.submitWebOrder = submitWebOrder;
 })();

@@ -745,6 +745,7 @@
             Thank you! We have received your booking inquiry.<br/>
             Hum jald hi confirm karenge — phone ready rakhein!
           </p>
+          <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #d97706, #f59e0b); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(217,119,6,0.4); transition:all 0.2s ease;">➕ Place Another Inquiry</button>
         </div>
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/birdmanfoodspk" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="form-group">
@@ -979,6 +980,8 @@
       window.open(whatsappUrl, '_blank');
       
       form.style.display = 'none';
+      if (typeof cart === 'object' && cart !== null) { for (const k in cart) delete cart[k]; }
+      if (typeof preorderCart === 'object' && preorderCart !== null) { for (const k in preorderCart) delete preorderCart[k]; }
       const successDiv = document.getElementById('form-success');
       if (successDiv) {
         successDiv.style.display = 'block';
@@ -1005,12 +1008,49 @@
 
     // Auto-select package in form and scroll
     function selectPackage(packageName) {
+      if (typeof resetOrderForm === "function") {
+        const s = document.getElementById("form-success");
+        if (s && s.style.display === "block") resetOrderForm();
+      }
       const select = document.getElementById('package-select');
       if (select) {
         select.value = packageName;
       }
       document.getElementById('catering').scrollIntoView({ behavior: 'smooth' });
     }
+  
+    function resetOrderForm() {
+      const form = document.getElementById('order-form') || document.getElementById('res-form') || document.getElementById('catering-form') || document.querySelector('form');
+      const successDiv = document.getElementById('form-success');
+      if (form) {
+        form.reset();
+        form.style.display = 'block';
+      }
+      if (successDiv) {
+        successDiv.style.display = 'none';
+      }
+      if (typeof cart === 'object' && cart !== null) {
+        for (const k in cart) delete cart[k];
+      }
+      if (typeof preorderCart === 'object' && preorderCart !== null) {
+        for (const k in preorderCart) delete preorderCart[k];
+      }
+      if (typeof updateTextArea === 'function') updateTextArea();
+      if (typeof updateRequestsTextArea === 'function') updateRequestsTextArea();
+    }
+  
+    // Reset order form automatically if user clicks an order navigation CTA while in success state
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a[href="#order"], a[href="#book"], a[href="#catering"], a[href="#reservation"], .nav-cta, .btn-fire, .btn-red, .btn-grad, .btn-purple').forEach(link => {
+        link.addEventListener('click', () => {
+          const s = document.getElementById("form-success");
+          if (s && s.style.display === "block") {
+            if (typeof resetOrderForm === "function") resetOrderForm();
+          }
+        });
+      });
+    });
+
   </script>
 <script>window.BRAND_SLUG = "birdmanfoodspk";</script>
 <script src="live_catalog.js" defer></script>

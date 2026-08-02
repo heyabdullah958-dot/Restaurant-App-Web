@@ -591,7 +591,20 @@
   </section>
 
   <!-- Add Instafeed.js for real Instagram Integration -->
-  <script src="https://cdn.jsdelivr.net/gh/stevenschobert/instafeed.js@2.0.0rc1/src/instafeed.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/stevenschobert/instafeed.js@2.0.0rc1/src/instafeed.min.js">
+    // Reset order form automatically if user clicks an order navigation CTA while in success state
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a[href="#order"], a[href="#book"], a[href="#catering"], a[href="#reservation"], .nav-cta, .btn-fire, .btn-red, .btn-grad, .btn-purple').forEach(link => {
+        link.addEventListener('click', () => {
+          const s = document.getElementById("form-success");
+          if (s && s.style.display === "block") {
+            if (typeof resetOrderForm === "function") resetOrderForm();
+          }
+        });
+      });
+    });
+
+  </script>
   <script>
     // Note: To make this work in production, generate an Instagram Basic Display API Access Token
     // and replace 'YOUR_INSTAGRAM_ACCESS_TOKEN' below.
@@ -671,6 +684,7 @@
             Thank you! We have received your booking request.<br/>
             Hum jald hi confirm karenge — phone ready rakhein!
           </p>
+          <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #6f4e37, #8b5a2b); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(111,78,55,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
         </div>
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/getafomo" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="f-row">
@@ -875,6 +889,10 @@
     }
 
     function addToPreorderForm(itemName, price) {
+      if (typeof resetOrderForm === "function") {
+        const s = document.getElementById("form-success");
+        if (s && s.style.display === "block") resetOrderForm();
+      }
       if (preorderCart[itemName]) {
         preorderCart[itemName]++;
       } else {
@@ -1045,10 +1063,32 @@
       window.open(whatsappUrl, '_blank');
       
       form.style.display = 'none';
+      if (typeof cart === 'object' && cart !== null) { for (const k in cart) delete cart[k]; }
+      if (typeof preorderCart === 'object' && preorderCart !== null) { for (const k in preorderCart) delete preorderCart[k]; }
       const successDiv = document.getElementById('form-success');
       if (successDiv) {
         successDiv.style.display = 'block';
       }
+    }
+  
+    function resetOrderForm() {
+      const form = document.getElementById('order-form') || document.getElementById('res-form') || document.getElementById('catering-form') || document.querySelector('form');
+      const successDiv = document.getElementById('form-success');
+      if (form) {
+        form.reset();
+        form.style.display = 'block';
+      }
+      if (successDiv) {
+        successDiv.style.display = 'none';
+      }
+      if (typeof cart === 'object' && cart !== null) {
+        for (const k in cart) delete cart[k];
+      }
+      if (typeof preorderCart === 'object' && preorderCart !== null) {
+        for (const k in preorderCart) delete preorderCart[k];
+      }
+      if (typeof updateTextArea === 'function') updateTextArea();
+      if (typeof updateRequestsTextArea === 'function') updateRequestsTextArea();
     }
   </script>
 
