@@ -116,7 +116,7 @@
               if (Array.isArray(window.menuData[key])) {
                 window.menuData[key].forEach(nativeItem => {
                   if (nativeItem.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
-                    nativeItem.image = resolveItemImage(item);
+                    if (!nativeItem.image || !nativeItem.image.startsWith('./images')) { nativeItem.image = resolveItemImage(item); }
                     nativeItem.price = item.price;
                     nativeItem.desc = item.description || nativeItem.desc;
                   }
