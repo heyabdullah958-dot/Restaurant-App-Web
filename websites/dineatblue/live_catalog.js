@@ -46,7 +46,13 @@
     'Beef Shawarma': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg',
     'Charcoal Shawarma Chicken': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg',
     'Chicken Shawarma Platter': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg',
-    'Chicken Shawarma Platter (with cheese)': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg'
+    'Chicken Shawarma Platter (with cheese)': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg',
+    'Lotus Can Dessert': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80',
+    'Red Velvet Can Dessert': 'https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&h=400&q=80',
+    'Nutella Can Dessert': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=80',
+    'Cheese Add-on': 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&h=400&q=80',
+    'Tortilla Bread': 'https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80',
+    'Plain Fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80'
   };
 
   function getFallbackMedia(name = '') {

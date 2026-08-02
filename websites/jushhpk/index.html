@@ -536,7 +536,7 @@
     <div class="hero-content">
       <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:20px">
         <div class="verified-badge">✓ Meta Verified</div>
-        <div class="hero-tag">📍 2 Branches · Lahore</div>
+        <div class="hero-tag">📍 3 Branches · Lahore</div>
       </div>
       <h1 class="hero-title">
         You Don't Find<br/>
@@ -544,7 +544,7 @@
         JUSHHH Finds You
       </h1>
       <div class="hero-tagline">"Food That Makes You Go Shh..."</div>
-      <p class="hero-sub">Lahore ke dono siron pe — Johar Town aur Lake City. Bold flavors, bigger combos, aur taste jo tumhein chup kara de.</p>
+      <p class="hero-sub">Lahore mein 3 Locations — Johar Town, Lake City, aur DHA Phase 1. Bold flavors, bigger combos, aur taste jo tumhein chup kara de.</p>
       <div class="hero-btns">
         <a href="#order" class="btn-red">🍔 Order Now — COD</a>
         <a href="#menu" class="btn-ghost">🔥 See Combos</a>
@@ -562,6 +562,13 @@
           <div>
             <strong>Lake City Business Bay</strong>
             <div class="branch-phone">+92 324 4441735</div>
+          </div>
+        </div>
+        <div class="branch-pill">
+          📍
+          <div>
+            <strong>DHA Phase 1</strong>
+            <div class="branch-phone">+92 325 7217221</div>
           </div>
         </div>
       </div>
@@ -629,6 +636,8 @@
         <a href="tel:+923269946142" class="call-link">📞 +92 326 9946142</a>
         <p style="margin-top:12px"><strong>Lake City Business Bay:</strong></p>
         <a href="tel:+923244441735" class="call-link">📞 +92 324 4441735</a>
+        <p style="margin-top:12px"><strong>DHA Phase 1:</strong></p>
+        <a href="tel:+923257217221" class="call-link">📞 +92 325 7217221</a>
       </div>
     </div>
   </section>
@@ -730,14 +739,14 @@
         { name: "Chicken Shawarma Platter (with cheese)", price: 1000, desc: "Deconstructed chicken shawarma topped with melted cheese", emoji: "🍽️", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg" }
       ],
       desserts: [
-        { name: "Lotus Can Dessert", price: 600, desc: "Creamy Lotus Biscoff dessert served in a signature can", emoji: "🍰" },
-        { name: "Red Velvet Can Dessert", price: 600, desc: "Rich red velvet cake layered in a signature can", emoji: "🍰" },
-        { name: "Nutella Can Dessert", price: 600, desc: "Decadent Nutella chocolate dessert in a signature can", emoji: "🍰" },
-        { name: "Cheese Add-on", price: 90, desc: "Extra melted cheese portion", emoji: "🧀" },
+        { name: "Lotus Can Dessert", price: 600, desc: "Creamy Lotus Biscoff dessert served in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80" },
+        { name: "Red Velvet Can Dessert", price: 600, desc: "Rich red velvet cake layered in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1586788680434-30d324b2d46f?auto=format&fit=crop&w=600&h=400&q=80" },
+        { name: "Nutella Can Dessert", price: 600, desc: "Decadent Nutella chocolate dessert in a signature can", emoji: "🍰", image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=80" },
+        { name: "Cheese Add-on", price: 90, desc: "Extra melted cheese portion", emoji: "🧀", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&h=400&q=80" },
         { name: "Dip Add-on", price: 90, desc: "Signature Jushh garlic or spicy dip", emoji: "🏺", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg" },
-        { name: "Tortilla Bread", price: 90, desc: "Extra soft tortilla flatbread", emoji: "🫓" },
+        { name: "Tortilla Bread", price: 90, desc: "Extra soft tortilla flatbread", emoji: "🫓", image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80" },
         { name: "Pita Bread", price: 60, desc: "Extra Lebanese pita pocket bread", emoji: "🫓", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg" },
-        { name: "Plain Fries", price: 150, desc: "Golden salted french fries side", emoji: "🍟" },
+        { name: "Plain Fries", price: 150, desc: "Golden salted french fries side", emoji: "🍟", image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80" },
         { name: "Water", price: 80, desc: "Mineral water bottle", emoji: "🥤", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg" },
         { name: "Soft Drink", price: 150, desc: "Chilled regular soft drink", emoji: "🥤", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg" },
         { name: "Blueberry Mojito", price: 290, desc: "Refreshing blueberry mocktail", emoji: "🍹", image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg" },
@@ -775,16 +784,12 @@
         const card = document.createElement('div');
         card.className = 'combo-card';
         
-        // Dynamic image backgrounds
-        const bgs = ['ci1', 'ci2', 'ci3'];
-        const bgClass = bgs[idx % bgs.length];
-
-        const imgContent = item.image 
-          ? `<img src="${item.image}" alt="${item.name}" />`
-          : item.emoji;
+        const fallbackImg = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80";
+        const imgSrc = item.image || fallbackImg;
+        const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='${fallbackImg}';" />`;
 
         card.innerHTML = `
-          <div class="combo-img ${item.image ? '' : bgClass}">${imgContent}</div>
+          <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">${imgContent}</div>
           <div class="combo-body">
             <div class="combo-name">${item.name}</div>
             <div class="combo-includes">${item.desc}</div>
