@@ -488,6 +488,25 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+  
+    /* Demo Photo Badge Overlay */
+    .demo-photo-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(234, 88, 12, 0.92);
+      color: #FFFFFF;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
   </style>
 </head>
 <body>
@@ -717,7 +736,8 @@
   </footer>
 
   <script>
-    const menuData = {
+    const JUSH_REAL_SET = new Set(["Chicken Turkish Wrap", "Chicken Turkish Doner", "Charcoal Shawarma Chicken", "Blueberry Mojito", "Full Dubai Shawaya", "Chicken Doner Fries", "Beef Pouch Shawarma", "Beef Doner Fries", "Pita Bread", "Peach Mojito", "Add-on Rice", "Beef Turkish Wrap", "Beef Turkish Doner", "Dip Add-on", "Dip", "Half Dubai Shawaya", "Water", "Chicken Grilled Sandwich", "Green Apple Mojito", "Chicken Shawarma Platter (with cheese)", "Lemon Mojito", "Soft Drink", "Chicken Pouch Shawarma", "Beef Shawarma", "Beef Grilled Sandwich", "Strawberry Mojito", "Chicken Shawarma Platter", "Chicken Shawarma"]);
+const menuData = {
   "appetizer": [
     {
       "name": "Chicken Doner Fries",
@@ -958,7 +978,10 @@
         const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='${fallbackImg}';" />`;
 
         card.innerHTML = `
-          <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">${imgContent}</div>
+          <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">
+            ${!JUSH_REAL_SET.has(item.name) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
+            ${imgContent}
+          </div>
           <div class="combo-body">
             <div class="combo-name">${item.name}</div>
             <div class="combo-includes">${item.desc}</div>

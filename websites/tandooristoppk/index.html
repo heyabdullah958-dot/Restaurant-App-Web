@@ -514,6 +514,25 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+  
+    /* Demo Photo Badge Overlay */
+    .demo-photo-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(234, 88, 12, 0.92);
+      color: #FFFFFF;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
   </style>
 </head>
 <body>
@@ -811,7 +830,8 @@
   </footer>
 
   <script>
-    const menuData = {
+    const TS_REAL_SET = new Set(["Tandoori Chicken Bone (Cheese Naan Double)", "Seekh Kabab (Per Seekh)", "Tandoori Chicken Bone (With Rice)", "Tikka Boti (Per Seekh)", "Tandoori Chicken Boneless (With Rice)", "Blueberry Mojito", "Butter Naan", "Peach Mojito", "Plain Roti", "Roghni Naan", "Tandoori Chicken Bone (Cheese Naan Single)", "Peri Peri Quarter Sajji", "Tandoori Chicken Boneless", "Chicken Paratha Roll", "Mint Margaritas", "Full Sajji", "Tandoori Chicken Boneless (Cheese Naan Single)", "Full Stop Roll", "Strawberry Mojito", "Puri Paratha", "Malai Boti (Per Seekh)", "Tandoori Chicken Boneless (Cheese Naan Double)", "Peri Peri Full Sajji", "Apple Mojito", "Tandoori Chicken Roll", "Cheese Naan", "Peri Peri Half Sajji", "Tandoori Chicken Bone", "Quarter Sajji", "Malai Boti Roll", "Rice", "Half Sajji"]);
+const menuData = {
       tandoori: [
         { name: "Tandoori Chicken Bone (Cheese Naan Single)", price: 1150, desc: "Tandoori chicken (with bone) served with 1 cheese naan", emoji: "🍗" , image: "./images/IMG_7585.JPG.jpeg" },
         { name: "Tandoori Chicken Boneless (Cheese Naan Single)", price: 1350, desc: "Boneless tandoori chicken served with 1 cheese naan", emoji: "🍗" , image: "./images/IMG_7585.JPG.jpeg" },
@@ -917,7 +937,10 @@
           : item.emoji || '🍗';
 
         card.innerHTML = `
-          <div class="card-img ${item.image ? '' : bgClass}">${imgHtml}</div>
+          <div class="card-img ${item.image ? '' : bgClass}" style="position:relative;">
+            ${!TS_REAL_SET.has(item.name) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
+            ${imgHtml}
+          </div>
           <div class="card-body">
             <div class="card-name">${item.name}</div>
             <div class="card-desc">${item.desc}</div>
