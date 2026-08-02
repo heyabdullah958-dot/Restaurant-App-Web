@@ -1176,6 +1176,16 @@
     });
 
     // Hide loader when page loads
+    
+    // Safety auto-hide loader after 1.5s if load event is delayed
+    setTimeout(() => {
+      const loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(() => { try { loader.remove(); } catch(e){} }, 500);
+      }
+    }, 1500);
+
     window.addEventListener('load', () => {
       const loader = document.getElementById('page-loader');
       if (loader) {
