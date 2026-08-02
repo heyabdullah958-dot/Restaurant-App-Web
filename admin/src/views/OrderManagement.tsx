@@ -55,11 +55,12 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
-  // Helper to open rider assignment modal with active live API rider fetch
+  // Helper to open rider assignment modal with active live API rider fetch & multi-type branch matching
   const loadAvailableRidersForModal = async (order: Order) => {
     setIsLoadingModalRiders(true);
     try {
-      const targetBranchId = order.branch_id || (order as any).branch?.id || (order as any).branch || user?.branchId;
+      const targetBranchId = order.branch_id || (typeof (order as any).branch === 'number' ? (order as any).branch : (order as any).branch?.id) || user?.branchId;
+      const targetBranchName = order.branch_name || (typeof (order as any).branch === 'string' ? (order as any).branch : (order as any).branch?.name);
       
       // Active Live API Call - Direct backend query for available riders
       let fetched = await fetchRiders({ 
@@ -69,31 +70,40 @@ export const OrderManagement: React.FC = () => {
       });
 
       if (!Array.isArray(fetched) || fetched.length === 0) {
-        // Fallback: fetch without branch_id filter in case backend scope requires client filter
+        // Fallback: fetch all active riders in case branch query returned empty
         fetched = await fetchRiders({ status: 'AVAILABLE', is_active: true });
       }
 
+      if (!Array.isArray(fetched) || fetched.length === 0) {
+        // Ultimate Fallback: fetch all riders
+        fetched = await fetchRiders();
+      }
+
       // Robust multi-type branch comparison helper
-      const filtered = (fetched || []).filter((r: any) => {
+      let filtered = (fetched || []).filter((r: any) => {
         const isAvail = String(r.status || '').toUpperCase() === 'AVAILABLE' && r.is_active !== false;
         if (!isAvail) return false;
         
-        if (!targetBranchId) return true; // Superadmin or un-scoped order matches all
+        if (!targetBranchId && !targetBranchName) return true; // Superadmin or un-scoped order matches all
 
         const riderBranchId = typeof r.branch === 'object' ? r.branch?.id : r.branch;
-        const riderBranchSlug = typeof r.branch === 'object' ? r.branch?.slug : r.branch_slug;
-        const riderBranchName = typeof r.branch === 'object' ? r.branch?.name : r.branch_name;
+        const riderBranchName = r.branch_name || (typeof r.branch === 'object' ? r.branch?.name : '');
 
-        const matchesId = Number(riderBranchId) === Number(targetBranchId);
-        const matchesSlug = String(riderBranchSlug || '').toLowerCase() === String(targetBranchId).toLowerCase();
-        const matchesName = String(riderBranchName || '').toLowerCase() === String(targetBranchId).toLowerCase();
+        const matchesId = targetBranchId && Number(riderBranchId) === Number(targetBranchId);
+        const matchesName = targetBranchName && String(riderBranchName || '').toLowerCase().trim() === String(targetBranchName || '').toLowerCase().trim();
 
-        return matchesId || matchesSlug || matchesName;
+        return matchesId || matchesName;
       });
+
+      // Graceful fallback: If exact branch filter returned empty set but available riders exist, display available riders
+      if (filtered.length === 0 && (fetched || []).length > 0) {
+        filtered = (fetched || []).filter((r: any) => String(r.status || '').toUpperCase() === 'AVAILABLE' && r.is_active !== false);
+      }
 
       setModalRiders(filtered);
       setSelectedRiderIdForModal(filtered.length > 0 ? filtered[0].id : null);
     } catch (err) {
+      console.warn('[Rider Assignment Modal] Error fetching riders:', err);
       setModalRiders([]);
       setSelectedRiderIdForModal(null);
     } finally {

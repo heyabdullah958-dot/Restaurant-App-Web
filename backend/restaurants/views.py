@@ -335,9 +335,9 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
 
         if branch_id:
             if str(branch_id).isdigit():
-                qs = qs.filter(branch_id=int(branch_id))
+                qs = qs.filter(models.Q(branch_id=int(branch_id)) | models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
             else:
-                qs = qs.filter(Q(branch__slug=branch_id) | Q(branch__name__iexact=branch_id))
+                qs = qs.filter(models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
         if restaurant_id:
             if str(restaurant_id).isdigit():
                 qs = qs.filter(branch__restaurant_id=int(restaurant_id))
