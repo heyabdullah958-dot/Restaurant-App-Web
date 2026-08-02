@@ -21,6 +21,13 @@ class Command(BaseCommand):
 
         self.seed_promo_coupons()
 
+        try:
+            from django.core.management import call_command
+            call_command('consolidate_menu_variants')
+            self.stdout.write('Consolidated menu variants successfully.')
+        except Exception as e:
+            self.stdout.write(f'Note on variant consolidation: {e}')
+
         if options.get('force'):
             self.stdout.write('Force flag detected. Clearing existing restaurant data...')
             Restaurant.objects.all().delete()
