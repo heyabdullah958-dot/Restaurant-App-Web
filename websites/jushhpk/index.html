@@ -1250,10 +1250,23 @@ window.menuData = menuData;
       ta.value = list.join(', ');
     }
 
-    // Initialize Menu
-    document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Menu & Loader Safely
+    function initMenuAndLoader() {
       renderMenu('all');
-    });
+      const loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(() => { try { loader.remove(); } catch(e){} }, 400);
+      }
+    }
+
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      setTimeout(initMenuAndLoader, 1);
+    } else {
+      document.addEventListener('DOMContentLoaded', initMenuAndLoader);
+      window.addEventListener('load', initMenuAndLoader);
+    }
+    setTimeout(initMenuAndLoader, 500); // Fail-safe fallback to ensure loader NEVER stays stuck
 
     // Toggle Mobile Navigation
     function toggleMobileNav() {
@@ -1301,24 +1314,7 @@ window.menuData = menuData;
       });
     });
 
-    // Hide loader when page loads
-    
-    // Safety auto-hide loader after 1.5s if load event is delayed
-    setTimeout(() => {
-      const loader = document.getElementById('page-loader');
-      if (loader) {
-        loader.classList.add('hidden');
-        setTimeout(() => { try { loader.remove(); } catch(e){} }, 500);
-      }
-    }, 1500);
 
-    window.addEventListener('load', () => {
-      const loader = document.getElementById('page-loader');
-      if (loader) {
-        loader.classList.add('hidden');
-        setTimeout(() => loader.remove(), 500);
-      }
-    });
 
     // Handle WhatsApp Order Submission
         async function handleFormSubmit(e) {

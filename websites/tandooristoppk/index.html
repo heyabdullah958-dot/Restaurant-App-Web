@@ -1343,21 +1343,18 @@ const menuData = {
       ta.value = list.join(', ');
     }
 
-    // Initialize Menu
-    document.addEventListener('DOMContentLoaded', () => {
-      renderMenu('all');
-    });
-
     // Toggle Mobile Navigation
     function toggleMobileNav() {
       const nav = document.getElementById('mobile-nav');
       const btn = document.getElementById('hamburger');
-      nav.classList.toggle('open');
-      btn.classList.toggle('open');
+      if (nav) nav.classList.toggle('open');
+      if (btn) btn.classList.toggle('open');
     }
     function closeMobileNav() {
-      document.getElementById('mobile-nav').classList.remove('open');
-      document.getElementById('hamburger').classList.remove('open');
+      const nav = document.getElementById('mobile-nav');
+      const btn = document.getElementById('hamburger');
+      if (nav) nav.classList.remove('open');
+      if (btn) btn.classList.remove('open');
     }
 
     // Scroll Progress & Back to Top & Scroll Spy
@@ -1394,24 +1391,23 @@ const menuData = {
       });
     });
 
-    // Hide loader when page loads
-    
-    // Safety auto-hide loader after 1.5s if load event is delayed
-    setTimeout(() => {
+    // Initialize Menu & Loader Safely
+    function initMenuAndLoader() {
+      renderMenu('all');
       const loader = document.getElementById('page-loader');
       if (loader) {
         loader.classList.add('hidden');
-        setTimeout(() => { try { loader.remove(); } catch(e){} }, 500);
+        setTimeout(() => { try { loader.remove(); } catch(e){} }, 400);
       }
-    }, 1500);
+    }
 
-    window.addEventListener('load', () => {
-      const loader = document.getElementById('page-loader');
-      if (loader) {
-        loader.classList.add('hidden');
-        setTimeout(() => loader.remove(), 500);
-      }
-    });
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      setTimeout(initMenuAndLoader, 1);
+    } else {
+      document.addEventListener('DOMContentLoaded', initMenuAndLoader);
+      window.addEventListener('load', initMenuAndLoader);
+    }
+    setTimeout(initMenuAndLoader, 500); // Fail-safe fallback to ensure loader NEVER stays stuck
 
     // Handle WhatsApp Order Submission
         async function handleFormSubmit(e) {

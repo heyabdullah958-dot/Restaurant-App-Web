@@ -299,12 +299,18 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function runInitCatalog() {
     const slug = window.BRAND_SLUG || document.body.dataset.brandSlug;
     if (slug) {
       loadLiveMenu(slug);
     }
-  });
+  }
+
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    setTimeout(runInitCatalog, 1);
+  } else {
+    document.addEventListener('DOMContentLoaded', runInitCatalog);
+  }
 
   window.loadLiveMenu = loadLiveMenu;
 

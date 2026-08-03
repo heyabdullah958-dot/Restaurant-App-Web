@@ -830,13 +830,19 @@
   }
 
   // Initialization
-  document.addEventListener('DOMContentLoaded', () => {
+  function runInit() {
     initCartState();
     injectDOM();
     updateFloatingBadge();
     monkeyPatchOrderForm();
     checkAndHydrateActiveGuestOrder();
-  });
+  }
+
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    setTimeout(runInit, 1);
+  } else {
+    document.addEventListener('DOMContentLoaded', runInit);
+  }
 
   // Export Public API
   window.CartDrawer = {
