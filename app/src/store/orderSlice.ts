@@ -110,7 +110,10 @@ export const placeOrder = createAsyncThunk(
 
 export const fetchOrderTrack = createAsyncThunk(
   'order/fetchOrderTrack',
-  async ({ orderId, token }: { orderId?: number; token?: string }, { rejectWithValue }) => {
+  async ({ orderId, token }: { orderId?: number | string; token?: string }, { rejectWithValue }) => {
+    if (!orderId && !token) {
+      return rejectWithValue('No active order ID or tracking token provided');
+    }
     try {
       let url = orderId ? `/orders/${orderId}/track/` : `/orders/track/`;
       if (token) {
@@ -123,7 +126,9 @@ export const fetchOrderTrack = createAsyncThunk(
     } catch (error: any) {
       if (orderId) {
         try {
-          const fallbackRes = await api.get(`/orders/${orderId}/`);
+          let fbUrl = `/orders/${orderId}/`;
+          if (token) fbUrl += `?tracking_token=${token}`;
+          const fallbackRes = await api.get(fbUrl);
           const fbData = fallbackRes.data || fallbackRes;
           return fbData.data || fbData;
         } catch (e: any) {}

@@ -611,8 +611,8 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
           activeOpacity={0.9}
           style={styles.activeGuestOrderBanner}
           onPress={() => navigation.navigate('Tracking', { 
-            orderId: activeGuestOrder.orderId,
-            trackingToken: activeGuestOrder.trackingToken
+            orderId: activeGuestOrder.orderId || activeGuestOrder.id,
+            trackingToken: activeGuestOrder.trackingToken || activeGuestOrder.tracking_token
           })}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>

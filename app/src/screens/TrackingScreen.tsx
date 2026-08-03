@@ -44,8 +44,12 @@ export default function TrackingScreen() {
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
   
-  const orderId = route.params?.orderId || activeOrder?.id;
-  const [guestToken, setGuestToken] = useState<string | null>(null);
+  const initialOrderId = route.params?.orderId || route.params?.id || activeOrder?.id;
+  const initialToken = route.params?.trackingToken || route.params?.token || route.params?.tracking_token;
+
+  const [effectiveOrderId, setEffectiveOrderId] = useState<number | string | null>(initialOrderId || null);
+  const [effectiveToken, setEffectiveToken] = useState<string | null>(initialToken || null);
+  const [isResolvingCredentials, setIsResolvingCredentials] = useState<boolean>(true);
 
   // Review prompt state
   const [reviewRating, setReviewRating] = useState<number>(5);
@@ -60,31 +64,88 @@ export default function TrackingScreen() {
   useEffect(() => {
     maxStepRef.current = 0;
     lastTrackedStatusRef.current = null;
-  }, [orderId]);
+  }, [effectiveOrderId]);
+
+  // Robust async credential resolver across all potential AsyncStorage keys & route params
+  useEffect(() => {
+    let isMounted = true;
+    async function resolveCredentials() {
+      setIsResolvingCredentials(true);
+      let targetId: any = route.params?.orderId || route.params?.id || activeOrder?.id || null;
+      let targetToken: string | null = route.params?.trackingToken || route.params?.token || route.params?.tracking_token || null;
+
+      // 1. Check order_token_<id>
+      if (targetId && !targetToken) {
+        try {
+          const tok = await AsyncStorage.getItem(`order_token_${targetId}`);
+          if (tok) targetToken = tok;
+        } catch (e) {}
+      }
+
+      // 2. Check guest_tracking_token
+      if (!targetToken) {
+        try {
+          const tok = await AsyncStorage.getItem('guest_tracking_token');
+          if (tok) targetToken = tok;
+        } catch (e) {}
+      }
+
+      // 3. Check @getfood_active_guest_order object
+      if (!targetId || !targetToken) {
+        try {
+          const raw = await AsyncStorage.getItem('@getfood_active_guest_order');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (!targetId && (parsed?.orderId || parsed?.id)) {
+              targetId = parsed.orderId || parsed.id;
+            }
+            if (!targetToken && (parsed?.trackingToken || parsed?.tracking_token)) {
+              targetToken = parsed.trackingToken || parsed.tracking_token;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 4. Check foodsphere_guest_active_order_id
+      if (!targetId) {
+        try {
+          const rawId = await AsyncStorage.getItem('foodsphere_guest_active_order_id');
+          if (rawId) targetId = rawId;
+        } catch (e) {}
+      }
+
+      if (isMounted) {
+        if (targetId) setEffectiveOrderId(targetId);
+        if (targetToken) setEffectiveToken(targetToken);
+        setIsResolvingCredentials(false);
+      }
+    }
+
+    resolveCredentials();
+    return () => { isMounted = false; };
+  }, [route.params?.orderId, route.params?.id, route.params?.trackingToken, route.params?.token, activeOrder?.id]);
 
   useEffect(() => {
-    if (orderId) {
-      AsyncStorage.getItem(`order_token_${orderId}`).then((token) => {
-        if (token) setGuestToken(token);
-      });
-      AsyncStorage.getItem(`reviewed_order_${orderId}`).then((val) => {
+    if (effectiveOrderId) {
+      AsyncStorage.getItem(`reviewed_order_${effectiveOrderId}`).then((val) => {
         if (val === 'true') setHasSubmittedReview(true);
       });
     }
-  }, [orderId]);
+  }, [effectiveOrderId]);
 
   const handleSubmitReview = async () => {
-    if (!orderId || !currentOrder) return;
+    const targetOrderId = currentOrder?.id || effectiveOrderId;
+    if (!targetOrderId || !currentOrder) return;
     setIsSubmittingReview(true);
     try {
       const restId = currentOrder.restaurant?.id || currentOrder.restaurant;
       await api.post(`/restaurants/${restId}/reviews/`, {
-        order: orderId,
+        order: targetOrderId,
         rating: reviewRating,
         comment: reviewComment.trim(),
         restaurant: restId,
       });
-      await AsyncStorage.setItem(`reviewed_order_${orderId}`, 'true');
+      await AsyncStorage.setItem(`reviewed_order_${targetOrderId}`, 'true');
       setHasSubmittedReview(true);
       Alert.alert('Review Submitted', 'Thank you for your feedback!');
     } catch (e: any) {
@@ -318,25 +379,30 @@ export default function TrackingScreen() {
   };
 
   const fetchLiveTrack = React.useCallback(() => {
-    if (orderId || guestToken) {
-      dispatch(fetchOrderTrack({ orderId: orderId ? Number(orderId) : undefined, token: guestToken || undefined }));
+    if (isResolvingCredentials) return;
+    if (effectiveOrderId || effectiveToken) {
+      dispatch(fetchOrderTrack({ 
+        orderId: effectiveOrderId ? (isNaN(Number(effectiveOrderId)) ? (effectiveOrderId as any) : Number(effectiveOrderId)) : undefined, 
+        token: effectiveToken || undefined 
+      }));
     }
-  }, [dispatch, orderId, guestToken]);
+  }, [dispatch, isResolvingCredentials, effectiveOrderId, effectiveToken]);
 
-  // Fetch order details on mount or ID change
+  // Fetch order details on mount or ID/token resolution
   useEffect(() => {
-    fetchLiveTrack();
+    if (!isResolvingCredentials && (effectiveOrderId || effectiveToken)) {
+      fetchLiveTrack();
+    }
 
     return () => {
-      // Cleanup current order in store on unmount
       dispatch(clearCurrentOrder());
     };
-  }, [fetchLiveTrack, dispatch]);
+  }, [isResolvingCredentials, effectiveOrderId, effectiveToken, fetchLiveTrack, dispatch]);
 
   // Set up polling (refreshes order status every 3 seconds while active)
   useEffect(() => {
     const status = currentOrder?.status?.toLowerCase();
-    if ((!orderId && !guestToken) || status === 'delivered' || status === 'cancelled') {
+    if (isResolvingCredentials || (!effectiveOrderId && !effectiveToken) || status === 'delivered' || status === 'cancelled') {
       return;
     }
 
@@ -345,7 +411,7 @@ export default function TrackingScreen() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [fetchLiveTrack, orderId, guestToken, currentOrder?.status]);
+  }, [fetchLiveTrack, isResolvingCredentials, effectiveOrderId, effectiveToken, currentOrder?.status]);
 
   const onRefresh = React.useCallback(() => {
     fetchLiveTrack();
@@ -363,7 +429,7 @@ export default function TrackingScreen() {
   useEffect(() => {
     if (!currentOrder || !currentOrder.status) return;
     const status = currentOrder.status.toLowerCase();
-    const orderIdNum = Number(currentOrder.id || orderId);
+    const orderIdNum = Number(currentOrder.id || effectiveOrderId);
     const orderLabel = currentOrder.display_order_id || `#${orderIdNum}`;
     const brandName = restaurantName || 'Restaurant';
 
@@ -403,7 +469,7 @@ export default function TrackingScreen() {
       }
     }
     lastTrackedStatusRef.current = status;
-  }, [currentOrder?.status, currentOrder?.id, orderId, restaurantName]);
+  }, [currentOrder?.status, currentOrder?.id, effectiveOrderId, restaurantName]);
 
 
 
@@ -422,11 +488,13 @@ export default function TrackingScreen() {
       case 'out for delivery':
         return '10 - 15 mins';
       case 'delivered':
-        return 'Delivered';
+        return 'Delivered 🎉';
+      case 'cancelled':
+        return 'Cancelled';
       default:
         return '30 - 45 mins';
     }
-  }, [currentOrder]);
+  }, [currentOrder?.status]);
 
   // Format order date
   const formatDate = (dateStr: string) => {
@@ -444,7 +512,7 @@ export default function TrackingScreen() {
     }
   };
 
-  if (loading && !currentOrder) {
+  if (isResolvingCredentials || (loading && !currentOrder)) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -453,7 +521,7 @@ export default function TrackingScreen() {
     );
   }
 
-  if (error || !orderId) {
+  if ((error && !currentOrder) || (!effectiveOrderId && !effectiveToken)) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
         <Ionicons name="alert-circle-outline" size={80} color={COLORS.danger} />
@@ -480,7 +548,7 @@ export default function TrackingScreen() {
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>Order Tracking</Text>
-          <Text style={styles.headerSubtitle}>Order {currentOrder?.display_order_id || (orderId ? `#${orderId}` : '')}</Text>
+          <Text style={styles.headerSubtitle}>Order {currentOrder?.display_order_id || (effectiveOrderId ? `#${effectiveOrderId}` : '')}</Text>
         </View>
         <TouchableOpacity activeOpacity={0.75} onPress={onRefresh} style={styles.refreshButton}>
           <Ionicons name="refresh-outline" size={22} color={COLORS.primary} />
