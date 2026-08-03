@@ -126,3 +126,13 @@
   - `FlashDeal` & `Coupon` Models (`promotions.0004_coupon_is_dine_in_only_flashdeal_is_dine_in_only`): Added `is_dine_in_only` toggle.
 - **Checkout & Order Flow Adaptation**: Bypassed delivery address requirements and distance radius checks for Dine-In/Takeaway orders in `CheckoutScreen.tsx`, set `delivery_fee = 0`, and included `table_number` in the order payload.
 - **Admin HQ Live Board Integration**: Added prominent 🍽️ **Dine-In** badges (with Table #) and 🛍️ **Takeaway** badges on Kanban cards in `OrderManagement.tsx`, and added Dine-In toggles in `BranchDashboard.tsx` and `FlashDealManagement.tsx`.
+
+## [KFC/McDonald's Style Interactive Sliding Cart Drawer & Checkout Engine] - 2026-08-04
+- **Interactive Sliding Cart Drawer**: Created modular, zero-dependency `cart_drawer.js` & `cart_drawer.css` featuring persistent client-side cart storage, a floating cart trigger button with live count/subtotal badge, and a glassmorphic slide-over panel.
+- **QSR Multi-Step Checkout Workflow**: Implemented a 3-step checkout flow:
+  - Step 1: Cart items review with quantity modifiers (`+`/`-`), single-tap deletion (`🗑️`), item notes, and real-time subtotal calculation.
+  - Step 2: Fulfillment toggle (`🛵 Delivery` vs `🛍️ Pickup / Takeaway`), dynamic branch outlet picker, validated customer fields, and live subtotal/delivery fee breakdown.
+  - Step 3: Order confirmation card displaying returned `display_order_id` (e.g. `JK-JT-1014`) and 1-tap WhatsApp confirmation redirect.
+- **Universal Brand Integration**: Deployed cart drawer assets across active brand websites (`jushhpk`, `tandooristoppk`, `getafomo`) and monkey-patched menu card `addToOrderForm` actions.
+- **Automated API Verification**: Verified order payload submission directly against backend Django REST API (`POST /api/orders/`) with clean `201 Created` status return.
+

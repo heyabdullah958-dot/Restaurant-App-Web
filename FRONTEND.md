@@ -71,4 +71,27 @@
   - `app/src/screens/RewardsScreen.tsx`
 - **Confidence score**: 100% (Verified 0 TypeScript compilation errors and 100% test pass rate in local audit suite)
 
+---
+
+## Phase 5 — Interactive Cart Drawer & KFC/McDonald's Style Checkout Engine — 2026-08-04
+- **What was done**:
+  1. Created modular, zero-dependency `cart_drawer.js` & `cart_drawer.css` implementing persistent client-side cart storage, a floating cart trigger button with live count/subtotal badge, and a glassmorphic slide-over cart drawer.
+  2. Built a 3-step QSR checkout workflow: Step 1 (Cart item quantity modifiers & notes), Step 2 (Fulfillment toggle `DELIVERY` vs `TAKEAWAY`, active tenant branch picker, validated customer fields, and live subtotal/delivery fee calculation), Step 3 (Order confirmation with `display_order_id` and 1-tap WhatsApp confirmation link).
+  3. Integrated cart drawer scripts across brand websites (`jushhpk`, `tandooristoppk`, `getafomo`) and monkey-patched menu card `addToOrderForm` actions.
+- **Files modified**:
+  - `websites/cart_drawer.js` [NEW]
+  - `websites/cart_drawer.css` [NEW]
+  - `websites/jushhpk/cart_drawer.js` [NEW]
+  - `websites/jushhpk/cart_drawer.css` [NEW]
+  - `websites/jushhpk/index.html`
+  - `websites/tandooristoppk/cart_drawer.js` [NEW]
+  - `websites/tandooristoppk/cart_drawer.css` [NEW]
+  - `websites/tandooristoppk/index.html`
+  - `websites/getafomo/cart_drawer.js` [NEW]
+  - `websites/getafomo/cart_drawer.css` [NEW]
+  - `websites/getafomo/index.html`
+- **Self-corrections used**: 0/3
+- **Confidence score**: 100% (Verified web order creation API return status `201 Created` with display ID `JK-JT-1014`)
+
+
 
