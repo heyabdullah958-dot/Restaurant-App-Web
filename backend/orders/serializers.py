@@ -160,10 +160,18 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"Your subtotal is Rs. {subtotal:.0f}."
                 )
 
-        # Task 2: Delivery Radius Enforcement (DELIVERY mode only)
+        # Task 2: Delivery Radius Enforcement & Tenant Relational Validation
         delivery_lat = attrs.get('delivery_lat')
         delivery_lng = attrs.get('delivery_lng')
         branch = attrs.get('branch')
+        
+        # Enforce relational integrity: branch MUST belong to the specified restaurant tenant
+        if branch and restaurant:
+            if branch.restaurant_id != restaurant.id:
+                raise serializers.ValidationError(
+                    f"Selected branch '{branch.name}' (ID {branch.id}) does not belong to restaurant '{restaurant.name}' (ID {restaurant.id})."
+                )
+
         ord_type_val = str(attrs.get('order_type') or 'DELIVERY').upper()
         if ord_type_val == 'DELIVERY' and delivery_lat is not None and delivery_lng is not None and restaurant:
             if not branch:

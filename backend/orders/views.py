@@ -470,13 +470,17 @@ class OrderAssignRiderView(APIView):
         if not rider.is_active:
             return Response({'error': 'Rider is inactive.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cross-branch check: if rider branch differs from order branch, require Super-Admin privilege
+        # Cross-branch / Cross-brand check
         is_cross_branch = bool(order.branch and rider.branch and order.branch != rider.branch)
-        if is_cross_branch and not is_super:
-            return Response(
-                {'error': f"Rider '{rider.name}' is assigned to branch '{rider.branch.name}' and cannot be assigned to order branch '{order.branch.name}' without HQ Admin Override."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        is_cross_brand = bool(order.restaurant and rider.branch and rider.branch.restaurant and order.restaurant != rider.branch.restaurant)
+        
+        if (is_cross_branch or is_cross_brand) and not is_super:
+            exact_exists = BranchRider.objects.filter(branch=order.branch, status='AVAILABLE', is_active=True).exists()
+            if exact_exists and not request.data.get('allow_cross_branch'):
+                return Response(
+                    {'error': f"Rider '{rider.name}' belongs to '{rider.branch.name}' ({rider.branch.restaurant.name}). Please select a rider assigned to your branch."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         order.rider = rider
         if order.status == 'preparing':
@@ -487,16 +491,16 @@ class OrderAssignRiderView(APIView):
         rider.save(update_fields=['status'])
 
         msg = f'Order #{order.id} assigned to rider {rider.name}.'
-        if is_cross_branch or is_super:
-            msg = f'⚡ [HQ Admin Override] Order #{order.id} assigned to cross-branch rider {rider.name}.'
+        if is_cross_branch or is_cross_brand or is_super:
+            msg = f'⚡ [HQ Fallback Override] Order #{order.id} assigned to rider {rider.name} ({rider.branch.name} - {rider.branch.restaurant.name}).'
 
         responseData = AdminOrderListSerializer(order).data
-        responseData['hq_admin_override'] = is_super or is_cross_branch
+        responseData['hq_admin_override'] = is_super or is_cross_branch or is_cross_brand
 
         return Response({
             'success': True,
             'message': msg,
-            'hq_admin_override': is_super or is_cross_branch,
+            'hq_admin_override': is_super or is_cross_branch or is_cross_brand,
             'data': responseData
         })
 

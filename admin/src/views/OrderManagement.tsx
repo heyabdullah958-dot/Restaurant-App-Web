@@ -60,54 +60,23 @@ export const OrderManagement: React.FC = () => {
     setIsLoadingModalRiders(true);
     try {
       const targetBranchId = order.branch_id || (typeof (order as any).branch === 'number' ? (order as any).branch : (order as any).branch?.id) || user?.branchId;
-      const targetBranchName = order.branch_name || (typeof (order as any).branch === 'string' ? (order as any).branch : (order as any).branch?.name);
+      const targetRestaurantId = order.restaurant_id || (typeof (order as any).restaurant === 'number' ? (order as any).restaurant : (order as any).restaurant?.id);
       
-      const isSuper = user?.role === 'super_admin' || user?.username === 'admin';
-
-      // Active Live API Call - Direct backend query for available riders
+      // Direct backend query using 3-Tier Fallback Query Architecture
       let fetched = await fetchRiders({ 
+        branch_id: targetBranchId,
+        restaurant_id: targetRestaurantId,
         status: 'AVAILABLE', 
-        is_active: true 
+        is_active: true,
+        allow_global: true
       });
 
       if (!Array.isArray(fetched) || fetched.length === 0) {
-        fetched = await fetchRiders();
+        fetched = await fetchRiders({ status: 'AVAILABLE', is_active: true, allow_global: true });
       }
 
-      if (isSuper) {
-        // Super-Admin Global Scope Override: Display all active riders across all branches
-        const superRiders = (fetched || []).filter((r: any) => r.is_active !== false).map((r: any) => {
-          const riderBranchId = typeof r.branch === 'object' ? r.branch?.id : r.branch;
-          const isCross = targetBranchId ? Number(riderBranchId) !== Number(targetBranchId) : false;
-          return { ...r, isCrossBranch: isCross };
-        });
-        setModalRiders(superRiders);
-        setSelectedRiderIdForModal(superRiders.length > 0 ? superRiders[0].id : null);
-        return;
-      }
-
-      // Standard Branch Manager matching logic
-      let filtered = (fetched || []).filter((r: any) => {
-        const isAvail = String(r.status || '').toUpperCase() === 'AVAILABLE' && r.is_active !== false;
-        if (!isAvail) return false;
-        
-        if (!targetBranchId && !targetBranchName) return true;
-
-        const riderBranchId = typeof r.branch === 'object' ? r.branch?.id : r.branch;
-        const riderBranchName = r.branch_name || (typeof r.branch === 'object' ? r.branch?.name : '');
-
-        const matchesId = targetBranchId && Number(riderBranchId) === Number(targetBranchId);
-        const matchesName = targetBranchName && String(riderBranchName || '').toLowerCase().trim() === String(targetBranchName || '').toLowerCase().trim();
-
-        return matchesId || matchesName;
-      });
-
-      if (filtered.length === 0 && (fetched || []).length > 0) {
-        filtered = (fetched || []).filter((r: any) => String(r.status || '').toUpperCase() === 'AVAILABLE' && r.is_active !== false);
-      }
-
-      setModalRiders(filtered);
-      setSelectedRiderIdForModal(filtered.length > 0 ? filtered[0].id : null);
+      setModalRiders(fetched || []);
+      setSelectedRiderIdForModal((fetched && fetched.length > 0) ? fetched[0].id : null);
     } catch (err) {
       console.warn('[Rider Assignment Modal] Error fetching riders:', err);
       setModalRiders([]);
@@ -1144,7 +1113,7 @@ export const OrderManagement: React.FC = () => {
                   <option value="" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>-- Choose Rider --</option>
                   {modalRiders.map((r: any) => (
                     <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
-                      {r.name} ({r.phone}) — [{r.status || 'AVAILABLE'}]{r.branch_name ? ` (${r.branch_name})` : ''}{r.isCrossBranch ? ' ⚡ HQ Cross-Branch Override' : ''}
+                      {r.name} ({r.phone}) — [{r.status || 'AVAILABLE'}]{r.branch_name ? ` (${r.branch_name}${r.restaurant_name ? ` - ${r.restaurant_name}` : ''})` : ''}{r.is_cross_brand ? ' ⚡ Cross-Brand Fallback' : r.is_cross_branch ? ' ⚡ Cross-Branch Fallback' : ''}
                     </option>
                   ))}
                 </select>

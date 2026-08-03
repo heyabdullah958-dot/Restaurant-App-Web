@@ -314,35 +314,86 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
         if stuck_riders.exists():
             stuck_riders.update(status='AVAILABLE')
 
-        qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
+        base_qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
         
         branch_id = self.request.query_params.get('branch_id')
         restaurant_id = self.request.query_params.get('restaurant_id')
         status_param = self.request.query_params.get('status')
         is_active_param = self.request.query_params.get('is_active')
+        allow_global_param = self.request.query_params.get('allow_global')
 
         if not user.is_superuser:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             managed_branch = get_managed_branch(user)
             if managed_branch:
-                qs = qs.filter(branch=managed_branch)
+                base_qs = base_qs.filter(branch=managed_branch)
             else:
                 managed_restaurant = get_managed_restaurant(user)
                 if managed_restaurant:
-                    qs = qs.filter(branch__restaurant=managed_restaurant)
-                else:
+                    base_qs = base_qs.filter(branch__restaurant=managed_restaurant)
+                elif allow_global_param not in ['true', '1']:
                     return BranchRider.objects.none()
 
-        if branch_id:
-            if str(branch_id).isdigit():
-                qs = qs.filter(models.Q(branch_id=int(branch_id)) | models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
-            else:
-                qs = qs.filter(models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
-        if restaurant_id:
-            if str(restaurant_id).isdigit():
-                qs = qs.filter(branch__restaurant_id=int(restaurant_id))
-            else:
-                qs = qs.filter(branch__restaurant__slug=restaurant_id)
+        # Execute 3-Tier Fallback Strategy whenever branch_id or restaurant_id is specified
+        if branch_id or restaurant_id:
+            status_filter = status_param.upper() if status_param else None
+            is_act_filter = True if (is_active_param and is_active_param.lower() in ['true', '1']) else (False if (is_active_param and is_active_param.lower() in ['false', '0']) else None)
+
+            # --- TIER 1: Exact Branch Match ---
+            t1_qs = base_qs
+            if branch_id:
+                if str(branch_id).isdigit():
+                    t1_qs = t1_qs.filter(models.Q(branch_id=int(branch_id)) | models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
+                else:
+                    t1_qs = t1_qs.filter(models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
+            if restaurant_id:
+                if str(restaurant_id).isdigit():
+                    t1_qs = t1_qs.filter(branch__restaurant_id=int(restaurant_id))
+                else:
+                    t1_qs = t1_qs.filter(branch__restaurant__slug__iexact=restaurant_id)
+            if status_filter:
+                t1_qs = t1_qs.filter(status__iexact=status_filter)
+            if is_act_filter is not None:
+                t1_qs = t1_qs.filter(is_active=is_act_filter)
+
+            if t1_qs.exists():
+                return t1_qs
+
+            # --- TIER 2: Tenant / Restaurant Fleet Fallback ---
+            target_rest_id = restaurant_id
+            if not target_rest_id and branch_id:
+                from restaurants.models import Branch
+                if str(branch_id).isdigit():
+                    b_obj = Branch.objects.filter(id=int(branch_id)).first()
+                else:
+                    b_obj = Branch.objects.filter(models.Q(slug__iexact=branch_id) | models.Q(name__iexact=branch_id)).first()
+                if b_obj:
+                    target_rest_id = b_obj.restaurant_id
+
+            t2_qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
+            if target_rest_id:
+                if str(target_rest_id).isdigit():
+                    t2_qs = t2_qs.filter(branch__restaurant_id=int(target_rest_id))
+                else:
+                    t2_qs = t2_qs.filter(branch__restaurant__slug__iexact=target_rest_id)
+            if status_filter:
+                t2_qs = t2_qs.filter(status__iexact=status_filter)
+            if is_act_filter is not None:
+                t2_qs = t2_qs.filter(is_active=is_act_filter)
+
+            if t2_qs.exists():
+                return t2_qs
+
+            # --- TIER 3: HQ Global Platform-Wide Fallback ---
+            t3_qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
+            if status_filter:
+                t3_qs = t3_qs.filter(status__iexact=status_filter)
+            if is_act_filter is not None:
+                t3_qs = t3_qs.filter(is_active=is_act_filter)
+            
+            return t3_qs
+
+        qs = base_qs
         if status_param:
             qs = qs.filter(status__iexact=status_param)
         if is_active_param is not None:

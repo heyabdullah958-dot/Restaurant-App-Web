@@ -136,10 +136,12 @@ class BranchRiderSerializer(serializers.ModelSerializer):
     branch_name = serializers.ReadOnlyField(source='branch.name')
     restaurant_id = serializers.ReadOnlyField(source='branch.restaurant.id')
     restaurant_name = serializers.ReadOnlyField(source='branch.restaurant.name')
+    is_cross_branch = serializers.SerializerMethodField()
+    is_cross_brand = serializers.SerializerMethodField()
 
     class Meta:
         model = BranchRider
-        fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'created_at')
+        fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'is_cross_branch', 'is_cross_brand', 'created_at')
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=BranchRider.objects.all(),
@@ -147,6 +149,45 @@ class BranchRiderSerializer(serializers.ModelSerializer):
                 message="A rider with this phone number already exists for this branch."
             )
         ]
+
+    def get_is_cross_branch(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return getattr(obj, '_is_cross_branch', False)
+        target_branch = request.query_params.get('branch_id')
+        if not target_branch:
+            return getattr(obj, '_is_cross_branch', False)
+        
+        target_str = str(target_branch).lower().strip()
+        b_id = str(obj.branch_id)
+        b_slug = str(obj.branch.slug).lower() if obj.branch and obj.branch.slug else ''
+        b_name = str(obj.branch.name).lower() if obj.branch and obj.branch.name else ''
+        
+        is_match = (target_str == b_id or target_str == b_slug or target_str == b_name)
+        return not is_match
+
+    def get_is_cross_brand(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return getattr(obj, '_is_cross_brand', False)
+        target_rest = request.query_params.get('restaurant_id')
+        if not target_rest and request.query_params.get('branch_id'):
+            target_branch = request.query_params.get('branch_id')
+            if str(target_branch).isdigit():
+                from restaurants.models import Branch
+                b = Branch.objects.filter(id=int(target_branch)).first()
+                if b:
+                    target_rest = b.restaurant_id
+        if not target_rest:
+            return getattr(obj, '_is_cross_brand', False)
+
+        target_str = str(target_rest).lower().strip()
+        r_id = str(obj.branch.restaurant_id) if obj.branch else ''
+        r_slug = str(obj.branch.restaurant.slug).lower() if (obj.branch and obj.branch.restaurant and obj.branch.restaurant.slug) else ''
+        r_name = str(obj.branch.restaurant.name).lower() if (obj.branch and obj.branch.restaurant and obj.branch.restaurant.name) else ''
+
+        is_match = (target_str == r_id or target_str == r_slug or target_str == r_name)
+        return not is_match
 
     def validate_phone(self, value):
         cleaned = value.strip()
