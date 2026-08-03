@@ -1207,7 +1207,16 @@ const menuData = {
       renderMenu(category);
     }
 
-    function addToOrderForm(itemName, price) {
+    function addToOrderForm(itemName, price, image) {
+      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
+        window.CartDrawer.addItem({
+          name: itemName,
+          price: price,
+          qty: 1,
+          image: image || ''
+        });
+        return;
+      }
       if (typeof resetOrderForm === "function") {
         const s = document.getElementById("form-success");
         if (s && s.style.display === "block") resetOrderForm();

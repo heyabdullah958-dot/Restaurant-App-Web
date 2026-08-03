@@ -823,27 +823,27 @@
       <div class="eyebrow" style="margin-bottom:12px">🫓 Naan Counter</div>
       <h3 style="font-size:26px;font-weight:800;margin-bottom:32px">Fresh from the <span style="color:var(--fire2)">Tandoor</span></h3>
       <div class="naan-grid">
-        <div class="naan-card" onclick="addToOrderForm('Plain Naan', 40)" style="cursor:pointer">
+        <div class="naan-card" onclick="addToOrderForm('Plain Naan', 40, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
           <div class="naan-emoji">🫓</div>
           <div class="naan-name">Plain Naan</div>
           <div class="naan-price">Rs. 40</div>
         </div>
-        <div class="naan-card" onclick="addToOrderForm('Roghni Naan', 200)" style="cursor:pointer">
+        <div class="naan-card" onclick="addToOrderForm('Roghni Naan', 200, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
           <div class="naan-emoji">🌾</div>
           <div class="naan-name">Roghni Naan</div>
           <div class="naan-price">Rs. 200</div>
         </div>
-        <div class="naan-card" onclick="addToOrderForm('Butter Naan', 350)" style="cursor:pointer">
+        <div class="naan-card" onclick="addToOrderForm('Butter Naan', 350, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
           <div class="naan-emoji">🧈</div>
           <div class="naan-name">Butter Naan</div>
           <div class="naan-price">Rs. 350</div>
         </div>
-        <div class="naan-card" onclick="addToOrderForm('Cheese Naan', 500)" style="cursor:pointer">
+        <div class="naan-card" onclick="addToOrderForm('Cheese Naan', 500, './images/IMG_7581.JPG.jpeg')" style="cursor:pointer">
           <div class="naan-emoji">🧀</div>
           <div class="naan-name">Cheese Naan</div>
           <div class="naan-price">Rs. 500</div>
         </div>
-        <div class="naan-card" onclick="addToOrderForm('Puri Paratha', 270)" style="cursor:pointer">
+        <div class="naan-card" onclick="addToOrderForm('Puri Paratha', 270, './images/IMG_7580.JPG.jpeg')" style="cursor:pointer">
           <div class="naan-emoji">🫓</div>
           <div class="naan-name">Puri Paratha</div>
           <div class="naan-price">Rs. 270</div>
@@ -1305,7 +1305,16 @@ const menuData = {
       renderMenu(category);
     }
 
-    function addToOrderForm(itemName, price) {
+    function addToOrderForm(itemName, price, image) {
+      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
+        window.CartDrawer.addItem({
+          name: itemName,
+          price: price,
+          qty: 1,
+          image: image || ''
+        });
+        return;
+      }
       if (typeof resetOrderForm === "function") {
         const s = document.getElementById("form-success");
         if (s && s.style.display === "block") resetOrderForm();
@@ -1318,7 +1327,6 @@ const menuData = {
 
       updateTextArea();
       
-      // Highlight form boundary or feedback
       const orderSec = document.getElementById('order');
       if (orderSec) {
         orderSec.scrollIntoView({ behavior: 'smooth' });

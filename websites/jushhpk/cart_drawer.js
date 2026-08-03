@@ -66,7 +66,14 @@
       const saved = sessionStorage.getItem('foodsphere_cart_' + (window.BRAND_SLUG || 'default'));
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed.items)) cartState.items = parsed.items;
+        if (Array.isArray(parsed.items)) {
+          cartState.items = parsed.items.map(item => {
+            if (!item.image || item.image.includes('unsplash.com')) {
+              item.image = findProductImage(item.name);
+            }
+            return item;
+          });
+        }
       }
     } catch (e) {
       console.warn('[CartDrawer] State restore skipped', e);
@@ -230,6 +237,20 @@
     return cartState.items.reduce((count, item) => count + item.qty, 0);
   }
 
+  // Category Emoji Resolver
+  function getItemEmoji(itemName) {
+    if (!itemName) return '🍽️';
+    const nameL = itemName.toLowerCase();
+    if (nameL.includes('naan') || nameL.includes('roti') || nameL.includes('bread') || nameL.includes('paratha')) return '🫓';
+    if (nameL.includes('boti') || nameL.includes('tikka') || nameL.includes('bbq') || nameL.includes('sajji') || nameL.includes('kabab') || nameL.includes('kebab') || nameL.includes('karahi') || nameL.includes('handi') || nameL.includes('chicken') || nameL.includes('beef') || nameL.includes('burger') || nameL.includes('shawarma') || nameL.includes('wrap') || nameL.includes('doner')) return '🍖';
+    if (nameL.includes('fries')) return '🍟';
+    if (nameL.includes('rice')) return '🍚';
+    if (nameL.includes('drink') || nameL.includes('water') || nameL.includes('mojito') || nameL.includes('coffee') || nameL.includes('lime') || nameL.includes('soda')) return '🥤';
+    if (nameL.includes('sweet') || nameL.includes('cake') || nameL.includes('dessert') || nameL.includes('eclair') || nameL.includes('sundae')) return '🍰';
+    if (nameL.includes('sauce') || nameL.includes('dip') || nameL.includes('cheese') || nameL.includes('syrup') || nameL.includes('raita') || nameL.includes('salad')) return '🏺';
+    return '🍽️';
+  }
+
   // Dynamic Product Image Resolver Across Global Menu Data, DOM Cards, and Master Brand Asset Maps
   function findProductImage(itemName) {
     if (!itemName) return '';
@@ -246,7 +267,7 @@
               i.name.toLowerCase() === baseName.toLowerCase()
             )
           );
-          if (match && match.image) return match.image;
+          if (match && match.image && !match.image.includes('unsplash.com')) return match.image;
         }
       }
     }
@@ -258,7 +279,7 @@
         const text = card.textContent || '';
         if (text.includes(cleanName) || text.includes(baseName)) {
           const img = card.querySelector('img');
-          if (img && img.src && !img.src.includes('data:image')) {
+          if (img && img.src && !img.src.includes('data:image') && !img.src.includes('unsplash.com')) {
             return img.src;
           }
         }
@@ -293,15 +314,16 @@
     if (nameLower.includes('nutella can') || nameLower.includes('nutella dessert')) return './images/nutella_can_dessert.jpg';
 
     // TandooriStop
+    if (nameLower.includes('tikka boti')) return './images/IMG_7583.JPG.jpeg';
     if (nameLower.includes('malai boti') && nameLower.includes('roll')) return './images/IMG_7592.JPG.jpeg';
     if (nameLower.includes('malai boti')) return './images/IMG_7584.JPG.jpeg';
-    if (nameLower.includes('tikka boti')) return './images/IMG_7583.JPG.jpeg';
     if (nameLower.includes('kabab') || nameLower.includes('kebab')) return './images/IMG_7578.JPG.jpeg';
-    if (nameLower.includes('tandoori roll') || nameLower.includes('paratha roll') || nameLower.includes('stop roll')) return './images/IMG_7591.JPG.jpeg';
-    if (nameLower.includes('roghni naan') || nameLower.includes('butter naan') || nameLower.includes('plain naan')) return './images/IMG_7582.JPG.jpeg';
+    if (nameLower.includes('tandoori roll') || nameLower.includes('paratha roll') || nameLower.includes('stop roll') || nameLower.includes('chicken roll')) return './images/IMG_7591.JPG.jpeg';
+    if (nameLower.includes('roghni naan') || nameLower.includes('butter naan') || nameLower.includes('plain naan') || nameLower.includes('roti')) return './images/IMG_7582.JPG.jpeg';
     if (nameLower.includes('cheese naan')) return './images/IMG_7581.JPG.jpeg';
     if (nameLower.includes('puri paratha')) return './images/IMG_7580.JPG.jpeg';
     if (nameLower.includes('rice') || nameLower.includes('add-on rice')) return './images/IMG_7579.JPG.jpeg';
+    if (nameLower.includes('tandoori chicken')) return './images/IMG_7585.JPG.jpeg';
 
     return '';
   }
@@ -310,7 +332,10 @@
   function addItem(item) {
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
-    const itemImg = item.image || findProductImage(nameKey);
+    let itemImg = item.image;
+    if (!itemImg || itemImg.includes('unsplash.com')) {
+      itemImg = findProductImage(nameKey);
+    }
     
     const existingIndex = cartState.items.findIndex(
       i => i.name === nameKey && i.variant === (item.variant || '')
@@ -318,7 +343,7 @@
 
     if (existingIndex > -1) {
       cartState.items[existingIndex].qty += qtyToAdd;
-      if (!cartState.items[existingIndex].image && itemImg) {
+      if ((!cartState.items[existingIndex].image || cartState.items[existingIndex].image.includes('unsplash.com')) && itemImg) {
         cartState.items[existingIndex].image = itemImg;
       }
     } else {
@@ -491,21 +516,17 @@
       }
 
       let itemsHtml = cartState.items.map((item, idx) => {
-        const itemImg = item.image || findProductImage(item.name);
+        let itemImg = item.image;
+        if (!itemImg || itemImg.includes('unsplash.com')) {
+          itemImg = findProductImage(item.name);
+        }
+
+        const emoji = getItemEmoji(item.name);
 
         let imgHtml = '';
-        if (itemImg) {
-          imgHtml = `<img src="${itemImg}" alt="${item.name}" class="cd-item-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'cd-item-img-placeholder\\'>🛍️</div>';" />`;
+        if (itemImg && !itemImg.includes('unsplash.com')) {
+          imgHtml = `<img src="${itemImg}" alt="${item.name}" class="cd-item-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'cd-item-img-placeholder\\'>${emoji}</div>';" />`;
         } else {
-          let emoji = '🍽️';
-          const nameL = item.name.toLowerCase();
-          if (nameL.includes('naan') || nameL.includes('roti') || nameL.includes('bread') || nameL.includes('paratha')) emoji = '🫓';
-          else if (nameL.includes('fries') || nameL.includes('doner')) emoji = '🍟';
-          else if (nameL.includes('rice')) emoji = '🍚';
-          else if (nameL.includes('drink') || nameL.includes('water') || nameL.includes('mojito') || nameL.includes('coffee') || nameL.includes('lime')) emoji = '🥤';
-          else if (nameL.includes('sweet') || nameL.includes('cake') || nameL.includes('dessert') || nameL.includes('eclair') || nameL.includes('sundae')) emoji = '🍰';
-          else if (nameL.includes('sauce') || nameL.includes('dip') || nameL.includes('cheese') || nameL.includes('syrup')) emoji = '🏺';
-
           imgHtml = `<div class="cd-item-img-placeholder">${emoji}</div>`;
         }
 
@@ -793,7 +814,10 @@
   // Intercept & Upgrade existing `addToOrderForm` calls across brand HTML files
   function monkeyPatchOrderForm() {
     window.addToOrderForm = function (itemName, price, image) {
-      const resolvedImage = image || findProductImage(itemName);
+      let resolvedImage = image;
+      if (!resolvedImage || resolvedImage.includes('unsplash.com')) {
+        resolvedImage = findProductImage(itemName);
+      }
       addItem({
         name: itemName,
         price: price,
