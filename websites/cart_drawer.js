@@ -267,7 +267,10 @@
               i.name.toLowerCase() === baseName.toLowerCase()
             )
           );
-          if (match && match.image && !match.image.includes('unsplash.com')) return match.image;
+          if (match) {
+            const img = match.image_url || match.image || match.thumbnail;
+            if (img && typeof img === 'string' && !img.includes('unsplash.com')) return img;
+          }
         }
       }
     }
@@ -332,15 +335,20 @@
   function addItem(item) {
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
-    const itemImg = item.image || findProductImage(nameKey);
+    let itemImg = item.image_url || item.image || item.thumbnail;
+    if (!itemImg || itemImg.includes('unsplash.com')) {
+      itemImg = findProductImage(nameKey);
+    }
     
+    console.log('[CartDrawer] Adding item:', nameKey, 'Resolved Image:', itemImg);
+
     const existingIndex = cartState.items.findIndex(
       i => i.name === nameKey && i.variant === (item.variant || '')
     );
 
     if (existingIndex > -1) {
       cartState.items[existingIndex].qty += qtyToAdd;
-      if (!cartState.items[existingIndex].image && itemImg) {
+      if ((!cartState.items[existingIndex].image || cartState.items[existingIndex].image.includes('unsplash.com')) && itemImg) {
         cartState.items[existingIndex].image = itemImg;
       }
     } else {
@@ -842,7 +850,8 @@
     setFulfillmentType,
     processOrderSubmission,
     resetAndClose,
-    clearActiveGuestOrder
+    clearActiveGuestOrder,
+    findProductImage
   };
 
 })();

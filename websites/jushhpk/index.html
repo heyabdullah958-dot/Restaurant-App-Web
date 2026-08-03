@@ -1115,10 +1115,10 @@ const menuData = {
     }
   ]
 };
+window.menuData = menuData;
 
     let cart = {};
 
-    
     function onCardVariantChange(selectEl, baseItemName) {
       const selectedOption = selectEl.options[selectEl.selectedIndex];
       const variantName = selectedOption.value;
@@ -1129,7 +1129,10 @@ const menuData = {
         const priceEl = comboBody.querySelector('.combo-price');
         const btnEl = comboBody.querySelector('.order-btn');
         const cardImg = comboBody.parentElement ? comboBody.parentElement.querySelector('.combo-img img') : null;
-        const imgUrl = cardImg ? cardImg.getAttribute('src') : '';
+        let imgUrl = cardImg ? cardImg.getAttribute('src') : '';
+        if ((!imgUrl || imgUrl.includes('unsplash.com')) && window.CartDrawer && typeof window.CartDrawer.findProductImage === 'function') {
+          imgUrl = window.CartDrawer.findProductImage(baseItemName);
+        }
         const fullName = `${baseItemName} (${variantName})`;
         
         if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;

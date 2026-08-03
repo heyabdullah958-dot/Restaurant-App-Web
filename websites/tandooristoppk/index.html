@@ -1203,10 +1203,10 @@ const menuData = {
         { name: "Mint Margaritas", price: 300, desc: "Minty blended ice margarita", emoji: "🥤" , image: "./images/IMG_7577.JPG.jpeg" }
       ]
     };
+    window.menuData = menuData;
 
     let cart = {};
 
-    
     function onCardVariantChange(selectEl, baseItemName) {
       const selectedOption = selectEl.options[selectEl.selectedIndex];
       const variantName = selectedOption.value;
@@ -1216,20 +1216,17 @@ const menuData = {
       if (cardBody) {
         const priceEl = cardBody.querySelector('.card-price');
         const btnEl = cardBody.querySelector('.order-btn');
+        const cardImg = cardBody.parentElement ? cardBody.parentElement.querySelector('.card-img img') : null;
+        let imgUrl = cardImg ? cardImg.getAttribute('src') : '';
+        if ((!imgUrl || imgUrl.includes('unsplash.com')) && window.CartDrawer && typeof window.CartDrawer.findProductImage === 'function') {
+          imgUrl = window.CartDrawer.findProductImage(baseItemName);
+        }
         const fullName = `${baseItemName} (${variantName})`;
         
-        const comboBody = selectEl.closest('.card-body');
-        if (comboBody) {
-          const priceEl = comboBody.querySelector('.card-price');
-          const btnEl = comboBody.querySelector('.order-btn');
-          const cardImg = comboBody.parentElement ? comboBody.parentElement.querySelector('.card-img img') : null;
-          const imgUrl = cardImg ? cardImg.getAttribute('src') : '';
-          const fullName = `${baseItemName} (${variantName})`;
-          
-          if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
-          if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
-        }
+        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
+        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
       }
+    }
 
       function renderMenu(category = 'all') {
         const container = document.getElementById('menu-grid-container');

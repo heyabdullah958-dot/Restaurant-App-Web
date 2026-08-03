@@ -267,7 +267,10 @@
               i.name.toLowerCase() === baseName.toLowerCase()
             )
           );
-          if (match && match.image && !match.image.includes('unsplash.com')) return match.image;
+          if (match) {
+            const img = match.image_url || match.image || match.thumbnail;
+            if (img && typeof img === 'string' && !img.includes('unsplash.com')) return img;
+          }
         }
       }
     }
@@ -332,11 +335,13 @@
   function addItem(item) {
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
-    let itemImg = item.image;
+    let itemImg = item.image_url || item.image || item.thumbnail;
     if (!itemImg || itemImg.includes('unsplash.com')) {
       itemImg = findProductImage(nameKey);
     }
     
+    console.log('[CartDrawer] Adding item:', nameKey, 'Resolved Image:', itemImg);
+
     const existingIndex = cartState.items.findIndex(
       i => i.name === nameKey && i.variant === (item.variant || '')
     );
@@ -814,10 +819,7 @@
   // Intercept & Upgrade existing `addToOrderForm` calls across brand HTML files
   function monkeyPatchOrderForm() {
     window.addToOrderForm = function (itemName, price, image) {
-      let resolvedImage = image;
-      if (!resolvedImage || resolvedImage.includes('unsplash.com')) {
-        resolvedImage = findProductImage(itemName);
-      }
+      const resolvedImage = image || findProductImage(itemName);
       addItem({
         name: itemName,
         price: price,
@@ -848,7 +850,8 @@
     setFulfillmentType,
     processOrderSubmission,
     resetAndClose,
-    clearActiveGuestOrder
+    clearActiveGuestOrder,
+    findProductImage
   };
 
 })();

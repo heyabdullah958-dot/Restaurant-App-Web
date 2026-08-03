@@ -131,44 +131,61 @@
     'malai boti': 9
   };
 
-  const DEFAULT_CATEGORY_IMAGES = {
-    'fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80',
-    'doner': 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&h=400&q=80',
-    'wrap': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&h=400&q=80',
-    'shawarma': 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&h=400&q=80',
-    'sandwich': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&h=400&q=80',
-    'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&h=400&q=80',
-    'tandoori': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=600&h=400&q=80',
-    'kabab': 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=600&h=400&q=80',
-    'default': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80'
-  };
+  const BRAND_ASSET_MAP = {
+    // TandooriStop
+    'tikka boti': './images/IMG_7583.JPG.jpeg',
+    'malai boti': './images/IMG_7584.JPG.jpeg',
+    'reshmi handi': './images/IMG_7584.JPG.jpeg',
+    'sha jahani handi': './images/IMG_7584.JPG.jpeg',
+    'seekh kabab': './images/IMG_7578.JPG.jpeg',
+    'kabab': './images/IMG_7578.JPG.jpeg',
+    'full stop roll': './images/IMG_7591.JPG.jpeg',
+    'tandoori chicken roll': './images/IMG_7591.JPG.jpeg',
+    'chicken paratha roll': './images/IMG_7588.JPG.jpeg',
+    'malai boti roll': './images/IMG_7592.JPG.jpeg',
+    'roghni naan': './images/IMG_7582.JPG.jpeg',
+    'butter naan': './images/IMG_7582.JPG.jpeg',
+    'plain naan': './images/IMG_7582.JPG.jpeg',
+    'cheese naan': './images/IMG_7581.JPG.jpeg',
+    'puri paratha': './images/IMG_7580.JPG.jpeg',
+    'rice': './images/IMG_7579.JPG.jpeg',
+    'tandoori chicken': './images/IMG_7585.JPG.jpeg',
+    'mint margaritas': './images/IMG_7577.JPG.jpeg',
+    'blueberry mojito': './images/IMG_7576.JPG.jpeg',
+    'strawberry mojito': './images/IMG_7576.JPG.jpeg',
+    'peach mojito': './images/IMG_7576.JPG.jpeg',
+    'apple mojito': './images/IMG_7576.JPG.jpeg',
 
-  const JUSHHPK_CDN_MAP = {
-    'Chicken Doner Fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg',
-    'Beef Doner Fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg',
-    'Chicken Grilled Sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg',
-    'Beef Grilled Sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg',
-    'Half Dubai Shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg',
-    'Full Dubai Shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg'
+    // JushhPK
+    'chicken doner fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg',
+    'beef doner fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg',
+    'chicken grilled sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg',
+    'beef grilled sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg',
+    'half dubai shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg',
+    'full dubai shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg',
+    'beef burger': './images/beef_smashed_burger.jpg',
+    'chicken burger': './images/chicken_crispy_burger.jpg',
+    'pouch shawarma': './images/chicken_pouch_shawarma.jpg',
+    'shawarma platter': './images/chicken_shawarma_platter.jpg',
+    'turkish wrap': './images/chicken_turkish_wrap.jpg',
+    'cheese add-on': './images/cheese_addon.jpg',
+    'garlic dip': './images/garlic_dip.jpg',
+    'pita bread': './images/pita_bread.jpg',
+    'lotus can dessert': './images/lotus_can_dessert.jpg',
+    'red velvet can dessert': './images/red_velvet_can_dessert.jpg',
+    'nutella can dessert': './images/nutella_can_dessert.jpg'
   };
-
-  function getFallbackMedia(name = '') {
-    const nameLower = name.toLowerCase();
-    for (const kw in DEFAULT_CATEGORY_IMAGES) {
-      if (nameLower.includes(kw)) return DEFAULT_CATEGORY_IMAGES[kw];
-    }
-    return DEFAULT_CATEGORY_IMAGES.default;
-  }
 
   function resolveItemImage(item) {
-    let img = item.image || item.image_url;
-    if (JUSHHPK_CDN_MAP[item.name]) {
-      return JUSHHPK_CDN_MAP[item.name];
-    }
-    if (img && typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('./images'))) {
+    let img = item.image || item.image_url || item.thumbnail;
+    if (img && typeof img === 'string' && !img.includes('unsplash.com') && (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('./images'))) {
       return img;
     }
-    return getFallbackMedia(item.name);
+    const nameLower = (item.name || '').toLowerCase().trim();
+    for (const key in BRAND_ASSET_MAP) {
+      if (nameLower.includes(key)) return BRAND_ASSET_MAP[key];
+    }
+    return '';
   }
 
   async function loadLiveMenu(brandSlug) {
@@ -290,5 +307,36 @@
   });
 
   window.loadLiveMenu = loadLiveMenu;
+
+  /**
+   * Universal Order Form Reset Engine
+   * Clears cart state, resets form fields, hides success screen, and shows order form for sequential orders.
+   */
+  function resetOrderForm() {
+    console.log("[FoodSphere Order API] Resetting order form state for new order...");
+    const form = document.getElementById('order-form') || document.querySelector('form[action*="formspree"]') || document.querySelector('form');
+    const successDiv = document.getElementById('form-success');
+    
+    if (form) {
+      form.reset();
+      form.style.display = 'block';
+    }
+    if (successDiv) {
+      successDiv.style.display = 'none';
+    }
+    
+    if (typeof window.cart === 'object' && window.cart !== null) {
+      for (const k in window.cart) delete window.cart[k];
+    }
+    if (typeof window.preorderCart === 'object' && window.preorderCart !== null) {
+      for (const k in window.preorderCart) delete window.preorderCart[k];
+    }
+    
+    const textareas = document.querySelectorAll('textarea[name="order"], #order-textarea, #requests-textarea, textarea[name="requests"], textarea[name="note"]');
+    textareas.forEach(ta => { if (ta) ta.value = ''; });
+  }
+
+  window.resetOrderForm = resetOrderForm;
+
   window.submitWebOrder = submitWebOrder;
 })();
