@@ -262,14 +262,20 @@
       orderItems.push({ menu_item: (restId === 4) ? 76 : 37, quantity: 1 });
     }
 
+    const resolvedOrderType = String(opts.orderType || opts.fulfillmentType || "DELIVERY").toUpperCase();
+    const isPickupOrDineIn = resolvedOrderType === 'TAKEAWAY' || resolvedOrderType === 'DINE_IN';
+    const fallbackAddress = isPickupOrDineIn 
+      ? `${resolvedOrderType === 'TAKEAWAY' ? 'Takeaway Pickup' : 'Dine-In'} - ${opts.branchName || 'Branch Outlet'}`
+      : "Address Provided via Phone";
+
     const payload = {
       restaurant: restId,
       branch: branchId,
       guest_name: opts.guestName || "Website Customer",
       guest_phone: opts.guestPhone || "+923000000000",
-      delivery_address: opts.deliveryAddress || "Address Provided via Phone",
+      delivery_address: opts.deliveryAddress || fallbackAddress,
       payment_method: "cod",
-      order_type: "DELIVERY",
+      order_type: resolvedOrderType,
       items: orderItems
     };
 

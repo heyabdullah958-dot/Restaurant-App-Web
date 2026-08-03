@@ -160,11 +160,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"Your subtotal is Rs. {subtotal:.0f}."
                 )
 
-        # Task 2: Delivery Radius Enforcement
+        # Task 2: Delivery Radius Enforcement (DELIVERY mode only)
         delivery_lat = attrs.get('delivery_lat')
         delivery_lng = attrs.get('delivery_lng')
         branch = attrs.get('branch')
-        if delivery_lat is not None and delivery_lng is not None and restaurant:
+        ord_type_val = str(attrs.get('order_type') or 'DELIVERY').upper()
+        if ord_type_val == 'DELIVERY' and delivery_lat is not None and delivery_lng is not None and restaurant:
             if not branch:
                 from config.admin_utils import resolve_branch_for_order
                 branch = resolve_branch_for_order(
@@ -307,16 +308,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 })
 
             delivery_fee = restaurant.delivery_fee
-            ord_type = validated_data.get('order_type', 'DELIVERY')
+            ord_type = str(validated_data.get('order_type', 'DELIVERY')).upper()
+            validated_data['order_type'] = ord_type
+
             if ord_type in ['DINE_IN', 'TAKEAWAY']:
                 delivery_fee = Decimal('0.00')
 
-            if ord_type == 'DINE_IN' and not validated_data.get('delivery_address'):
+            curr_addr = validated_data.get('delivery_address')
+            if ord_type == 'DINE_IN' and (not curr_addr or curr_addr in ['Address Provided via Phone', 'PICKUP AT OUTLET']):
                 tbl = validated_data.get('table_number') or 'N/A'
                 br_obj = validated_data.get('branch')
                 br_title = br_obj.name if br_obj else restaurant.name
                 validated_data['delivery_address'] = f"Dine-In (Table #{tbl}) - {br_title}"
-            elif ord_type == 'TAKEAWAY' and not validated_data.get('delivery_address'):
+            elif ord_type == 'TAKEAWAY' and (not curr_addr or curr_addr in ['Address Provided via Phone', 'PICKUP AT OUTLET']):
                 br_obj = validated_data.get('branch')
                 br_title = br_obj.name if br_obj else restaurant.name
                 validated_data['delivery_address'] = f"Takeaway Pickup - {br_title}"
