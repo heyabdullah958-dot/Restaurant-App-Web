@@ -4,6 +4,17 @@
 
 - **Render Backend Deployment**: `render.yaml` orchestrates build (`pip install`, `collectstatic`, `migrate`, `seed_restaurants`, `seed_branches`, `create_admin`, `create_restaurant_managers`).
 - **Cloudflare Pages Deployment**: Static & Vite production builds for 7 websites and Admin panel.
+  - **Admin HQ (`foodsphere-admin`)**: Automatic Git deploy on `git push origin main`.
+  - **7 Brand Websites Direct Upload**: Deployed via Wrangler CLI (`npx wrangler pages deploy`):
+    ```bash
+    npx wrangler pages deploy websites/tandooristoppk --project-name=tandooristoppk-foodsphere
+    npx wrangler pages deploy websites/jushhpk --project-name=jushhpk-foodsphere
+    npx wrangler pages deploy websites/getafomo --project-name=getafomo-foodsphere
+    npx wrangler pages deploy websites/seenbanao --project-name=seenbanao-foodsphere
+    npx wrangler pages deploy websites/dineatblue --project-name=dineatblue-foodsphere
+    npx wrangler pages deploy websites/sandmelts --project-name=sandmelts-foodsphere
+    npx wrangler pages deploy websites/birdmanfoodspk --project-name=birdmanfoodspk-foodsphere
+    ```
 - **Media Assets**: Cloudinary storage (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
 
 ---

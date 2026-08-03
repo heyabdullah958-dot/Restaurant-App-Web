@@ -206,6 +206,8 @@ FoodSphere/
 19. **Universal Order Mode Invariant:** `Order.order_type` MUST support `DELIVERY`, `TAKEAWAY`, and `DINE_IN`. Dine-In orders MUST populate `table_number` and bypass delivery address requirements & delivery fees.
 20. **Reorder Engine Invariant:** `ReorderView` (`POST /api/orders/<pk>/reorder/`) MUST validate item stock availability against current DB state and segregate out-of-stock items into an `unavailable_items` list.
 21. **Persistent Search & App Rebrand Invariant:** App Expo configuration MUST be named `GetFood` in `app.json`. Recent search history MUST be persisted locally via `AsyncStorage` (`@getfood_recent_searches`).
+22. **Brand Website Cloudflare Pages Deployment Invariant:** The 7 individual brand websites (`seenbanao`, `dineatblue`, `jushhpk`, `tandooristoppk`, `sandmelts`, `birdmanfoodspk`, `getafomo`) are deployed to Cloudflare Pages via **Wrangler Direct Upload** (`Git Provider: No`). Any updates to `websites/` MUST be deployed using `npx wrangler pages deploy websites/<brand_slug> --project-name=<brand_slug>-foodsphere` in addition to pushing code to GitHub `main`.
+23. **Cart Drawer Image & Asset Fallback Invariant:** `CartDrawer.addItem` and `findProductImage` MUST resolve item images dynamically from `window.menuData` (`image_url` / `image` / `thumbnail`), DOM card images, or local brand asset paths (`./images/...`). Unsplash URLs (`https://images.unsplash.com/...`) MUST NEVER be returned by `resolveItemImage()` or used as fallbacks in `live_catalog.js` or `CartDrawer` components. If an item has no image, a clean emoji badge (e.g. `🫓`, `🍖`, `🍟`, `🥤`) MUST be rendered.
 
 ---
 
