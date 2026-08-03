@@ -194,7 +194,7 @@ function AppContent() {
           const link = JSON.parse(val);
           AsyncStorage.removeItem('pending_deep_link');
           if (navRef.isReady() && link?.screen) {
-            navRef.navigate(link.screen, link.params);
+            (navRef as any).navigate(link.screen, link.params);
           }
         } catch (e) {}
       }

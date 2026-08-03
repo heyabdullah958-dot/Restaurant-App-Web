@@ -1,13 +1,14 @@
 /**
  * FoodSphere KFC/McDonald's-Style Interactive Sliding Cart Drawer & Checkout Engine
  * Provides persistent cart state, multi-step checkout, live delivery calculation,
- * and direct backend DRF API integration across brand websites.
+ * persistent active guest order tracking hydration, and direct DRF API integration.
  */
 
 (function () {
   'use strict';
 
   const DELIVERY_FEE = 150;
+  const ACTIVE_ORDER_KEY = 'foodsphere_active_guest_order_v1';
 
   // Cart State Storage
   let cartState = {
@@ -19,7 +20,8 @@
     customerAddress: '',
     instructions: '',
     activeStep: 1, // 1: Cart, 2: Checkout, 3: Confirmation
-    lastOrder: null
+    lastOrder: null,
+    activeOrderBanner: null
   };
 
   // Branch Options per Brand
@@ -58,7 +60,7 @@
     'seenbanao': '923000000000'
   };
 
-  // Load saved state from sessionStorage if available
+  // Load saved cart state from sessionStorage
   function initCartState() {
     try {
       const saved = sessionStorage.getItem('foodsphere_cart_' + (window.BRAND_SLUG || 'default'));
@@ -77,6 +79,138 @@
         items: cartState.items
       }));
     } catch (e) {}
+  }
+
+  // --- PERSISTENT ACTIVE GUEST ORDER STORAGE & HYDRATION ---
+  function saveActiveGuestOrder(orderData, customerInfo) {
+    try {
+      const activeObj = {
+        orderId: orderData.id,
+        displayOrderId: orderData.display_order_id || ('#FS-' + orderData.id),
+        trackingToken: orderData.tracking_token || '',
+        customerName: customerInfo.name,
+        customerPhone: customerInfo.phone,
+        customerAddress: customerInfo.address,
+        fulfillmentType: customerInfo.fulfillmentType,
+        selectedBranch: customerInfo.branch,
+        totalAmount: getGrandTotal(),
+        status: orderData.status || 'received',
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem(ACTIVE_ORDER_KEY + '_' + (window.BRAND_SLUG || 'default'), JSON.stringify(activeObj));
+    } catch (e) {
+      console.warn('[CartDrawer] Could not save active guest order', e);
+    }
+  }
+
+  function getActiveGuestOrder() {
+    try {
+      const raw = localStorage.getItem(ACTIVE_ORDER_KEY + '_' + (window.BRAND_SLUG || 'default'));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearActiveGuestOrder() {
+    try {
+      localStorage.removeItem(ACTIVE_ORDER_KEY + '_' + (window.BRAND_SLUG || 'default'));
+      removeActiveOrderBanner();
+    } catch (e) {}
+  }
+
+  async function checkAndHydrateActiveGuestOrder() {
+    const activeOrder = getActiveGuestOrder();
+    if (!activeOrder || !activeOrder.orderId) return;
+
+    try {
+      // Poll backend for live status
+      const orderId = activeOrder.orderId;
+      const trackingToken = activeOrder.trackingToken;
+      let url = `https://getfoodpk-fd9b20442fcf.herokuapp.com/api/orders/${orderId}/track/`;
+      if (trackingToken) url += `?token=${trackingToken}`;
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        const liveOrder = json.data || json;
+        const liveStatus = (liveOrder.status || 'received').toLowerCase();
+
+        // Check if order is completed or cancelled
+        if (['delivered', 'completed', 'cancelled'].includes(liveStatus)) {
+          clearActiveGuestOrder();
+          return;
+        }
+
+        // Order is active! Update local stored state
+        activeOrder.status = liveStatus;
+        activeOrder.displayOrderId = liveOrder.display_order_id || activeOrder.displayOrderId;
+        localStorage.setItem(ACTIVE_ORDER_KEY + '_' + (window.BRAND_SLUG || 'default'), JSON.stringify(activeOrder));
+
+        // Restore context in cartState
+        cartState.lastOrder = liveOrder;
+        cartState.customerName = activeOrder.customerName;
+        cartState.customerPhone = activeOrder.customerPhone;
+        cartState.customerAddress = activeOrder.customerAddress;
+        cartState.fulfillmentType = activeOrder.fulfillmentType || 'DELIVERY';
+        cartState.selectedBranch = activeOrder.selectedBranch || '';
+
+        // Inject Floating Active Order Banner
+        renderActiveOrderBanner(activeOrder);
+      }
+    } catch (err) {
+      console.warn('[CartDrawer] Failed to hydrate active guest order status:', err);
+      // Fallback: render banner with cached stored data
+      renderActiveOrderBanner(activeOrder);
+    }
+  }
+
+  function renderActiveOrderBanner(activeOrder) {
+    removeActiveOrderBanner();
+
+    const banner = document.createElement('div');
+    banner.id = 'cd-active-order-banner';
+    banner.style.cssText = `
+      position: fixed;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9980;
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      animation: cdBannerSlideDown 0.4s ease forwards;
+    `;
+
+    const statusText = (activeOrder.status || 'PREPARING').toUpperCase().replace('_', ' ');
+
+    banner.innerHTML = `
+      <span>🛵</span>
+      <span>Active Order <strong>${activeOrder.displayOrderId}</strong>: <span style="text-decoration:underline;">${statusText}</span></span>
+      <span style="background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:12px; font-size:11px;">Track →</span>
+    `;
+
+    banner.onclick = () => {
+      setStep(3);
+      openDrawer();
+    };
+
+    document.body.appendChild(banner);
+  }
+
+  function removeActiveOrderBanner() {
+    const existing = document.getElementById('cd-active-order-banner');
+    if (existing) existing.remove();
   }
 
   // Calculate totals
@@ -98,7 +232,6 @@
 
   // Add Item to Cart
   function addItem(item) {
-    // item: { name, price, qty?, variant?, image? }
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
     
@@ -235,11 +368,7 @@
     
     const floatBtn = document.getElementById('cd-float-btn');
     if (floatBtn) {
-      if (count > 0) {
-        floatBtn.style.display = 'flex';
-      } else {
-        floatBtn.style.display = 'flex'; // Keep accessible
-      }
+      floatBtn.style.display = 'flex';
     }
   }
 
@@ -401,51 +530,51 @@
       `;
     }
 
-    // STEP 3: Order Confirmation Screen
+    // STEP 3: Order Confirmation & Live Tracking View
     else if (cartState.activeStep === 3) {
-      if (headerText) headerText.textContent = 'Order Confirmed!';
+      if (headerText) headerText.textContent = 'Live Order Status';
 
       const order = cartState.lastOrder || {};
-      const displayId = order.display_order_id || ('#FS-' + Math.floor(1000 + Math.random() * 9000));
+      const activeStored = getActiveGuestOrder();
+      const displayId = order.display_order_id || (activeStored ? activeStored.displayOrderId : ('#FS-' + Math.floor(1000 + Math.random() * 9000)));
+      const rawStatus = (order.status || (activeStored ? activeStored.status : 'received')).toLowerCase();
+      const statusLabel = rawStatus.toUpperCase().replace('_', ' ');
       const whatsappPhone = WHATSAPP_NUMBERS[brandSlug] || '923000000000';
 
-      const whatsappMessage = `Assalam o Alaikum! I just placed an order on the website 🛵\n\n` +
+      const whatsappMessage = `Assalam o Alaikum! I am checking on my order 🛵\n\n` +
         `*Order ID:* ${displayId}\n` +
-        `*Customer Name:* ${cartState.customerName}\n` +
-        `*Phone:* ${cartState.customerPhone}\n` +
-        `*Fulfillment:* ${cartState.fulfillmentType}\n` +
-        (cartState.customerAddress ? `*Address:* ${cartState.customerAddress}\n` : '') +
-        `*Total Amount:* Rs. ${getGrandTotal().toLocaleString()} (COD)\n\n` +
-        `Please confirm my order. Shukriya!`;
+        `*Customer Name:* ${cartState.customerName || activeStored?.customerName || 'Customer'}\n` +
+        `*Status:* ${statusLabel}\n\n` +
+        `Please confirm latest status. Shukriya!`;
 
       const waUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
       body.innerHTML = `
         <div class="cd-step active">
           <div class="cd-success-box">
-            <div class="cd-success-icon">✅</div>
-            <h3 style="font-size:22px; font-weight:900; margin-bottom:4px;">Order Placed Successfully!</h3>
-            <p style="font-size:13px; color:var(--cd-muted);">Your order has been sent to our kitchen team.</p>
+            <div class="cd-success-icon">🛵</div>
+            <h3 style="font-size:20px; font-weight:900; margin-bottom:4px;">Active Order Tracking</h3>
+            <p style="font-size:13px; color:var(--cd-muted);">Your order is active and saved in this browser.</p>
             
             <div class="cd-success-order-id">${displayId}</div>
 
             <div class="cd-summary-box" style="text-align:left; margin-bottom:24px;">
               <div class="cd-summary-row">
                 <span>Branch:</span>
-                <span style="color:#ffffff; font-weight:700;">${cartState.selectedBranch || 'Main Branch'}</span>
+                <span style="color:#ffffff; font-weight:700;">${cartState.selectedBranch || activeStored?.selectedBranch || 'Main Branch'}</span>
               </div>
               <div class="cd-summary-row">
                 <span>Payment:</span>
                 <span style="color:#ffffff; font-weight:700;">Cash on Delivery (COD)</span>
               </div>
               <div class="cd-summary-row">
-                <span>Status:</span>
-                <span style="color:var(--cd-accent); font-weight:700;">RECEIVED</span>
+                <span>Current Status:</span>
+                <span style="color:#10B981; font-weight:900;">${statusLabel}</span>
               </div>
             </div>
 
             <a href="${waUrl}" target="_blank" rel="noopener" class="cd-btn-primary" style="text-decoration:none; margin-bottom:12px;">
-              <span>💬 Confirm on WhatsApp</span>
+              <span>💬 Confirm Status on WhatsApp</span>
             </a>
           </div>
         </div>
@@ -453,7 +582,7 @@
 
       footer.innerHTML = `
         <button class="cd-btn-secondary" onclick="CartDrawer.resetAndClose()">
-          Done / Place Another Order
+          Start New Order / Done
         </button>
       `;
     }
@@ -531,18 +660,35 @@
       }
     }
 
-    cartState.lastOrder = (orderResult && orderResult.data) ? orderResult.data : null;
+    const orderData = (orderResult && orderResult.data) ? orderResult.data : {
+      id: Math.floor(1000 + Math.random() * 9000),
+      display_order_id: '#FS-' + Math.floor(1000 + Math.random() * 9000),
+      status: 'received'
+    };
+
+    cartState.lastOrder = orderData;
     
+    // Save to persistent localStorage active guest order
+    saveActiveGuestOrder(orderData, {
+      name,
+      phone,
+      address,
+      branch,
+      fulfillmentType: cartState.fulfillmentType
+    });
+
     // Clear active cart items on success
     cartState.items = [];
     saveCartState();
     updateFloatingBadge();
 
-    // Advance to Step 3: Confirmation
+    // Advance to Step 3 & Show Banner
     setStep(3);
+    checkAndHydrateActiveGuestOrder();
   }
 
   function resetAndClose() {
+    clearActiveGuestOrder();
     cartState.activeStep = 1;
     closeDrawer();
   }
@@ -564,6 +710,7 @@
     injectDOM();
     updateFloatingBadge();
     monkeyPatchOrderForm();
+    checkAndHydrateActiveGuestOrder();
   });
 
   // Export Public API
@@ -577,7 +724,8 @@
     setStep,
     setFulfillmentType,
     processOrderSubmission,
-    resetAndClose
+    resetAndClose,
+    clearActiveGuestOrder
   };
 
 })();

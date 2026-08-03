@@ -393,6 +393,49 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
   const [isTabSwitching, setIsTabSwitching] = React.useState(false);
+  const [activeGuestOrder, setActiveGuestOrder] = React.useState<any>(null);
+
+  const checkActiveGuestOrder = React.useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem('@getfood_active_guest_order');
+      if (!raw) {
+        setActiveGuestOrder(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.orderId) {
+        setActiveGuestOrder(null);
+        return;
+      }
+
+      const orderId = parsed.orderId;
+      const trackingToken = parsed.trackingToken;
+      let url = `/orders/${orderId}/track/`;
+      if (trackingToken) url += `?token=${trackingToken}`;
+
+      const res = await api.get(url);
+      const liveOrder = res.data?.data || res.data;
+      const liveStatus = (liveOrder?.status || 'received').toLowerCase();
+
+      if (['delivered', 'completed', 'cancelled'].includes(liveStatus)) {
+        await AsyncStorage.removeItem('@getfood_active_guest_order');
+        setActiveGuestOrder(null);
+      } else {
+        const updated = {
+          ...parsed,
+          status: liveStatus,
+          displayOrderId: liveOrder.display_order_id || parsed.displayOrderId
+        };
+        await AsyncStorage.setItem('@getfood_active_guest_order', JSON.stringify(updated));
+        setActiveGuestOrder(updated);
+      }
+    } catch (e) {
+      try {
+        const raw = await AsyncStorage.getItem('@getfood_active_guest_order');
+        if (raw) setActiveGuestOrder(JSON.parse(raw));
+      } catch {}
+    }
+  }, []);
 
   const handleSwitchFulfillmentMode = React.useCallback((mode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN') => {
     if (mode === fulfillmentMode) return;
@@ -494,6 +537,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       }
       checkUnratedDeliveredOrders();
       checkOrderStatusUpdates();
+      checkActiveGuestOrder();
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
         if (user && !user.is_guest) {
@@ -501,9 +545,10 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         }
         checkUnratedDeliveredOrders();
         checkOrderStatusUpdates();
+        checkActiveGuestOrder();
       }, 5000);
       return () => clearInterval(interval);
-    }, [dispatch, user, checkUnratedDeliveredOrders])
+    }, [dispatch, user, checkUnratedDeliveredOrders, checkActiveGuestOrder])
   );
 
 
@@ -560,6 +605,32 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const ListHeader = React.useMemo(() => (
     <View>
       <HeroBannerSection fulfillmentMode={fulfillmentMode} onPressBanner={handlePressBanner} />
+
+      {activeGuestOrder && (
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.activeGuestOrderBanner}
+          onPress={() => navigation.navigate('Tracking', { 
+            orderId: activeGuestOrder.orderId,
+            trackingToken: activeGuestOrder.trackingToken
+          })}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+            <Text style={{ fontSize: 22 }}>🛵</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>
+                Active Order {activeGuestOrder.displayOrderId || `#${activeGuestOrder.orderId}`}
+              </Text>
+              <Text style={{ color: '#E0F2FE', fontSize: 11, fontWeight: '600' }}>
+                Status: {(activeGuestOrder.status || 'PREPARING').toUpperCase().replace('_', ' ')}
+              </Text>
+            </View>
+          </View>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.25)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '800' }}>Track →</Text>
+          </View>
+        </TouchableOpacity>
+      )}
 
       {unratedOrder && (
         <View style={styles.feedbackBannerContainer}>
@@ -633,7 +704,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <Text style={styles.sectionLink}>View All</Text>
       </View>
     </View>
-  ), [fulfillmentMode, handlePressBanner, unratedOrder, navigation, renderCategoryChipItem]);
+  ), [fulfillmentMode, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
 
 
   const ListEmpty = React.useMemo(() => {
@@ -808,7 +879,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             </View>
             <View style={{ marginLeft: SPACING.sm }}>
               <Text style={styles.stickyLoginTitle}>Browsing as Guest</Text>
-              <Text style={styles.stickyLoginSubtitle}>Sign in to earn loyalty points</Text>
+              <Text style={styles.stickyLoginText}>Sign in to earn loyalty points</Text>
             </View>
           </View>
           <TouchableOpacity activeOpacity={0.8}
@@ -1312,5 +1383,18 @@ const styles = StyleSheet.create({
   segmentTextActive: {
     color: '#0f172a',
     fontWeight: '800',
+  },
+  activeGuestOrderBanner: {
+    backgroundColor: '#10B981',
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...SHADOWS.medium,
   },
 });

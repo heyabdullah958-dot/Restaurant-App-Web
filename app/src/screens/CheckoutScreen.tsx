@@ -493,6 +493,18 @@ export default function CheckoutScreen() {
           }
         }
 
+        try {
+          await AsyncStorage.setItem('@getfood_active_guest_order', JSON.stringify({
+            orderId: createdOrder.id,
+            displayOrderId: createdOrder.display_order_id || (`#FS-${createdOrder.id}`),
+            trackingToken: token || '',
+            status: createdOrder.status || 'received',
+            createdAt: new Date().toISOString()
+          }));
+        } catch (e) {
+          if (__DEV__) console.error('Failed to save active guest order object:', e);
+        }
+
         // Refresh user profile so loyalty points update live
         dispatch(fetchUserProfile());
 
