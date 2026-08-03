@@ -48,7 +48,7 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
           width: width as any,
           height,
           borderRadius,
-          backgroundColor: '#ECEEEF', // Warm, premium light gray placeholder
+          backgroundColor: '#E2E8F0', // Distinct slate-gray placeholder
           overflow: 'hidden',
           position: 'relative',
         },
@@ -63,7 +63,7 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
         ]}
       >
         <LinearGradient
-          colors={['transparent', 'rgba(255, 255, 255, 0.65)', 'transparent']}
+          colors={['transparent', 'rgba(255, 255, 255, 0.75)', 'transparent']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
@@ -75,11 +75,17 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
 
 export const RestaurantCardSkeleton: React.FC = () => (
   <View style={styles.cardSkeleton}>
-    <SkeletonBox height={160} borderRadius={0} />
+    <SkeletonBox height={120} borderRadius={0} />
     <View style={styles.cardBody}>
-      <SkeletonBox width="60%" height={16} style={{ marginBottom: 8 }} />
-      <SkeletonBox width="40%" height={12} style={{ marginBottom: 8 }} />
-      <SkeletonBox width="30%" height={10} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <SkeletonBox width="55%" height={18} borderRadius={6} />
+        <SkeletonBox width="25%" height={14} borderRadius={6} />
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <SkeletonBox width="30%" height={14} borderRadius={4} />
+        <SkeletonBox width="35%" height={14} borderRadius={6} />
+      </View>
+      <SkeletonBox width="80%" height={12} borderRadius={4} />
     </View>
   </View>
 );

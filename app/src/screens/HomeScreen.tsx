@@ -392,7 +392,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
-  const [isTabSwitching, setIsTabSwitching] = React.useState(false);
   const [activeGuestOrder, setActiveGuestOrder] = React.useState<any>(null);
 
   const checkActiveGuestOrder = React.useCallback(async () => {
@@ -439,11 +438,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const handleSwitchFulfillmentMode = React.useCallback((mode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN') => {
     if (mode === fulfillmentMode) return;
-    setIsTabSwitching(true);
     dispatch(setFulfillmentMode(mode));
-    setTimeout(() => {
-      setIsTabSwitching(false);
-    }, 120);
   }, [dispatch, fulfillmentMode]);
 
   React.useEffect(() => {
@@ -708,7 +703,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
 
   const ListEmpty = React.useMemo(() => {
-    if ((loading || isTabSwitching) && filteredRestaurants.length === 0) {
+    if (loading && filteredRestaurants.length === 0) {
       return (
         <View style={{ paddingHorizontal: 0, minHeight: 400 }}>
           {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
@@ -738,7 +733,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         )}
       </View>
     );
-  }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory]);
+  }, [loading, filteredRestaurants.length, selectedCategory]);
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
@@ -831,43 +826,28 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       </View>
 
       <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
-        {isTabSwitching ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {ListHeader}
-            <View style={{ gap: 12 }}>
-              <RestaurantCardSkeleton />
-              <RestaurantCardSkeleton />
-              <RestaurantCardSkeleton />
-            </View>
-          </ScrollView>
-        ) : (
-          <FlatList
-            data={filteredRestaurants}
-            extraData={fulfillmentMode}
-            renderItem={renderRestaurantItem}
-            keyExtractor={keyExtractor}
-            getItemLayout={getItemLayout}
-            ListHeaderComponent={ListHeader}
-            ListEmptyComponent={ListEmpty}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={6}
-            maxToRenderPerBatch={6}
-            windowSize={7}
-            removeClippedSubviews={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                tintColor={COLORS.primary}
-                colors={[COLORS.primary]}
-              />
-            }
-          />
-        )}
+        <FlatList
+          data={filteredRestaurants}
+          extraData={[fulfillmentMode, selectedCategory, loading, filteredRestaurants]}
+          renderItem={renderRestaurantItem}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={ListHeader}
+          ListEmptyComponent={ListEmpty}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
+          windowSize={7}
+          removeClippedSubviews={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={COLORS.primary}
+              colors={[COLORS.primary]}
+            />
+          }
+        />
       </View>
 
       {/* Guest Login Banner */}
