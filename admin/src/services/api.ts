@@ -220,8 +220,17 @@ export interface ApiOrder {
   items?: any[];
 }
 
-export const fetchAllOrders = () =>
-  apiFetch<{ results: ApiOrder[]; count: number }>('/api/orders/?page_size=100');
+export const fetchAllOrders = (params?: { restaurant_id?: number; branch_id?: number }) => {
+  let url = '/api/orders/?page_size=100';
+  if (params) {
+    const q = new URLSearchParams();
+    if (params.restaurant_id) q.append('restaurant_id', String(params.restaurant_id));
+    if (params.branch_id) q.append('branch_id', String(params.branch_id));
+    const str = q.toString();
+    if (str) url += `&${str}`;
+  }
+  return apiFetch<{ results: ApiOrder[]; count: number }>(url);
+};
 
 export const updateOrderStatus = (orderId: number, status: string, cancellation_reason?: string) =>
   apiFetch<ApiOrder>(`/api/orders/${orderId}/`, {
@@ -552,8 +561,8 @@ export const fetchRiders = async (params?: { branch_id?: number | string; status
 export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { method: 'POST', body: JSON.stringify(data) });
 export const updateRider = (id: number, data: any) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteRider = (id: number) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'DELETE' });
-export const assignRiderToOrder = (orderId: number, riderId: number | null) => 
-  apiFetch<any>(`/api/orders/${orderId}/assign-rider/`, { method: 'POST', body: JSON.stringify({ rider_id: riderId }) });
+export const assignRiderToOrder = (orderId: number, riderId: number | null, is_hq_override?: boolean) => 
+  apiFetch<any>(`/api/orders/${orderId}/assign-rider/`, { method: 'POST', body: JSON.stringify({ rider_id: riderId, is_hq_override: is_hq_override ?? true }) });
 
 export const updateBranchStock = (branchId: number, itemId: number, is_in_stock: boolean) => 
   apiFetch<any>(`/api/admin/branches/${branchId}/stock/`, { method: 'POST', body: JSON.stringify({ item_id: itemId, is_in_stock }) });

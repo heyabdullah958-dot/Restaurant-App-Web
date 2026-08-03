@@ -182,6 +182,11 @@ export const RiderManagement: React.FC = () => {
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Bike className="text-blue-500" />
             Branch Rider Fleet Management
+            {isSuper && (
+              <span className="text-[10px] uppercase font-black tracking-wider bg-blue-500/10 border border-blue-500/30 text-blue-400 px-2.5 py-1 rounded-full flex items-center gap-1">
+                ⚡ Global Fleet Scope (HQ Console)
+              </span>
+            )}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-slate-400">
             Manage delivery riders, vehicle types, live status, and contact options across branches.

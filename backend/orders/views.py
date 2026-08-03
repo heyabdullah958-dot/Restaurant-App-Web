@@ -38,7 +38,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         queryset = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').order_by('-created_at')
         
-        # If user is a branch manager (staff but not superuser), filter by their managed restaurant
+        # If user is a branch manager (staff but not superuser), filter by their managed restaurant/branch
         if user.is_authenticated and user.is_staff and not user.is_superuser:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             managed_branch = get_managed_branch(user)
@@ -50,6 +50,20 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     queryset = queryset.filter(restaurant=managed)
                 else:
                     queryset = queryset.none()
+        elif user.is_authenticated and user.is_superuser:
+            # Super-Admin global scope override with optional query parameter filtering
+            restaurant_id = self.request.query_params.get('restaurant_id') or self.request.query_params.get('tenant_id')
+            branch_id = self.request.query_params.get('branch_id')
+            if restaurant_id:
+                if str(restaurant_id).isdigit():
+                    queryset = queryset.filter(restaurant_id=int(restaurant_id))
+                else:
+                    queryset = queryset.filter(restaurant__slug=restaurant_id)
+            if branch_id:
+                if str(branch_id).isdigit():
+                    queryset = queryset.filter(branch_id=int(branch_id))
+                else:
+                    queryset = queryset.filter(branch__slug=branch_id)
                 
         return queryset
 
@@ -253,7 +267,11 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         user = self.request.user
         queryset = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item')
         
-        # If the user is a manager (is_staff and not is_superuser), restrict update operations to their managed restaurant/branch
+        # If the user is a superuser, grant full global access to all orders
+        if user.is_authenticated and user.is_superuser:
+            return queryset
+
+        # If the user is a branch manager (is_staff and not is_superuser), restrict operations to their managed branch/restaurant
         if user.is_authenticated and user.is_staff:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             from django.db.models import Q
@@ -264,8 +282,6 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                 return queryset.filter(Q(branch=managed_branch) | Q(restaurant=managed_branch.restaurant))
             elif managed_restaurant:
                 return queryset.filter(restaurant=managed_restaurant)
-            elif user.is_superuser:
-                return queryset
             return Order.objects.none()
             
         return queryset
@@ -418,7 +434,7 @@ class OrderAssignRiderView(APIView):
     """
     POST /api/orders/{id}/assign-rider/
     Assigns a BranchRider to an Order.
-    Payload: { "rider_id": 5 } or { "rider_id": null }
+    Payload: { "rider_id": 5, "is_hq_override": true } or { "rider_id": null }
     """
     permission_classes = [permissions.IsAdminUser]
 
@@ -427,6 +443,9 @@ class OrderAssignRiderView(APIView):
             order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        is_super = getattr(user, 'is_superuser', False) or bool(request.data.get('is_hq_override'))
 
         rider_id = request.data.get('rider_id')
         if rider_id is None and 'rider' in request.data:
@@ -438,6 +457,7 @@ class OrderAssignRiderView(APIView):
             return Response({
                 'success': True,
                 'message': 'Rider unassigned from order.',
+                'hq_admin_override': is_super,
                 'data': AdminOrderListSerializer(order).data
             })
 
@@ -450,6 +470,14 @@ class OrderAssignRiderView(APIView):
         if not rider.is_active:
             return Response({'error': 'Rider is inactive.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Cross-branch check: if rider branch differs from order branch, require Super-Admin privilege
+        is_cross_branch = bool(order.branch and rider.branch and order.branch != rider.branch)
+        if is_cross_branch and not is_super:
+            return Response(
+                {'error': f"Rider '{rider.name}' is assigned to branch '{rider.branch.name}' and cannot be assigned to order branch '{order.branch.name}' without HQ Admin Override."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         order.rider = rider
         if order.status == 'preparing':
             order.status = 'out_for_delivery'
@@ -458,10 +486,18 @@ class OrderAssignRiderView(APIView):
         rider.status = 'ON_DELIVERY'
         rider.save(update_fields=['status'])
 
+        msg = f'Order #{order.id} assigned to rider {rider.name}.'
+        if is_cross_branch or is_super:
+            msg = f'⚡ [HQ Admin Override] Order #{order.id} assigned to cross-branch rider {rider.name}.'
+
+        responseData = AdminOrderListSerializer(order).data
+        responseData['hq_admin_override'] = is_super or is_cross_branch
+
         return Response({
             'success': True,
-            'message': f'Order #{order.id} assigned to rider {rider.name}.',
-            'data': AdminOrderListSerializer(order).data
+            'message': msg,
+            'hq_admin_override': is_super or is_cross_branch,
+            'data': responseData
         })
 
 
