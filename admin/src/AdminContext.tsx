@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type { User, Restaurant, Order, MenuCategory, OrderStatus, MenuItemOptions } from './types';
 import {
+  safeGetLocalStorage,
+  safeSetLocalStorage,
+  safeRemoveLocalStorage,
+  safeGetJSON,
+  safeSetJSON,
+  safeClearSessionStorage
+} from './utils/storage';
+import {
   loginAdmin,
   logoutAdmin,
   fetchRestaurants,
@@ -64,6 +72,7 @@ interface AdminContextProps {
   updateRestaurantDetails: (id: number, data: { phone?: string; address?: string; city?: string; is_active?: boolean; is_force_closed?: boolean }) => Promise<void>;
   updateBranchDetails: (branchId: number, data: { phone?: string; address?: string; is_active?: boolean }) => Promise<void>;
   updateUser: (fields: Partial<User>) => void;
+  isHydrated: boolean;
 
 }
 
@@ -201,86 +210,81 @@ function mergeAllRestaurants(apiMapped: Restaurant[], currentState: Restaurant[]
 }
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    // Clear any legacy mock user flag from localStorage
-    localStorage.removeItem('foodsphere_admin_mock_user');
+  const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
-    const token = getToken();
-    if (token) {
-      const payload = decodeToken(token);
-      if (payload && payload.exp * 1000 > Date.now()) {
-        const isSuperByUsername = isSuperAdminUser(payload.username, payload.is_superuser);
-        return {
-          id: payload.user_id,
-          username: payload.username || 'Admin',
-          email: '',
-          role: isSuperByUsername ? 'super_admin' : 'branch_manager',
-          restaurantId: isSuperByUsername ? undefined : payload.restaurant_id,
-          branchId: isSuperByUsername ? undefined : payload.branch_id,
-        };
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      safeRemoveLocalStorage('foodsphere_admin_mock_user');
+      const token = getToken();
+      if (token) {
+        const payload = decodeToken(token);
+        if (payload && payload.exp * 1000 > Date.now()) {
+          const isSuperByUsername = isSuperAdminUser(payload.username, payload.is_superuser);
+          return {
+            id: payload.user_id,
+            username: payload.username || 'Admin',
+            email: '',
+            role: isSuperByUsername ? 'super_admin' : 'branch_manager',
+            restaurantId: isSuperByUsername ? undefined : payload.restaurant_id,
+            branchId: isSuperByUsername ? undefined : payload.branch_id,
+          };
+        }
       }
+    } catch (e) {
+      console.warn('[AdminContext] Safe user hydration fallback:', e);
     }
     return null;
   });
 
   const [activeView, setActiveView] = useState<string>(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash && hash !== 'login') {
-      return hash;
-    }
-    const savedView = localStorage.getItem('foodsphere_admin_view');
-    if (savedView) return savedView;
-
-    const token = getToken();
-    if (token) {
-      const payload = decodeToken(token);
-      if (payload && payload.exp * 1000 > Date.now()) {
-        const isSuper = isSuperAdminUser(payload.username, payload.is_superuser);
-        return isSuper ? 'super_dashboard' : 'branch_dashboard';
+    try {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && hash !== 'login') {
+        return hash;
       }
+      const savedView = safeGetLocalStorage('foodsphere_admin_view');
+      if (savedView) return savedView;
+
+      const token = getToken();
+      if (token) {
+        const payload = decodeToken(token);
+        if (payload && payload.exp * 1000 > Date.now()) {
+          const isSuper = isSuperAdminUser(payload.username, payload.is_superuser);
+          return isSuper ? 'super_dashboard' : 'branch_dashboard';
+        }
+      }
+    } catch (e) {
+      console.warn('[AdminContext] Safe activeView hydration fallback:', e);
     }
     return 'login';
   });
 
-  // Always start fresh — never read stale restaurant cache on init.
-  // loadAppData() fires immediately on mount and populates from the live API.
-  // (Stale cache previously caused 7→3 restaurant mismatch after refresh.)
   const [restaurants, setRestaurantsState] = useState<Restaurant[]>([]);
 
   const setRestaurants = (action: React.SetStateAction<Restaurant[]>) => {
     setRestaurantsState((prev) => {
       const next = typeof action === 'function' ? action(prev) : action;
-      try {
-        localStorage.setItem('foodsphere_admin_restaurants_cache', JSON.stringify(next));
-      } catch {}
+      safeSetJSON('foodsphere_admin_restaurants_cache', next);
       return next;
     });
   };
 
   const [orders, setOrdersState] = useState<Order[]>(() => {
-    const cached = localStorage.getItem('foodsphere_admin_orders_cache');
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
-    }
-    return [];
+    const parsed = safeGetJSON<Order[]>('foodsphere_admin_orders_cache', []);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : [];
   });
 
   const setOrders = (action: React.SetStateAction<Order[]>) => {
     setOrdersState((prev) => {
       const next = typeof action === 'function' ? action(prev) : action;
-      try {
-        localStorage.setItem('foodsphere_admin_orders_cache', JSON.stringify(next.slice(0, 100)));
-      } catch {}
+      safeSetJSON('foodsphere_admin_orders_cache', next.slice(0, 100));
       return next;
     });
   };
 
   const [menuItems, setMenuItems] = useState<Record<number, MenuCategory[]>>({});
   const [selectedBrandId, setSelectedBrandId] = useState<number>(() => {
-    const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
+    const savedBrandId = safeGetLocalStorage('foodsphere_admin_brand_id');
     return savedBrandId ? Number(savedBrandId) : 1;
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -373,25 +377,31 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
 
   // Restore session from localStorage on mount & listen to browser Back / Forward buttons
   useEffect(() => {
-    localStorage.removeItem('foodsphere_admin_mock_user');
-    const token = getToken();
-    if (token) {
-      const payload = decodeToken(token);
-      if (!payload || payload.exp * 1000 <= Date.now()) {
-        logout();
-      } else {
-        const isSuperAdmin = isSuperAdminUser(payload.username, payload.is_superuser);
-        const loggedInUser: User = {
-          id: payload.user_id || 0,
-          username: payload.username || 'admin',
-          email: '',
-          role: isSuperAdmin ? 'super_admin' : 'branch_manager',
-          restaurantId: isSuperAdmin ? undefined : payload.restaurant_id,
-          branchId: isSuperAdmin ? undefined : payload.branch_id,
-        };
-        setUser((prev) => isEqualUser(prev, loggedInUser) ? prev : loggedInUser);
-        loadAppData();
+    try {
+      safeRemoveLocalStorage('foodsphere_admin_mock_user');
+      const token = getToken();
+      if (token) {
+        const payload = decodeToken(token);
+        if (!payload || payload.exp * 1000 <= Date.now()) {
+          logout();
+        } else {
+          const isSuperAdmin = isSuperAdminUser(payload.username, payload.is_superuser);
+          const loggedInUser: User = {
+            id: payload.user_id || 0,
+            username: payload.username || 'admin',
+            email: '',
+            role: isSuperAdmin ? 'super_admin' : 'branch_manager',
+            restaurantId: isSuperAdmin ? undefined : payload.restaurant_id,
+            branchId: isSuperAdmin ? undefined : payload.branch_id,
+          };
+          setUser((prev) => isEqualUser(prev, loggedInUser) ? prev : loggedInUser);
+          loadAppData();
+        }
       }
+    } catch (e) {
+      console.warn('[AdminContext] Error in mount session restoration:', e);
+    } finally {
+      setIsHydrated(true);
     }
   }, []);
 
@@ -403,10 +413,10 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
     const handlePopState = (event?: PopStateEvent | HashChangeEvent | Event) => {
       const hashView = window.location.hash.replace('#', '');
       const stateView = (event as PopStateEvent)?.state?.view;
-      const targetView = hashView || stateView || localStorage.getItem('foodsphere_admin_view');
+      const targetView = hashView || stateView || safeGetLocalStorage('foodsphere_admin_view');
       if (targetView && targetView !== activeViewRef.current) {
         setActiveView(targetView);
-        localStorage.setItem('foodsphere_admin_view', targetView);
+        safeSetLocalStorage('foodsphere_admin_view', targetView);
       }
     };
 
@@ -543,7 +553,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
         if (!isSuper) {
           const activeBrandId = resolveUserRestaurantId(user || payload?.username, managerRestId, finalRestaurants);
           setSelectedBrandId((prev) => prev === activeBrandId ? prev : activeBrandId);
-          localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
+          safeSetLocalStorage('foodsphere_admin_brand_id', String(activeBrandId));
 
           // Ensure user.branchId is set when app data finishes loading
           const currentRest = finalRestaurants.find((r) => r.id === activeBrandId);
@@ -555,7 +565,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
             });
           }
         } else {
-          const savedBrandId = localStorage.getItem('foodsphere_admin_brand_id');
+          const savedBrandId = safeGetLocalStorage('foodsphere_admin_brand_id');
           const exists = savedBrandId && finalRestaurants.some((r) => r.id === Number(savedBrandId));
           const targetBrandId = exists ? Number(savedBrandId) : finalRestaurants[0].id;
           setSelectedBrandId((prev) => prev === targetBrandId ? prev : targetBrandId);
@@ -627,7 +637,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
       // 1. Authenticate against Heroku REST API and get JWT tokens
       const response = await loginAdmin(targetUsername, password);
       setTokens(response.access, response.refresh);
-      localStorage.removeItem('foodsphere_admin_mock_user');
+      safeRemoveLocalStorage('foodsphere_admin_mock_user');
 
       // 2. Decode JWT to determine role
       const payload = decodeToken(response.access);
@@ -656,10 +666,10 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
 
       if (finalRestaurants.length > 0) {
         const activeBrandId = isSuperAdmin
-          ? (Number(localStorage.getItem('foodsphere_admin_brand_id')) || finalRestaurants[0].id)
+          ? (Number(safeGetLocalStorage('foodsphere_admin_brand_id')) || finalRestaurants[0].id)
           : (managerRestId || finalRestaurants[0].id);
         setSelectedBrandId(activeBrandId);
-        localStorage.setItem('foodsphere_admin_brand_id', String(activeBrandId));
+        safeSetLocalStorage('foodsphere_admin_brand_id', String(activeBrandId));
       }
 
       const targetRest = finalRestaurants.find((r) => r.id === managerRestId);
@@ -678,7 +688,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
       };
       setUser(loggedInUser);
       const defaultView = isSuperAdmin ? 'super_dashboard' : 'branch_dashboard';
-      localStorage.setItem('foodsphere_admin_view', defaultView);
+      safeSetLocalStorage('foodsphere_admin_view', defaultView);
       setActiveView(defaultView);
       showToast(`Welcome back, ${targetUsername}! 🚀`, 'success');
       return true;
@@ -697,15 +707,13 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
       logoutAdmin(refresh).catch(() => {});
     }
     clearTokens();
-    localStorage.removeItem('foodsphere_admin_view');
-    localStorage.removeItem('foodsphere_admin_brand_id');
-    localStorage.removeItem('foodsphere_admin_mock_user');
-    localStorage.removeItem('foodsphere_admin_orders_cache');
-    localStorage.removeItem('foodsphere_admin_restaurants_cache');
+    safeRemoveLocalStorage('foodsphere_admin_view');
+    safeRemoveLocalStorage('foodsphere_admin_brand_id');
+    safeRemoveLocalStorage('foodsphere_admin_mock_user');
+    safeRemoveLocalStorage('foodsphere_admin_orders_cache');
+    safeRemoveLocalStorage('foodsphere_admin_restaurants_cache');
     knownOrderIdsRef.current = new Set();
-    try {
-      sessionStorage.removeItem('foodsphere_notified_order_ids');
-    } catch (e) {}
+    safeClearSessionStorage();
     isInitialOrderFetchRef.current = true;
     setUser(null);
     setOrders([]);
@@ -716,7 +724,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
 
   const setView = (view: string, updateHistory = true) => {
     setLoading(true);
-    localStorage.setItem('foodsphere_admin_view', view);
+    safeSetLocalStorage('foodsphere_admin_view', view);
     if (updateHistory && window.location.hash !== `#${view}`) {
       window.history.pushState({ view }, '', `#${view}`);
     }
@@ -731,7 +739,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
       return;
     }
     setSelectedBrandId(id);
-    localStorage.setItem('foodsphere_admin_brand_id', String(id));
+    safeSetLocalStorage('foodsphere_admin_brand_id', String(id));
     showToast(`Switched view to ${restaurants.find((r) => r.id === id)?.name}`, 'info');
   };
 
@@ -740,9 +748,9 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
       if (!prev) return null;
       const updated = { ...prev, ...fields };
       // Sync mock user locally if saved
-      const mockUserJson = localStorage.getItem('foodsphere_admin_mock_user');
+      const mockUserJson = safeGetLocalStorage('foodsphere_admin_mock_user');
       if (mockUserJson) {
-        localStorage.setItem('foodsphere_admin_mock_user', JSON.stringify(updated));
+        safeSetJSON('foodsphere_admin_mock_user', updated);
       }
       return updated;
     });
@@ -1296,6 +1304,7 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
         updateRestaurantDetails,
         updateBranchDetails,
         updateUser,
+        isHydrated,
       }}
     >
 

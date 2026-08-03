@@ -18,22 +18,41 @@ import { RiderManagement } from './views/RiderManagement';
 import { Menu, Sun, Moon, Bell, ArrowLeft } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+import { safeGetLocalStorage, safeSetLocalStorage } from './utils/storage';
+
 const MainLayout: React.FC = () => {
-  const { user, activeView, loading, restaurants, selectedBrandId } = useAdmin();
+  const { user, activeView, loading, restaurants, selectedBrandId, isHydrated } = useAdmin();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('admin-theme') === 'dark';
+    return safeGetLocalStorage('admin-theme') === 'dark';
   });
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('admin-theme', 'dark');
+      safeSetLocalStorage('admin-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('admin-theme', 'light');
+      safeSetLocalStorage('admin-theme', 'light');
     }
   }, [darkMode]);
+
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
+        <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center space-y-4 backdrop-blur-md">
+          <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mx-auto text-xl font-black animate-pulse">
+            ⚡
+          </div>
+          <h2 className="text-base font-extrabold tracking-tight text-white">FoodSphere Executive Console</h2>
+          <p className="text-xs text-slate-400">Restoring session context & multi-tenant security layers...</p>
+          <div className="pt-2">
+            <SkeletonLoader type="card" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Login />;

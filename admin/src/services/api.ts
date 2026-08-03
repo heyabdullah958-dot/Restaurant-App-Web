@@ -8,22 +8,24 @@ const BASE_URL = import.meta.env.VITE_API_URL !== undefined && import.meta.env.V
   ? import.meta.env.VITE_API_URL 
   : 'https://getfoodpk-fd9b20442fcf.herokuapp.com';
 
+import { safeGetLocalStorage, safeSetLocalStorage, safeRemoveLocalStorage } from '../utils/storage';
+
 // ─── Token Management ────────────────────────────────────────────────────────
 
 export const getToken = (): string | null =>
-  localStorage.getItem('foodsphere_admin_token');
+  safeGetLocalStorage('foodsphere_admin_token') || null;
 
 export const getRefreshToken = (): string | null =>
-  localStorage.getItem('foodsphere_admin_refresh');
+  safeGetLocalStorage('foodsphere_admin_refresh') || null;
 
 export const setTokens = (access: string, refresh: string): void => {
-  localStorage.setItem('foodsphere_admin_token', access);
-  localStorage.setItem('foodsphere_admin_refresh', refresh);
+  safeSetLocalStorage('foodsphere_admin_token', access);
+  safeSetLocalStorage('foodsphere_admin_refresh', refresh);
 };
 
 export const clearTokens = (): void => {
-  localStorage.removeItem('foodsphere_admin_token');
-  localStorage.removeItem('foodsphere_admin_refresh');
+  safeRemoveLocalStorage('foodsphere_admin_token');
+  safeRemoveLocalStorage('foodsphere_admin_refresh');
 };
 
 // ─── Authenticated Fetch Wrapper ─────────────────────────────────────────────
