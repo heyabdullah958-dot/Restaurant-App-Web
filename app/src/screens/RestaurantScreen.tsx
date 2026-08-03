@@ -113,9 +113,6 @@ const MenuItemCard = React.memo(({
         ) : (
           <View style={styles.itemImagePlaceholder}>
             <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
-            <Text style={{ fontSize: 9, color: COLORS.primary, marginTop: 2, opacity: 0.7 }}>
-              No Image
-            </Text>
           </View>
         )}
 

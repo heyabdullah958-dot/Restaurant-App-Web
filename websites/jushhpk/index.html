@@ -489,24 +489,6 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-  
-    /* Demo Photo Badge Overlay */
-    .demo-photo-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: rgba(234, 88, 12, 0.92);
-      color: #FFFFFF;
-      font-size: 9px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.3);
-    }
 
   
     /* Dynamic Variant Selector Styling */
@@ -1201,7 +1183,6 @@ const menuData = {
 
         card.innerHTML = `
           <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">
-            ${!JUSH_REAL_SET.has(item.name) && !JUSH_REAL_SET.has(initialName) ? '<span class="demo-photo-badge">DEMO PHOTO — Photo Needed</span>' : ''}
             ${imgContent}
           </div>
           <div class="combo-body">
