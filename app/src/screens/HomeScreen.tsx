@@ -282,6 +282,7 @@ const CategoryChip = React.memo(({ item, isSelected, onSelect }: { item: typeof 
 
 // Memoized Restaurant Card Component with Dine-In Badges
 const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand: any, fulfillmentMode: string, onPress: (slug: string) => void }) => {
+  if (!brand || !brand.name || !brand.slug) return null;
   const styleData = PROTOTYPE_STYLES[brand.slug] || PROTOTYPE_STYLES['default'];
   const isOpen = isBrandOpen(brand);
   const isDineInAvailable = brand.is_dine_in_enabled !== false;
@@ -393,6 +394,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
   const [activeGuestOrder, setActiveGuestOrder] = React.useState<any>(null);
+  const [isTabSwitching, setIsTabSwitching] = React.useState(false);
 
   const checkActiveGuestOrder = React.useCallback(async () => {
     try {
@@ -431,14 +433,18 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     } catch (e) {
       try {
         const raw = await AsyncStorage.getItem('@getfood_active_guest_order');
-        if (raw) setActiveGuestOrder(JSON.parse(raw));
+        if (raw) setActiveGuestOrder(raw ? JSON.parse(raw) : null);
       } catch {}
     }
   }, []);
 
   const handleSwitchFulfillmentMode = React.useCallback((mode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN') => {
     if (mode === fulfillmentMode) return;
+    setIsTabSwitching(true);
     dispatch(setFulfillmentMode(mode));
+    setTimeout(() => {
+      setIsTabSwitching(false);
+    }, 200);
   }, [dispatch, fulfillmentMode]);
 
   React.useEffect(() => {
@@ -703,12 +709,14 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
 
   const ListEmpty = React.useMemo(() => {
-    if (loading && filteredRestaurants.length === 0) {
-      return (
-        <View style={{ paddingHorizontal: 0, minHeight: 400 }}>
-          {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
-        </View>
-      );
+    if ((loading || isTabSwitching) || filteredRestaurants.length === 0) {
+      if (loading || isTabSwitching) {
+        return (
+          <View style={{ paddingHorizontal: 0, minHeight: 400 }}>
+            {[1, 2, 3].map(i => <RestaurantCardSkeleton key={i} />)}
+          </View>
+        );
+      }
     }
     return (
       <View style={styles.emptyStateBox}>
@@ -733,7 +741,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         )}
       </View>
     );
-  }, [loading, filteredRestaurants.length, selectedCategory]);
+  }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory]);
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
@@ -827,8 +835,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
       <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
         <FlatList
+          key={`home_restaurant_list_${fulfillmentMode}_${selectedCategory}`}
           data={filteredRestaurants}
-          extraData={[fulfillmentMode, selectedCategory, loading, filteredRestaurants]}
+          extraData={[fulfillmentMode, selectedCategory, loading, isTabSwitching, filteredRestaurants]}
           renderItem={renderRestaurantItem}
           keyExtractor={keyExtractor}
           ListHeaderComponent={ListHeader}

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View, ViewStyle, Dimensions } from 'react-native';
+import { StyleSheet, View, ViewStyle, Dimensions, Animated as RNAnimated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -22,14 +22,14 @@ interface SkeletonProps {
 export const SkeletonBox: React.FC<SkeletonProps> = ({
   width = '100%',
   height = 16,
-  borderRadius = 4,
+  borderRadius = 6,
   style,
 }) => {
   const shimmerX = useSharedValue(-200);
 
   useEffect(() => {
     shimmerX.value = withRepeat(
-      withTiming(200, { duration: 1500, easing: Easing.linear }),
+      withTiming(200, { duration: 1200, easing: Easing.bezier(0.4, 0.0, 0.2, 1) }),
       -1, // Loop infinitely
       false
     );
@@ -48,7 +48,9 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
           width: width as any,
           height,
           borderRadius,
-          backgroundColor: '#E2E8F0', // Distinct slate-gray placeholder
+          backgroundColor: '#CBD5E1', // High-contrast Slate-300 placeholder
+          borderColor: '#E2E8F0',
+          borderWidth: 0.5,
           overflow: 'hidden',
           position: 'relative',
         },
@@ -59,11 +61,11 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
         style={[
           StyleSheet.absoluteFill,
           animatedStyle,
-          { width: '150%' } // Allow wider range for natural sweeping speed
+          { width: '150%' }
         ]}
       >
         <LinearGradient
-          colors={['transparent', 'rgba(255, 255, 255, 0.75)', 'transparent']}
+          colors={['transparent', 'rgba(255, 255, 255, 0.65)', 'transparent']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
@@ -75,17 +77,19 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
 
 export const RestaurantCardSkeleton: React.FC = () => (
   <View style={styles.cardSkeleton}>
-    <SkeletonBox height={120} borderRadius={0} />
+    <View style={styles.skeletonHeader}>
+      <SkeletonBox height={120} borderRadius={0} style={{ backgroundColor: '#94A3B8' }} />
+    </View>
     <View style={styles.cardBody}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <SkeletonBox width="55%" height={18} borderRadius={6} />
-        <SkeletonBox width="25%" height={14} borderRadius={6} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <SkeletonBox width="58%" height={18} borderRadius={6} />
+        <SkeletonBox width="28%" height={14} borderRadius={6} />
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-        <SkeletonBox width="30%" height={14} borderRadius={4} />
-        <SkeletonBox width="35%" height={14} borderRadius={6} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <SkeletonBox width="32%" height={14} borderRadius={4} />
+        <SkeletonBox width="38%" height={14} borderRadius={6} />
       </View>
-      <SkeletonBox width="80%" height={12} borderRadius={4} />
+      <SkeletonBox width="85%" height={12} borderRadius={4} />
     </View>
   </View>
 );
@@ -153,9 +157,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  skeletonHeader: {
+    height: 120,
+    backgroundColor: '#CBD5E1',
+    overflow: 'hidden',
   },
   cardBody: {
     padding: 16,
+    backgroundColor: '#FFFFFF',
   },
 });
+
 
