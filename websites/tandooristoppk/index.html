@@ -1218,78 +1218,86 @@ const menuData = {
         const btnEl = cardBody.querySelector('.order-btn');
         const fullName = `${baseItemName} (${variantName})`;
         
-        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
-        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\'")}', ${price})`);
-      }
-    }
-
-    function renderMenu(category = 'all') {
-      const container = document.getElementById('menu-grid-container');
-      if (!container) return;
-
-      container.innerHTML = '';
-      
-      let items = [];
-      if (category === 'all') {
-        items = [...menuData.tandoori, ...menuData.tawa, ...menuData.bbq, ...menuData.platters];
-      } else {
-        items = menuData[category] || [];
+        const comboBody = selectEl.closest('.card-body');
+        if (comboBody) {
+          const priceEl = comboBody.querySelector('.card-price');
+          const btnEl = comboBody.querySelector('.order-btn');
+          const cardImg = comboBody.parentElement ? comboBody.parentElement.querySelector('.card-img img') : null;
+          const imgUrl = cardImg ? cardImg.getAttribute('src') : '';
+          const fullName = `${baseItemName} (${variantName})`;
+          
+          if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
+          if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
+        }
       }
 
-      // Unique items just in case
-      const seen = new Set();
-      const uniqueItems = items.filter(el => {
-        const duplicate = seen.has(el.name);
-        seen.add(el.name);
-        return !duplicate;
-      });
+      function renderMenu(category = 'all') {
+        const container = document.getElementById('menu-grid-container');
+        if (!container) return;
 
-      uniqueItems.forEach((item, idx) => {
-        const card = document.createElement('div');
-        card.className = 'menu-card';
+        container.innerHTML = '';
         
-        // Dynamic image backgrounds
-        const bgs = ['ci-1', 'ci-2', 'ci-3', 'ci-4'];
-        const bgClass = bgs[idx % bgs.length];
-
-        const imgHtml = item.image 
-          ? `<img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" /><span style="display:none;font-size:50px;">${item.emoji || '🍗'}</span>`
-          : item.emoji || '🍗';
-
-        
-        let variantHtml = '';
-        let initialPrice = item.price;
-        let initialName = item.name;
-
-        if (item.variants && item.variants.length > 0) {
-          initialPrice = item.variants[0].price;
-          initialName = `${item.name} (${item.variants[0].name})`;
-          variantHtml = `
-            <div class="variant-selector-wrap">
-              <label class="variant-label">Select Option / Size:</label>
-              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\'")}')">
-                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
-              </select>
-            </div>`;
+        let items = [];
+        if (category === 'all') {
+          items = [...menuData.tandoori, ...menuData.tawa, ...menuData.bbq, ...menuData.platters];
+        } else {
+          items = menuData[category] || [];
         }
 
-        card.innerHTML = `
-          <div class="card-img ${item.image ? '' : bgClass}" style="position:relative;">
-            ${imgHtml}
-          </div>
-          <div class="card-body">
-            <div class="card-name">${item.name}</div>
-            <div class="card-desc">${item.desc}</div>
-            ${variantHtml}
-            <div class="card-foot">
-              <div class="card-price" id="price-card-${idx}">Rs. ${initialPrice.toLocaleString()}</div>
-              <button class="order-btn" id="btn-card-${idx}" onclick="addToOrderForm('${initialName.replace(/'/g, "\'")}', ${initialPrice})">Order</button>
+        // Unique items just in case
+        const seen = new Set();
+        const uniqueItems = items.filter(el => {
+          const duplicate = seen.has(el.name);
+          seen.add(el.name);
+          return !duplicate;
+        });
+
+        uniqueItems.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'menu-card';
+          
+          // Dynamic image backgrounds
+          const bgs = ['ci-1', 'ci-2', 'ci-3', 'ci-4'];
+          const bgClass = bgs[idx % bgs.length];
+
+          const imgHtml = item.image 
+            ? `<img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" /><span style="display:none;font-size:50px;">${item.emoji || '🍗'}</span>`
+            : item.emoji || '🍗';
+
+          
+          let variantHtml = '';
+          let initialPrice = item.price;
+          let initialName = item.name;
+
+          if (item.variants && item.variants.length > 0) {
+            initialPrice = item.variants[0].price;
+            initialName = `${item.name} (${item.variants[0].name})`;
+            variantHtml = `
+              <div class="variant-selector-wrap">
+                <label class="variant-label">Select Option / Size:</label>
+                <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
+                  ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
+                </select>
+              </div>`;
+          }
+
+          card.innerHTML = `
+            <div class="card-img ${item.image ? '' : bgClass}" style="position:relative;">
+              ${imgHtml}
             </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+            <div class="card-body">
+              <div class="card-name">${item.name}</div>
+              <div class="card-desc">${item.desc}</div>
+              ${variantHtml}
+              <div class="card-foot">
+                <div class="card-price" id="price-card-${idx}">Rs. ${initialPrice.toLocaleString()}</div>
+                <button class="order-btn" id="btn-card-${idx}" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${initialPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">Order</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
 
     function filterMenu(btn, category) {
       document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));

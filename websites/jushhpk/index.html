@@ -1128,10 +1128,12 @@ const menuData = {
       if (comboBody) {
         const priceEl = comboBody.querySelector('.combo-price');
         const btnEl = comboBody.querySelector('.order-btn');
+        const cardImg = comboBody.parentElement ? comboBody.parentElement.querySelector('.combo-img img') : null;
+        const imgUrl = cardImg ? cardImg.getAttribute('src') : '';
         const fullName = `${baseItemName} (${variantName})`;
         
         if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
-        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\'")}', ${price})`);
+        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
       }
     }
 
@@ -1175,8 +1177,8 @@ const menuData = {
           variantHtml = `
             <div class="variant-selector-wrap">
               <label class="variant-label">Select Option / Variant:</label>
-              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\'")}')">
-                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
+              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
+                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
               </select>
             </div>`;
         }
@@ -1191,7 +1193,7 @@ const menuData = {
             ${variantHtml}
             <div class="combo-foot">
               <span class="combo-price">Rs. ${initialPrice.toLocaleString()}</span>
-              <button class="order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\'")}', ${initialPrice})">Order</button>
+              <button class="order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${initialPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">Order</button>
             </div>
           </div>
         `;

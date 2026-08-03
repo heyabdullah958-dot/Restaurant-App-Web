@@ -867,7 +867,13 @@
         row.className = 'menu-row';
         row.style.width = '100%';
         row.style.cursor = 'pointer';
-        row.onclick = () => addToPreorderForm(item.name, item.price);
+        row.onclick = () => {
+          if (typeof addToOrderForm === 'function') {
+            addToOrderForm(item.name, item.price, item.image || '');
+          } else {
+            addToPreorderForm(item.name, item.price);
+          }
+        };
 
         row.innerHTML = `
           <div class="mr-info">

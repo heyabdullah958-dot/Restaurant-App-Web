@@ -230,10 +230,87 @@
     return cartState.items.reduce((count, item) => count + item.qty, 0);
   }
 
+  // Dynamic Product Image Resolver Across Global Menu Data, DOM Cards, and Master Brand Asset Maps
+  function findProductImage(itemName) {
+    if (!itemName) return '';
+    const cleanName = itemName.trim();
+    const baseName = cleanName.replace(/\s*\([^)]*\)/g, '').trim();
+
+    // 1. Check global menuData if available on window
+    if (window.menuData && typeof window.menuData === 'object') {
+      for (const cat in window.menuData) {
+        if (Array.isArray(window.menuData[cat])) {
+          const match = window.menuData[cat].find(i => 
+            i.name && (
+              i.name.toLowerCase() === cleanName.toLowerCase() || 
+              i.name.toLowerCase() === baseName.toLowerCase()
+            )
+          );
+          if (match && match.image) return match.image;
+        }
+      }
+    }
+
+    // 2. Search DOM elements for matching cards/titles
+    try {
+      const cards = document.querySelectorAll('.combo-card, .menu-card, .naan-card, .menu-row, .card-body, .product-card');
+      for (const card of cards) {
+        const text = card.textContent || '';
+        if (text.includes(cleanName) || text.includes(baseName)) {
+          const img = card.querySelector('img');
+          if (img && img.src && !img.src.includes('data:image')) {
+            return img.src;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 3. Master Brand Asset Map
+    const nameLower = baseName.toLowerCase();
+    
+    // JushhPK
+    if (nameLower.includes('beef doner') || nameLower.includes('doner fries')) return './images/beef_doner_fries.jpg';
+    if (nameLower.includes('chicken doner')) return './images/chicken_doner_fries.jpg';
+    if (nameLower.includes('beef burger') || nameLower.includes('double smashed')) return './images/beef_smashed_burger.jpg';
+    if (nameLower.includes('chicken burger') || nameLower.includes('crispy chicken')) return './images/chicken_crispy_burger.jpg';
+    if (nameLower.includes('pouch shawarma') && nameLower.includes('beef')) return './images/beef_pouch_shawarma.jpg';
+    if (nameLower.includes('pouch shawarma')) return './images/chicken_pouch_shawarma.jpg';
+    if (nameLower.includes('shawarma platter')) return './images/chicken_shawarma_platter.jpg';
+    if (nameLower.includes('shawarma') && nameLower.includes('beef')) return './images/beef_turkish_wrap.jpg';
+    if (nameLower.includes('shawarma')) return './images/chicken_turkish_wrap.jpg';
+    if (nameLower.includes('cheese add-on') || nameLower.includes('extra cheese')) return './images/cheese_addon.jpg';
+    if (nameLower.includes('garlic dip') || nameLower.includes('dip add-on')) return './images/garlic_dip.jpg';
+    if (nameLower.includes('tortilla') || nameLower.includes('pita')) return './images/pita_bread.jpg';
+    if (nameLower.includes('water')) return './images/water_bottle.jpg';
+    if (nameLower.includes('soft drink')) return './images/soft_drink.jpg';
+    if (nameLower.includes('blueberry mojito')) return './images/blueberry_mojito.jpg';
+    if (nameLower.includes('strawberry mojito')) return './images/strawberry_mojito.jpg';
+    if (nameLower.includes('green apple mojito') || nameLower.includes('apple mojito')) return './images/green_apple_mojito.jpg';
+    if (nameLower.includes('peach mojito')) return './images/peach_mojito.jpg';
+    if (nameLower.includes('lemon mojito') || nameLower.includes('mint margarita')) return './images/lemon_mojito.jpg';
+    if (nameLower.includes('lotus can') || nameLower.includes('lotus dessert')) return './images/lotus_can_dessert.jpg';
+    if (nameLower.includes('red velvet')) return './images/red_velvet_can_dessert.jpg';
+    if (nameLower.includes('nutella can') || nameLower.includes('nutella dessert')) return './images/nutella_can_dessert.jpg';
+
+    // TandooriStop
+    if (nameLower.includes('malai boti') && nameLower.includes('roll')) return './images/IMG_7592.JPG.jpeg';
+    if (nameLower.includes('malai boti')) return './images/IMG_7584.JPG.jpeg';
+    if (nameLower.includes('tikka boti')) return './images/IMG_7583.JPG.jpeg';
+    if (nameLower.includes('kabab') || nameLower.includes('kebab')) return './images/IMG_7578.JPG.jpeg';
+    if (nameLower.includes('tandoori roll') || nameLower.includes('paratha roll') || nameLower.includes('stop roll')) return './images/IMG_7591.JPG.jpeg';
+    if (nameLower.includes('roghni naan') || nameLower.includes('butter naan') || nameLower.includes('plain naan')) return './images/IMG_7582.JPG.jpeg';
+    if (nameLower.includes('cheese naan')) return './images/IMG_7581.JPG.jpeg';
+    if (nameLower.includes('puri paratha')) return './images/IMG_7580.JPG.jpeg';
+    if (nameLower.includes('rice') || nameLower.includes('add-on rice')) return './images/IMG_7579.JPG.jpeg';
+
+    return '';
+  }
+
   // Add Item to Cart
   function addItem(item) {
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
+    const itemImg = item.image || findProductImage(nameKey);
     
     const existingIndex = cartState.items.findIndex(
       i => i.name === nameKey && i.variant === (item.variant || '')
@@ -241,13 +318,16 @@
 
     if (existingIndex > -1) {
       cartState.items[existingIndex].qty += qtyToAdd;
+      if (!cartState.items[existingIndex].image && itemImg) {
+        cartState.items[existingIndex].image = itemImg;
+      }
     } else {
       cartState.items.push({
         name: nameKey,
         price: parseFloat(item.price) || 0,
         qty: qtyToAdd,
         variant: item.variant || '',
-        image: item.image || ''
+        image: itemImg
       });
     }
 
@@ -411,10 +491,27 @@
       }
 
       let itemsHtml = cartState.items.map((item, idx) => {
-        const itemImg = item.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=200&q=80';
+        const itemImg = item.image || findProductImage(item.name);
+
+        let imgHtml = '';
+        if (itemImg) {
+          imgHtml = `<img src="${itemImg}" alt="${item.name}" class="cd-item-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'cd-item-img-placeholder\\'>🛍️</div>';" />`;
+        } else {
+          let emoji = '🍽️';
+          const nameL = item.name.toLowerCase();
+          if (nameL.includes('naan') || nameL.includes('roti') || nameL.includes('bread') || nameL.includes('paratha')) emoji = '🫓';
+          else if (nameL.includes('fries') || nameL.includes('doner')) emoji = '🍟';
+          else if (nameL.includes('rice')) emoji = '🍚';
+          else if (nameL.includes('drink') || nameL.includes('water') || nameL.includes('mojito') || nameL.includes('coffee') || nameL.includes('lime')) emoji = '🥤';
+          else if (nameL.includes('sweet') || nameL.includes('cake') || nameL.includes('dessert') || nameL.includes('eclair') || nameL.includes('sundae')) emoji = '🍰';
+          else if (nameL.includes('sauce') || nameL.includes('dip') || nameL.includes('cheese') || nameL.includes('syrup')) emoji = '🏺';
+
+          imgHtml = `<div class="cd-item-img-placeholder">${emoji}</div>`;
+        }
+
         return `
           <div class="cd-item-card">
-            <img src="${itemImg}" alt="${item.name}" class="cd-item-img" onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=200&q=80'" />
+            ${imgHtml}
             <div class="cd-item-info">
               <div class="cd-item-name">${item.name}</div>
               <div class="cd-item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
@@ -695,11 +792,13 @@
 
   // Intercept & Upgrade existing `addToOrderForm` calls across brand HTML files
   function monkeyPatchOrderForm() {
-    window.addToOrderForm = function (itemName, price) {
+    window.addToOrderForm = function (itemName, price, image) {
+      const resolvedImage = image || findProductImage(itemName);
       addItem({
         name: itemName,
         price: price,
-        qty: 1
+        qty: 1,
+        image: resolvedImage
       });
     };
   }
