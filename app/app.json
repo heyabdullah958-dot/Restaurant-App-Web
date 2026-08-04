@@ -1,8 +1,7 @@
 {
   "expo": {
     "name": "GetFood",
-    "displayName": "GetFood",
-    "slug": "app",
+    "slug": "yooo",
     "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -36,10 +35,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "a9aa889c-4c98-49ee-bc19-0e6f517fd342"
+        "projectId": "61e77707-45e4-4c06-895b-8a7cfc3462aa"
       }
     },
-    "owner": "ak47letsgoo",
+    "owner": "helllloos-team",
     "plugins": [
       [
         "expo-build-properties",
