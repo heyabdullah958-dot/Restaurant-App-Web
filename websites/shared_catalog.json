@@ -446,7 +446,7 @@
   "jushhpk": {
     "slug": "jushhpk",
     "category_count": 6,
-    "item_count": 33,
+    "item_count": 35,
     "categories": [
       {
         "id": 11,
@@ -569,6 +569,26 @@
             "is_available": true,
             "spicy_level": 0,
             "calories": null
+          },
+          {
+            "id": 201,
+            "name": "Dubai Shawaya",
+            "description": "Rotisserie flame-roasted Dubai style chicken shawaya served with garlic dip & rice.",
+            "price": 1400.0,
+            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 202,
+            "name": "Turkish Doner",
+            "description": "Authentic Turkish doner kebab served with salad & signature sauce.",
+            "price": 850.0,
+            "image": "https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&h=400&q=80",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
           }
         ]
       },
@@ -659,7 +679,7 @@
             "name": "Lotus Can Dessert",
             "description": "Creamy Lotus Biscoff dessert served in a signature can",
             "price": 600.0,
-            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1273_lotus_can_dessert_wt0erf",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -669,7 +689,7 @@
             "name": "Red Velvet Can Dessert",
             "description": "Rich red velvet cake layered in a signature can",
             "price": 600.0,
-            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1274_red_velvet_can_dessert_vdxtci",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -679,7 +699,7 @@
             "name": "Nutella Can Dessert",
             "description": "Decadent Nutella chocolate dessert in a signature can",
             "price": 600.0,
-            "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1275_nutella_can_dessert_kjmyie",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -696,7 +716,7 @@
             "name": "Cheese",
             "description": "Extra melted cheese portion",
             "price": 90.0,
-            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1276_cheese_addon_s0v0a3",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -716,7 +736,7 @@
             "name": "Tortilla Bread",
             "description": "Extra soft tortilla flatbread",
             "price": 90.0,
-            "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -825,7 +845,7 @@
   "tandooristoppk": {
     "slug": "tandooristoppk",
     "category_count": 12,
-    "item_count": 59,
+    "item_count": 61,
     "categories": [
       {
         "id": 17,
@@ -919,6 +939,26 @@
         "name": "CHICKEN SAJJI",
         "order": 2,
         "items": [
+          {
+            "id": 199,
+            "name": "Traditional Chicken Sajji",
+            "description": "Slow-roasted traditional chicken sajji seasoned with secret tandoori spices.",
+            "price": 799.0,
+            "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&h=400&q=80",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 200,
+            "name": "Peri Peri Chicken Sajji",
+            "description": "Flame-grilled spicy peri peri chicken sajji.",
+            "price": 900.0,
+            "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&h=400&q=80",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
           {
             "id": 78,
             "name": "Quarter Sajji",
@@ -1299,16 +1339,6 @@
             "calories": null
           },
           {
-            "id": 111,
-            "name": "Cheese Naan",
-            "description": "Naan stuffed with melted cheese",
-            "price": 500.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1329_IMG_7581.JPG_p8inf5",
-            "is_available": true,
-            "spicy_level": 0,
-            "calories": null
-          },
-          {
             "id": 109,
             "name": "Roghni Naan",
             "description": "Fluffy sesame roghni naan",
@@ -1334,6 +1364,16 @@
             "description": "Hot whole wheat roti",
             "price": 30.0,
             "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1331_IMG_7582.JPG_f1ie9j",
+            "is_available": true,
+            "spicy_level": 0,
+            "calories": null
+          },
+          {
+            "id": 111,
+            "name": "Cheese Naan",
+            "description": "Naan stuffed with melted cheese",
+            "price": 500.0,
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1329_IMG_7581.JPG_p8inf5",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
