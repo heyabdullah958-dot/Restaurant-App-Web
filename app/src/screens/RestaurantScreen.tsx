@@ -125,44 +125,46 @@ const MenuItemCard = React.memo(({
             )}
 
             <View style={styles.quantitySelectorContainer}>
-          {isClosed ? (
-            <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-              <Text style={[styles.addButtonText, { fontSize: 11 }]}>CLOSED</Text>
+              {isClosed ? (
+                <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+                  <Text style={[styles.addButtonText, { fontSize: 11 }]}>CLOSED</Text>
+                </View>
+              ) : isOutOfStock ? (
+                <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+                  <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
+                </View>
+              ) : quantity > 0 && !item.options?.has_variants ? (
+                <View style={styles.quantityRow}>
+                  <TouchableOpacity activeOpacity={0.75}
+                    style={styles.quantityBtn}
+                    onPress={() => onDecrement(item, quantity)}
+                  >
+                    <Ionicons name="remove" size={16} color={COLORS.white} />
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>{quantity}</Text>
+                  <TouchableOpacity activeOpacity={0.75}
+                    style={styles.quantityBtn}
+                    onPress={() => onIncrement(item, quantity)}
+                  >
+                    <Ionicons name="add" size={16} color={COLORS.white} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.addButton}
+                  activeOpacity={0.8}
+                  onPress={() => onAddToCart(item)}
+                >
+                  <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
+                  <Text style={styles.addButtonText}>
+                    {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-          ) : isOutOfStock ? (
-            <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-              <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
-            </View>
-          ) : quantity > 0 && !item.options?.has_variants ? (
-            <View style={styles.quantityRow}>
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.quantityBtn}
-                onPress={() => onDecrement(item, quantity)}
-              >
-                <Ionicons name="remove" size={16} color={COLORS.white} />
-              </TouchableOpacity>
-              <Text style={styles.quantityText}>{quantity}</Text>
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.quantityBtn}
-                onPress={() => onIncrement(item, quantity)}
-              >
-                <Ionicons name="add" size={16} color={COLORS.white} />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.addButton}
-              activeOpacity={0.8}
-              onPress={() => onAddToCart(item)}
-            >
-              <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
-              <Text style={styles.addButtonText}>
-                {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+          </View>
+        );
+      })()}
     </View>
   );
 });
