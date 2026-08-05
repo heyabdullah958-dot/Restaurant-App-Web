@@ -136,3 +136,10 @@
 - **Universal Brand Integration**: Deployed cart drawer assets across active brand websites (`jushhpk`, `tandooristoppk`, `getafomo`) and monkey-patched menu card `addToOrderForm` actions.
 - **Automated API Verification**: Verified order payload submission directly against backend Django REST API (`POST /api/orders/`) with clean `201 Created` status return.
 
+## [Universal Image Audit & Dynamic Asset Binding Engine] - 2026-08-05
+- **Media Asset Resolution Layer**: Created `mediaAssetService.ts` containing `BRAND_ORIGINAL_ASSETS` dictionary and `resolveItemImage(item)` helper to dynamically bind verified Cloudinary food photography assets across JushhPK, TandooriStop, and GET A FOMO.
+- **Generic Vector Icon Removal**: Refactored `RestaurantScreen.tsx` and `SearchScreen.tsx` to remove generic vector icons (`fast-food-outline` burger/drink icons) and generic stock photos (`unsplash.com`). Rendered clean transparent containers (`itemImageBlank`) when photos are missing, maintaining card alignment and `+ ADD` button positioning.
+- **Cloudinary Asset Seeding**: Uploaded local dessert and addon food photography assets (`lotus_can_dessert.jpg`, `red_velvet_can_dessert.jpg`, `nutella_can_dessert.jpg`, `cheese_addon.jpg`) to Cloudinary and bound their live URLs into JushhPK menu items.
+- **Automated 3-Brand Terminal Audit Script**: Built and executed `audit_mobile_assets.py` to audit and print terminal reports categorized by brand, confirming 31 applied original photos for JushhPK, 32 for TandooriStop, and clean blank slots for missing items with zero generic icons.
+
+
