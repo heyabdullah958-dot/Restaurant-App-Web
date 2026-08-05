@@ -158,7 +158,10 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           style: 'destructive',
           onPress: async () => {
             await dispatch(logoutUser());
-            navigation.replace('Auth');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Auth' }],
+            });
           },
         },
       ]

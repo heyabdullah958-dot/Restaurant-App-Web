@@ -93,6 +93,12 @@ export default function RewardsScreen({ navigation }: { navigation: any }) {
 
   // Fetch Loyalty Data from Backend
   const fetchLoyaltyData = async (isRefreshing = false) => {
+    if (!user || user.is_guest) {
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
     if (isRefreshing) {
       setRefreshing(true);
     } else {

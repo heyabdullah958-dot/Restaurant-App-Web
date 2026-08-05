@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { loginUser, registerUser, guestLogin, clearError, updateUserProfile } from '../store/userSlice';
+import { fetchMyOrders } from '../store/orderSlice';
 import { StatusBar } from 'expo-status-bar';
 import api from '../services/api';
 
@@ -38,7 +39,7 @@ const getPasswordStrength = (pass: string): { level: number; label: string; colo
 
 export default function AuthScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { loading, error, isAuthenticated, user } = useSelector((state: RootState) => state.user);
 
   const [activeTab, setActiveTab] = useState<TabType>('login');
 
@@ -174,11 +175,17 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   };
 
   useEffect(() => {
-    // If authenticated, go to Main App Flow
+    // If authenticated, perform atomic navigation reset to Main App Flow
     if (isAuthenticated) {
-      navigation.replace('Main');
+      if (user && !user.is_guest) {
+        dispatch(fetchMyOrders());
+      }
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
     }
-  }, [isAuthenticated, navigation]);
+  }, [isAuthenticated, user, navigation, dispatch]);
 
   useEffect(() => {
     // Clear any stale Redux errors from background operations (loadSavedToken)

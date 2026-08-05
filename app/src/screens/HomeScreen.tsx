@@ -380,7 +380,7 @@ const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand:
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
-  const user = useSelector((state: RootState) => state.user.user);
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
   const restaurants = useSelector((state: RootState) => state.restaurant.restaurants);
   const loading = useSelector((state: RootState) => state.restaurant.loading);
   const fulfillmentMode = useSelector((state: RootState) => state.cart.fulfillmentMode || 'DELIVERY');
@@ -454,6 +454,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, []);
 
   const checkUnratedDeliveredOrders = React.useCallback(async () => {
+    if (!isAuthenticated || !user || user.is_guest) return;
     try {
       const res = await api.get('/orders/');
       const results = Array.isArray(res.data) ? res.data : (res.data?.results || []);

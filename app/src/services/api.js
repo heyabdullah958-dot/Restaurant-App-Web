@@ -29,9 +29,13 @@ export const isPublicUrl = (url) => {
     '/users/register',
     '/users/guest',
     '/token',
-    '/search/',
+    '/search',
     '/popular-tags',
-    '/platform-settings'
+    '/platform-settings',
+    '/restaurants',
+    '/branches',
+    '/categories',
+    '/menu',
   ];
   return publicPatterns.some(pattern => url.toLowerCase().includes(pattern));
 };
@@ -41,17 +45,25 @@ api.interceptors.request.use(
   async (config) => {
     // Do not attach token for public auth/search endpoints to avoid 401/403 on login/refresh with expired tokens
     if (isPublicUrl(config.url)) {
-      delete api.defaults.headers.common['Authorization'];
+      // NOTE: Only delete from request-specific config.headers! NEVER mutate api.defaults.headers.common globally!
       delete config.headers['Authorization'];
       delete config.headers['authorization'];
-    } else if (!config.headers['Authorization']) {
-      try {
-        const token = await AsyncStorage.getItem('auth_token');
-        if (token) {
-          config.headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      // Check if global default header exists first for fast synchronous resolution
+      const defaultAuth = api.defaults.headers.common['Authorization'];
+      if (defaultAuth && typeof defaultAuth === 'string') {
+        config.headers['Authorization'] = defaultAuth;
+      } else if (!config.headers['Authorization']) {
+        try {
+          const token = await AsyncStorage.getItem('auth_token');
+          if (token) {
+            const bearer = `Bearer ${token}`;
+            config.headers['Authorization'] = bearer;
+            api.defaults.headers.common['Authorization'] = bearer;
+          }
+        } catch (err) {
+          if (__DEV__) console.error('Error fetching token from AsyncStorage:', err);
         }
-      } catch (err) {
-        if (__DEV__) console.error('Error fetching token from AsyncStorage:', err);
       }
     }
     return config;
