@@ -861,19 +861,19 @@
     <div class="order-wrap">
       <div class="order-card">
         <h2 style="font-size:26px;font-weight:900;margin-bottom:6px">🥪 Order Now</h2>
-        <p style="font-size:14px;color:var(--muted);margin-bottom:32px;font-weight:300">Form fill karo — COD delivery, no card needed!</p>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:32px;font-weight:300">Fill out the form — Cash on Delivery available, no card needed!</p>
         <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
           <div style="font-size:48px; margin-bottom:16px;">✅</div>
           <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Order Received!</h3>
           <p style="color:var(--muted); font-size:14px; line-height:1.6;">
-            Shukriya! Aapka order humein mil gaya hai.<br/>
-            Hum jald hi confirm karenge — phone ready rakhein!
+            Thank you! Your order has been received.<br/>
+            We will confirm shortly — please keep your phone ready!
           </p>
           <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #ff6b00, #ff8c00); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(255,107,0,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
         </div>
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/sandmelts" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="f-row">
-            <div><label class="f-label">Naam</label><input type="text" name="name" class="f-input" placeholder="Aapka naam" required/></div>
+            <div><label class="f-label">Full Name</label><input type="text" name="name" class="f-input" placeholder="Your full name" required/></div>
             <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
           </div>
           <div class="f-full">
@@ -884,8 +884,8 @@
             <label class="f-label">Apna Order</label>
             <textarea name="order" class="f-textarea" placeholder="e.g. 1x Classic Cheese Steak, 1x Oreo Shake..." required></textarea>
           </div>
-          <div class="cod-note">💵 <span>Payment: <strong>Cash on Delivery</strong> — Delivery par pay karo</span></div>
-          <button type="submit" class="submit">🥪 Order Place Karo</button>
+          <div class="cod-note">💵 <span>Payment: <strong>Cash on Delivery</strong> — Pay upon delivery</span></div>
+          <button type="submit" class="submit">🥪 Place Order</button>
         </form>
       </div>
     </div>
@@ -1035,7 +1035,7 @@
       }
 
       // Dual Action: Open WhatsApp Order Confirmation
-      const message = `Assalam o Alaikum! I want to place an order from SandMelts Website 🛵\n\n` +
+      const message = `Hello! I want to place an order from SandMelts Website 🛵\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
                       `• *Phone:* ${phone}\n` +

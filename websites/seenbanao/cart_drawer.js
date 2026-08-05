@@ -664,11 +664,11 @@
       const statusLabel = rawStatus.toUpperCase().replace('_', ' ');
       const whatsappPhone = WHATSAPP_NUMBERS[brandSlug] || '923000000000';
 
-      const whatsappMessage = `Assalam o Alaikum! I am checking on my order 🛵\n\n` +
+      const whatsappMessage = `Hello! I am checking on my order 🛵\n\n` +
         `*Order ID:* ${displayId}\n` +
         `*Customer Name:* ${cartState.customerName || activeStored?.customerName || 'Customer'}\n` +
         `*Status:* ${statusLabel}\n\n` +
-        `Please confirm latest status. Shukriya!`;
+        `Please confirm latest status. Thank you!`;
 
       const waUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 

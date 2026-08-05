@@ -917,7 +917,7 @@
   <!-- BRANCHES -->
   <section class="section section-dk" id="branches">
     <div class="eyebrow">📍 Find Us</div>
-    <h2 class="sec-title">Hamare <span style="color:var(--fire2)">3 Branches</span></h2>
+    <h2 class="sec-title">Our <span style="color:var(--fire2)">3 Outlets</span></h2>
     <p class="sec-desc">Lahore ke top locations par — Johar Town, Lake City & Baghbanpura!</p>
     <div class="branches-grid">
       <div class="branch-card">
@@ -945,25 +945,25 @@
   <section class="section section-dk2" id="order">
     <div class="order-wrap">
       <div class="order-box">
-        <h2 class="form-title">🔥 Order Karo</h2>
-        <p class="form-sub">Form fill karo — 5 minute mein confirmation aayegi.</p>
+        <h2 class="form-title">🔥 Place Order</h2>
+        <p class="form-sub">Fill out the form — confirmation will be sent within 5 minutes.</p>
         <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
           <div style="font-size:48px; margin-bottom:16px;">✅</div>
           <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Order Received!</h3>
           <p style="color:var(--muted); font-size:14px; line-height:1.6;">
-            Shukriya! Aapka order humein mil gaya hai.<br/>
-            Hum jald hi confirm karenge — phone ready rakhein!
+            Thank you! Your order has been received.<br/>
+            We will confirm shortly — please keep your phone ready!
           </p>
           <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #AD1F23, #EC4F24); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(173,31,35,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
         </div>
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/tandooristoppk" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="f-row">
-            <div><label class="f-label">Naam</label><input type="text" name="name" class="f-input" placeholder="Aapka naam" required/></div>
+            <div><label class="f-label">Full Name</label><input type="text" name="name" class="f-input" placeholder="Your full name" required/></div>
             <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
           </div>
           <div class="f-row">
             <div>
-              <label class="f-label">Branch Choose Karo</label>
+              <label class="f-label">Select Branch</label>
               <select name="branch" class="f-input f-select">
                 <option>PIA Road, Johar Town</option>
                 <option>Lake City</option>
@@ -985,8 +985,8 @@
             <label class="f-label">Apna Order</label>
             <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Tandoori Chicken, 2x Seekh Kabab, 4x Naan..." required></textarea>
           </div>
-          <div class="cod-row">🪙 <span>Payment: <strong>Cash on Delivery (COD)</strong> — Delivery par pay karo</span></div>
-          <button type="submit" class="submit">🔥 Order Place Karo</button>
+          <div class="cod-row">🪙 <span>Payment: <strong>Cash on Delivery (COD)</strong> — Pay upon delivery</span></div>
+          <button type="submit" class="submit">🔥 Place Order</button>
         </form>
       </div>
     </div>
@@ -1455,7 +1455,7 @@ const menuData = {
       }
 
       // Dual Action: Open WhatsApp Order Confirmation
-      const message = `Assalam o Alaikum! I want to place an order from Tandoori Stop Website 🛵\n\n` +
+      const message = `Hello! I want to place an order from Tandoori Stop Website 🛵\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
                       `• *Phone:* ${phone}\n` +

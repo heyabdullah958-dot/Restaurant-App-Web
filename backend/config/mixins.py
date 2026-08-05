@@ -34,9 +34,9 @@ class AuditLogMixin:
         super().save_model(request, obj, form, change)
 
     def delete_model(self, request, obj):
-        """Log delete PEHLE karo, phir actual delete."""
+        """Log deletion before performing actual delete operation."""
         obj_pk = obj.pk
-        obj_repr = str(obj)  # Delete se pehle capture karein
+        obj_repr = str(obj)  # Capture object representation before deletion
         
         AdminAuditLog.objects.create(
             user=request.user,

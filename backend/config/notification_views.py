@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_firebase_app():
-    """Firebase Admin SDK initialize karein."""
+    """Initialize Firebase Admin SDK."""
     try:
         import firebase_admin
         from firebase_admin import credentials
@@ -24,7 +24,7 @@ def get_firebase_app():
         if not service_account_json:
             return None
         
-        # Agar already initialized hai toh wahi return karein
+        # If already initialized, return existing app instance
         try:
             return firebase_admin.get_app()
         except ValueError:

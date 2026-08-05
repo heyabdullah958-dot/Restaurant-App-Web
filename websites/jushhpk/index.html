@@ -811,7 +811,7 @@
   <!-- TIMINGS & BRANCHES -->
   <section class="section sek" id="timings">
     <div class="eyebrow">⏰ Hours & Branches</div>
-    <h2 class="sec-h" style="margin-bottom:40px">Hum Kab <span class="highlight">Open</span> Hain</h2>
+    <h2 class="sec-h" style="margin-bottom:40px">Opening <span class="highlight">Hours</span></h2>
     <div class="timings-grid">
       <div class="timing-card">
         <h4>🕐 Opening Hours</h4>
@@ -837,25 +837,25 @@
   <section class="section sek2" id="order">
     <div class="order-wrap">
       <div class="order-box">
-        <h2 style="font-size:26px;font-weight:900;margin-bottom:6px">🥙 Order Karo</h2>
-        <p style="font-size:14px;color:var(--muted);margin-bottom:32px">Form fill karo — WhatsApp pe 5 min mein confirm!</p>
+        <h2 style="font-size:26px;font-weight:900;margin-bottom:6px">🥙 Place Your Order</h2>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:32px">Fill out the form — we will confirm via WhatsApp within 5 minutes!</p>
         <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
           <div style="font-size:48px; margin-bottom:16px;">✅</div>
           <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Order Received!</h3>
           <p style="color:var(--muted); font-size:14px; line-height:1.6;">
-            Shukriya! Aapka order humein mil gaya hai.<br/>
-            Hum jald hi confirm karenge — phone ready rakhein!
+            Thank you! Your order has been received.<br/>
+            We will confirm shortly — please keep your phone ready!
           </p>
           <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #c8102e, #e11d48); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(200,16,46,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
         </div>
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/jushhpk" method="POST" onsubmit="handleFormSubmit(event)">
           <div class="f-row">
-            <div><label class="f-label">Naam</label><input type="text" name="name" class="f-input" placeholder="Aapka naam" required/></div>
+            <div><label class="f-label">Full Name</label><input type="text" name="name" class="f-input" placeholder="Your full name" required/></div>
             <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
           </div>
           <div class="f-row">
             <div>
-              <label class="f-label">Branch Choose Karo</label>
+              <label class="f-label">Select Branch</label>
               <select name="branch" class="f-input f-select">
                 <option>Johar Town, R2</option>
                 <option>Lake City Business Bay</option>
@@ -878,7 +878,7 @@
             <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Chicken Doner Fries, 2x Chicken Turkish Wrap..." required></textarea>
           </div>
           <div class="cod-note">💵 <span>Payment: <strong>Cash on Delivery (COD)</strong></span></div>
-          <button type="submit" class="submit">Shhh... Order Place Karo 🥙</button>
+          <button type="submit" class="submit">Place Your Order 🥙</button>
         </form>
       </div>
     </div>
@@ -1362,7 +1362,7 @@ window.menuData = menuData;
       }
 
       // Dual Action: Open WhatsApp Order Confirmation
-      const message = `Assalam o Alaikum! I want to place an order from Jushh Website 🛵\n\n` +
+      const message = `Hello! I want to place an order from Jushh Website 🛵\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
                       `• *Phone:* ${phone}\n` +
