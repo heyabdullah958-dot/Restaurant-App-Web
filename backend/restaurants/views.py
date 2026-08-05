@@ -308,11 +308,12 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
         user = self.request.user
         
         # Auto-heal riders stuck on ON_DELIVERY who have 0 active out_for_delivery orders
-        stuck_riders = BranchRider.objects.filter(status='ON_DELIVERY').exclude(
-            orders__status='out_for_delivery'
-        )
-        if stuck_riders.exists():
-            stuck_riders.update(status='AVAILABLE')
+        try:
+            from orders.models import Order
+            active_rider_ids = list(Order.objects.filter(status='out_for_delivery', rider__isnull=False).values_list('rider_id', flat=True))
+            BranchRider.objects.filter(status='ON_DELIVERY').exclude(id__in=active_rider_ids).update(status='AVAILABLE')
+        except Exception:
+            pass
 
         base_qs = BranchRider.objects.all().select_related('branch', 'branch__restaurant')
         
@@ -325,14 +326,17 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
         if not user.is_superuser:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             managed_branch = get_managed_branch(user)
-            if managed_branch:
+            managed_restaurant = get_managed_restaurant(user)
+            if allow_global_param in ['true', '1']:
+                pass
+            elif managed_branch and not branch_id:
+                base_qs = base_qs.filter(branch=managed_branch)
+            elif managed_restaurant:
+                base_qs = base_qs.filter(branch__restaurant=managed_restaurant)
+            elif managed_branch:
                 base_qs = base_qs.filter(branch=managed_branch)
             else:
-                managed_restaurant = get_managed_restaurant(user)
-                if managed_restaurant:
-                    base_qs = base_qs.filter(branch__restaurant=managed_restaurant)
-                elif allow_global_param not in ['true', '1']:
-                    return BranchRider.objects.none()
+                return BranchRider.objects.none()
 
         # Execute 3-Tier Fallback Strategy whenever branch_id or restaurant_id is specified
         if branch_id or restaurant_id:
