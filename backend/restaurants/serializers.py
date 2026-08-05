@@ -151,43 +151,49 @@ class BranchRiderSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_cross_branch(self, obj):
-        request = self.context.get('request')
-        if not request:
-            return getattr(obj, '_is_cross_branch', False)
-        target_branch = request.query_params.get('branch_id')
-        if not target_branch:
-            return getattr(obj, '_is_cross_branch', False)
-        
-        target_str = str(target_branch).lower().strip()
-        b_id = str(obj.branch_id)
-        b_slug = str(obj.branch.slug).lower() if obj.branch and obj.branch.slug else ''
-        b_name = str(obj.branch.name).lower() if obj.branch and obj.branch.name else ''
-        
-        is_match = (target_str == b_id or target_str == b_slug or target_str == b_name)
-        return not is_match
+        try:
+            request = self.context.get('request')
+            if not request:
+                return getattr(obj, '_is_cross_branch', False)
+            target_branch = request.query_params.get('branch_id')
+            if not target_branch:
+                return getattr(obj, '_is_cross_branch', False)
+            
+            target_str = str(target_branch).lower().strip()
+            b_id = str(obj.branch_id) if obj.branch_id is not None else ''
+            b_slug = str(obj.branch.slug).lower() if (obj.branch and getattr(obj.branch, 'slug', None)) else ''
+            b_name = str(obj.branch.name).lower() if (obj.branch and getattr(obj.branch, 'name', None)) else ''
+            
+            is_match = (target_str == b_id or target_str == b_slug or target_str == b_name)
+            return not is_match
+        except Exception:
+            return False
 
     def get_is_cross_brand(self, obj):
-        request = self.context.get('request')
-        if not request:
-            return getattr(obj, '_is_cross_brand', False)
-        target_rest = request.query_params.get('restaurant_id')
-        if not target_rest and request.query_params.get('branch_id'):
-            target_branch = request.query_params.get('branch_id')
-            if str(target_branch).isdigit():
-                from restaurants.models import Branch
-                b = Branch.objects.filter(id=int(target_branch)).first()
-                if b:
-                    target_rest = b.restaurant_id
-        if not target_rest:
-            return getattr(obj, '_is_cross_brand', False)
+        try:
+            request = self.context.get('request')
+            if not request:
+                return getattr(obj, '_is_cross_brand', False)
+            target_rest = request.query_params.get('restaurant_id')
+            if not target_rest and request.query_params.get('branch_id'):
+                target_branch = request.query_params.get('branch_id')
+                if str(target_branch).isdigit():
+                    from restaurants.models import Branch
+                    b = Branch.objects.filter(id=int(target_branch)).first()
+                    if b:
+                        target_rest = b.restaurant_id
+            if not target_rest:
+                return getattr(obj, '_is_cross_brand', False)
 
-        target_str = str(target_rest).lower().strip()
-        r_id = str(obj.branch.restaurant_id) if obj.branch else ''
-        r_slug = str(obj.branch.restaurant.slug).lower() if (obj.branch and obj.branch.restaurant and obj.branch.restaurant.slug) else ''
-        r_name = str(obj.branch.restaurant.name).lower() if (obj.branch and obj.branch.restaurant and obj.branch.restaurant.name) else ''
+            target_str = str(target_rest).lower().strip()
+            r_id = str(obj.branch.restaurant_id) if (obj.branch and getattr(obj.branch, 'restaurant_id', None)) else ''
+            r_slug = str(obj.branch.restaurant.slug).lower() if (obj.branch and getattr(obj.branch, 'restaurant', None) and getattr(obj.branch.restaurant, 'slug', None)) else ''
+            r_name = str(obj.branch.restaurant.name).lower() if (obj.branch and getattr(obj.branch, 'restaurant', None) and getattr(obj.branch.restaurant, 'name', None)) else ''
 
-        is_match = (target_str == r_id or target_str == r_slug or target_str == r_name)
-        return not is_match
+            is_match = (target_str == r_id or target_str == r_slug or target_str == r_name)
+            return not is_match
+        except Exception:
+            return False
 
     def validate_phone(self, value):
         cleaned = value.strip()
