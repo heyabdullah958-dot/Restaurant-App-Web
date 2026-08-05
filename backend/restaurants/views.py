@@ -347,9 +347,9 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
             t1_qs = base_qs
             if branch_id:
                 if str(branch_id).isdigit():
-                    t1_qs = t1_qs.filter(models.Q(branch_id=int(branch_id)) | models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
+                    t1_qs = t1_qs.filter(Q(branch_id=int(branch_id)) | Q(branch__slug__iexact=branch_id) | Q(branch__name__iexact=branch_id))
                 else:
-                    t1_qs = t1_qs.filter(models.Q(branch__slug__iexact=branch_id) | models.Q(branch__name__iexact=branch_id))
+                    t1_qs = t1_qs.filter(Q(branch__slug__iexact=branch_id) | Q(branch__name__iexact=branch_id))
             if restaurant_id:
                 if str(restaurant_id).isdigit():
                     t1_qs = t1_qs.filter(branch__restaurant_id=int(restaurant_id))
@@ -370,7 +370,7 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 if str(branch_id).isdigit():
                     b_obj = Branch.objects.filter(id=int(branch_id)).first()
                 else:
-                    b_obj = Branch.objects.filter(models.Q(slug__iexact=branch_id) | models.Q(name__iexact=branch_id)).first()
+                    b_obj = Branch.objects.filter(Q(slug__iexact=branch_id) | Q(name__iexact=branch_id)).first()
                 if b_obj:
                     target_rest_id = b_obj.restaurant_id
 
