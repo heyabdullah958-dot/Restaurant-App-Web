@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { RootState, AppDispatch } from '../store';
 import { fetchMyOrders, fetchOrderDetails } from '../store/orderSlice';
@@ -28,7 +28,7 @@ export default function OrdersScreen() {
 
   // Fetch state from store
   const { myOrders, loading } = useSelector((state: RootState) => state.order);
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
 
   // Re-ordering state to track specific order spinner
   const [reorderingId, setReorderingId] = useState<number | null>(null);
@@ -60,18 +60,20 @@ export default function OrdersScreen() {
     return ordersArray.filter((o: any) => o !== null && o !== undefined);
   }, [myOrders, orderFilter]);
 
-  // Fetch orders on mount and poll every 4 seconds while screen is open
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchMyOrders());
-
-      const interval = setInterval(() => {
+  // Fetch orders on tab focus and poll every 4 seconds while screen is active
+  useFocusEffect(
+    React.useCallback(() => {
+      if (isAuthenticated && user && !user.is_guest) {
         dispatch(fetchMyOrders());
-      }, 4000);
 
-      return () => clearInterval(interval);
-    }
-  }, [dispatch, isAuthenticated]);
+        const interval = setInterval(() => {
+          dispatch(fetchMyOrders());
+        }, 4000);
+
+        return () => clearInterval(interval);
+      }
+    }, [dispatch, isAuthenticated, user])
+  );
 
   const handleRefresh = () => {
     if (isAuthenticated) {
@@ -266,8 +268,8 @@ export default function OrdersScreen() {
     );
   };
 
-  // If user is not authenticated, prompt to login (APP-15)
-  if (!isAuthenticated) {
+  // If user is not authenticated or is a guest user, prompt to login (APP-15)
+  if (!isAuthenticated || (user && user.is_guest)) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>

@@ -33,9 +33,17 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   const [username, setUsername] = useState(user?.username || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
-  const [address, setAddress] = useState(
-    user?.addresses?.[0] || ''
-  );
+  const [address, setAddress] = useState(user?.addresses?.[0] || '');
+
+  // Sync local input fields whenever Redux user profile updates
+  React.useEffect(() => {
+    if (user) {
+      setUsername(user.username || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+      setAddress(user.addresses?.[0] || '');
+    }
+  }, [user]);
 
   // Validation Errors
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
