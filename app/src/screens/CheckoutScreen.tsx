@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart } from '../store/cartSlice';
@@ -44,6 +45,7 @@ const TIME_OPTIONS = [
 ];
 
 export default function CheckoutScreen() {
+  const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
 
@@ -973,7 +975,7 @@ export default function CheckoutScreen() {
         </ScrollView>
 
         {/* Footer sticky place order button */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, SPACING.md) }]}>
           <TouchableOpacity activeOpacity={0.9}
             style={[
               styles.placeOrderBtn,

@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
@@ -75,7 +76,8 @@ const SwipeableRow = ({ children, onSwipeLeft }: { children: React.ReactNode; on
 };
 
 export default function CartScreen() {
-  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
 
   const cart = useSelector((state: RootState) => state.cart);
@@ -382,7 +384,7 @@ export default function CartScreen() {
       </ScrollView>
 
       {/* Proceed to Checkout Button */}
-      <View style={styles.checkoutFooter}>
+      <View style={[styles.checkoutFooter, { paddingBottom: Math.max(insets.bottom + 12, 28) }]}>
         <TouchableOpacity
           style={styles.checkoutButton}
           activeOpacity={0.9}

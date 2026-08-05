@@ -19,6 +19,7 @@ import { useRoute, useNavigation, useFocusEffect, RouteProp } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
@@ -168,6 +169,7 @@ const MenuItemCard = React.memo(({
 
 
 export default function RestaurantScreen() {
+  const insets = useSafeAreaInsets();
   const route = useRoute<RestaurantScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
@@ -666,7 +668,7 @@ export default function RestaurantScreen() {
       />
 
       {cart.restaurantId === restaurant.id && cart.totalQuantity > 0 && (
-        <View style={styles.bottomCartBar}>
+        <View style={[styles.bottomCartBar, { bottom: Math.max(insets.bottom + 12, 24) }]}>
           <TouchableOpacity
             style={styles.cartBarButton}
             activeOpacity={0.9}
