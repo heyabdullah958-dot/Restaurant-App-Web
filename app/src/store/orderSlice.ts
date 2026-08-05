@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { guestLogin, loginUser, registerUser, logoutUser } from './userSlice';
+import { guestLogin, loginUser, registerUser, logoutUser, sessionExpired } from './userSlice';
+import type { RootState } from './index';
 
 export const placeOrder = createAsyncThunk(
   'order/placeOrder',
@@ -19,7 +20,7 @@ export const placeOrder = createAsyncThunk(
     use_loyalty_points?: boolean;
     points_to_redeem?: number;
     coupon_code?: string;
-  }, { dispatch, rejectWithValue }) => {
+  }, { dispatch, getState, rejectWithValue }) => {
     try {
       const response = await api.post('/orders/', orderData);
       const data = response.data || response;
@@ -40,27 +41,33 @@ export const placeOrder = createAsyncThunk(
         return rejectWithValue('High request volume detected. Please wait a few seconds before placing your order again.');
       }
 
-      // If 401 invalid/expired token error occurs, automatically clear bad token and retry with a fresh guest session
+      // If 401 invalid/expired token error occurs, check user role before retry
       if (error.response?.status === 401 || JSON.stringify(error.response?.data || '').includes('token')) {
-        try {
-          delete api.defaults.headers.common['Authorization'];
-          await AsyncStorage.removeItem('auth_token');
-          await AsyncStorage.removeItem('refresh_token');
-          const guestRes = await dispatch(guestLogin()).unwrap();
-          if (guestRes && guestRes.token) {
-            const retryResponse = await api.post('/orders/', orderData);
-            const retryData = retryResponse.data || retryResponse;
-            if (!retryData || !retryData.id) {
-              return rejectWithValue('Order retry failed — no order ID returned from server.');
+        const isGuest = (getState() as RootState).user.user?.is_guest;
+        if (isGuest) {
+          try {
+            delete api.defaults.headers.common['Authorization'];
+            await AsyncStorage.removeItem('auth_token');
+            await AsyncStorage.removeItem('refresh_token');
+            const guestRes = await dispatch(guestLogin()).unwrap();
+            if (guestRes && guestRes.token) {
+              const retryResponse = await api.post('/orders/', orderData);
+              const retryData = retryResponse.data || retryResponse;
+              if (!retryData || !retryData.id) {
+                return rejectWithValue('Order retry failed — no order ID returned from server.');
+              }
+              if (__DEV__) console.log('[placeOrder] Retry succeeded. Order:', retryData.id);
+              return retryData;
+            } else {
+              return rejectWithValue('Guest session expired. Please tap Place Order again.');
             }
-            if (__DEV__) console.log('[placeOrder] Retry succeeded. Order:', retryData.id);
-            return retryData;
-          } else {
-            return rejectWithValue('Guest session expired. Please tap Place Order again.');
+          } catch (retryErr: any) {
+            if (__DEV__) console.error('[placeOrder] Retry failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
+            return rejectWithValue('Session expired. Please try placing your order again.');
           }
-        } catch (retryErr: any) {
-          if (__DEV__) console.error('[placeOrder] Retry failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
-          return rejectWithValue('Session expired. Please try placing your order again.');
+        } else {
+          dispatch(sessionExpired());
+          return rejectWithValue('Session expired. Please log in again.');
         }
       }
 
@@ -134,20 +141,36 @@ export const fetchOrderTrack = createAsyncThunk(
         } catch (e: any) {}
       }
       const errorData = error.response?.data;
-      let errMsg = 'Failed to fetch live order tracking';
-      if (errorData) {
-        if (typeof errorData === 'string') errMsg = errorData;
-        else if (errorData.message) errMsg = errorData.message;
-        else if (errorData.detail) errMsg = errorData.detail;
-      }
+      let errMsg = sanitizeErrorMessage(errorData, 'Order tracking details are currently unavailable. Please refresh or check Order History.');
       return rejectWithValue(errMsg);
     }
   }
 );
 
+const sanitizeErrorMessage = (errorData: any, defaultMsg: string): string => {
+  let errMsg = defaultMsg;
+  if (errorData) {
+    if (typeof errorData === 'string') {
+      errMsg = errorData;
+    } else if (errorData.message) {
+      errMsg = String(errorData.message);
+    } else if (errorData.detail) {
+      errMsg = String(errorData.detail);
+    } else if (typeof errorData === 'object') {
+      errMsg = Object.entries(errorData)
+        .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
+        .join('\n');
+    }
+  }
+  if (typeof errMsg === 'string' && (errMsg.includes('<html') || errMsg.includes('<!doctype') || errMsg.includes('<h1'))) {
+    return defaultMsg;
+  }
+  return errMsg;
+};
+
 export const fetchOrderDetails = createAsyncThunk(
   'order/fetchOrderDetails',
-  async (orderId: number, { rejectWithValue }) => {
+  async (orderId: number | string, { rejectWithValue }) => {
     try {
       const response = await api.get(`/orders/${orderId}/track/`);
       const resData = response.data || response;
@@ -158,20 +181,7 @@ export const fetchOrderDetails = createAsyncThunk(
         return fallbackRes.data || fallbackRes;
       } catch (fbErr: any) {
         const errorData = error.response?.data || fbErr.response?.data;
-        let errMsg = 'Failed to fetch order details';
-        if (errorData) {
-          if (typeof errorData === 'string') {
-            errMsg = errorData;
-          } else if (errorData.message) {
-            errMsg = errorData.message;
-          } else if (errorData.detail) {
-            errMsg = errorData.detail;
-          } else if (typeof errorData === 'object') {
-            errMsg = Object.entries(errorData)
-              .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
-              .join('\n');
-          }
-        }
+        let errMsg = sanitizeErrorMessage(errorData, 'Failed to fetch order details');
         return rejectWithValue(errMsg);
       }
     }
@@ -187,20 +197,7 @@ export const fetchGuestOrderStatus = createAsyncThunk(
       return resData.data || resData;
     } catch (error: any) {
       const errorData = error.response?.data;
-      let errMsg = 'Failed to fetch guest order status';
-      if (errorData) {
-        if (typeof errorData === 'string') {
-          errMsg = errorData;
-        } else if (errorData.message) {
-          errMsg = errorData.message;
-        } else if (errorData.detail) {
-          errMsg = errorData.detail;
-        } else if (typeof errorData === 'object') {
-          errMsg = Object.entries(errorData)
-            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
-            .join('\n');
-        }
-      }
+      let errMsg = sanitizeErrorMessage(errorData, 'Failed to fetch guest order status');
       return rejectWithValue(errMsg);
     }
   }

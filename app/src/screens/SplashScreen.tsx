@@ -55,7 +55,7 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
         // Otherwise, show the onboarding screen
         navigation.replace('Onboarding');
       }
-    }, 2800);
+    }, 1800);
 
     return () => clearTimeout(timer);
   }, [isAuthenticated, navigation]);

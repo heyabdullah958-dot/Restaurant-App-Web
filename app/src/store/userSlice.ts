@@ -34,6 +34,19 @@ const initialState: UserState = {
   error: null,
 };
 
+export const purgeGuestSessionStorage = async (): Promise<void> => {
+  const keys = [
+    '@foodsphere_guest_name',
+    '@foodsphere_guest_phone',
+    '@foodsphere_guest_address',
+    'guest_address',
+    'guest_tracking_token',
+    '@getfood_active_guest_order',
+    'foodsphere_guest_active_order_id',
+  ];
+  await AsyncStorage.multiRemove(keys).catch(() => {});
+};
+
 // Async Thunks with explicit types
 export const loadSavedToken = createAsyncThunk<
   { user: UserProfile; token: string; refreshToken: string } | null,
@@ -155,6 +168,7 @@ export const loginUser = createAsyncThunk<
       
       // Save token locally
       try {
+        await purgeGuestSessionStorage();
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', refreshToken);
       } catch (err) {
@@ -210,6 +224,7 @@ export const registerUser = createAsyncThunk<
       
       // Save token locally
       try {
+        await purgeGuestSessionStorage();
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', tokens.refresh);
       } catch (err) {
@@ -237,8 +252,17 @@ export const guestLogin = createAsyncThunk<
       await AsyncStorage.removeItem('auth_token').catch(() => {});
       await AsyncStorage.removeItem('refresh_token').catch(() => {});
 
-      // POST to /auth/guest/
-      const response = await api.post('/auth/guest/') as any;
+      // Race API call against a 10-second timeout to prevent UI hangs during Heroku cold-starts
+      const GUEST_AUTH_TIMEOUT = 10000;
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('GUEST_AUTH_TIMEOUT')), GUEST_AUTH_TIMEOUT)
+      );
+
+      const response = await Promise.race([
+        api.post('/auth/guest/') as Promise<any>,
+        timeoutPromise,
+      ]);
+
       const responseData = response.data || response;
       const payload = (responseData.data && responseData.data.user) ? responseData.data : responseData;
       const { user, tokens } = payload;
@@ -271,7 +295,7 @@ export const guestLogin = createAsyncThunk<
       
       return { user, token, refreshToken: tokens.refresh };
     } catch (error: any) {
-      if (__DEV__) console.warn('Backend guest auth throttled or offline. Using local session state.');
+      if (__DEV__) console.warn('Guest auth timed out or failed. Using local session state.');
       delete api.defaults.headers.common['Authorization'];
       const fallbackUser: UserProfile = {
         id: 9999,
@@ -355,6 +379,7 @@ export const logoutUser = createAsyncThunk<
   async (_, { dispatch }) => {
     delete api.defaults.headers.common['Authorization'];
     try {
+      await purgeGuestSessionStorage();
       await AsyncStorage.removeItem('auth_token');
       await AsyncStorage.removeItem('refresh_token');
     } catch (err) {

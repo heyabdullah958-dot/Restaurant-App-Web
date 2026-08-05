@@ -459,9 +459,17 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       const results = Array.isArray(res.data) ? res.data : (res.data?.results || []);
       const deliveredOrders = results.filter((o: any) => o.status?.toLowerCase() === 'delivered');
 
+      // Batch check all delivered orders' review status at once
+      const reviewKeys = deliveredOrders.map((o: any) => `reviewed_order_${o.id}`);
+      const dismissKeys = deliveredOrders.map((o: any) => `dismissed_feedback_order_${o.id}`);
+      const allKeys = [...reviewKeys, ...dismissKeys];
+      const storageResults = await AsyncStorage.multiGet(allKeys);
+      const statusMap: Record<string, string | null> = {};
+      storageResults.forEach(([key, val]: [string, string | null]) => { statusMap[key] = val; });
+
       for (const order of deliveredOrders) {
-        const reviewed = await AsyncStorage.getItem(`reviewed_order_${order.id}`);
-        const dismissed = await AsyncStorage.getItem(`dismissed_feedback_order_${order.id}`);
+        const reviewed = statusMap[`reviewed_order_${order.id}`];
+        const dismissed = statusMap[`dismissed_feedback_order_${order.id}`];
         if (reviewed !== 'true' && dismissed !== 'true') {
           setUnratedOrder(order);
           return;
@@ -547,7 +555,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         checkUnratedDeliveredOrders();
         checkOrderStatusUpdates();
         checkActiveGuestOrder();
-      }, 5000);
+      }, 30000);
       return () => clearInterval(interval);
     }, [dispatch, user, checkUnratedDeliveredOrders, checkActiveGuestOrder])
   );

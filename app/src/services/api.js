@@ -164,7 +164,22 @@ api.interceptors.response.use(
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
-    } else if (error.response && status !== 401 && status !== 403) {
+    }
+
+    // Sanitize non-JSON raw HTML error responses (e.g. 404/500 server HTML pages)
+    if (error.response && error.response.data && typeof error.response.data === 'string') {
+      const isHtml = error.response.data.includes('<html') ||
+                     error.response.data.trim().startsWith('<!') ||
+                     (error.response.headers && String(error.response.headers['content-type']).includes('text/html'));
+      if (isHtml) {
+        const cleanMsg = status === 404
+          ? 'Requested resource or order was not found.'
+          : 'Server encountered an error. Please try again later.';
+        error.response.data = { message: cleanMsg, detail: cleanMsg };
+      }
+    }
+
+    if (error.response && status !== 401 && status !== 403) {
       if (__DEV__) console.log('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
       if (__DEV__) console.log('API No Response (Backend waking up or offline):', error.message || 'Network timeout');

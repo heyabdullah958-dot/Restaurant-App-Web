@@ -24,6 +24,7 @@ import { addInAppNotification } from '../services/inAppNotificationService';
 import { RootState, AppDispatch } from '../store';
 import { fetchOrderDetails, fetchGuestOrderStatus, fetchOrderTrack, clearCurrentOrder } from '../store/orderSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
+import { SkeletonBox, TrackingStatusSkeleton } from '../components/SkeletonLoader';
 
 const { width } = Dimensions.get('window');
 
@@ -74,45 +75,49 @@ export default function TrackingScreen() {
       let targetId: any = route.params?.orderId || route.params?.id || activeOrder?.id || null;
       let targetToken: string | null = route.params?.trackingToken || route.params?.token || route.params?.tracking_token || null;
 
-      // 1. Check order_token_<id>
-      if (targetId && !targetToken) {
-        try {
-          const tok = await AsyncStorage.getItem(`order_token_${targetId}`);
-          if (tok) targetToken = tok;
-        } catch (e) {}
-      }
+      // Batch all potential AsyncStorage reads in one call
+      try {
+        const keys = [
+          targetId ? `order_token_${targetId}` : '',
+          'guest_tracking_token',
+          '@getfood_active_guest_order',
+          'foodsphere_guest_active_order_id',
+        ].filter(Boolean);
+        const results = await AsyncStorage.multiGet(keys);
+        const storageMap: Record<string, string | null> = {};
+        results.forEach(([key, val]: [string, string | null]) => { storageMap[key] = val; });
 
-      // 2. Check guest_tracking_token
-      if (!targetToken) {
-        try {
-          const tok = await AsyncStorage.getItem('guest_tracking_token');
-          if (tok) targetToken = tok;
-        } catch (e) {}
-      }
+        // 1. Check order_token_<id>
+        if (targetId && !targetToken && storageMap[`order_token_${targetId}`]) {
+          targetToken = storageMap[`order_token_${targetId}`];
+        }
 
-      // 3. Check @getfood_active_guest_order object
-      if (!targetId || !targetToken) {
-        try {
-          const raw = await AsyncStorage.getItem('@getfood_active_guest_order');
+        // 2. Check guest_tracking_token only if no explicit targetId exists
+        if (!targetId && !targetToken && storageMap['guest_tracking_token']) {
+          targetToken = storageMap['guest_tracking_token'];
+        }
+
+        // 3. Check @getfood_active_guest_order object
+        if (!targetId || !targetToken) {
+          const raw = storageMap['@getfood_active_guest_order'];
           if (raw) {
-            const parsed = JSON.parse(raw);
-            if (!targetId && (parsed?.orderId || parsed?.id)) {
-              targetId = parsed.orderId || parsed.id;
-            }
-            if (!targetToken && (parsed?.trackingToken || parsed?.tracking_token)) {
-              targetToken = parsed.trackingToken || parsed.tracking_token;
-            }
+            try {
+              const parsed = JSON.parse(raw);
+              if (!targetId && (parsed?.orderId || parsed?.id)) {
+                targetId = parsed.orderId || parsed.id;
+              }
+              if (!targetToken && (parsed?.trackingToken || parsed?.tracking_token)) {
+                targetToken = parsed.trackingToken || parsed.tracking_token;
+              }
+            } catch (e) {}
           }
-        } catch (e) {}
-      }
+        }
 
-      // 4. Check foodsphere_guest_active_order_id
-      if (!targetId) {
-        try {
-          const rawId = await AsyncStorage.getItem('foodsphere_guest_active_order_id');
-          if (rawId) targetId = rawId;
-        } catch (e) {}
-      }
+        // 4. Check foodsphere_guest_active_order_id
+        if (!targetId && storageMap['foodsphere_guest_active_order_id']) {
+          targetId = storageMap['foodsphere_guest_active_order_id'];
+        }
+      } catch (e) {}
 
       if (isMounted) {
         if (targetId) setEffectiveOrderId(targetId);
@@ -512,26 +517,57 @@ export default function TrackingScreen() {
     }
   };
 
+  const sanitizedError = useMemo(() => {
+    if (!error) return null;
+    if (typeof error === 'string' && (error.includes('<html') || error.includes('<!doctype') || error.includes('<h1'))) {
+      return 'Order tracking details are currently unavailable. Please refresh or check Order History.';
+    }
+    return error;
+  }, [error]);
+
   if (isResolvingCredentials || (loading && !currentOrder)) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Fetching order details...</Text>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
+          </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+             <SkeletonBox width={150} height={24} borderRadius={6} style={{ marginBottom: 4 }} />
+             <SkeletonBox width={100} height={16} borderRadius={6} />
+          </View>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={{ padding: 16 }}>
+          <TrackingStatusSkeleton />
+          <SkeletonBox width="100%" height={120} borderRadius={12} style={{ marginTop: 16 }} />
+          <SkeletonBox width="100%" height={250} borderRadius={12} style={{ marginTop: 16 }} />
+        </View>
       </SafeAreaView>
     );
   }
 
-  if ((error && !currentOrder) || (!effectiveOrderId && !effectiveToken)) {
+  if ((sanitizedError && !currentOrder) || (!effectiveOrderId && !effectiveToken)) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
         <Ionicons name="alert-circle-outline" size={80} color={COLORS.danger} />
         <Text style={styles.errorTitle}>Order Tracking Unavailable</Text>
         <Text style={styles.errorSubtitle}>
-          {error || "We couldn't find a valid active order to track."}
+          {sanitizedError || "We couldn't find a valid active order to track."}
         </Text>
         <TouchableOpacity activeOpacity={0.75}
           style={styles.actionBtn}
-          onPress={() => navigation.navigate('Main', { screen: 'Orders' })}
+          onPress={() => {
+            try {
+              navigation.navigate('Main', { screen: 'Orders' });
+            } catch (e) {
+              try {
+                navigation.navigate('Orders');
+              } catch (err) {
+                navigation.goBack();
+              }
+            }
+          }}
         >
           <Text style={styles.actionBtnText}>Go to Order History</Text>
         </TouchableOpacity>
@@ -690,35 +726,37 @@ export default function TrackingScreen() {
         </View>
 
         {/* Delivery Details */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Delivery Information</Text>
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={20} color={COLORS.gray} />
-            <Text style={styles.infoValueText}>{currentOrder?.delivery_address}</Text>
-          </View>
-          {(currentOrder?.branch_name || currentOrder?.branch?.name) && (
-            <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
-              <Ionicons name="storefront-outline" size={20} color={COLORS.primary} />
-              <Text style={[styles.infoValueText, { fontWeight: 'bold', color: COLORS.primary }]}>
-                Branch: {currentOrder.branch_name || currentOrder.branch.name}
-              </Text>
+        {currentOrder && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Delivery Information</Text>
+            <View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={20} color={COLORS.gray} />
+              <Text style={styles.infoValueText}>{currentOrder?.delivery_address}</Text>
             </View>
-          )}
-          {currentOrder?.special_instructions && (
+            {(currentOrder?.branch_name || currentOrder?.branch?.name) && (
+              <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
+                <Ionicons name="storefront-outline" size={20} color={COLORS.primary} />
+                <Text style={[styles.infoValueText, { fontWeight: 'bold', color: COLORS.primary }]}>
+                  Branch: {currentOrder.branch_name || currentOrder.branch?.name}
+                </Text>
+              </View>
+            )}
+            {currentOrder?.special_instructions && (
+              <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
+                <Ionicons name="chatbox-ellipses-outline" size={20} color={COLORS.gray} />
+                <Text style={styles.infoValueText}>
+                  Note: {currentOrder.special_instructions}
+                </Text>
+              </View>
+            )}
             <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
-              <Ionicons name="chatbox-ellipses-outline" size={20} color={COLORS.gray} />
+              <Ionicons name="time-outline" size={20} color={COLORS.gray} />
               <Text style={styles.infoValueText}>
-                Note: {currentOrder.special_instructions}
+                Placed on: {formatDate(currentOrder?.created_at)}
               </Text>
             </View>
-          )}
-          <View style={[styles.infoRow, { marginTop: SPACING.sm }]}>
-            <Ionicons name="time-outline" size={20} color={COLORS.gray} />
-            <Text style={styles.infoValueText}>
-              Placed on: {formatDate(currentOrder?.created_at)}
-            </Text>
           </View>
-        </View>
+        )}
 
         {/* Order Review Prompt Card */}
         {currentOrder?.status?.toLowerCase() === 'delivered' && (
@@ -785,52 +823,54 @@ export default function TrackingScreen() {
         )}
 
         {/* Order Items */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Order Summary</Text>
-          {currentOrder?.items?.map((item: any, idx: number) => (
-            <View key={item.id || idx} style={styles.itemRow}>
-              <Text style={styles.itemQuantity}>{item.quantity}x</Text>
-              <View style={styles.itemNameContainer}>
-                <Text style={styles.itemName}>{item.menu_item_name || 'Menu Item'}</Text>
-                {item.special_notes ? (
-                  <Text style={styles.itemNotes}>{item.special_notes}</Text>
-                ) : null}
+        {currentOrder && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Order Summary</Text>
+            {currentOrder?.items?.map((item: any, idx: number) => (
+              <View key={item.id || idx} style={styles.itemRow}>
+                <Text style={styles.itemQuantity}>{item.quantity}x</Text>
+                <View style={styles.itemNameContainer}>
+                  <Text style={styles.itemName}>{item.menu_item_name || 'Menu Item'}</Text>
+                  {item.special_notes ? (
+                    <Text style={styles.itemNotes}>{item.special_notes}</Text>
+                  ) : null}
+                </View>
+                <Text style={styles.itemPrice}>
+                  Rs. {parseFloat(item.total_price || (parseFloat(item.unit_price || 0) * item.quantity) || 0).toFixed(2)}
+                </Text>
               </View>
-              <Text style={styles.itemPrice}>
-                Rs. {parseFloat(item.total_price || (parseFloat(item.unit_price || 0) * item.quantity) || 0).toFixed(2)}
-              </Text>
-            </View>
-          ))}
+            ))}
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <View style={styles.priceSummaryRow}>
-            <Text style={styles.priceSummaryLabel}>Subtotal</Text>
-            <Text style={styles.priceSummaryVal}>
-              Rs. {parseFloat(currentOrder?.subtotal || 0).toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.priceSummaryRow}>
-            <Text style={styles.priceSummaryLabel}>Delivery Fee</Text>
-            <Text style={styles.priceSummaryVal}>
-              Rs. {parseFloat(currentOrder?.delivery_fee || 0).toFixed(2)}
-            </Text>
-          </View>
-          {parseFloat(currentOrder?.discount || 0) > 0 && (
             <View style={styles.priceSummaryRow}>
-              <Text style={styles.priceSummaryLabel}>Discount</Text>
-              <Text style={[styles.priceSummaryVal, styles.discountText]}>
-                -Rs. {parseFloat(currentOrder?.discount || 0).toFixed(2)}
+              <Text style={styles.priceSummaryLabel}>Subtotal</Text>
+              <Text style={styles.priceSummaryVal}>
+                Rs. {parseFloat(currentOrder?.subtotal || 0).toFixed(2)}
               </Text>
             </View>
-          )}
-          <View style={[styles.priceSummaryRow, { marginTop: SPACING.sm }]}>
-            <Text style={styles.totalSummaryLabel}>Total</Text>
-            <Text style={styles.totalSummaryVal}>
-              Rs. {parseFloat(currentOrder?.total || 0).toFixed(2)}
-            </Text>
+            <View style={styles.priceSummaryRow}>
+              <Text style={styles.priceSummaryLabel}>Delivery Fee</Text>
+              <Text style={styles.priceSummaryVal}>
+                Rs. {parseFloat(currentOrder?.delivery_fee || 0).toFixed(2)}
+              </Text>
+            </View>
+            {parseFloat(currentOrder?.discount || 0) > 0 && (
+              <View style={styles.priceSummaryRow}>
+                <Text style={styles.priceSummaryLabel}>Discount</Text>
+                <Text style={[styles.priceSummaryVal, styles.discountText]}>
+                  -Rs. {parseFloat(currentOrder?.discount || 0).toFixed(2)}
+                </Text>
+              </View>
+            )}
+            <View style={[styles.priceSummaryRow, { marginTop: SPACING.sm }]}>
+              <Text style={styles.totalSummaryLabel}>Total</Text>
+              <Text style={styles.totalSummaryVal}>
+                Rs. {parseFloat(currentOrder?.total || 0).toFixed(2)}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Close Button / Go to History */}
         <TouchableOpacity activeOpacity={0.75}

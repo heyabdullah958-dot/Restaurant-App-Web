@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -106,6 +106,7 @@ export default function CheckoutScreen() {
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   // Custom Alert State
@@ -194,30 +195,45 @@ export default function CheckoutScreen() {
   const restaurantRef = React.useRef(restaurant);
   React.useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
 
-  // Load saved guest info on mount if fields are empty
+  // Hydrate user profile or saved guest info on mount
   React.useEffect(() => {
-    const loadSavedGuestInfo = async () => {
-      try {
-        const savedName = await AsyncStorage.getItem('@foodsphere_guest_name');
-        const savedPhone = await AsyncStorage.getItem('@foodsphere_guest_phone');
-        const savedAddress = await AsyncStorage.getItem('@foodsphere_guest_address');
-
-        if (savedName && !guestName) {
-          setGuestName(savedName);
-        }
-        if (savedPhone && !guestPhone) {
-          setGuestPhone(savedPhone);
-        }
-        if (savedAddress && !address) {
-          setAddress(savedAddress);
-        }
-      } catch (e) {
-        if (__DEV__) console.warn('Failed to load saved guest info from AsyncStorage:', e);
+    if (user && !user.is_guest) {
+      if (user.addresses && user.addresses.length > 0 && user.addresses[0]) {
+        setAddress(user.addresses[0]);
+      } else {
+        setAddress('');
       }
-    };
+      const displayName = user.name || user.username;
+      if (displayName) {
+        setGuestName(displayName);
+      }
+      if (user.phone) {
+        setGuestPhone(user.phone);
+      }
+    } else {
+      const loadSavedGuestInfo = async () => {
+        try {
+          const savedName = await AsyncStorage.getItem('@foodsphere_guest_name');
+          const savedPhone = await AsyncStorage.getItem('@foodsphere_guest_phone');
+          const savedAddress = await AsyncStorage.getItem('@foodsphere_guest_address');
 
-    loadSavedGuestInfo();
-  }, []);
+          if (savedName && !guestName) {
+            setGuestName(savedName);
+          }
+          if (savedPhone && !guestPhone) {
+            setGuestPhone(savedPhone);
+          }
+          if (savedAddress && !address) {
+            setAddress(savedAddress);
+          }
+        } catch (e) {
+          if (__DEV__) console.warn('Failed to load saved guest info from AsyncStorage:', e);
+        }
+      };
+
+      loadSavedGuestInfo();
+    }
+  }, [user]);
 
   // Load branches for selected restaurant on focus & poll every 10s
   useFocusEffect(
@@ -362,6 +378,7 @@ export default function CheckoutScreen() {
   const loyaltyPointsEarned = Math.floor(finalTotal / 100);
 
   const handlePlaceOrder = async () => {
+    if (isSubmittingRef.current) return;
     // 1. Validation checks
     const effectivePhone = guestPhone ? guestPhone.trim() : (user?.phone || '');
     if (!effectivePhone) {
@@ -414,6 +431,7 @@ export default function CheckoutScreen() {
     }
 
     setIsSubmitting(true);
+    isSubmittingRef.current = true;
 
     // 2. Map cart items to payload
     const orderItems = items.map((item) => {
@@ -470,7 +488,7 @@ export default function CheckoutScreen() {
 
     try {
       // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
-      if (!isAuthenticated || isGuestMode) {
+      if (!isAuthenticated) {
         try {
           await dispatch(guestLogin()).unwrap();
         } catch (e) {
@@ -490,6 +508,9 @@ export default function CheckoutScreen() {
           try {
             await AsyncStorage.setItem('guest_tracking_token', token);
             await AsyncStorage.setItem(`order_token_${orderId}`, token);
+            if (createdOrder?.display_order_id) {
+              await AsyncStorage.setItem(`order_token_${createdOrder.display_order_id}`, token);
+            }
           } catch (e) {
             if (__DEV__) console.error('Failed to save guest tracking token:', e);
           }
@@ -530,10 +551,17 @@ export default function CheckoutScreen() {
 
         // 5. Handle payments integration based on choice
         if (paymentMethod === 'cod') {
-          await dispatch(confirmCODPayment(orderId));
-          showAlert('Success', 'Order placed successfully! Cash on Delivery confirmed.', [
-             { text: 'OK', onPress: () => { hideAlert(); navigation.replace('OrderConfirmation', { orderId: createdOrder.display_order_id || orderId, loyaltyPointsEarned, branchName }); } }
-          ]);
+          const codResult = await dispatch(confirmCODPayment(orderId));
+          if (confirmCODPayment.fulfilled.match(codResult)) {
+            showAlert('Success', 'Order placed successfully! Cash on Delivery confirmed.', [
+              { text: 'OK', onPress: () => { dispatch(clearCart()); hideAlert(); navigation.replace('OrderConfirmation', { orderId: createdOrder.display_order_id || orderId, loyaltyPointsEarned, branchName }); } }
+            ]);
+          } else {
+            showAlert('COD Error', String(codResult.payload || 'Failed to confirm Cash on Delivery payment. Your order was placed — please contact support.'));
+            setIsSubmitting(false);
+            isSubmittingRef.current = false;
+            return;
+          }
         } else if (paymentMethod === 'stripe') {
           const stripeResult = await dispatch(createStripeIntent(orderId));
           if (createStripeIntent.fulfilled.match(stripeResult)) {
@@ -542,15 +570,19 @@ export default function CheckoutScreen() {
               showAlert(
                 'Redirecting to Stripe',
                 'We are opening Stripe secure checkout to complete the payment.',
-                [{ text: 'OK', onPress: () => { hideAlert(); Linking.openURL(checkoutUrl); navigation.replace('Orders'); } }]
+                [{ text: 'OK', onPress: () => { dispatch(clearCart()); hideAlert(); Linking.openURL(checkoutUrl); navigation.replace('Orders'); } }]
               );
             } else {
               showAlert('Payment Error', 'Failed to retrieve Stripe checkout URL.');
+              setIsSubmitting(false);
+              isSubmittingRef.current = false;
+              return;
             }
           } else {
             const errMsg = stripeResult.payload || 'Failed to initialize Stripe payment';
             showAlert('Payment Error', String(errMsg));
             setIsSubmitting(false);
+            isSubmittingRef.current = false;
             return;
           }
         } else if (paymentMethod === 'payfast') {
@@ -561,24 +593,28 @@ export default function CheckoutScreen() {
               showAlert(
                 'Redirecting to PayFast',
                 'Redirecting you to PayFast secure portal to complete your payment.',
-                [{ text: 'OK', onPress: () => { hideAlert(); Linking.openURL(redirectUrl); navigation.replace('Orders'); } }]
+                [{ text: 'OK', onPress: () => { dispatch(clearCart()); hideAlert(); Linking.openURL(redirectUrl); navigation.replace('Orders'); } }]
               );
             } else {
               showAlert('Payment Error', 'Failed to retrieve PayFast checkout URL.');
+              setIsSubmitting(false);
+              isSubmittingRef.current = false;
+              return;
             }
           } else {
             const errMsg = payFastResult.payload || 'Failed to initialize PayFast payment';
             showAlert('Payment Error', String(errMsg));
             setIsSubmitting(false);
+            isSubmittingRef.current = false;
             return;
           }
         }
 
-        // 6. Clear cart & redirect to order confirmation success page
-        dispatch(clearCart());
         setIsSubmitting(false);
+        isSubmittingRef.current = false;
       } else {
         setIsSubmitting(false);
+        isSubmittingRef.current = false;
         const rawPayload = resultAction.payload;
         let errMsg = 'Failed to place order';
         if (typeof rawPayload === 'string') {
@@ -590,6 +626,7 @@ export default function CheckoutScreen() {
       }
     } catch (err: any) {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
       showAlert('Checkout Error', err.message || 'Something went wrong.');
     }
   };

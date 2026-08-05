@@ -64,6 +64,7 @@ const MenuItemCard = React.memo(({
   quantity, 
   showCategoryName,
   isClosed,
+  restaurantSlug,
   onAddToCart, 
   onIncrement, 
   onDecrement 
@@ -72,6 +73,7 @@ const MenuItemCard = React.memo(({
   quantity: number;
   showCategoryName: boolean;
   isClosed?: boolean;
+  restaurantSlug?: string | number;
   onAddToCart: (item: MenuItem) => void;
   onIncrement: (item: MenuItem, qty: number) => void;
   onDecrement: (item: MenuItem, qty: number) => void;
@@ -110,7 +112,7 @@ const MenuItemCard = React.memo(({
       </View>
 
       {(() => {
-        const resKey = restaurant?.slug || restaurant?.id;
+        const resKey = restaurantSlug;
         const { uri, isLogoFallback } = resolveItemImageWithLogoFallback(item, resKey);
         const itemImgSource = getImageUrl(uri);
         return (
@@ -175,7 +177,22 @@ export default function RestaurantScreen() {
   const route = useRoute<RestaurantScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
-  const { slug } = route.params;
+  const slug = route.params?.slug ?? '';
+
+  // Guard: if slug is empty (edge case in Hermes native nav), show error UI
+  if (!slug) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color={COLORS.danger} />
+          <Text style={styles.errorTitle}>Invalid Restaurant</Text>
+          <TouchableOpacity activeOpacity={0.75} style={styles.errorButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.errorButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const currentRestaurant = useSelector((state: RootState) => state.restaurant.currentRestaurant);
   const loading = useSelector((state: RootState) => state.restaurant.loading);
@@ -429,6 +446,7 @@ export default function RestaurantScreen() {
       quantity={cartQuantityMap[item.id] || 0}
       showCategoryName={selectedCategory === 'All'}
       isClosed={!isOpen}
+      restaurantSlug={restaurant?.slug || restaurant?.id}
       onAddToCart={handleAddToCart}
       onIncrement={handleIncrement}
       onDecrement={handleDecrement}

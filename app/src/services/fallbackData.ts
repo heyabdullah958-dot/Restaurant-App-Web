@@ -420,9 +420,10 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
   }
 ];
 
-export const getImageUrl = (path: string | null) => {
+export const getImageUrl = (path: string | null): { uri: string } => {
   if (!path || typeof path !== 'string' || path.trim() === '' || path.includes('unsplash.com')) {
-    return null;
+    // Return a minimal transparent placeholder to satisfy Image source type
+    return { uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' };
   }
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return { uri: path };

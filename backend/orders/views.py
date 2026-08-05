@@ -287,7 +287,16 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         return queryset
 
     def get_object(self):
-        obj = super().get_object()
+        queryset = self.filter_queryset(self.get_queryset())
+        pk = self.kwargs.get('pk')
+        from django.db.models import Q
+        from rest_framework.generics import get_object_or_404
+        query = Q(display_order_id__iexact=str(pk).strip())
+        if str(pk).isdigit():
+            query |= Q(pk=int(pk))
+        
+        obj = get_object_or_404(queryset, query)
+        self.check_object_permissions(self.request, obj)
         request = self.request
         user = request.user
 

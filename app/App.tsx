@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { View, Text, Platform } from 'react-native';
+import { View, Text, Platform, TouchableOpacity } from 'react-native';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -68,6 +68,51 @@ type MainTabParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+// Global Error Boundary — catches unhandled render errors in any screen
+// Must be a class component: React hooks do NOT support getDerivedStateFromError
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    if (__DEV__) {
+      console.error('ErrorBoundary caught:', error, errorInfo);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8F9FA', padding: 24 }}>
+          <Text style={{ fontSize: 48, marginBottom: 16 }}>😵</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1E293B', textAlign: 'center' }}>
+            Something went wrong
+          </Text>
+          <Text style={{ fontSize: 14, color: '#64748B', textAlign: 'center', marginTop: 8, marginBottom: 24 }}>
+            The app encountered an unexpected error. Please try again.
+          </Text>
+          <TouchableOpacity
+            onPress={() => this.setState({ hasError: false, error: null })}
+            style={{ backgroundColor: '#FF6B35', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12 }}
+          >
+            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 16 }}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function MainTabs() {
   const insets = useSafeAreaInsets();
@@ -216,6 +261,7 @@ function AppContent() {
 
   return (
     <NavigationContainer ref={navRef}>
+      <ErrorBoundary>
       <Stack.Navigator
         initialRouteName="Splash"
         screenOptions={{
@@ -235,6 +281,7 @@ function AppContent() {
         <Stack.Screen name="Rewards" component={RewardsScreen} />
         <Stack.Screen name="Legal" component={LegalScreen} />
       </Stack.Navigator>
+      </ErrorBoundary>
       <NotificationToast navigationRef={navRef} />
       <StatusBar style="auto" />
     </NavigationContainer>

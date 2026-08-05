@@ -35,7 +35,8 @@ type RootStackParamList = {
   Search: undefined;
   Restaurant: { slug: string };
   Cart: undefined;
-  Checkout: undefined;
+  Checkout: { coupon_code?: string | null; discount_amount?: number } | undefined;
+  Main: { screen: string };
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Cart'>;
