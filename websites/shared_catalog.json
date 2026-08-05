@@ -679,7 +679,7 @@
             "name": "Lotus Can Dessert",
             "description": "Creamy Lotus Biscoff dessert served in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1273_lotus_can_dessert_wt0erf",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -689,7 +689,7 @@
             "name": "Red Velvet Can Dessert",
             "description": "Rich red velvet cake layered in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1274_red_velvet_can_dessert_vdxtci",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -699,7 +699,7 @@
             "name": "Nutella Can Dessert",
             "description": "Decadent Nutella chocolate dessert in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1275_nutella_can_dessert_kjmyie",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -716,7 +716,7 @@
             "name": "Cheese",
             "description": "Extra melted cheese portion",
             "price": 90.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_1276_cheese_addon_s0v0a3",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -736,7 +736,7 @@
             "name": "Tortilla Bread",
             "description": "Extra soft tortilla flatbread",
             "price": 90.0,
-            "image": "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -756,7 +756,7 @@
             "name": "Plain Fries",
             "description": "Golden salted french fries side",
             "price": 150.0,
-            "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&h=400&q=80",
+            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
