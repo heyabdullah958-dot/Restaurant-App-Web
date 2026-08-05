@@ -107,3 +107,38 @@ export const resolveItemImage = (item?: any): string | null => {
 
   return null;
 };
+
+export const BRAND_LOGOS: Record<string, string> = {
+  '1': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/seenbanao_logo.png',
+  '2': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/dineatblue_logo.png',
+  '3': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
+  '4': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
+  '5': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/sandmelts_logo.png',
+  '6': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/birdman_logo.png',
+  '7': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/getafomo_logo.jpg',
+  'seenbanao': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/seenbanao_logo.png',
+  'dineatblue': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/dineatblue_logo.png',
+  'jushhpk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
+  'jushh': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
+  'tandooristoppk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
+  'tandooristop': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
+  'sandmelts': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/sandmelts_logo.png',
+  'birdmanfoodspk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/birdman_logo.png',
+  'getafomo': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/getafomo_logo.jpg'
+};
+
+export const getBrandLogo = (restaurantIdOrSlug?: string | number): string => {
+  if (!restaurantIdOrSlug) return BRAND_LOGOS['jushhpk'];
+  const key = String(restaurantIdOrSlug).toLowerCase().trim();
+  return BRAND_LOGOS[key] || BRAND_LOGOS['jushhpk'];
+};
+
+export const resolveItemImageWithLogoFallback = (item?: any, restaurantIdOrSlug?: string | number): { uri: string; isLogoFallback: boolean } => {
+  const photo = resolveItemImage(item);
+  if (photo) {
+    return { uri: photo, isLogoFallback: false };
+  }
+  const brandKey = restaurantIdOrSlug || item?.restaurant_id || item?.restaurant;
+  return { uri: getBrandLogo(brandKey), isLogoFallback: true };
+};
+

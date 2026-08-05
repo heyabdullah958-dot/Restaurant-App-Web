@@ -27,7 +27,7 @@ import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from 
 import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
-import { resolveItemImage } from '../services/mediaAssetService';
+import { resolveItemImage, resolveItemImageWithLogoFallback } from '../services/mediaAssetService';
 import api from '../services/api';
 
 type RootStackParamList = {
@@ -109,12 +109,16 @@ const MenuItemCard = React.memo(({
       </View>
 
       {(() => {
-        const itemImgUrl = resolveItemImage(item);
-        const itemImgSource = getImageUrl(itemImgUrl);
+        const resKey = restaurant?.slug || restaurant?.id;
+        const { uri, isLogoFallback } = resolveItemImageWithLogoFallback(item, resKey);
+        const itemImgSource = getImageUrl(uri);
         return (
-          <View style={styles.menuItemImageContainer}>
+          <View style={[styles.menuItemImageContainer, isLogoFallback && { backgroundColor: '#1E1216', justifyContent: 'center', alignItems: 'center' }]}>
             {itemImgSource ? (
-              <Image source={itemImgSource} style={styles.itemImage} />
+              <Image 
+                source={itemImgSource} 
+                style={[styles.itemImage, isLogoFallback && { width: '75%', height: '75%', resizeMode: 'contain' }]} 
+              />
             ) : (
               <View style={styles.itemImageBlank} />
             )}

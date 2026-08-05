@@ -39,6 +39,12 @@ REPLACEMENTS = [
     ("WhatsApp pe 5 min mein confirm", "confirm via WhatsApp within 5 minutes"),
     
     # Input Placeholders & Labels
+    ("placeholder=\"Ghar ka pura address\"", "placeholder=\"Complete delivery address\""),
+    ("placeholder='Ghar ka pura address'", "placeholder='Complete delivery address'"),
+    ("Ghar ka pura address", "Complete delivery address"),
+    ("<label class=\"f-label\">Apna Order</label>", "<label class=\"f-label\">YOUR ORDER SUMMARY</label>"),
+    ("Apna Order", "YOUR ORDER SUMMARY"),
+    ("APNA ORDER", "YOUR ORDER SUMMARY"),
     ("placeholder=\"Aapka naam\"", "placeholder=\"Your full name\""),
     ("placeholder='Aapka naam'", "placeholder='Your full name'"),
     ("<label class=\"f-label\">Naam</label>", "<label class=\"f-label\">Full Name</label>"),

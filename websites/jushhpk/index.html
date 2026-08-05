@@ -735,7 +735,7 @@
         JUSHHH Finds You
       </h1>
       <div class="hero-tagline">"Food That Makes You Go Shh..."</div>
-      <p class="hero-sub">Lahore mein 3 Locations — Johar Town, Lake City, aur DHA Phase 1. Bold flavors, bigger combos, aur taste jo tumhein chup kara de.</p>
+      <p class="hero-sub">3 Locations in Lahore — Johar Town, Lake City, and DHA Phase 1. Bold flavors, bigger combos, and a taste that leaves you speechless.</p>
       <div class="hero-btns">
         <a href="#order" class="btn-red">🍔 Order Now — COD</a>
         <a href="#menu" class="btn-ghost">🔥 See Combos</a>
@@ -871,10 +871,10 @@
           </div>
           <div class="f-full">
             <label class="f-label">Delivery Address</label>
-            <input type="text" name="address" class="f-input" placeholder="Ghar ka pura address" required/>
+            <input type="text" name="address" class="f-input" placeholder="Complete delivery address" required/>
           </div>
           <div class="f-full">
-            <label class="f-label">Apna Order</label>
+            <label class="f-label">YOUR ORDER SUMMARY</label>
             <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Chicken Doner Fries, 2x Chicken Turkish Wrap..." required></textarea>
           </div>
           <div class="cod-note">💵 <span>Payment: <strong>Cash on Delivery (COD)</strong></span></div>
@@ -1167,7 +1167,7 @@ window.menuData = menuData;
         
         const fallbackImg = "./images/jushh_logo.jpg";
         const imgSrc = item.image || fallbackImg;
-        const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='${fallbackImg}';" />`;
+        const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:${item.image ? 'cover' : 'contain'};${item.image ? '' : 'padding:16px;'}" onerror="this.onerror=null; this.src='${fallbackImg}'; this.style.objectFit='contain'; this.style.padding='16px';" />`;
 
         
         let variantHtml = '';
