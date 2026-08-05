@@ -492,11 +492,17 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     restaurant = RestaurantSerializer(read_only=True)
     rider = BranchRiderSerializer(read_only=True)
+    rider_id = serializers.PrimaryKeyRelatedField(
+        queryset=BranchRider.objects.all(),
+        source='rider',
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Order
         fields = (
-            'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'guest_name', 'guest_phone', 'order_type', 'table_number', 'status', 'payment_method',
+            'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'rider_id', 'guest_name', 'guest_phone', 'order_type', 'table_number', 'status', 'payment_method',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
@@ -517,6 +523,17 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                         f"This order is already {current_status.replace('_', ' ')}. You cannot cancel it now."
                     )
         return attrs
+
+    def update(self, instance, validated_data):
+        rider = validated_data.get('rider', getattr(instance, 'rider', None))
+        status = validated_data.get('status', instance.status)
+        if rider and status == 'out_for_delivery':
+            rider.status = 'ON_DELIVERY'
+            rider.save(update_fields=['status'])
+        elif status == 'delivered' and instance.rider:
+            instance.rider.status = 'AVAILABLE'
+            instance.rider.save(update_fields=['status'])
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
