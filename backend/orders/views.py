@@ -409,15 +409,20 @@ class MyOrdersListView(generics.ListAPIView):
     GET /api/orders/my-orders/
     Order history for authenticated user.
     BUG-08 FIX: select_related('restaurant') — no N+1 per order row.
+    Supports matching orders by user FK, guest_name, or guest_phone.
     """
     serializer_class = OrderListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return Order.objects.filter(
-            user=user
-        ).select_related('restaurant').order_by('-created_at')
+        from django.db.models import Q
+        query = Q(user=user)
+        if user.username:
+            query |= Q(guest_name__iexact=user.username.strip())
+        if getattr(user, 'phone', None) and str(user.phone).strip():
+            query |= Q(guest_phone=str(user.phone).strip())
+        return Order.objects.filter(query).select_related('restaurant').order_by('-created_at')
 
 
 class PurgeOrdersView(APIView):
