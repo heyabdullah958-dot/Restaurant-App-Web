@@ -258,8 +258,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 1,
         is_active: true,
         items: [
-          { id: 70, name: "Tandoori Chicken Bone (Cheese Naan Single)", description: "Tandoori chicken (with bone) served with 1 cheese naan", price: 1150, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 15 },
-          { id: 71, name: "Tandoori Chicken Boneless (Cheese Naan Single)", description: "Boneless tandoori chicken served with 1 cheese naan", price: 1350, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 15 }
+          { id: 70, name: "Tandoori Chicken Bone (Cheese Naan Single)", description: "Tandoori chicken (with bone) served with 1 cheese naan", price: 1150, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1288_IMG_7585.JPG_xhiffo", is_available: true, is_featured: true, preparation_time: 15 },
+          { id: 71, name: "Tandoori Chicken Boneless (Cheese Naan Single)", description: "Boneless tandoori chicken served with 1 cheese naan", price: 1350, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1289_IMG_7585.JPG_cxjp6v", is_available: true, is_featured: false, preparation_time: 15 }
         ]
       },
       {
@@ -269,8 +269,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 2,
         is_active: true,
         items: [
-          { id: 78, name: "Quarter Sajji", description: "Slow-roasted quarter chicken sajji", price: 799, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 20 },
-          { id: 79, name: "Half Sajji", description: "Slow-roasted half chicken sajji", price: 1400, image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 25 }
+          { id: 78, name: "Quarter Sajji", description: "Slow-roasted quarter chicken sajji", price: 799, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1296_IMG_7587.JPG_cbsi5z", is_available: true, is_featured: true, preparation_time: 20 },
+          { id: 79, name: "Half Sajji", description: "Slow-roasted half chicken sajji", price: 1400, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1297_IMG_7587.JPG_s9a0wa", is_available: true, is_featured: false, preparation_time: 25 }
         ]
       },
       {
@@ -280,8 +280,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
         order: 3,
         is_active: true,
         items: [
-          { id: 84, name: "Full Stop Roll", description: "TandooriStopp signature giant roll", price: 650, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: true, preparation_time: 10 },
-          { id: 85, name: "Tandoori Chicken Roll", description: "Tandoori chicken chunks wrapped in paratha", price: 520, image: "https://images.unsplash.com/photo-1601050690597-df056fb4ce78?w=400&auto=format&fit=crop&q=80", is_available: true, is_featured: false, preparation_time: 10 }
+          { id: 84, name: "Full Stop Roll", description: "TandooriStopp signature giant roll", price: 650, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1302_IMG_7591.JPG_veizgo", is_available: true, is_featured: true, preparation_time: 10 },
+          { id: 85, name: "Tandoori Chicken Roll", description: "Tandoori chicken chunks wrapped in paratha", price: 520, image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1303_IMG_7591.JPG_kooigy", is_available: true, is_featured: false, preparation_time: 10 }
         ]
       }
     ]
@@ -320,7 +320,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
             name: "Chicken Black Pepper Sandwich",
             description: "Shredded chicken in black pepper sauce melted in toasted sourdough.",
             price: 790,
-            image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&auto=format&fit=crop&q=80",
+            image: null,
             is_available: true,
             is_featured: true,
             preparation_time: 15
@@ -363,7 +363,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
             name: "Crispy Fried Chicken (2pcs)",
             description: "Spicy double-dreaded crisp fried chicken parts served with garlic dip.",
             price: 720,
-            image: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=400&auto=format&fit=crop&q=80",
+            image: null,
             is_available: true,
             is_featured: true,
             preparation_time: 12
@@ -397,7 +397,6 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
       { id: 7, name: "Gulberg III Branch", address: "65, Block D1 Gulberg III, Lahore, Pakistan", phone: "03212784841", is_active: true }
     ],
     categories: [
-
       {
         id: 11,
         name: "Specialty Coffee",
@@ -410,7 +409,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
             name: "Espresso Double",
             description: "Double shot of premium espresso with sweetened condensed milk and silky microfoam.",
             price: 520,
-            image: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&auto=format&fit=crop&q=80",
+            image: null,
             is_available: true,
             is_featured: true,
             preparation_time: 6
@@ -422,8 +421,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
 ];
 
 export const getImageUrl = (path: string | null) => {
-  if (!path) {
-    return { uri: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80' };
+  if (!path || typeof path !== 'string' || path.trim() === '' || path.includes('unsplash.com')) {
+    return null;
   }
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return { uri: path };

@@ -22,6 +22,7 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { FALLBACK_RESTAURANTS, getImageUrl, Restaurant, MenuItem } from '../services/fallbackData';
+import { resolveItemImage } from '../services/mediaAssetService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
@@ -98,25 +99,29 @@ const RestaurantResultCard = React.memo(({ restaurant, onPress }: { restaurant: 
   </TouchableOpacity>
 ));
 
-const DishResultCard = React.memo(({ dish, onPress }: { dish: MatchingDish, onPress: (slug: string) => void }) => (
-  <TouchableOpacity
-    activeOpacity={0.8}
-    style={styles.dishRowCard}
-    onPress={() => onPress(dish.restaurantSlug)}
-  >
-    <View style={styles.dishTextContent}>
-      <Text style={styles.dishName}>{dish.item.name}</Text>
-      <Text style={styles.dishRestaurantName}>from {dish.restaurantName}</Text>
-      <Text style={styles.dishDescription} numberOfLines={2}>
-        {dish.item.description}
-      </Text>
-      <Text style={styles.dishPrice}>Rs. {dish.item.price}</Text>
-    </View>
-    {(dish.item.image_url || dish.item.image) && (
-      <Image source={getImageUrl(dish.item.image_url || dish.item.image)} style={styles.dishImage} />
-    )}
-  </TouchableOpacity>
-));
+const DishResultCard = React.memo(({ dish, onPress }: { dish: MatchingDish, onPress: (slug: string) => void }) => {
+  const imgUrl = resolveItemImage(dish.item);
+  const imgSource = getImageUrl(imgUrl);
+  return (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={styles.dishRowCard}
+      onPress={() => onPress(dish.restaurantSlug)}
+    >
+      <View style={styles.dishTextContent}>
+        <Text style={styles.dishName}>{dish.item.name}</Text>
+        <Text style={styles.dishRestaurantName}>from {dish.restaurantName}</Text>
+        <Text style={styles.dishDescription} numberOfLines={2}>
+          {dish.item.description}
+        </Text>
+        <Text style={styles.dishPrice}>Rs. {dish.item.price}</Text>
+      </View>
+      {imgSource && (
+        <Image source={imgSource} style={styles.dishImage} />
+      )}
+    </TouchableOpacity>
+  );
+});
 
 import api from '../services/api';
 

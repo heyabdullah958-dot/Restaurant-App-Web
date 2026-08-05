@@ -27,6 +27,7 @@ import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from 
 import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
+import { resolveItemImage } from '../services/mediaAssetService';
 import api from '../services/api';
 
 type RootStackParamList = {
@@ -107,16 +108,18 @@ const MenuItemCard = React.memo(({
         )}
       </View>
 
-      <View style={styles.menuItemImageContainer}>
-        {(item.image_url || item.image) ? (
-          <Image source={getImageUrl(item.image_url || item.image)} style={styles.itemImage} />
-        ) : (
-          <View style={styles.itemImagePlaceholder}>
-            <Ionicons name="fast-food-outline" size={28} color={COLORS.primary} />
-          </View>
-        )}
+      {(() => {
+        const itemImgUrl = resolveItemImage(item);
+        const itemImgSource = getImageUrl(itemImgUrl);
+        return (
+          <View style={styles.menuItemImageContainer}>
+            {itemImgSource ? (
+              <Image source={itemImgSource} style={styles.itemImage} />
+            ) : (
+              <View style={styles.itemImageBlank} />
+            )}
 
-        <View style={styles.quantitySelectorContainer}>
+            <View style={styles.quantitySelectorContainer}>
           {isClosed ? (
             <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
               <Text style={[styles.addButtonText, { fontSize: 11 }]}>CLOSED</Text>
@@ -1046,6 +1049,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 87, 34, 0.15)',
+  },
+  itemImageBlank: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    backgroundColor: 'transparent',
   },
   quantitySelectorContainer: {
     position: 'absolute',
