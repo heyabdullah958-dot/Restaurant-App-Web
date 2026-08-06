@@ -42,6 +42,16 @@ class LoyaltyTransactionSerializer(serializers.ModelSerializer):
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username = attrs.get(self.username_field)
+        if username:
+            try:
+                user = User.objects.get(username__iexact=username.strip())
+                attrs[self.username_field] = user.username
+            except (User.DoesNotExist, User.MultipleObjectsReturned):
+                pass
+        return super().validate(attrs)
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
