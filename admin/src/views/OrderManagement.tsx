@@ -55,24 +55,23 @@ export const OrderManagement: React.FC = () => {
     }
   };
 
-  // Helper to open rider assignment modal with active live API rider fetch & multi-type branch matching
+  // Helper to open rider assignment modal with active live API rider fetch & multi-tier fallback matching
   const loadAvailableRidersForModal = async (order: Order) => {
     setIsLoadingModalRiders(true);
     try {
       const targetBranchId = order.branch_id || (typeof (order as any).branch === 'number' ? (order as any).branch : (order as any).branch?.id) || user?.branchId;
       const targetRestaurantId = order.restaurant_id || (typeof (order as any).restaurant === 'number' ? (order as any).restaurant : (order as any).restaurant?.id);
       
-      // Direct backend query using 3-Tier Fallback Query Architecture
+      // Direct backend query fetching active riders
       let fetched = await fetchRiders({ 
         branch_id: targetBranchId,
         restaurant_id: targetRestaurantId,
-        status: 'AVAILABLE', 
         is_active: true,
         allow_global: true
       });
 
       if (!Array.isArray(fetched) || fetched.length === 0) {
-        fetched = await fetchRiders({ status: 'AVAILABLE', is_active: true, allow_global: true });
+        fetched = await fetchRiders({ is_active: true, allow_global: true });
       }
 
       setModalRiders(fetched || []);
@@ -725,6 +724,49 @@ export const OrderManagement: React.FC = () => {
                             </div>
                           </div>
 
+                          {/* Rider Assignment Bar (Prominent Top Position) */}
+                          <div className="mb-3 p-2 rounded-xl bg-slate-900 border border-slate-800 shadow-sm">
+                            {order.rider ? (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 text-xs font-black text-sky-400 truncate">
+                                  <Bike size={15} className="flex-shrink-0 text-sky-400" />
+                                  <span className="truncate">🚴 {order.rider.name}</span>
+                                  {order.rider.phone && <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>}
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                  <button
+                                    onClick={() => openRiderAssignmentModal(order)}
+                                    title="Reassign / Change Rider"
+                                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 text-[10px] font-bold rounded-lg flex items-center gap-1 transition-colors cursor-pointer border border-sky-500/20"
+                                  >
+                                    <Edit3 size={12} />
+                                    <span>Change</span>
+                                  </button>
+                                  <button
+                                    onClick={() => triggerRiderWhatsApp(order)}
+                                    title="Send WhatsApp Dispatch to Rider"
+                                    className="px-2 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-black rounded-lg flex items-center gap-1 transition-colors cursor-pointer border border-emerald-500/30"
+                                  >
+                                    <MessageSquare size={12} /> WhatsApp
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 truncate">
+                                  <Bike size={14} className="flex-shrink-0 text-slate-500" />
+                                  <span className="truncate text-slate-400">Rider: <strong className="text-amber-400 font-black uppercase text-[10px]">Unassigned</strong></span>
+                                </div>
+                                <button
+                                  onClick={() => openRiderAssignmentModal(order)}
+                                  className="px-3 py-1.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-black rounded-lg shadow-md flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                                >
+                                  <Bike size={13} /> + Assign Rider
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           {/* Customer Info */}
                           <div className="space-y-1.5 mb-3.5 bg-slate-950/20 p-2.5 rounded-lg border border-slate-900/10">
                             <span className="block font-black text-xs text-slate-100 flex items-center gap-1">
@@ -746,48 +788,6 @@ export const OrderManagement: React.FC = () => {
                                 </span>
                               </div>
                             )}
-                            
-                            {/* Rider Assignment Control */}
-                            <div className="mt-2 pt-2 border-t border-slate-900/60">
-                              {order.rider ? (
-                                <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-1.5 text-xs font-extrabold text-sky-400 truncate">
-                                    <Bike size={14} className="flex-shrink-0" />
-                                    <span className="truncate">🚴 Rider: {order.rider.name}</span>
-                                    {order.rider.phone && <span className="text-[10px] text-slate-400 font-mono">({order.rider.phone})</span>}
-                                  </div>
-                                  <div className="flex items-center gap-1 flex-shrink-0">
-                                    <button
-                                      onClick={() => setAssignRiderModalOrder(order)}
-                                      title="Reassign / Change Rider"
-                                      className="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded flex items-center gap-1 transition-colors"
-                                    >
-                                      <Edit3 size={11} />
-                                    </button>
-                                    <button
-                                      onClick={() => triggerRiderWhatsApp(order)}
-                                      title="Send WhatsApp Dispatch to Rider"
-                                      className="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] font-extrabold rounded flex items-center gap-1 transition-colors"
-                                    >
-                                      <MessageSquare size={11} /> WhatsApp
-                                    </button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 truncate">
-                                    <Bike size={12} className="flex-shrink-0" />
-                                    <span className="truncate">Unassigned</span>
-                                  </div>
-                                  <button
-                                    onClick={() => setAssignRiderModalOrder(order)}
-                                    className="px-2.5 py-1 bg-sky-500/20 hover:bg-sky-500/30 text-sky-400 text-[10px] font-extrabold rounded-md border border-sky-500/30 flex items-center gap-1 transition-colors cursor-pointer"
-                                  >
-                                    + Assign Rider
-                                  </button>
-                                </div>
-                              )}
-                            </div>
                           </div>
 
                           {/* Items summary list */}

@@ -28,7 +28,7 @@ export default function OrdersScreen() {
 
   // Fetch state from store
   const { myOrders, loading } = useSelector((state: RootState) => state.order);
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
+  const { isAuthenticated, user, loading: userLoading } = useSelector((state: RootState) => state.user);
 
   // Re-ordering state to track specific order spinner
   const [reorderingId, setReorderingId] = useState<number | null>(null);
@@ -268,8 +268,20 @@ export default function OrdersScreen() {
     );
   };
 
+  // If user session is currently restoring saved token from storage, render a clean loading spinner to avoid UI flickering
+  if (userLoading) {
+    return (
+      <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
+        <View style={styles.emptyContent}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={[styles.emptySubtitle, { marginTop: SPACING.md }]}>Restoring session...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // If user is not authenticated or is a guest user, prompt to login (APP-15)
-  if (!isAuthenticated || (user && user.is_guest)) {
+  if (!isAuthenticated || !user || user.is_guest) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>

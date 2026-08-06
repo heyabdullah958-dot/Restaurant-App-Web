@@ -86,30 +86,45 @@ export const loadSavedToken = createAsyncThunk<
       api.defaults.headers.common['Authorization'] = `Bearer ${activeToken}`;
       
       // Fetch user profile info to verify token works
-      const profileResponse = await api.get('/users/profile/') as any;
-      
-      // Extract user profile data robustly
-      let user = profileResponse;
-      if (profileResponse && typeof profileResponse === 'object') {
-        if ('data' in profileResponse) {
-          user = profileResponse.data;
+      try {
+        const profileResponse = await api.get('/users/profile/') as any;
+        let user = profileResponse;
+        if (profileResponse && typeof profileResponse === 'object') {
+          if ('data' in profileResponse) {
+            user = profileResponse.data;
+          }
         }
+        
+        try {
+          const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
+          if (savedAddress) {
+            user.addresses = [savedAddress];
+          }
+          await AsyncStorage.setItem('user_profile', JSON.stringify(user));
+        } catch (e) {}
+
+        return { user, token: activeToken, refreshToken: refreshToken || '' };
+      } catch (profileErr: any) {
+        const isAuthError = profileErr?.response?.status === 401 || profileErr?.response?.status === 403;
+        if (isAuthError) {
+          delete api.defaults.headers.common['Authorization'];
+          try {
+            await AsyncStorage.multiRemove(['auth_token', 'refresh_token', 'user_profile']);
+          } catch (e) {}
+          return rejectWithValue('Session expired');
+        }
+
+        // Network error / timeout offline fallback: restore cached user profile if available
+        const cachedUserJson = await AsyncStorage.getItem('user_profile').catch(() => null);
+        if (cachedUserJson) {
+          try {
+            const cachedUser = JSON.parse(cachedUserJson);
+            return { user: cachedUser, token: activeToken, refreshToken: refreshToken || '' };
+          } catch (e) {}
+        }
+        return rejectWithValue(profileErr.message || 'Network error');
       }
-      
-      try {
-        const savedAddress = await AsyncStorage.getItem(`user_address_${user.id}`);
-        if (savedAddress) {
-          user.addresses = [savedAddress];
-        }
-      } catch (e) {}
-      
-      return { user, token: activeToken, refreshToken: refreshToken || '' };
     } catch (error: any) {
-      // If profile fails, clean up token
-      delete api.defaults.headers.common['Authorization'];
-      try {
-        await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
-      } catch (e) {}
       return rejectWithValue(error.message || 'Session expired');
     }
   }
@@ -166,15 +181,6 @@ export const loginUser = createAsyncThunk<
       // Set the default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Save token locally
-      try {
-        await purgeGuestSessionStorage();
-        await AsyncStorage.setItem('auth_token', token);
-        await AsyncStorage.setItem('refresh_token', refreshToken);
-      } catch (err) {
-        if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
-      }
-      
       // Fetch user profile info
       const profileResponse = await api.get('/users/profile/') as any;
       let user = profileResponse;
@@ -190,6 +196,16 @@ export const loginUser = createAsyncThunk<
           user.addresses = [savedAddress];
         }
       } catch (e) {}
+
+      // Save token & user profile locally
+      try {
+        await purgeGuestSessionStorage();
+        await AsyncStorage.setItem('auth_token', token);
+        await AsyncStorage.setItem('refresh_token', refreshToken);
+        await AsyncStorage.setItem('user_profile', JSON.stringify(user));
+      } catch (err) {
+        if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
+      }
       
       return { user, token, refreshToken };
     } catch (error: any) {
@@ -222,11 +238,12 @@ export const registerUser = createAsyncThunk<
       // Set default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Save token locally
+      // Save token & user profile locally
       try {
         await purgeGuestSessionStorage();
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', tokens.refresh);
+        await AsyncStorage.setItem('user_profile', JSON.stringify(user));
       } catch (err) {
         if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
       }
@@ -251,6 +268,7 @@ export const guestLogin = createAsyncThunk<
       delete api.defaults.headers.common['Authorization'];
       await AsyncStorage.removeItem('auth_token').catch(() => {});
       await AsyncStorage.removeItem('refresh_token').catch(() => {});
+      await AsyncStorage.removeItem('user_profile').catch(() => {});
 
       // Race API call against a 10-second timeout to prevent UI hangs during Heroku cold-starts
       const GUEST_AUTH_TIMEOUT = 10000;
@@ -285,10 +303,11 @@ export const guestLogin = createAsyncThunk<
       // Set default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Save token locally
+      // Save token & user profile locally
       try {
         await AsyncStorage.setItem('auth_token', token);
         await AsyncStorage.setItem('refresh_token', tokens.refresh);
+        await AsyncStorage.setItem('user_profile', JSON.stringify(user));
       } catch (err) {
         if (__DEV__) console.error('Failed to save token to AsyncStorage:', err);
       }
@@ -382,6 +401,7 @@ export const logoutUser = createAsyncThunk<
       await purgeGuestSessionStorage();
       await AsyncStorage.removeItem('auth_token');
       await AsyncStorage.removeItem('refresh_token');
+      await AsyncStorage.removeItem('user_profile');
     } catch (err) {
       if (__DEV__) console.error('Failed to remove token from AsyncStorage:', err);
     }

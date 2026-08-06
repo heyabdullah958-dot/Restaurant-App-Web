@@ -488,7 +488,9 @@ const orderSlice = createSlice({
       })
       // Fetch My Orders
       .addCase(fetchMyOrders.pending, (state) => {
-        state.loading = true;
+        if (state.myOrders.length === 0) {
+          state.loading = true;
+        }
         state.error = null;
       })
       .addCase(fetchMyOrders.fulfilled, (state, action) => {

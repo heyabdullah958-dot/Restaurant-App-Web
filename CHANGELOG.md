@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 2026-08-06 Auth Session Loss & Guest Fallback Loop Architecture Overhaul
+- **Atomic Token & Profile Persistence (`userSlice.ts`)**: Updated `loginUser`, `registerUser`, and `guestLogin` to atomically persist `auth_token`, `refresh_token`, and `user_profile` in `AsyncStorage`.
+- **Phone OTP & Google Auth Token Issuance (`AuthScreen.tsx`)**: Replaced temporary guest token overrides with real authenticated user JWT token issuance and registration logic for Phone OTP and Google Sign-In.
+- **Flicker-Free Navigation & Order History Hydration (`OrdersScreen.tsx` & `api.js`)**: Guarded tab screens against un-hydrated `userLoading` states, ensured `Authorization: Bearer <token>` request header injection, and prevented transient network errors from dropping logged-in users to Guest prompts.
+
+## 2026-08-06 Local Development Server Launch
+- **GetFood Mobile App & Metro Bundler**: Launched local development server (`npx expo start`) for the GetFood React Native mobile application.
+- **Unified Web Application & Brand Websites**: Launched local HTTP web server (`npx http-server -p 3000`) serving `index.html` prototype and all 7 brand websites on `http://localhost:3000/`.
+- **Admin HQ & Django API Servers**: Launched Django REST API backend on `http://localhost:8000/` and Vite Admin HQ on `http://localhost:5173/`. Launched default Windows web browser for live user inspection.
+
 ## 2026-08-02 Local Asset Cross-Verification & Multi-Tenant Catalog Mapping
 - **Local Folder Asset Audit**: Audited `Tandoori stop` and `Jush Menu Pics` directory files, cross-verifying images, logos, banners, and menu items across multi-tenant brand entities (`seenbanao`: 1, `dineatblue`: 2, `jushhpk`: 3, `tandooristoppk`: 4, `sandmelts`: 5, `birdmanfoodspk`: 6, `getafomo`: 7).
 - **Multi-Tenant Database & Cloudinary Binding**: Verified `upload_tandoori_stop_assets.py` asset mapping (41 menu items + logo/cover/banner bound to Cloudinary CDN) and synced DRF backend database models (`Restaurant`, `MenuCategory`, `MenuItem`).

@@ -24,3 +24,19 @@
 - **Files modified**: `websites/shared_catalog.json`, `websites/live_catalog.js`, `fix_website_product_images.py`, `upload_tandoori_stop_assets.py`, `sync_app_to_web_catalog.py`, `inject_live_catalog.py`, `CHANGELOG.md`, `BUILD.md`.
 - **Self-corrections used**: 0/3.
 - **Confidence score**: 98%.
+
+---
+
+## Phase 2 — Local Development Server Launch & Shutdown — 2026-08-06
+- **What was done**: Launched full local development environment (Django REST API on 8000, Vite Admin HQ on 5173, Web App on 3000, Expo Metro on 8081). Upon request, cleanly terminated all active background localhost server processes.
+- **Files modified**: None (Runtime server management).
+- **Self-corrections used**: 0/3.
+- **Confidence score**: 100%.
+
+---
+
+## Phase 3 — Auth Session Loss & Order History Hydration Fix — 2026-08-06
+- **What was done**: Fixed persistent auth session loss, guest fallback loops during bottom tab navigation, and un-hydrated order history for logged-in users across all accounts.
+- **Files modified**: `app/src/store/userSlice.ts`, `app/src/screens/AuthScreen.tsx`, `app/src/screens/OrdersScreen.tsx`, `app/src/services/api.js`, `CHANGELOG.md`, `BUILD.md`.
+- **Self-corrections used**: 1/3 (Resolved TS2304 variable scoping error in `userSlice.ts`).
+- **Confidence score**: 100%.

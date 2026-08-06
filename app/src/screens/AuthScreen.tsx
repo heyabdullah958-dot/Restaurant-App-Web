@@ -119,14 +119,19 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     }
     
     dispatch(clearError());
-    const result = await dispatch(guestLogin());
-    if (guestLogin.fulfilled.match(result)) {
-      dispatch(updateUserProfile({ 
-        username: `User_${phone.slice(-4)}`, 
-        phone: phone.trim(),
-        email: `phone_user_${phone.slice(-4)}@getfood.pk`,
-        is_guest: false
-      }));
+    const sanitizePhone = phone.replace(/[^0-9]/g, '');
+    const genUsername = `user_${sanitizePhone}`;
+    const genEmail = `phone_${sanitizePhone}@getfood.pk`;
+    const genPassword = `PhonePass_${sanitizePhone.slice(-4)}!123`;
+
+    // Try logging in existing phone user first
+    let result = await dispatch(loginUser({ username: genUsername, password: genPassword }));
+    if (!loginUser.fulfilled.match(result)) {
+      // If user does not exist, register account automatically
+      result = await dispatch(registerUser({ username: genUsername, email: genEmail, password: genPassword, phone: phone.trim() }));
+    }
+
+    if (loginUser.fulfilled.match(result) || registerUser.fulfilled.match(result)) {
       showAlert('Success', 'Phone verification successful! Welcome to GetFood.');
     }
   };
@@ -135,14 +140,16 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     setGoogleModalVisible(false);
     dispatch(clearError());
     
-    const result = await dispatch(guestLogin());
-    if (guestLogin.fulfilled.match(result)) {
-      dispatch(updateUserProfile({ 
-        username: displayName, 
-        email: selectedEmail,
-        phone: '+92 300 1234567',
-        is_guest: false
-      }));
+    const sanitizeName = displayName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const genUsername = `g_${sanitizeName}`;
+    const genPassword = `GooglePass_${selectedEmail.slice(0, 4)}!123`;
+
+    let result = await dispatch(loginUser({ username: genUsername, password: genPassword }));
+    if (!loginUser.fulfilled.match(result)) {
+      result = await dispatch(registerUser({ username: genUsername, email: selectedEmail, password: genPassword, phone: '+92 300 1234567' }));
+    }
+
+    if (loginUser.fulfilled.match(result) || registerUser.fulfilled.match(result)) {
       showAlert('Google Sign-In Success', `Welcome, ${displayName}! You have logged in with ${selectedEmail}.`);
     }
   };

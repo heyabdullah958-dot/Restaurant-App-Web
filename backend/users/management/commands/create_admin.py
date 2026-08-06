@@ -27,13 +27,8 @@ class Command(BaseCommand):
             user.is_superuser = True
             user.is_staff = True
             user.is_active = True
-        # Ensure abdullah1 test account password is set to Password123
-        try:
-            test_user = User.objects.filter(username='abdullah1').first()
-            if test_user:
-                test_user.set_password('Password123')
-                test_user.is_guest = False
-                test_user.save()
-                self.stdout.write(self.style.SUCCESS('Customer "abdullah1" password set to Password123 successfully.'))
-        except Exception as e:
+            user.save()
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" updated successfully.'))
+        else:
+            self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
             self.stdout.write(self.style.WARNING(f'Failed to set abdullah1 password: {e}'))
