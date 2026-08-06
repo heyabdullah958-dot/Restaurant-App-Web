@@ -454,7 +454,7 @@ const userSlice = createSlice({
           state.user = action.payload.user;
           state.token = action.payload.token;
           state.refreshToken = action.payload.refreshToken;
-          state.isAuthenticated = true;
+          state.isAuthenticated = Boolean(action.payload.user && !action.payload.user.is_guest);
         }
       })
       .addCase(loadSavedToken.rejected, (state) => {
@@ -504,7 +504,7 @@ const userSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
-        state.isAuthenticated = true;
+        state.isAuthenticated = false;
       })
       .addCase(guestLogin.rejected, (state, action) => {
         state.loading = false;
