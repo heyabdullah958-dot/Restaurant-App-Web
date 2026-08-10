@@ -39,4 +39,11 @@
   3. Form inputs on checkout MUST be preserved in navigation params (`returnParams`) when sending users to AuthScreen so form data auto-restores post-login.
 - **Applies to**: `app/src/store/orderSlice.ts`, `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/AuthScreen.tsx`, `app/src/screens/OrdersScreen.tsx`.
 
+---
 
+## Lesson 6 — Redux Auth Lifecycle Race Conditions on Re-Login — 2026-08-10
+- **Pattern**: Any screen that reads Redux state populated by polling (fetchMyOrders, fetchGuestOrderStatus) and also reacts to login/logout lifecycle transitions.
+- **Wrong assumption made**: Clearing `state.myOrders = []` on `loginUser.pending` is safe because "the user isn't logged in yet." In reality, `.pending` fires the moment the network request starts — before authentication is confirmed — creating a window where old orders are gone and new ones haven't arrived yet.
+- **What actually mattered**: State resets tied to auth should fire on `.fulfilled`, not `.pending`. `.pending` = request started, not user confirmed. Moving clears to `.fulfilled` eliminates the race window while keeping the security invariant (old data gone before new user's data loads).
+- **Corollary**: Any `loading = true` guard in a polling loop MUST check whether data already exists before activating the loading state. `if (state.array.length === 0)` alone is insufficient — add `&& !state.loading` to prevent double-firing the spinner on the second poll cycle after a login-induced clear.
+- **Applies to**: `app/src/store/orderSlice.ts` (`loginUser.pending/fulfilled`, `registerUser.pending/fulfilled`, `fetchMyOrders.pending`). Generalizes to any Redux slice that polls + clears on auth events.

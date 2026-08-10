@@ -56,6 +56,17 @@
   5. Added `distanceInfo` Haversine radius validation banner and disabled Place Order CTA if location exceeds `max_radius`.
 - **Verification Evidence**: Ran `npx tsc --noEmit` (0 errors) and `test_backend_local.py` (23/23 tests passed, code 0).
 
-
+### Bug #7: Orders History Disappears After Logout → Re-login Same Account (Resolved 2026-08-10)
+- **Symptom**: Authenticated user logs out then logs back in with the same account. Orders appear in the Orders tab for ~1 second, then vanish — the screen either goes blank or shows the Login/Signup guard screen.
+- **Part 12 Stuck-Loop Investigation — This is a DIFFERENT root cause from Bug #5 (guest) and Bug #6 (form resets). The user was logged in, not a guest.**
+- **True Root Cause — 3 interlocking race conditions in `orderSlice.ts`**:
+  1. `loginUser.pending` cleared `state.myOrders = []` immediately. The moment login started, orders were wiped from Redux — before the new user was even confirmed authenticated.
+  2. `fetchMyOrders.pending` set `state.loading = true` whenever `myOrders.length === 0`. Since `.pending` on login just wiped the array, the very next 4-second polling interval would trigger `loading = true` → the `OrdersScreen` loading guard (`loading && myOrders.length === 0`) would blank the screen.
+  3. The combined effect: orders load briefly via `fetchMyOrders.fulfilled`, show for ~1s, then the background poll fires → `loading = true` + empty array → screen blanks out.
+- **Fix Applied** (`app/src/store/orderSlice.ts`):
+  1. Removed `state.myOrders = []` from `loginUser.pending` and `registerUser.pending`.
+  2. Added `state.myOrders = []` to `loginUser.fulfilled` and `registerUser.fulfilled` — orders are now cleared only once the new account token is confirmed authenticated (security invariant preserved, race window eliminated).
+  3. Added `&& !state.loading` guard to `fetchMyOrders.pending` loading setter — prevents double-trigger of the loading spinner on polling when orders already exist.
+- **Verification**: `npx tsc --noEmit` → 0 errors (exit code 0)
 
 

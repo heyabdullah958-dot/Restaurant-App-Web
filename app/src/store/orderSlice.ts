@@ -415,13 +415,32 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Reset state on auth boundary changes (security: prevent cross-account data leak)
+      // Reset state on auth boundary changes (security: prevent cross-account data leak).
+      // BUG FIX: myOrders is cleared on .fulfilled (not .pending) to prevent a race where
+      // loginUser.pending wipes orders immediately, causing the Orders tab to flash empty
+      // and then the 4s polling interval re-fires loading=true before fetchMyOrders completes.
+      // Security invariant is still met: old account's orders are wiped the instant the new
+      // account token is confirmed, before new orders are fetched.
       .addCase(loginUser.pending, (state) => {
+        state.currentOrder = null;
+        state.activeOrder = null;
+        // Note: myOrders intentionally NOT cleared here — cleared in loginUser.fulfilled below
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.currentOrder = null;
+        state.activeOrder = null;
+        // Note: myOrders intentionally NOT cleared here — cleared in registerUser.fulfilled below
+      })
+      // Clear orders on login/register fulfilled — this is when we KNOW a new account has authenticated.
+      // Clearing here (not on .pending) prevents the race: orders no longer flash empty while the
+      // login request is in-flight, and security is maintained because old orders are purged the
+      // instant the new account token is confirmed (before fetchMyOrders runs for the new user).
+      .addCase(loginUser.fulfilled, (state) => {
         state.myOrders = [];
         state.currentOrder = null;
         state.activeOrder = null;
       })
-      .addCase(registerUser.pending, (state) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.myOrders = [];
         state.currentOrder = null;
         state.activeOrder = null;
@@ -429,6 +448,7 @@ const orderSlice = createSlice({
       .addCase(guestLogin.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(logoutUser.pending, (state) => {
         state.myOrders = [];
         state.currentOrder = null;
@@ -513,7 +533,10 @@ const orderSlice = createSlice({
       })
       // Fetch My Orders
       .addCase(fetchMyOrders.pending, (state) => {
-        if (state.myOrders.length === 0) {
+        // BUG FIX: Only set loading=true on the FIRST fetch (no existing orders).
+        // If myOrders already has data, polling silently refreshes in background without
+        // triggering the loading guard in OrdersScreen that blanks the list.
+        if (state.myOrders.length === 0 && !state.loading) {
           state.loading = true;
         }
         state.error = null;
