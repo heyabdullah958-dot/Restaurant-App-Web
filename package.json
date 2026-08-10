@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "FoodSphere unified app prototype and brand websites",
   "scripts": {
-    "dev": "npx http-server -p 8000"
+    "dev": "npx http-server -p 8000",
+    "build": "cd admin && npm install && npm run build"
   }
 }
