@@ -14,7 +14,7 @@ from .serializers import (
 
 class OrderListCreateView(generics.ListCreateAPIView):
     """
-    POST /api/orders/ - Place a new order (AllowAny).
+    POST /api/orders/ - Place a new order (IsAuthenticated).
     GET /api/orders/ - List all orders (IsAdminUser) for dashboard sales aggregates.
     """
     def get_serializer_class(self):
@@ -25,7 +25,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [permissions.AllowAny()]
+            return [permissions.IsAuthenticated()]
         return [permissions.IsAdminUser()]
 
     def get_throttles(self):

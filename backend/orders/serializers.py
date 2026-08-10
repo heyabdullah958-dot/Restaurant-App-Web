@@ -68,25 +68,18 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         Validate guest fields, operating hours, distance radius, coupon validity, min order amount, and loyalty redemption.
         """
-        request = self.context.get('request')
+        # Enforce registered account requirement — zero guest orders permitted
+        user = getattr(request, 'user', None) if request else None
+        if not user or user.is_anonymous or getattr(user, 'is_guest', False):
+            raise serializers.ValidationError(
+                "Account registration is required to place an order. Please sign in or register."
+            )
 
         # Require phone for all users
-        is_guest_or_anon = (
-            not request or
-            not request.user or
-            request.user.is_anonymous or
-            (hasattr(request.user, 'is_guest') and request.user.is_guest)
-        )
-        
-        has_phone = bool(attrs.get('guest_phone')) or (not is_guest_or_anon and getattr(request.user, 'phone', None))
+        has_phone = bool(attrs.get('guest_phone')) or getattr(user, 'phone', None)
         if not has_phone:
             raise serializers.ValidationError(
                 "A contact phone number is required to place an order."
-            )
-
-        if is_guest_or_anon and not attrs.get('guest_name'):
-            raise serializers.ValidationError(
-                "Guest name is required for guest checkout."
             )
 
         # Must have at least one item
@@ -260,27 +253,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 coupon = Coupon.objects.filter(code__iexact=str(coupon_code_param).strip(), is_active=True).first()
 
             request = self.context.get('request')
-            user = None
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
+            user = getattr(request, 'user', None) if request else None
+            if not user or user.is_anonymous or getattr(user, 'is_guest', False):
+                raise serializers.ValidationError("Account registration is required to place an order.")
 
-            if request and request.user and request.user.is_authenticated and not request.user.is_guest:
-                user = request.user
-                if not user.phone and validated_data.get('guest_phone'):
-                    user.phone = str(validated_data.get('guest_phone')).strip()
-                    user.save(update_fields=['phone'])
-            else:
-                # Fuzzy match guest name or phone against registered users
-                g_name = str(validated_data.get('guest_name') or '').strip()
-                g_phone = str(validated_data.get('guest_phone') or '').strip()
-                
-                matched = None
-                if g_name:
-                    matched = User.objects.filter(username__iexact=g_name, is_guest=False).first()
-                if not matched and g_phone:
-                    matched = User.objects.filter(phone=g_phone, is_guest=False).first()
-                if matched:
-                    user = matched
+            if not user.phone and validated_data.get('guest_phone'):
+                user.phone = str(validated_data.get('guest_phone')).strip()
+                user.save(update_fields=['phone'])
+            
+            validated_data['user'] = user
 
             subtotal = Decimal('0.00')
             order_items_to_create = []

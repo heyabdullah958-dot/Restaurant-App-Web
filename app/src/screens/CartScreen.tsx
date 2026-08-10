@@ -191,10 +191,6 @@ export default function CartScreen() {
   const grandTotal = Math.max(0, cart.totalAmount - promoDiscount + deliveryFee);
 
   const handleProceedToCheckout = () => {
-    if (!isAuthenticated || user?.is_guest) {
-      setShowAuthChoiceModal(true);
-      return;
-    }
     navigation.navigate('Checkout', {
       coupon_code: appliedPromo?.code || null,
       discount_amount: promoDiscount,

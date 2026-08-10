@@ -215,50 +215,56 @@ export default function CheckoutScreen() {
     };
   }, [fulfillmentMode, customerCoords, selectedBranchId, branches]);
 
-  // Hydrate user profile or saved guest info on mount
+  // Hydrate user profile or saved checkout form info on mount / post-auth
   React.useEffect(() => {
     const routeParams = (navigation as any).getState?.()?.routes?.find((r: any) => r.name === 'Checkout')?.params || {};
-    if (user && !user.is_guest) {
-      if (user.addresses && user.addresses.length > 0 && user.addresses[0]) {
-        setAddress(user.addresses[0]);
-      } else if (routeParams.savedAddress) {
-        setAddress(routeParams.savedAddress);
-      }
-      const displayName = user.name || user.username;
-      if (displayName) {
-        setGuestName(displayName);
-      } else if (routeParams.savedGuestName) {
-        setGuestName(routeParams.savedGuestName);
-      }
-      if (user.phone) {
-        setGuestPhone(user.phone);
-      } else if (routeParams.savedGuestPhone) {
-        setGuestPhone(routeParams.savedGuestPhone);
-      }
-    } else {
-      const loadSavedGuestInfo = async () => {
-        try {
-          const savedName = routeParams.savedGuestName || (await AsyncStorage.getItem('@foodsphere_guest_name'));
-          const savedPhone = routeParams.savedGuestPhone || (await AsyncStorage.getItem('@foodsphere_guest_phone'));
-          const savedAddress = routeParams.savedAddress || (await AsyncStorage.getItem('@foodsphere_guest_address'));
-
-          if (savedName && !guestName) {
-            setGuestName(savedName);
-          }
-          if (savedPhone && !guestPhone) {
-            setGuestPhone(savedPhone);
-          }
-          if (savedAddress && !address) {
-            setAddress(savedAddress);
-          }
-        } catch (e) {
-          if (__DEV__) console.warn('Failed to load saved guest info from AsyncStorage:', e);
+    
+    const restoreSavedForm = async () => {
+      let savedObj: any = null;
+      try {
+        const storedJson = await AsyncStorage.getItem('@getfood_checkout_saved_form');
+        if (storedJson) {
+          savedObj = JSON.parse(storedJson);
+          await AsyncStorage.removeItem('@getfood_checkout_saved_form');
         }
-      };
+      } catch (e) {}
 
-      loadSavedGuestInfo();
-    }
-  }, [user]);
+      const name = savedObj?.savedGuestName || routeParams?.savedGuestName;
+      const phone = savedObj?.savedGuestPhone || routeParams?.savedGuestPhone;
+      const addr = savedObj?.savedAddress || routeParams?.savedAddress;
+      const inst = savedObj?.savedInstructions || routeParams?.savedInstructions;
+      const branchId = savedObj?.savedBranchId || routeParams?.savedBranchId;
+      const tableNum = savedObj?.savedTableNumber || routeParams?.savedTableNumber;
+      const payMethod = savedObj?.savedPaymentMethod || routeParams?.savedPaymentMethod;
+      const sched = savedObj?.savedIsScheduled || routeParams?.savedIsScheduled;
+      const sDate = savedObj?.savedSchedDate || routeParams?.savedSchedDate;
+      const sTime = savedObj?.savedSchedTime || routeParams?.savedSchedTime;
+      const loyalty = savedObj?.savedUseLoyaltyPoints || routeParams?.savedUseLoyaltyPoints;
+      const promo = savedObj?.savedPromoCode || routeParams?.savedPromoCode;
+
+      if (user && !user.is_guest) {
+        setGuestName(user.name || user.username || name || '');
+        setGuestPhone(user.phone || phone || '');
+        setAddress(user.addresses?.[0] || addr || '');
+      } else {
+        if (name) setGuestName(name);
+        if (phone) setGuestPhone(phone);
+        if (addr) setAddress(addr);
+      }
+
+      if (inst) setInstructions(inst);
+      if (branchId) setSelectedBranchId(branchId);
+      if (tableNum) setTableNumberInput(tableNum);
+      if (payMethod) setPaymentMethod(payMethod);
+      if (sched !== undefined && typeof sched === 'boolean') setIsScheduled(sched);
+      if (sDate) setSchedDate(sDate);
+      if (sTime) setSchedTime(sTime);
+      if (loyalty !== undefined && typeof loyalty === 'boolean') setUseLoyaltyPoints(loyalty);
+      if (promo) setPromoCodeInput(promo);
+    };
+
+    restoreSavedForm();
+  }, [user, navigation]);
 
   // Load branches for selected restaurant on focus & poll every 10s
   useFocusEffect(
@@ -455,6 +461,51 @@ export default function CheckoutScreen() {
       return;
     }
 
+    // Intercept unauthenticated / guest user order execution
+    if (!isAuthenticated || !user || user.is_guest) {
+      const returnParams = {
+        savedGuestName: effectiveName,
+        savedGuestPhone: effectivePhone,
+        savedAddress: address.trim(),
+        savedInstructions: instructions.trim(),
+        savedBranchId: selectedBranchId,
+        savedFulfillmentMode: fulfillmentMode,
+        savedTableNumber: tableNumberInput,
+        savedPaymentMethod: paymentMethod,
+        savedIsScheduled: isScheduled,
+        savedSchedDate: schedDate,
+        savedSchedTime: schedTime,
+        savedUseLoyaltyPoints: useLoyaltyPoints,
+        savedPromoCode: appliedPromo?.code || null,
+      };
+
+      showAlert(
+        'Sign In Required to Complete Order',
+        'Account registration is required to place an order. Please sign in or register to complete your order — your delivery details and cart will be saved!',
+        [
+          {
+            text: 'Sign In / Register',
+            onPress: async () => {
+              hideAlert();
+              try {
+                await AsyncStorage.setItem('@getfood_checkout_saved_form', JSON.stringify(returnParams));
+              } catch (e) {}
+              (navigation as any).navigate('Auth', {
+                returnScreen: 'Checkout',
+                returnParams,
+              });
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: hideAlert,
+          },
+        ]
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     isSubmittingRef.current = true;
 
@@ -512,16 +563,7 @@ export default function CheckoutScreen() {
     };
 
     try {
-      // 4. Automatically perform guest login if anonymous to bind it to a persistent guest session
-      if (!isAuthenticated) {
-        try {
-          await dispatch(guestLogin()).unwrap();
-        } catch (e) {
-          if (__DEV__) console.warn('Guest login error in checkout, proceeding with guest payload:', e);
-        }
-      }
-
-      // 5. Dispatch placeOrder
+      // 4. Dispatch placeOrder directly for authenticated user
       const resultAction = await dispatch(placeOrder(orderData));
       
       if (placeOrder.fulfilled.match(resultAction)) {
