@@ -61,7 +61,15 @@ const MainLayout: React.FC = () => {
   const isSuper = user.role === 'super_admin';
   const activeRestaurant = restaurants.find((r) => r.id === selectedBrandId) || restaurants[0];
 
-  const SUPER_ADMIN_VIEWS = ['super_dashboard', 'tenant_management', 'manager_management'];
+  const SUPER_ADMIN_VIEWS = [
+    'super_dashboard',
+    'tenant_management',
+    'customer_management',
+    'manager_management',
+    'notification_center',
+    'promo_management',
+    'flash_deal_management'
+  ];
 
   // Helper to render the correct view
   const renderView = () => {
@@ -82,15 +90,15 @@ const MainLayout: React.FC = () => {
       case 'rider_management':
         return <RiderManagement />;
       case 'notification_center':
-        return <NotificationCenter />;
+        return isSuper ? <NotificationCenter /> : <BranchDashboard />;
       case 'customer_management':
-        return <CustomerManagement />;
+        return isSuper ? <CustomerManagement /> : <BranchDashboard />;
       case 'manager_management':
         return isSuper ? <ManagerManagement /> : <BranchDashboard />;
       case 'promo_management':
-        return <PromoManagement />;
+        return isSuper ? <PromoManagement /> : <BranchDashboard />;
       case 'flash_deal_management':
-        return <FlashDealManagement />;
+        return isSuper ? <FlashDealManagement /> : <BranchDashboard />;
       default:
         return isSuper ? <SuperDashboard /> : <BranchDashboard />;
     }
