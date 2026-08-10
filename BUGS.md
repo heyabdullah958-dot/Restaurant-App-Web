@@ -69,4 +69,8 @@
   3. Added `&& !state.loading` guard to `fetchMyOrders.pending` loading setter — prevents double-trigger of the loading spinner on polling when orders already exist.
 - **Verification**: `npx tsc --noEmit` → 0 errors (exit code 0)
 
-
+### Bug #8: Infinite 401 → sessionExpired → myOrders Wipe Loop (ACTUAL Root Cause — Resolved 2026-08-10)
+- **Symptom**: Orders disappear after re-login. Metro logs showed `401 Unauthorized → [API Interceptor] session expired. Purging tokens and resetting state...` repeating every 4 seconds.
+- **Part 12 — Bug #7 fix was wrong diagnosis**: The real issue was `ROTATE_REFRESH_TOKENS=True` + `BLACKLIST_AFTER_ROTATION=True` in Django settings. Every refresh rotates and blacklists the old token. But `loadSavedToken` (userSlice.ts) and the `api.js` 401 interceptor both saved the new `access` token while **discarding the new `refresh` token**. Old (blacklisted) refresh stayed in AsyncStorage → next 401 → interceptor sends blacklisted refresh → 401 → `sessionExpired` dispatched → `myOrders=[]` wiped → infinite loop.
+- **Fix Applied**: Both `userSlice.ts loadSavedToken` and `api.js` interceptor now parse and save `response.data?.refresh` alongside `response.data?.access` after every successful token refresh.
+- **Verification**: `npx tsc --noEmit` → 0 errors. Backend confirmed healthy via Python test (admin login + profile + my-orders = all 200 OK).
