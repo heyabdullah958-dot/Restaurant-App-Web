@@ -65,6 +65,11 @@
 4. **100% Passing Automated Integration Test Suite**:
    - Ran `test_backend_local.py` across all 11 core subsystems (100% Pass Rate).
 
+5. **JWT Token Rotation & Session Expiry Resolution (2026-08-10)**:
+   - Diagnosed and resolved the root cause of orders history disappearing after re-login.
+   - Refactored `loadSavedToken` in `userSlice.ts` to validate active access tokens via `GET /users/profile/` instead of proactively executing `/auth/refresh/` on app launch.
+   - Fixed token rotation persistence across `userSlice.ts` and `api.js` to save both access and rotated refresh tokens to `AsyncStorage` (`auth_token` and `refresh_token`), preventing token blacklisting loops.
+
 ---
 
 ## ⏳ 5. Client Pending Action Items (For Production Handoff)

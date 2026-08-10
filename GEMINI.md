@@ -166,6 +166,7 @@ FoodSphere/
 | Admin Live SLA Monitoring Timers | ✅ Completed (`OrderManagement.tsx` <15m green, 15-30m amber, >30m overdue pulse) | Done |
 | SuperDashboard Today vs Yesterday Trends | ✅ Completed (`SuperDashboard.tsx` sales & order count growth indicators) | Done |
 | GetFood App Rebrand Configuration | ✅ Completed (`app.json`, `AuthScreen`, `HomeScreen` branding updated) | Done |
+| JWT Token Rotation & Session Expiry Fix | ✅ Completed (Eliminated proactive token refresh race condition & blacklisting) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -208,6 +209,7 @@ FoodSphere/
 21. **Persistent Search & App Rebrand Invariant:** App Expo configuration MUST be named `GetFood` in `app.json`. Recent search history MUST be persisted locally via `AsyncStorage` (`@getfood_recent_searches`).
 22. **Brand Website Cloudflare Pages Deployment Invariant:** The 7 individual brand websites (`seenbanao`, `dineatblue`, `jushhpk`, `tandooristoppk`, `sandmelts`, `birdmanfoodspk`, `getafomo`) are deployed to Cloudflare Pages via **Wrangler Direct Upload** (`Git Provider: No`). Any updates to `websites/` MUST be deployed using `npx wrangler pages deploy websites/<brand_slug> --project-name=<brand_slug>-foodsphere` in addition to pushing code to GitHub `main`.
 23. **Cart Drawer Image & Asset Fallback Invariant:** `CartDrawer.addItem` and `findProductImage` MUST resolve item images dynamically from `window.menuData` (`image_url` / `image` / `thumbnail`), DOM card images, or local brand asset paths (`./images/...`). Unsplash URLs (`https://images.unsplash.com/...`) MUST NEVER be returned by `resolveItemImage()` or used as fallbacks in `live_catalog.js` or `CartDrawer` components. If an item has no image, a clean emoji badge (e.g. `🫓`, `🍖`, `🍟`, `🥤`) MUST be rendered.
+24. **JWT Token Rotation & App Launch Invariant:** `loadSavedToken` in `userSlice.ts` MUST NEVER proactively trigger `/auth/refresh/` on app launch. Since Django backend uses `ROTATE_REFRESH_TOKENS=True` and `BLACKLIST_AFTER_ROTATION=True`, proactive refresh invalidates the stored refresh token and creates a race condition where concurrent API requests receive HTTP 401, triggering `sessionExpired` purges. `loadSavedToken` MUST validate the active `auth_token` via `GET /users/profile/` first, and ONLY refresh if `/users/profile/` returns HTTP 401. Furthermore, any token refresh MUST save both the new `access` token and the rotated `refresh` token to `AsyncStorage` (`auth_token` and `refresh_token`), and the API 401 interceptor MUST skip `sessionExpired` dispatches if `!isAuthenticated` or user is a guest.
 
 ---
 
