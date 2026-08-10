@@ -34,8 +34,12 @@ class CouponValidateView(views.APIView):
         })
 
 class CouponListCreateView(generics.ListCreateAPIView):
-    permission_classes = [permissions.AllowAny]
     serializer_class = CouponSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.IsAdminUser()]
+        return [permissions.IsAdminUser()]
 
     def get_queryset(self):
         qs = Coupon.objects.all().order_by('-created_at')
@@ -48,7 +52,7 @@ class CouponListCreateView(generics.ListCreateAPIView):
         return qs
 
 class CouponDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAdminUser]
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
 
@@ -70,8 +74,12 @@ class ActiveCouponsView(generics.ListAPIView):
         return qs
 
 class FlashDealListCreateView(generics.ListCreateAPIView):
-    permission_classes = [permissions.AllowAny]
     serializer_class = FlashDealSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
 
     def get_queryset(self):
         qs = FlashDeal.objects.all().order_by('-created_at')
@@ -96,7 +104,12 @@ class ActiveFlashDealsView(generics.ListAPIView):
         return qs
 
 class FlashDealDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.AllowAny]
     queryset = FlashDeal.objects.all()
     serializer_class = FlashDealSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
+
 

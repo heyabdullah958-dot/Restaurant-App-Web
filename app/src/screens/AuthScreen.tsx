@@ -37,7 +37,7 @@ const getPasswordStrength = (pass: string): { level: number; label: string; colo
   return { level: 3, label: 'Medium', color: COLORS.secondary };
 };
 
-export default function AuthScreen({ navigation }: { navigation: any }) {
+export default function AuthScreen({ navigation, route }: { navigation: any; route?: any }) {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, isAuthenticated, user } = useSelector((state: RootState) => state.user);
 
@@ -182,17 +182,29 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
   };
 
   useEffect(() => {
-    // If authenticated, perform atomic navigation reset to Main App Flow
+    // If authenticated, perform atomic navigation reset to Main App Flow or target returnScreen
     if (isAuthenticated) {
       if (user && !user.is_guest) {
         dispatch(fetchMyOrders());
       }
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+      const returnScreen = route?.params?.returnScreen;
+      const returnParams = route?.params?.returnParams || {};
+      if (returnScreen) {
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'Main' },
+            { name: returnScreen as any, params: returnParams },
+          ],
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      }
     }
-  }, [isAuthenticated, user, navigation, dispatch]);
+  }, [isAuthenticated, user, navigation, dispatch, route]);
 
   useEffect(() => {
     // Clear any stale Redux errors from background operations (loadSavedToken)
@@ -276,9 +288,27 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
     }
   };
 
-  const handleGuestLogin = () => {
+  const handleGuestLogin = async () => {
     dispatch(clearError());
-    dispatch(guestLogin());
+    const result = await dispatch(guestLogin());
+    if (guestLogin.fulfilled.match(result)) {
+      const returnScreen = route?.params?.returnScreen;
+      const returnParams = route?.params?.returnParams || {};
+      if (returnScreen) {
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'Main' },
+            { name: returnScreen as any, params: returnParams },
+          ],
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      }
+    }
   };
 
   return (
@@ -289,6 +319,20 @@ export default function AuthScreen({ navigation }: { navigation: any }) {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
+        {/* Top Back to Browsing Link */}
+        {navigation.canGoBack() && (
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}
+            activeOpacity={0.75}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
+            <Text style={{ fontSize: 14, fontWeight: '600', color: COLORS.dark, marginLeft: 6 }}>
+              Back to Browsing
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Brand Header */}
         <View style={styles.headerContainer}>
           <View style={styles.logoBadge}>

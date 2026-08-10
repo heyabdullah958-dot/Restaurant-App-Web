@@ -219,6 +219,7 @@ class OrderTrackView(APIView):
     Universal Live Order Status Tracking Endpoint.
     Allows any customer (authenticated or guest) to query live status, step, rider details,
     estimated time, and restaurant/branch info for Order #<pk> without authorization restrictions.
+    Redacts sensitive PII (phone & exact address) unless valid tracking_token or owner auth is present.
     """
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
@@ -234,13 +235,27 @@ class OrderTrackView(APIView):
                     query |= Q(pk=int(pk))
                 order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(query)
             elif token:
-                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(tracking_token=token)
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(tracking_token=str(token).strip())
             else:
                 return Response({'success': False, 'message': 'order_id or token required'}, status=status.HTTP_400_BAD_REQUEST)
         except Order.DoesNotExist:
             return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        data = OrderDetailSerializer(order).data
+        data = OrderDetailSerializer(order, context={'request': request}).data
+
+        # PII Protection: Redact phone & address if token is missing/invalid and user is not owner/staff
+        user = request.user
+        is_owner_or_staff = user and user.is_authenticated and (
+            (order.user and order.user == user) or user.is_staff
+        )
+        has_valid_token = bool(token and str(order.tracking_token).strip() == str(token).strip())
+
+        if not (is_owner_or_staff or has_valid_token):
+            data['guest_phone'] = None
+            data['delivery_address'] = "[Protected]"
+            data['delivery_lat'] = None
+            data['delivery_lng'] = None
+
         return Response({
             'success': True,
             'message': 'Live tracking data fetched',
@@ -354,22 +369,24 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                 existing_txs = list(LoyaltyTransaction.objects.filter(order=instance))
                 for tx in existing_txs:
                     if tx.transaction_type == 'redeemed':
-                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') + tx.points)
+                        pts_refund = abs(tx.points)
+                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') + pts_refund)
                         LoyaltyTransaction.objects.create(
                             user=instance.user,
                             order=instance,
-                            points=tx.points,
+                            points=pts_refund,
                             transaction_type='earned',
-                            description=f"Refunded {tx.points} pts for cancelled Order #{instance.id}"
+                            description=f"Refunded {pts_refund} pts for cancelled Order #{instance.id}"
                         )
                     elif tx.transaction_type == 'earned':
-                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') - tx.points)
+                        pts_revert = abs(tx.points)
+                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') - pts_revert)
                         LoyaltyTransaction.objects.create(
                             user=instance.user,
                             order=instance,
-                            points=tx.points,
+                            points=-pts_revert,
                             transaction_type='redeemed',
-                            description=f"Reverted {tx.points} earned pts for cancelled Order #{instance.id}"
+                            description=f"Reverted {pts_revert} earned pts for cancelled Order #{instance.id}"
                         )
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)

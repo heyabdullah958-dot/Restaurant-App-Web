@@ -650,6 +650,26 @@ export default function CheckoutScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Guest Mode Banner */}
+          {isGuestMode && (
+            <View style={styles.guestBannerRow}>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Ionicons name="sparkles" size={18} color={COLORS.secondary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guestBannerTitle}>Guest Checkout Mode</Text>
+                  <Text style={styles.guestBannerSub}>Sign in now to earn loyalty rewards on this order!</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.guestBannerBtn}
+                onPress={() => navigation.navigate('Auth', { returnScreen: 'Checkout' })}
+              >
+                <Text style={styles.guestBannerBtnText}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Restaurant Banner */}
           {restaurant && (
             <View style={styles.restaurantInfo}>
@@ -1466,5 +1486,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: SPACING.xs,
+  },
+  guestBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff7ed',
+    borderWidth: 1,
+    borderColor: '#ffedd5',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  guestBannerTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#c2410c',
+  },
+  guestBannerSub: {
+    fontSize: 11,
+    color: '#9a3412',
+  },
+  guestBannerBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  guestBannerBtnText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });

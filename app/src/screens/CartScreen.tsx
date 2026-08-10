@@ -15,6 +15,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,6 +28,7 @@ import { AppDispatch, RootState } from '../store';
 import { updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlice';
 import { placeOrder } from '../store/orderSlice';
 import { fetchRestaurants } from '../store/restaurantSlice';
+import { guestLogin } from '../store/userSlice';
 import { getImageUrl } from '../services/fallbackData';
 import api from '../services/api';
 
@@ -83,10 +85,12 @@ export default function CartScreen() {
 
   const cart = useSelector((state: RootState) => state.cart);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
 
-  // Promo code state
+  // Promo code & auth state
   const [promoCode, setPromoCode] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
+  const [showAuthChoiceModal, setShowAuthChoiceModal] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string;
     discount: number;
@@ -187,6 +191,32 @@ export default function CartScreen() {
   const grandTotal = Math.max(0, cart.totalAmount - promoDiscount + deliveryFee);
 
   const handleProceedToCheckout = () => {
+    if (!isAuthenticated || user?.is_guest) {
+      setShowAuthChoiceModal(true);
+      return;
+    }
+    navigation.navigate('Checkout', {
+      coupon_code: appliedPromo?.code || null,
+      discount_amount: promoDiscount,
+    });
+  };
+
+  const handleChoiceLogin = () => {
+    setShowAuthChoiceModal(false);
+    (navigation as any).navigate('Auth', {
+      returnScreen: 'Checkout',
+      returnParams: {
+        coupon_code: appliedPromo?.code || null,
+        discount_amount: promoDiscount,
+      },
+    });
+  };
+
+  const handleChoiceGuest = async () => {
+    setShowAuthChoiceModal(false);
+    if (!isAuthenticated) {
+      await dispatch(guestLogin());
+    }
     navigation.navigate('Checkout', {
       coupon_code: appliedPromo?.code || null,
       discount_amount: promoDiscount,
@@ -395,6 +425,54 @@ export default function CartScreen() {
           <Text style={styles.checkoutBtnAmount}>Rs. {grandTotal.toFixed(0)}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Deferred Auth Interceptor Modal */}
+      <Modal
+        visible={showAuthChoiceModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowAuthChoiceModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.choiceModalContent, SHADOWS.medium]}>
+            <View style={styles.choiceModalHeader}>
+              <View style={styles.choiceIconBadge}>
+                <Ionicons name="person-circle" size={42} color={COLORS.primary} />
+              </View>
+              <Text style={styles.choiceModalTitle}>How would you like to checkout?</Text>
+              <Text style={styles.choiceModalSub}>
+                Sign in to earn loyalty points, access saved addresses, and track orders live, or proceed as guest!
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.choicePrimaryBtn}
+              onPress={handleChoiceLogin}
+            >
+              <Ionicons name="log-in-outline" size={20} color={COLORS.white} />
+              <Text style={styles.choicePrimaryBtnText}>Sign In / Register (Earn Rewards)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.choiceSecondaryBtn}
+              onPress={handleChoiceGuest}
+            >
+              <Ionicons name="flash-outline" size={18} color={COLORS.dark} />
+              <Text style={styles.choiceSecondaryBtnText}>Continue as Guest</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ marginTop: 12, paddingVertical: 8, alignItems: 'center' }}
+              onPress={() => setShowAuthChoiceModal(false)}
+            >
+              <Text style={{ color: COLORS.gray, fontSize: 14, fontWeight: '600' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -751,5 +829,77 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 6,
     fontWeight: '500',
+  },
+  // Modal styles for deferred auth choice
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+  },
+  choiceModalContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: SPACING.lg,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  choiceModalHeader: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  choiceIconBadge: {
+    marginBottom: SPACING.xs,
+  },
+  choiceModalTitle: {
+    ...FONTS.title,
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: COLORS.dark,
+    marginBottom: SPACING.xs,
+  },
+  choiceModalSub: {
+    ...FONTS.body,
+    fontSize: 13,
+    color: COLORS.gray,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  choicePrimaryBtn: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 50,
+    marginBottom: SPACING.sm,
+    gap: 8,
+    ...SHADOWS.small,
+  },
+  choicePrimaryBtnText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  choiceSecondaryBtn: {
+    backgroundColor: COLORS.light,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 48,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    gap: 8,
+  },
+  choiceSecondaryBtnText: {
+    color: COLORS.dark,
+    fontWeight: '600',
+    fontSize: 15,
   },
 });

@@ -116,8 +116,6 @@ const cartSlice = createSlice({
       state.tableNumber = '';
     };
     builder
-      .addCase('user/login/pending', resetCartState)
-      .addCase('user/register/pending', resetCartState)
       .addCase('user/logout/fulfilled', resetCartState)
       .addCase('user/logout', resetCartState)
       .addCase('user/sessionExpired', resetCartState);

@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 2026-08-10 Pre-Ship Security Audit & Vulnerability Remediation
+- **Promotions & Coupon Authorization Lockdown (`promotions/views.py`)**: Secured `CouponListCreateView`, `CouponDetailView`, `FlashDealListCreateView`, and `FlashDealDetailView` by overriding `get_permissions()` to strictly enforce `permissions.IsAdminUser` for `POST`, `PUT`, `PATCH`, and `DELETE` requests.
+- **Order Tracking PII Protection Engine (`orders/views.py`)**: Updated `OrderTrackView` to automatically redact sensitive customer PII (`guest_phone`, `delivery_address`, coordinates) on integer ID queries unless a valid `tracking_token` UUID or owner authentication is provided.
+- **Loyalty Refund Sign Alignment (`orders/views.py`)**: Corrected positive balance incrementing on order cancellation refunds (`abs(tx.points)`), restoring test suite pass rate to 100%.
+- **Comprehensive Audit Verification**: 100% pass rate achieved on `test_backend_local.py` (23/23 tests passed), with 0 errors on `npx tsc --noEmit` across Mobile App (`app`) and Admin Dashboard (`admin`).
+
+
 ## 2026-08-06 Auth Session Loss & Guest Fallback Loop Architecture Overhaul
 - **Atomic Token & Profile Persistence (`userSlice.ts`)**: Updated `loginUser`, `registerUser`, and `guestLogin` to atomically persist `auth_token`, `refresh_token`, and `user_profile` in `AsyncStorage`.
 - **Phone OTP & Google Auth Token Issuance (`AuthScreen.tsx`)**: Replaced temporary guest token overrides with real authenticated user JWT token issuance and registration logic for Phone OTP and Google Sign-In.
@@ -151,5 +158,13 @@
 - **Generic Vector Icon Removal**: Refactored `RestaurantScreen.tsx` and `SearchScreen.tsx` to remove generic vector icons (`fast-food-outline` burger/drink icons) and generic stock photos (`unsplash.com`). Rendered clean transparent containers (`itemImageBlank`) when photos are missing, maintaining card alignment and `+ ADD` button positioning.
 - **Cloudinary Asset Seeding**: Uploaded local dessert and addon food photography assets (`lotus_can_dessert.jpg`, `red_velvet_can_dessert.jpg`, `nutella_can_dessert.jpg`, `cheese_addon.jpg`) to Cloudinary and bound their live URLs into JushhPK menu items.
 - **Automated 3-Brand Terminal Audit Script**: Built and executed `audit_mobile_assets.py` to audit and print terminal reports categorized by brand, confirming 31 applied original photos for JushhPK, 32 for TandooriStop, and clean blank slots for missing items with zero generic icons.
+
+## [Mobile Application Guest Browsing Mode & Deferred Auth Engine] - 2026-08-10
+- **Unauthenticated / Guest Discovery Access**: Modified router & onboarding lifecycle so unauthenticated users land directly into `MainTabs` as guests to explore restaurants, filter categories, search dishes, and populate their shopping cart without mandatory upfront login.
+- **Deferred Auth Interceptor Modal**: Added a modal interceptor on `CartScreen.tsx` "Proceed to Checkout" action giving users a 1-tap choice to either "Sign In / Register (Earn Rewards)" or "Continue as Guest".
+- **Context-Preserved Auth Redirection**: Configured `AuthScreen.tsx` with `returnScreen` parameter support to automatically reset navigation back to `CheckoutScreen` post-login/registration.
+- **Redux Cart State Conversion Protection**: Updated `cartSlice.ts` extraReducers to remove `user/login/pending` and `user/register/pending` from resetting cart state, ensuring guest cart items are preserved 100% intact when converting to a logged-in user.
+- **Guest Checkout Banner & Header Actions**: Added a Guest Mode sign-in tip banner in `CheckoutScreen.tsx` and a 1-tap `Sign In` header button in `HomeScreen.tsx`.
+
 
 

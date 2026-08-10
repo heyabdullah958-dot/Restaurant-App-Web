@@ -776,6 +776,15 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
 
         <View style={styles.headerActions}>
+          {(!isAuthenticated || user?.is_guest) && (
+            <TouchableOpacity
+              style={{ backgroundColor: COLORS.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, marginRight: 6 }}
+              onPress={() => navigation.navigate('Auth')}
+              activeOpacity={0.8}
+            >
+              <Text style={{ color: COLORS.white, fontSize: 11, fontWeight: '700' }}>Sign In</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.headerIconBtn}
             onPress={() => setShowNotifModal(true)}

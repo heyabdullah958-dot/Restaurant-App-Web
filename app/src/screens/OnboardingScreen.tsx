@@ -71,11 +71,15 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
       flatListRef.current?.scrollToOffset({ offset });
       setCurrentSlideIndex(nextSlideIndex);
     } else {
-      navigation.replace('Auth');
+      navigation.replace('Main');
     }
   };
 
   const handleSkip = () => {
+    navigation.replace('Main');
+  };
+
+  const handleSignInDirect = () => {
     navigation.replace('Auth');
   };
 
@@ -108,11 +112,14 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       
-      {/* Top Header - Skip Button */}
+      {/* Top Header - Sign In or Skip */}
       <View style={styles.header}>
+        <TouchableOpacity activeOpacity={0.75} onPress={handleSignInDirect}>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: COLORS.primary }}>Sign In</Text>
+        </TouchableOpacity>
         {currentSlideIndex < slides.length - 1 ? (
           <TouchableOpacity activeOpacity={0.75} onPress={handleSkip}>
-            <Text style={styles.skipButtonText}>Skip</Text>
+            <Text style={styles.skipButtonText}>Explore as Guest →</Text>
           </TouchableOpacity>
         ) : (
           <View style={{ height: 20 }} />
@@ -180,8 +187,9 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 50,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: SPACING.lg,
   },
   skipButtonText: {

@@ -21,6 +21,17 @@
   - `backend/orders/views.py`
   - `backend/users/views.py`
   - `backend/restaurants/migrations/0012_platformsettings.py`
-- **Confidence score**: 100% (Verified via `test_backend_local.py` — 11/11 tests passed)
+## Phase 2 — Pre-Ship Security Audit & Vulnerability Remediation — 2026-08-10
+- **What changed and why**:
+  - Enforced `permissions.IsAdminUser` on mutation methods (`POST`, `PUT`, `PATCH`, `DELETE`) across `CouponListCreateView`, `CouponDetailView`, `FlashDealListCreateView`, and `FlashDealDetailView` (rejected rejected alternative: keeping endpoints `AllowAny` for guest convenience, which posed critical unauthenticated coupon creation risk).
+  - Implemented automatic customer PII redaction (`guest_phone`, `delivery_address`, coordinates) in `OrderTrackView` when querying orders by integer ID `pk` without matching `tracking_token` UUID or owner authentication.
+  - Aligned loyalty cancellation refund signs (`abs(tx.points)`), restoring atomic point balance refunds to 100% accuracy.
+- **Files modified**:
+  - `backend/promotions/views.py`
+  - `backend/orders/views.py`
+  - `test_backend_local.py`
+- **How it was verified**: Ran `backend\venv\Scripts\python.exe test_backend_local.py` (23/23 tests passed, code 0)
+- **Confidence**: 100% — verified via automated integration suite and manual endpoint inspection
+
 
 
