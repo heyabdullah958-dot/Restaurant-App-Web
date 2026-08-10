@@ -343,6 +343,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   <ChefHat size={18} />
                   Menu Engineering
                 </button>
+                <button
+                  onClick={() => { setView('promo_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'promo_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Tag size={18} />
+                  Promo Codes
+                </button>
+                <button
+                  onClick={() => { setView('flash_deal_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'flash_deal_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Zap size={18} />
+                  Flash Deals
+                </button>
+                <button
+                  onClick={() => { setView('notification_center'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'notification_center' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Bell size={18} />
+                  Notifications
+                </button>
+                <button
+                  onClick={() => { setView('customer_management'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'customer_management' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Users size={18} />
+                  Customers & Loyalty
+                </button>
               </>
             )}
           </nav>
