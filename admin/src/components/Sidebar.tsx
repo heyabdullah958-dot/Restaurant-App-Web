@@ -1,3 +1,4 @@
+// Sidebar Component v1.0.8 — Cache-Buster Build timestamp 2026-08-10T19:08:00Z
 import React from 'react';
 import { useAdmin } from '../AdminContext';
 import { 
@@ -22,6 +23,8 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+  const ADMIN_BUILD_VER = '1.0.8';
+  console.log('[Sidebar] Build Version:', ADMIN_BUILD_VER);
   const { user, activeView, setView, logout, restaurants, selectedBrandId, setSelectedBrand, showToast, updateUser } = useAdmin();
 
   const [showPassModal, setShowPassModal] = React.useState(false);
