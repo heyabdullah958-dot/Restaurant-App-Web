@@ -438,18 +438,18 @@ class MyOrdersListView(generics.ListAPIView):
         # Auto-link unassigned guest orders matching user's username or phone
         try:
             base_name = user.username.lower().replace('1', '').replace('2', '').strip()
-            link_query = Q(user__isnull=True) & (
+            link_query = (Q(user__isnull=True) | Q(user__is_guest=True)) & (
                 Q(guest_name__iexact=user.username) |
                 Q(guest_name__icontains=user.username) |
                 (Q(guest_name__icontains=base_name) if len(base_name) >= 4 else Q(pk=-1))
             )
             if getattr(user, 'phone', None) and str(user.phone).strip():
                 clean_phone = str(user.phone).strip()
-                link_query |= Q(user__isnull=True, guest_phone=clean_phone)
+                link_query |= (Q(user__isnull=True) | Q(user__is_guest=True)) & Q(guest_phone=clean_phone)
                 if clean_phone.startswith('+92'):
-                    link_query |= Q(user__isnull=True, guest_phone='0' + clean_phone[3:])
+                    link_query |= (Q(user__isnull=True) | Q(user__is_guest=True)) & Q(guest_phone='0' + clean_phone[3:])
                 elif clean_phone.startswith('0'):
-                    link_query |= Q(user__isnull=True, guest_phone='+92' + clean_phone[1:])
+                    link_query |= (Q(user__isnull=True) | Q(user__is_guest=True)) & Q(guest_phone='+92' + clean_phone[1:])
             Order.objects.filter(link_query).update(user=user)
         except Exception:
             pass

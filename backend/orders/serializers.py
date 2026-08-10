@@ -261,11 +261,26 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
             request = self.context.get('request')
             user = None
-            if request and request.user and request.user.is_authenticated:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+
+            if request and request.user and request.user.is_authenticated and not request.user.is_guest:
                 user = request.user
-                if (user.is_guest or not user.phone) and validated_data.get('guest_phone'):
-                    user.phone = validated_data.get('guest_phone', '')
-                    user.save()
+                if not user.phone and validated_data.get('guest_phone'):
+                    user.phone = str(validated_data.get('guest_phone')).strip()
+                    user.save(update_fields=['phone'])
+            else:
+                # Fuzzy match guest name or phone against registered users
+                g_name = str(validated_data.get('guest_name') or '').strip()
+                g_phone = str(validated_data.get('guest_phone') or '').strip()
+                
+                matched = None
+                if g_name:
+                    matched = User.objects.filter(username__iexact=g_name, is_guest=False).first()
+                if not matched and g_phone:
+                    matched = User.objects.filter(phone=g_phone, is_guest=False).first()
+                if matched:
+                    user = matched
 
             subtotal = Decimal('0.00')
             order_items_to_create = []
