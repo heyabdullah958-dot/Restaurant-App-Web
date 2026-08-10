@@ -173,7 +173,7 @@ FoodSphere/
 ### 🔗 Deployed Prototypes
 
 #### ⛅️ Cloudflare Pages & Vercel (Active)
-- **admin panel website:** [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app) (Backup: [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev))
+- **admin panel website:** [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev) (Vercel Primary: [https://admin-orpin-psi.vercel.app](https://admin-orpin-psi.vercel.app))
 - **seenbanao website:** [https://seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev)
 - **dineatblue website:** [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev)
 - **jushhpk website:** [https://jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev)

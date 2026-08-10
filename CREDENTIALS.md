@@ -6,6 +6,7 @@ This document contains all login credentials for the **FoodSphere Admin Dashboar
 
 ## 🌐 Dashboard Access URLs
 - **Live Cloudflare Admin Dashboard**: [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev)
+- **Live Vercel Admin Dashboard**: [https://admin-orpin-psi.vercel.app](https://admin-orpin-psi.vercel.app)
 - **Live Heroku Backend API**: [https://getfoodpk-fd9b20442fcf.herokuapp.com](https://getfoodpk-fd9b20442fcf.herokuapp.com)
 
 ---
