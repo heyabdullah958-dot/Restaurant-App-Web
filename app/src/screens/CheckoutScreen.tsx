@@ -51,7 +51,7 @@ export default function CheckoutScreen() {
 
   // Fetch state from store
   const { items, restaurantId, totalAmount, fulfillmentMode, tableNumber } = useSelector((state: RootState) => state.cart);
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { user, isAuthenticated, loading: userLoading } = useSelector((state: RootState) => state.user);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
   // Determine if we are in guest checkout mode (either unauthenticated or logged in as a guest user)
@@ -655,6 +655,17 @@ export default function CheckoutScreen() {
       showAlert('Checkout Error', err.message || 'Something went wrong.');
     }
   };
+
+  if (userLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ marginTop: 12, color: COLORS.gray, fontSize: 14, fontWeight: '500' }}>
+          Restoring user session...
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

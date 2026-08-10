@@ -516,13 +516,34 @@ const orderSlice = createSlice({
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
         state.loading = false;
         const payload = action.payload;
+        let fetchedArray: any[] = [];
         if (payload && Array.isArray(payload.results)) {
-          state.myOrders = payload.results;
+          fetchedArray = payload.results;
         } else if (payload && Array.isArray(payload.data)) {
-          state.myOrders = payload.data;
+          fetchedArray = payload.data;
         } else if (Array.isArray(payload)) {
-          state.myOrders = payload;
+          fetchedArray = payload;
         }
+
+        const map = new Map<string, any>();
+        state.myOrders.forEach((o: any) => {
+          if (o && o.id) map.set(String(o.id), o);
+        });
+        fetchedArray.forEach((o: any) => {
+          if (o && o.id) {
+            const existing = map.get(String(o.id));
+            map.set(String(o.id), existing ? mergeMonotonicOrder(existing, o) : o);
+          }
+        });
+
+        const merged = Array.from(map.values());
+        merged.sort((a: any, b: any) => {
+          const tA = new Date(a.created_at || 0).getTime();
+          const tB = new Date(b.created_at || 0).getTime();
+          return tB - tA;
+        });
+
+        state.myOrders = merged;
       })
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;

@@ -191,6 +191,16 @@ api.interceptors.response.use(
       }
     }
 
+    // Sanitize DRF non_field_errors & field error dictionary objects into clean readable messages
+    if (error.response && error.response.data && typeof error.response.data === 'object') {
+      const data = error.response.data;
+      if (data.non_field_errors) {
+        const cleanMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors.join('\n') : String(data.non_field_errors);
+        error.response.data.message = cleanMsg;
+        error.response.data.detail = cleanMsg;
+      }
+    }
+
     if (error.response && status !== 401 && status !== 403) {
       if (__DEV__) console.log('API Error Response:', error.response.status, error.response.data);
     } else if (error.request) {
