@@ -429,6 +429,11 @@ const orderSlice = createSlice({
       .addCase(guestLogin.pending, (state) => {
         state.loading = true;
       })
+      .addCase(logoutUser.pending, (state) => {
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.myOrders = [];
         state.currentOrder = null;

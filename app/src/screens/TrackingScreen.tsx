@@ -547,7 +547,7 @@ export default function TrackingScreen() {
     );
   }
 
-  if ((sanitizedError && !currentOrder) || (!effectiveOrderId && !effectiveToken)) {
+  if ((sanitizedError && !currentOrder) || (!effectiveOrderId && !effectiveToken && !currentOrder)) {
     return (
       <SafeAreaView style={styles.emptyContainer}>
         <Ionicons name="alert-circle-outline" size={80} color={COLORS.danger} />

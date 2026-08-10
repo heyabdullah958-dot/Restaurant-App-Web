@@ -127,7 +127,8 @@ export default function OrdersScreen() {
   const [orderFilter, setOrderFilter] = React.useState<'all' | 'active' | 'delivered'>('all');
   const filteredOrders = React.useMemo(() => {
     const isUserGuest = !isAuthenticated || !user || user.is_guest;
-    const ordersSource = isUserGuest ? guestOrders : (Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []));
+    const rawMyOrders = Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []);
+    const ordersSource = isUserGuest ? guestOrders : rawMyOrders;
     const ordersArray = Array.isArray(ordersSource) ? ordersSource : [];
     if (orderFilter === 'active') {
       return ordersArray.filter((o: any) => o && o.status !== 'delivered' && o.status !== 'cancelled');
@@ -391,9 +392,10 @@ export default function OrdersScreen() {
     );
   }
 
-  // If user is not authenticated or is a guest user, and has NO active guest order stored
+  // If user is not authenticated or is a guest user, and has NO active guest order stored AND no local myOrders
   const isGuestSession = !isAuthenticated || !user || user.is_guest;
-  if (isGuestSession && guestOrders.length === 0) {
+  const hasLocalMyOrders = Array.isArray(myOrders) && myOrders.length > 0;
+  if (isGuestSession && guestOrders.length === 0 && !hasLocalMyOrders) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={[styles.emptyContent, { width: '100%', paddingHorizontal: SPACING.lg }]}>
