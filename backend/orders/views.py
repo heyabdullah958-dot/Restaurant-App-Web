@@ -434,11 +434,41 @@ class MyOrdersListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         from django.db.models import Q
+        
+        # Auto-link unassigned guest orders matching user's username or phone
+        try:
+            base_name = user.username.lower().replace('1', '').replace('2', '').strip()
+            link_query = Q(user__isnull=True) & (
+                Q(guest_name__iexact=user.username) |
+                Q(guest_name__icontains=user.username) |
+                (Q(guest_name__icontains=base_name) if len(base_name) >= 4 else Q(pk=-1))
+            )
+            if getattr(user, 'phone', None) and str(user.phone).strip():
+                clean_phone = str(user.phone).strip()
+                link_query |= Q(user__isnull=True, guest_phone=clean_phone)
+                if clean_phone.startswith('+92'):
+                    link_query |= Q(user__isnull=True, guest_phone='0' + clean_phone[3:])
+                elif clean_phone.startswith('0'):
+                    link_query |= Q(user__isnull=True, guest_phone='+92' + clean_phone[1:])
+            Order.objects.filter(link_query).update(user=user)
+        except Exception:
+            pass
+
         query = Q(user=user)
         if user.username:
             query |= Q(guest_name__iexact=user.username.strip())
+            query |= Q(guest_name__icontains=user.username.strip())
+            base_name = user.username.lower().replace('1', '').replace('2', '').strip()
+            if len(base_name) >= 4:
+                query |= Q(guest_name__icontains=base_name)
         if getattr(user, 'phone', None) and str(user.phone).strip():
-            query |= Q(guest_phone=str(user.phone).strip())
+            clean_phone = str(user.phone).strip()
+            query |= Q(guest_phone=clean_phone)
+            if clean_phone.startswith('+92'):
+                query |= Q(guest_phone='0' + clean_phone[3:])
+            elif clean_phone.startswith('0'):
+                query |= Q(guest_phone='+92' + clean_phone[1:])
+
         return Order.objects.filter(query).select_related('restaurant').order_by('-created_at')
 
 
