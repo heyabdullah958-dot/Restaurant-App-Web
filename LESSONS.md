@@ -47,3 +47,11 @@
 - **What actually mattered**: State resets tied to auth should fire on `.fulfilled`, not `.pending`. `.pending` = request started, not user confirmed. Moving clears to `.fulfilled` eliminates the race window while keeping the security invariant (old data gone before new user's data loads).
 - **Corollary**: Any `loading = true` guard in a polling loop MUST check whether data already exists before activating the loading state. `if (state.array.length === 0)` alone is insufficient — add `&& !state.loading` to prevent double-firing the spinner on the second poll cycle after a login-induced clear.
 - **Applies to**: `app/src/store/orderSlice.ts` (`loginUser.pending/fulfilled`, `registerUser.pending/fulfilled`, `fetchMyOrders.pending`). Generalizes to any Redux slice that polls + clears on auth events.
+
+---
+
+## Lesson 7 — Guest Order Interception & Multi-Layer Checkout Form Preservation — 2026-08-10
+- **Pattern**: Converting anonymous/guest checkout flows to mandatory authenticated order placement without frustrating users or losing entered form details.
+- **Wrong assumption made**: Relying solely on `route.params` to pass saved checkout form fields back from `AuthScreen` after authentication.
+- **What actually mattered**: `route.params` can be cleared or overwritten during complex navigation stack resets (`navigation.reset`). Form state preservation MUST use a **dual-persistence strategy**: save to `AsyncStorage` (`@getfood_checkout_saved_form`) AND pass via `returnParams`. `CheckoutScreen` hydration reads `AsyncStorage` first, auto-populates all inputs (Name, Phone, Address, Instructions, Branch, Payment Method, Schedule), and purges the key cleanly post-hydration.
+- **Applies to**: `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/AuthScreen.tsx`, `backend/orders/serializers.py`, `backend/orders/views.py`.

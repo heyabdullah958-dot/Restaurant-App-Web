@@ -74,3 +74,15 @@
 - **Part 12 — Bug #7 fix was wrong diagnosis**: The real issue was `ROTATE_REFRESH_TOKENS=True` + `BLACKLIST_AFTER_ROTATION=True` in Django settings. Every refresh rotates and blacklists the old token. But `loadSavedToken` (userSlice.ts) and the `api.js` 401 interceptor both saved the new `access` token while **discarding the new `refresh` token**. Old (blacklisted) refresh stayed in AsyncStorage → next 401 → interceptor sends blacklisted refresh → 401 → `sessionExpired` dispatched → `myOrders=[]` wiped → infinite loop.
 - **Fix Applied**: Both `userSlice.ts loadSavedToken` and `api.js` interceptor now parse and save `response.data?.refresh` alongside `response.data?.access` after every successful token refresh.
 - **Verification**: `npx tsc --noEmit` → 0 errors. Backend confirmed healthy via Python test (admin login + profile + my-orders = all 200 OK).
+
+### Feature / Architecture Upgrade #9: Restrict Guest Order Placement & Checkout Form Preservation (Completed 2026-08-10)
+- **Objective**: Eliminate guest order creation pathways across mobile app and backend while maintaining frictionless guest browsing and form state preservation.
+- **Frontend Changes**:
+  - `CartScreen.tsx`: Direct navigation to `CheckoutScreen` without intrusive upfront auth popups.
+  - `CheckoutScreen.tsx`: Intercepted `Place Order` button execution for `!isAuthenticated` or `user.is_guest` with a user-friendly modal ("Sign In Required to Complete Order").
+  - Form State Preservation: Saved all checkout input fields (`savedGuestName`, `savedGuestPhone`, `savedAddress`, `savedInstructions`, `savedBranchId`, `savedFulfillmentMode`, `savedTableNumber`, `savedPaymentMethod`, `savedIsScheduled`, `savedSchedDate`, `savedSchedTime`, `savedUseLoyaltyPoints`, `savedPromoCode`) to `AsyncStorage` (`@getfood_checkout_saved_form`) and passed as `returnParams` to `AuthScreen`.
+  - Form State Auto-Population: Added post-auth hydration effect restoring all saved form fields automatically upon returning to `CheckoutScreen`.
+- **Backend Changes**:
+  - `backend/orders/views.py`: Enforced `permissions.IsAuthenticated()` on POST `/api/orders/`.
+  - `backend/orders/serializers.py`: `OrderCreateSerializer.validate()` rejects anonymous or guest user order creation with `401 / 400` validation error ("Account registration is required to place an order. Please sign in or register.").
+- **Verification**: `npx tsc --noEmit` → 0 errors (exit code 0).
