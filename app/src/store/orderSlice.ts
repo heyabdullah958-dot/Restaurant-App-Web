@@ -33,7 +33,7 @@ export const placeOrder = createAsyncThunk(
       return data;
     } catch (error: any) {
       const status = error.response?.status ? `${error.response.status}` : 'Network/Timeout';
-      if (__DEV__) console.warn(`[placeOrder] Order submission failed (${status}):`, error.response?.data || error.message);
+      if (__DEV__) console.log('Order submission status:', status, error.response?.data || error.message);
 
       // Handle HTTP 500 Internal Server Errors cleanly
       if (error.response?.status >= 500) {

@@ -68,9 +68,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """
         Validate guest fields, operating hours, distance radius, coupon validity, min order amount, and loyalty redemption.
         """
-        # Enforce registered account requirement — zero guest orders permitted
+        request = self.context.get('request')
         user = getattr(request, 'user', None) if request else None
-        if not user or user.is_anonymous or getattr(user, 'is_guest', False):
+        is_guest_or_anon = not user or user.is_anonymous or getattr(user, 'is_guest', False)
+
+        # Enforce registered account requirement — zero guest orders permitted
+        if is_guest_or_anon:
             raise serializers.ValidationError(
                 "Account registration is required to place an order. Please sign in or register."
             )
