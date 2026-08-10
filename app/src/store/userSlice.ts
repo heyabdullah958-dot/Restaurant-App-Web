@@ -72,10 +72,18 @@ export const loadSavedToken = createAsyncThunk<
           });
           
           const newAccessToken = refreshResponse.data?.access || refreshResponse.data?.data?.access;
+          // BUG FIX: Backend has ROTATE_REFRESH_TOKENS=True + BLACKLIST_AFTER_ROTATION=True.
+          // When refresh succeeds, a NEW refresh token is issued and the OLD one is blacklisted.
+          // We MUST save both the new access AND new refresh tokens — or the next 401 will
+          // try the now-blacklisted old refresh token → 401 → sessionExpired → wipe loop.
+          const newRefreshToken = refreshResponse.data?.refresh || refreshResponse.data?.data?.refresh;
           if (newAccessToken) {
             await AsyncStorage.setItem('auth_token', newAccessToken);
             activeToken = newAccessToken;
-            if (__DEV__) console.log('Successfully refreshed token proactively on app launch');
+            if (newRefreshToken) {
+              await AsyncStorage.setItem('refresh_token', newRefreshToken);
+            }
+            if (__DEV__) console.log('[loadSavedToken] Proactive token refresh succeeded — access + refresh tokens saved');
           }
         } catch (refreshErr) {
           if (__DEV__) console.log('[loadSavedToken] Proactive token refresh failed — token will be validated via profile fetch');

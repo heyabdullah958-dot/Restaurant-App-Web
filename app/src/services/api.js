@@ -155,14 +155,23 @@ api.interceptors.response.use(
           });
           
           const newAccessToken = response.data?.access || response.data?.data?.access;
+          // BUG FIX: Save rotated refresh token too. ROTATE_REFRESH_TOKENS=True on backend means
+          // every successful refresh issues a NEW refresh token and blacklists the old one.
+          // If we only save the new access token, the next 401 retry will send the now-blacklisted
+          // old refresh token → 401 again → sessionExpired loop → orders wiped infinitely.
+          const newRefreshToken = response.data?.refresh || response.data?.data?.refresh;
           if (newAccessToken) {
             await AsyncStorage.setItem('auth_token', newAccessToken);
+            if (newRefreshToken) {
+              await AsyncStorage.setItem('refresh_token', newRefreshToken);
+            }
             api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
             processQueue(null, newAccessToken);
             isRefreshing = false;
             return api(originalRequest);
           }
+
         }
       } catch (refreshError) {
         if (__DEV__) console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
