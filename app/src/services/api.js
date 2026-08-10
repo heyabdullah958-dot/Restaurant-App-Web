@@ -16,8 +16,15 @@ const api = axios.create({
   timeout: 90000, // 90 seconds to allow Render cold-starts (45-60s) to complete
 });
 
-export const isPublicUrl = (url) => {
+export const isPublicUrl = (url, method = 'get') => {
   if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  const lowerMethod = (method || 'get').toLowerCase();
+
+  // Review submission and branch availability management require authentication context
+  if (lowerUrl.includes('/reviews') && lowerMethod === 'post') return false;
+  if (lowerUrl.includes('/branch-item-availability')) return false;
+
   const publicPatterns = [
     '/auth/login',
     '/auth/register',
@@ -32,19 +39,21 @@ export const isPublicUrl = (url) => {
     '/search',
     '/popular-tags',
     '/platform-settings',
-    '/restaurants',
-    '/branches',
-    '/categories',
-    '/menu',
   ];
-  return publicPatterns.some(pattern => url.toLowerCase().includes(pattern));
+
+  // For GET requests to catalog endpoints, consider it public
+  if (lowerMethod === 'get') {
+    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu');
+  }
+
+  return publicPatterns.some(pattern => lowerUrl.includes(pattern));
 };
 
 // Request interceptor to attach JWT auth token
 api.interceptors.request.use(
   async (config) => {
     // Do not attach token for public auth/search endpoints to avoid 401/403 on login/refresh with expired tokens
-    if (isPublicUrl(config.url)) {
+    if (isPublicUrl(config.url, config.method)) {
       // NOTE: Only delete from request-specific config.headers! NEVER mutate api.defaults.headers.common globally!
       delete config.headers['Authorization'];
       delete config.headers['authorization'];

@@ -516,12 +516,14 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
 
         data['restaurant'] = restaurant_obj.id
 
-        if not order_id and RestaurantReview.objects.filter(user=request.user, restaurant=restaurant_obj, order__isnull=True).exists():
+        user_obj = request.user if (request.user and request.user.is_authenticated) else None
+
+        if not order_id and user_obj and RestaurantReview.objects.filter(user=user_obj, restaurant=restaurant_obj, order__isnull=True).exists():
             raise ValidationError({'restaurant': 'You have already submitted a review for this restaurant.'})
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user, restaurant=restaurant_obj, order=order_obj)
+        serializer.save(user=user_obj, restaurant=restaurant_obj, order=order_obj)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

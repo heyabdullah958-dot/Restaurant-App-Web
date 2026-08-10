@@ -118,7 +118,13 @@ export default function OrderConfirmationScreen() {
       setHasSubmittedReview(true);
       Alert.alert('Review Submitted', 'Thank you for your feedback!');
     } catch (e: any) {
-      const errMsg = e.response?.data?.restaurant?.[0] || e.response?.data?.order?.[0] || e.response?.data?.detail || e.message || 'Failed to submit review';
+      let errMsg = 'Unable to submit review right now. Please try again.';
+      if (e.response?.status === 401) {
+        errMsg = 'Please sign in to submit a review for your meal.';
+      } else if (e.response?.data) {
+        const d = e.response.data;
+        errMsg = d.restaurant?.[0] || d.order?.[0] || d.detail || d.non_field_errors?.[0] || errMsg;
+      }
       Alert.alert('Review Error', String(errMsg));
     } finally {
       setIsSubmittingReview(false);
