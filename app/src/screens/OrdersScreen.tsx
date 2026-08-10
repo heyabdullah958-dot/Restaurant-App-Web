@@ -157,7 +157,7 @@ export default function OrdersScreen() {
         }, 4000);
         return () => clearInterval(interval);
       }
-    }, [dispatch, isAuthenticated, user, fetchGuestOrdersFromStorage])
+    }, [dispatch, isAuthenticated, user?.id, user?.is_guest, fetchGuestOrdersFromStorage])
   );
 
   const handleRefresh = () => {
