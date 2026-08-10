@@ -31,6 +31,23 @@ export default function OrdersScreen() {
   // Fetch state from store
   const { myOrders, loading } = useSelector((state: RootState) => state.order);
   const { isAuthenticated, user, loading: userLoading } = useSelector((state: RootState) => state.user);
+  const { restaurants } = useSelector((state: RootState) => state.restaurant);
+
+  const resolveBrandName = React.useCallback((item: any) => {
+    if (!item) return 'GetFood Restaurant';
+    if (typeof item.restaurant_name === 'string' && item.restaurant_name && item.restaurant_name !== 'Restaurant') return item.restaurant_name;
+    if (typeof item.brand_name === 'string' && item.brand_name) return item.brand_name;
+    if (item.restaurant && typeof item.restaurant === 'object' && item.restaurant.name) return item.restaurant.name;
+    if (typeof item.branch_name === 'string' && item.branch_name) return item.branch_name;
+    if (item.branch && typeof item.branch === 'object' && item.branch.name) return item.branch.name;
+
+    const restId = item.restaurant?.id || (typeof item.restaurant === 'number' ? item.restaurant : null);
+    if (restId) {
+      const matched = restaurants?.find((r: any) => r.id === restId);
+      if (matched?.name) return matched.name;
+    }
+    return 'GetFood Restaurant';
+  }, [restaurants]);
 
   // Re-ordering state to track specific order spinner
   const [reorderingId, setReorderingId] = useState<number | null>(null);
@@ -305,7 +322,7 @@ export default function OrdersScreen() {
             )}
             <View style={styles.restaurantMeta}>
               <Text style={styles.restaurantName} numberOfLines={1}>
-                {item?.restaurant_name || 'Restaurant'}
+                {resolveBrandName(item)}
               </Text>
               <Text style={styles.orderDate}>{formatDate(item?.created_at)}</Text>
             </View>

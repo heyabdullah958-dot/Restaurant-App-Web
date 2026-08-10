@@ -195,27 +195,52 @@ export default function CheckoutScreen() {
   const restaurantRef = React.useRef(restaurant);
   React.useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
 
+  // Distance radius computation
+  const distanceInfo = useMemo(() => {
+    if (fulfillmentMode !== 'DELIVERY' || !customerCoords || !selectedBranchId) {
+      return null;
+    }
+    const selectedBranch = branches.find((b: any) => b.id === selectedBranchId);
+    if (!selectedBranch) return null;
+    const bLat = selectedBranch.latitude ? parseFloat(selectedBranch.latitude) : null;
+    const bLng = selectedBranch.longitude ? parseFloat(selectedBranch.longitude) : null;
+    const maxRadius = selectedBranch.delivery_radius_km ? parseFloat(selectedBranch.delivery_radius_km) : 10.0;
+    if (bLat === null || bLng === null) return null;
+    const dist = calculateHaversineDistance(customerCoords.latitude, customerCoords.longitude, bLat, bLng);
+    return {
+      distanceKm: dist,
+      maxRadiusKm: maxRadius,
+      isOutOfRadius: dist > maxRadius,
+      branchName: selectedBranch.name,
+    };
+  }, [fulfillmentMode, customerCoords, selectedBranchId, branches]);
+
   // Hydrate user profile or saved guest info on mount
   React.useEffect(() => {
+    const routeParams = (navigation as any).getState?.()?.routes?.find((r: any) => r.name === 'Checkout')?.params || {};
     if (user && !user.is_guest) {
       if (user.addresses && user.addresses.length > 0 && user.addresses[0]) {
         setAddress(user.addresses[0]);
-      } else {
-        setAddress('');
+      } else if (routeParams.savedAddress) {
+        setAddress(routeParams.savedAddress);
       }
       const displayName = user.name || user.username;
       if (displayName) {
         setGuestName(displayName);
+      } else if (routeParams.savedGuestName) {
+        setGuestName(routeParams.savedGuestName);
       }
       if (user.phone) {
         setGuestPhone(user.phone);
+      } else if (routeParams.savedGuestPhone) {
+        setGuestPhone(routeParams.savedGuestPhone);
       }
     } else {
       const loadSavedGuestInfo = async () => {
         try {
-          const savedName = await AsyncStorage.getItem('@foodsphere_guest_name');
-          const savedPhone = await AsyncStorage.getItem('@foodsphere_guest_phone');
-          const savedAddress = await AsyncStorage.getItem('@foodsphere_guest_address');
+          const savedName = routeParams.savedGuestName || (await AsyncStorage.getItem('@foodsphere_guest_name'));
+          const savedPhone = routeParams.savedGuestPhone || (await AsyncStorage.getItem('@foodsphere_guest_phone'));
+          const savedAddress = routeParams.savedAddress || (await AsyncStorage.getItem('@foodsphere_guest_address'));
 
           if (savedName && !guestName) {
             setGuestName(savedName);
@@ -1033,22 +1058,45 @@ export default function CheckoutScreen() {
 
         {/* Footer sticky place order button */}
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, SPACING.md) }]}>
+          {distanceInfo?.isOutOfRadius && (
+            <View style={{
+              backgroundColor: '#fef2f2',
+              borderColor: '#fca5a5',
+              borderWidth: 1,
+              borderRadius: 10,
+              padding: 10,
+              marginBottom: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <Ionicons name="warning-outline" size={20} color={COLORS.danger} />
+              <Text style={{ fontSize: 12, color: '#991b1b', flex: 1, fontWeight: '600' }}>
+                Outside Delivery Radius ({distanceInfo.distanceKm.toFixed(1)} km vs {distanceInfo.maxRadiusKm.toFixed(1)} km max limit for {distanceInfo.branchName}). Select takeaway or a closer address.
+              </Text>
+            </View>
+          )}
+
           <TouchableOpacity activeOpacity={0.9}
             style={[
               styles.placeOrderBtn,
-              (isSubmitting || areAllBranchesClosed) && styles.placeOrderBtnDisabled
+              (isSubmitting || areAllBranchesClosed || distanceInfo?.isOutOfRadius) && styles.placeOrderBtnDisabled
             ]}
             onPress={handlePlaceOrder}
-            disabled={isSubmitting || areAllBranchesClosed}
+            disabled={isSubmitting || areAllBranchesClosed || Boolean(distanceInfo?.isOutOfRadius)}
           >
             {isSubmitting ? (
               <ActivityIndicator color={COLORS.white} />
             ) : (
               <>
                 <Text style={styles.placeOrderText}>
-                  {areAllBranchesClosed ? 'All Branches Closed' : `Place Order (Rs. ${finalTotal.toFixed(2)})`}
+                  {areAllBranchesClosed
+                    ? 'All Branches Closed'
+                    : distanceInfo?.isOutOfRadius
+                    ? 'Outside Delivery Radius'
+                    : `Place Order (Rs. ${finalTotal.toFixed(2)})`}
                 </Text>
-                <Ionicons name={areAllBranchesClosed ? "lock-closed-outline" : "checkbox-outline"} size={20} color={COLORS.white} />
+                <Ionicons name={areAllBranchesClosed || distanceInfo?.isOutOfRadius ? "lock-closed-outline" : "checkbox-outline"} size={20} color={COLORS.white} />
               </>
             )}
           </TouchableOpacity>

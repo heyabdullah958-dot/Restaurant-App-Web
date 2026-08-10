@@ -28,5 +28,15 @@
 - **What actually mattered**: 
   1. For this project, always confirm EAS publish (`eas update`), channel match, and `app.json` `updates.enabled` status before re-diagnosing application code on a repeat-reported mobile bug. (When `updates.enabled` is `false`, fresh APK builds or local Metro dev server runs are required).
   2. Guest navigation screens (`OrdersScreen`, `TrackingScreen`) MUST hydrate active guest order credentials from `AsyncStorage` (`@getfood_active_guest_order` / `guest_tracking_token`) rather than blocking guest users with a static login guard.
-- **Applies to**: `app/app.json`, `app/src/screens/OrdersScreen.tsx`, `app/src/screens/TrackingScreen.tsx`, `BUILD.md`.
+---
+
+## Lesson 5 — Redux State Preservation & DRF Error Sanitization — 2026-08-10
+- **Pattern**: Handling state array mutations and error alert formatting across authentication boundaries.
+- **Wrong assumption made**: Assuming `guestLogin.pending` should clear `myOrders`, and assuming raw stringification of DRF error objects is user-friendly.
+- **What actually mattered**: 
+  1. `guestLogin.pending` must NOT clear existing order history arrays in Redux state, and `placeOrder.fulfilled` MUST prepend newly created orders to `myOrders` to prevent UI array wipes.
+  2. Django REST Framework error objects containing `non_field_errors` MUST have raw key prefixes stripped and field keys formatted nicely (`Guest phone: ...`) before passing to alert UI dialogs.
+  3. Form inputs on checkout MUST be preserved in navigation params (`returnParams`) when sending users to AuthScreen so form data auto-restores post-login.
+- **Applies to**: `app/src/store/orderSlice.ts`, `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/AuthScreen.tsx`, `app/src/screens/OrdersScreen.tsx`.
+
 

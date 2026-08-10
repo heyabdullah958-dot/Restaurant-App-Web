@@ -148,19 +148,35 @@ export const fetchOrderTrack = createAsyncThunk(
 );
 
 const sanitizeErrorMessage = (errorData: any, defaultMsg: string): string => {
+  if (!errorData) return defaultMsg;
   let errMsg = defaultMsg;
-  if (errorData) {
-    if (typeof errorData === 'string') {
-      errMsg = errorData;
-    } else if (errorData.message) {
-      errMsg = String(errorData.message);
-    } else if (errorData.detail) {
-      errMsg = String(errorData.detail);
-    } else if (typeof errorData === 'object') {
-      errMsg = Object.entries(errorData)
-        .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(', ') : val}`)
-        .join('\n');
-    }
+  if (typeof errorData === 'string') {
+    errMsg = errorData;
+  } else if (errorData.message) {
+    errMsg = String(errorData.message);
+  } else if (errorData.detail) {
+    errMsg = String(errorData.detail);
+  } else if (errorData.error) {
+    errMsg = String(errorData.error);
+  } else if (typeof errorData === 'object') {
+    const parts: string[] = [];
+    Object.entries(errorData).forEach(([key, val]) => {
+      let cleanVal = '';
+      if (Array.isArray(val)) {
+        cleanVal = val.map((v) => (typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v))).join(' ');
+      } else if (typeof val === 'object' && val !== null) {
+        cleanVal = JSON.stringify(val);
+      } else {
+        cleanVal = String(val);
+      }
+      if (key === 'non_field_errors' || key === 'detail' || key === 'message' || key === 'error') {
+        parts.push(cleanVal);
+      } else {
+        const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+        parts.push(`${formattedKey}: ${cleanVal}`);
+      }
+    });
+    if (parts.length > 0) errMsg = parts.join('\n');
   }
   if (typeof errMsg === 'string' && (errMsg.includes('<html') || errMsg.includes('<!doctype') || errMsg.includes('<h1'))) {
     return defaultMsg;
@@ -411,9 +427,7 @@ const orderSlice = createSlice({
         state.activeOrder = null;
       })
       .addCase(guestLogin.pending, (state) => {
-        state.myOrders = [];
-        state.currentOrder = null;
-        state.activeOrder = null;
+        state.loading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.myOrders = [];
@@ -438,6 +452,12 @@ const orderSlice = createSlice({
       .addCase(placeOrder.fulfilled, (state, action) => {
         state.loading = false;
         state.activeOrder = action.payload;
+        if (action.payload && action.payload.id) {
+          const exists = state.myOrders.some((o: any) => String(o.id) === String(action.payload.id));
+          if (!exists) {
+            state.myOrders = [action.payload, ...state.myOrders];
+          }
+        }
       })
       .addCase(placeOrder.rejected, (state, action) => {
         state.loading = false;

@@ -39,7 +39,23 @@
   - Refactored `OrdersScreen.tsx` to asynchronously fetch active guest order credentials from `AsyncStorage` (`@getfood_active_guest_order`, `guest_tracking_token`, `foodsphere_guest_active_order_id`) when unauthenticated or in guest mode.
   - Added live guest order card rendering directly inside `OrdersScreen.tsx` with 1-tap "Track" and "Details" navigation.
   - Added a fallback "🔍 Track Order by ID / Code" input bar for guest users without an active local token.
-- **Verification Evidence**: Compiled `app/` via `npx tsc --noEmit` (0 TypeScript errors, code 0) and verified backend `/api/orders/track/` endpoint via `test_backend_local.py` (23/23 tests passed, code 0).
+---
+
+### Bug #6: Order History Overwriting, Guest Form Reset on Login & Raw DRF Error Leaks (Resolved 2026-08-10)
+- **Symptom**: Placed order history array was reset/wiped on guest auth triggers; guest form fields (Name, Phone, Address) were lost when redirecting to Sign In from checkout; raw Django error strings (`non_field_errors`) leaked into UI popups; order cards showed fallback "Restaurant" text.
+- **Root Cause**:
+  1. `guestLogin.pending` in `orderSlice.ts` purged `state.myOrders = []`, and `placeOrder.fulfilled` did not prepend the newly created order object to `myOrders`.
+  2. `CartScreen` and `CheckoutScreen` did not pass guest form values (`savedGuestName`, `savedGuestPhone`, `savedAddress`) in `returnParams` during authentication redirects.
+  3. `sanitizeErrorMessage` in `orderSlice.ts` formatted `non_field_errors` key names rawly with JSON formatting.
+  4. `OrdersScreen.tsx` lacked fallback key path resolution (`brand_name`, `restaurant.name`, Redux store lookup).
+- **Fix Applied**:
+  1. Updated `orderSlice.ts` to preserve `myOrders` during `guestLogin.pending` and prepend created orders in `placeOrder.fulfilled`.
+  2. Updated `CheckoutScreen.tsx` to save and pass `savedGuestName`, `savedGuestPhone`, `savedAddress` across `AuthScreen` redirects.
+  3. Refactored `sanitizeErrorMessage` to strip `non_field_errors` prefixes and format field validation errors cleanly.
+  4. Added `resolveBrandName()` in `OrdersScreen.tsx` checking `restaurant_name`, `brand_name`, `restaurant.name`, `branch_name`, and Redux store fallback.
+  5. Added `distanceInfo` Haversine radius validation banner and disabled Place Order CTA if location exceeds `max_radius`.
+- **Verification Evidence**: Ran `npx tsc --noEmit` (0 errors) and `test_backend_local.py` (23/23 tests passed, code 0).
+
 
 
 
