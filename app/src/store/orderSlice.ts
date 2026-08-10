@@ -33,8 +33,12 @@ export const placeOrder = createAsyncThunk(
       return data;
     } catch (error: any) {
       const status = error.response?.status ? `${error.response.status}` : 'Network/Timeout';
-      const detailMsg = error.response?.data ? JSON.stringify(error.response.data) : (error.message || 'Unknown network error');
-      if (__DEV__) console.error(`[placeOrder] Error (${status}):`, detailMsg);
+      if (__DEV__) console.warn(`[placeOrder] Order submission failed (${status}):`, error.response?.data || error.message);
+
+      // Handle HTTP 500 Internal Server Errors cleanly
+      if (error.response?.status >= 500) {
+        return rejectWithValue('An unexpected server issue occurred while processing your order. Please try tapping Place Order again.');
+      }
 
       // Handle HTTP 429 Throttling rate limits
       if (error.response?.status === 429 || JSON.stringify(error.response?.data || '').includes('throttled')) {
@@ -62,7 +66,7 @@ export const placeOrder = createAsyncThunk(
               return rejectWithValue('Guest session expired. Please tap Place Order again.');
             }
           } catch (retryErr: any) {
-            if (__DEV__) console.error('[placeOrder] Retry failed:', retryErr?.response?.status, JSON.stringify(retryErr?.response?.data || retryErr?.message));
+            if (__DEV__) console.warn('[placeOrder] Retry failed:', retryErr?.response?.status, retryErr?.response?.data || retryErr?.message);
             return rejectWithValue('Session expired. Please try placing your order again.');
           }
         } else {
@@ -79,13 +83,14 @@ export const placeOrder = createAsyncThunk(
           errMsg = 'Some items in your cart are no longer available in the menu. Please refresh your cart and select fresh items.';
         } else if (typeof errorData === 'string') {
           errMsg = errorData;
-        } else if (errorData.message) {
-          errMsg = String(errorData.message);
-        } else if (errorData.detail) {
-          errMsg = String(errorData.detail);
+        } else if (errorData.message && typeof errorData.message === 'string') {
+          errMsg = errorData.message;
+        } else if (errorData.detail && typeof errorData.detail === 'string') {
+          errMsg = errorData.detail;
         } else if (typeof errorData === 'object') {
           const messages: string[] = [];
           Object.entries(errorData).forEach(([key, val]) => {
+            if (key === 'success' || key === 'status') return;
             if (typeof val === 'string') {
               messages.push(`${key}: ${val}`);
             } else if (Array.isArray(val)) {
@@ -110,6 +115,7 @@ export const placeOrder = createAsyncThunk(
       } else if (error.message) {
         errMsg = error.message;
       }
+      return rejectWithValue(errMsg);
       return rejectWithValue(errMsg);
     }
   }

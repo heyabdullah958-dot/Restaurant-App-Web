@@ -367,7 +367,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
             # Create Order
             order = Order.objects.create(
-                user=user,
                 subtotal=subtotal,
                 delivery_fee=delivery_fee,
                 discount=discount,
