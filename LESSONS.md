@@ -55,3 +55,11 @@
 - **Wrong assumption made**: Relying solely on `route.params` to pass saved checkout form fields back from `AuthScreen` after authentication.
 - **What actually mattered**: `route.params` can be cleared or overwritten during complex navigation stack resets (`navigation.reset`). Form state preservation MUST use a **dual-persistence strategy**: save to `AsyncStorage` (`@getfood_checkout_saved_form`) AND pass via `returnParams`. `CheckoutScreen` hydration reads `AsyncStorage` first, auto-populates all inputs (Name, Phone, Address, Instructions, Branch, Payment Method, Schedule), and purges the key cleanly post-hydration.
 - **Applies to**: `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/AuthScreen.tsx`, `backend/orders/serializers.py`, `backend/orders/views.py`.
+
+---
+
+## Lesson 8 — Django Keyword Argument Collisions in Model.objects.create — 2026-08-10
+- **Pattern**: Unpacking `**validated_data` into Django model creation method (`Model.objects.create(...)`).
+- **Wrong assumption made**: Assuming passing `user=user` explicitly alongside `**validated_data` (which already contains `'user': user`) is harmless or supported by kwargs merging.
+- **What actually mattered**: In Python, passing a keyword argument explicitly while the unpacked `**dict` also contains that key raises a `TypeError: got multiple values for keyword argument`. On Django REST Framework in production, unhandled `TypeError` exceptions trigger HTTP 500 Internal Server Errors (`{"success":false,"message":"An internal server error occurred."}`). Always set model relationship fields directly inside `validated_data` before unpacking `**validated_data` into `objects.create()`.
+- **Applies to**: `backend/orders/serializers.py` (`OrderCreateSerializer.create`).

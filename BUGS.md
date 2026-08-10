@@ -86,3 +86,13 @@
   - `backend/orders/views.py`: Enforced `permissions.IsAuthenticated()` on POST `/api/orders/`.
   - `backend/orders/serializers.py`: `OrderCreateSerializer.validate()` rejects anonymous or guest user order creation with `401 / 400` validation error ("Account registration is required to place an order. Please sign in or register.").
 - **Verification**: `npx tsc --noEmit` → 0 errors (exit code 0).
+
+### Bug #10: HTTP 500 Internal Server Error & Raw Toast Output on Order Submission (Resolved 2026-08-10)
+- **Symptom**: Submitting an order post-login with auto-restored guest details triggered an alert: "Checkout Error: An internal server error occurred" and bottom toast: `[placeOrder] Error (500): {"success":false,...}` with Expo RedBox popup.
+- **Root Cause**:
+  1. `backend/orders/serializers.py`: `Order.objects.create(user=user, subtotal=..., **validated_data)` passed `user=user` explicitly while `validated_data` ALREADY contained `'user': user`. In Python, passing duplicate kwargs raises `TypeError: Order.objects.create() got multiple values for keyword argument 'user'`, triggering an unhandled HTTP 500 Exception on Django REST Framework.
+  2. `app/src/store/orderSlice.ts`: Line 37 called `console.error` with raw `JSON.stringify(error.response.data)`, which Expo RedBox caught as an unhandled console error frame.
+- **Fix Applied**:
+  1. Removed duplicate `user=user` keyword parameter from `Order.objects.create` in `backend/orders/serializers.py`.
+  2. Refactored `orderSlice.ts` error handling to log DEV warnings via `console.warn` (suppressing RedBox) and sanitize HTTP 500 responses into clean user-friendly alerts.
+- **Verification**: `npx tsc --noEmit` → 0 errors. Python API test confirmed order placement succeeds with HTTP 201/200 OK.
