@@ -63,34 +63,7 @@ export const loadSavedToken = createAsyncThunk<
       
       let activeToken: string = token;
       
-      // Proactively attempt token refresh on launch if refreshToken exists
-      if (refreshToken) {
-        try {
-          const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
-          const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken }, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          const newAccessToken = refreshResponse.data?.access || refreshResponse.data?.data?.access;
-          // BUG FIX: Backend has ROTATE_REFRESH_TOKENS=True + BLACKLIST_AFTER_ROTATION=True.
-          // When refresh succeeds, a NEW refresh token is issued and the OLD one is blacklisted.
-          // We MUST save both the new access AND new refresh tokens — or the next 401 will
-          // try the now-blacklisted old refresh token → 401 → sessionExpired → wipe loop.
-          const newRefreshToken = refreshResponse.data?.refresh || refreshResponse.data?.data?.refresh;
-          if (newAccessToken) {
-            await AsyncStorage.setItem('auth_token', newAccessToken);
-            activeToken = newAccessToken;
-            if (newRefreshToken) {
-              await AsyncStorage.setItem('refresh_token', newRefreshToken);
-            }
-            if (__DEV__) console.log('[loadSavedToken] Proactive token refresh succeeded — access + refresh tokens saved');
-          }
-        } catch (refreshErr) {
-          if (__DEV__) console.log('[loadSavedToken] Proactive token refresh failed — token will be validated via profile fetch');
-        }
-      }
-      
-      // Set default auth header
+      // Set default auth header synchronously first
       api.defaults.headers.common['Authorization'] = `Bearer ${activeToken}`;
       
       // Fetch user profile info to verify token works
@@ -114,6 +87,37 @@ export const loadSavedToken = createAsyncThunk<
         return { user, token: activeToken, refreshToken: refreshToken || '' };
       } catch (profileErr: any) {
         const isAuthError = profileErr?.response?.status === 401 || profileErr?.response?.status === 403;
+        
+        // ONLY if profile fetch failed with 401/403, attempt a single refresh if refreshToken exists
+        if (isAuthError && refreshToken) {
+          try {
+            const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
+            const refreshResponse = await axios.post(refreshUrl, { refresh: refreshToken }, {
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const newAccessToken = refreshResponse.data?.access || refreshResponse.data?.data?.access;
+            const newRefreshToken = refreshResponse.data?.refresh || refreshResponse.data?.data?.refresh;
+            if (newAccessToken) {
+              await AsyncStorage.setItem('auth_token', newAccessToken);
+              if (newRefreshToken) {
+                await AsyncStorage.setItem('refresh_token', newRefreshToken);
+              }
+              api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+              
+              // Retry fetching user profile with new access token
+              const profileRetryResponse = await api.get('/users/profile/') as any;
+              let user = profileRetryResponse;
+              if (profileRetryResponse && typeof profileRetryResponse === 'object' && 'data' in profileRetryResponse) {
+                user = profileRetryResponse.data;
+              }
+              return { user, token: newAccessToken, refreshToken: newRefreshToken || refreshToken };
+            }
+          } catch (refreshErr) {
+            if (__DEV__) console.log('[loadSavedToken] Token refresh failed on app launch:', refreshErr);
+          }
+        }
+
         if (isAuthError) {
           delete api.defaults.headers.common['Authorization'];
           try {

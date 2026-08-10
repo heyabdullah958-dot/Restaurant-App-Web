@@ -123,9 +123,13 @@ api.interceptors.response.use(
 
     // 2. Handle 401 Unauthorized & 403 Forbidden globally for protected requests
     if ((status === 401 || status === 403) && !originalRequest._retry) {
-      const isGuestUser = storeInstance?.getState()?.user?.user?.is_guest;
-      if (isGuestUser) {
-        if (__DEV__) console.log('[API Interceptor] 401/403 encountered for guest user — skipping sessionExpired dispatch');
+      const state = storeInstance?.getState()?.user;
+      const isGuestUser = state?.user?.is_guest;
+      const isAuthenticated = state?.isAuthenticated;
+
+      // If user is guest or not authenticated, don't trigger sessionExpired dispatch
+      if (isGuestUser || !isAuthenticated) {
+        if (__DEV__) console.log('[API Interceptor] 401/403 encountered for guest/unauthenticated user — skipping sessionExpired dispatch');
         return Promise.reject(error);
       }
 
