@@ -27,8 +27,8 @@
   // Branch Options per Brand
   const BRAND_BRANCHES = {
     'jushhpk': [
-      { name: 'Johar Town, R2', id: 4 },
-      { name: 'Lake City Business Bay', id: 35 },
+      { name: 'Johar Town', id: 4 },
+      { name: 'Lake City', id: 35 },
       { name: 'DHA Phase 1', id: 34 }
     ],
     'tandooristoppk': [
