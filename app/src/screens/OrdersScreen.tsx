@@ -380,22 +380,21 @@ export default function OrdersScreen() {
     );
   };
 
-  // If user session is currently restoring saved token from storage, render a clean loading spinner to avoid UI flickering
-  if (userLoading || isGuestLoading) {
+  // If user session is currently restoring or fetching orders, render a clean loading spinner to avoid UI flickering
+  if (userLoading || isGuestLoading || (loading && myOrders.length === 0 && isAuthenticated && user && !user.is_guest)) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={[styles.emptySubtitle, { marginTop: SPACING.md }]}>Restoring order history...</Text>
+          <Text style={[styles.emptySubtitle, { marginTop: SPACING.md }]}>Fetching your order history...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // If user is not authenticated or is a guest user, and has NO active guest order stored AND no local myOrders
+  // Render Guest Order Lookup UI strictly when the user is NOT authenticated or is a Guest User
   const isGuestSession = !isAuthenticated || !user || user.is_guest;
-  const hasLocalMyOrders = Array.isArray(myOrders) && myOrders.length > 0;
-  if (isGuestSession && guestOrders.length === 0 && !hasLocalMyOrders) {
+  if (isGuestSession && guestOrders.length === 0) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={[styles.emptyContent, { width: '100%', paddingHorizontal: SPACING.lg }]}>
