@@ -11,7 +11,9 @@ import {
   SafeAreaView,
   RefreshControl,
   Alert,
+  TextInput,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +22,7 @@ import { fetchMyOrders, fetchOrderDetails } from '../store/orderSlice';
 import { addItemToCart } from '../store/cartSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import CustomAlertModal from '../components/CustomAlertModal';
-import { API_BASE_URL } from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 
 export default function OrdersScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -47,18 +49,77 @@ export default function OrdersScreen() {
 
   const hideAlert = () => setAlertConfig(prev => ({ ...prev, visible: false }));
 
+  // Guest active order state
+  const [guestOrders, setGuestOrders] = useState<any[]>([]);
+  const [isGuestLoading, setIsGuestLoading] = useState<boolean>(false);
+  const [lookupInput, setLookupInput] = useState<string>('');
+  const [isLookingUp, setIsLookingUp] = useState<boolean>(false);
+
+  const fetchGuestOrdersFromStorage = React.useCallback(async () => {
+    setIsGuestLoading(true);
+    try {
+      const keys = [
+        'guest_tracking_token',
+        '@getfood_active_guest_order',
+        'foodsphere_guest_active_order_id',
+      ];
+      const results = await AsyncStorage.multiGet(keys);
+      const storageMap: Record<string, string | null> = {};
+      results.forEach(([k, v]: [string, string | null]) => { storageMap[k] = v; });
+
+      let token = storageMap['guest_tracking_token'];
+      let targetId: any = null;
+
+      const rawActiveOrder = storageMap['@getfood_active_guest_order'];
+      if (rawActiveOrder) {
+        try {
+          const parsed = JSON.parse(rawActiveOrder);
+          if (parsed?.trackingToken) token = parsed.trackingToken;
+          if (parsed?.orderId || parsed?.id) targetId = parsed.orderId || parsed.id;
+        } catch (e) {}
+      }
+
+      if (!targetId && storageMap['foodsphere_guest_active_order_id']) {
+        targetId = storageMap['foodsphere_guest_active_order_id'];
+      }
+
+      if (token || targetId) {
+        const res: any = await api.get('/orders/track/', {
+          params: {
+            token: token || undefined,
+            order_id: targetId || undefined,
+          }
+        });
+        const data = res?.data?.data || res?.data;
+        if (data && data.id) {
+          setGuestOrders([data]);
+        } else {
+          setGuestOrders([]);
+        }
+      } else {
+        setGuestOrders([]);
+      }
+    } catch (e) {
+      setGuestOrders([]);
+    } finally {
+      setIsGuestLoading(false);
+    }
+  }, []);
+
   // APP-14: Selected filter and computed list
   const [orderFilter, setOrderFilter] = React.useState<'all' | 'active' | 'delivered'>('all');
   const filteredOrders = React.useMemo(() => {
-    const ordersArray = Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []);
+    const isUserGuest = !isAuthenticated || !user || user.is_guest;
+    const ordersSource = isUserGuest ? guestOrders : (Array.isArray(myOrders) ? myOrders : (myOrders && Array.isArray((myOrders as any).results) ? (myOrders as any).results : []));
+    const ordersArray = Array.isArray(ordersSource) ? ordersSource : [];
     if (orderFilter === 'active') {
-      return ordersArray.filter((o: any) => o && o.status !== 'delivered');
+      return ordersArray.filter((o: any) => o && o.status !== 'delivered' && o.status !== 'cancelled');
     }
     if (orderFilter === 'delivered') {
       return ordersArray.filter((o: any) => o && o.status === 'delivered');
     }
     return ordersArray.filter((o: any) => o !== null && o !== undefined);
-  }, [myOrders, orderFilter]);
+  }, [myOrders, guestOrders, isAuthenticated, user, orderFilter]);
 
   // Fetch orders on tab focus and poll every 4 seconds while screen is active
   useFocusEffect(
@@ -71,13 +132,46 @@ export default function OrdersScreen() {
         }, 4000);
 
         return () => clearInterval(interval);
+      } else {
+        fetchGuestOrdersFromStorage();
+        const interval = setInterval(() => {
+          fetchGuestOrdersFromStorage();
+        }, 4000);
+        return () => clearInterval(interval);
       }
-    }, [dispatch, isAuthenticated, user])
+    }, [dispatch, isAuthenticated, user, fetchGuestOrdersFromStorage])
   );
 
   const handleRefresh = () => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user && !user.is_guest) {
       dispatch(fetchMyOrders());
+    } else {
+      fetchGuestOrdersFromStorage();
+    }
+  };
+
+  const handleManualLookup = async () => {
+    const query = lookupInput.trim();
+    if (!query) {
+      showAlert('Lookup Code Required', 'Please enter your Order ID or tracking code (e.g. FS-1014 or 42).');
+      return;
+    }
+
+    setIsLookingUp(true);
+    try {
+      const res: any = await api.get('/orders/track/', {
+        params: { order_id: query }
+      });
+      const data = res?.data?.data || res?.data;
+      if (data && data.id) {
+        navigation.navigate('Tracking', { orderId: data.display_order_id || data.id, trackingToken: data.tracking_token });
+      } else {
+        showAlert('Order Not Found', `No active order matching '${query}' was found.`);
+      }
+    } catch (e: any) {
+      showAlert('Lookup Error', 'Unable to find order matching that ID. Please double check your order receipt.');
+    } finally {
+      setIsLookingUp(false);
     }
   };
 
@@ -233,7 +327,7 @@ export default function OrdersScreen() {
         <View style={styles.cardActions}>
           <TouchableOpacity activeOpacity={0.75}
             style={styles.detailBtn}
-            onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id })}
+            onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id, trackingToken: item.tracking_token })}
           >
             <Ionicons name="information-circle-outline" size={18} color={COLORS.dark} />
             <Text style={styles.detailBtnText}>Details</Text>
@@ -242,7 +336,7 @@ export default function OrdersScreen() {
           {item.status !== 'delivered' && (
             <TouchableOpacity activeOpacity={0.75}
               style={[styles.trackBtn]}
-              onPress={() => navigation.navigate('Tracking', { orderId: item.id })}
+              onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id, trackingToken: item.tracking_token })}
             >
               <Ionicons name="bicycle-outline" size={18} color={COLORS.primary} />
               <Text style={styles.trackBtnText}>Track</Text>
@@ -269,46 +363,103 @@ export default function OrdersScreen() {
   };
 
   // If user session is currently restoring saved token from storage, render a clean loading spinner to avoid UI flickering
-  if (userLoading) {
+  if (userLoading || isGuestLoading) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={[styles.emptySubtitle, { marginTop: SPACING.md }]}>Restoring session...</Text>
+          <Text style={[styles.emptySubtitle, { marginTop: SPACING.md }]}>Restoring order history...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  // If user is not authenticated or is a guest user, prompt to login (APP-15)
-  if (!isAuthenticated || !user || user.is_guest) {
+  // If user is not authenticated or is a guest user, and has NO active guest order stored
+  const isGuestSession = !isAuthenticated || !user || user.is_guest;
+  if (isGuestSession && guestOrders.length === 0) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
-        <View style={styles.emptyContent}>
+        <View style={[styles.emptyContent, { width: '100%', paddingHorizontal: SPACING.lg }]}>
           <View style={{
-            width: 100, height: 100, borderRadius: 50,
+            width: 90, height: 90, borderRadius: 45,
             backgroundColor: 'rgba(255,87,34,0.08)',
             alignItems: 'center', justifyContent: 'center',
-            marginBottom: SPACING.lg,
+            marginBottom: SPACING.md,
           }}>
-            <Ionicons name="receipt-outline" size={52} color={COLORS.primary} />
+            <Ionicons name="receipt-outline" size={48} color={COLORS.primary} />
           </View>
-          <Text style={[styles.emptyTitle, { fontSize: 20 }]}>Track Your Orders</Text>
-          <Text style={styles.emptySubtitle}>
-            Sign in to see your order history, track active deliveries, and earn loyalty points on every order!
+          <Text style={[styles.emptyTitle, { fontSize: 22, textAlign: 'center' }]}>Track Your Orders</Text>
+          <Text style={[styles.emptySubtitle, { textAlign: 'center', marginBottom: SPACING.lg }]}>
+            Sign in to access your full order history, or enter your Order ID to track an existing delivery!
           </Text>
+
+          {/* Quick Guest Order Lookup Box */}
+          <View style={{
+            width: '100%',
+            backgroundColor: COLORS.white,
+            borderRadius: 14,
+            padding: SPACING.md,
+            marginBottom: SPACING.lg,
+            borderWidth: 1,
+            borderColor: COLORS.lightGray,
+            ...SHADOWS.small,
+          }}>
+            <Text style={{ fontSize: 13, fontWeight: 'bold', color: COLORS.dark, marginBottom: 8 }}>
+              🔍 Track Order by ID / Code
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={{
+                  flex: 1,
+                  backgroundColor: COLORS.light,
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  fontSize: 14,
+                  color: COLORS.dark,
+                  borderWidth: 1,
+                  borderColor: COLORS.lightGray,
+                }}
+                placeholder="e.g. JK-JT-1014 or 42"
+                placeholderTextColor={COLORS.gray}
+                value={lookupInput}
+                onChangeText={setLookupInput}
+                autoCapitalize="characters"
+              />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                disabled={isLookingUp}
+                onPress={handleManualLookup}
+                style={{
+                  backgroundColor: COLORS.primary,
+                  borderRadius: 10,
+                  paddingHorizontal: 16,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {isLookingUp ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  <Text style={{ color: COLORS.white, fontWeight: 'bold', fontSize: 14 }}>Track</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <TouchableOpacity activeOpacity={0.75}
-            style={[styles.loginButton, { flexDirection: 'row', gap: 8 }]}
+            style={[styles.loginButton, { width: '100%', flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
             onPress={() => navigation.navigate('Auth')}
           >
             <Ionicons name="log-in-outline" size={18} color={COLORS.white} />
             <Text style={styles.loginButtonText}>Sign In / Register</Text>
           </TouchableOpacity>
+
           <TouchableOpacity activeOpacity={0.75}
             style={{ marginTop: SPACING.md }}
             onPress={() => navigation.navigate('Main', { screen: 'Home' })}
           >
-            <Text style={{ color: COLORS.gray, fontSize: 13 }}>Continue as Guest</Text>
+            <Text style={{ color: COLORS.gray, fontSize: 13 }}>Continue Browsing as Guest</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

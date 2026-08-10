@@ -30,9 +30,16 @@
 
 ---
 
-### Bug #4: Unauthenticated Customer PII Exposure on Order Tracking (Resolved 2026-08-10)
-- **Symptom**: Hitting `GET /api/v1/orders/<pk>/track/` using integer primary key `pk` returned un-redacted customer phone numbers and full street addresses without authentication.
-- **Root Cause**: `OrderTrackView` permitted status queries by integer ID without verifying matching `tracking_token` UUID or owner authentication.
-- **Fix Applied**: Added automatic PII redaction (`guest_phone = None`, `delivery_address = "[Protected]"`) on integer ID queries unless a valid `tracking_token` or owner session is supplied. Verified via `test_backend_local.py` (100% Pass Rate).
+### Bug #5: Orders Tab Shows Login/Signup Guard Screen After Successful Guest Order (Resolved 2026-08-10)
+- **Symptom**: User places an order successfully (confirmation screen displays order ID), but navigating to track the order via the "Orders" tab shows a "Sign in to see your order history" / Login-Signup prompt instead of order tracking details.
+- **Part 12 Stuck-Loop Investigation & Root Causes**:
+  - **Step 1-3 Deploy Chain Root Cause**: `app/app.json` has `updates.enabled: false` (OTA updates via `eas update` are disabled). Code fixes committed to git previously were never published into a new release APK or pushed to the device via active Expo Metro development server, leaving test devices running older pre-built bundles.
+  - **Step 4 Application Logic Root Cause**: `OrdersScreen.tsx` unconditionally rendered the Login/Signup fallback UI whenever `!isAuthenticated || !user || user.is_guest` evaluated to true. It completely ignored active guest order tracking tokens stored in `AsyncStorage` (`@getfood_active_guest_order`, `guest_tracking_token`).
+- **Fix Applied**:
+  - Refactored `OrdersScreen.tsx` to asynchronously fetch active guest order credentials from `AsyncStorage` (`@getfood_active_guest_order`, `guest_tracking_token`, `foodsphere_guest_active_order_id`) when unauthenticated or in guest mode.
+  - Added live guest order card rendering directly inside `OrdersScreen.tsx` with 1-tap "Track" and "Details" navigation.
+  - Added a fallback "🔍 Track Order by ID / Code" input bar for guest users without an active local token.
+- **Verification Evidence**: Compiled `app/` via `npx tsc --noEmit` (0 TypeScript errors, code 0) and verified backend `/api/orders/track/` endpoint via `test_backend_local.py` (23/23 tests passed, code 0).
+
 
 

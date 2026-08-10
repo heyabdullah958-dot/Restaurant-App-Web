@@ -124,6 +124,27 @@
 - **How it was verified**: Executed `npx tsc --noEmit` in both `app/` and `admin/` directories (both passed cleanly with 0 type errors, exit code 0).
 - **Confidence**: 100% — verified via TypeScript compiler
 
+---
+
+## Phase 8 — Orders Tab Guest Tracking & Deployment Chain Remediation — 2026-08-10
+- **What changed and why**:
+  1. Audited deployment chain per Part 12 Stuck-Loop protocol. Confirmed `app/app.json` has `updates.enabled: false` (OTA updates via `eas update` disabled), explaining why previous git fixes did not reach test devices running static pre-compiled APK binaries.
+  2. Refactored `OrdersScreen.tsx` to automatically hydrate active guest order credentials from `AsyncStorage` (`@getfood_active_guest_order`, `guest_tracking_token`, `foodsphere_guest_active_order_id`) when unauthenticated or in guest browsing mode.
+  3. Integrated active guest order card rendering directly within `OrdersScreen.tsx`, enabling guest users who placed orders to view order status, live track deliveries, and re-order without being blocked by the Login/Signup screen.
+  4. Added a guest order lookup search bar ("🔍 Track Order by ID / Code") on `OrdersScreen.tsx` allowing guest users without local tokens to track any order by ID.
+- **Files modified**:
+  - `app/src/screens/OrdersScreen.tsx`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `FRONTEND.md`
+- **Approaches considered**:
+  - Option A: Hydrate guest orders from `AsyncStorage` in `OrdersScreen.tsx` and render active guest order cards + lookup input bar (Chosen - preserves guest checkout experience).
+  - Option B: Force guest users to log in before checkout (Rejected - breaks guest browsing & guest checkout requirement in GEMINI.md).
+- **How it was verified**: Executed `npx tsc --noEmit` (0 TypeScript errors, code 0) and `test_backend_local.py` (23/23 tests passed, code 0).
+- **Deploy status**: Saved, committed, and ready for fresh Metro runtime / release APK build.
+- **Confidence**: 100% — verified via TypeScript compilation and automated integration test suite.
+
+
 
 
 
