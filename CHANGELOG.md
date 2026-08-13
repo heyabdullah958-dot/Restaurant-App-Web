@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 2026-08-13 Phase 1 — Fix WELCOME1 Active Promo Validation & Production Deploy Chain Verification
+- **Stuck-Loop Deploy Chain Audit**: Identified uncommitted local git changes (`backend/promotions/serializers.py`, migration `promotions.0005`) that were never pushed to `origin/main` or deployed to Heroku (`git subtree push --prefix backend heroku main`), causing live Heroku API to reject brand slug strings (`"getafomo"`) with HTTP 400.
+- **Production PostgreSQL Database Seeding**: Executed `seed_welcome1_heroku.py` against live Heroku API to seed active `WELCOME1` promo code (15% OFF, GetAFomo brand, N/A expiry `valid_to=None`).
+- **Backend Heroku Release**: Deployed commit `f387999` to Heroku production backend. Migration `promotions.0005` applied cleanly on Heroku.
+- **Live Empirical Verification**: Confirmed `POST /api/coupons/validate/` returns `200 OK` with `Rs. 150.00` calculated discount for both string brand slug `"getafomo"` and integer restaurant ID `7`.
+
+
 ## 2026-08-10 Pre-Ship Security Audit & Vulnerability Remediation
 - **Promotions & Coupon Authorization Lockdown (`promotions/views.py`)**: Secured `CouponListCreateView`, `CouponDetailView`, `FlashDealListCreateView`, and `FlashDealDetailView` by overriding `get_permissions()` to strictly enforce `permissions.IsAdminUser` for `POST`, `PUT`, `PATCH`, and `DELETE` requests.
 - **Order Tracking PII Protection Engine (`orders/views.py`)**: Updated `OrderTrackView` to automatically redact sensitive customer PII (`guest_phone`, `delivery_address`, coordinates) on integer ID queries unless a valid `tracking_token` UUID or owner authentication is provided.

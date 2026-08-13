@@ -260,6 +260,24 @@
   4. Seeded active `WELCOME1` coupon in DB (15% OFF, GetAFomo brand, N/A expiry).
 - **Verification Evidence**: Executed `test_welcome1_null_expiry_suite.py` — verified DB audit of `WELCOME1` (N/A expiry), brand slug validation (`"getafomo"`), integer ID validation, structured warning logging, and order placement with `WELCOME1` redemption.
 
+---
+
+### Bug #26: Repeat WELCOME1 Active Promo Code Failure — Heroku Un-Deployed Git Tree & Unseeded Production DB (Resolved 2026-08-13)
+- **Symptom**: Customer App checkout returned "Invalid or expired promo code" when applying `WELCOME1` on GetAFomo orders on production Heroku backend.
+- **Root Cause & Stuck-Loop Deploy Chain Audit**:
+  1. Local git working tree contained uncommitted changes (`backend/promotions/serializers.py`, migration `promotions.0005...`). The updated code allowing string brand slugs (`"getafomo"`) and NULL expiry dates was NEVER pushed to `origin/main` or deployed to Heroku (`git subtree push --prefix backend heroku main`), causing live Heroku API to return HTTP 400 (`"restaurant_id: A valid integer is required."`).
+  2. Production PostgreSQL database on Heroku was missing the `WELCOME1` coupon record, returning HTTP 400 (`"non_field_errors: Invalid coupon code."`).
+- **Fix Applied**:
+  1. Updated `CouponValidateSerializer` and `Coupon` model NULL expiry guards locally.
+  2. Updated `seed_heroku_coupons.py` and executed `seed_welcome1_on_heroku` to seed active `WELCOME1` coupon (15% OFF, GetAFomo, N/A expiry date `valid_to=None`).
+  3. Committed changes to git `main` (`f387999`) and executed `git push origin main`.
+  4. Deployed backend subtree to Heroku (`git subtree push --prefix backend heroku main`). Migration `promotions.0005` applied cleanly on Heroku.
+- **Verification Evidence**:
+  - Live Heroku API `POST /api/coupons/validate/` returns `200 OK` with valid discount `Rs. 150.00` calculated for both brand slug `"getafomo"` and integer restaurant ID `7`.
+  - Brand scope mismatch (`seenbanao`) returns clean granular feedback: `{"success":false,"message":"Promo code 'WELCOME1' is only valid for GetAFomo."}`.
+  - Automated test suite `test_welcome1_null_expiry_suite.py` passed 100%.
+
+
 
 
 

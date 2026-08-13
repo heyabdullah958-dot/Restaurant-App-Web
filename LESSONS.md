@@ -104,6 +104,18 @@
   2. Client API service wrappers MUST use `http://${window.location.hostname}:8000` to match the exact hostname (`localhost` vs `127.0.0.1`) used in the user's browser address bar.
 - **Applies to**: `backend/config/settings.py`, `admin-app/src/services/api.ts`, `app/src/services/api.js`, `admin/src/services/api.ts`.
 
+---
+
+## Lesson 14 — Deploy Chain Verification & Production DB Seeding Invariant — 2026-08-13
+- **Pattern**: Debugging repeat reports of backend API validation or data failures where local test suites pass but live production environment fails.
+- **Wrong assumption made**: Assuming that because a bug fix passed in local integration tests (`test_welcome1_null_expiry_suite.py`), the live backend API automatically updated and production DB was seeded.
+- **What actually mattered**: 
+  1. ALWAYS execute `git status` and `git subtree push --prefix backend heroku main` when fixing Django REST Framework backend APIs. Local SQLite DB state and local uncommitted files do NOT affect live production Heroku APIs until committed, pushed to `origin/main`, and deployed via Heroku subtree push.
+  2. Production databases (e.g. PostgreSQL on Heroku) are isolated from dev databases. Whenever adding promo codes or static system data, ALWAYS execute a seed script (`seed_welcome1_on_heroku`) against the live API to ensure production database records match local test databases.
+  3. ALWAYS run live endpoint probes (`urllib.request` / `curl` against `https://getfoodpk-fd9b20442fcf.herokuapp.com/api/...`) to inspect exact production HTTP status codes and error bodies before concluding that application code is broken.
+- **Applies to**: `backend/promotions/serializers.py`, `backend/orders/views.py`, `seed_heroku_coupons.py`, Heroku production deployment workflow.
+
+
 
 
 
