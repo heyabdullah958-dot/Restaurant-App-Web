@@ -434,6 +434,7 @@ def main():
         ]
     }
     req_tamper = factory.post("/api/orders/", tamper_payload, format="json")
+    force_authenticate(req_tamper, user=admin_user)
     resp_tamper = OrderListCreateView.as_view()(req_tamper)
     if resp_tamper.status_code == 201:
         tamper_ord_data = resp_tamper.data.get('data', resp_tamper.data)

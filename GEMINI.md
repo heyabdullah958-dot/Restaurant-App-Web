@@ -49,7 +49,18 @@ FoodSphere/
 │   │   └── AdminContext.tsx # Context managing global state, live API syncing
 │   └── package.json
 │
+├── /admin-app            # React Native / Expo Mobile Management App for Super Admins & Branch Managers
+│   ├── /src
+│   │   ├── /screens      # LoginScreen, OrderManagementScreen, BranchDashboardScreen, MenuManagementScreen, RiderManagementScreen
+│   │   ├── /components   # NewOrderAlertOverlay, RiderAssignmentModal
+│   │   ├── /navigation   # AppNavigator (Role-gated navigation shell)
+│   │   ├── /store        # Redux Toolkit (auth, orders, menu, riders slices)
+│   │   ├── /services     # api.ts (Axios, JWT storage, refresh interception), NewOrderAlertService
+│   │   └── theme.ts      # Role-differentiated themes (Super Admin dark vs Branch Manager light)
+│   └── package.json
+│
 ├── /app                  # React Native / Expo mobile app
+
 │   ├── /src
 │   │   ├── /screens      # Home, Restaurant, Cart, Checkout, Tracking, Rewards, Profile
 │   │   ├── /components   # Shared UI components
@@ -163,10 +174,12 @@ FoodSphere/
 | Cart Promo Code Input Engine & Validation | ✅ Completed (`CartScreen.tsx` input + `/coupons/validate/` API discount preview) | Done |
 | 1-Tap Reorder API Endpoint | ✅ Completed (`POST /api/orders/<pk>/reorder/` with stock availability check) | Done |
 | Persistent Search & History | ✅ Completed (`AsyncStorage` `@getfood_recent_searches` with clear & submit handlers) | Done |
-| Admin Live SLA Monitoring Timers | ✅ Completed (`OrderManagement.tsx` <15m green, 15-30m amber, >30m overdue pulse) | Done |
-| SuperDashboard Today vs Yesterday Trends | ✅ Completed (`SuperDashboard.tsx` sales & order count growth indicators) | Done |
-| GetFood App Rebrand Configuration | ✅ Completed (`app.json`, `AuthScreen`, `HomeScreen` branding updated) | Done |
-| JWT Token Rotation & Session Expiry Fix | ✅ Completed (Eliminated proactive token refresh race condition & blacklisting) | Done |
+| Admin Mobile App Scaffold (Phases 1-3) | ✅ Completed (`admin-app` scaffold, JWT auth, order polling, foreground ringing) | Done |
+| Admin Mobile App Menu Management (Phase 4) | ✅ Completed (Role-scoped catalog, per-branch availability toggle, gallery photo upload) | Done |
+| Admin Mobile App Rider Roster & Dispatch (Phase 5) | ✅ Completed (Rider roster CRUD, tap-to-call, atomic dispatch modal integration) | Done |
+| Admin Mobile App Super Admin HQ Core (Phase 6A) | ✅ Completed (Platform analytics, multi-brand onboarding, branch manager provisioning & password reset) | Done |
+| Admin Mobile App Super Admin CRM & Growth Suite (Phase 6B) | ✅ Completed (Customer CRM with loyalty adjustment, Promo Coupons engine, Flash Deals, FCM Push Notification center) | Done |
+| Dual-App Integration, Merchant Alarm & Guest Gate | ✅ Completed (`test_dual_app_e2e.py` 100% pass, unstoppable merchant alarm, guest gate form restoration, account isolation) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -211,6 +224,10 @@ FoodSphere/
 23. **Cart Drawer Image & Asset Fallback Invariant:** `CartDrawer.addItem` and `findProductImage` MUST resolve item images dynamically from `window.menuData` (`image_url` / `image` / `thumbnail`), DOM card images, or local brand asset paths (`./images/...`). Unsplash URLs (`https://images.unsplash.com/...`) MUST NEVER be returned by `resolveItemImage()` or used as fallbacks in `live_catalog.js` or `CartDrawer` components. If an item has no image, a clean emoji badge (e.g. `🫓`, `🍖`, `🍟`, `🥤`) MUST be rendered.
 24. **JWT Token Rotation & App Launch Invariant:** `loadSavedToken` in `userSlice.ts` MUST NEVER proactively trigger `/auth/refresh/` on app launch. Since Django backend uses `ROTATE_REFRESH_TOKENS=True` and `BLACKLIST_AFTER_ROTATION=True`, proactive refresh invalidates the stored refresh token and creates a race condition where concurrent API requests receive HTTP 401, triggering `sessionExpired` purges. `loadSavedToken` MUST validate the active `auth_token` via `GET /users/profile/` first, and ONLY refresh if `/users/profile/` returns HTTP 401. Furthermore, any token refresh MUST save both the new `access` token and the rotated `refresh` token to `AsyncStorage` (`auth_token` and `refresh_token`), and the API 401 interceptor MUST skip `sessionExpired` dispatches if `!isAuthenticated` or user is a guest.
 25. **Mandatory Authenticated Order Placement & Form State Preservation Invariant:** Unauthenticated or guest users MUST NOT be permitted to create orders in the database. Frontend `CheckoutScreen.tsx` MUST allow guests to fill out delivery inputs and select branches, but MUST intercept the `Place Order` button trigger behind a mandatory Sign In modal. Checkout input values MUST be saved to `@getfood_checkout_saved_form` in `AsyncStorage` and passed in `returnParams` to `AuthScreen`, restoring all form fields automatically upon post-auth navigation back to `CheckoutScreen`. Backend `OrderListCreateView` (POST) MUST enforce `IsAuthenticated` and `OrderCreateSerializer.validate()` MUST reject anonymous / guest user order creation.
+26. **Admin Mobile App Role & Theme Scoping Invariant:** `admin-app` MUST strictly scope permissions and theme tokens by user role. Super Admin views MUST use slate dark theme (`COLORS.superAdmin.*`), brand selectors across all 7 brands, and full CRUD permissions. Branch Manager views MUST use warm light theme (`COLORS.branchManager.*`), scope strictly to the manager's assigned branch (`auth.branchId` / `auth.restaurantId`), and restrict operations to low-friction operational controls (per-branch stock toggling via `POST /api/restaurants/branch-item-availability/`, order status transitions, rider availability toggles).
+27. **Rider Dispatch Atomic Side-Effects Invariant:** Assigning a rider to a `preparing` order (`POST /api/orders/{id}/assign-rider/`) automatically sets `order.status = 'out_for_delivery'` and `rider.status = 'ON_DELIVERY'` server-side. Setting order status to `delivered` or `cancelled` automatically frees up the rider (`rider.status = 'AVAILABLE'`) in backend `orders/models.py`. The mobile app MUST NOT make secondary client-side status PATCH calls after rider assignment.
+28. **In-App Foreground Order Ringing Invariant:** `admin-app` uses `NewOrderAlertService` event bus singleton coupled to root-level `useOrderPolling` to trigger a full-screen takeover modal (`NewOrderAlertOverlay`) with looping sound (`expo-av` with `isLooping: true`) and screen keep-awake (`expo-keep-awake`) whenever new unaccepted orders arrive while foregrounded.
+29. **Admin Mobile App Comprehensive 12-View Suite:** All 12 views in `admin-app` (Login, OrderManagement, BranchDashboard, MenuManagement, RiderManagement, SuperDashboard, TenantManagement, ManagerManagement, CustomerManagement, PromoManagement, FlashDealManagement, NotificationCenter) are 100% implemented, role-scoped, wired to real DRF backend APIs, and verified with zero compilation errors (`npx tsc --noEmit`).
 
 ---
 

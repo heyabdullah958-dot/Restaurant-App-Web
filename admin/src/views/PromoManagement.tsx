@@ -27,6 +27,35 @@ export const PromoManagement: React.FC = () => {
     is_active: true,
   });
 
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const safeISODate = (dtStr: string, fallbackOffsetDays = 0): string => {
+    if (!dtStr) {
+      return new Date(Date.now() + fallbackOffsetDays * 86400000).toISOString();
+    }
+    const d = new Date(dtStr);
+    return isNaN(d.getTime()) ? new Date(Date.now() + fallbackOffsetDays * 86400000).toISOString() : d.toISOString();
+  };
+
+  const formatErrorMessage = (err: any): string => {
+    const raw = err.response?.data ? JSON.stringify(err.response.data) : (err.message || 'Error saving coupon');
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return Object.entries(parsed)
+          .map(([k, v]) => `${k.replace('_', ' ').toUpperCase()}: ${Array.isArray(v) ? v.join(', ') : v}`)
+          .join(' | ');
+      }
+    } catch {}
+    return raw;
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
@@ -51,6 +80,24 @@ export const PromoManagement: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.code.trim()) {
+      showToast('Please enter a valid coupon code.', 'error');
+      return;
+    }
+    if (!formData.discount_value || parseFloat(formData.discount_value) <= 0) {
+      showToast('Please enter a discount value greater than 0.', 'error');
+      return;
+    }
+    if (formData.target_scope === 'restaurant' && !formData.restaurant) {
+      showToast('Please select a restaurant brand for this promo code.', 'error');
+      return;
+    }
+    if (formData.target_scope === 'branch' && (!formData.restaurant || !formData.branch)) {
+      showToast('Please select both a restaurant brand and specific branch for this promo code.', 'error');
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const payload: any = {
         code: formData.code.trim().toUpperCase(),
@@ -58,8 +105,8 @@ export const PromoManagement: React.FC = () => {
         discount_value: parseFloat(formData.discount_value) || 0,
         min_subtotal: parseFloat(formData.min_subtotal) || 0,
         max_discount: formData.discount_type === 'percentage' && formData.max_discount ? parseFloat(formData.max_discount) : null,
-        valid_from: new Date(formData.valid_from).toISOString(),
-        valid_to: new Date(formData.valid_to).toISOString(),
+        valid_from: safeISODate(formData.valid_from, 0),
+        valid_to: safeISODate(formData.valid_to, 30),
         usage_limit: parseInt(formData.usage_limit, 10) || 100,
         per_user_limit: parseInt(formData.per_user_limit, 10) || 1,
         is_active: formData.is_active,
@@ -69,15 +116,19 @@ export const PromoManagement: React.FC = () => {
 
       if (editingCoupon) {
         await updateCoupon(editingCoupon.id, payload);
+        showToast(`Promo code '${payload.code}' updated successfully!`, 'success');
       } else {
         await createCoupon(payload);
+        showToast(`Promo code '${payload.code}' created successfully!`, 'success');
       }
       setShowModal(false);
       setEditingCoupon(null);
       loadInitialData();
     } catch (err: any) {
-      const msg = err.response?.data ? JSON.stringify(err.response.data) : (err.message || 'Error saving coupon');
-      alert(`Save Failed: ${msg}`);
+      const cleanMsg = formatErrorMessage(err);
+      showToast(`Save Failed: ${cleanMsg}`, 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -158,7 +209,18 @@ export const PromoManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto relative">
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl border font-medium text-sm transition-all animate-bounce ${
+          toast.type === 'success'
+            ? 'bg-emerald-600 text-white border-emerald-500'
+            : 'bg-red-600 text-white border-red-500'
+        }`}>
+          {toast.message}
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
@@ -513,9 +575,17 @@ export const PromoManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition shadow-md"
+                  disabled={submitting}
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg font-medium transition shadow-md flex items-center gap-2"
                 >
-                  {editingCoupon ? 'Update Coupon' : 'Save Coupon'}
+                  {submitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    editingCoupon ? 'Update Coupon' : 'Save Coupon'
+                  )}
                 </button>
               </div>
             </form>

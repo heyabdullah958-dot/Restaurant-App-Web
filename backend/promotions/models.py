@@ -13,8 +13,8 @@ class Coupon(AuditLogMixin, models.Model):
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, null=True, blank=True, related_name='coupons')
     branch = models.ForeignKey('restaurants.Branch', on_delete=models.CASCADE, null=True, blank=True, related_name='coupons')
     is_dine_in_only = models.BooleanField(default=False, help_text="Exclusively available for Dine-In orders.")
-    valid_from = models.DateTimeField()
-    valid_to = models.DateTimeField()
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
     usage_limit = models.IntegerField(default=100)
     times_used = models.IntegerField(default=0, db_index=True)
     per_user_limit = models.IntegerField(default=1)
@@ -26,7 +26,13 @@ class Coupon(AuditLogMixin, models.Model):
         
     def is_valid(self):
         now = timezone.now()
-        return self.is_active and self.valid_from <= now <= self.valid_to
+        if not self.is_active:
+            return False
+        if self.valid_from and now < self.valid_from:
+            return False
+        if self.valid_to and now > self.valid_to:
+            return False
+        return True
 
 class CouponUsage(models.Model):
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name='usages')

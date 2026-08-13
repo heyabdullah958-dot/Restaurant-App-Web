@@ -45,4 +45,24 @@ c2, created2 = Coupon.objects.get_or_create(
     }
 )
 
-print(f"Coupons Ready: WELCOME10 (Created: {created1}), GETFOOD50 (Created: {created2})")
+from restaurants.models import Restaurant
+fomo = Restaurant.objects.filter(slug__iexact='getafomo').first()
+
+c3, created3 = Coupon.objects.get_or_create(
+    code='WELCOME1',
+    defaults={
+        'discount_type': 'percentage',
+        'discount_value': Decimal('15.00'),
+        'min_subtotal': Decimal('0.00'),
+        'max_discount': Decimal('500.00'),
+        'restaurant': fomo,
+        'valid_from': now,
+        'valid_to': None,  # N/A expiration date
+        'usage_limit': 1000,
+        'per_user_limit': 5,
+        'is_active': True
+    }
+)
+
+print(f"Coupons Ready: WELCOME10 (Created: {created1}), GETFOOD50 (Created: {created2}), WELCOME1 (Created: {created3})")
+

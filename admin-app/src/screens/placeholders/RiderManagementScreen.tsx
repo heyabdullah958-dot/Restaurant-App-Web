@@ -1,0 +1,646 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Modal,
+  RefreshControl,
+  Alert,
+  Linking,
+  Platform,
+} from 'react-native';
+import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
+import { useAppDispatch, useAppSelector } from '../../store';
+import {
+  fetchRidersThunk,
+  createRiderThunk,
+  updateRiderThunk,
+  deleteRiderThunk,
+  setSearchQuery,
+  setStatusFilter,
+} from '../../store/riderSlice';
+import { BranchRider } from '../../services/api';
+
+export const RiderManagementScreen = () => {
+  const dispatch = useAppDispatch();
+  const { role, branchId, restaurantId } = useAppSelector((state) => state.auth);
+  const { riders, isLoading, isRefreshing, searchQuery, statusFilter } = useAppSelector(
+    (state) => state.riders
+  );
+
+  const isSuper = role === 'super_admin';
+
+  // Role-based theme tokens
+  const themeBg = isSuper ? COLORS.superAdmin.bg : COLORS.branchManager.bg;
+  const themeCard = isSuper ? COLORS.superAdmin.card : COLORS.branchManager.card;
+  const themeText = isSuper ? COLORS.superAdmin.text : COLORS.branchManager.text;
+  const themeMuted = isSuper ? COLORS.superAdmin.muted : COLORS.branchManager.muted;
+  const themeAccent = isSuper ? COLORS.superAdmin.accent : COLORS.branchManager.primary;
+  const themeBorder = isSuper ? COLORS.superAdmin.border : COLORS.branchManager.border;
+
+  // Add / Edit Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingRider, setEditingRider] = useState<BranchRider | null>(null);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [vehicleType, setVehicleType] = useState<'BIKE' | 'CAR' | 'SCOOTER' | 'BICYCLE'>('BIKE');
+  const [status, setStatus] = useState<'AVAILABLE' | 'ON_DELIVERY' | 'OFFLINE'>('AVAILABLE');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const activeBranchId = branchId || undefined;
+
+  useEffect(() => {
+    dispatch(fetchRidersThunk({ branch_id: activeBranchId }));
+  }, [dispatch, activeBranchId]);
+
+  const handleRefresh = () => {
+    dispatch(fetchRidersThunk({ branch_id: activeBranchId, isRefresh: true }));
+  };
+
+  const handleCallRider = async (phoneNumber: string) => {
+    if (!phoneNumber) return;
+    const url = `tel:${phoneNumber}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Call Error', `Cannot dial ${phoneNumber} on this device.`);
+      }
+    } catch {
+      Alert.alert('Call Error', `Failed to open phone dialer for ${phoneNumber}.`);
+    }
+  };
+
+  const handleQuickStatusToggle = (rider: BranchRider) => {
+    const nextStatus = rider.status === 'AVAILABLE' ? 'OFFLINE' : 'AVAILABLE';
+    dispatch(updateRiderThunk({ id: rider.id, data: { status: nextStatus } }));
+  };
+
+  const openAddModal = () => {
+    setEditingRider(null);
+    setName('');
+    setPhone('');
+    setVehicleType('BIKE');
+    setStatus('AVAILABLE');
+    setModalVisible(true);
+  };
+
+  const openEditModal = (rider: BranchRider) => {
+    setEditingRider(rider);
+    setName(rider.name);
+    setPhone(rider.phone);
+    setVehicleType(rider.vehicle_type || 'BIKE');
+    setStatus(rider.status);
+    setModalVisible(true);
+  };
+
+  const handleSaveRider = async () => {
+    if (!name.trim() || !phone.trim()) {
+      Alert.alert('Validation Error', 'Name and Phone number are required.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (editingRider) {
+        await dispatch(
+          updateRiderThunk({
+            id: editingRider.id,
+            data: {
+              name: name.trim(),
+              phone: phone.trim(),
+              vehicle_type: vehicleType,
+              status,
+            },
+          })
+        ).unwrap();
+      } else {
+        const payload: Partial<BranchRider> = {
+          name: name.trim(),
+          phone: phone.trim(),
+          vehicle_type: vehicleType,
+          status,
+          is_active: true,
+          branch: branchId || 1,
+        };
+        await dispatch(createRiderThunk(payload)).unwrap();
+      }
+      setModalVisible(false);
+      handleRefresh();
+    } catch (err: any) {
+      Alert.alert('Error', typeof err === 'string' ? err : 'Failed to save rider');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteRider = (rider: BranchRider) => {
+    Alert.alert('Delete Rider', `Remove rider "${rider.name}" from roster?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await dispatch(deleteRiderThunk(rider.id)).unwrap();
+          } catch (err: any) {
+            Alert.alert('Error', typeof err === 'string' ? err : 'Failed to delete rider');
+          }
+        },
+      },
+    ]);
+  };
+
+  // Filter riders by search and status filter
+  const filteredRiders = riders.filter((r) => {
+    const matchesSearch =
+      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.phone.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusBadgeInfo = (st: string) => {
+    switch (st) {
+      case 'AVAILABLE':
+        return { label: '🟢 Available', color: '#10B981', bg: 'rgba(16, 185, 129, 0.12)' };
+      case 'ON_DELIVERY':
+        return { label: '🛵 On Delivery', color: '#0284C7', bg: 'rgba(2, 132, 199, 0.12)' };
+      case 'OFFLINE':
+        return { label: '🛑 Offline', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.12)' };
+      default:
+        return { label: st, color: '#64748B', bg: '#F1F5F9' };
+    }
+  };
+
+  const renderRiderCard = ({ item }: { item: BranchRider }) => {
+    const badge = getStatusBadgeInfo(item.status);
+
+    return (
+      <View style={[styles.card, { backgroundColor: themeCard, borderColor: themeBorder }]}>
+        <View style={styles.cardHeader}>
+          <View style={styles.avatarBox}>
+            <Text style={styles.avatarIcon}>🛵</Text>
+          </View>
+          <View style={styles.riderInfoCol}>
+            <Text style={[styles.riderName, { color: themeText }]}>{item.name}</Text>
+            <TouchableOpacity onPress={() => handleCallRider(item.phone)}>
+              <Text style={styles.riderPhone}>📞 {item.phone}</Text>
+            </TouchableOpacity>
+            <Text style={[styles.vehicleText, { color: themeMuted }]}>
+              Vehicle: {item.vehicle_type || 'BIKE'}
+            </Text>
+          </View>
+
+          <View style={[styles.statusBadge, { backgroundColor: badge.bg }]}>
+            <Text style={[styles.statusText, { color: badge.color }]}>{badge.label}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardActionsRow}>
+          {/* Quick Toggle Available / Offline */}
+          {item.status !== 'ON_DELIVERY' ? (
+            <TouchableOpacity
+              style={[
+                styles.quickToggleBtn,
+                item.status === 'AVAILABLE' ? styles.offBtn : styles.availBtn,
+              ]}
+              onPress={() => handleQuickStatusToggle(item)}
+            >
+              <Text style={styles.quickToggleText}>
+                {item.status === 'AVAILABLE' ? 'Set Offline' : 'Set Available'}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={[styles.onDeliveryText, { color: themeMuted }]}>Busy on active delivery</Text>
+          )}
+
+          <View style={styles.rightActionRow}>
+            <TouchableOpacity style={styles.editBtn} onPress={() => openEditModal(item)}>
+              <Text style={styles.editBtnText}>✏️ Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDeleteRider(item)}>
+              <Text style={styles.deleteBtnText}>🗑️</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: themeBg }]}>
+      <StatusBar barStyle={isSuper ? 'light-content' : 'dark-content'} backgroundColor={themeBg} />
+
+      {/* Search & Add Header */}
+      <View style={styles.searchBarContainer}>
+        <View style={[styles.searchBox, { backgroundColor: themeCard, borderColor: themeBorder }]}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={[styles.searchInput, { color: themeText }]}
+            placeholder="Search riders by name or phone..."
+            placeholderTextColor={themeMuted}
+            value={searchQuery}
+            onChangeText={(text) => dispatch(setSearchQuery(text))}
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => dispatch(setSearchQuery(''))}>
+              <Text style={{ color: themeMuted, fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        <TouchableOpacity style={[styles.addRiderBtn, { backgroundColor: themeAccent }]} onPress={openAddModal}>
+          <Text style={styles.addRiderBtnText}>+ Rider</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Status Filter Segmented Control */}
+      <View style={styles.filterBar}>
+        {['ALL', 'AVAILABLE', 'ON_DELIVERY', 'OFFLINE'].map((st) => (
+          <TouchableOpacity
+            key={st}
+            style={[styles.filterChip, statusFilter === st && { backgroundColor: themeAccent }]}
+            onPress={() => dispatch(setStatusFilter(st))}
+          >
+            <Text
+              style={[
+                styles.filterChipText,
+                { color: statusFilter === st ? '#FFFFFF' : themeMuted },
+              ]}
+            >
+              {st.replace('_', ' ')}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Rider List */}
+      {isLoading && riders.length === 0 ? (
+        <View style={styles.loadingCenter}>
+          <ActivityIndicator size="large" color={themeAccent} />
+          <Text style={[styles.loadingText, { color: themeMuted }]}>Loading Riders Fleet...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredRiders}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderRiderCard}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              colors={[themeAccent]}
+              tintColor={themeAccent}
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>🛵</Text>
+              <Text style={[styles.emptyTitle, { color: themeText }]}>No Riders Found</Text>
+              <Text style={[styles.emptySubtitle, { color: themeMuted }]}>
+                {searchQuery
+                  ? `No riders match "${searchQuery}"`
+                  : 'No riders registered for this branch yet.'}
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      {/* Add / Edit Rider Modal */}
+      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: themeCard }]}>
+            <Text style={[styles.modalTitle, { color: themeText }]}>
+              {editingRider ? 'Edit Rider Profile' : 'Add New Branch Rider'}
+            </Text>
+
+            <Text style={[styles.inputLabel, { color: themeMuted }]}>Rider Full Name *</Text>
+            <TextInput
+              style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
+              placeholder="e.g. Tariq Mehmood"
+              placeholderTextColor={themeMuted}
+              value={name}
+              onChangeText={setName}
+            />
+
+            <Text style={[styles.inputLabel, { color: themeMuted }]}>Phone Number *</Text>
+            <TextInput
+              style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
+              placeholder="e.g. 03001234567"
+              placeholderTextColor={themeMuted}
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+
+            <Text style={[styles.inputLabel, { color: themeMuted }]}>Vehicle Type</Text>
+            <View style={styles.vehicleRow}>
+              {(['BIKE', 'CAR', 'SCOOTER', 'BICYCLE'] as const).map((v) => (
+                <TouchableOpacity
+                  key={v}
+                  style={[
+                    styles.vehicleChip,
+                    vehicleType === v && { backgroundColor: themeAccent },
+                  ]}
+                  onPress={() => setVehicleType(v)}
+                >
+                  <Text style={{ color: vehicleType === v ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
+                    {v}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.sm }]}>Rider Status</Text>
+            <View style={styles.vehicleRow}>
+              {(['AVAILABLE', 'OFFLINE'] as const).map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  style={[
+                    styles.vehicleChip,
+                    status === s && { backgroundColor: s === 'AVAILABLE' ? '#10B981' : '#EF4444' },
+                  ]}
+                  onPress={() => setStatus(s)}
+                >
+                  <Text style={{ color: status === s ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
+                    {s}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setModalVisible(false)}>
+                <Text style={{ color: themeMuted }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalSaveBtn, { backgroundColor: themeAccent }]}
+                onPress={handleSaveRider}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>Save Rider</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    padding: SPACING.sm,
+    alignItems: 'center',
+  },
+  searchBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    borderWidth: 1,
+    height: 42,
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: SPACING.xs,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+  },
+  addRiderBtn: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 10,
+    borderRadius: RADIUS.sm,
+    marginLeft: SPACING.xs,
+  },
+  addRiderBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  filterBar: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  filterChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.round,
+    marginRight: 6,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+  filterChipText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  listContent: {
+    padding: SPACING.sm,
+  },
+  loadingCenter: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: SPACING.sm,
+    fontSize: 14,
+  },
+  card: {
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    ...SHADOWS.small,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  avatarBox: {
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  avatarIcon: {
+    fontSize: 22,
+  },
+  riderInfoCol: {
+    flex: 1,
+  },
+  riderName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  riderPhone: {
+    fontSize: 13,
+    color: '#0284C7',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  vehicleText: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.xs,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  cardActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+    paddingTop: SPACING.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  quickToggleBtn: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+  },
+  availBtn: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  offBtn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+  },
+  quickToggleText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  onDeliveryText: {
+    fontSize: 11,
+    fontStyle: 'italic',
+  },
+  rightActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderRadius: RADIUS.xs,
+    marginRight: 6,
+  },
+  editBtnText: {
+    color: '#3B82F6',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  deleteBtn: {
+    padding: 4,
+  },
+  deleteBtnText: {
+    fontSize: 14,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xxl,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.md,
+  },
+  modalCard: {
+    width: '100%',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    ...SHADOWS.large,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: SPACING.md,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: RADIUS.xs,
+    padding: SPACING.sm,
+    fontSize: 14,
+    marginBottom: SPACING.md,
+  },
+  vehicleRow: {
+    flexDirection: 'row',
+    marginBottom: SPACING.sm,
+  },
+  vehicleChip: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: RADIUS.xs,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginRight: 6,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  modalCancelBtn: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginRight: SPACING.sm,
+  },
+  modalSaveBtn: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.xs,
+  },
+});

@@ -33,7 +33,7 @@ def run_tests():
     
     branch = Branch.objects.filter(restaurant=restaurant, is_active=True).first()
     if not branch:
-        branch = Branch.objects.create(restaurant=restaurant, name="Test Branch", code="TB", is_active=True)
+        branch = Branch.objects.create(restaurant=restaurant, name="Test Branch", is_active=True)
 
     other_restaurant = Restaurant.objects.exclude(id=restaurant.id).first()
     if not other_restaurant:
@@ -155,15 +155,17 @@ def run_tests():
         "items": [
             {
                 "menu_item": menu_item.id,
-                "quantity": 1
+                "quantity": 2
             }
         ]
     }
 
-    from django.contrib.auth.models import AnonymousUser
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    test_user, _ = User.objects.get_or_create(username="promo_tester", defaults={"email": "promo@test.com", "is_guest": False})
     factory = APIRequestFactory()
     wsgi_request = factory.post('/api/orders/', order_data, format='json')
-    wsgi_request.user = AnonymousUser()
+    wsgi_request.user = test_user
 
     serializer = OrderCreateSerializer(data=order_data, context={'request': wsgi_request})
     assert serializer.is_valid(), f"Order create serialization failed: {serializer.errors}"

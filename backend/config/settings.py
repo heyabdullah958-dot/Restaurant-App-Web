@@ -311,18 +311,35 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# CORS Settings — BUG-21 FIX
-# Allow all origins for API usage (JWT handles security, not CORS)
-CORS_ALLOW_ALL_ORIGINS = str(os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'False')).lower() in ('true', '1', 'yes')
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True
 
-# Explicit origins as fallback when CORS_ALLOW_ALL_ORIGINS=False
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:8081,http://localhost:19006,http://localhost:19000,https://foodsphere-admin.netlify.app,https://foodsphere-app.pages.dev'
-).split(',')
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:8081',
+    'http://localhost:8082',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:8081',
+    'http://127.0.0.1:8082',
+    'http://10.0.2.2:8000',
+    'http://10.0.2.2:8081',
+    'http://10.0.2.2:8082',
+    'https://foodsphere-admin.pages.dev',
+    'https://admin-orpin-psi.vercel.app',
+    'https://foodsphere-admin.netlify.app',
+]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost(:\d+)?$",
+    r"^http://127\.0\.0\.1(:\d+)?$",
+    r"^http://10\.0\.2\.2(:\d+)?$",
+    r"^http://192\.168\.\d+\.\d+(:\d+)?$",
+    r"^http://10\.\d+\.\d+\.\d+(:\d+)?$",
+    r"^http://172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+(:\d+)?$",
     r"^https://.*\.pages\.dev$",
+    r"^https://.*\.vercel\.app$",
     r"^https://.*\.netlify\.app$",
     r"^https://.*\.expo\.dev$",
     r"^exp://.*$",

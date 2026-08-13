@@ -63,3 +63,47 @@
 - **Wrong assumption made**: Assuming passing `user=user` explicitly alongside `**validated_data` (which already contains `'user': user`) is harmless or supported by kwargs merging.
 - **What actually mattered**: In Python, passing a keyword argument explicitly while the unpacked `**dict` also contains that key raises a `TypeError: got multiple values for keyword argument`. On Django REST Framework in production, unhandled `TypeError` exceptions trigger HTTP 500 Internal Server Errors (`{"success":false,"message":"An internal server error occurred."}`). Always set model relationship fields directly inside `validated_data` before unpacking `**validated_data` into `objects.create()`.
 - **Applies to**: `backend/orders/serializers.py` (`OrderCreateSerializer.create`).
+
+---
+
+## Lesson 9 — Rider Dispatch Server-Side Atomic State Synchronization — 2026-08-13
+- **Pattern**: Assigning riders to orders and updating status transitions in client mobile apps.
+- **Wrong assumption made**: Client app needs to send a secondary PATCH request (`PATCH /api/orders/{id}/` status='out_for_delivery') after calling `POST /api/orders/{id}/assign-rider/`.
+- **What actually mattered**: Backend `OrderAssignRiderView` (`backend/orders/views.py`) ALREADY performs atomic side-effects: assigning a rider to a `preparing` order automatically updates `order.status = 'out_for_delivery'` and `rider.status = 'ON_DELIVERY'` in a single DB transaction. Furthermore, marking an order `delivered` or `cancelled` automatically frees up the rider (`rider.status = 'AVAILABLE'`) in backend signals. Sending redundant client-side status PATCH calls creates race conditions and double network overhead.
+- **Applies to**: `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`, `admin-app/src/store/riderSlice.ts`, `backend/orders/views.py`.
+
+---
+
+## Lesson 10 — Admin Mobile App Role-Scoped UI & Optimistic Redux Mutators — 2026-08-13
+- **Pattern**: Shared management screens used by both Super Admins and Branch Managers on mobile devices.
+- **Wrong assumption made**: Shared screens can use a single monolithic UI layout with conditional if-statements scattered throughout rendering code.
+- **What actually mattered**: Role boundaries require completely distinct theme tokens (`COLORS.superAdmin.*` slate dark vs `COLORS.branchManager.*` warm light) and capability scoping. Branch Managers need low-friction, high-speed operational toggles (e.g. per-branch item stock switches via `POST /api/restaurants/branch-item-availability/`, 1-tap rider status switches) backed by **optimistic Redux mutators** (UI state updates immediately, reverts on API failure) so branch managers never experience UI lag on mobile networks. Super Admins receive HQ management controls (brand switcher bars, category creation, item editing with `expo-image-picker` gallery upload).
+- **Applies to**: `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`, `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`, `admin-app/src/store/menuSlice.ts`, `admin-app/src/store/riderSlice.ts`.
+
+---
+
+## Lesson 11 — Porting Complex Web Admin Systems to Mobile UX Patterns — 2026-08-13
+- **Pattern**: Porting complex web admin dashboards (Vite + React) to mobile apps (Expo / React Native).
+- **Wrong assumption made**: Mobile management views can simply copy web admin JSX structures without adjusting touch density, form inputs, modal dialogs, or selector controls.
+- **What actually mattered**: Mobile admin apps demand touch-optimized layouts (choice chip selectors, card rows with status pills, numeric touch inputs, `RefreshControl` pull-to-refresh). Super Admin HQ screens (`SuperDashboardScreen`, `TenantManagementScreen`, `ManagerManagementScreen`, `CustomerManagementScreen`, `PromoManagementScreen`, `FlashDealManagementScreen`, `NotificationCenterScreen`) require:
+  1. Compact 2×2 metric grids and pure Flexbox inline bar charts for performance without heavy web chart dependencies.
+  2. One-time copyable credential modals for staff provisioning results.
+  3. Mandatory audit reason text inputs for sensitive customer loyalty balance modifications (`PATCH /api/admin/customers/{id}/loyalty/`).
+  4. Explicit discount type switchers (`FLAT` vs `PERCENTAGE`) and scope dropdowns (`GLOBAL` vs specific brand ID).
+## Lesson 12 — Environment API Base URL Desync & Metro Cache Resets — 2026-08-13
+- **Pattern**: Running local development servers (`http://127.0.0.1:8000`) alongside production deployments (`https://getfoodpk-fd9b20442fcf.herokuapp.com`).
+- **Wrong assumption made**: Hardcoding production backend fallback URLs or assuming environment variables automatically resolve across Expo Go / browser runs.
+- **What actually mattered**: 
+  1. API service wrappers across all client apps (`app/src/services/api.js`, `admin-app/src/services/api.ts`, `admin/src/services/api.ts`) MUST dynamically inspect `window.location.hostname` (or local environment flags) to route requests to `http://127.0.0.1:8000` when running locally, avoiding split-brain data states where coupons created in local admin HQ fail on local mobile apps hitting Heroku.
+  2. Any repeat report of code fixes not taking effect locally requires resetting Metro bundler cache (`npx expo start -c`) to purge cached JS bundles.
+## Lesson 13 — Django CORS Whitelist & Dynamic Browser Host Matching — 2026-08-13
+- **Pattern**: Running multiple Expo web instances (`http://localhost:8081`, `http://localhost:8082`) and Vite web apps (`http://localhost:5173`) against a local Django REST API server (`http://localhost:8000`).
+- **Wrong assumption made**: Hardcoding `http://127.0.0.1:8000` in API base URLs or leaving new local app dev ports out of Django `CORS_ALLOWED_ORIGINS` will work without issue.
+- **What actually mattered**: 
+  1. Web browsers enforce strict cross-origin policies. If a browser loads `http://localhost:8082`, sending requests to `http://127.0.0.1:8000` triggers cross-origin preflight requests that fail unless both `http://localhost:8082` and regex `r"^http://localhost(:\d+)?$"` are in `CORS_ALLOWED_ORIGINS` / `CORS_ALLOWED_ORIGIN_REGEXES` in `backend/config/settings.py`.
+  2. Client API service wrappers MUST use `http://${window.location.hostname}:8000` to match the exact hostname (`localhost` vs `127.0.0.1`) used in the user's browser address bar.
+- **Applies to**: `backend/config/settings.py`, `admin-app/src/services/api.ts`, `app/src/services/api.js`, `admin/src/services/api.ts`.
+
+
+
+

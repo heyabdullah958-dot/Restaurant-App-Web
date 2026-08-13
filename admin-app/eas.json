@@ -1,0 +1,34 @@
+{
+  "cli": {
+    "version": ">= 19.1.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api"
+      }
+    },
+    "preview": {
+      "channel": "preview",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.parallel=false -Dorg.gradle.daemon=false",
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://getfoodpk-fd9b20442fcf.herokuapp.com/api"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

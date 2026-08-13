@@ -127,10 +127,13 @@ export default function CartScreen() {
       setPromoError('');
     } catch (err: any) {
       const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.detail ||
+        err?.response?.data?.non_field_errors?.[0] ||
         err?.response?.data?.error ||
-        err?.response?.data?.code?.[0] ||
+        err?.message ||
         'Invalid or expired promo code.';
-      setPromoError(msg);
+      setPromoError(String(msg));
       shakePromoInput();
     } finally {
       setPromoLoading(false);

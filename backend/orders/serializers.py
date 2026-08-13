@@ -211,22 +211,31 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             except Coupon.DoesNotExist:
                 raise serializers.ValidationError("Invalid promo code.")
 
-            if not coupon.is_valid():
-                raise serializers.ValidationError("Promo code is expired or inactive.")
+            from django.utils import timezone
+            now = timezone.now()
+            if not coupon.is_active:
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' is currently inactive.")
+
+            if coupon.valid_from and now < coupon.valid_from:
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' is not active yet.")
+
+            if coupon.valid_to and now > coupon.valid_to:
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' has expired.")
 
             if coupon.usage_limit > 0 and coupon.times_used >= coupon.usage_limit:
-                raise serializers.ValidationError("Promo code usage limit has been reached.")
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' usage limit has been reached.")
 
             if coupon.restaurant and restaurant and coupon.restaurant != restaurant:
-                raise serializers.ValidationError(f"Promo code is not valid for {restaurant.name}.")
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' is only valid for {coupon.restaurant.name}.")
 
             branch = attrs.get('branch')
             if coupon.branch and branch and coupon.branch != branch:
-                raise serializers.ValidationError(f"Promo code is not valid for branch '{branch.name}'.")
+                raise serializers.ValidationError(f"Promo code '{coupon.code}' is only valid for branch '{coupon.branch.name}'.")
 
-            if subtotal < coupon.min_subtotal:
+            min_sub = coupon.min_subtotal or 0
+            if subtotal < min_sub:
                 raise serializers.ValidationError(
-                    f"Minimum subtotal of Rs. {coupon.min_subtotal:.0f} required to use promo code '{coupon.code}'."
+                    f"Minimum subtotal of Rs. {min_sub:.0f} required to use promo code '{coupon.code}'."
                 )
 
             if not is_guest_or_anon and request and request.user:

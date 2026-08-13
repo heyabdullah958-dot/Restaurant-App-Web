@@ -389,7 +389,12 @@ export default function CheckoutScreen() {
         showAlert('Invalid Promo', data.message || 'Coupon code is invalid or expired.');
       }
     } catch (err: any) {
-      const errorMsg = err.response?.data?.non_field_errors?.[0] || err.response?.data?.detail || err.message || 'Failed to validate promo code.';
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        err.response?.data?.non_field_errors?.[0] ||
+        err.message ||
+        'Failed to validate promo code.';
       showAlert('Promo Code Error', String(errorMsg));
     } finally {
       setIsValidatingPromo(false);

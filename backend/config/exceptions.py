@@ -21,15 +21,13 @@ def custom_exception_handler(exc, context):
             if 'detail' in response.data:
                 message = response.data['detail']
             else:
-                # Format validation errors: "field_name: error message"
                 errs = []
                 for field, value in response.data.items():
-                    if isinstance(value, list):
-                        errs.append(f"{field}: {', '.join(map(str, value))}")
-                    elif isinstance(value, dict):
-                        errs.append(f"{field}: {str(value)}")
+                    val_str = ', '.join(map(str, value)) if isinstance(value, list) else str(value)
+                    if field == 'non_field_errors' or field == 'detail':
+                        errs.append(val_str)
                     else:
-                        errs.append(f"{field}: {str(value)}")
+                        errs.append(f"{field}: {val_str}")
                 message = "; ".join(errs)
         elif isinstance(response.data, list):
             message = ", ".join(map(str, response.data))

@@ -3,6 +3,7 @@ Admin Customer Management Views — FoodSphere
 API endpoints for the React admin dashboard's Customer Management view.
 Super admin only (IsAdminUser).
 """
+from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response

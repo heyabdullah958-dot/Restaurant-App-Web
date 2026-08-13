@@ -5,8 +5,39 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // NOTE: process.env.EXPO_PUBLIC_API_URL only loads correctly when running via QR code scan (Metro bundler).
 // When running Expo Go without QR (direct local), env vars don't inject — so we hardcode the production URL here.
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
 export const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+
+const getLocalOrProductionBaseUrl = () => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    return `http://${host}:8000/api`;
+  }
+
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || Constants?.experienceUrl;
+    if (hostUri) {
+      const ip = hostUri.split(':')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+        return `http://${ip}:8000/api`;
+      }
+    }
+
+    if (Platform.OS === 'android') {
+      return 'http://10.0.2.2:8000/api';
+    }
+
+    return 'http://127.0.0.1:8000/api';
+  }
+
+  return PRODUCTION_API_URL;
+};
+export const API_BASE_URL = getLocalOrProductionBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
