@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { sendPushBroadcast, fetchRestaurants } from '../../services/api';
+import { Card } from '../../components/ui';
 
 export const NotificationCenterScreen = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -92,7 +93,7 @@ export const NotificationCenterScreen = () => {
         </View>
 
         {/* Composer Card */}
-        <View style={styles.card}>
+        <Card style={styles.card} themeMode="super">
           <Text style={styles.cardTitle}>📣 Compose Push Broadcast</Text>
 
           <Text style={styles.inputLabel}>Notification Title</Text>
@@ -123,6 +124,7 @@ export const NotificationCenterScreen = () => {
                 selectedTarget === 'all' && styles.targetOptionActive,
               ]}
               onPress={() => setSelectedTarget('all')}
+              activeOpacity={0.8}
             >
               <Text
                 style={[
@@ -142,6 +144,7 @@ export const NotificationCenterScreen = () => {
                   selectedTarget === r.id && styles.targetOptionActive,
                 ]}
                 onPress={() => setSelectedTarget(r.id)}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -159,6 +162,7 @@ export const NotificationCenterScreen = () => {
             style={styles.sendButton}
             onPress={handleSendBroadcast}
             disabled={isSending}
+            activeOpacity={0.8}
           >
             {isSending ? (
               <ActivityIndicator color="#FFF" />
@@ -166,10 +170,10 @@ export const NotificationCenterScreen = () => {
               <Text style={styles.sendButtonText}>🚀 Dispatch Push Notification</Text>
             )}
           </TouchableOpacity>
-        </View>
+        </Card>
 
         {/* Dispatch Log Card */}
-        <View style={styles.card}>
+        <Card style={styles.card} themeMode="super">
           <Text style={styles.cardTitle}>📋 Recent Dispatch Session Log</Text>
           {recentDispatches.length === 0 ? (
             <Text style={styles.emptyLogText}>No notifications sent in this session yet.</Text>
@@ -185,7 +189,7 @@ export const NotificationCenterScreen = () => {
               </View>
             ))
           )}
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
   title: {
     color: COLORS.superAdmin.text,
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   subtitle: {
     color: COLORS.superAdmin.muted,
@@ -213,18 +217,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   card: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   cardTitle: {
     color: COLORS.superAdmin.text,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: SPACING.md,
   },
   inputLabel: {

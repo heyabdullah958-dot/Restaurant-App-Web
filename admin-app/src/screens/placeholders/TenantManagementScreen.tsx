@@ -22,6 +22,7 @@ import {
   updateTenantRestaurant,
   deleteTenantRestaurant,
 } from '../../services/api';
+import { Card, formatHumanTime } from '../../components/ui';
 
 export const TenantManagementScreen = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -243,10 +244,10 @@ export const TenantManagementScreen = () => {
             />
           }
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <Card style={styles.card} themeMode="super">
               <View style={styles.cardHeader}>
                 <View style={styles.brandBadge}>
-                  <Text style={styles.brandIcon}>🍽️</Text>
+                  <Text style={styles.brandIcon}>🏢</Text>
                 </View>
                 <View style={styles.brandInfo}>
                   <Text style={styles.brandTitle}>{item.name}</Text>
@@ -271,6 +272,11 @@ export const TenantManagementScreen = () => {
                 <Text style={styles.detailText}>📍 {item.city || 'Lahore'}</Text>
                 <Text style={styles.detailText}>📞 {item.phone || 'N/A'}</Text>
                 <Text style={styles.detailText}>🚚 Fee: Rs.{item.delivery_fee}</Text>
+                {item.opens_at && item.closes_at ? (
+                  <Text style={styles.detailText}>
+                    🕒 {formatHumanTime(item.opens_at)} - {formatHumanTime(item.closes_at)}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Toggles Row */}
@@ -301,18 +307,19 @@ export const TenantManagementScreen = () => {
                 <TouchableOpacity
                   style={styles.editButton}
                   onPress={() => openEditModal(item)}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.editButtonText}>✏️ Edit Config</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => handleDeleteBrand(item)}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.deleteButtonText}>🗑️ Remove Brand</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </Card>
           )}
         />
       )}
@@ -495,13 +502,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -509,10 +510,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   brandBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.superAdmin.bg,
+    width: 38,
+    height: 38,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(6, 182, 212, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
@@ -526,11 +527,13 @@ const styles = StyleSheet.create({
   brandTitle: {
     color: COLORS.superAdmin.text,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   brandSlug: {
-    color: COLORS.superAdmin.muted,
+    color: '#38BDF8',
     fontSize: 12,
+    marginTop: 2,
+    fontWeight: '600',
   },
   statusPill: {
     borderWidth: 1,
@@ -540,11 +543,12 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   detailsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
     backgroundColor: COLORS.superAdmin.bg,
     padding: SPACING.sm,
     borderRadius: RADIUS.sm,

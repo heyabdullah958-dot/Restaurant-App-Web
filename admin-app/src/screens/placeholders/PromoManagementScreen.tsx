@@ -25,6 +25,7 @@ import {
   deleteCouponThunk,
 } from '../../store/promoSlice';
 import { PromoCoupon, fetchRestaurants } from '../../services/api';
+import { Card, formatHumanDate } from '../../components/ui';
 
 export const PromoManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -159,51 +160,70 @@ export const PromoManagementScreen = () => {
               tintColor={COLORS.superAdmin.accent}
             />
           }
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.codeBadge}>
-                  <Text style={styles.codeText}>{item.code}</Text>
+          renderItem={({ item }) => {
+            const hasMinOrder = item.min_order_amount && Number(item.min_order_amount) > 0;
+            const minOrderText = hasMinOrder
+              ? `Min Order: Rs. ${parseFloat(String(item.min_order_amount)).toLocaleString()}`
+              : 'No minimum order';
+
+            const hasExpiry = Boolean(item.valid_until);
+            const expiryText = hasExpiry
+              ? `Expires: ${formatHumanDate(item.valid_until)}`
+              : 'No expiry date';
+
+            const hasMaxDisc = item.max_discount_amount && Number(item.max_discount_amount) > 0;
+            const maxDiscText = hasMaxDisc
+              ? `Max Cap: Rs. ${parseFloat(String(item.max_discount_amount)).toLocaleString()}`
+              : null;
+
+            return (
+              <Card style={styles.card} themeMode="super">
+                <View style={styles.cardHeader}>
+                  <View style={styles.codeBadge}>
+                    <Text style={styles.codeIcon}>🎟️</Text>
+                    <Text style={styles.codeText}>{item.code}</Text>
+                  </View>
+
+                  <View style={styles.valueBadge}>
+                    <Text style={styles.valueText}>
+                      {item.discount_type === 'FLAT'
+                        ? `Rs. ${item.discount_value} OFF`
+                        : `${item.discount_value}% OFF`}
+                    </Text>
+                  </View>
+
+                  <Switch
+                    value={item.is_active}
+                    onValueChange={() => handleToggleActive(item)}
+                    trackColor={{ false: '#334155', true: '#EC4899' }}
+                    thumbColor="#FFF"
+                  />
                 </View>
 
-                <View style={styles.valueBadge}>
-                  <Text style={styles.valueText}>
-                    {item.discount_type === 'FLAT'
-                      ? `Rs. ${item.discount_value} OFF`
-                      : `${item.discount_value}% OFF`}
+                <View style={styles.detailsRow}>
+                  <Text style={styles.detailText}>🛒 {minOrderText}</Text>
+                  {maxDiscText ? <Text style={styles.detailText}>🏷️ {maxDiscText}</Text> : null}
+                  <Text style={styles.detailText}>📅 {expiryText}</Text>
+                  <Text style={styles.detailText}>
+                    🏢 Scope: {item.restaurant_name || 'All Platform Brands'}
+                  </Text>
+                  <Text style={styles.detailText}>
+                    📊 Usage: {item.used_count || item.times_used || 0} times used (Active)
                   </Text>
                 </View>
 
-                <Switch
-                  value={item.is_active}
-                  onValueChange={() => handleToggleActive(item)}
-                  trackColor={{ false: '#334155', true: '#10B981' }}
-                  thumbColor="#FFF"
-                />
-              </View>
-
-              <View style={styles.detailsRow}>
-                <Text style={styles.detailText}>
-                  🛒 Min Order: Rs.{item.min_order_amount}
-                </Text>
-                <Text style={styles.detailText}>
-                  📅 Expires: {item.valid_until ? item.valid_until.substring(0, 10) : 'N/A'}
-                </Text>
-                <Text style={styles.detailText}>
-                  🏢 Scope: {item.restaurant_name || 'All Brands'}
-                </Text>
-              </View>
-
-              <View style={styles.actionRow}>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeleteCoupon(item)}
-                >
-                  <Text style={styles.deleteButtonText}>🗑️ Delete Coupon</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+                <View style={styles.actionRow}>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteCoupon(item)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.deleteButtonText}>🗑️ Delete Coupon</Text>
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            );
+          }}
         />
       )}
 
@@ -400,13 +420,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -414,27 +428,33 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   codeBadge: {
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    borderColor: COLORS.superAdmin.accent,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(236, 72, 153, 0.15)',
+    borderColor: '#EC4899',
     borderWidth: 1,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: RADIUS.xs,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 5,
+    borderRadius: RADIUS.sm,
     marginRight: SPACING.sm,
   },
-  codeText: {
-    color: COLORS.superAdmin.accent,
+  codeIcon: {
     fontSize: 14,
-    fontWeight: 'bold',
+    marginRight: 4,
+  },
+  codeText: {
+    color: '#F472B6',
+    fontSize: 14,
+    fontWeight: '700',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   valueBadge: {
     flex: 1,
   },
   valueText: {
-    color: '#10B981',
+    color: '#34D399',
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   detailsRow: {
     backgroundColor: COLORS.superAdmin.bg,

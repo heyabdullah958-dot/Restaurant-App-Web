@@ -24,6 +24,7 @@ import {
   deleteFlashDealThunk,
 } from '../../store/promoSlice';
 import { FlashDeal } from '../../services/api';
+import { Card, formatHumanDateTime } from '../../components/ui';
 
 export const FlashDealManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -143,7 +144,7 @@ export const FlashDealManagementScreen = () => {
             />
           }
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <Card style={styles.card} themeMode="super">
               <View style={styles.cardHeader}>
                 <View style={styles.badge}>
                   <Text style={styles.badgeIcon}>⚡</Text>
@@ -163,17 +164,17 @@ export const FlashDealManagementScreen = () => {
                 <Switch
                   value={item.is_active}
                   onValueChange={() => handleToggleActive(item)}
-                  trackColor={{ false: '#334155', true: '#10B981' }}
+                  trackColor={{ false: '#334155', true: '#EF4444' }}
                   thumbColor="#FFF"
                 />
               </View>
 
               <View style={styles.timeBox}>
                 <Text style={styles.timeText}>
-                  🕒 Start: {item.start_time ? item.start_time.substring(0, 16).replace('T', ' ') : 'Now'}
+                  🕒 Start: {item.start_time ? formatHumanDateTime(item.start_time) : 'Active Now'}
                 </Text>
                 <Text style={styles.timeText}>
-                  🏁 End: {item.end_time ? item.end_time.substring(0, 16).replace('T', ' ') : 'N/A'}
+                  🏁 End: {item.end_time ? formatHumanDateTime(item.end_time) : 'No end time'}
                 </Text>
               </View>
 
@@ -181,11 +182,12 @@ export const FlashDealManagementScreen = () => {
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => handleDeleteDeal(item)}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.deleteButtonText}>🗑️ Delete Deal</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </Card>
           )}
         />
       )}
@@ -297,13 +299,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -311,16 +307,16 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   badge: {
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.round,
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
   },
   badgeIcon: {
-    fontSize: 16,
+    fontSize: 18,
   },
   titleBox: {
     flex: 1,
@@ -328,15 +324,16 @@ const styles = StyleSheet.create({
   dealTitle: {
     color: COLORS.superAdmin.text,
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   itemSub: {
     color: COLORS.superAdmin.muted,
-    fontSize: 11,
+    fontSize: 12,
+    marginTop: 2,
   },
   discountBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    borderColor: '#10B981',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: '#EF4444',
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -344,9 +341,9 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   discountText: {
-    color: '#10B981',
+    color: '#EF4444',
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   timeBox: {
     backgroundColor: COLORS.superAdmin.bg,

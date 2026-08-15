@@ -337,6 +337,43 @@
   - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
   - Metro bundler compiled and served Android JS bundle with HTTP 200 OK.
 
+---
+
+### Bug #30: Super Admin HQ Visual Uniformity & Display Inconsistencies (Resolved 2026-08-15)
+- **Symptom**:
+  1. "More" navigation screen displayed internal technical permission/route keys (`tenant_management`, `customer_management`) as subtext.
+  2. Promo codes rendered broken blank text (`Min Order: Rs.`) when fields were null or 0.
+  3. "Reset Password" button on manager accounts was styled in red/destructive, implying an emergency action rather than routine management.
+  4. Password security status read ambiguously as `"Must Change Password: NO ✅"`.
+  5. Long manager usernames broke awkwardly mid-word without truncation.
+  6. Super Admin screens looked interchangeable without distinguishing visual identity per functional section.
+  7. Timestamps and promotion expiry dates were rendered in raw computer formats (`2026-08-01 08:49`).
+  8. 7-Day Revenue Trend chart looked broken and empty when revenue was sparse or only on one day.
+  9. Super Admin More screen logout button lacked a confirmation modal.
+- **Root Cause**:
+  1. Technical string array rendered `item.key` instead of human-friendly descriptions.
+  2. Missing ternary fallback expressions for nullable numeric/date fields.
+  3. Hardcoded destructive color styling on routine action button.
+  4. Conflation of Boolean state with negative assertion text.
+  5. Missing `numberOfLines={1}` and `ellipsizeMode="tail"` with monospace formatting.
+  6. Lack of section-specific accent color treatments across Super Admin views.
+  7. Direct `.substring()` formatting instead of structured human date parsing.
+  8. Missing baseline axis grid and sparse data zero-pips on the bar chart.
+  9. Single-tap unconfirmed dispatch of `logoutStaffThunk`.
+- **Fix Applied**:
+  1. Replaced technical keys in `AppNavigator.tsx` with human descriptions (`"Manage restaurant brands, branches & menus"`, `"User accounts, loyalty points & order history"`, etc.) and distinct section icons.
+  2. Implemented fallback expressions across Promo Codes (`"No minimum order"`, `"No expiry date"`, `"No max cap"`).
+  3. Recolored "Reset Password" to neutral/accent outline button (`#60A5FA` / `rgba(59, 130, 246, 0.12)`), reserving red exclusively for destructive deletions.
+  4. Replaced ambiguous password check with clear security status badges (`"⚠️ Password Reset Pending"` vs `"🔒 Password Active & Set"`).
+  5. Added `numberOfLines={1}`, `ellipsizeMode="tail"`, and tap-to-inspect modal for long manager usernames.
+  6. Applied distinctive color accents per section: Cyan (Tenants), Purple (CRM), Amber (Managers), Pink (Promos), Red (Flash Deals), Blue (FCM Notifications & Dashboard).
+  7. Created `dateUtils.ts` (`formatHumanDateTime`, `formatHumanDate`, `formatHumanTime`) and applied across all timestamp displays.
+  8. Enhanced 7-Day Revenue Trend chart with intentional baseline grid, zero-pips, total summary pill, and active rolling window subtitle.
+  9. Wrapped Super Admin logout button in an `Alert.alert` confirmation dialog.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle (`index.ts`) with HTTP 200 OK.
+
 
 
 

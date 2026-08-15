@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,10 @@ import {
   RefreshControl,
   Dimensions,
 } from 'react-native';
-import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
+import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchAnalyticsThunk } from '../../store/analyticsSlice';
+import { Card, StatusBadge } from '../../components/ui';
 
 const { width } = Dimensions.get('window');
 
@@ -34,8 +35,11 @@ export const SuperDashboardScreen = () => {
   const restaurantBreakdown = data?.restaurant_breakdown || [];
   const statusBreakdown = data?.status_breakdown || {};
 
-  // Maximum revenue for trend scaling
-  const maxRevenue = Math.max(...dailyTrend.map((d) => d.revenue), 100);
+  // Maximum revenue for trend scaling (with minimum scale of 1000)
+  const maxRevenue = Math.max(...dailyTrend.map((d) => d.revenue), 1000);
+  const totalTrendRevenue = dailyTrend.reduce((sum, d) => sum + d.revenue, 0);
+  const totalTrendOrders = dailyTrend.reduce((sum, d) => sum + d.orders, 0);
+  const isSparseData = dailyTrend.every((d) => d.revenue === 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -66,7 +70,7 @@ export const SuperDashboardScreen = () => {
           <View style={styles.errorCard}>
             <Text style={styles.errorText}>⚠️ {error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-              <Text style={styles.retryText}>Retry Fetch</Text>
+              <Text style={styles.retryText}>Retry</Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -80,7 +84,7 @@ export const SuperDashboardScreen = () => {
           <>
             {/* Top 4 Summary Metric Cards (2x2 Grid) */}
             <View style={styles.grid}>
-              <View style={styles.metricCard}>
+              <Card style={styles.metricCard} themeMode="super">
                 <View style={styles.metricHeader}>
                   <Text style={styles.metricIcon}>💰</Text>
                   <Text style={styles.metricLabel}>Revenue Today</Text>
@@ -91,9 +95,9 @@ export const SuperDashboardScreen = () => {
                 <Text style={styles.metricSub}>
                   {summary?.orders_today || 0} Orders Today
                 </Text>
-              </View>
+              </Card>
 
-              <View style={styles.metricCard}>
+              <Card style={styles.metricCard} themeMode="super">
                 <View style={styles.metricHeader}>
                   <Text style={styles.metricIcon}>📈</Text>
                   <Text style={styles.metricLabel}>30-Day Revenue</Text>
@@ -104,9 +108,9 @@ export const SuperDashboardScreen = () => {
                 <Text style={styles.metricSub}>
                   {summary?.orders_30d || 0} Orders (30 Days)
                 </Text>
-              </View>
+              </Card>
 
-              <View style={styles.metricCard}>
+              <Card style={styles.metricCard} themeMode="super">
                 <View style={styles.metricHeader}>
                   <Text style={styles.metricIcon}>👥</Text>
                   <Text style={styles.metricLabel}>Total Customers</Text>
@@ -115,9 +119,9 @@ export const SuperDashboardScreen = () => {
                 <Text style={styles.metricSub}>
                   + {summary?.total_guests || 0} Guest Accounts
                 </Text>
-              </View>
+              </Card>
 
-              <View style={styles.metricCard}>
+              <Card style={styles.metricCard} themeMode="super">
                 <View style={styles.metricHeader}>
                   <Text style={styles.metricIcon}>🏪</Text>
                   <Text style={styles.metricLabel}>Active Brands</Text>
@@ -126,40 +130,70 @@ export const SuperDashboardScreen = () => {
                 <Text style={styles.metricSub}>
                   {summary?.total_loyalty_points.toLocaleString() || 0} Loyalty Points
                 </Text>
-              </View>
+              </Card>
             </View>
 
             {/* 7-Day Revenue & Order Trend Bar Chart */}
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>📊 7-Day Revenue & Order Trend</Text>
-              <Text style={styles.sectionSubtitle}>Daily aggregated sales across all active tenant brands</Text>
+            <Card style={styles.sectionCard} themeMode="super">
+              <View style={styles.sectionTitleRow}>
+                <View>
+                  <Text style={styles.sectionTitle}>📊 7-Day Revenue & Order Trend</Text>
+                  <Text style={styles.sectionSubtitle}>
+                    Daily aggregated sales across all active tenant brands
+                  </Text>
+                </View>
+                <View style={styles.trendSummaryPill}>
+                  <Text style={styles.trendSummaryText}>
+                    Rs. {Math.round(totalTrendRevenue).toLocaleString()} ({totalTrendOrders} ord)
+                  </Text>
+                </View>
+              </View>
 
               <View style={styles.chartContainer}>
                 {dailyTrend.map((day, idx) => {
-                  const barHeightPercent = Math.max((day.revenue / maxRevenue) * 100, 8);
+                  const hasRevenue = day.revenue > 0;
+                  const barHeightPercent = hasRevenue
+                    ? Math.max((day.revenue / maxRevenue) * 100, 12)
+                    : 6;
+
                   return (
                     <View key={idx} style={styles.barColumn}>
-                      <Text style={styles.barValueText}>
-                        {day.revenue > 0 ? `${(day.revenue / 1000).toFixed(1)}k` : '0'}
+                      <Text style={[styles.barValueText, hasRevenue && styles.barValueActive]}>
+                        {hasRevenue
+                          ? day.revenue >= 1000
+                            ? `${(day.revenue / 1000).toFixed(1)}k`
+                            : `Rs.${day.revenue}`
+                          : '0'}
                       </Text>
+
                       <View style={styles.barTrack}>
                         <View
                           style={[
                             styles.barFill,
                             { height: `${barHeightPercent}%` },
+                            !hasRevenue && styles.barFillZero,
                           ]}
                         />
                       </View>
+
                       <Text style={styles.barLabel}>{day.date}</Text>
                       <Text style={styles.barOrderCount}>{day.orders} ord</Text>
                     </View>
                   );
                 })}
               </View>
-            </View>
+
+              {isSparseData ? (
+                <View style={styles.sparseBanner}>
+                  <Text style={styles.sparseText}>
+                    ℹ️ Real-time 7-day rolling window is active. Data populates automatically as orders arrive.
+                  </Text>
+                </View>
+              ) : null}
+            </Card>
 
             {/* Order Status Breakdown */}
-            <View style={styles.sectionCard}>
+            <Card style={styles.sectionCard} themeMode="super">
               <Text style={styles.sectionTitle}>📦 Global Order Status Breakdown</Text>
               <View style={styles.statusRow}>
                 <View style={[styles.statusPill, { borderColor: '#6366F1' }]}>
@@ -177,7 +211,7 @@ export const SuperDashboardScreen = () => {
                 </View>
 
                 <View style={[styles.statusPill, { borderColor: '#0284C7' }]}>
-                  <Text style={styles.statusPillTitle}>Out for Delivery</Text>
+                  <Text style={styles.statusPillTitle}>On Delivery</Text>
                   <Text style={[styles.statusPillValue, { color: '#0284C7' }]}>
                     {statusBreakdown['out_for_delivery'] || 0}
                   </Text>
@@ -190,10 +224,10 @@ export const SuperDashboardScreen = () => {
                   </Text>
                 </View>
               </View>
-            </View>
+            </Card>
 
             {/* Brand-Wise Performance Breakdown */}
-            <View style={styles.sectionCard}>
+            <Card style={styles.sectionCard} themeMode="super">
               <Text style={styles.sectionTitle}>🏆 Brand Performance Ranking (30 Days)</Text>
               <Text style={styles.sectionSubtitle}>Top revenue generating restaurant brands</Text>
 
@@ -216,7 +250,7 @@ export const SuperDashboardScreen = () => {
                   </View>
                 </View>
               ))}
-            </View>
+            </Card>
           </>
         )}
       </ScrollView>
@@ -240,9 +274,8 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xs,
   },
   headerTitle: {
+    ...TYPOGRAPHY.h2,
     color: COLORS.superAdmin.text,
-    fontSize: 22,
-    fontWeight: 'bold',
   },
   headerSubtitle: {
     color: COLORS.superAdmin.muted,
@@ -269,7 +302,7 @@ const styles = StyleSheet.create({
   liveBadgeText: {
     color: '#10B981',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   loadingContainer: {
     paddingVertical: SPACING.xxl,
@@ -305,7 +338,7 @@ const styles = StyleSheet.create({
   retryText: {
     color: '#FFF',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   grid: {
     flexDirection: 'row',
@@ -315,13 +348,7 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     width: (width - SPACING.md * 3) / 2,
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   metricHeader: {
     flexDirection: 'row',
@@ -341,7 +368,7 @@ const styles = StyleSheet.create({
   metricValue: {
     color: COLORS.superAdmin.text,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginVertical: 4,
   },
   metricSub: {
@@ -349,24 +376,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   sectionCard: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.xs,
   },
   sectionTitle: {
+    ...TYPOGRAPHY.h3,
     color: COLORS.superAdmin.text,
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   sectionSubtitle: {
     color: COLORS.superAdmin.muted,
     fontSize: 12,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
     marginTop: 2,
+  },
+  trendSummaryPill: {
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.round,
+  },
+  trendSummaryText: {
+    color: '#60A5FA',
+    fontSize: 11,
+    fontWeight: '700',
   },
   chartContainer: {
     flexDirection: 'row',
@@ -374,6 +411,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     height: 140,
     paddingTop: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    paddingBottom: SPACING.xs,
   },
   barColumn: {
     flex: 1,
@@ -383,6 +423,10 @@ const styles = StyleSheet.create({
     color: COLORS.superAdmin.muted,
     fontSize: 9,
     marginBottom: 4,
+  },
+  barValueActive: {
+    color: '#60A5FA',
+    fontWeight: '700',
   },
   barTrack: {
     width: 14,
@@ -397,6 +441,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.superAdmin.accent,
     borderRadius: RADIUS.xs,
   },
+  barFillZero: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
   barLabel: {
     color: COLORS.superAdmin.text,
     fontSize: 11,
@@ -406,6 +453,17 @@ const styles = StyleSheet.create({
   barOrderCount: {
     color: COLORS.superAdmin.muted,
     fontSize: 9,
+  },
+  sparseBanner: {
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: RADIUS.sm,
+  },
+  sparseText: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   statusRow: {
     flexDirection: 'row',
@@ -425,11 +483,11 @@ const styles = StyleSheet.create({
     color: COLORS.superAdmin.muted,
     fontSize: 9,
     textTransform: 'uppercase',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   statusPillValue: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginTop: 2,
   },
   brandRow: {
@@ -451,7 +509,7 @@ const styles = StyleSheet.create({
   brandRankText: {
     color: COLORS.superAdmin.accent,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   brandInfo: {
     flex: 1,
@@ -459,7 +517,7 @@ const styles = StyleSheet.create({
   brandName: {
     color: COLORS.superAdmin.text,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   brandSlug: {
     color: COLORS.superAdmin.muted,
@@ -471,7 +529,7 @@ const styles = StyleSheet.create({
   brandRevenue: {
     color: '#10B981',
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   brandOrders: {
     color: COLORS.superAdmin.muted,

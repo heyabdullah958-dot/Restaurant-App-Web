@@ -410,6 +410,37 @@
   - Metro bundler compiled and served Android JS bundle (`index.ts`, 1062 modules) with HTTP 200 OK.
 - Confidence: [100%] — Reusable design system is firmly established, all 6 confirmed issues are resolved, and the branch manager UX is polished and operational.
 
+## [Phase 8 — Design Polish: Super Admin HQ Cluster] — 2026-08-15
+- What changed and why: Extended Phase 7's shared design system to all 7 Super Admin HQ screens and the More menu, resolving 9 confirmed visual and semantic issues.
+  1. Replaced technical routing keys in the More menu with human descriptions (`"Manage restaurant brands, branches & menus"`, `"User accounts, loyalty points & order history"`, etc.) and distinct section icons.
+  2. Defined explicit fallback copy for all nullable promo/deal fields (`"No minimum order"`, `"No expiry date"`, `"No max cap"`), eliminating broken `"Min Order: Rs."` blank text.
+  3. Recolored manager "Reset Password" button from destructive red to a neutral/accent outline (`#60A5FA` / `rgba(59, 130, 246, 0.12)`), strictly reserving red for permanent deletions.
+  4. Clarified manager password security state with unambiguous badges: `"⚠️ Password Reset Pending"` (Amber) vs `"🔒 Password Active & Set"` (Emerald).
+  5. Implemented `numberOfLines={1}`, `ellipsizeMode="tail"`, and tap-to-inspect alert for long manager usernames (`manager_getafomo_gulberg_iii`).
+  6. Gave each Super Admin section a distinct color identity: Cyan (Tenants), Purple (CRM), Amber (Managers), Pink (Promos), Red (Flash Deals), Blue (Notifications & Dashboard).
+  7. Created `dateUtils.ts` (`formatHumanDateTime`, `formatHumanDate`, `formatHumanTime`) and applied across all timestamp displays.
+  8. Refactored the 7-Day Revenue Trend chart with a clear baseline axis, zero-pips, total summary badge, and active rolling window subtitle.
+  9. Audited all Super Admin views and protected the HQ logout button with an `Alert.alert` confirmation dialog.
+- Files created:
+  - `admin-app/src/components/ui/dateUtils.ts`
+- Files modified:
+  - `admin-app/src/components/ui/index.ts`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/TenantManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/ManagerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/CustomerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/NotificationCenterScreen.tsx`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `CHANGELOG.md`
+- Verification evidence:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle (`index.ts`, 1063 modules) with HTTP 200 OK.
+- Confidence: [100%] — All 9 confirmed issues resolved, design system reused across all Super Admin screens with zero functional regression.
+
 
 
 

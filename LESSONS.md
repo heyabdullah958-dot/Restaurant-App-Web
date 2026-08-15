@@ -149,6 +149,18 @@
   4. **Component reuse**: Building foundational UI components (`Card`, `StatusBadge`, `SlaBadge`, `Button`, `ConfirmModal`) rooted in centralized theme tokens ensures consistent visual hierarchy and seamless reuse across Super Admin and Branch views.
 - **Applies to**: `admin-app/src/theme.ts`, `admin-app/src/components/ui/*`, `OrderManagementScreen.tsx`, `BranchDashboardScreen.tsx`, `NewOrderAlertOverlay.tsx`.
 
+---
+
+## Lesson 18 — Super Admin Design Cohesion & Semantic Clarity Invariants — 2026-08-15
+- **Pattern**: Extending Phase 7's shared design system to Super Admin HQ screens (Tenants, CRM, Managers, Promos, Flash Deals, Notifications, Analytics).
+- **Wrong assumption made**: Relying on raw object field strings without fallbacks, hardcoding red destructive buttons on safe actions (like password reset), showing technical database keys as menu subtext, and leaving sparse charts without an explicit baseline.
+- **What actually mattered**: 
+  1. **Data fallbacks**: Nullable database fields must always render meaningful human fallback copy (`"No minimum order"`, `"No expiry date"`, `"All Platform Brands"`) rather than broken empty prefixes like `"Min Order: Rs."`.
+  2. **Color semantics**: Red must be reserved strictly for irreversible destructive actions (Delete Promo, Remove Brand, Delete Rider). Routine management actions (Reset Password, Edit Config) must use neutral or accent outline styling.
+  3. **Section visual identity**: Within a dark theme, each functional area should have a distinct accent badge (Cyan for Tenants, Purple for CRM, Amber for Managers, Pink for Promos, Red for Flash Deals, Blue for FCM/Analytics) to prevent screen interchangeability.
+  4. **Sparse chart design**: Bar charts with low/zero historical data need an explicit baseline, zero-pips, and explanatory context so administrators know live tracking is working.
+- **Applies to**: `SuperDashboardScreen.tsx`, `TenantManagementScreen.tsx`, `ManagerManagementScreen.tsx`, `CustomerManagementScreen.tsx`, `PromoManagementScreen.tsx`, `FlashDealManagementScreen.tsx`, `NotificationCenterScreen.tsx`, `AppNavigator.tsx`.
+
 
 
 

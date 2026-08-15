@@ -33,16 +33,27 @@ const SuperAdminMoreMain = ({ navigation }: any) => {
   const { user } = useAppSelector((state) => state.auth);
 
   const moreItems = [
-    { title: 'Tenant Registry', route: 'TenantManagement', key: 'tenant_management', icon: '🏢' },
-    { title: 'Customer CRM', route: 'CustomerManagement', key: 'customer_management', icon: '👥' },
-    { title: 'Manager Accounts', route: 'ManagerManagement', key: 'manager_management', icon: '🔐' },
-    { title: 'Notifications', route: 'NotificationCenter', key: 'notification_center', icon: '🔔' },
-    { title: 'Promo Codes', route: 'PromoManagement', key: 'promo_management', icon: '🎟️' },
-    { title: 'Flash Deals', route: 'FlashDealManagement', key: 'flash_deal_management', icon: '⚡' },
+    { title: 'Tenant Registry', route: 'TenantManagement', description: 'Manage restaurant brands, branches & menus', icon: '🏢', accentBg: 'rgba(6, 182, 212, 0.15)', accentColor: '#06B6D4' },
+    { title: 'Customer CRM', route: 'CustomerManagement', description: 'User accounts, loyalty points & order history', icon: '👥', accentBg: 'rgba(139, 92, 246, 0.15)', accentColor: '#8B5CF6' },
+    { title: 'Manager Accounts', route: 'ManagerManagement', description: 'Branch manager logins & password controls', icon: '🔐', accentBg: 'rgba(245, 158, 11, 0.15)', accentColor: '#F59E0B' },
+    { title: 'Notifications', route: 'NotificationCenter', description: 'FCM push broadcasts & targeted alerts', icon: '🔔', accentBg: 'rgba(59, 130, 246, 0.15)', accentColor: '#3B82F6' },
+    { title: 'Promo Codes', route: 'PromoManagement', description: 'Discount vouchers & usage limits', icon: '🎟️', accentBg: 'rgba(236, 72, 153, 0.15)', accentColor: '#EC4899' },
+    { title: 'Flash Deals', route: 'FlashDealManagement', description: 'Time-limited promotional discounts', icon: '⚡', accentBg: 'rgba(239, 68, 68, 0.15)', accentColor: '#EF4444' },
   ];
 
   const handleLogout = () => {
-    dispatch(logoutStaffThunk());
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out of Super Admin HQ Command Center?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: () => dispatch(logoutStaffThunk()),
+        },
+      ]
+    );
   };
 
   return (
@@ -57,17 +68,19 @@ const SuperAdminMoreMain = ({ navigation }: any) => {
         <Text style={styles.sectionTitle}>Additional Views</Text>
         {moreItems.map((item) => (
           <TouchableOpacity
-            key={item.key}
+            key={item.route}
             style={styles.moreCard}
             onPress={() => navigation.navigate(item.route)}
             activeOpacity={0.7}
           >
-            <Text style={styles.cardIcon}>{item.icon}</Text>
+            <View style={[styles.cardIconBox, { backgroundColor: item.accentBg }]}>
+              <Text style={styles.cardIcon}>{item.icon}</Text>
+            </View>
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardKey}>{item.key}</Text>
+              <Text style={styles.cardDesc}>{item.description}</Text>
             </View>
-
+            <Text style={styles.cardArrow}>›</Text>
           </TouchableOpacity>
         ))}
 
@@ -76,7 +89,7 @@ const SuperAdminMoreMain = ({ navigation }: any) => {
           onPress={handleLogout}
           activeOpacity={0.8}
         >
-          <Text style={styles.logoutText}>Sign Out</Text>
+          <Text style={styles.logoutText}>🚪 Sign Out of HQ</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -386,9 +399,16 @@ const styles = StyleSheet.create({
     borderColor: COLORS.superAdmin.border,
     borderWidth: 1,
   },
-  cardIcon: {
-    fontSize: 24,
+  cardIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: SPACING.md,
+  },
+  cardIcon: {
+    fontSize: 22,
   },
   cardInfo: {
     flex: 1,
@@ -396,31 +416,34 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: COLORS.superAdmin.text,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  cardKey: {
+  cardDesc: {
     color: COLORS.superAdmin.muted,
     fontSize: 12,
     marginTop: 2,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    lineHeight: 16,
   },
   cardArrow: {
     color: COLORS.superAdmin.muted,
-    fontSize: 22,
+    fontSize: 24,
+    fontWeight: '300',
+    marginLeft: SPACING.sm,
   },
   logoutButton: {
     backgroundColor: 'rgba(239, 68, 68, 0.12)',
-    borderColor: COLORS.danger,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
     borderWidth: 1,
     borderRadius: RADIUS.md,
     paddingVertical: SPACING.md,
     alignItems: 'center',
     marginTop: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
   logoutText: {
-    color: COLORS.danger,
+    color: '#EF4444',
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   headerLogout: {
     flexDirection: 'row',

@@ -13,6 +13,7 @@ import {
   RefreshControl,
   Alert,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -22,6 +23,7 @@ import {
   changeManagerPasswordThunk,
 } from '../../store/tenantSlice';
 import { fetchRestaurants, fetchBranches, StaffManager } from '../../services/api';
+import { Card } from '../../components/ui';
 
 export const ManagerManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -203,17 +205,28 @@ export const ManagerManagementScreen = () => {
             />
           }
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <Card style={styles.card} themeMode="super">
               <View style={styles.cardHeader}>
                 <View style={styles.avatarBadge}>
                   <Text style={styles.avatarIcon}>🔐</Text>
                 </View>
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{item.username}</Text>
-                  <Text style={styles.userSub}>
+                <TouchableOpacity
+                  style={styles.userInfo}
+                  onPress={() =>
+                    Alert.alert(
+                      'Manager Account Details',
+                      `Username: ${item.username}\nBrand: ${item.restaurant_name}\nBranch: ${item.branch_name || 'Main Branch'}\nEmail: ${item.notification_email}`
+                    )
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.userName} numberOfLines={1} ellipsizeMode="tail">
+                    {item.username}
+                  </Text>
+                  <Text style={styles.userSub} numberOfLines={1}>
                     {item.restaurant_name} • {item.branch_name || 'Main Branch'}
                   </Text>
-                </View>
+                </TouchableOpacity>
                 <View style={styles.roleBadge}>
                   <Text style={styles.roleBadgeText}>MANAGER</Text>
                 </View>
@@ -221,23 +234,42 @@ export const ManagerManagementScreen = () => {
 
               <View style={styles.detailsBox}>
                 <Text style={styles.detailText}>📧 Email: {item.notification_email}</Text>
-                <Text style={styles.detailText}>
-                  🔑 Must Change Password:{' '}
-                  <Text style={{ color: item.must_change_password ? '#F59E0B' : '#10B981' }}>
-                    {item.must_change_password ? 'YES ⚠️' : 'NO ✅'}
-                  </Text>
-                </Text>
+                <View style={styles.passwordStatusRow}>
+                  <Text style={styles.detailLabel}>Security:</Text>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      item.must_change_password
+                        ? styles.statusBadgeWarning
+                        : styles.statusBadgeSuccess,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.statusBadgeText,
+                        item.must_change_password
+                          ? styles.statusTextWarning
+                          : styles.statusTextSuccess,
+                      ]}
+                    >
+                      {item.must_change_password
+                        ? '⚠️ Password Reset Pending'
+                        : '🔒 Password Active & Set'}
+                    </Text>
+                  </View>
+                </View>
               </View>
 
               <View style={styles.actionRow}>
                 <TouchableOpacity
                   style={styles.resetButton}
                   onPress={() => handleOpenResetModal(item)}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.resetButtonText}>🔑 Reset Password</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </Card>
           )}
         />
       )}
@@ -477,13 +509,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   card: {
-    backgroundColor: COLORS.superAdmin.card,
-    borderColor: COLORS.superAdmin.border,
-    borderWidth: 1,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    ...SHADOWS.medium,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -491,10 +517,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   avatarBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.round,
-    backgroundColor: COLORS.superAdmin.bg,
+    width: 38,
+    height: 38,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
@@ -504,28 +530,32 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flex: 1,
+    marginRight: SPACING.xs,
   },
   userName: {
     color: COLORS.superAdmin.text,
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   userSub: {
-    color: COLORS.superAdmin.accent,
+    color: '#F59E0B',
     fontSize: 12,
+    marginTop: 2,
+    fontWeight: '600',
   },
   roleBadge: {
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    borderColor: COLORS.superAdmin.accent,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderColor: '#F59E0B',
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.round,
   },
   roleBadgeText: {
-    color: COLORS.superAdmin.accent,
+    color: '#F59E0B',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   detailsBox: {
     backgroundColor: COLORS.superAdmin.bg,
@@ -538,22 +568,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginVertical: 2,
   },
+  passwordStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 6,
+  },
+  detailLabel: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 12,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.round,
+  },
+  statusBadgeWarning: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+  },
+  statusBadgeSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  statusTextWarning: {
+    color: '#FBBF24',
+  },
+  statusTextSuccess: {
+    color: '#34D399',
+  },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
   resetButton: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderColor: COLORS.danger,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
     borderWidth: 1,
     paddingHorizontal: SPACING.md,
     paddingVertical: 6,
     borderRadius: RADIUS.sm,
   },
   resetButtonText: {
-    color: '#F87171',
+    color: '#60A5FA',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   modalOverlay: {
     flex: 1,

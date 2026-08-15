@@ -3,3 +3,4 @@ export * from './StatusBadge';
 export * from './SlaBadge';
 export * from './Button';
 export * from './ConfirmModal';
+export * from './dateUtils';

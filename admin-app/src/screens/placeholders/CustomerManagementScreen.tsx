@@ -21,6 +21,7 @@ import {
   setCustomerSearchQuery,
 } from '../../store/customerSlice';
 import { CustomerProfile } from '../../services/api';
+import { Card } from '../../components/ui';
 
 export const CustomerManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -140,7 +141,7 @@ export const CustomerManagementScreen = () => {
             />
           }
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <Card style={styles.card} themeMode="super">
               <View style={styles.cardHeader}>
                 <View style={styles.avatarBadge}>
                   <Text style={styles.avatarIcon}>{item.is_guest ? '👤' : '👥'}</Text>
@@ -174,10 +175,11 @@ export const CustomerManagementScreen = () => {
               <TouchableOpacity
                 style={styles.adjustButton}
                 onPress={() => openLoyaltyModal(item)}
+                activeOpacity={0.8}
               >
                 <Text style={styles.adjustButtonText}>💎 Adjust Loyalty Points</Text>
               </TouchableOpacity>
-            </View>
+            </Card>
           )}
         />
       )}
@@ -306,10 +308,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   avatarBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.round,
-    backgroundColor: COLORS.superAdmin.bg,
+    width: 38,
+    height: 38,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
@@ -323,21 +325,24 @@ const styles = StyleSheet.create({
   customerName: {
     color: COLORS.superAdmin.text,
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   customerPhone: {
-    color: COLORS.superAdmin.muted,
+    color: '#A78BFA',
     fontSize: 12,
+    marginTop: 2,
+    fontWeight: '600',
   },
   customerEmail: {
     color: COLORS.superAdmin.muted,
     fontSize: 11,
+    marginTop: 1,
   },
   pointsPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    borderColor: '#F59E0B',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    borderColor: '#8B5CF6',
     borderWidth: 1,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -348,9 +353,9 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   pointsText: {
-    color: '#F59E0B',
+    color: '#C4B5FD',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   statsRow: {
     flexDirection: 'row',
@@ -368,25 +373,26 @@ const styles = StyleSheet.create({
     color: COLORS.superAdmin.muted,
     fontSize: 10,
     textTransform: 'uppercase',
+    fontWeight: '600',
   },
   statValue: {
     color: COLORS.superAdmin.text,
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginTop: 2,
   },
   adjustButton: {
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    borderColor: COLORS.superAdmin.accent,
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderColor: 'rgba(139, 92, 246, 0.3)',
     borderWidth: 1,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.sm,
     alignItems: 'center',
   },
   adjustButtonText: {
-    color: COLORS.superAdmin.accent,
+    color: '#A78BFA',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   modalOverlay: {
     flex: 1,
