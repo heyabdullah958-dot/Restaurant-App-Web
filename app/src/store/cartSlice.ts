@@ -10,6 +10,15 @@ export interface CartItem {
   [key: string]: any; // Allow other optional fields
 }
 
+export interface AppliedPromo {
+  code: string;
+  discount: number;
+  discount_type: string;
+  discount_value: number;
+  min_subtotal: number;
+  max_discount?: number | null;
+}
+
 export interface CartState {
   items: CartItem[];
   restaurantId: number | null;
@@ -17,6 +26,10 @@ export interface CartState {
   totalAmount: number;
   fulfillmentMode: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN';
   tableNumber: string;
+  appliedPromo: AppliedPromo | null;
+  promoRemovalNotice: string | null;
+  useLoyaltyPoints: boolean;
+  redeemedLoyaltyPoints: number;
 }
 
 const initialState: CartState = {
@@ -26,6 +39,27 @@ const initialState: CartState = {
   totalAmount: 0,
   fulfillmentMode: 'DELIVERY',
   tableNumber: '',
+  appliedPromo: null,
+  promoRemovalNotice: null,
+  useLoyaltyPoints: false,
+  redeemedLoyaltyPoints: 0,
+};
+
+const evaluatePromoState = (state: CartState) => {
+  if (!state.appliedPromo) return;
+  if (state.items.length === 0 || state.totalAmount < (state.appliedPromo.min_subtotal || 0)) {
+    const code = state.appliedPromo.code;
+    const minSub = state.appliedPromo.min_subtotal || 0;
+    state.appliedPromo = null;
+    state.promoRemovalNotice = `Promo code '${code}' removed: Minimum order subtotal of Rs. ${minSub.toFixed(0)} required.`;
+  } else if (state.appliedPromo.discount_type === 'percentage') {
+    let newDisc = state.totalAmount * (state.appliedPromo.discount_value / 100);
+    if (state.appliedPromo.max_discount) {
+      newDisc = Math.min(newDisc, state.appliedPromo.max_discount);
+    }
+    state.appliedPromo.discount = Math.min(newDisc, state.totalAmount);
+    state.promoRemovalNotice = null;
+  }
 };
 
 const cartSlice = createSlice({
@@ -38,6 +72,27 @@ const cartSlice = createSlice({
     setTableNumber(state, action: PayloadAction<string>) {
       state.tableNumber = action.payload;
     },
+    applyPromo(state, action: PayloadAction<AppliedPromo>) {
+      state.appliedPromo = action.payload;
+      state.promoRemovalNotice = null;
+      evaluatePromoState(state);
+    },
+    removePromo(state) {
+      state.appliedPromo = null;
+      state.promoRemovalNotice = null;
+    },
+    clearPromoNotice(state) {
+      state.promoRemovalNotice = null;
+    },
+    setUseLoyaltyPoints(state, action: PayloadAction<boolean>) {
+      state.useLoyaltyPoints = action.payload;
+      if (!action.payload) {
+        state.redeemedLoyaltyPoints = 0;
+      }
+    },
+    setRedeemedLoyaltyPoints(state, action: PayloadAction<number>) {
+      state.redeemedLoyaltyPoints = Math.max(0, action.payload);
+    },
     addItemToCart(state, action: PayloadAction<{ item: CartItem; restaurantId: number }>) {
       const { item, restaurantId } = action.payload;
       
@@ -46,6 +101,10 @@ const cartSlice = createSlice({
         state.items = [];
         state.totalQuantity = 0;
         state.totalAmount = 0;
+        state.appliedPromo = null;
+        state.promoRemovalNotice = null;
+        state.useLoyaltyPoints = false;
+        state.redeemedLoyaltyPoints = 0;
       }
       
       state.restaurantId = restaurantId;
@@ -67,6 +126,7 @@ const cartSlice = createSlice({
 
       state.totalQuantity += addedQty;
       state.totalAmount += (item.price * addedQty);
+      evaluatePromoState(state);
     },
     removeItemFromCart(state, action: PayloadAction<{ id: number; selectedOptions?: any }>) {
       const { id, selectedOptions } = action.payload;
@@ -84,7 +144,10 @@ const cartSlice = createSlice({
 
       if (state.items.length === 0) {
         state.restaurantId = null;
+        state.useLoyaltyPoints = false;
+        state.redeemedLoyaltyPoints = 0;
       }
+      evaluatePromoState(state);
     },
     updateQuantity(state, action: PayloadAction<{ id: number; selectedOptions?: any; quantity: number }>) {
       const { id, selectedOptions, quantity } = action.payload;
@@ -98,12 +161,17 @@ const cartSlice = createSlice({
         state.totalQuantity += difference;
         state.totalAmount += (existingItem.price * difference);
       }
+      evaluatePromoState(state);
     },
     clearCart(state) {
       state.items = [];
       state.restaurantId = null;
       state.totalQuantity = 0;
       state.totalAmount = 0;
+      state.appliedPromo = null;
+      state.promoRemovalNotice = null;
+      state.useLoyaltyPoints = false;
+      state.redeemedLoyaltyPoints = 0;
     },
   },
   extraReducers: (builder) => {
@@ -114,6 +182,10 @@ const cartSlice = createSlice({
       state.totalAmount = 0;
       state.fulfillmentMode = 'DELIVERY';
       state.tableNumber = '';
+      state.appliedPromo = null;
+      state.promoRemovalNotice = null;
+      state.useLoyaltyPoints = false;
+      state.redeemedLoyaltyPoints = 0;
     };
     builder
       .addCase('user/logout/fulfilled', resetCartState)
@@ -122,5 +194,18 @@ const cartSlice = createSlice({
   },
 });
 
-export const { setFulfillmentMode, setTableNumber, addItemToCart, removeItemFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const {
+  setFulfillmentMode,
+  setTableNumber,
+  applyPromo,
+  removePromo,
+  clearPromoNotice,
+  setUseLoyaltyPoints,
+  setRedeemedLoyaltyPoints,
+  addItemToCart,
+  removeItemFromCart,
+  updateQuantity,
+  clearCart,
+} = cartSlice.actions;
 export default cartSlice.reducer;
+

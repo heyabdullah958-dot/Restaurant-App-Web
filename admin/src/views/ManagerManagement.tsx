@@ -67,31 +67,6 @@ const isLaunchBrand = (str: string) => {
   return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
 };
 
-const MOCK_BRANCHES: Branch[] = [
-  { id: 1, name: 'Johar Town', address: 'PIA Road, Hakim Chowk', phone: '0327-4945947', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
-  { id: 2, name: 'Lake City', address: 'Opposite Lake City Mall', phone: '0324-4441735', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
-  { id: 3, name: 'GT Road Baghbanpura', address: 'GT Road, Baghbanpura', phone: '0326-6811177', is_active: true, restaurant_id: 4, restaurant_name: 'Tandoori Stop' },
-  { id: 4, name: 'DHA Phase 1', address: 'DHA Phase 1, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 5, name: 'Johar Town', address: 'Johar Town, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 6, name: 'Lake City', address: 'Lake City, Lahore', phone: '', is_active: true, restaurant_id: 3, restaurant_name: 'Jush' },
-  { id: 7, name: 'Gulberg III', address: 'Gulberg III, Lahore', phone: '', is_active: true, restaurant_id: 7, restaurant_name: 'GetAFomo' },
-];
-
-const MOCK_MANAGERS: Manager[] = [
-  // Tandoori Stop Branches (3)
-  { id: 2, username: 'manager_tandooristoppk_johar_town', email: 'manager@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'Johar Town', branch_id: 1, notification_email: 'manager@tandooristoppk.com' },
-  { id: 3, username: 'manager_tandooristoppk_lake_city', email: 'manager2@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'Lake City', branch_id: 2, notification_email: 'manager2@tandooristoppk.com' },
-  { id: 4, username: 'manager_tandooristoppk_gt_road_baghbanpura', email: 'manager3@tandooristoppk.com', restaurant_name: 'TandooriStopPK', restaurant_id: 4, branch_name: 'GT Road Baghbanpura', branch_id: 3, notification_email: 'manager3@tandooristoppk.com' },
-
-  // Jush Branches (3)
-  { id: 5, username: 'manager_jushhpk_dha_phase_1', email: 'manager.dha@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'DHA Phase 1', branch_id: 4, notification_email: 'manager.dha@jushhpk.com' },
-  { id: 6, username: 'manager_jushhpk_johar_town', email: 'manager@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Johar Town', branch_id: 5, notification_email: 'manager@jushhpk.com' },
-  { id: 7, username: 'manager_jushhpk_lake_city', email: 'manager.lake@jushhpk.com', restaurant_name: 'JushhPK', restaurant_id: 3, branch_name: 'Lake City', branch_id: 6, notification_email: 'manager.lake@jushhpk.com' },
-
-  // GetAFomo Branches (1)
-  { id: 8, username: 'manager_getafomo_gulberg_iii', email: 'manager.gulberg@getafomo.com', restaurant_name: 'GetAFomo', restaurant_id: 7, branch_name: 'Gulberg III', branch_id: 7, notification_email: 'manager.gulberg@getafomo.com' },
-];
-
 export const ManagerManagement: React.FC = () => {
   const { showToast, restaurants } = useAdmin();
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -101,7 +76,7 @@ export const ManagerManagement: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  // New state variables for Branch Manager creation
+  // State variables for Branch Manager creation
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [branchesLoading, setBranchesLoading] = useState(false);
@@ -116,29 +91,19 @@ export const ManagerManagement: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [copiedField, setCopiedField] = useState<'username' | 'password' | null>(null);
 
-  const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
-
   const isWhitelistedManager = (m: Manager) => {
     return WHITELISTED_USERNAMES.includes(m.username);
   };
 
   const loadManagers = async () => {
     setLoading(true);
-    if (isMock) {
-      setTimeout(() => {
-        setManagers(MOCK_MANAGERS.filter(isWhitelistedManager));
-        setLoading(false);
-      }, 500);
-      return;
-    }
-
     try {
       const data = await fetchAllManagers();
       const filtered = data.filter((m: Manager) => isWhitelistedManager(m) || WHITELISTED_USERNAMES.some(w => m.username.includes(w)));
-      setManagers(filtered.length > 0 ? filtered : MOCK_MANAGERS);
+      setManagers(filtered);
     } catch (err: any) {
-      showToast('Failed to load manager accounts. Using offline mocks.', 'error');
-      setManagers(MOCK_MANAGERS);
+      showToast('Failed to load manager accounts from live API.', 'error');
+      setManagers([]);
     } finally {
       setLoading(false);
     }
@@ -163,23 +128,12 @@ export const ManagerManagement: React.FC = () => {
     const restaurantId = Number(restaurantIdStr);
     setBranchesLoading(true);
 
-    if (isMock) {
-      setTimeout(() => {
-        const filteredMockBranches = MOCK_BRANCHES.filter(
-          (b) => b.restaurant_id === restaurantId
-        );
-        setBranches(filteredMockBranches);
-        setBranchesLoading(false);
-      }, 400);
-      return;
-    }
-
     try {
       const data = await fetchBranches(restaurantId);
       setBranches(data);
     } catch (err: any) {
-      showToast('Failed to load branches for selected restaurant.', 'error');
-      setBranches(MOCK_BRANCHES.filter((b) => b.restaurant_id === restaurantId));
+      showToast('Failed to load branches from API.', 'error');
+      setBranches([]);
     } finally {
       setBranchesLoading(false);
     }
@@ -207,43 +161,6 @@ export const ManagerManagement: React.FC = () => {
     }
 
     setCreating(true);
-
-    if (isMock) {
-      setTimeout(() => {
-        const selectedRest = restaurants.find((r) => r.id === Number(createForm.restaurant_id));
-        const selectedBranch = branches.find((b) => b.id === Number(createForm.branch_id));
-        const restName = selectedRest?.name || 'Restaurant';
-        const branchName = selectedBranch?.name || 'Branch';
-
-        const generatedPass = createForm.password.trim() || 'Secr3t!' + Math.floor(1000 + Math.random() * 9000);
-        const generatedUser = `manager_${restName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${branchName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-
-        const newManager: Manager = {
-          id: Date.now(),
-          username: generatedUser,
-          email: createForm.notification_email.trim(),
-          restaurant_name: restName,
-          restaurant_id: Number(createForm.restaurant_id),
-          branch_name: branchName,
-          branch_id: Number(createForm.branch_id),
-          notification_email: createForm.notification_email.trim(),
-        };
-
-        MOCK_MANAGERS.unshift(newManager);
-        setCreatedCredentials({
-          username: generatedUser,
-          password: generatedPass,
-          restaurant: restName,
-          branch: branchName,
-          notification_email: createForm.notification_email.trim(),
-        });
-        setShowCreateForm(false);
-        setCreateForm({ restaurant_id: '', branch_id: '', notification_email: '', password: '' });
-        setCreating(false);
-        loadManagers();
-      }, 800);
-      return;
-    }
 
     try {
       const response = await createManagerAccount({
@@ -281,15 +198,6 @@ export const ManagerManagement: React.FC = () => {
     }
 
     setUpdating(true);
-    if (isMock) {
-      setTimeout(() => {
-        showToast(`[Demo Mode] Password for ${selectedManager.username} set to: ${newPassword}`, 'success');
-        setUpdating(false);
-        setSelectedManager(null);
-        setNewPassword('');
-      }, 800);
-      return;
-    }
 
     try {
       await changeManagerPassword(selectedManager.id, newPassword.trim());
@@ -359,12 +267,6 @@ export const ManagerManagement: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {isMock && (
-            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs px-3 py-1.5 rounded-full font-bold">
-              <ShieldAlert size={14} className="animate-pulse" />
-              <span>Demo Mode (Changes simulated)</span>
-            </div>
-          )}
           <button
             onClick={() => setShowCreateForm(true)}
             className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"

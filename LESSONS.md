@@ -4,6 +4,51 @@
 
 ---
 
+## Lesson 11 — Super Admin Multi-Tenant Modal Provisioning & Delivered-Only CRM Annotation — 2026-08-16
+- **Pattern**: Modal entity creation in role-differentiated apps (Super Admin vs Branch Manager) and CRM user metric aggregation.
+- **Wrong assumption made**: Assuming that creation modals designed for branch managers (where branch context is implicitly known from `auth.branchId`) can be rendered unchanged for Super Admin, and assuming customer lists only need raw user model counts.
+- **What actually mattered**: 
+  1. Creation modals for global administrative roles (Super Admin) MUST provide explicit Brand and Branch selection controls so the target foreign key is deliberately chosen rather than falling back to arbitrary default IDs.
+  2. Customer CRM profiles must annotate `delivered_orders_count` and `delivered_total_spent` using conditional Django ORM aggregations (`filter=Q(orders__status='delivered')`) to show true customer lifetime value without counting unearned or cancelled orders.
+  3. Interactive UI date/time pickers with quick presets (+24h, +3d, +7d, End of Month) prevent malformed ISO timestamp errors and eliminate the cognitive friction of manual string typing on mobile keyboards.
+- **Applies to**: `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`, `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`, `backend/users/admin_views.py`, `backend/promotions/serializers.py`.
+
+---
+
+## Lesson 10 — Dual Slug/Numeric ID Resolution & Defensive Promo Error Extraction — 2026-08-16
+- **Pattern**: Handling tenant route identifiers in REST endpoints and parsing validation errors across mobile clients.
+- **Wrong assumption made**: Assuming that URLs structured as `/api/restaurants/{slug}/menu/` will only ever receive string slugs, and assuming error responses from coupon validation will always contain an `err.response.data.message` field.
+- **What actually mattered**: 
+  1. In JWT-authenticated systems, user token payloads frequently supply numeric database primary keys (`restaurant_id`) rather than alphanumeric slugs. REST endpoints taking `{slug}` MUST inspect whether the input is numeric (`isdigit()`) and support resolving either `id=int(slug)` or `slug__iexact=slug` to prevent spurious 404 errors for managers.
+  2. Client-side promo handlers must never assume the exact JSON envelope (`res.data.code` vs `res.code` vs `res.data.data.code`). Unwrapping defensively (`res?.data?.data || res?.data || res`) and validating presence before accessing properties prevents JavaScript runtime `TypeError: Cannot read property 'code' of undefined`.
+  3. Error parsers must unpack Django REST Framework's array structures (`data.code[0]`, `data.non_field_errors[0]`) rather than letting catch handlers fall back to generic client exceptions.
+- **Applies to**: `backend/restaurants/views.py`, `app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `app/src/services/api.js`, `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`.
+
+---
+
+## Lesson 9 — Delivered-Only Revenue Accounting & Rider-to-Brand Schema Linkage — 2026-08-16
+- **Pattern**: Calculating revenue aggregates and identifying multi-tenant fleet relationships across administrative dashboards.
+- **Wrong assumption made**: Assuming that summing `Order.total` with `status != 'cancelled'` accurately reflects earned business revenue, and assuming raw branch names are sufficient for Super Admin to identify rider brand affiliation.
+- **What actually mattered**: 
+  1. Financial metrics (today, 7d, 30d, all-time, daily trend) MUST filter strictly by `status === 'delivered'`. Counting `placed`, `received`, or `preparing` orders prematurely inflates financial statements with unearned or potentially cancellable funds.
+  2. In multi-tenant systems, `BranchRider` is linked to `Branch`, and `Branch` is linked to `Restaurant`. Serializers (`BranchRiderSerializer`) must explicitly flatten `restaurant_id`, `restaurant_name`, and `restaurant_slug` so Super Admin views can provide brand filters and visual brand tags (`🏪 Brand • 📍 Branch`).
+  3. Customer feedback submitted on completed deliveries must have dedicated endpoints (`/api/admin/reviews/`) and dedicated cards in operational dashboards.
+- **Applies to**: `backend/config/analytics_views.py`, `backend/restaurants/serializers.py`, `backend/restaurants/views.py`, `admin/src/views/BranchDashboard.tsx`, `admin/src/views/SuperDashboard.tsx`, `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`, `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`.
+
+---
+
+## Lesson 8 — Queryset Fallback Leaks & Multi-Tenant Rider Dispatch Integrity — 2026-08-16
+- **Pattern**: Scoping filtered API querysets in multi-tenant backends (e.g. `GET /api/admin/riders/?branch_id=X`).
+- **Wrong assumption made**: Assuming that when a branch filter yields 0 records (`t1_qs.exists() == False`), falling back to the base queryset (`qs = base_qs`) provides a "helpful default" list.
+- **What actually mattered**: 
+  1. Falling back to the base queryset silently leaks entities from other branches and restaurant brands into branch-specific modals.
+  2. When the user selects one of these cross-branch entities, mutation endpoints reject the action with 403 Forbidden because of tenancy mismatch.
+  3. Queryset filters MUST strictly return the scoped query result (even if empty) unless global fallback is explicitly requested by caller (`allow_global=true`).
+  4. Mutation endpoints (`OrderAssignRiderView`) must support both internal integer primary keys and display IDs (`display_order_id`), and reject busy/offline assignments at the API layer with HTTP 400.
+- **Applies to**: `backend/restaurants/views.py`, `backend/orders/views.py`, `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`, `admin/src/views/OrderManagement.tsx`.
+
+---
+
 ## Lesson 1 — Multi-Tenant Order Sequence Scoping — 2026-07-25
 - **Pattern**: Generating branch/tenant scoped display IDs (e.g. `TS-LC-1001`).
 - **Wrong assumption made**: Using global auto-incrementing integer IDs (`Order.id`) for customer receipt display and dispatcher modals.
@@ -185,8 +230,18 @@
   2. **Launch Brand Scoping**: In multi-tenant systems launching in phases, active brand filtering must be enforced at both the UI presentation layer (filtering out `is_active: false` brands) and the Super Admin analytics layer so that draft tenants do not pollute live operational statistics.
 - **Applies to**: `app/src/services/api.js`, `app/src/screens/HomeScreen.tsx`, `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`, `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`.
 
+---
 
+---
 
-
+## Lesson 23 — Basket-Level Loyalty Invariants, Mock Elimination & DateTime Guarding — 2026-08-16
+- **Pattern**: Managing user discounts across multi-step ordering funnels, removing offline mock code in enterprise admin dashboards, and securing promotional deal dates.
+- **Wrong assumption made**: Managing loyalty points toggle state inside checkout screen component state while coupons were applied in the basket, causing total calculation desyncs and requiring duplicate price deduction recalculations.
+- **What actually mattered**: 
+  1. **All Discounts Consolidated in Basket**: Both Promo Code application and Loyalty Points redemption belong strictly on the Basket screen (`CartScreen.tsx`). The Checkout screen should act purely as a read-only consumer of `cart.appliedPromo` and `cart.useLoyaltyPoints`.
+  2. **Redux-Driven Discount Invalidation**: Both promo discounts and loyalty point redemptions must be held in the centralized Redux state (`cartSlice.ts`). When subtotal changes, loyalty redemptions must automatically recalculate so points redeemed never exceed the remaining subtotal.
+  3. **Zero Offline Mocks**: Production admin dashboards must never maintain static mock fallback arrays or `isMock` simulations. If an API call fails, the UI should render an explicit `ErrorState` or toast with a retry trigger rather than injecting fictitious data.
+  4. **Strict Temporal Guards on DateTime Pickers**: Date/time picker modals for time-bound promotions must strictly enforce `minDate = new Date()`, disable previous month navigation when viewing the current month, and reject any configuration where `end_time <= start_time`.
+- **Applies to**: `app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `app/src/store/cartSlice.ts`, `admin/src/views/ManagerManagement.tsx`, `admin-app/src/components/ui/DateTimePickerModal.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`.
 
 

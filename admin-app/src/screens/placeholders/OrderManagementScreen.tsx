@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import {
   UIManager,
   Alert,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk, updateOrderStatusThunk } from '../../store/orderSlice';
@@ -36,6 +37,8 @@ if (
 export const OrderManagementScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
   const { orders, isLoading, isRefreshing, error } = useAppSelector((state) => state.orders);
+  const { role } = useAppSelector((state) => state.auth);
+  const isSuper = role === 'super_admin';
 
   const newOrderCount = orders.filter((o) => o.status === 'received').length;
 
@@ -57,9 +60,12 @@ export const OrderManagementScreen = ({ navigation }: any) => {
   const [loadingRiders, setLoadingRiders] = useState(false);
   const [dispatchSubmitting, setDispatchSubmitting] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchOrdersThunk());
-  }, [dispatch]);
+  // Real-time synchronization on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchOrdersThunk());
+    }, [dispatch])
+  );
 
   const handleRefresh = () => {
     dispatch(fetchOrdersThunk({ isRefresh: true }));
@@ -103,7 +109,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
 
   const openDispatchModal = async (order: AdminOrder) => {
     setDispatchTargetOrder(order);
-    setSelectedRiderId(order.rider?.id || null);
+    setSelectedRiderId(null);
     setDispatchModalVisible(true);
     setLoadingRiders(true);
 
@@ -113,11 +119,13 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         is_active: true,
       });
       setAvailableRiders(riders);
-      if (!order.rider?.id) {
-        const firstAvailable = riders.find((r) => r.status === 'AVAILABLE');
-        if (firstAvailable) {
-          setSelectedRiderId(firstAvailable.id);
-        }
+      
+      // Select first available active rider by default
+      const firstAvailable = riders.find((r) => r.status === 'AVAILABLE' && r.is_active);
+      if (firstAvailable) {
+        setSelectedRiderId(firstAvailable.id);
+      } else {
+        setSelectedRiderId(null);
       }
     } catch (err) {
       console.warn('Failed to load riders for dispatch modal:', err);
@@ -129,18 +137,28 @@ export const OrderManagementScreen = ({ navigation }: any) => {
   const handleConfirmDispatch = async () => {
     if (!dispatchTargetOrder) return;
     if (!selectedRiderId) {
-      Alert.alert('Rider Required', 'Please select a delivery rider before dispatching this order.');
+      Alert.alert('Rider Required', 'Please select an available delivery rider before dispatching this order.');
+      return;
+    }
+
+    const targetRider = availableRiders.find((r) => r.id === selectedRiderId);
+    if (!targetRider || targetRider.status !== 'AVAILABLE' || !targetRider.is_active) {
+      Alert.alert('Rider Unavailable', 'The selected rider is currently offline or already on another delivery.');
       return;
     }
 
     setDispatchSubmitting(true);
     try {
-      await assignRiderToOrder(dispatchTargetOrder.id, selectedRiderId);
+      await assignRiderToOrder(dispatchTargetOrder.id, selectedRiderId, {
+        allow_cross_branch: true,
+        is_hq_override: isSuper,
+      });
       setDispatchModalVisible(false);
       setDispatchTargetOrder(null);
       dispatch(fetchOrdersThunk({ isRefresh: true }));
     } catch (err: any) {
-      Alert.alert('Dispatch Error', err?.response?.data?.detail || err?.message || 'Failed to dispatch order');
+      const msg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to dispatch order';
+      Alert.alert('Dispatch Error', msg);
     } finally {
       setDispatchSubmitting(false);
     }
@@ -472,23 +490,47 @@ export const OrderManagementScreen = ({ navigation }: any) => {
             ) : (
               <ScrollView style={{ maxHeight: 220, marginVertical: SPACING.xs }}>
                 {availableRiders.map((r) => {
+                  const isAvail = r.status === 'AVAILABLE' && r.is_active;
                   const isSelected = selectedRiderId === r.id;
-                  const isAvail = r.status === 'AVAILABLE';
 
                   return (
                     <TouchableOpacity
                       key={r.id}
-                      style={[styles.riderOption, isSelected && styles.riderOptionSelected]}
-                      onPress={() => setSelectedRiderId(r.id)}
-                      activeOpacity={0.8}
+                      disabled={!isAvail}
+                      style={[
+                        styles.riderOption,
+                        isSelected && styles.riderOptionSelected,
+                        !isAvail && { opacity: 0.55, backgroundColor: COLORS.neutral100 }
+                      ]}
+                      onPress={() => isAvail && setSelectedRiderId(r.id)}
+                      activeOpacity={isAvail ? 0.8 : 1}
                     >
-                      <Text style={styles.radioDot}>{isSelected ? '🔘' : '⚪'}</Text>
+                      <Text style={styles.radioDot}>
+                        {!isAvail ? '🔒' : isSelected ? '🔘' : '⚪'}
+                      </Text>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.riderOptionName}>{r.name}</Text>
+                        <Text style={[styles.riderOptionName, !isAvail && { color: COLORS.neutral500 }]}>
+                          {r.name} {!isAvail ? `(Unavailable)` : ''}
+                        </Text>
                         <Text style={styles.riderOptionSub}>📞 {r.phone} | {r.vehicle_type}</Text>
                       </View>
-                      <Text style={[styles.riderOptionStatus, { color: isAvail ? COLORS.success : COLORS.warningDark }]}>
-                        {isAvail ? '🟢 Available' : '🛵 On Delivery'}
+                      <Text
+                        style={[
+                          styles.riderOptionStatus,
+                          {
+                            color: isAvail
+                              ? COLORS.success
+                              : r.status === 'ON_DELIVERY'
+                              ? COLORS.warningDark
+                              : COLORS.danger,
+                          },
+                        ]}
+                      >
+                        {isAvail
+                          ? '🟢 Available'
+                          : r.status === 'ON_DELIVERY'
+                          ? '🛵 Busy (On Delivery)'
+                          : '⛔ Offline'}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -510,7 +552,11 @@ export const OrderManagementScreen = ({ navigation }: any) => {
                 size="md"
                 onPress={handleConfirmDispatch}
                 isLoading={dispatchSubmitting}
-                disabled={!selectedRiderId || availableRiders.length === 0}
+                disabled={
+                  !selectedRiderId ||
+                  availableRiders.length === 0 ||
+                  !availableRiders.some((r) => r.id === selectedRiderId && r.status === 'AVAILABLE' && r.is_active)
+                }
                 style={styles.modalBtn}
               />
             </View>

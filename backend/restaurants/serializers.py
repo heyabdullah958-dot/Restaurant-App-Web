@@ -136,12 +136,13 @@ class BranchRiderSerializer(serializers.ModelSerializer):
     branch_name = serializers.ReadOnlyField(source='branch.name')
     restaurant_id = serializers.ReadOnlyField(source='branch.restaurant.id')
     restaurant_name = serializers.ReadOnlyField(source='branch.restaurant.name')
+    restaurant_slug = serializers.ReadOnlyField(source='branch.restaurant.slug')
     is_cross_branch = serializers.SerializerMethodField()
     is_cross_brand = serializers.SerializerMethodField()
 
     class Meta:
         model = BranchRider
-        fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'is_cross_branch', 'is_cross_brand', 'created_at')
+        fields = ('id', 'branch', 'branch_name', 'restaurant_id', 'restaurant_name', 'restaurant_slug', 'name', 'phone', 'vehicle_type', 'status', 'is_active', 'is_cross_branch', 'is_cross_brand', 'created_at')
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=BranchRider.objects.all(),

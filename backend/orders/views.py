@@ -495,14 +495,19 @@ class OrderAssignRiderView(APIView):
     """
     POST /api/orders/{id}/assign-rider/
     Assigns a BranchRider to an Order.
-    Payload: { "rider_id": 5, "is_hq_override": true } or { "rider_id": null }
+    Payload: { "rider_id": 5, "allow_cross_branch": true, "is_hq_override": true } or { "rider_id": null }
+    Supports numeric Order.id and string Order.display_order_id.
     """
     permission_classes = [permissions.IsAdminUser]
 
     def post(self, request, pk):
-        try:
-            order = Order.objects.get(pk=pk)
-        except Order.DoesNotExist:
+        from django.db.models import Q
+        query = Q(display_order_id__iexact=str(pk).strip())
+        if str(pk).isdigit():
+            query |= Q(pk=int(pk))
+        
+        order = Order.objects.select_related('restaurant', 'branch', 'rider').filter(query).order_by('-id').first()
+        if not order:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
         user = request.user
@@ -513,8 +518,15 @@ class OrderAssignRiderView(APIView):
             rider_id = request.data.get('rider')
 
         if rider_id is None or rider_id == 0 or rider_id == '':
-            order.rider = None
-            order.save(update_fields=['rider'])
+            if order.rider:
+                old_rider = order.rider
+                order.rider = None
+                order.save(update_fields=['rider'])
+                # Free old rider if no other active deliveries
+                active_deliveries = Order.objects.filter(status='out_for_delivery', rider=old_rider).exclude(pk=order.pk).exists()
+                if not active_deliveries:
+                    old_rider.status = 'AVAILABLE'
+                    old_rider.save(update_fields=['status'])
             return Response({
                 'success': True,
                 'message': 'Rider unassigned from order.',
@@ -524,27 +536,56 @@ class OrderAssignRiderView(APIView):
 
         from restaurants.models import BranchRider
         try:
-            rider = BranchRider.objects.get(pk=rider_id)
-        except BranchRider.DoesNotExist:
+            rider = BranchRider.objects.select_related('branch', 'branch__restaurant').get(pk=rider_id)
+        except (BranchRider.DoesNotExist, ValueError):
             return Response({'error': 'Rider not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        # 1. Inactive check
         if not rider.is_active:
-            return Response({'error': 'Rider is inactive.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': f"Rider '{rider.name}' is inactive and cannot be assigned."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cross-branch / Cross-brand check
-        is_cross_branch = bool(order.branch and rider.branch and order.branch != rider.branch)
+        # 2. Availability Guard: Reject ON_DELIVERY or OFFLINE riders
+        if rider.status == 'ON_DELIVERY' and order.rider != rider:
+            return Response(
+                {'error': f"Rider '{rider.name}' is currently on another active delivery (ON_DELIVERY). Please select an available rider."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if rider.status == 'OFFLINE':
+            return Response(
+                {'error': f"Rider '{rider.name}' is currently marked OFFLINE. Please select an active available rider or activate the rider first."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 3. Multi-Tenant Branch & Brand Scoping
         is_cross_brand = bool(order.restaurant and rider.branch and rider.branch.restaurant and order.restaurant != rider.branch.restaurant)
-        
-        if (is_cross_branch or is_cross_brand) and not is_super:
-            exact_exists = BranchRider.objects.filter(branch=order.branch, status='AVAILABLE', is_active=True).exists()
-            if exact_exists and not request.data.get('allow_cross_branch'):
+        is_cross_branch = bool(order.branch and rider.branch and order.branch != rider.branch)
+
+        # Strict isolation: Riders cannot be assigned across different restaurant brands unless Super Admin
+        if is_cross_brand and not is_super:
+            return Response(
+                {'error': f"Rider '{rider.name}' belongs to '{rider.branch.restaurant.name}'. Cross-brand dispatch is prohibited for branch manager accounts."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Cross-branch fallback within same restaurant brand: Allowed for managers when local riders unavailable or allow_cross_branch requested
+        if is_cross_branch and not is_super:
+            exact_exists = BranchRider.objects.filter(branch=order.branch, status='AVAILABLE', is_active=True).exclude(pk=rider.pk).exists()
+            if exact_exists and not (request.data.get('allow_cross_branch') or request.data.get('allow_fallback')):
                 return Response(
-                    {'error': f"Rider '{rider.name}' belongs to '{rider.branch.name}' ({rider.branch.restaurant.name}). Please select a rider assigned to your branch."},
+                    {'error': f"Rider '{rider.name}' belongs to '{rider.branch.name}'. Available local riders exist for your branch."},
                     status=status.HTTP_403_FORBIDDEN
                 )
 
+        # Unassign previous rider if order was already assigned to someone else
+        if order.rider and order.rider != rider:
+            prev_rider = order.rider
+            active_other = Order.objects.filter(status='out_for_delivery', rider=prev_rider).exclude(pk=order.pk).exists()
+            if not active_other:
+                prev_rider.status = 'AVAILABLE'
+                prev_rider.save(update_fields=['status'])
+
         order.rider = rider
-        if order.status == 'preparing':
+        if order.status in ['pending', 'received', 'preparing']:
             order.status = 'out_for_delivery'
         order.save(update_fields=['rider', 'status'])
 
@@ -553,7 +594,7 @@ class OrderAssignRiderView(APIView):
 
         msg = f'Order #{order.id} assigned to rider {rider.name}.'
         if is_cross_branch or is_cross_brand or is_super:
-            msg = f'⚡ [HQ Fallback Override] Order #{order.id} assigned to rider {rider.name} ({rider.branch.name} - {rider.branch.restaurant.name}).'
+            msg = f'⚡ [HQ Override] Order #{order.id} assigned to rider {rider.name} ({rider.branch.name} - {rider.branch.restaurant.name}).'
 
         responseData = AdminOrderListSerializer(order).data
         responseData['hq_admin_override'] = is_super or is_cross_branch or is_cross_brand

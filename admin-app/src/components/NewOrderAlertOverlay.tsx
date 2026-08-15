@@ -9,10 +9,21 @@ import {
   ScrollView,
   Animated,
   Platform,
+  Vibration,
+  NativeModules,
 } from 'react-native';
-// Safe dynamic native module loaders to prevent app crashes when ExponentAV is unlinked in runtime
+
 const getExpoAudio = () => {
   try {
+    if (Platform.OS === 'web') return null;
+    // Check if ExponentAV native module exists in NativeModules
+    const hasNativeAV = Boolean(
+      NativeModules?.ExponentAV ||
+      (globalThis as any)?.expo?.modules?.ExponentAV
+    );
+    if (!hasNativeAV) {
+      return null;
+    }
     const av = require('expo-av');
     return av?.Audio || null;
   } catch (e) {
@@ -48,6 +59,8 @@ export const NewOrderAlertOverlay = () => {
 
   const soundRef = useRef<any>(null);
   const htmlAudioRef = useRef<HTMLAudioElement | null>(null);
+  const webAudioIntervalRef = useRef<any>(null);
+  const webAudioCtxRef = useRef<any>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Pulsing animation for alert bell icon
@@ -72,6 +85,51 @@ export const NewOrderAlertOverlay = () => {
     }
   }, [visible, pulseAnim]);
 
+  // Synthesized Web Audio Beeper for guaranteed audio on Web / Browsers
+  const startWebAudioSynth = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!webAudioCtxRef.current) {
+        webAudioCtxRef.current = new AudioCtx();
+      }
+      const ctx = webAudioCtxRef.current;
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      const playBeep = () => {
+        try {
+          if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+          osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15); // A6 note
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {}
+      };
+
+      playBeep();
+      if (!webAudioIntervalRef.current) {
+        webAudioIntervalRef.current = setInterval(playBeep, 800);
+      }
+    } catch (e) {}
+  };
+
+  const stopWebAudioSynth = () => {
+    if (webAudioIntervalRef.current) {
+      clearInterval(webAudioIntervalRef.current);
+      webAudioIntervalRef.current = null;
+    }
+  };
+
   // Audio & Keep Awake Lifecycle
   const startRingingAndKeepAwake = async () => {
     // 1. Keep Awake (defensive)
@@ -81,44 +139,70 @@ export const NewOrderAlertOverlay = () => {
         await ka.activateKeepAwakeAsync('new-order-alert');
       }
     } catch (e) {
-      console.warn('[NewOrderAlertOverlay] Keep-awake activation skipped:', e);
+      console.warn('[NewOrderAlertOverlay] Keep-awake activation notice:', e);
     }
 
-    // 2. Audio Playback (defensive: Web HTML5 Audio vs Expo Audio)
+    // 2. Continuous Vibration Haptics on Native
     try {
-      if (typeof window !== 'undefined' && typeof window.Audio !== 'undefined') {
-        if (!htmlAudioRef.current) {
-          const audio = new window.Audio(ALERT_SOUND_URL);
-          audio.loop = true;
-          audio.volume = 1.0;
-          htmlAudioRef.current = audio;
+      if (Platform.OS !== 'web') {
+        Vibration.vibrate([0, 600, 300, 600], true);
+      }
+    } catch (e) {}
+
+    // 3. Audio Playback (defensive: Web HTML5 Audio -> Web Audio Synth -> Expo Audio)
+    try {
+      if (Platform.OS === 'web' || (typeof window !== 'undefined' && typeof window.Audio !== 'undefined')) {
+        try {
+          if (!htmlAudioRef.current && typeof window !== 'undefined' && window.Audio) {
+            const audio = new window.Audio(ALERT_SOUND_URL);
+            audio.loop = true;
+            audio.volume = 1.0;
+            htmlAudioRef.current = audio;
+          }
+          if (htmlAudioRef.current) {
+            const playPromise = htmlAudioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => {
+                // If browser autoplay policy blocked MP3 url, fallback to Web Audio synth
+                startWebAudioSynth();
+              });
+            }
+          } else {
+            startWebAudioSynth();
+          }
+        } catch {
+          startWebAudioSynth();
         }
-        await htmlAudioRef.current.play().catch(() => {});
         return;
       }
 
+      // Native Mobile (Android / iOS)
       const ExpoAudio = getExpoAudio();
-      if (ExpoAudio) {
-        await ExpoAudio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: false,
-        });
+      if (ExpoAudio && ExpoAudio.setAudioModeAsync) {
+        try {
+          await ExpoAudio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            shouldDuckAndroid: false,
+          });
 
-        if (!soundRef.current) {
-          const { sound } = await ExpoAudio.Sound.createAsync(
-            { uri: ALERT_SOUND_URL },
-            { shouldPlay: true, isLooping: true, volume: 1.0 }
-          );
-          soundRef.current = sound;
-        } else {
-          await soundRef.current.setIsLoopingAsync(true);
-          await soundRef.current.setVolumeAsync(1.0);
-          await soundRef.current.playAsync();
+          if (!soundRef.current) {
+            const { sound } = await ExpoAudio.Sound.createAsync(
+              { uri: ALERT_SOUND_URL },
+              { shouldPlay: true, isLooping: true, volume: 1.0 }
+            );
+            soundRef.current = sound;
+          } else {
+            await soundRef.current.setIsLoopingAsync(true);
+            await soundRef.current.setVolumeAsync(1.0);
+            await soundRef.current.playAsync();
+          }
+        } catch (nativeAudioErr) {
+          console.warn('[NewOrderAlertOverlay] Native audio execution notice:', nativeAudioErr);
         }
       } else {
-        console.warn('[NewOrderAlertOverlay] Native module ExponentAV not present in runtime. Visual alert active.');
+        console.warn('[NewOrderAlertOverlay] Native ExponentAV not available in runtime. Visual and vibration alert active.');
       }
     } catch (err) {
       console.warn('[NewOrderAlertOverlay] Audio playback notice (visual alert active):', err);
@@ -126,7 +210,14 @@ export const NewOrderAlertOverlay = () => {
   };
 
   const stopRingingAndKeepAwake = async () => {
-    // 1. Keep Awake release
+    // 1. Cancel Vibration
+    try {
+      if (Platform.OS !== 'web') {
+        Vibration.cancel();
+      }
+    } catch (e) {}
+
+    // 2. Keep Awake release
     try {
       const ka = getExpoKeepAwake();
       if (ka && ka.deactivateKeepAwake) {
@@ -136,7 +227,7 @@ export const NewOrderAlertOverlay = () => {
       console.warn('[NewOrderAlertOverlay] Keep-awake deactivation notice:', e);
     }
 
-    // 2. HTML5 Audio release
+    // 3. HTML5 Audio release
     if (htmlAudioRef.current) {
       try {
         htmlAudioRef.current.pause();
@@ -145,7 +236,10 @@ export const NewOrderAlertOverlay = () => {
       htmlAudioRef.current = null;
     }
 
-    // 3. Expo Audio release
+    // 4. Web Audio Synth release
+    stopWebAudioSynth();
+
+    // 5. Expo Audio release
     if (soundRef.current) {
       try {
         await soundRef.current.stopAsync();

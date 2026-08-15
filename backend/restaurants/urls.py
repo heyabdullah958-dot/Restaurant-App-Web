@@ -13,6 +13,7 @@ router.register('admin/branches', AdminBranchViewSet, basename='admin_branches')
 router.register('admin/riders', AdminBranchRiderViewSet, basename='admin_riders')
 router.register('admin/menu-categories', AdminMenuCategoryViewSet, basename='admin_categories')
 router.register('admin/menu-items', AdminMenuItemViewSet, basename='admin_items')
+router.register('admin/reviews', RestaurantReviewViewSet, basename='admin_reviews')
 router.register('reviews', RestaurantReviewViewSet, basename='restaurant_reviews')
 
 

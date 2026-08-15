@@ -22,7 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
-import { clearCart } from '../store/cartSlice';
+import { clearCart, applyPromo, removePromo, clearPromoNotice, setUseLoyaltyPoints } from '../store/cartSlice';
 import { guestLogin, updateUserProfile, fetchUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -50,7 +50,8 @@ export default function CheckoutScreen() {
   const navigation = useNavigation<any>();
 
   // Fetch state from store
-  const { items, restaurantId, totalAmount, fulfillmentMode, tableNumber } = useSelector((state: RootState) => state.cart);
+  const cart = useSelector((state: RootState) => state.cart);
+  const { items, restaurantId, totalAmount, fulfillmentMode, tableNumber } = cart;
   const { user, isAuthenticated, loading: userLoading } = useSelector((state: RootState) => state.user);
   const { restaurants } = useSelector((state: RootState) => state.restaurant);
 
@@ -88,18 +89,9 @@ export default function CheckoutScreen() {
   const [tempDate, setTempDate] = useState('Today');
   const [tempTime, setTempTime] = useState('ASAP (Immediate)');
 
-  // Loyalty Points Redemption State
-  const [useLoyaltyPoints, setUseLoyaltyPoints] = useState(false);
-
-  // Promo Code State
-  const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<{
-    code: string;
-    discount: number;
-    discount_type: string;
-    discount_value: number;
-  } | null>(null);
-  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  // Loyalty Points & Promo Code State (Derived from Cart Redux Store)
+  const useLoyaltyPoints = cart.useLoyaltyPoints;
+  const appliedPromo = cart.appliedPromo;
 
   // Location Coordinates State
   const [customerCoords, setCustomerCoords] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -259,12 +251,19 @@ export default function CheckoutScreen() {
       if (sched !== undefined && typeof sched === 'boolean') setIsScheduled(sched);
       if (sDate) setSchedDate(sDate);
       if (sTime) setSchedTime(sTime);
-      if (loyalty !== undefined && typeof loyalty === 'boolean') setUseLoyaltyPoints(loyalty);
-      if (promo) setPromoCodeInput(promo);
+      if (loyalty !== undefined && typeof loyalty === 'boolean') dispatch(setUseLoyaltyPoints(loyalty));
     };
 
     restoreSavedForm();
   }, [user, navigation]);
+
+  // Watch for reactive promo removal if cart subtotal drops below minimum order requirement
+  React.useEffect(() => {
+    if (cart.promoRemovalNotice) {
+      showAlert('Promo Removed', cart.promoRemovalNotice);
+      dispatch(clearPromoNotice());
+    }
+  }, [cart.promoRemovalNotice, dispatch]);
 
   // Load branches for selected restaurant on focus & poll every 10s
   useFocusEffect(
@@ -361,45 +360,6 @@ export default function CheckoutScreen() {
   }, [restaurant, fulfillmentMode]);
 
   const subtotal = totalAmount;
-
-  const handleApplyPromoCode = async () => {
-    if (!promoCodeInput.trim()) {
-      showAlert('Promo Code Required', 'Please enter a valid promo code.');
-      return;
-    }
-    setIsValidatingPromo(true);
-    try {
-      const response: any = await api.post('/coupons/validate/', {
-        code: promoCodeInput.trim(),
-        subtotal: subtotal,
-        restaurant_id: restaurantId,
-        branch_id: selectedBranchId,
-        guest_phone: guestPhone ? guestPhone.trim() : undefined,
-      });
-      const data = response.data || response;
-      if (data && data.valid) {
-        setAppliedPromo({
-          code: data.code,
-          discount: parseFloat(data.discount || 0),
-          discount_type: data.discount_type,
-          discount_value: parseFloat(data.discount_value || 0),
-        });
-        showAlert('Coupon Applied!', `Promo code '${data.code}' applied! Discount: Rs. ${parseFloat(data.discount || 0).toFixed(2)}.`);
-      } else {
-        showAlert('Invalid Promo', data.message || 'Coupon code is invalid or expired.');
-      }
-    } catch (err: any) {
-      const errorMsg =
-        err.response?.data?.message ||
-        err.response?.data?.detail ||
-        err.response?.data?.non_field_errors?.[0] ||
-        err.message ||
-        'Failed to validate promo code.';
-      showAlert('Promo Code Error', String(errorMsg));
-    } finally {
-      setIsValidatingPromo(false);
-    }
-  };
 
   // Loyalty points & promo coupon redemption calculations
   const availablePoints = (user && !user.is_guest) ? (user.loyalty_points || 0) : 0;
@@ -887,105 +847,30 @@ export default function CheckoutScreen() {
 
           </View>
 
-          {/* Promo Coupon Code Box */}
-          <View style={[styles.sectionCard, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <Ionicons name="pricetag" size={18} color="#166534" />
-              <Text style={[styles.sectionTitle, { fontSize: 15, marginBottom: 0, color: '#166534' }]}>
-                Have a Promo Code?
-              </Text>
-            </View>
-            {appliedPromo ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#dcfce7', padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#86efac' }}>
-                <View>
-                  <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#15803d' }}>
-                    Code '{appliedPromo.code}' Applied!
-                  </Text>
-                  <Text style={{ fontSize: 12, color: '#166534' }}>
-                    Discount Saved: Rs. {appliedPromo.discount.toFixed(2)}
-                  </Text>
+          {/* Applied Promo Code Card (Applied in Basket) */}
+          {appliedPromo && (
+            <View style={[styles.sectionCard, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                    <Ionicons name="pricetag" size={18} color="#166534" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#15803d' }}>
+                      Promo Code '{appliedPromo.code}' Applied
+                    </Text>
+                    <Text style={{ fontSize: 12, color: '#166534' }}>
+                      Discount Saved: Rs. {appliedPromo.discount.toFixed(2)}
+                    </Text>
+                  </View>
                 </View>
                 <TouchableOpacity
-                  onPress={() => setAppliedPromo(null)}
+                  onPress={() => dispatch(removePromo())}
                   style={{ backgroundColor: '#ef4444', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 }}
                 >
                   <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: 'bold' }}>Remove</Text>
                 </TouchableOpacity>
               </View>
-            ) : (
-              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-                <TextInput
-                  style={[styles.input, { flex: 1, marginBottom: 0, textTransform: 'uppercase', fontWeight: 'bold' }]}
-                  placeholder="Enter promo code (e.g. WELCOME10)"
-                  placeholderTextColor={COLORS.gray}
-                  value={promoCodeInput}
-                  onChangeText={setPromoCodeInput}
-                  autoCapitalize="characters"
-                />
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  disabled={isValidatingPromo}
-                  onPress={handleApplyPromoCode}
-                  style={{
-                    backgroundColor: COLORS.primary,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: 10,
-                  }}
-                >
-                  {isValidatingPromo ? (
-                    <ActivityIndicator size="small" color="#ffffff" />
-                  ) : (
-                    <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 13 }}>Apply</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-
-          {/* Loyalty Points Redemption Box */}
-          {isAuthenticated && !user?.is_guest && availablePoints > 0 && (
-            <View style={[styles.sectionCard, { backgroundColor: '#fffdf5', borderColor: '#ffe0b2', borderWidth: 1 }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 8 }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,152,0,0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 10 }}>
-                    <Ionicons name="sparkles" size={22} color={COLORS.secondary} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.sectionTitle, { fontSize: 15, marginBottom: 2 }]}>Redeem Loyalty Points</Text>
-                    <Text style={{ fontSize: 12, color: COLORS.gray }}>
-                      Balance: <Text style={{ fontWeight: 'bold', color: COLORS.secondary }}>{availablePoints} pts</Text> (Rs. {availablePoints} value)
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setUseLoyaltyPoints(!useLoyaltyPoints)}
-                  style={{
-                    backgroundColor: useLoyaltyPoints ? COLORS.secondary : COLORS.lightGray,
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4
-                  }}
-                >
-                  <Ionicons name={useLoyaltyPoints ? "checkmark-circle" : "add-circle-outline"} size={16} color={useLoyaltyPoints ? COLORS.white : COLORS.dark} />
-                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: useLoyaltyPoints ? COLORS.white : COLORS.dark }}>
-                    {useLoyaltyPoints ? 'Applied' : 'Use Points'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              {useLoyaltyPoints && (
-                <View style={{ marginTop: 10, padding: 10, backgroundColor: 'rgba(255,152,0,0.1)', borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,152,0,0.25)' }}>
-                  <Text style={{ fontSize: 12, color: COLORS.dark, fontWeight: '600' }}>
-                    🎉 Redeeming <Text style={{ fontWeight: 'bold', color: COLORS.secondary }}>{maxRedeemablePoints} points</Text> for an instant <Text style={{ fontWeight: 'bold', color: COLORS.success }}>Rs. {maxRedeemablePoints}</Text> discount!
-                  </Text>
-                </View>
-              )}
             </View>
           )}
 

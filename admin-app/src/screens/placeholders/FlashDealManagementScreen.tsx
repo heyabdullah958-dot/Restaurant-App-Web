@@ -14,6 +14,7 @@ import {
   Alert,
   Switch,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -24,7 +25,7 @@ import {
   deleteFlashDealThunk,
 } from '../../store/promoSlice';
 import { FlashDeal } from '../../services/api';
-import { Card, formatHumanDateTime, LoadingState, ErrorState, EmptyState } from '../../components/ui';
+import { Card, formatHumanDateTime, LoadingState, ErrorState, EmptyState, DateTimePickerModal } from '../../components/ui';
 
 export const FlashDealManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -36,8 +37,14 @@ export const FlashDealManagementScreen = () => {
 
   const [title, setTitle] = useState('');
   const [discountPercentage, setDiscountPercentage] = useState('25');
-  const [startTime, setStartTime] = useState('2026-08-12T00:00:00Z');
-  const [endTime, setEndTime] = useState('2026-12-31T23:59:59Z');
+  const [startTime, setStartTime] = useState(new Date().toISOString());
+  const [endTime, setEndTime] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    d.setHours(23, 59, 59, 0);
+    return d.toISOString();
+  });
+  const [pickerTarget, setPickerTarget] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
     dispatch(fetchFlashDealsThunk());
@@ -60,8 +67,12 @@ export const FlashDealManagementScreen = () => {
     setEditingDeal(null);
     setTitle('');
     setDiscountPercentage('25');
-    setStartTime('2026-08-12T00:00:00Z');
-    setEndTime('2026-12-31T23:59:59Z');
+    const now = new Date();
+    setStartTime(now.toISOString());
+    const end = new Date();
+    end.setDate(end.getDate() + 7);
+    end.setHours(23, 59, 59, 0);
+    setEndTime(end.toISOString());
     setModalVisible(true);
   };
 
@@ -71,9 +82,23 @@ export const FlashDealManagementScreen = () => {
       return;
     }
 
+    const sDate = new Date(startTime);
+    const eDate = new Date(endTime);
+    if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
+      Alert.alert('Validation Error', 'Please select valid start and end dates.');
+      return;
+    }
+    if (eDate <= sDate) {
+      Alert.alert('Validation Error', 'End Time must strictly be after Start Time.');
+      return;
+    }
+
+    const val = parseFloat(discountPercentage) || 0;
     const payload: Partial<FlashDeal> = {
       title: title.trim(),
-      discount_percentage: parseFloat(discountPercentage) || 0,
+      deal_type: 'percentage',
+      discount_value: val,
+      discount_percentage: val,
       start_time: startTime.trim(),
       end_time: endTime.trim(),
       is_active: true,
@@ -234,18 +259,45 @@ export const FlashDealManagementScreen = () => {
               keyboardType="numeric"
             />
 
-            <Text style={styles.inputLabel}>Start Time (ISO String)</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={startTime}
-              onChangeText={setStartTime}
-            />
+            <Text style={styles.inputLabel}>Start Time</Text>
+            <TouchableOpacity
+              style={styles.datePickerTrigger}
+              onPress={() => setPickerTarget('start')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.datePickerIcon}>📅</Text>
+              <View style={styles.datePickerCol}>
+                <Text style={styles.datePickerHuman}>{formatHumanDateTime(startTime)}</Text>
+                <Text style={styles.datePickerIso}>{startTime}</Text>
+              </View>
+              <Text style={styles.datePickerEdit}>Change</Text>
+            </TouchableOpacity>
 
-            <Text style={styles.inputLabel}>End Time (ISO String)</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={endTime}
-              onChangeText={setEndTime}
+            <Text style={styles.inputLabel}>End Time (Expiry)</Text>
+            <TouchableOpacity
+              style={styles.datePickerTrigger}
+              onPress={() => setPickerTarget('end')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.datePickerIcon}>🏁</Text>
+              <View style={styles.datePickerCol}>
+                <Text style={styles.datePickerHuman}>{formatHumanDateTime(endTime)}</Text>
+                <Text style={styles.datePickerIso}>{endTime}</Text>
+              </View>
+              <Text style={styles.datePickerEdit}>Change</Text>
+            </TouchableOpacity>
+
+            <DateTimePickerModal
+              visible={pickerTarget !== null}
+              onClose={() => setPickerTarget(null)}
+              onSelect={(iso) => {
+                if (pickerTarget === 'start') setStartTime(iso);
+                if (pickerTarget === 'end') setEndTime(iso);
+              }}
+              initialDate={pickerTarget === 'start' ? startTime : endTime}
+              mode="datetime"
+              title={pickerTarget === 'start' ? 'Set Deal Start DateTime' : 'Set Deal End DateTime'}
+              themeMode="super"
             />
 
             <View style={styles.modalActions}>
@@ -453,5 +505,43 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  datePickerTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.superAdmin.bg,
+    borderColor: COLORS.superAdmin.border,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  datePickerIcon: {
+    fontSize: 18,
+    marginRight: SPACING.sm,
+  },
+  datePickerCol: {
+    flex: 1,
+  },
+  datePickerHuman: {
+    color: COLORS.superAdmin.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  datePickerIso: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  datePickerEdit: {
+    color: COLORS.superAdmin.accent,
+    fontSize: 12,
+    fontWeight: '700',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
 });

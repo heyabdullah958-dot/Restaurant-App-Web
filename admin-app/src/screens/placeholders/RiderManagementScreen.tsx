@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,9 @@ import {
   Alert,
   Linking,
   Platform,
+  ScrollView,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
@@ -25,7 +27,7 @@ import {
   setSearchQuery,
   setStatusFilter,
 } from '../../store/riderSlice';
-import { BranchRider } from '../../services/api';
+import { BranchRider, fetchRestaurants } from '../../services/api';
 import { StatusBadge, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const RiderManagementScreen = () => {
@@ -45,6 +47,21 @@ export const RiderManagementScreen = () => {
   const themeAccent = isSuper ? COLORS.superAdmin.accent : COLORS.branchManager.primary;
   const themeBorder = isSuper ? COLORS.superAdmin.border : COLORS.branchManager.border;
 
+  // Super Admin Brand Filter
+  const [brandFilter, setBrandFilter] = useState<string>('ALL');
+  const [restaurantsList, setRestaurantsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isSuper) {
+      fetchRestaurants()
+        .then((res: any) => {
+          const list = Array.isArray(res) ? res : (res?.results || []);
+          setRestaurantsList(list);
+        })
+        .catch(() => {});
+    }
+  }, [isSuper]);
+
   // Add / Edit Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [editingRider, setEditingRider] = useState<BranchRider | null>(null);
@@ -52,13 +69,24 @@ export const RiderManagementScreen = () => {
   const [phone, setPhone] = useState('');
   const [vehicleType, setVehicleType] = useState<'BIKE' | 'CAR' | 'SCOOTER' | 'BICYCLE'>('BIKE');
   const [status, setStatus] = useState<'AVAILABLE' | 'ON_DELIVERY' | 'OFFLINE'>('AVAILABLE');
+  const [modalBrandId, setModalBrandId] = useState<number | null>(null);
+  const [modalBranchId, setModalBranchId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeBranchId = branchId || undefined;
 
-  useEffect(() => {
-    dispatch(fetchRidersThunk({ branch_id: activeBranchId }));
-  }, [dispatch, activeBranchId]);
+  // Real-time synchronization when Riders screen gains focus & continuous live interval
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchRidersThunk({ branch_id: activeBranchId }));
+
+      const interval = setInterval(() => {
+        dispatch(fetchRidersThunk({ branch_id: activeBranchId, isRefresh: false }));
+      }, 6000);
+
+      return () => clearInterval(interval);
+    }, [dispatch, activeBranchId])
+  );
 
   const handleRefresh = () => {
     dispatch(fetchRidersThunk({ branch_id: activeBranchId, isRefresh: true }));
@@ -90,6 +118,11 @@ export const RiderManagementScreen = () => {
     setPhone('');
     setVehicleType('BIKE');
     setStatus('AVAILABLE');
+    const firstRest = restaurantsList[0];
+    const initialBrandId = firstRest ? firstRest.id : null;
+    const initialBranchId = firstRest?.branches?.[0]?.id || null;
+    setModalBrandId(initialBrandId);
+    setModalBranchId(initialBranchId);
     setModalVisible(true);
   };
 
@@ -99,12 +132,20 @@ export const RiderManagementScreen = () => {
     setPhone(rider.phone);
     setVehicleType(rider.vehicle_type || 'BIKE');
     setStatus(rider.status);
+    setModalBranchId(rider.branch || null);
+    setModalBrandId(rider.restaurant_id || null);
     setModalVisible(true);
   };
 
   const handleSaveRider = async () => {
     if (!name.trim() || !phone.trim()) {
       Alert.alert('Validation Error', 'Name and Phone number are required.');
+      return;
+    }
+
+    const targetBranch = isSuper ? (modalBranchId || branchId) : (branchId || 1);
+    if (!targetBranch) {
+      Alert.alert('Branch Required', 'Please select a branch to assign this rider.');
       return;
     }
 
@@ -119,6 +160,7 @@ export const RiderManagementScreen = () => {
               phone: phone.trim(),
               vehicle_type: vehicleType,
               status,
+              ...(isSuper && modalBranchId ? { branch: modalBranchId } : {}),
             },
           })
         ).unwrap();
@@ -129,7 +171,7 @@ export const RiderManagementScreen = () => {
           vehicle_type: vehicleType,
           status,
           is_active: true,
-          branch: branchId || 1,
+          branch: targetBranch,
         };
         await dispatch(createRiderThunk(payload)).unwrap();
       }
@@ -159,13 +201,19 @@ export const RiderManagementScreen = () => {
     ]);
   };
 
-  // Filter riders by search and status filter
+  // Filter riders by search, status, and brand filter
   const filteredRiders = riders.filter((r) => {
     const matchesSearch =
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.phone.toLowerCase().includes(searchQuery.toLowerCase());
+      r.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.branch_name && r.branch_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (r.restaurant_name && r.restaurant_name.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesBrand =
+      brandFilter === 'ALL' ||
+      String(r.restaurant_id) === String(brandFilter) ||
+      (r.restaurant_name && r.restaurant_name.toLowerCase() === brandFilter.toLowerCase());
+    return matchesSearch && matchesStatus && matchesBrand;
   });
 
   const getStatusBadgeInfo = (st: string) => {
@@ -195,6 +243,19 @@ export const RiderManagementScreen = () => {
             <TouchableOpacity onPress={() => handleCallRider(item.phone)} activeOpacity={0.7}>
               <Text style={styles.riderPhone}>📞 {item.phone}</Text>
             </TouchableOpacity>
+
+            {/* Prominent Brand & Branch Mapping Tag */}
+            {item.restaurant_name || item.branch_name ? (
+              <View style={styles.brandTagContainer}>
+                {item.restaurant_name ? (
+                  <Text style={styles.brandTagText}>🏪 {item.restaurant_name}</Text>
+                ) : null}
+                {item.branch_name ? (
+                  <Text style={styles.branchTagText}>📍 {item.branch_name}</Text>
+                ) : null}
+              </View>
+            ) : null}
+
             <Text style={[styles.vehicleText, { color: themeMuted }]}>
               {item.vehicle_type || 'BIKE'}
             </Text>
@@ -266,6 +327,52 @@ export const RiderManagementScreen = () => {
           <Text style={styles.addRiderBtnText}>+ Rider</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Super Admin Brand Filter Chips */}
+      {isSuper && restaurantsList.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.brandChipsScroll}
+          contentContainerStyle={styles.brandChipsContainer}
+        >
+          <TouchableOpacity
+            style={[
+              styles.brandChip,
+              brandFilter === 'ALL' && { backgroundColor: themeAccent },
+            ]}
+            onPress={() => setBrandFilter('ALL')}
+          >
+            <Text
+              style={[
+                styles.brandChipText,
+                { color: brandFilter === 'ALL' ? '#FFFFFF' : themeMuted },
+              ]}
+            >
+              All Brands ({riders.length})
+            </Text>
+          </TouchableOpacity>
+          {restaurantsList.map((rest) => (
+            <TouchableOpacity
+              key={rest.id}
+              style={[
+                styles.brandChip,
+                String(brandFilter) === String(rest.id) && { backgroundColor: themeAccent },
+              ]}
+              onPress={() => setBrandFilter(String(rest.id))}
+            >
+              <Text
+                style={[
+                  styles.brandChipText,
+                  { color: String(brandFilter) === String(rest.id) ? '#FFFFFF' : themeMuted },
+                ]}
+              >
+                🏪 {rest.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : null}
 
       {/* Status Filter Segmented Control */}
       <View style={styles.filterBar}>
@@ -356,6 +463,68 @@ export const RiderManagementScreen = () => {
               value={phone}
               onChangeText={setPhone}
             />
+
+            {/* Super Admin Brand & Branch Picker */}
+            {isSuper ? (
+              <>
+                <Text style={[styles.inputLabel, { color: themeMuted }]}>Assigned Restaurant Brand *</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
+                  {restaurantsList.map((rest) => (
+                    <TouchableOpacity
+                      key={rest.id}
+                      style={[
+                        styles.modalChip,
+                        modalBrandId === rest.id && { backgroundColor: themeAccent, borderColor: themeAccent },
+                      ]}
+                      onPress={() => {
+                        setModalBrandId(rest.id);
+                        const firstBr = rest.branches?.[0];
+                        if (firstBr) setModalBranchId(firstBr.id);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.modalChipText,
+                          { color: modalBrandId === rest.id ? '#FFFFFF' : themeText },
+                        ]}
+                      >
+                        🏪 {rest.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.xs }]}>Assigned Branch *</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
+                  {(() => {
+                    const currentBrandObj = restaurantsList.find((r) => r.id === modalBrandId) || restaurantsList[0];
+                    const branches = currentBrandObj?.branches || [];
+                    if (branches.length === 0) {
+                      return <Text style={{ color: themeMuted, fontSize: 11, fontStyle: 'italic' }}>No active branches found</Text>;
+                    }
+                    return branches.map((br: any) => (
+                      <TouchableOpacity
+                        key={br.id}
+                        style={[
+                          styles.modalChip,
+                          modalBranchId === br.id && { backgroundColor: themeAccent, borderColor: themeAccent },
+                        ]}
+                        onPress={() => setModalBranchId(br.id)}
+                      >
+                        <Text
+                          style={[
+                            styles.modalChipText,
+                            { color: modalBranchId === br.id ? '#FFFFFF' : themeText },
+                          ]}
+                        >
+                          📍 {br.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ));
+                  })()}
+                </ScrollView>
+              </>
+            ) : null}
 
             <Text style={[styles.inputLabel, { color: themeMuted }]}>Vehicle Type</Text>
             <View style={styles.vehicleRow}>
@@ -656,5 +825,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.xs,
+  },
+  brandChipsScroll: {
+    marginBottom: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  brandChipsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  brandChip: {
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 5,
+    borderRadius: RADIUS.round,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  brandChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  brandTagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginVertical: 3,
+  },
+  brandTagText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#38BDF8',
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  branchTagText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
+    backgroundColor: 'rgba(148, 163, 184, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  modalChipsScroll: {
+    marginBottom: SPACING.sm,
+  },
+  modalChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADIUS.round,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginRight: 6,
+  },
+  modalChipText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

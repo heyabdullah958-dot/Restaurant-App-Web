@@ -114,18 +114,45 @@ const PROTOTYPE_STYLES: Record<string, { colors: readonly [string, string, ...st
   'default': { colors: ['#FF5722', '#E91E63'] as const, emoji: '🍽️' }
 };
 
-// Isolated Banner Carousel — prevents 3.5s auto-rotate from re-rendering the whole HomeScreen & cards
+// Isolated Banner Carousel — dynamically consumes live active flash deals & promotional banners
 const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => void }) => {
   const [bannerIndex, setBannerIndex] = React.useState(0);
+  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    api.get('/promotions/flash-deals/')
+      .then((res: any) => {
+        const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+        if (isMounted && data.length > 0) {
+          setFlashDeals(data.filter((d: any) => !d.is_dine_in_only));
+        }
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, []);
+
+  const activeBanners = React.useMemo(() => {
+    if (flashDeals.length > 0) {
+      return flashDeals.map((deal: any) => ({
+        icon: 'flash-outline' as const,
+        title: deal.title || 'Flash Deal Special',
+        subtitle: deal.description || `${deal.discount_value}% OFF on all orders!`,
+        bg: '#e11d48',
+        tag: '⚡ FLASH SALE',
+      }));
+    }
+    return BANNERS;
+  }, [flashDeals]);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      setBannerIndex(prev => (prev + 1) % BANNERS.length);
+      setBannerIndex(prev => (prev + 1) % activeBanners.length);
     }, 3500);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeBanners.length]);
 
-  const banner = BANNERS[bannerIndex];
+  const banner = activeBanners[bannerIndex] || activeBanners[0];
 
   return (
     <TouchableOpacity
@@ -143,12 +170,12 @@ const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => voi
           </View>
         </View>
         <View style={styles.bannerIconWrap}>
-          <Ionicons name={banner.icon} size={72} color="rgba(255,255,255,0.25)" />
+          <Ionicons name={banner.icon as any} size={72} color="rgba(255,255,255,0.25)" />
         </View>
       </View>
       {/* Dot Indicators */}
       <View style={styles.bannerDots}>
-        {BANNERS.map((_, i) => (
+        {activeBanners.map((_, i) => (
           <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
         ))}
       </View>

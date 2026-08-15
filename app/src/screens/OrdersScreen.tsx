@@ -351,13 +351,21 @@ export default function OrdersScreen() {
             <Text style={styles.detailBtnText}>Details</Text>
           </TouchableOpacity>
 
-          {item.status !== 'delivered' && (
+          {item.status?.toLowerCase() !== 'delivered' ? (
             <TouchableOpacity activeOpacity={0.75}
               style={[styles.trackBtn]}
               onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id, trackingToken: item.tracking_token })}
             >
               <Ionicons name="bicycle-outline" size={18} color={COLORS.primary} />
               <Text style={styles.trackBtnText}>Track</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity activeOpacity={0.75}
+              style={[styles.trackBtn, { borderColor: '#f59e0b', backgroundColor: '#fffbeb' }]}
+              onPress={() => navigation.navigate('Tracking', { orderId: item.display_order_id || item.id, trackingToken: item.tracking_token })}
+            >
+              <Ionicons name="star" size={16} color="#d97706" />
+              <Text style={[styles.trackBtnText, { color: '#d97706', fontWeight: '700' }]}>Rate</Text>
             </TouchableOpacity>
           )}
 

@@ -2,6 +2,84 @@
 
 ## Resolved Bugs Log
 
+### Bug #13: Super Admin Rider Modal Missing Branch Selector & Customer CRM Zero Spend Metrics
+- **Severity**: Medium
+- **Status**: FIXED
+- **Reported In**: Phase 2 — Super Admin Rider Creation, CRM Metrics Aggregation & Visual DatePickers
+- **Symptoms**:
+  1. Super Admin adding riders in the mobile management app defaulted `branch` to `1` (Johar Town) without allowing selection of target brand or branch.
+  2. Customer CRM profiles in administrative interfaces showed `ORDERS PLACED: 0` and `TOTAL SPENT: Rs. 0` because `AdminCustomerListView` omitted delivered orders count and total spend annotations.
+  3. Flash Deal and Promo creation modals required manual typing of raw ISO 8601 timestamps on virtual keyboards.
+- **Root Cause**:
+  1. `RiderManagementScreen.tsx` modal state only managed `name`, `phone`, `vehicleType`, `status`, lacking `brand_id` and `branch_id` selectors for Super Admin.
+  2. `AdminCustomerListView.list()` in `backend/users/admin_views.py` only annotated `total_orders_count` without filtering `status='delivered'` or summing `orders__total`.
+  3. Deal and coupon creation interfaces lacked interactive UI date/time picker modals and duration presets.
+- **Fix Applied**:
+  1. Added Brand and Branch selection chip pickers inside the Add/Edit Rider modal for Super Admin in `RiderManagementScreen.tsx`.
+  2. Updated `AdminCustomerListView` to annotate `delivered_orders_count = Count('orders', filter=Q(orders__status='delivered'))` and `delivered_total_spent = Sum('orders__total', filter=Q(orders__status='delivered'))`, populating `orders_count`, `orders_placed`, `total_orders`, and `total_spent`.
+  3. Built cross-platform `DateTimePickerModal.tsx` in `admin-app/src/components/ui/` with calendar grid, hour/minute selectors, and fast presets (+24h, +3d weekend, +7d, End of Month) wired into `FlashDealManagementScreen.tsx` and `PromoManagementScreen.tsx`.
+- **Files Modified**:
+  - `backend/users/admin_views.py`
+  - `backend/promotions/serializers.py`
+  - `admin-app/src/components/ui/DateTimePickerModal.tsx`
+  - `admin-app/src/components/ui/index.ts`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`
+  - `test_phase2_rider_crm_datepicker_suite.py`
+- **Verification**: `test_phase2_rider_crm_datepicker_suite.py` (100% pass, 6/6 steps).
+
+---
+
+### Bug #12: Menu Sync 404 on Numeric ID Lookups & Promo Code TypeError on Cart/Checkout (Resolved 2026-08-16)
+- **Symptom**: Branch Manager App displayed `Menu Sync Notice - Request failed with status code 404` when viewing the Stock tab; Mobile Customer App displayed `Cannot read property 'code' of undefined` in red text below the promo code input on CartScreen and CheckoutScreen when typing or applying invalid promo codes; Native order alerts lacked continuous physical vibration haptics.
+- **Root Cause**:
+  1. `RestaurantMenuView` in `backend/restaurants/views.py` queried `Restaurant.objects.get(slug=slug)` strictly by slug string. When branch managers logged in, their JWT token provided numeric `restaurant_id` (e.g. `60`), which caused `activeSlug = "60"` in `MenuManagementScreen.tsx`. Querying `GET /api/restaurants/60/menu/` threw `Restaurant.DoesNotExist` and returned HTTP 404.
+  2. `CartScreen.tsx` directly accessed `res.data.code` inside `handleApplyPromo`. If the response structure varied or was unwrapped, accessing `res.data.code` threw a JavaScript `TypeError: Cannot read property 'code' of undefined`. The catch block then captured `err.message` and displayed the raw TypeError string on screen.
+  3. `isPublicUrl` in `app/src/services/api.js` lacked `/coupons/validate` in public route patterns, creating auth header edge cases for guest carts.
+  4. Native order alerts in `admin-app/src/components/NewOrderAlertOverlay.tsx` lacked vibration haptics fallback for devices in silent mode or without audio modules.
+- **Fix Applied**:
+  1. Updated `RestaurantMenuView` and `RestaurantDetailView` in `backend/restaurants/views.py` to support dual lookup: resolving either numeric integer `id` or slug string `slug__iexact`.
+  2. Refactored promo code validation in `CartScreen.tsx` and `CheckoutScreen.tsx` with defensive unwrapping (`const data = res?.data?.data || res?.data || res;`) and comprehensive multi-format error extraction covering `code[0]`, `non_field_errors[0]`, `detail`, and `message`.
+  3. Added `/coupons/validate` and `/coupons/active` to `publicPatterns` in `app/src/services/api.js`.
+  4. Integrated continuous tactile vibration haptics (`Vibration.vibrate([0, 600, 300, 600], true)`) and clean cancellation (`Vibration.cancel()`) in `NewOrderAlertOverlay.tsx`.
+- **Verification Evidence**: `test_phase1_repair_audio_menu_promo_suite.py` (100% Pass Rate), `test_phase2_revenue_reviews_riders_suite.py` (100% Pass Rate), `test_phase1_audio_dispatch_sync_suite.py` (100% Pass Rate), `test_dual_app_e2e.py` (100% Pass Rate), `npx tsc --noEmit` in `admin-app` (0 errors), `npx tsc --noEmit` in `app` (0 errors), `npm run build` in `admin` (0 errors).
+
+---
+
+### Bug #11: Premature Revenue Accounting on In-Progress Orders & Missing Review Interfaces (Resolved 2026-08-16)
+- **Symptom**: Gross revenue metrics across Super Admin analytics and branch manager dashboards aggregated all active/in-progress orders (including `received` and `preparing`) rather than earned revenue from completed orders; Customer reviews and ratings submitted in mobile apps lacked dedicated administrative UI surfaces; Super Admin fleet dashboards lacked visual brand tags and brand filters.
+- **Root Cause**:
+  1. `PlatformAnalyticsView` and `RestaurantAnalyticsView` in `backend/config/analytics_views.py` aggregated `Sum('total')` without filtering by `status='delivered'`.
+  2. `BranchDashboard.tsx`, `SuperDashboard.tsx`, and `BranchDashboardScreen.tsx` summed `o.total` over orders with `o.status !== 'cancelled'`, prematurely inflating revenue before delivery.
+  3. Customer reviews were stored in `RestaurantReview` database models but neither branch dashboards nor super admin dashboards provided UI cards or endpoints to view customer comments and star ratings.
+  4. Super Admin rider fleet views only displayed raw branch names without prominent brand tags or brand filtering.
+- **Fix Applied**:
+  1. Enforced universal `status='delivered'` filtering across all backend analytics endpoints (`PlatformAnalyticsView`, `RestaurantAnalyticsView`) and all web/mobile dashboard revenue reducers.
+  2. Registered `admin/reviews` router endpoint in `backend/restaurants/urls.py` and implemented `fetchReviews()` in both `admin` and `admin-app` service layers.
+  3. Integrated responsive Customer Reviews & Ratings cards across web and mobile Branch/Super dashboards.
+  4. Added `restaurant_slug` to `BranchRiderSerializer`, Brand Filter dropdowns, and prominent brand pill badges (`🏪 Brand • 📍 Branch`) across Super Admin rider management interfaces.
+- **Verification Evidence**: `test_phase2_revenue_reviews_riders_suite.py` (100% Pass Rate), `test_phase1_audio_dispatch_sync_suite.py` (100% Pass Rate), `test_dual_app_e2e.py` (100% Pass Rate), `npx tsc --noEmit` in `admin-app` (0 errors), `npm run build` in `admin` (0 errors).
+
+---
+
+### Bug #10: Native Audio Crash, 403 Dispatch Forbidden & Busy Rider Assignment (Resolved 2026-08-16)
+- **Symptom**: `NewOrderAlertOverlay.tsx` threw `Cannot find native module 'ExponentAV'`, suppressing audio incoming order alerts; Order dispatch endpoint returned HTTP 403 Forbidden for branch managers; Rider modal allowed selecting busy (`ON_DELIVERY`) or `OFFLINE` riders without validation; Riders screen lacked live synchronization.
+- **Root Cause**:
+  1. `NewOrderAlertOverlay.tsx` called `expo-av` methods on web and non-native runtimes without guarding against unlinked native bridge modules or browser autoplay policy blocks.
+  2. `AdminBranchRiderViewSet.get_queryset()` had a fallback bug that returned riders from other branches when local branch queries were empty, causing `OrderAssignRiderView` to trigger cross-branch 403 Forbidden rejections for branch managers.
+  3. `OrderAssignRiderView` and dispatch modals lacked validation guards for `rider.status == 'ON_DELIVERY'` or `rider.status == 'OFFLINE'`.
+  4. `RiderManagementScreen.tsx` and `OrderManagementScreen.tsx` only fetched data on initial mount (`useEffect`), failing to re-sync when navigating between tabs.
+- **Fix Applied**:
+  1. Implemented a universal resilient audio driver in `NewOrderAlertOverlay.tsx` with Web Audio API oscillator synthesis fallback and safe `NativeModules` isolation.
+  2. Fixed `AdminBranchRiderViewSet` queryset scoping to strictly respect `branch_id` query params without leaking other branch riders.
+  3. Updated `OrderAssignRiderView` to support `display_order_id` lookups, validate rider availability (rejecting `ON_DELIVERY` and `OFFLINE` with HTTP 400), and allow valid branch dispatches.
+  4. Universally disabled and styled busy/offline riders in both mobile and web dispatch modals.
+  5. Added `@react-navigation/native` `useFocusEffect` hooks and polling intervals to ensure real-time synchronization on screen focus.
+- **Verification Evidence**: `test_phase1_audio_dispatch_sync_suite.py` (100% Pass Rate), `test_dual_app_e2e.py` (100% Pass Rate), `npx tsc --noEmit` in `admin-app` (0 errors), `npm run build` in `admin` (0 errors).
+
+---
+
 ### Bug #1: HTTP 404 Error on Save Coupon in Admin Panel (Resolved 2026-07-27)
 - **Symptom**: Clicking 'Save Coupon' in the Super Admin Promo Code modal triggered a browser alert popup: HTTP 404.
 - **Root Cause**: admin/src/services/api.ts called POST /api/coupons/, but backend/promotions/urls.py only contained /api/coupons/validate/ and /api/coupons/active/ without any list/create/update/delete CRUD views registered.
@@ -418,18 +496,92 @@
   - `npx tsc --noEmit` passed with 0 errors across both `app` and `admin-app`.
   - Android JS bundles compiled and served with HTTP 200 OK on port 8081 (`admin-app`) and port 8082 (`app`).
 
+---
 
+### Bug #33 — Missing Reactive Cart Coupon Invalidation & Threshold Guard
+- **Discovered**: 2026-08-16
+- **Status**: Fixed
+- **Severity**: High (Financial & Promotional Integrity)
+- **Component**: `app/src/store/cartSlice.ts`, `app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `backend/promotions/views.py` (`CouponValidateView`), `backend/orders/serializers.py` (`OrderCreateSerializer`)
+- **Symptom**:
+  1. Applying a promo coupon with a minimum order requirement (e.g. `min_subtotal: 1000`) and subsequently reducing cart item quantities or removing items allowed the discount to persist even when the subtotal dropped below the threshold (e.g. Rs. 600).
+  2. Percentage-based coupons did not dynamically recalibrate when item quantities increased or decreased.
+  3. `CouponValidateView` omitted `min_subtotal` and `max_discount` from the validation response payload.
+- **Root Cause**:
+  1. Coupon state was stored in isolated local component state in `CartScreen.tsx` without a watcher or subscriber on `cart.totalAmount`.
+  2. Redux `cartSlice` mutations (`addItemToCart`, `removeItemFromCart`, `updateQuantity`, `clearCart`) did not re-evaluate active coupon eligibility against `min_subtotal`.
+- **Fix Applied**:
+  1. Integrated `AppliedPromo` state, `applyPromo`, `removePromo`, `clearPromoNotice`, and `evaluatePromoState(state)` directly into Redux `cartSlice.ts`.
+  2. Subtotal reductions below `min_subtotal` automatically detach the coupon, reset discount to 0, and emit `promoRemovalNotice`. Subtotal changes on percentage coupons automatically recalculate the exact discount amount.
+  3. Updated `CartScreen.tsx` and `CheckoutScreen.tsx` to bind to `cart.appliedPromo` and display `promoRemovalNotice` feedback banners.
+  4. Updated `backend/promotions/views.py` `CouponValidateView` to return `min_subtotal`, `discount_value`, and `max_discount`.
+  5. Verified backend double-check guard in `backend/orders/serializers.py` strictly rejecting below-threshold orders with HTTP 400 Bad Request.
+- **Verification Evidence**:
+  - `test_reactive_coupon_invalidation_suite.py` passed 100% (5/5 steps).
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` passed with 0 errors across `app` and `admin-app`.
+  - `npm run build` in `admin` built cleanly in 1.74s.
 
+---
 
+### Bug #34 — Redundant Promo Inputs on Checkout & Delayed Coupon Usage Validation
+- **Discovered**: 2026-08-16
+- **Status**: Fixed
+- **Severity**: Medium (UX Streamlining & Early Fraud Prevention)
+- **Component**: `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/CartScreen.tsx`, `backend/promotions/serializers.py` (`CouponValidateSerializer`)
+- **Symptom**:
+  1. Duplicate promo code text input and apply buttons existed on both Cart/Basket and Checkout screens, causing desynchronization risk and unnecessary duplicate user inputs.
+  2. Basket-level coupon application did not pass the user's phone number or check past customer order usage, resulting in phantom discounts that were only rejected later upon final order submission.
+- **Root Cause**:
+  1. `CheckoutScreen.tsx` maintained an independent `promoCodeInput` field and `handleApplyPromoCode` instead of reading the established promo state from Redux.
+  2. `CartScreen.tsx` omitted `phone` / `guest_phone` in the `/api/coupons/validate/` request payload, and `CouponValidateSerializer` lacked multi-attribute Q-queries to inspect usage across guest orders, customer orders, and profile phone numbers.
+- **Fix Applied**:
+  1. Removed duplicate promo code inputs and validation handlers from `CheckoutScreen.tsx`. Replaced with a clean read-only Applied Promo summary card with an optional Remove trigger.
+  2. Updated `CartScreen.tsx` `handleApplyPromo` to inject `phone: customerPhone` and `guest_phone: customerPhone` into the validation request.
+  3. Hardened `CouponValidateSerializer` in `backend/promotions/serializers.py` to check authenticated user usage and query `CouponUsage` records across `order__guest_phone`, `order__user__phone`, and `user__phone`.
+- **Verification Evidence**:
+  - `test_single_point_basket_promo_usage_suite.py` passed 100% (6/6 steps).
+  - `test_reactive_coupon_invalidation_suite.py` passed 100%.
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
 
+---
 
-
-
-
-
-
-
-
-
-
-
+### Bug #35 — Loyalty Points Checkout Coupling, Admin Mock Fallbacks & Flash Deal Date Picker Past Allowed
+- **Discovered**: 2026-08-16
+- **Status**: Fixed
+- **Severity**: High (State Machine Isolation & Promotion Date Integrity)
+- **Component**: `app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `app/src/store/cartSlice.ts`, `admin/src/views/ManagerManagement.tsx`, `admin-app/src/components/ui/DateTimePickerModal.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`, `app/src/screens/HomeScreen.tsx`
+- **Symptom**:
+  1. Loyalty points redemption was coupled to `CheckoutScreen.tsx`, which caused subtotal and discount calculations to diverge between Basket and Checkout.
+  2. `ManagerManagement.tsx` contained static fallback arrays (`MOCK_BRANCHES`, `MOCK_MANAGERS`) and `isMock` simulations.
+  3. `DateTimePickerModal.tsx` lacked `minDate` past date guards, permitting selection of past days and navigation to past months. Flash deal preset handlers did not enforce end-time after start-time.
+  4. Universal / Delivery Flash deals were not surfaced in the main top banner carousel on `HomeScreen.tsx`.
+- **Root Cause**:
+  1. `useLoyaltyPoints` was managed locally in `CheckoutScreen.tsx` component state rather than inside Redux `cartSlice.ts`.
+  2. Offline mock arrays remained in legacy admin code instead of cleanly handling live API error states.
+  3. Calendar day slots in `DateTimePickerModal.tsx` did not compare slot dates against `new Date()`.
+  4. `BannerCarousel` on `HomeScreen.tsx` used static banner arrays instead of dynamically consuming `/promotions/flash-deals/`.
+- **Fix Applied**:
+  1. Moved Loyalty Points redemption UI and calculations entirely to `CartScreen.tsx` (Basket), integrated into Redux `cartSlice.ts` (`useLoyaltyPoints`, `redeemedLoyaltyPoints`). Displayed loyalty discount strictly as a read-only deduction on `CheckoutScreen.tsx`.
+  2. Purged all mock branches and managers from `ManagerManagement.tsx` and `BranchDashboard.tsx`.
+  3. Added strict `minDate` locks, disabled past day selection, disabled past month navigation in `DateTimePickerModal.tsx`, and validated `endTime > startTime` in `FlashDealManagementScreen.tsx`.
+  4. Connected `BannerCarousel` on `HomeScreen.tsx` to live `GET /promotions/flash-deals/` endpoint.
+- **Verification Evidence**:
+  - `test_basket_loyalty_mock_purge_flash_deal_suite.py` passed 100% (6/6 steps).
+  - `test_single_point_basket_promo_usage_suite.py` passed 100%.
+  - `test_reactive_coupon_invalidation_suite.py` passed 100%.
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors).

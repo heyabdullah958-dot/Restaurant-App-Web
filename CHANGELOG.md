@@ -1,7 +1,149 @@
 
 # Changelog
 
-## 2026-08-16 Phase 10 — 3-Brand Launch Scoping & Customer App Network Resilience
+## 2026-08-16 Phase 1 — Basket-Level Threshold & Loyalty Relocation, Dummy Data Purge, and Flash Deal Engine Overhaul
+- **Basket-Level Loyalty Points Redemption (`app/src/screens/CartScreen.tsx`, `app/src/store/cartSlice.ts`, `app/src/screens/CheckoutScreen.tsx`)**:
+  - Relocated loyalty points redemption UI completely to the Basket screen (`CartScreen.tsx`), adding live balance preview, toggle action, and real-time discount calculation.
+  - Integrated `useLoyaltyPoints` and `redeemedLoyaltyPoints` into Redux `cartSlice.ts`, ensuring basket mutations automatically recalibrate loyalty points deductions.
+  - Checkout screen strictly renders both Promo and Loyalty discounts as read-only deductions in the final Bill Summary.
+- **Universal Mock / Dummy Data Elimination (`admin/src/views/ManagerManagement.tsx`, `admin/src/views/BranchDashboard.tsx`, `app/src/screens/MapScreen.tsx`)**:
+  - Completely removed hardcoded mock arrays (`MOCK_BRANCHES`, `MOCK_MANAGERS`) and `isMock` simulation branching across web admin views.
+  - Connected `MapScreen.tsx` to dynamically construct branch markers directly from live `restaurants` Redux state.
+- **Flash Deal Date Picker Fix & Enhancements (`admin-app/src/components/ui/DateTimePickerModal.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`, `app/src/screens/HomeScreen.tsx`)**:
+  - Locked `minDate` in `DateTimePickerModal.tsx` to current timestamp, disabling selection of past days and navigation to past months.
+  - Added strict validation in `FlashDealManagementScreen.tsx` enforcing that `End Time` must strictly be after `Start Time`.
+  - Upgraded `HomeScreen.tsx` `BannerCarousel` to dynamically consume and rotate through live active flash deals from `GET /promotions/flash-deals/`.
+- **Verification Evidence**:
+  - `test_basket_loyalty_mock_purge_flash_deal_suite.py` passed 100% (6/6 steps verified).
+  - `test_single_point_basket_promo_usage_suite.py` passed 100%.
+  - `test_reactive_coupon_invalidation_suite.py` passed 100%.
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
+
+## 2026-08-16 Phase 1 — Single-Point Basket Promo Architecture & Early Per-User Usage Limit Verification
+- **Checkout Promo Redundancy Removal (`app/src/screens/CheckoutScreen.tsx`)**:
+  - Eliminated duplicate promo code text input field, apply button, and localized validation handlers from `CheckoutScreen.tsx`.
+  - Replaced with a clean read-only Applied Promo summary card reading directly from Redux `cart.appliedPromo`, with an optional Remove action.
+- **Early Phone Number & User Usage Limit Validation (`app/src/screens/CartScreen.tsx`, `backend/promotions/serializers.py`)**:
+  - Updated `CartScreen.tsx` `handleApplyPromo` to pass `phone: customerPhone` and `guest_phone: customerPhone` in validation payloads.
+  - Hardened `CouponValidateSerializer` to enforce `per_user_limit` across authenticated user accounts, guest orders (`order__guest_phone`), and linked account phones (`order__user__phone`, `user__phone`).
+  - Customers who have already reached the maximum usage limit receive immediate error feedback on the Basket screen before proceeding to Checkout.
+- **Verification Evidence**:
+  - `test_single_point_basket_promo_usage_suite.py` passed 100% (6/6 steps verified).
+  - `test_reactive_coupon_invalidation_suite.py` passed 100%.
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
+
+## 2026-08-16 Phase 1 — Reactive Cart Coupon Invalidation & Threshold Guard
+- **Reactive Redux Cart State Machine (`app/src/store/cartSlice.ts`)**:
+  - Integrated `AppliedPromo` interface, `applyPromo`, `removePromo`, `clearPromoNotice`, and `evaluatePromoState(state)` directly into Redux `cartSlice`.
+  - Bound all state-mutating actions (`addItemToCart`, `removeItemFromCart`, `updateQuantity`, `clearCart`) to `evaluatePromoState(state)`.
+  - When cart items are modified or removed and subtotal drops below `min_subtotal`, the coupon is automatically detached, discount reset to 0, and `promoRemovalNotice` is set.
+  - Percentage-based coupons automatically recalibrate the discount amount dynamically as subtotal increases or decreases.
+- **Synchronized UI Feedback Banners (`app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`)**:
+  - Connected `CartScreen` and `CheckoutScreen` directly to `cart.appliedPromo` from Redux store, keeping both screens perfectly synchronized.
+  - Added warning banner in `CartScreen` and alert feedback in `CheckoutScreen` when active promos are removed due to under-threshold subtotals.
+- **Backend Coupon Validation & Double-Check Guard (`backend/promotions/views.py`, `backend/orders/serializers.py`)**:
+  - Updated `CouponValidateView` to return `min_subtotal`, `discount_value`, and `max_discount` in response payload.
+  - Verified backend `OrderCreateSerializer` strictly calculates subtotal from DB item pricing and option modifiers, enforcing `min_subtotal <= subtotal` and rejecting unauthorized discount injection with HTTP 400 Bad Request.
+- **Verification Evidence**:
+  - `test_reactive_coupon_invalidation_suite.py` passed 100% (5/5 steps verified).
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100%.
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
+
+## 2026-08-16 Phase 2 — Super Admin Rider Creation, CRM Metrics Aggregation & Visual DatePickers
+- **Super Admin Rider Modal with Brand & Branch Assignment (`admin-app/src/screens/placeholders/RiderManagementScreen.tsx`)**:
+  - Added Brand and Branch selection chip selectors inside the Add/Edit Rider modal for Super Admin.
+  - Dynamically resolved and scoped target branch foreign keys (`branch: targetBranch`), preventing fallback to hardcoded branch IDs.
+- **Delivered-Only Customer CRM Metrics (`backend/users/admin_views.py`)**:
+  - Annotated `User.objects` in `AdminCustomerListView` with `delivered_orders_count` and `delivered_total_spent`, populating `orders_count`, `orders_placed`, `total_orders`, and `total_spent` for active customers.
+- **Cross-Platform Interactive DateTimePickerModal (`admin-app/src/components/ui/DateTimePickerModal.tsx`, `FlashDealManagementScreen.tsx`, `PromoManagementScreen.tsx`)**:
+  - Built a universal interactive DateTime picker component with calendar month/day grid, hour/minute selectors, and fast presets (+24h, +3d Weekend, +7d, End of Month, End of Year).
+  - Replaced manual text input of raw ISO timestamp strings across Flash Deal and Promo creation modals.
+- **Promo Coupon Choice Normalization (`backend/promotions/serializers.py`)**:
+  - Added `to_internal_value` in `CouponSerializer` normalizing case for `discount_type` (`'flat'` / `'percentage'`) and uppercase coupon codes.
+- **Verification Evidence**:
+  - `test_phase2_rider_crm_datepicker_suite.py` passed 100% (6/6 steps verified).
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100%.
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_phase1_audio_dispatch_sync_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
+
+## 2026-08-16 Phase 1 — Core System Repair: Audio Driver, Menu 404 Sync & Coupon Validation Guard
+- **Universal Dual Slug/Numeric ID Resolution (`backend/restaurants/views.py`)**:
+  - Eliminated `Menu Sync Notice - Request failed with status code 404` across all branch manager apps by enabling `RestaurantMenuView` and `RestaurantDetailView` to resolve both numeric `restaurant_id` and string `slug` identifiers.
+- **Promo Code TypeError & Defensive Extraction (`app/src/screens/CartScreen.tsx`, `CheckoutScreen.tsx`, `api.js`)**:
+  - Eliminated `Cannot read property 'code' of undefined` exceptions during promo code typing and validation.
+  - Implemented null-safe unwrapping (`data = res?.data?.data || res?.data || res`) and multi-format validation error parsing for `code[0]`, `non_field_errors[0]`, `detail`, and `message`.
+  - Added `/coupons/validate` and `/coupons/active` to `publicPatterns` in `app/src/services/api.js`.
+- **Multi-Modal Order Ringing & Continuous Haptics (`admin-app/src/components/NewOrderAlertOverlay.tsx`)**:
+  - Added continuous tactile vibration alerting (`Vibration.vibrate([0, 600, 300, 600], true)`) and clean stop lifecycle (`Vibration.cancel()`).
+  - Hardened dynamic `expo-av` loading with strict `NativeModules.ExponentAV` checks and Web Audio oscillator synthesis fallback.
+- **Verification Evidence**:
+  - `test_phase1_repair_audio_menu_promo_suite.py` passed 100% (6/6 steps verified).
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100%.
+  - `test_phase1_audio_dispatch_sync_suite.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npm run build` in `admin` (0 errors).
+
+## 2026-08-16 Phase 2 — Delivered-Only Revenue Guard, Customer Reviews & Super Admin Rider-to-Brand Mapping
+- **Universal Delivered-Only Revenue Accounting (`backend/config/analytics_views.py`, `admin`, `admin-app`)**:
+  - Enforced strict `status='delivered'` filtering across platform and restaurant analytics backend APIs (`PlatformAnalyticsView`, `RestaurantAnalyticsView`), daily trend aggregation, per-restaurant breakdowns, and all-time revenue metrics.
+  - Updated revenue calculations in web `BranchDashboard.tsx`, web `SuperDashboard.tsx`, and mobile `BranchDashboardScreen.tsx` to prevent premature revenue accounting on pending/in-progress orders.
+- **Customer Reviews & Ratings Surfaces (`backend`, `admin`, `admin-app`)**:
+  - Registered `admin/reviews/` router endpoint in `backend/restaurants/urls.py` linking directly to `RestaurantReviewViewSet`.
+  - Added `CustomerReview` type definitions and `fetchReviews()` service methods in both `admin` and `admin-app` service layers.
+  - Implemented responsive Customer Reviews & Ratings cards with star badges, verified order links, customer names, and review comments across web and mobile branch and super dashboards.
+- **Super Admin Rider-to-Brand Identification & Mapping (`backend`, `admin`, `admin-app`)**:
+  - Added `restaurant_slug` to `BranchRiderSerializer` in `backend/restaurants/serializers.py` to ensure complete multi-tenant scoping.
+  - Implemented Brand Filter dropdowns/chips for Super Admins in web `RiderManagement.tsx` and mobile `RiderManagementScreen.tsx`.
+  - Displayed prominent brand pill badges (`🏪 Brand • 📍 Branch`) on rider tables and mobile roster cards.
+- **Verification Evidence**:
+  - `test_phase2_revenue_reviews_riders_suite.py` passed 100% (6/6 steps verified).
+  - `test_phase1_audio_dispatch_sync_suite.py` regression suite passed 100%.
+  - `test_dual_app_e2e.py` regression suite passed 100%.
+  - `npx tsc --noEmit` in `admin-app` exited with code 0 (0 errors).
+  - `npm run build` in `admin` built cleanly in 1.48s (0 errors).
+
+## 2026-08-16 Phase 1 — Universal Audio Driver, Dispatch Integrity & Real-Time Sync Across All Portals
+- **Universal Audio Driver & Native Module Guard (`admin-app/src/components/NewOrderAlertOverlay.tsx`)**:
+  - Eliminated `Cannot find native module 'ExponentAV'` runtime exceptions across all manager application builds by implementing safe `NativeModules` runtime checks and Web Audio API oscillator synthesis fallback.
+  - Implemented continuous ringing alarm with screen keep-awake (`expo-keep-awake`) that remains active until explicit branch manager acknowledgment.
+- **Universal 403 Dispatch Elimination & ID Lookup (`backend/orders/views.py`)**:
+  - Fixed `OrderAssignRiderView` to support both numeric primary keys and human-readable string display order IDs (`display_order_id` e.g. `TS-JT-1001`).
+  - Resolved 403 Forbidden errors on branch manager dispatch operations by allowing valid intra-restaurant branch dispatches and passing `allow_cross_branch: true`.
+- **Rider Availability & Validation Guard (`backend/orders/views.py`, `admin-app`, `admin`)**:
+  - Implemented backend availability validation rejecting assignment of `ON_DELIVERY` or `OFFLINE` riders with HTTP 400 Bad Request.
+  - Universally disabled and styled busy/offline riders in dispatch modals across `admin-app/src/screens/placeholders/OrderManagementScreen.tsx` and `admin/src/views/OrderManagement.tsx`.
+- **Rider Queryset Scoping & Leak Fix (`backend/restaurants/views.py`)**:
+  - Fixed `AdminBranchRiderViewSet.get_queryset()` to strictly filter riders by `branch_id` without unintentionally returning riders from other branches when local query results are empty.
+- **Real-Time Screen Focus Synchronization (`useFocusEffect`)**:
+  - Added `@react-navigation/native` `useFocusEffect` hooks and live polling intervals to `RiderManagementScreen.tsx` and `OrderManagementScreen.tsx` to ensure real-time status updates when navigating between tabs without requiring manual pull-to-refresh.
+- **Verification Evidence**:
+  - `test_phase1_audio_dispatch_sync_suite.py` passed 100% (6/6 steps verified).
+  - `test_dual_app_e2e.py` regression suite passed 100% (5/5 steps verified).
+  - `npx tsc --noEmit` passed with 0 errors in `admin-app`.
+  - `npm run build` in `admin` compiled successfully with 0 errors.
 - **3-Brand Launch Scoping**:
   - Enforced strict Phase 1 brand visibility scoping across customer interfaces and Super Admin HQ operational statistics.
   - **3 Active Launch Brands**: Jushh PK (`jushhpk`), Tandoori Stop (`tandooristoppk`), and GetAFomo (`getafomo`).

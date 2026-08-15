@@ -548,8 +548,16 @@ export const createFlashDeal = (data: any) => apiFetch<any>('/api/deals/', { met
 export const updateFlashDeal = (id: number, data: any) => apiFetch<any>(`/api/deals/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteFlashDeal = (id: number) => apiFetch<any>(`/api/deals/${id}/`, { method: 'DELETE' });
 
-export const fetchReviews = async () => {
-  const data = await apiFetch<any>('/api/admin/reviews/');
+export const fetchReviews = async (params?: { restaurant_id?: number | string; restaurant_slug?: string }) => {
+  let url = '/api/admin/reviews/';
+  if (params) {
+    const query = new URLSearchParams();
+    if (params.restaurant_id) query.append('restaurant_id', String(params.restaurant_id));
+    if (params.restaurant_slug) query.append('restaurant_slug', String(params.restaurant_slug));
+    const qs = query.toString();
+    if (qs) url += `?${qs}`;
+  }
+  const data = await apiFetch<any>(url);
   return Array.isArray(data) ? data : (data?.results || []);
 };
 

@@ -113,8 +113,8 @@ class Command(BaseCommand):
 
             valid_names = [b['name'] for b in branches]
             
-            # Deactivate or delete old branches not in the real list
-            Branch.objects.filter(restaurant=restaurant).exclude(name__in=valid_names).update(is_active=False)
+            # Completely delete old / draft branches not in the real list
+            Branch.objects.filter(restaurant=restaurant).exclude(name__in=valid_names).delete()
 
             for branch_data in branches:
                 branch, created = Branch.objects.get_or_create(

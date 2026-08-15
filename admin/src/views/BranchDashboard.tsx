@@ -17,8 +17,10 @@ import {
   X,
   Settings,
   Save,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react';
+import { fetchReviews } from '../services/api';
 
 export const BranchDashboard: React.FC = () => {
   const { user, selectedBrandId, restaurants, orders, setView, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails, updateBranchDetails } = useAdmin();
@@ -31,6 +33,10 @@ export const BranchDashboard: React.FC = () => {
   const [editIsActive, setEditIsActive] = useState(true);
   const [isSavingDetails, setIsSavingDetails] = useState(false);
   const [timeframe, setTimeframe] = useState<'today' | 'week' | 'month' | 'all'>('today');
+
+  // Customer Reviews state
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   const isSuper = user?.role === 'super_admin';
   const managerRestId = isSuper ? selectedBrandId : (user?.restaurantId || selectedBrandId);
@@ -65,7 +71,19 @@ export const BranchDashboard: React.FC = () => {
   }, [restaurant, currentBranch, showEditModal]);
 
 
-  const isMock = !!localStorage.getItem('foodsphere_admin_mock_user');
+  // Fetch customer reviews for this restaurant
+  React.useEffect(() => {
+    if (restaurant?.id) {
+      setLoadingReviews(true);
+      fetchReviews({ restaurant_id: restaurant.id })
+        .then((res: any) => {
+          const list = Array.isArray(res) ? res : (res?.results || []);
+          setReviews(list);
+        })
+        .catch(() => setReviews([]))
+        .finally(() => setLoadingReviews(false));
+    }
+  }, [restaurant?.id]);
 
 
   // Filter orders for this restaurant (robust casting)
@@ -76,7 +94,7 @@ export const BranchDashboard: React.FC = () => {
   );
   const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
 
-  // Calculate live stats based on timeframe
+  // Calculate live stats based on timeframe (Delivered-Only Revenue Accounting)
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfWeek = new Date(startOfToday);
@@ -92,11 +110,14 @@ export const BranchDashboard: React.FC = () => {
     filteredBrandOrders = brandOrders.filter((o) => new Date(o.created_at) >= startOfMonth);
   }
 
-  const liveRevenue = filteredBrandOrders.reduce((sum, o) => sum + o.total, 0);
+  // Strictly filter by status === 'delivered' for revenue accounting
+  const liveDeliveredOrders = filteredBrandOrders.filter((o) => o.status === 'delivered');
+  const liveRevenue = liveDeliveredOrders.reduce((sum, o) => sum + o.total, 0);
   const liveOrdersCount = filteredBrandOrders.length;
   
-  // All time aggregates for reference in subtitles
-  const allTimeRevenue = brandOrders.reduce((sum, o) => sum + o.total, 0);
+  // All time aggregates for reference in subtitles (strictly delivered)
+  const allTimeDeliveredOrders = brandOrders.filter((o) => o.status === 'delivered');
+  const allTimeRevenue = allTimeDeliveredOrders.reduce((sum, o) => sum + o.total, 0);
   const allTimeOrdersCount = brandOrders.length;
 
   const displayRevenue = liveRevenue;
@@ -140,9 +161,6 @@ export const BranchDashboard: React.FC = () => {
   };
 
   const getSalesCardStatus = () => {
-    if (isMock) {
-      return `Total: ${displayOrdersCount} Orders (${timeframe.toUpperCase()})`;
-    }
     const timeframeText = timeframe === 'today' ? 'today' : timeframe === 'week' ? 'this week' : timeframe === 'month' ? 'this month' : 'all-time';
     return `Total: ${displayOrdersCount} Orders ${timeframeText} (Rs. ${Math.round(allTimeRevenue).toLocaleString()} / ${allTimeOrdersCount} All-time)`;
   };
@@ -475,6 +493,72 @@ export const BranchDashboard: React.FC = () => {
             Open Live Kanban Board
           </button>
         </div>
+      </div>
+
+      {/* Customer Reviews & Feedback Card */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-zinc-200 dark:border-slate-700 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b border-zinc-100 dark:border-slate-700 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+              <Star size={18} />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-zinc-900 dark:text-white text-base">
+                Customer Ratings & Reviews
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-slate-400">
+                Direct feedback submitted by mobile customers
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              ⭐ {restaurant.rating ? Number(restaurant.rating).toFixed(1) : '4.8'} / 5.0 Rating
+            </span>
+            <span className="text-xs font-semibold text-zinc-400">
+              ({reviews.length} total reviews)
+            </span>
+          </div>
+        </div>
+
+        {loadingReviews ? (
+          <div className="py-8 text-center text-xs text-zinc-400">
+            <Loader2 className="animate-spin inline-block mr-2" size={16} />
+            Loading customer reviews...
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="py-8 text-center">
+            <div className="text-2xl mb-1">💬</div>
+            <div className="text-xs font-bold text-zinc-400">No customer reviews yet</div>
+            <div className="text-[11px] text-zinc-500 mt-0.5">Reviews submitted after order deliveries will appear here</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
+            {reviews.map((rev) => (
+              <div
+                key={rev.id}
+                className="p-3.5 bg-zinc-50 dark:bg-slate-900/60 border border-zinc-200/80 dark:border-slate-700/60 rounded-xl space-y-1.5"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-zinc-900 dark:text-slate-100">
+                    {rev.user_name || 'Verified Customer'}
+                  </span>
+                  <div className="flex items-center text-amber-400 text-xs">
+                    {'★'.repeat(Math.min(Math.max(rev.rating, 1), 5))}
+                    {'☆'.repeat(5 - Math.min(Math.max(rev.rating, 1), 5))}
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-600 dark:text-slate-300 italic">
+                  "{rev.comment || 'Great food and fast delivery!'}"
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-100 dark:border-slate-800">
+                  {rev.order ? <span>Verified Order #{rev.order}</span> : <span>Verified Dining</span>}
+                  <span>{new Date(rev.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Image Preview Modal */}

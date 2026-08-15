@@ -39,8 +39,9 @@ class RestaurantListView(generics.ListAPIView):
 
 class RestaurantDetailView(generics.RetrieveAPIView):
     """
-    GET /api/restaurants/{slug}/
+    GET /api/restaurants/{slug_or_id}/
     BUG-07 FIX: prefetch_related('categories__items') reduces N+1 to 3 queries max.
+    Supports both restaurant slug and numeric restaurant ID lookups.
     """
     queryset = Restaurant.objects.all().prefetch_related(
         'branches',
@@ -51,20 +52,45 @@ class RestaurantDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
     permission_classes = [permissions.AllowAny]
 
+    def get_object(self):
+        slug_or_id = self.kwargs.get('slug')
+        queryset = self.get_queryset()
+        if str(slug_or_id).isdigit():
+            obj = queryset.filter(id=int(slug_or_id)).first()
+            if obj:
+                return obj
+        obj = queryset.filter(slug__iexact=slug_or_id).first()
+        if not obj:
+            from django.http import Http404
+            raise Http404(f"Restaurant '{slug_or_id}' not found")
+        return obj
+
 
 class RestaurantMenuView(generics.GenericAPIView):
     """
-    GET /api/restaurants/{slug}/menu/
+    GET /api/restaurants/{slug_or_id}/menu/
     BUG-07 FIX: prefetch_related on categories and items.
+    Supports both restaurant slug and numeric restaurant ID lookups.
     """
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, slug):
         try:
-            restaurant = Restaurant.objects.prefetch_related(
+            base_qs = Restaurant.objects.prefetch_related(
                 'categories',
                 'categories__items'
-            ).get(slug=slug)
+            )
+            restaurant = None
+            if str(slug).isdigit():
+                restaurant = base_qs.filter(id=int(slug)).first()
+            if not restaurant:
+                restaurant = base_qs.filter(slug__iexact=slug).first()
+
+            if not restaurant:
+                return Response({
+                    'success': False,
+                    'message': f'Restaurant "{slug}" not found'
+                }, status=404)
 
             # Use prefetched categories to avoid extra DB query
             all_cats = list(restaurant.categories.all())
@@ -80,11 +106,11 @@ class RestaurantMenuView(generics.GenericAPIView):
                 'success': True,
                 'data': serializer.data
             })
-        except Restaurant.DoesNotExist:
+        except Exception as e:
             return Response({
                 'success': False,
-                'message': 'Restaurant not found'
-            }, status=404)
+                'message': str(e)
+            }, status=500)
 
 
 from rest_framework import viewsets
@@ -353,7 +379,8 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 t1_qs = t1_qs.filter(status__iexact=status_filter)
             if is_act_filter is not None:
                 t1_qs = t1_qs.filter(is_active=is_act_filter)
-            if t1_qs.exists():
+            # Return branch-scoped queryset directly unless global fallback is explicitly requested
+            if t1_qs.exists() or allow_global_param not in ['true', '1']:
                 return t1_qs
 
         if restaurant_id:
@@ -368,7 +395,8 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 t2_qs = t2_qs.filter(status__iexact=status_filter)
             if is_act_filter is not None:
                 t2_qs = t2_qs.filter(is_active=is_act_filter)
-            if t2_qs.exists():
+            # Return restaurant-scoped queryset directly unless global fallback is explicitly requested
+            if t2_qs.exists() or allow_global_param not in ['true', '1']:
                 return t2_qs
 
         qs = base_qs

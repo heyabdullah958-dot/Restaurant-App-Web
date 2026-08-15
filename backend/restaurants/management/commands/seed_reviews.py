@@ -108,6 +108,6 @@ class Command(BaseCommand):
 
             # Recalculate restaurant rating
             restaurant.update_rating()
-            self.stdout.write(self.style.SUCCESS(f"Updated rating for {restaurant.name}: {restaurant.rating}⭐ ({restaurant.total_reviews} reviews)"))
+            self.stdout.write(self.style.SUCCESS(f"Updated rating for {restaurant.name}: {restaurant.rating} / 5.0 ({restaurant.total_reviews} reviews)"))
 
         self.stdout.write(self.style.SUCCESS(f"Successfully seeded {total_seeded} reviews across launch restaurants!"))

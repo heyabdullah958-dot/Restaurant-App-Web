@@ -14,7 +14,7 @@ import {
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk } from '../../store/orderSlice';
-import { fetchRestaurants, AdminOrder } from '../../services/api';
+import { fetchRestaurants, fetchReviews, AdminOrder, CustomerReview } from '../../services/api';
 import { useOrderPolling } from '../../hooks/useOrderPolling';
 import { Card, StatusBadge, SlaBadge, ErrorState, EmptyState, LoadingState } from '../../components/ui';
 
@@ -32,6 +32,9 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
   const [restaurantData, setRestaurantData] = useState<any | null>(null);
   const [branchDetail, setBranchDetail] = useState<any | null>(null);
   const [loadingRestaurant, setLoadingRestaurant] = useState(false);
+
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   const loadDashboardData = async (isRefresh: boolean = false) => {
     dispatch(fetchOrdersThunk({ isRefresh }));
@@ -51,11 +54,19 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
         setLoadingRestaurant(false);
       }
     }
+
+    if (restaurantId) {
+      setLoadingReviews(true);
+      fetchReviews({ restaurant_id: restaurantId })
+        .then((revs) => setReviews(revs))
+        .catch(() => setReviews([]))
+        .finally(() => setLoadingReviews(false));
+    }
   };
 
   useEffect(() => {
     loadDashboardData(false);
-  }, []);
+  }, [restaurantId]);
 
   const handleRefresh = () => {
     loadDashboardData(true);
@@ -66,7 +77,7 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
     (o) => o.status === 'received' || o.status === 'preparing' || o.status === 'out_for_delivery'
   ).length;
 
-  // Stat 2: Sales with Timeframe filter
+  // Stat 2: Sales with Timeframe filter (Delivered-Only Revenue Accounting)
   const calculateRevenue = () => {
     const now = new Date();
     let cutoff = new Date(0); // All time default
@@ -79,8 +90,9 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
       cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     }
 
+    // Strictly filter by status === 'delivered'
     const filtered = orders.filter(
-      (o) => o.status !== 'cancelled' && new Date(o.created_at).getTime() >= cutoff.getTime()
+      (o) => o.status === 'delivered' && new Date(o.created_at).getTime() >= cutoff.getTime()
     );
 
     return filtered.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
@@ -246,6 +258,44 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
               <View style={styles.recentRight}>
                 <Text style={styles.recentTotal}>Rs. {parseFloat(ord.total).toLocaleString()}</Text>
                 <StatusBadge status={ord.status} size="sm" />
+              </View>
+            </Card>
+          ))
+        )}
+
+        {/* Customer Reviews & Feedback Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>💬 Customer Reviews & Ratings</Text>
+          <Text style={styles.sectionSubtitle}>
+            {reviews.length} feedback received
+          </Text>
+        </View>
+
+        {loadingReviews ? (
+          <ActivityIndicator color={COLORS.branchManager.primary} style={{ marginVertical: 16 }} />
+        ) : reviews.length === 0 ? (
+          <Card style={styles.emptyReviewsCard}>
+            <Text style={styles.emptyReviewsText}>No customer reviews yet. Reviews will appear here after delivery completion.</Text>
+          </Card>
+        ) : (
+          reviews.slice(0, 5).map((rev) => (
+            <Card key={rev.id} style={styles.reviewCard}>
+              <View style={styles.reviewHeader}>
+                <Text style={styles.reviewUser}>👤 {rev.user_name || 'Verified Customer'}</Text>
+                <Text style={styles.reviewStars}>
+                  {'⭐'.repeat(Math.min(Math.max(rev.rating, 1), 5))}
+                </Text>
+              </View>
+              <Text style={styles.reviewComment}>
+                "{rev.comment || 'Great food and delivery!'}"
+              </Text>
+              <View style={styles.reviewFooter}>
+                <Text style={styles.reviewMeta}>
+                  {rev.order ? `Order #${rev.order}` : 'Verified Dining'}
+                </Text>
+                <Text style={styles.reviewDate}>
+                  {new Date(rev.created_at).toLocaleDateString()}
+                </Text>
               </View>
             </Card>
           ))
@@ -426,5 +476,65 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.branchManager.primary,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: COLORS.neutral500,
+    fontWeight: '600',
+  },
+  emptyReviewsCard: {
+    padding: SPACING.md,
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  emptyReviewsText: {
+    fontSize: 12,
+    color: COLORS.neutral400,
+    textAlign: 'center',
+  },
+  reviewCard: {
+    padding: SPACING.sm + 4,
+    marginBottom: SPACING.sm,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: RADIUS.md,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  reviewUser: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.dark,
+  },
+  reviewStars: {
+    fontSize: 12,
+  },
+  reviewComment: {
+    fontSize: 12,
+    color: COLORS.neutral700,
+    fontStyle: 'italic',
+    marginBottom: 6,
+  },
+  reviewFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 4,
+  },
+  reviewMeta: {
+    fontSize: 10,
+    color: COLORS.neutral400,
+    fontWeight: '600',
+  },
+  reviewDate: {
+    fontSize: 10,
+    color: COLORS.neutral400,
   },
 });

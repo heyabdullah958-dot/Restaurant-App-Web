@@ -14,6 +14,7 @@ import {
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchAnalyticsThunk } from '../../store/analyticsSlice';
+import { fetchReviews, CustomerReview } from '../../services/api';
 import { Card, StatusBadge, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 const { width } = Dimensions.get('window');
@@ -22,12 +23,25 @@ export const SuperDashboardScreen = () => {
   const dispatch = useAppDispatch();
   const { data, isLoading, isRefreshing, error } = useAppSelector((state) => state.analytics);
 
+  const [reviews, setReviews] = React.useState<CustomerReview[]>([]);
+  const [loadingReviews, setLoadingReviews] = React.useState(false);
+
+  const loadReviews = () => {
+    setLoadingReviews(true);
+    fetchReviews()
+      .then((revs) => setReviews(revs))
+      .catch(() => setReviews([]))
+      .finally(() => setLoadingReviews(false));
+  };
+
   useEffect(() => {
     dispatch(fetchAnalyticsThunk());
+    loadReviews();
   }, [dispatch]);
 
   const handleRefresh = () => {
     dispatch(fetchAnalyticsThunk({ isRefresh: true }));
+    loadReviews();
   };
 
   const LAUNCH_BRAND_SLUGS = ['jushhpk', 'tandooristoppk', 'getafomo'];
@@ -257,6 +271,47 @@ export const SuperDashboardScreen = () => {
                 </View>
               ))}
             </Card>
+
+            {/* Customer Reviews & Feedback Section */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Customer Feedback & Ratings</Text>
+              <Text style={styles.sectionBadge}>
+                {reviews.length} Verified Reviews
+              </Text>
+            </View>
+
+            {loadingReviews ? (
+              <ActivityIndicator color={COLORS.superAdmin.accent} style={{ marginVertical: 16 }} />
+            ) : reviews.length === 0 ? (
+              <Card style={styles.emptyCard} themeMode="super">
+                <Text style={styles.emptyText}>No customer reviews received yet.</Text>
+              </Card>
+            ) : (
+              reviews.slice(0, 6).map((rev) => (
+                <Card key={rev.id} style={styles.reviewCard} themeMode="super">
+                  <View style={styles.reviewHeader}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.reviewUser}>👤 {rev.user_name || 'Customer'}</Text>
+                      <Text style={styles.reviewBrandTag}>🏪 {rev.restaurant_name}</Text>
+                    </View>
+                    <Text style={styles.reviewStars}>
+                      {'⭐'.repeat(Math.min(Math.max(rev.rating, 1), 5))}
+                    </Text>
+                  </View>
+                  <Text style={styles.reviewComment}>
+                    "{rev.comment || 'Great food!'}"
+                  </Text>
+                  <View style={styles.reviewFooter}>
+                    <Text style={styles.reviewMeta}>
+                      {rev.order ? `Order #${rev.order}` : 'Verified Dining'}
+                    </Text>
+                    <Text style={styles.reviewDate}>
+                      {new Date(rev.created_at).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </Card>
+              ))
+            )}
           </>
         ) : null}
       </ScrollView>
@@ -540,5 +595,73 @@ const styles = StyleSheet.create({
   brandOrders: {
     color: COLORS.superAdmin.muted,
     fontSize: 10,
+  },
+  reviewCard: {
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  reviewUser: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.superAdmin.text,
+  },
+  reviewBrandTag: {
+    fontSize: 11,
+    color: COLORS.superAdmin.accent,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  reviewStars: {
+    fontSize: 12,
+  },
+  reviewComment: {
+    fontSize: 12,
+    color: COLORS.superAdmin.text,
+    fontStyle: 'italic',
+    marginBottom: 6,
+  },
+  reviewFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: COLORS.superAdmin.border,
+    paddingTop: 4,
+  },
+  reviewMeta: {
+    fontSize: 10,
+    color: COLORS.superAdmin.muted,
+  },
+  reviewDate: {
+    fontSize: 10,
+    color: COLORS.superAdmin.muted,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  sectionBadge: {
+    fontSize: 12,
+    color: COLORS.superAdmin.accent,
+    fontWeight: '700',
+  },
+  emptyCard: {
+    padding: SPACING.lg,
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  emptyText: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 13,
+    textAlign: 'center',
   },
 });

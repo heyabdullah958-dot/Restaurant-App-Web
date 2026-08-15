@@ -67,7 +67,6 @@ export const OrderManagement: React.FC = () => {
         branch_id: targetBranchId,
         restaurant_id: targetRestaurantId,
         is_active: true,
-        allow_global: true
       });
 
       if (!Array.isArray(fetched) || fetched.length === 0) {
@@ -75,7 +74,8 @@ export const OrderManagement: React.FC = () => {
       }
 
       setModalRiders(fetched || []);
-      setSelectedRiderIdForModal((fetched && fetched.length > 0) ? fetched[0].id : null);
+      const firstAvailable = (fetched || []).find((r: any) => r.status === 'AVAILABLE' && r.is_active);
+      setSelectedRiderIdForModal(firstAvailable ? firstAvailable.id : null);
     } catch (err) {
       console.warn('[Rider Assignment Modal] Error fetching riders:', err);
       setModalRiders([]);
@@ -97,8 +97,15 @@ export const OrderManagement: React.FC = () => {
       showToast('Please select an available delivery rider first.', 'error');
       return;
     }
+
+    const chosenRider = modalRiders.find((r: any) => r.id === selectedRiderIdForModal);
+    if (!chosenRider || chosenRider.status !== 'AVAILABLE' || !chosenRider.is_active) {
+      showToast('Selected rider is currently busy or offline. Please choose an available rider.', 'error');
+      return;
+    }
+
     try {
-      const res: any = await assignRiderToOrder(assignRiderModalOrder.id, selectedRiderIdForModal);
+      const res: any = await assignRiderToOrder(assignRiderModalOrder.id, selectedRiderIdForModal, true);
       showToast('Rider assigned & order dispatched!', 'success');
       fetchRiders().then(r => setRiders(r || [])).catch(() => {});
       await refreshOrders();
@@ -1111,11 +1118,23 @@ export const OrderManagement: React.FC = () => {
                   className="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 text-white font-bold rounded-xl p-3 text-xs outline-none cursor-pointer"
                 >
                   <option value="" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>-- Choose Rider --</option>
-                  {modalRiders.map((r: any) => (
-                    <option key={r.id} value={r.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
-                      {r.name} ({r.phone}) — [{r.status || 'AVAILABLE'}]{r.branch_name ? ` (${r.branch_name}${r.restaurant_name ? ` - ${r.restaurant_name}` : ''})` : ''}{r.is_cross_brand ? ' ⚡ Cross-Brand Fallback' : r.is_cross_branch ? ' ⚡ Cross-Branch Fallback' : ''}
-                    </option>
-                  ))}
+                  {modalRiders.map((r: any) => {
+                    const isAvail = r.status === 'AVAILABLE' && r.is_active;
+                    return (
+                      <option
+                        key={r.id}
+                        value={r.id}
+                        disabled={!isAvail}
+                        className={`font-bold ${!isAvail ? 'text-slate-500 bg-slate-950' : 'text-slate-100 bg-slate-900'}`}
+                        style={{
+                          backgroundColor: !isAvail ? '#020617' : '#0f172a',
+                          color: !isAvail ? '#64748b' : '#ffffff',
+                        }}
+                      >
+                        {isAvail ? '🟢' : r.status === 'ON_DELIVERY' ? '🛵 (Busy)' : '⛔ (Offline)'} {r.name} ({r.phone}) — [{r.status || 'AVAILABLE'}]{r.branch_name ? ` (${r.branch_name}${r.restaurant_name ? ` - ${r.restaurant_name}` : ''})` : ''}{!isAvail ? ' — UNAVAILABLE' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               )}
             </div>
@@ -1129,7 +1148,10 @@ export const OrderManagement: React.FC = () => {
               </button>
               <button
                 onClick={handleModalAssignRider}
-                disabled={!selectedRiderIdForModal}
+                disabled={
+                  !selectedRiderIdForModal ||
+                  !modalRiders.some((r: any) => r.id === selectedRiderIdForModal && r.status === 'AVAILABLE' && r.is_active)
+                }
                 className="px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-50 text-white font-black rounded-xl text-xs transition-all shadow-lg active:scale-95 flex items-center gap-1.5"
               >
                 <Bike size={14} /> Assign & Dispatch →

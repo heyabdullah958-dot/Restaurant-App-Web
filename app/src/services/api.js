@@ -189,6 +189,8 @@ export const isPublicUrl = (url, method = 'get') => {
     '/search',
     '/popular-tags',
     '/platform-settings',
+    '/coupons/validate',
+    '/coupons/active',
   ];
 
   if (lowerMethod === 'get') {

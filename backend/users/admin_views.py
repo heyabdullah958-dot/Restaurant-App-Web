@@ -42,12 +42,15 @@ class AdminCustomerListView(generics.ListAPIView):
         return qs.order_by('-date_joined')
 
     def list(self, request, *args, **kwargs):
+        from django.db.models import Q, Sum, Count
         page_size = min(int(request.query_params.get('page_size', 50)), 200)
         page = max(int(request.query_params.get('page', 1)), 1)
         offset = (page - 1) * page_size
         
         queryset = self.get_queryset().annotate(
-            total_orders_count=Count('orders')
+            delivered_orders_count=Count('orders', filter=Q(orders__status='delivered')),
+            delivered_total_spent=Sum('orders__total', filter=Q(orders__status='delivered')),
+            all_orders_count=Count('orders')
         )
         
         total = queryset.count()
@@ -55,15 +58,23 @@ class AdminCustomerListView(generics.ListAPIView):
         
         results = []
         for user in users_page:
+            delivered_cnt = getattr(user, 'delivered_orders_count', 0)
+            all_cnt = getattr(user, 'all_orders_count', 0)
+            spent = getattr(user, 'delivered_total_spent', 0) or 0.0
+            
             results.append({
                 'id': user.id,
                 'username': user.username,
+                'name': user.get_full_name() or user.username,
                 'email': user.email or '',
                 'phone': user.phone or '',
                 'loyalty_points': user.loyalty_points,
                 'is_guest': user.is_guest,
                 'date_joined': user.date_joined.isoformat() if user.date_joined else None,
-                'total_orders': user.total_orders_count,
+                'orders_count': delivered_cnt if delivered_cnt > 0 else all_cnt,
+                'orders_placed': delivered_cnt if delivered_cnt > 0 else all_cnt,
+                'total_orders': all_cnt,
+                'total_spent': float(spent),
             })
         
         return Response({

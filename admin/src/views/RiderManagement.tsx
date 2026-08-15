@@ -162,6 +162,8 @@ export const RiderManagement: React.FC = () => {
     return clean;
   };
 
+  const [brandFilter, setBrandFilter] = useState<string>('ALL');
+
   const safeRiders = Array.isArray(riders) ? riders : [];
   const filteredRiders = safeRiders.filter(r => {
     const matchesSearch = 
@@ -171,7 +173,8 @@ export const RiderManagement: React.FC = () => {
       (r.restaurant_name && r.restaurant_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesBrand = brandFilter === 'ALL' || String(r.restaurant_id) === String(brandFilter) || (r.restaurant_name && r.restaurant_name.toLowerCase() === brandFilter.toLowerCase());
+    return matchesSearch && matchesStatus && matchesBrand;
   });
 
   return (
@@ -214,18 +217,38 @@ export const RiderManagement: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs font-semibold text-zinc-500 dark:text-slate-400">Filter Status:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm px-3 py-2 outline-none cursor-pointer"
-          >
-            <option value="ALL" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>All Statuses</option>
-            <option value="AVAILABLE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Available</option>
-            <option value="ON_DELIVERY" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>On Delivery</option>
-            <option value="OFFLINE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Offline</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          {isSuper && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-zinc-500 dark:text-slate-400">Brand:</span>
+              <select
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm px-3 py-2 outline-none cursor-pointer"
+              >
+                <option value="ALL" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>All Brands</option>
+                {restaurants.map((rest) => (
+                  <option key={rest.id} value={rest.id} className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>
+                    {rest.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-zinc-500 dark:text-slate-400">Filter Status:</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-zinc-50 dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 rounded-lg text-sm px-3 py-2 outline-none cursor-pointer"
+            >
+              <option value="ALL" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>All Statuses</option>
+              <option value="AVAILABLE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Available</option>
+              <option value="ON_DELIVERY" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>On Delivery</option>
+              <option value="OFFLINE" className="bg-slate-900 text-slate-100 font-bold" style={{ backgroundColor: '#0f172a', color: '#ffffff' }}>Offline</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -261,10 +284,16 @@ export const RiderManagement: React.FC = () => {
                       {rider.phone}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium">{rider.branch_name || `Branch #${rider.branch}`}</div>
-                      {rider.restaurant_name && (
-                        <div className="text-[11px] text-zinc-400 dark:text-slate-400">{rider.restaurant_name}</div>
-                      )}
+                      <div className="flex flex-col gap-1 items-start">
+                        {rider.restaurant_name ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            🏪 {rider.restaurant_name}
+                          </span>
+                        ) : null}
+                        <span className="text-xs font-medium text-zinc-700 dark:text-slate-300">
+                          📍 {rider.branch_name || `Branch #${rider.branch}`}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs uppercase font-bold text-zinc-500 dark:text-slate-400">
                       {rider.vehicle_type}

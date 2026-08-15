@@ -30,7 +30,7 @@ class PlatformAnalyticsView(APIView):
         last_7 = today - timedelta(days=7)
         last_30 = today - timedelta(days=30)
 
-        # Daily trend — last 7 days (efficient single-query approach, active restaurants only)
+        # Daily trend — last 7 days (efficient single-query approach, active restaurants only, delivered revenue)
         orders_7d_stats = Order.objects.filter(
             restaurant__is_active=True,
             created_at__date__gte=today - timedelta(days=6)
@@ -38,7 +38,7 @@ class PlatformAnalyticsView(APIView):
             date_only=TruncDate('created_at')
         ).values('date_only').annotate(
             order_count=Count('id'),
-            revenue_sum=Sum('total')
+            revenue_sum=Sum('total', filter=Q(status='delivered'))
         )
         stats_map = {stat['date_only']: stat for stat in orders_7d_stats}
 
@@ -52,7 +52,7 @@ class PlatformAnalyticsView(APIView):
                 'revenue': float(stat['revenue_sum'] or 0) if stat else 0.0,
             })
 
-        # Per-restaurant breakdown (active restaurants only, last 30 days & all-time)
+        # Per-restaurant breakdown (active restaurants only, last 30 days & all-time, delivered revenue)
         restaurant_stats = Restaurant.objects.filter(is_active=True).annotate(
             orders_30d=Count(
                 'orders',
@@ -61,11 +61,11 @@ class PlatformAnalyticsView(APIView):
             ),
             revenue_30d=Sum(
                 'orders__total',
-                filter=Q(orders__created_at__date__gte=last_30)
+                filter=Q(orders__created_at__date__gte=last_30, orders__status='delivered')
             ),
             orders_all_time=Count('orders', distinct=True),
-            revenue_all_time=Sum('orders__total'),
-            avg_order=Avg('orders__total'),
+            revenue_all_time=Sum('orders__total', filter=Q(orders__status='delivered')),
+            avg_order=Avg('orders__total', filter=Q(orders__status='delivered')),
         ).values(
             'id', 'name', 'slug',
             'orders_30d', 'revenue_30d',
@@ -92,21 +92,24 @@ class PlatformAnalyticsView(APIView):
             'summary': {
                 'orders_today': Order.objects.filter(restaurant__is_active=True, created_at__date=today).count(),
                 'revenue_today': float(
-                    Order.objects.filter(restaurant__is_active=True, created_at__date=today)
+                    Order.objects.filter(restaurant__is_active=True, created_at__date=today, status='delivered')
                     .aggregate(Sum('total'))['total__sum'] or 0
                 ),
                 'orders_7d': Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_7).count(),
                 'revenue_7d': float(
-                    Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_7)
+                    Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_7, status='delivered')
                     .aggregate(Sum('total'))['total__sum'] or 0
                 ),
                 'orders_30d': Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_30).count(),
                 'revenue_30d': float(
-                    Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_30)
+                    Order.objects.filter(restaurant__is_active=True, created_at__date__gte=last_30, status='delivered')
                     .aggregate(Sum('total'))['total__sum'] or 0
                 ),
                 'orders_all_time': Order.objects.filter(restaurant__is_active=True).count(),
-                'revenue_all_time': float(Order.objects.filter(restaurant__is_active=True).aggregate(Sum('total'))['total__sum'] or 0),
+                'revenue_all_time': float(
+                    Order.objects.filter(restaurant__is_active=True, status='delivered')
+                    .aggregate(Sum('total'))['total__sum'] or 0
+                ),
                 'total_customers': User.objects.filter(is_guest=False, is_staff=False).count(),
                 'total_guests': User.objects.filter(is_guest=True).count(),
                 'total_loyalty_points': int(
@@ -145,7 +148,7 @@ class RestaurantAnalyticsView(APIView):
 
         orders_30d = Order.objects.filter(restaurant=restaurant, created_at__date__gte=last_30)
 
-        # Daily breakdown (efficient single-query approach)
+        # Daily breakdown (efficient single-query approach, delivered revenue)
         restaurant_orders_7d = Order.objects.filter(
             restaurant=restaurant,
             created_at__date__gte=today - timedelta(days=6)
@@ -153,7 +156,7 @@ class RestaurantAnalyticsView(APIView):
             date_only=TruncDate('created_at')
         ).values('date_only').annotate(
             order_count=Count('id'),
-            revenue_sum=Sum('total')
+            revenue_sum=Sum('total', filter=Q(status='delivered'))
         )
         stats_map = {stat['date_only']: stat for stat in restaurant_orders_7d}
 
@@ -173,8 +176,8 @@ class RestaurantAnalyticsView(APIView):
                 'orders_today': Order.objects.filter(restaurant=restaurant, created_at__date=today).count(),
                 'orders_7d': Order.objects.filter(restaurant=restaurant, created_at__date__gte=last_7).count(),
                 'orders_30d': orders_30d.count(),
-                'revenue_30d': float(orders_30d.aggregate(Sum('total'))['total__sum'] or 0),
-                'avg_order': float(orders_30d.aggregate(Avg('total'))['total__avg'] or 0),
+                'revenue_30d': float(orders_30d.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0),
+                'avg_order': float(orders_30d.filter(status='delivered').aggregate(Avg('total'))['total__avg'] or 0),
             },
             'daily_trend': daily_trend,
         })

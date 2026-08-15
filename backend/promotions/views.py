@@ -28,9 +28,11 @@ class CouponValidateView(views.APIView):
         return Response({
             'valid': True,
             'code': coupon.code,
-            'discount': discount,
+            'discount': float(discount),
             'discount_type': coupon.discount_type,
-            'discount_value': coupon.discount_value,
+            'discount_value': float(coupon.discount_value),
+            'min_subtotal': float(coupon.min_subtotal or 0.0),
+            'max_discount': float(coupon.max_discount) if coupon.max_discount else None,
         })
 
 class CouponListCreateView(generics.ListCreateAPIView):

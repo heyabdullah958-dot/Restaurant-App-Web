@@ -2,12 +2,15 @@ import React from 'react';
 import { useAdmin } from '../AdminContext';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
 import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight, Clock, Settings, Save, CheckCircle } from 'lucide-react';
-import { fetchPlatformSettings, updatePlatformSettings } from '../services/api';
+import { fetchPlatformSettings, updatePlatformSettings, fetchReviews } from '../services/api';
 
 export const SuperDashboard: React.FC = () => {
   const { restaurants, orders, setSelectedBrand, setView, selectedBrandId } = useAdmin();
   const [scope, setScope] = React.useState<'all' | 'selected'>('all');
   const [timeframe, setTimeframe] = React.useState<'all' | 'today' | 'week' | 'month'>('all');
+
+  const [reviews, setReviews] = React.useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = React.useState(false);
 
   const [platformSettings, setPlatformSettings] = React.useState<{
     loyalty_earn_rate_pkr: number;
@@ -42,6 +45,15 @@ export const SuperDashboard: React.FC = () => {
         }
       })
       .catch(() => {});
+
+    setLoadingReviews(true);
+    fetchReviews()
+      .then((res: any) => {
+        const list = Array.isArray(res) ? res : (res?.results || []);
+        setReviews(list);
+      })
+      .catch(() => setReviews([]))
+      .finally(() => setLoadingReviews(false));
   }, []);
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -124,9 +136,11 @@ export const SuperDashboard: React.FC = () => {
     filteredOrders = filteredOrders.filter(o => new Date(o.created_at) >= startOfMonth);
   }
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  // Delivered-Only Revenue Accounting
+  const deliveredOrders = filteredOrders.filter(o => o.status === 'delivered');
+  const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
   const totalOrders = filteredOrders.length;
-  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const averageOrderValue = deliveredOrders.length > 0 ? totalRevenue / deliveredOrders.length : 0;
 
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
@@ -141,7 +155,8 @@ export const SuperDashboard: React.FC = () => {
     return d >= startOfYesterday && d < endOfYesterday;
   });
 
-  const yesterdayRevenue = yesterdayFilteredOrders.reduce((sum, o) => sum + o.total, 0);
+  const yesterdayDeliveredOrders = yesterdayFilteredOrders.filter(o => o.status === 'delivered');
+  const yesterdayRevenue = yesterdayDeliveredOrders.reduce((sum, o) => sum + o.total, 0);
   const yesterdayOrderCount = yesterdayFilteredOrders.length;
 
   const salesTrend = yesterdayRevenue > 0
@@ -558,6 +573,77 @@ export const SuperDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Customer Reviews & Feedback Card */}
+      <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 shadow-2xl">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-5 border-b border-slate-700/40 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <Star size={20} />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-white text-lg tracking-tight">
+                Customer Ratings & Feedback
+              </h3>
+              <p className="text-xs text-slate-400">
+                Live customer reviews submitted across all restaurant brands
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              ⭐ {(reviews.reduce((s, r) => s + (r.rating || 5), 0) / (reviews.length || 1)).toFixed(1)} / 5.0 Global Rating
+            </span>
+            <span className="text-xs font-semibold text-slate-400">
+              ({reviews.length} reviews)
+            </span>
+          </div>
+        </div>
+
+        {loadingReviews ? (
+          <div className="py-10 text-center text-xs text-slate-400">
+            Loading platform customer reviews...
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="py-10 text-center text-slate-400">
+            <div className="text-3xl mb-1">💬</div>
+            <div className="text-xs font-bold text-slate-300">No customer reviews yet</div>
+            <div className="text-[11px] text-slate-500 mt-1">Customer reviews submitted after order deliveries will appear here.</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-1">
+            {reviews.map((rev) => (
+              <div
+                key={rev.id}
+                className="p-4 bg-slate-900/60 border border-slate-700/50 rounded-2xl space-y-2 hover:border-slate-600 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-xs text-slate-200 truncate pr-2">
+                    {rev.user_name || 'Customer'}
+                  </div>
+                  <div className="flex items-center text-amber-400 text-xs shrink-0">
+                    {'★'.repeat(Math.min(Math.max(rev.rating, 1), 5))}
+                    {'☆'.repeat(5 - Math.min(Math.max(rev.rating, 1), 5))}
+                  </div>
+                </div>
+
+                <div className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md inline-block">
+                  🏪 {rev.restaurant_name || `Restaurant #${rev.restaurant}`}
+                </div>
+
+                <p className="text-xs text-slate-300 italic line-clamp-3">
+                  "{rev.comment || 'Great food and delivery!'}"
+                </p>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-800">
+                  <span>{rev.order ? `Order #${rev.order}` : 'Verified Dining'}</span>
+                  <span>{new Date(rev.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

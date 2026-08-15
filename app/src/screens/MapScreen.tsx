@@ -207,9 +207,42 @@ export default function MapScreen({ navigation }: { navigation: any }) {
   const userLat = userLocation?.coords?.latitude || 31.4690;
   const userLng = userLocation?.coords?.longitude || 74.2917;
 
+  // Compute dynamic live branches from API with fallback coordinates
+  const liveBranches: BranchLocation[] = useMemo(() => {
+    if (restaurants && restaurants.length > 0) {
+      const dynamicList: BranchLocation[] = [];
+      restaurants.forEach((r: any) => {
+        if (r.branches && Array.isArray(r.branches) && r.branches.length > 0) {
+          r.branches.forEach((b: any) => {
+            const fallbackMatch = REAL_BRANCH_LOCATIONS.find(
+              (fb) => fb.brandSlug === r.slug && fb.branchName.toLowerCase().includes((b.name || '').toLowerCase())
+            );
+            dynamicList.push({
+              id: `${r.slug}-${b.id}`,
+              brandSlug: r.slug,
+              brandName: r.name,
+              branchName: (b.name || '').includes('Branch') ? b.name : `${b.name} Branch`,
+              address: b.address || fallbackMatch?.address || r.address || 'Lahore, Pakistan',
+              phone: b.phone || fallbackMatch?.phone || r.phone || '',
+              lat: Number(b.latitude || fallbackMatch?.lat || 31.4690),
+              lng: Number(b.longitude || fallbackMatch?.lng || 74.2917),
+              emoji: fallbackMatch?.emoji || '🍽️',
+              accentColor: fallbackMatch?.accentColor || COLORS.primary,
+              opensAt: r.opens_at || '11:00 AM',
+              closesAt: r.closes_at || '03:00 AM',
+              isOpen: b.is_active !== false,
+            });
+          });
+        }
+      });
+      if (dynamicList.length > 0) return dynamicList;
+    }
+    return REAL_BRANCH_LOCATIONS;
+  }, [restaurants]);
+
   // Compute branches with distance
   const processedBranches = useMemo(() => {
-    return REAL_BRANCH_LOCATIONS.map((branch) => {
+    return liveBranches.map((branch) => {
       const dist = haversineKm(userLat, userLng, branch.lat, branch.lng);
       return {
         ...branch,
@@ -217,7 +250,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         formattedDistance: dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`,
       };
     });
-  }, [userLat, userLng]);
+  }, [liveBranches, userLat, userLng]);
 
   // Filtered branches
   const filteredBranches = useMemo(() => {

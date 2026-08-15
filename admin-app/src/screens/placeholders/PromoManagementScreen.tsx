@@ -25,7 +25,7 @@ import {
   deleteCouponThunk,
 } from '../../store/promoSlice';
 import { PromoCoupon, fetchRestaurants } from '../../services/api';
-import { Card, formatHumanDate, LoadingState, ErrorState, EmptyState } from '../../components/ui';
+import { Card, formatHumanDate, LoadingState, ErrorState, EmptyState, DateTimePickerModal } from '../../components/ui';
 
 export const PromoManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -37,13 +37,18 @@ export const PromoManagementScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<PromoCoupon | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [code, setCode] = useState('');
   const [discountType, setDiscountType] = useState<'FLAT' | 'PERCENTAGE'>('FLAT');
   const [discountValue, setDiscountValue] = useState('100');
   const [minOrderAmount, setMinOrderAmount] = useState('500');
   const [maxDiscountAmount, setMaxDiscountAmount] = useState('200');
-  const [validUntil, setValidUntil] = useState('2026-12-31');
+  const [validUntil, setValidUntil] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
   const [selectedRestId, setSelectedRestId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -321,13 +326,28 @@ export const PromoManagementScreen = () => {
               </View>
             </View>
 
-            <Text style={styles.inputLabel}>Expiration Date (YYYY-MM-DD)</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="2026-12-31"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={validUntil}
-              onChangeText={setValidUntil}
+            <Text style={styles.inputLabel}>Expiration Date</Text>
+            <TouchableOpacity
+              style={styles.datePickerTrigger}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.datePickerIcon}>📅</Text>
+              <View style={styles.datePickerCol}>
+                <Text style={styles.datePickerHuman}>{formatHumanDate(validUntil)}</Text>
+                <Text style={styles.datePickerIso}>{validUntil}</Text>
+              </View>
+              <Text style={styles.datePickerEdit}>Change</Text>
+            </TouchableOpacity>
+
+            <DateTimePickerModal
+              visible={showDatePicker}
+              onClose={() => setShowDatePicker(false)}
+              onSelect={(dateStr) => setValidUntil(dateStr)}
+              initialDate={validUntil}
+              mode="date"
+              title="Set Coupon Expiration Date"
+              themeMode="super"
             />
 
             <Text style={styles.inputLabel}>Scope (Brand Restriction)</Text>
@@ -623,5 +643,43 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  datePickerTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.superAdmin.bg,
+    borderColor: COLORS.superAdmin.border,
+    borderWidth: 1,
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  datePickerIcon: {
+    fontSize: 18,
+    marginRight: SPACING.sm,
+  },
+  datePickerCol: {
+    flex: 1,
+  },
+  datePickerHuman: {
+    color: COLORS.superAdmin.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  datePickerIso: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  datePickerEdit: {
+    color: COLORS.superAdmin.accent,
+    fontSize: 12,
+    fontWeight: '700',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+    backgroundColor: 'rgba(236, 72, 153, 0.15)',
   },
 });

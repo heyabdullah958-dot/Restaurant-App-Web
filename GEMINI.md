@@ -21,19 +21,31 @@ The client's long-term vision is to **scale and onboard more brands** in the fut
 
 ---
 
-## 🏪 The 7 Restaurant Brands
+## 🏪 The 7 Restaurant Brands & Phase 1 Scope
 
-| # | Brand Handle | Cuisine / Specialty | Key Features Needed |
-|---|---|---|---|
-| 1 | **seenbanao** | Desi BBQ & Handi items | Delivery timing, location map, COD order form |
-| 2 | **dineatblue** | Seafood specialty | Reservation inquiry, contact form |
-| 3 | **jushhpk** | Fast food & burgers | Combo deals, working hours |
-| 4 | **tandooristoppk** | Tandoori items, naan/roti counter | Gallery, phone order option |
-| 5 | **sandmelts** | Sandwiches, melts & shakes | Nutrition info |
-| 6 | **birdmanfoodspk** | Grilled & fried chicken | Catering inquiry |
-| 7 | **getafomo** | Trendy café items | Instagram feed integration, event booking |
+### 🚀 Phase 1 Active Launch Brands (3 Brands · 7 Real Operational Branches)
+*Note: There are NO upcoming or draft branches. Exactly these 7 live physical branches are active in the system.*
 
-> ⚠️ **Phase 1 Active Brands:** 3 brands launching first. All 7 must be architected from day one for clean onboarding.
+1. **🍗 Tandoori Stop (`tandooristoppk`) — 3 Branches**
+   - **Johar Town Branch** (PIA Road, Hakim Chowk, Johar Town, Lahore | `0327-4945947`)
+   - **Lake City Branch** (Opposite Lake City Mall, Raiwind Road, Lahore | `0324-4441735`)
+   - **GT Road Baghbanpura Branch** (GT Road, Baghbanpura, Lahore | `0326-6811177`)
+
+2. **🍔 Jush PK (`jushhpk`) — 3 Branches**
+   - **DHA Phase 1 Branch** (Sector H, DHA Phase 1, Lahore | `03257217221`)
+   - **Johar Town Branch** (Block R2, Phase 2 Johar Town, Lahore | `03269946142`)
+   - **Lake City Branch** (Business Bay M1, Lake City, Lahore | `03244441735`)
+
+3. **☕ Get A Fomo (`getafomo`) — 1 Branch**
+   - **Gulberg III Branch** (65, Block D1, Gulberg III, Lahore | `03212784841`)
+
+### 🏢 Phase 2 Hidden Brands (`is_active = False` for Phase 1)
+| Brand Handle | Cuisine / Specialty | Scope |
+|---|---|---|
+| **seenbanao** | Desi BBQ & Handi items | Phase 2 Website / Direct Outlet |
+| **dineatblue** | Seafood specialty | Phase 2 Direct Website |
+| **sandmelts** | Sandwiches, melts & shakes | Phase 2 Website / Direct Outlet |
+| **birdmanfoodspk** | Grilled & fried chicken | Phase 2 Direct Website |
 
 ---
 

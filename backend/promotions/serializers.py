@@ -10,6 +10,7 @@ class CouponValidateSerializer(serializers.Serializer):
     restaurant_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     branch_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     guest_phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     
     def validate(self, data):
         code = data.get('code')
@@ -85,16 +86,30 @@ class CouponValidateSerializer(serializers.Serializer):
 
         request = self.context.get('request')
         from .models import CouponUsage
+        from django.db.models import Q
+
+        # Check authenticated user usage
         if request and request.user and request.user.is_authenticated:
             user_count = CouponUsage.objects.filter(coupon=coupon, user=request.user).count()
             if user_count >= coupon.per_user_limit:
                 logger.warning(f"[PROMO VALIDATION FAILED] Code '{coupon.code}' PER-USER LIMIT REACHED for user #{request.user.id}.")
                 raise serializers.ValidationError(f"You have already used promo code '{coupon.code}' the maximum allowed times.")
-        elif data.get('guest_phone'):
-            phone = str(data.get('guest_phone')).strip()
-            phone_count = CouponUsage.objects.filter(coupon=coupon, order__guest_phone=phone).count()
+
+        # Check phone number usage across guest orders, customer orders, and profile phone
+        phone_input = data.get('phone') or data.get('guest_phone')
+        if not phone_input and request and request.user and getattr(request.user, 'phone', None):
+            phone_input = request.user.phone
+
+        if phone_input:
+            phone_str = str(phone_input).strip()
+            phone_count = CouponUsage.objects.filter(
+                coupon=coupon
+            ).filter(
+                Q(order__guest_phone=phone_str) | Q(order__user__phone=phone_str) | Q(user__phone=phone_str)
+            ).distinct().count()
+
             if phone_count >= coupon.per_user_limit:
-                logger.warning(f"[PROMO VALIDATION FAILED] Code '{coupon.code}' PER-PHONE LIMIT REACHED for guest phone '{phone}'.")
+                logger.warning(f"[PROMO VALIDATION FAILED] Code '{coupon.code}' PER-PHONE LIMIT REACHED for phone '{phone_str}'.")
                 raise serializers.ValidationError(f"This phone number has already used promo code '{coupon.code}' the maximum allowed times.")
             
         return data
@@ -111,6 +126,15 @@ class CouponSerializer(serializers.ModelSerializer):
             'valid_from', 'valid_to', 'usage_limit', 'times_used', 'per_user_limit',
             'is_active', 'created_at'
         ]
+
+    def to_internal_value(self, data):
+        data_copy = data.copy() if hasattr(data, 'copy') else dict(data)
+        if 'discount_type' in data_copy and isinstance(data_copy['discount_type'], str):
+            data_copy['discount_type'] = data_copy['discount_type'].lower()
+        if 'code' in data_copy and isinstance(data_copy['code'], str):
+            data_copy['code'] = data_copy['code'].upper().strip()
+        return super().to_internal_value(data_copy)
+
 
 class FlashDealSerializer(serializers.ModelSerializer):
     class Meta:

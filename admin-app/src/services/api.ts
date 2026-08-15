@@ -667,8 +667,16 @@ export const deleteRider = async (id: number): Promise<void> => {
   await api.delete(`/admin/riders/${id}/`);
 };
 
-export const assignRiderToOrder = async (orderId: number, riderId: number | null): Promise<any> => {
-  const response = await api.post(`/orders/${orderId}/assign-rider/`, { rider_id: riderId });
+export const assignRiderToOrder = async (
+  orderId: number | string,
+  riderId: number | null,
+  options?: { allow_cross_branch?: boolean; is_hq_override?: boolean }
+): Promise<any> => {
+  const response = await api.post(`/orders/${orderId}/assign-rider/`, {
+    rider_id: riderId,
+    allow_cross_branch: options?.allow_cross_branch ?? true,
+    is_hq_override: options?.is_hq_override,
+  });
   return response.data;
 };
 
@@ -931,6 +939,26 @@ export const sendPushBroadcast = async (payload: {
 }): Promise<any> => {
   const response = await api.post('/admin/notifications/send/', payload);
   return response.data;
+};
+
+export interface CustomerReview {
+  id: number;
+  restaurant: number;
+  restaurant_name: string;
+  order: number | null;
+  user: number | null;
+  user_name: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+export const fetchReviews = async (params?: {
+  restaurant_id?: number | string;
+  restaurant_slug?: string;
+}): Promise<CustomerReview[]> => {
+  const response = await api.get('/admin/reviews/', { params });
+  return Array.isArray(response.data) ? response.data : (response.data?.results || []);
 };
 
 
