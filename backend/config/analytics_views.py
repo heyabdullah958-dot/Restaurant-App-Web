@@ -30,6 +30,11 @@ class PlatformAnalyticsView(APIView):
         last_7 = today - timedelta(days=7)
         last_30 = today - timedelta(days=30)
 
+        # Enforce Phase 1 active launch brands scoping
+        LAUNCH_BRANDS = ['jushhpk', 'tandooristoppk', 'getafomo']
+        Restaurant.objects.exclude(slug__in=LAUNCH_BRANDS).filter(is_active=True).update(is_active=False)
+        Restaurant.objects.filter(slug__in=LAUNCH_BRANDS, is_active=False).update(is_active=True)
+
         # Daily trend — last 7 days (efficient single-query approach, active restaurants only, delivered revenue)
         orders_7d_stats = Order.objects.filter(
             restaurant__is_active=True,
