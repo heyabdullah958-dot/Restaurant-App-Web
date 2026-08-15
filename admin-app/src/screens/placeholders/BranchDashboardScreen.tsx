@@ -11,11 +11,12 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
+import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk } from '../../store/orderSlice';
 import { fetchRestaurants, AdminOrder } from '../../services/api';
 import { useOrderPolling } from '../../hooks/useOrderPolling';
+import { Card, StatusBadge, SlaBadge } from '../../components/ui';
 
 type Timeframe = 'today' | 'week' | 'month' | 'all';
 
@@ -114,9 +115,9 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
         }
       >
         {/* Branch Info Header */}
-        <View style={styles.headerCard}>
+        <Card style={styles.headerCard}>
           <View style={styles.headerTop}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.restaurantName}>
                 {restaurantData?.name || 'Restaurant Workspace'}
               </Text>
@@ -135,27 +136,27 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
           {branchDetail?.phone ? (
             <Text style={styles.headerPhone}>📞 {branchDetail.phone}</Text>
           ) : null}
-        </View>
+        </Card>
 
         {/* 2x2 Stat Cards Grid */}
         <View style={styles.gridContainer}>
           {/* Card 1: Pending Live Orders */}
-          <TouchableOpacity
+          <Card
             style={styles.statCard}
             onPress={() => navigation.navigate('OrderManagement')}
             activeOpacity={0.8}
           >
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(234, 88, 12, 0.1)' }]}>
+            <View style={[styles.iconBox, { backgroundColor: COLORS.primaryTint }]}>
               <Text style={styles.statIcon}>📦</Text>
             </View>
             <Text style={styles.statValue}>{pendingOrdersCount}</Text>
             <Text style={styles.statLabel}>Pending Orders</Text>
             <Text style={styles.statSubText}>Tap to view board →</Text>
-          </TouchableOpacity>
+          </Card>
 
           {/* Card 2: Sales Revenue */}
-          <View style={styles.statCard}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+          <Card style={styles.statCard}>
+            <View style={[styles.iconBox, { backgroundColor: COLORS.successLight }]}>
               <Text style={styles.statIcon}>💰</Text>
             </View>
             <Text style={styles.statValue}>Rs. {Math.round(revenueTotal).toLocaleString()}</Text>
@@ -175,66 +176,67 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </Card>
 
           {/* Card 3: Avg Delivery Time */}
-          <View style={styles.statCard}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(2, 132, 199, 0.1)' }]}>
+          <Card style={styles.statCard}>
+            <View style={[styles.iconBox, { backgroundColor: COLORS.infoLight }]}>
               <Text style={styles.statIcon}>⏱️</Text>
             </View>
             <Text style={styles.statValue}>{avgDeliveryTime}</Text>
             <Text style={styles.statLabel}>Avg Delivery Time</Text>
             <Text style={styles.statSubText}>Target SLA Window</Text>
-          </View>
+          </Card>
 
           {/* Card 4: Overall Rating */}
-          <View style={styles.statCard}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
+          <Card style={styles.statCard}>
+            <View style={[styles.iconBox, { backgroundColor: COLORS.warningLight }]}>
               <Text style={styles.statIcon}>⭐</Text>
             </View>
             <Text style={styles.statValue}>{ratingDisplay}</Text>
             <Text style={styles.statLabel}>Store Rating</Text>
             <Text style={styles.statSubText}>Verified Customers</Text>
-          </View>
+          </Card>
         </View>
 
         {/* Recent Orders Section */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Incoming Orders</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('OrderManagement')}>
+          <TouchableOpacity onPress={() => navigation.navigate('OrderManagement')} activeOpacity={0.7}>
             <Text style={styles.seeAllText}>View All ({orders.length}) →</Text>
           </TouchableOpacity>
         </View>
 
         {recentOrders.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No orders fetched yet.</Text>
-          </View>
+          <Card style={styles.emptyCard}>
+            <Text style={styles.emptyText}>No orders recorded yet.</Text>
+          </Card>
         ) : (
           recentOrders.map((ord: AdminOrder) => (
-            <TouchableOpacity
+            <Card
               key={ord.id}
               style={styles.recentOrderCard}
               onPress={() => navigation.navigate('OrderManagement')}
               activeOpacity={0.8}
             >
               <View style={styles.recentLeft}>
-                <Text style={styles.recentId}>
-                  {ord.display_order_id || `#${ord.id}`}
-                </Text>
-                <Text style={styles.recentCustomer}>{ord.guest_name || 'Guest'}</Text>
+                <View style={styles.recentIdRow}>
+                  <Text style={styles.recentId}>
+                    {ord.display_order_id || `#${ord.id}`}
+                  </Text>
+                  <SlaBadge createdAt={ord.created_at} status={ord.status} size="sm" />
+                </View>
+                <Text style={styles.recentCustomer}>👤 {ord.guest_name || 'Guest'}</Text>
                 <Text style={styles.recentTime}>
-                  {new Date(ord.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  Placed: {new Date(ord.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Text>
               </View>
 
               <View style={styles.recentRight}>
                 <Text style={styles.recentTotal}>Rs. {parseFloat(ord.total).toLocaleString()}</Text>
-                <View style={styles.recentStatusBadge}>
-                  <Text style={styles.recentStatusText}>{ord.status.replace('_', ' ')}</Text>
-                </View>
+                <StatusBadge status={ord.status} size="sm" />
               </View>
-            </TouchableOpacity>
+            </Card>
           ))
         )}
       </ScrollView>
@@ -251,13 +253,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   headerCard: {
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
-    ...SHADOWS.small,
   },
   headerTop: {
     flexDirection: 'row',
@@ -266,34 +262,34 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   restaurantName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    ...TYPOGRAPHY.h2,
+    color: COLORS.dark,
   },
   branchName: {
     fontSize: 14,
     color: COLORS.branchManager.primary,
-    fontWeight: '600',
+    fontWeight: '700',
+    marginTop: 2,
   },
   statusChip: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    paddingHorizontal: SPACING.sm,
+    backgroundColor: COLORS.successLight,
+    paddingHorizontal: SPACING.sm + 2,
     paddingVertical: 4,
     borderRadius: RADIUS.round,
   },
   statusChipText: {
-    color: '#10B981',
+    color: COLORS.successDark,
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   headerAddress: {
     fontSize: 12,
-    color: COLORS.branchManager.muted,
-    marginTop: 2,
+    color: COLORS.neutral600,
+    marginTop: 4,
   },
   headerPhone: {
     fontSize: 12,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral600,
     marginTop: 2,
   },
   gridContainer: {
@@ -304,18 +300,12 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '48%',
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
     marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
-    ...SHADOWS.small,
   },
   iconBox: {
     width: 36,
     height: 36,
-    borderRadius: RADIUS.xs,
+    borderRadius: RADIUS.sm,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xs,
@@ -325,18 +315,19 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontWeight: '700',
+    color: COLORS.dark,
     marginBottom: 2,
   },
   statLabel: {
     fontSize: 12,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     fontWeight: '600',
   },
   statSubText: {
-    fontSize: 10,
+    fontSize: 11,
     color: COLORS.branchManager.primary,
+    fontWeight: '600',
     marginTop: 4,
   },
   timeframeRow: {
@@ -347,20 +338,20 @@ const styles = StyleSheet.create({
   tfChip: {
     paddingHorizontal: 4,
     paddingVertical: 2,
-    borderRadius: 4,
-    backgroundColor: '#F1F5F9',
+    borderRadius: RADIUS.xs,
+    backgroundColor: COLORS.neutral100,
   },
   tfChipActive: {
     backgroundColor: COLORS.branchManager.primary,
   },
   tfText: {
     fontSize: 9,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral600,
     fontWeight: '600',
   },
   tfTextActive: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -369,74 +360,60 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    ...TYPOGRAPHY.h3,
+    color: COLORS.dark,
   },
   seeAllText: {
     fontSize: 13,
     color: COLORS.branchManager.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   emptyCard: {
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.md,
     padding: SPACING.lg,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
   },
   emptyText: {
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     fontSize: 13,
   },
   recentOrderCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.sm,
-    padding: SPACING.md,
     marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
   },
   recentLeft: {
     flex: 1,
   },
+  recentIdRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: 2,
+  },
   recentId: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontWeight: '700',
+    color: COLORS.dark,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
   recentCustomer: {
     fontSize: 13,
-    color: COLORS.branchManager.text,
+    color: COLORS.neutral700,
+    fontWeight: '500',
   },
   recentTime: {
     fontSize: 11,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral400,
+    marginTop: 2,
   },
   recentRight: {
     alignItems: 'flex-end',
+    gap: 4,
   },
   recentTotal: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
     color: COLORS.branchManager.primary,
-    marginBottom: 2,
-  },
-  recentStatusBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: RADIUS.xs,
-  },
-  recentStatusText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.muted,
-    textTransform: 'capitalize',
   },
 });

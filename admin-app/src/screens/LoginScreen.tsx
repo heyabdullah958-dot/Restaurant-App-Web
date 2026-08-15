@@ -35,6 +35,17 @@ export const LoginScreen = () => {
   const [passwordChangeError, setPasswordChangeError] = useState<string | null>(null);
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
 
+  const [logoTapCount, setLogoTapCount] = useState(0);
+
+  const handleLogoPress = () => {
+    const nextCount = logoTapCount + 1;
+    setLogoTapCount(nextCount);
+    if (nextCount >= 3) {
+      setLogoTapCount(0);
+      setShowServerModal(true);
+    }
+  };
+
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
       return;
@@ -86,33 +97,27 @@ export const LoginScreen = () => {
     >
       <StatusBar barStyle="light-content" backgroundColor={COLORS.superAdmin.bg} />
 
-      {/* Top Bar with Server Config Button */}
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={() => setShowServerModal(true)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.settingsIcon}>⚙️</Text>
-          <Text style={styles.settingsText}>Server</Text>
-        </TouchableOpacity>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.brandContainer}>
-          <LinearGradient
-            colors={['#2563EB', '#EA580C']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.logoBadge}
+          <TouchableOpacity
+            onPress={handleLogoPress}
+            activeOpacity={0.9}
+            style={styles.logoTouchArea}
           >
-            <Text style={styles.logoText}>GF</Text>
-          </LinearGradient>
+            <LinearGradient
+              colors={['#2563EB', '#EA580C']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.logoBadge}
+            >
+              <Text style={styles.logoText}>GF</Text>
+            </LinearGradient>
+          </TouchableOpacity>
           <Text style={styles.appTitle}>GetFood Manager</Text>
-          <Text style={styles.appSubtitle}>HQ Command & Branch Operations</Text>
+          <Text style={styles.appSubtitle}>Branch Operations & HQ Command</Text>
         </View>
 
         {!showPasswordChange ? (
@@ -170,18 +175,6 @@ export const LoginScreen = () => {
               ) : (
                 <Text style={styles.buttonText}>Sign In</Text>
               )}
-            </TouchableOpacity>
-
-            {/* Current Server Indicator */}
-            <TouchableOpacity
-              style={styles.serverIndicator}
-              onPress={() => setShowServerModal(true)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.serverDot} />
-              <Text style={styles.serverIndicatorText} numberOfLines={1}>
-                API: {activeServer.replace('https://', '').replace('http://', '')}
-              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -263,6 +256,10 @@ const styles = StyleSheet.create({
   brandContainer: {
     alignItems: 'center',
     marginBottom: SPACING.xl,
+  },
+  logoTouchArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoBadge: {
     width: 72,

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Sta
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { COLORS, SPACING, RADIUS, SHADOWS } from '../theme';
+import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logoutStaffThunk } from '../store/authSlice';
 
@@ -186,29 +186,79 @@ const SuperAdminTabNavigator = () => (
 
 const HeaderLogoutButton = () => {
   const dispatch = useAppDispatch();
+
+  const handleLogoutPress = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out of your manager session?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: () => dispatch(logoutStaffThunk()),
+        },
+      ]
+    );
+  };
+
   return (
     <TouchableOpacity
       style={styles.headerLogout}
-      onPress={() => dispatch(logoutStaffThunk())}
+      onPress={handleLogoutPress}
+      activeOpacity={0.7}
     >
-      <Text style={styles.headerLogoutText}>Logout</Text>
+      <Text style={styles.headerLogoutIcon}>🚪</Text>
+      <Text style={styles.headerLogoutText}>Sign Out</Text>
     </TouchableOpacity>
   );
 };
+
+// ─── Custom Tab Bar Icon Component with Active Pill ───────────────────────────
+
+const TabIconWithPill = ({
+  icon,
+  focused,
+  activeBg,
+}: {
+  icon: string;
+  focused: boolean;
+  activeBg: string;
+}) => (
+  <View style={[styles.tabIconContainer, focused && { backgroundColor: activeBg }]}>
+    <Text style={[styles.tabIconText, focused && styles.tabIconTextFocused]}>{icon}</Text>
+  </View>
+);
 
 // ─── Branch Manager Tab Navigator (4 views) ─────────────────────────────────
 
 const BranchManagerTabNavigator = () => (
   <BranchTab.Navigator
     screenOptions={{
-      headerStyle: { backgroundColor: COLORS.branchManager.card },
+      headerStyle: {
+        backgroundColor: COLORS.branchManager.card,
+        borderBottomColor: COLORS.branchManager.border,
+        borderBottomWidth: 1,
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+      headerTitleStyle: {
+        ...TYPOGRAPHY.h3,
+        color: COLORS.branchManager.text,
+      },
       headerTintColor: COLORS.branchManager.text,
       headerRight: () => <HeaderLogoutButton />,
       tabBarStyle: {
         backgroundColor: COLORS.branchManager.card,
         borderTopColor: COLORS.branchManager.border,
-        height: 60,
+        borderTopWidth: 1,
+        height: 64,
         paddingBottom: 8,
+        paddingTop: 6,
+      },
+      tabBarLabelStyle: {
+        fontSize: 11,
+        fontWeight: '600',
       },
       tabBarActiveTintColor: COLORS.branchManager.primary,
       tabBarInactiveTintColor: COLORS.branchManager.muted,
@@ -219,7 +269,13 @@ const BranchManagerTabNavigator = () => (
       component={BranchDashboardScreen}
       options={{
         title: 'Workspace',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🏪</Text>,
+        tabBarIcon: ({ focused }) => (
+          <TabIconWithPill
+            icon="🏪"
+            focused={focused}
+            activeBg={COLORS.branchManager.tint}
+          />
+        ),
       }}
     />
     <BranchTab.Screen
@@ -227,7 +283,13 @@ const BranchManagerTabNavigator = () => (
       component={OrderManagementScreen}
       options={{
         title: 'Orders',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>📦</Text>,
+        tabBarIcon: ({ focused }) => (
+          <TabIconWithPill
+            icon="📦"
+            focused={focused}
+            activeBg={COLORS.branchManager.tint}
+          />
+        ),
       }}
     />
     <BranchTab.Screen
@@ -235,7 +297,13 @@ const BranchManagerTabNavigator = () => (
       component={MenuManagementScreen}
       options={{
         title: 'Stock',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🍳</Text>,
+        tabBarIcon: ({ focused }) => (
+          <TabIconWithPill
+            icon="🍳"
+            focused={focused}
+            activeBg={COLORS.branchManager.tint}
+          />
+        ),
       }}
     />
     <BranchTab.Screen
@@ -243,7 +311,13 @@ const BranchManagerTabNavigator = () => (
       component={RiderManagementScreen}
       options={{
         title: 'Riders',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🛵</Text>,
+        tabBarIcon: ({ focused }) => (
+          <TabIconWithPill
+            icon="🛵"
+            focused={focused}
+            activeBg={COLORS.branchManager.tint}
+          />
+        ),
       }}
     />
   </BranchTab.Navigator>
@@ -335,7 +409,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   logoutButton: {
-    backgroundColor: 'rgba(255, 71, 87, 0.15)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     borderColor: COLORS.danger,
     borderWidth: 1,
     borderRadius: RADIUS.md,
@@ -344,20 +418,43 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   logoutText: {
-    color: '#FF6B6B',
-    fontSize: 16,
+    color: COLORS.danger,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   headerLogout: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderRadius: RADIUS.xs,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 5,
+    backgroundColor: COLORS.neutral100,
+    borderColor: COLORS.neutral200,
+    borderWidth: 1,
+    borderRadius: RADIUS.round,
+  },
+  headerLogoutIcon: {
+    fontSize: 13,
+    marginRight: 4,
   },
   headerLogoutText: {
-    color: '#EF4444',
-    fontSize: 13,
+    color: COLORS.neutral700,
+    fontSize: 12,
     fontWeight: '600',
+  },
+  tabIconContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: RADIUS.round,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabIconText: {
+    fontSize: 18,
+    opacity: 0.7,
+  },
+  tabIconTextFocused: {
+    fontSize: 20,
+    opacity: 1,
   },
 });

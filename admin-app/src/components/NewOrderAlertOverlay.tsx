@@ -227,67 +227,88 @@ export const NewOrderAlertOverlay = () => {
               🔔
             </Animated.Text>
             <View style={styles.headerTextCol}>
-              <Text style={styles.alertHeaderTitle}>NEW INCOMING ORDER!</Text>
+              <Text style={styles.alertHeaderTitle}>NEW ORDER ALERT</Text>
               <Text style={styles.alertHeaderSub}>
                 {pendingOrders.length > 1
-                  ? `Order ${currentIndex + 1} of ${pendingOrders.length}`
-                  : 'Requires Branch Manager Action'}
+                  ? `Order ${currentIndex + 1} of ${pendingOrders.length} • Action Required`
+                  : 'Requires Immediate Branch Action'}
               </Text>
             </View>
           </View>
 
           <ScrollView style={styles.scrollDetails} showsVerticalScrollIndicator={false}>
             {/* Order Primary Details */}
-            <View style={styles.orderTitleRow}>
-              <Text style={styles.displayIdText}>{displayId}</Text>
-              <Text style={styles.orderTotalText}>
-                Rs. {parseFloat(currentOrder.total).toLocaleString()}
-              </Text>
+            <View style={styles.orderHeaderCard}>
+              <View style={styles.orderTitleCol}>
+                <Text style={styles.displayIdText}>{displayId}</Text>
+                <Text style={styles.orderTimeText}>
+                  Just now • {new Date(currentOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.priceLabel}>TOTAL</Text>
+                <Text style={styles.orderTotalText}>
+                  Rs. {parseFloat(currentOrder.total).toLocaleString()}
+                </Text>
+              </View>
             </View>
 
             <View style={styles.badgeRow}>
               <View style={styles.typeChip}>
                 <Text style={styles.chipText}>
                   {currentOrder.order_type === 'DINE_IN'
-                    ? `🍽️ DINE-IN ${currentOrder.table_number ? `(T-${currentOrder.table_number})` : ''}`
+                    ? `🍽️ DINE-IN ${currentOrder.table_number ? `(Table ${currentOrder.table_number})` : ''}`
                     : currentOrder.order_type === 'TAKEAWAY'
-                    ? '🛍️ PICKUP'
-                    : '🛵 DELIVERY'}
+                    ? '🛍️ TAKEAWAY / PICKUP'
+                    : '🛵 HOME DELIVERY'}
                 </Text>
               </View>
               <View style={styles.payChip}>
                 <Text style={styles.payChipText}>
-                  {(currentOrder.payment_method || 'COD').toUpperCase()}
+                  💳 {(currentOrder.payment_method || 'COD').toUpperCase()}
                 </Text>
               </View>
             </View>
 
             {/* Customer Info */}
             <View style={styles.customerBox}>
-              <Text style={styles.customerName}>
-                👤 {currentOrder.guest_name || 'Guest Customer'}
-              </Text>
-              <Text style={styles.customerPhone}>
-                📞 {currentOrder.guest_phone || 'N/A'}
-              </Text>
-              {currentOrder.delivery_address ? (
-                <Text style={styles.customerAddress}>
-                  📍 {currentOrder.delivery_address}
+              <View style={styles.customerHeaderRow}>
+                <Text style={styles.customerName}>
+                  👤 {currentOrder.guest_name || 'Guest Customer'}
                 </Text>
+                <Text style={styles.customerPhone}>
+                  📞 {currentOrder.guest_phone || 'N/A'}
+                </Text>
+              </View>
+              {currentOrder.delivery_address ? (
+                <View style={styles.addressRow}>
+                  <Text style={styles.addressPin}>📍</Text>
+                  <Text style={styles.customerAddress} numberOfLines={2}>
+                    {currentOrder.delivery_address}
+                  </Text>
+                </View>
               ) : null}
             </View>
 
             {/* Item List */}
-            <Text style={styles.itemsTitle}>Items ({currentOrder.items?.length || 0}):</Text>
-            {currentOrder.items?.map((it, idx) => (
-              <View key={it.id || idx} style={styles.itemRow}>
-                <Text style={styles.itemQty}>{it.quantity}x</Text>
-                <Text style={styles.itemName}>{it.menu_item_name}</Text>
-                <Text style={styles.itemPrice}>
-                  Rs. {parseFloat(it.total_price).toLocaleString()}
-                </Text>
-              </View>
-            ))}
+            <View style={styles.itemsSection}>
+              <Text style={styles.itemsTitle}>
+                ORDER ITEMS ({currentOrder.items?.length || 0})
+              </Text>
+              {currentOrder.items?.map((it, idx) => (
+                <View key={it.id || idx} style={styles.itemRow}>
+                  <View style={styles.itemQtyBadge}>
+                    <Text style={styles.itemQtyText}>{it.quantity}x</Text>
+                  </View>
+                  <Text style={styles.itemName} numberOfLines={2}>
+                    {it.menu_item_name}
+                  </Text>
+                  <Text style={styles.itemPrice}>
+                    Rs. {parseFloat(it.total_price).toLocaleString()}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
             {currentOrder.special_instructions ? (
               <View style={styles.notesBox}>
@@ -303,19 +324,21 @@ export const NewOrderAlertOverlay = () => {
               <TouchableOpacity
                 disabled={currentIndex === 0}
                 onPress={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                style={styles.navBtn}
               >
                 <Text style={[styles.navText, currentIndex === 0 && styles.navDisabled]}>
                   ← Previous
                 </Text>
               </TouchableOpacity>
               <Text style={styles.pageCountText}>
-                {currentIndex + 1} / {pendingOrders.length}
+                {currentIndex + 1} of {pendingOrders.length}
               </Text>
               <TouchableOpacity
                 disabled={currentIndex >= pendingOrders.length - 1}
                 onPress={() =>
                   setCurrentIndex((prev) => Math.min(pendingOrders.length - 1, prev + 1))
                 }
+                style={styles.navBtn}
               >
                 <Text
                   style={[
@@ -335,17 +358,17 @@ export const NewOrderAlertOverlay = () => {
               style={styles.acceptButton}
               onPress={handleAccept}
               disabled={acceptLoading}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
               {acceptLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.acceptButtonText}>🍳 Accept & Start Preparing</Text>
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.dismissButton} onPress={handleSilenceAlarm}>
-              <Text style={styles.dismissButtonText}>🔕 Silence Alarm (Keep Received)</Text>
+            <TouchableOpacity style={styles.dismissButton} onPress={handleSilenceAlarm} activeOpacity={0.7}>
+              <Text style={styles.dismissButtonText}>🔕 Silence Alarm (Keep in Queue)</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -357,27 +380,29 @@ export const NewOrderAlertOverlay = () => {
 const styles = StyleSheet.create({
   overlayBackground: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.md,
   },
   alertCard: {
     width: '100%',
-    maxHeight: '85%',
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.lg,
+    maxWidth: 440,
+    maxHeight: '88%',
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.xl,
     overflow: 'hidden',
     ...SHADOWS.large,
   },
   headerBanner: {
-    backgroundColor: '#EF4444',
+    backgroundColor: COLORS.danger,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
   },
   bellIcon: {
-    fontSize: 32,
+    fontSize: 28,
     marginRight: SPACING.sm,
   },
   headerTextCol: {
@@ -385,127 +410,186 @@ const styles = StyleSheet.create({
   },
   alertHeaderTitle: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 17,
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
   alertHeaderSub: {
     color: 'rgba(255,255,255,0.9)',
     fontSize: 12,
-    marginTop: 2,
+    marginTop: 1,
   },
   scrollDetails: {
     padding: SPACING.md,
   },
-  orderTitleRow: {
+  orderHeaderCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.xs,
+    backgroundColor: COLORS.neutral50,
+    borderColor: COLORS.neutral200,
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  orderTitleCol: {
+    flex: 1,
   },
   displayIdText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.dark,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  orderTimeText: {
+    fontSize: 12,
+    color: COLORS.neutral500,
+    marginTop: 2,
+  },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  priceLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.neutral400,
+    letterSpacing: 0.5,
   },
   orderTotalText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: COLORS.branchManager.primary,
   },
   badgeRow: {
     flexDirection: 'row',
-    marginBottom: SPACING.md,
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
   },
   typeChip: {
-    backgroundColor: 'rgba(234, 88, 12, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: RADIUS.xs,
-    marginRight: SPACING.xs,
+    backgroundColor: COLORS.primaryTint,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.round,
   },
   chipText: {
     color: COLORS.branchManager.primary,
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '700',
   },
   payChip: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: RADIUS.xs,
+    backgroundColor: COLORS.neutral100,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.round,
   },
   payChipText: {
-    color: COLORS.branchManager.muted,
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: COLORS.neutral700,
+    fontSize: 11,
+    fontWeight: '600',
   },
   customerBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: RADIUS.xs,
-    padding: SPACING.sm,
-    marginBottom: SPACING.md,
-    borderColor: COLORS.branchManager.border,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm + 2,
+    marginBottom: SPACING.sm,
+    borderColor: COLORS.neutral200,
     borderWidth: 1,
   },
+  customerHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   customerName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.dark,
   },
   customerPhone: {
     fontSize: 13,
-    color: COLORS.branchManager.muted,
-    marginTop: 2,
+    color: COLORS.neutral600,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopColor: COLORS.neutral100,
+    borderTopWidth: 1,
+  },
+  addressPin: {
+    fontSize: 12,
+    marginRight: 4,
+    marginTop: 1,
   },
   customerAddress: {
+    flex: 1,
     fontSize: 12,
-    color: COLORS.branchManager.text,
-    marginTop: 4,
+    color: COLORS.neutral600,
+    lineHeight: 16,
+  },
+  itemsSection: {
+    marginTop: SPACING.xs,
+    backgroundColor: COLORS.neutral50,
+    borderColor: COLORS.neutral200,
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
   },
   itemsTitle: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.muted,
-    marginBottom: 4,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.neutral500,
+    letterSpacing: 0.5,
+    marginBottom: 6,
   },
   itemRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 3,
+    alignItems: 'center',
+    paddingVertical: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: COLORS.neutral200,
   },
-  itemQty: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  itemQtyBadge: {
+    backgroundColor: COLORS.primaryTint,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: RADIUS.xs,
+    marginRight: 8,
+  },
+  itemQtyText: {
+    fontSize: 12,
+    fontWeight: '700',
     color: COLORS.branchManager.primary,
-    width: 28,
   },
   itemName: {
-    fontSize: 14,
-    color: COLORS.branchManager.text,
+    fontSize: 13,
+    color: COLORS.dark,
     flex: 1,
   },
   itemPrice: {
-    fontSize: 14,
-    color: COLORS.branchManager.muted,
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.neutral700,
+    marginLeft: 6,
   },
   notesBox: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    borderWidth: 1,
     padding: SPACING.sm,
-    borderRadius: RADIUS.xs,
+    borderRadius: RADIUS.sm,
   },
   notesTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '700',
     color: '#D97706',
   },
   notesText: {
     fontSize: 12,
-    color: '#B45309',
+    color: '#92400E',
     marginTop: 2,
   },
   carouselNav: {
@@ -514,50 +598,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.neutral100,
     borderTopWidth: 1,
-    borderTopColor: COLORS.branchManager.border,
+    borderTopColor: COLORS.neutral200,
+  },
+  navBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
   navText: {
     color: COLORS.branchManager.primary,
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   navDisabled: {
-    color: COLORS.branchManager.muted,
-    opacity: 0.4,
+    color: COLORS.neutral400,
+    opacity: 0.5,
   },
   pageCountText: {
     fontSize: 12,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral600,
     fontWeight: '600',
   },
   actionContainer: {
     padding: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.branchManager.border,
-    backgroundColor: COLORS.branchManager.card,
+    borderTopColor: COLORS.neutral200,
+    backgroundColor: COLORS.card,
   },
   acceptButton: {
-    backgroundColor: '#10B981',
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.branchManager.primary,
+    paddingVertical: 14,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
-    marginBottom: SPACING.sm,
-    ...SHADOWS.small,
+    marginBottom: SPACING.xs,
+    ...SHADOWS.coloredBranch,
   },
   acceptButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   dismissButton: {
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.sm,
     alignItems: 'center',
   },
   dismissButtonText: {
-    color: COLORS.branchManager.muted,
-    fontSize: 14,
+    color: COLORS.neutral500,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

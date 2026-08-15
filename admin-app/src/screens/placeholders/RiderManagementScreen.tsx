@@ -26,6 +26,7 @@ import {
   setStatusFilter,
 } from '../../store/riderSlice';
 import { BranchRider } from '../../services/api';
+import { StatusBadge } from '../../components/ui';
 
 export const RiderManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -181,27 +182,25 @@ export const RiderManagementScreen = () => {
   };
 
   const renderRiderCard = ({ item }: { item: BranchRider }) => {
-    const badge = getStatusBadgeInfo(item.status);
-
     return (
       <View style={[styles.card, { backgroundColor: themeCard, borderColor: themeBorder }]}>
         <View style={styles.cardHeader}>
           <View style={styles.avatarBox}>
-            <Text style={styles.avatarIcon}>🛵</Text>
+            <Text style={styles.avatarIcon}>
+              {item.vehicle_type === 'CAR' ? '🚗' : item.vehicle_type === 'SCOOTER' ? '🛴' : '🛵'}
+            </Text>
           </View>
           <View style={styles.riderInfoCol}>
             <Text style={[styles.riderName, { color: themeText }]}>{item.name}</Text>
-            <TouchableOpacity onPress={() => handleCallRider(item.phone)}>
+            <TouchableOpacity onPress={() => handleCallRider(item.phone)} activeOpacity={0.7}>
               <Text style={styles.riderPhone}>📞 {item.phone}</Text>
             </TouchableOpacity>
             <Text style={[styles.vehicleText, { color: themeMuted }]}>
-              Vehicle: {item.vehicle_type || 'BIKE'}
+              {item.vehicle_type || 'BIKE'}
             </Text>
           </View>
 
-          <View style={[styles.statusBadge, { backgroundColor: badge.bg }]}>
-            <Text style={[styles.statusText, { color: badge.color }]}>{badge.label}</Text>
-          </View>
+          <StatusBadge status={item.status} size="sm" />
         </View>
 
         <View style={styles.cardActionsRow}>
@@ -213,20 +212,26 @@ export const RiderManagementScreen = () => {
                 item.status === 'AVAILABLE' ? styles.offBtn : styles.availBtn,
               ]}
               onPress={() => handleQuickStatusToggle(item)}
+              activeOpacity={0.8}
             >
-              <Text style={styles.quickToggleText}>
+              <Text
+                style={[
+                  styles.quickToggleText,
+                  { color: item.status === 'AVAILABLE' ? COLORS.danger : COLORS.successDark },
+                ]}
+              >
                 {item.status === 'AVAILABLE' ? 'Set Offline' : 'Set Available'}
               </Text>
             </TouchableOpacity>
           ) : (
-            <Text style={[styles.onDeliveryText, { color: themeMuted }]}>Busy on active delivery</Text>
+            <Text style={[styles.onDeliveryText, { color: themeMuted }]}>🛵 On active delivery</Text>
           )}
 
           <View style={styles.rightActionRow}>
-            <TouchableOpacity style={styles.editBtn} onPress={() => openEditModal(item)}>
+            <TouchableOpacity style={styles.editBtn} onPress={() => openEditModal(item)} activeOpacity={0.7}>
               <Text style={styles.editBtnText}>✏️ Edit</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDeleteRider(item)}>
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDeleteRider(item)} activeOpacity={0.7}>
               <Text style={styles.deleteBtnText}>🗑️</Text>
             </TouchableOpacity>
           </View>
@@ -527,24 +532,24 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(0,0,0,0.05)',
   },
   quickToggleBtn: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: RADIUS.xs,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 5,
+    borderRadius: RADIUS.round,
   },
   availBtn: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: COLORS.successLight,
   },
   offBtn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: COLORS.dangerLight,
   },
   quickToggleText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontWeight: '700',
   },
   onDeliveryText: {
     fontSize: 11,
     fontStyle: 'italic',
+    fontWeight: '600',
   },
   rightActionRow: {
     flexDirection: 'row',

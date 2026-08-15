@@ -137,6 +137,18 @@
   3. A 0-millisecond fallback timeout ensures the Expo runtime immediately boots the cached embedded JS bundle without waiting for or crashing on remote network drops.
 - **Applies to**: `app/app.json`, `admin-app/app.json`, `app.json`.
 
+---
+
+## Lesson 17 — Reusable Mobile Design Systems & Operational UX Invariants — 2026-08-15
+- **Pattern**: Polishing high-frequency operational mobile screens for branch managers and kitchen staff.
+- **Wrong assumption made**: Implementing per-screen inline styles with raw elapsed minutes, unverified action button colors, unconfirmed header logout triggers, and raw debug indicators.
+- **What actually mattered**: 
+  1. **Time formatting at a glance**: Kitchen and dispatch staff cannot parse `7060m OVERDUE`. Timers must always be humanized (`23m`, `4h 12m`, `2d 3h`).
+  2. **Accidental trigger prevention**: Never expose destructive or session-terminating buttons (e.g. Sign Out) as single-tap naked text links in navigation headers. Always wrap in confirmation alerts.
+  3. **Clean client-facing UI vs Developer tools**: Debug and QA tooling (like server switching) must be cleanly gated behind hidden developer gestures (e.g. multi-tap logo) or dev flags rather than cluttering production staff sign-in flows.
+  4. **Component reuse**: Building foundational UI components (`Card`, `StatusBadge`, `SlaBadge`, `Button`, `ConfirmModal`) rooted in centralized theme tokens ensures consistent visual hierarchy and seamless reuse across Super Admin and Branch views.
+- **Applies to**: `admin-app/src/theme.ts`, `admin-app/src/components/ui/*`, `OrderManagementScreen.tsx`, `BranchDashboardScreen.tsx`, `NewOrderAlertOverlay.tsx`.
+
 
 
 

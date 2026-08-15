@@ -85,7 +85,7 @@ const MenuItemCard = React.memo<{
 
       <View style={styles.itemDetails}>
         <View style={styles.titlePriceRow}>
-          <Text style={[styles.itemName, { color: themeText }]}>{item.name}</Text>
+          <Text style={[styles.itemName, { color: themeText }]} numberOfLines={1}>{item.name}</Text>
           <Text style={[styles.itemPrice, { color: themeAccent }]}>
             Rs. {parseFloat(item.price).toLocaleString()}
           </Text>
@@ -101,19 +101,26 @@ const MenuItemCard = React.memo<{
       <View style={styles.itemActionCol}>
         {!isSuper ? (
           <View style={styles.toggleContainer}>
-            <Text
+            <View
               style={[
-                styles.stockLabel,
-                { color: item.is_available ? '#10B981' : '#EF4444' },
+                styles.stockBadge,
+                { backgroundColor: item.is_available ? COLORS.successLight : COLORS.dangerLight },
               ]}
             >
-              {item.is_available ? 'In Stock' : 'Out of Stock'}
-            </Text>
+              <Text
+                style={[
+                  styles.stockLabel,
+                  { color: item.is_available ? COLORS.successDark : COLORS.danger },
+                ]}
+              >
+                {item.is_available ? 'In Stock' : 'Out'}
+              </Text>
+            </View>
             <Switch
               value={item.is_available}
               onValueChange={() => onToggleStock(item)}
-              trackColor={{ false: '#CBD5E1', true: 'rgba(16, 185, 129, 0.4)' }}
-              thumbColor={item.is_available ? '#10B981' : '#64748B'}
+              trackColor={{ false: COLORS.neutral300, true: 'rgba(16, 185, 129, 0.4)' }}
+              thumbColor={item.is_available ? COLORS.success : COLORS.neutral500}
             />
           </View>
         ) : (
@@ -709,18 +716,18 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     flexDirection: 'row',
-    borderRadius: RADIUS.md,
-    padding: SPACING.sm,
-    marginBottom: SPACING.xs,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.sm + 2,
+    marginBottom: SPACING.sm,
     borderWidth: 1,
     alignItems: 'center',
     ...SHADOWS.small,
   },
   imageBox: {
-    width: 54,
-    height: 54,
-    borderRadius: RADIUS.xs,
-    backgroundColor: '#F1F5F9',
+    width: 58,
+    height: 58,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.neutral100,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.sm,
@@ -735,7 +742,7 @@ const styles = StyleSheet.create({
   },
   itemDetails: {
     flex: 1,
-    marginRight: SPACING.xs,
+    marginRight: SPACING.sm,
   },
   titlePriceRow: {
     flexDirection: 'row',
@@ -744,17 +751,18 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
     flex: 1,
   },
   itemPrice: {
     fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 4,
+    fontWeight: '700',
+    marginLeft: 6,
   },
   itemDescription: {
     fontSize: 12,
     marginTop: 2,
+    lineHeight: 16,
   },
   itemActionCol: {
     alignItems: 'flex-end',
@@ -762,11 +770,16 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     alignItems: 'center',
+    gap: 4,
+  },
+  stockBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: RADIUS.round,
   },
   stockLabel: {
     fontSize: 10,
-    fontWeight: 'bold',
-    marginBottom: 2,
+    fontWeight: '700',
   },
   superActionRow: {
     flexDirection: 'row',

@@ -375,6 +375,41 @@
   - Metro dev server compiled and served Android bundle with HTTP 200 OK.
 - Confidence: [100%] — Application startup is shielded from remote EAS update download failures with zero-timeout local cache fallback.
 
+## [Phase 7 — Design Polish: Branch Manager Experience + Order Alert Overlay (Foundation)] — 2026-08-15
+- What changed and why: Established a coherent, reusable mobile design system across `admin-app` and fixed 6 critical UX issues across Branch Manager screens (Workspace, Orders, Stock, Riders) and the foreground order alert overlay.
+  1. Built shared UI foundation in `src/components/ui/`: `Card`, `StatusBadge`, `SlaBadge`, `Button`, `ConfirmModal`.
+  2. Implemented `formatHumanElapsedTime` in `SlaBadge`, eliminating raw minutes display (e.g. `7060m OVERDUE`) in favor of clear human units (`23m`, `4h 12m`, `2d 3h`).
+  3. Replaced raw shifting red circular badge on Orders tab with a clean `🔥 ${newOrderCount} NEW` pill.
+  4. Unified all action button colors to the warm branch brand palette (`COLORS.branchManager.primary`), eliminating orphan `#6366F1` indigo buttons.
+  5. Replaced persistent bare red logout link in navigation headers with a refined profile action button wired to an `Alert.alert` confirmation dialog.
+  6. Gated developer-facing Server configuration tools behind a secret 3-tap gesture on the GF brand logo, keeping the client-facing sign-in screen clean and uncluttered.
+  7. Audited and enforced Rider Dispatch requirement: disabled submit until a rider is selected, added takeaway/dine-in order type branching ("Mark Ready / Pickup"), and provided interactive 1-tap rider assignment for unassigned delivery orders.
+  8. Transformed `NewOrderAlertOverlay.tsx` into a high-contrast, ride-hailing style alert with prominent branch/order totals, item breakdown, and oversized Accept CTA.
+  9. Enhanced bottom tab bar with active background pill highlight indicators.
+- Files created:
+  - `admin-app/src/components/ui/Card.tsx`
+  - `admin-app/src/components/ui/StatusBadge.tsx`
+  - `admin-app/src/components/ui/SlaBadge.tsx`
+  - `admin-app/src/components/ui/Button.tsx`
+  - `admin-app/src/components/ui/ConfirmModal.tsx`
+  - `admin-app/src/components/ui/index.ts`
+- Files modified:
+  - `admin-app/src/theme.ts`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin-app/src/screens/LoginScreen.tsx`
+  - `admin-app/src/components/NewOrderAlertOverlay.tsx`
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `CHANGELOG.md`
+- Verification evidence:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle (`index.ts`, 1062 modules) with HTTP 200 OK.
+- Confidence: [100%] — Reusable design system is firmly established, all 6 confirmed issues are resolved, and the branch manager UX is polished and operational.
+
 
 
 

@@ -306,6 +306,37 @@
   - Manifest probe `HTTP GET http://127.0.0.1:8081/` with header `expo-platform: android` returns 200 OK without any `PluginError`.
   - Android JS bundle downloaded via `http://127.0.0.1:8081/index.bundle?platform=android&dev=true` in 14.7s (1062 modules) with status 200 OK.
 
+---
+
+### Bug #29: Branch Manager UX Inconsistencies & Missing Design System Tokens (Resolved 2026-08-15)
+- **Symptom**:
+  1. Overdue order cards displayed raw minutes for old orders (e.g. `7060m OVERDUE`).
+  2. The Orders tab showed an ambiguous, unlabeled red circular badge next to `Active (21)`.
+  3. "Start Preparing" action button was rendered in orphan blue/indigo (`#6366F1`) instead of warm branch brand orange.
+  4. Header had a bare persistent red "Logout" text link with zero confirmation step, risking accidental logout during busy shifts.
+  5. Login screen showed developer-facing "Server" button and raw API URL text.
+  6. Rider dispatch flow lacked rider selection enforcement and takeaway/dine-in order type branching.
+- **Root Cause**:
+  1. SLA calculation did not convert raw minutes into human-readable hours/days.
+  2. Tab badge rendered raw integer count without label.
+  3. Action buttons used hardcoded inline colors rather than semantic tokens.
+  4. Header logout button directly called thunk on single tap without `Alert.alert` confirmation.
+  5. Debug QA tools were rendered unconditionally in production login layout.
+  6. Status handler attempted rider dispatch modal on non-delivery orders and allowed submitting without selected rider.
+- **Fix Applied**:
+  1. Expanded `src/theme.ts` with comprehensive semantic color tokens, typography scale, shadows, and radii.
+  2. Created shared UI system in `src/components/ui/` (`Card`, `StatusBadge`, `SlaBadge`, `Button`, `ConfirmModal`).
+  3. Implemented `formatHumanElapsedTime` (`<60m` -> `${m}m`, `60m-24h` -> `${h}h ${m}m`, `>=24h` -> `${d}d ${h}h`) in `SlaBadge`.
+  4. Formatted active tab pill with `🔥 ${newOrderCount} NEW` tag (only when `> 0`).
+  5. Aligned primary branch action buttons to warm orange (`COLORS.branchManager.primary`) and semantic success/danger states.
+  6. Replaced bare red logout link with a styled header profile button wired to a confirmation dialog.
+  7. Gated Login screen server modal behind a hidden 3-tap gesture on the GF brand logo.
+  8. Enforced rider selection for delivery orders and branched takeaway/dine-in orders straight to "Mark Ready / Served".
+  9. Polished `NewOrderAlertOverlay.tsx` into a high-contrast, ride-hailing style alert.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle with HTTP 200 OK.
+
 
 
 

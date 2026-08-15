@@ -17,10 +17,11 @@ import {
   UIManager,
   Alert,
 } from 'react-native';
-import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
+import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { fetchOrdersThunk, updateOrderStatusThunk, clearOrderError } from '../../store/orderSlice';
+import { fetchOrdersThunk, updateOrderStatusThunk } from '../../store/orderSlice';
 import { AdminOrder, fetchRiders, assignRiderToOrder, BranchRider } from '../../services/api';
+import { Card, StatusBadge, SlaBadge, Button } from '../../components/ui';
 
 if (
   Platform.OS === 'android' &&
@@ -32,45 +33,9 @@ if (
   } catch (e) {}
 }
 
-// ─── SLA Timer Helper ────────────────────────────────────────────────────────
-
-const getSLABadge = (createdAt: string, status: string) => {
-  if (status === 'delivered' || status === 'cancelled') return null;
-
-  const elapsedMs = Date.now() - new Date(createdAt).getTime();
-  const elapsedMins = Math.floor(elapsedMs / 60000);
-
-  if (elapsedMins < 15) {
-    return { label: `🟢 ${elapsedMins}m`, color: '#10B981', bg: 'rgba(16, 185, 129, 0.12)' };
-  } else if (elapsedMins <= 30) {
-    return { label: `⚠️ ${elapsedMins}m`, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.12)' };
-  } else {
-    return { label: `🚨 ${elapsedMins}m OVERDUE`, color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)' };
-  }
-};
-
-// ─── Status Color Helper ─────────────────────────────────────────────────────
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'received':
-      return { label: 'Received', color: '#6366F1', bg: 'rgba(99, 102, 241, 0.12)' };
-    case 'preparing':
-      return { label: 'Preparing', color: '#F97316', bg: 'rgba(249, 115, 22, 0.12)' };
-    case 'out_for_delivery':
-      return { label: 'Out for Delivery', color: '#0284C7', bg: 'rgba(2, 132, 199, 0.12)' };
-    case 'delivered':
-      return { label: 'Delivered', color: '#10B981', bg: 'rgba(16, 185, 129, 0.12)' };
-    case 'cancelled':
-      return { label: 'Cancelled', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.12)' };
-    default:
-      return { label: status, color: '#64748B', bg: '#F1F5F9' };
-  }
-};
-
 export const OrderManagementScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
-  const { orders, isLoading, isRefreshing, error } = useAppSelector((state) => state.orders);
+  const { orders, isLoading, isRefreshing } = useAppSelector((state) => state.orders);
 
   const newOrderCount = orders.filter((o) => o.status === 'received').length;
 
@@ -106,15 +71,23 @@ export const OrderManagementScreen = ({ navigation }: any) => {
   };
 
   const handleAdvanceStatus = async (order: AdminOrder) => {
-    if (order.status === 'preparing') {
-      // Intercept preparing -> out_for_delivery with Rider Dispatch Modal
+    const isDelivery = !order.order_type || order.order_type === 'DELIVERY';
+
+    if (order.status === 'preparing' && isDelivery) {
+      // Intercept preparing -> out_for_delivery for delivery orders with Rider Dispatch Modal
       openDispatchModal(order);
       return;
     }
 
     let nextStatus = '';
-    if (order.status === 'received') nextStatus = 'preparing';
-    else if (order.status === 'out_for_delivery') nextStatus = 'delivered';
+    if (order.status === 'received') {
+      nextStatus = 'preparing';
+    } else if (order.status === 'preparing' && !isDelivery) {
+      // For TAKEAWAY / DINE_IN, preparing moves straight to delivered (completed/served)
+      nextStatus = 'delivered';
+    } else if (order.status === 'out_for_delivery') {
+      nextStatus = 'delivered';
+    }
 
     if (!nextStatus) return;
 
@@ -130,7 +103,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
 
   const openDispatchModal = async (order: AdminOrder) => {
     setDispatchTargetOrder(order);
-    setSelectedRiderId(null);
+    setSelectedRiderId(order.rider?.id || null);
     setDispatchModalVisible(true);
     setLoadingRiders(true);
 
@@ -140,9 +113,11 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         is_active: true,
       });
       setAvailableRiders(riders);
-      const firstAvailable = riders.find((r) => r.status === 'AVAILABLE');
-      if (firstAvailable) {
-        setSelectedRiderId(firstAvailable.id);
+      if (!order.rider?.id) {
+        const firstAvailable = riders.find((r) => r.status === 'AVAILABLE');
+        if (firstAvailable) {
+          setSelectedRiderId(firstAvailable.id);
+        }
       }
     } catch (err) {
       console.warn('Failed to load riders for dispatch modal:', err);
@@ -153,6 +128,10 @@ export const OrderManagementScreen = ({ navigation }: any) => {
 
   const handleConfirmDispatch = async () => {
     if (!dispatchTargetOrder) return;
+    if (!selectedRiderId) {
+      Alert.alert('Rider Required', 'Please select a delivery rider before dispatching this order.');
+      return;
+    }
 
     setDispatchSubmitting(true);
     try {
@@ -200,7 +179,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
     }
   };
 
-  // Filter orders by tab
+  // Filter orders by active tab
   const filteredOrders = orders.filter((o) => {
     if (activeTab === 'active') {
       return o.status === 'received' || o.status === 'preparing' || o.status === 'out_for_delivery';
@@ -213,144 +192,166 @@ export const OrderManagementScreen = ({ navigation }: any) => {
   const renderOrderCard = ({ item }: { item: AdminOrder }) => {
     const isExpanded = expandedOrderId === item.id;
     const isUpdating = actionLoadingId === item.id;
-    const statusBadge = getStatusBadge(item.status);
-    const slaBadge = getSLABadge(item.created_at, item.status);
     const displayId = item.display_order_id || `#${item.id}`;
+    const isDelivery = !item.order_type || item.order_type === 'DELIVERY';
 
     return (
-      <TouchableOpacity
-        style={styles.card}
+      <Card
+        style={styles.cardContainer}
+        padding={0}
         onPress={() => toggleExpand(item.id)}
-        activeOpacity={0.9}
       >
-        {/* Card Header */}
-        <View style={styles.cardHeader}>
-          <View style={styles.idContainer}>
-            <Text style={styles.displayId}>{displayId}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: statusBadge.bg }]}>
-              <Text style={[styles.statusText, { color: statusBadge.color }]}>
-                {statusBadge.label}
-              </Text>
+        <View style={styles.cardInner}>
+          {/* Card Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.idBadgeRow}>
+              <Text style={styles.displayId}>{displayId}</Text>
+              <StatusBadge status={item.status} size="sm" />
             </View>
+
+            <SlaBadge createdAt={item.created_at} status={item.status} size="sm" />
           </View>
 
-          {slaBadge ? (
-            <View style={[styles.slaBadge, { backgroundColor: slaBadge.bg }]}>
-              <Text style={[styles.slaText, { color: slaBadge.color }]}>{slaBadge.label}</Text>
+          {/* Customer & Type Info */}
+          <View style={styles.infoRow}>
+            <Text style={styles.customerName}>
+              👤 {item.guest_name || 'Guest Customer'}
+            </Text>
+            <Text style={styles.phoneText}>📞 {item.guest_phone || 'N/A'}</Text>
+          </View>
+
+          <View style={styles.metaRow}>
+            <View style={styles.typeBadge}>
+              <Text style={styles.typeText}>
+                {item.order_type === 'DINE_IN'
+                  ? `🍽️ DINE-IN ${item.table_number ? `(T-${item.table_number})` : ''}`
+                  : item.order_type === 'TAKEAWAY'
+                  ? '🛍️ PICKUP'
+                  : '🛵 DELIVERY'}
+              </Text>
+            </View>
+
+            <View style={styles.paymentBadge}>
+              <Text style={styles.paymentText}>
+                {(item.payment_method || 'COD').toUpperCase()}
+              </Text>
+            </View>
+
+            <Text style={styles.totalPrice}>Rs. {parseFloat(item.total).toLocaleString()}</Text>
+          </View>
+
+          {/* Time Stamp */}
+          <Text style={styles.timeText}>
+            Placed: {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+
+          {/* Assigned Rider Indicator or Warning if missing */}
+          {item.status === 'out_for_delivery' ? (
+            item.rider ? (
+              <View style={styles.riderRow}>
+                <Text style={styles.riderText}>🛵 Assigned: {item.rider.name} ({item.rider.phone})</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.missingRiderRow}
+                onPress={() => openDispatchModal(item)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.missingRiderText}>⚠️ No Rider Assigned • Tap to Assign Rider</Text>
+              </TouchableOpacity>
+            )
+          ) : null}
+
+          {/* Expanded Items & Details */}
+          {isExpanded ? (
+            <View style={styles.expandedContent}>
+              <View style={styles.divider} />
+              <Text style={styles.sectionHeader}>Order Items ({item.items?.length || 0})</Text>
+              {item.items?.map((it, idx) => (
+                <View key={it.id || idx} style={styles.itemRow}>
+                  <Text style={styles.itemQty}>{it.quantity}x</Text>
+                  <Text style={styles.itemName} numberOfLines={1}>{it.menu_item_name}</Text>
+                  <Text style={styles.itemPrice}>Rs. {parseFloat(it.total_price).toLocaleString()}</Text>
+                </View>
+              ))}
+
+              {item.delivery_address ? (
+                <View style={styles.addressContainer}>
+                  <Text style={styles.addressLabel}>Delivery Address:</Text>
+                  <Text style={styles.addressText}>{item.delivery_address}</Text>
+                </View>
+              ) : null}
+
+              {item.special_instructions ? (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesLabel}>Special Instructions:</Text>
+                  <Text style={styles.notesText}>{item.special_instructions}</Text>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* Action Buttons */}
+          {item.status !== 'delivered' && item.status !== 'cancelled' ? (
+            <View style={styles.actionRow}>
+              {isUpdating ? (
+                <ActivityIndicator color={COLORS.branchManager.primary} style={{ flex: 1, paddingVertical: 8 }} />
+              ) : (
+                <>
+                  {item.status === 'received' && (
+                    <Button
+                      title="🍳 Start Preparing"
+                      variant="primary"
+                      size="sm"
+                      onPress={() => handleAdvanceStatus(item)}
+                      style={styles.actionPrimaryBtn}
+                    />
+                  )}
+
+                  {item.status === 'preparing' && (
+                    isDelivery ? (
+                      <Button
+                        title="🛵 Dispatch Order"
+                        variant="secondary"
+                        size="sm"
+                        onPress={() => handleAdvanceStatus(item)}
+                        style={styles.actionPrimaryBtn}
+                      />
+                    ) : (
+                      <Button
+                        title={item.order_type === 'TAKEAWAY' ? '🛍️ Mark Ready / Pickup' : '🍽️ Mark Served / Done'}
+                        variant="success"
+                        size="sm"
+                        onPress={() => handleAdvanceStatus(item)}
+                        style={styles.actionPrimaryBtn}
+                      />
+                    )
+                  )}
+
+                  {item.status === 'out_for_delivery' && (
+                    <Button
+                      title="✅ Mark Delivered"
+                      variant="success"
+                      size="sm"
+                      onPress={() => handleAdvanceStatus(item)}
+                      style={styles.actionPrimaryBtn}
+                    />
+                  )}
+
+                  <Button
+                    title="Cancel"
+                    variant="outline"
+                    size="sm"
+                    onPress={() => openCancelModal(item)}
+                    textStyle={{ color: COLORS.danger }}
+                    style={styles.actionCancelBtn}
+                  />
+                </>
+              )}
             </View>
           ) : null}
         </View>
-
-        {/* Customer & Type Info */}
-        <View style={styles.infoRow}>
-          <Text style={styles.customerName}>{item.guest_name || 'Guest Customer'}</Text>
-          <Text style={styles.phoneText}>📞 {item.guest_phone || 'N/A'}</Text>
-        </View>
-
-        <View style={styles.metaRow}>
-          <View style={styles.typeBadge}>
-            <Text style={styles.typeText}>
-              {item.order_type === 'DINE_IN'
-                ? `🍽️ DINE-IN ${item.table_number ? `(T-${item.table_number})` : ''}`
-                : item.order_type === 'TAKEAWAY'
-                ? '🛍️ PICKUP'
-                : '🛵 DELIVERY'}
-            </Text>
-          </View>
-
-          <View style={styles.paymentBadge}>
-            <Text style={styles.paymentText}>
-              {(item.payment_method || 'COD').toUpperCase()}
-            </Text>
-          </View>
-
-          <Text style={styles.totalPrice}>Rs. {parseFloat(item.total).toLocaleString()}</Text>
-        </View>
-
-        {/* Time Stamp */}
-        <Text style={styles.timeText}>
-          Placed: {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
-
-        {/* Expanded Items & Address */}
-        {isExpanded ? (
-          <View style={styles.expandedContent}>
-            <View style={styles.divider} />
-            <Text style={styles.sectionHeader}>Order Items ({item.items?.length || 0})</Text>
-            {item.items?.map((it, idx) => (
-              <View key={it.id || idx} style={styles.itemRow}>
-                <Text style={styles.itemQty}>{it.quantity}x</Text>
-                <Text style={styles.itemName}>{it.menu_item_name}</Text>
-                <Text style={styles.itemPrice}>Rs. {parseFloat(it.total_price).toLocaleString()}</Text>
-              </View>
-            ))}
-
-            {item.delivery_address ? (
-              <View style={styles.addressContainer}>
-                <Text style={styles.addressLabel}>Delivery Address:</Text>
-                <Text style={styles.addressText}>{item.delivery_address}</Text>
-              </View>
-            ) : null}
-
-            {item.special_instructions ? (
-              <View style={styles.notesContainer}>
-                <Text style={styles.notesLabel}>Instructions:</Text>
-                <Text style={styles.notesText}>{item.special_instructions}</Text>
-              </View>
-            ) : null}
-
-            {item.rider ? (
-              <View style={styles.riderContainer}>
-                <Text style={styles.riderLabel}>Assigned Rider:</Text>
-                <Text style={styles.riderText}>🛵 {item.rider.name} ({item.rider.phone})</Text>
-              </View>
-            ) : null}
-          </View>
-        ) : null}
-
-        {/* Forward Status Action Buttons */}
-        {item.status !== 'delivered' && item.status !== 'cancelled' ? (
-          <View style={styles.actionRow}>
-            {isUpdating ? (
-              <ActivityIndicator color={COLORS.branchManager.primary} style={{ flex: 1 }} />
-            ) : (
-              <>
-                {item.status === 'received' && (
-                  <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: '#6366F1' }]}
-                    onPress={() => handleAdvanceStatus(item)}
-                  >
-                    <Text style={styles.buttonText}>🍳 Start Preparing</Text>
-                  </TouchableOpacity>
-                )}
-                {item.status === 'preparing' && (
-                  <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: '#F97316' }]}
-                    onPress={() => handleAdvanceStatus(item)}
-                  >
-                    <Text style={styles.buttonText}>🛵 Dispatch Order</Text>
-                  </TouchableOpacity>
-                )}
-                {item.status === 'out_for_delivery' && (
-                  <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: '#10B981' }]}
-                    onPress={() => handleAdvanceStatus(item)}
-                  >
-                    <Text style={styles.buttonText}>✅ Mark Delivered</Text>
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                  style={styles.cancelTextButton}
-                  onPress={() => openCancelModal(item)}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        ) : null}
-      </TouchableOpacity>
+      </Card>
     );
   };
 
@@ -363,13 +364,14 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.tab, activeTab === 'active' && styles.tabActive]}
           onPress={() => setActiveTab('active')}
+          activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>
             Active ({orders.filter((o) => o.status === 'received' || o.status === 'preparing' || o.status === 'out_for_delivery').length})
           </Text>
           {newOrderCount > 0 ? (
-            <View style={styles.newBadge}>
-              <Text style={styles.newBadgeText}>{newOrderCount}</Text>
+            <View style={styles.newPill}>
+              <Text style={styles.newPillText}>🔥 {newOrderCount} NEW</Text>
             </View>
           ) : null}
         </TouchableOpacity>
@@ -377,6 +379,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.tab, activeTab === 'delivered' && styles.tabActive]}
           onPress={() => setActiveTab('delivered')}
+          activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === 'delivered' && styles.tabTextActive]}>
             Delivered ({orders.filter((o) => o.status === 'delivered').length})
@@ -386,6 +389,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.tab, activeTab === 'cancelled' && styles.tabActive]}
           onPress={() => setActiveTab('cancelled')}
+          activeOpacity={0.8}
         >
           <Text style={[styles.tabText, activeTab === 'cancelled' && styles.tabTextActive]}>
             Cancelled ({orders.filter((o) => o.status === 'cancelled').length})
@@ -457,7 +461,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
                 </TouchableOpacity>
               </View>
             ) : (
-              <ScrollView style={{ maxHeight: 200, marginVertical: SPACING.xs }}>
+              <ScrollView style={{ maxHeight: 220, marginVertical: SPACING.xs }}>
                 {availableRiders.map((r) => {
                   const isSelected = selectedRiderId === r.id;
                   const isAvail = r.status === 'AVAILABLE';
@@ -467,14 +471,15 @@ export const OrderManagementScreen = ({ navigation }: any) => {
                       key={r.id}
                       style={[styles.riderOption, isSelected && styles.riderOptionSelected]}
                       onPress={() => setSelectedRiderId(r.id)}
+                      activeOpacity={0.8}
                     >
                       <Text style={styles.radioDot}>{isSelected ? '🔘' : '⚪'}</Text>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.riderOptionName}>{r.name}</Text>
                         <Text style={styles.riderOptionSub}>📞 {r.phone} | {r.vehicle_type}</Text>
                       </View>
-                      <Text style={[styles.riderOptionStatus, { color: isAvail ? '#10B981' : '#F59E0B' }]}>
-                        {isAvail ? '🟢 Available' : '🛵 Busy'}
+                      <Text style={[styles.riderOptionStatus, { color: isAvail ? COLORS.success : COLORS.warningDark }]}>
+                        {isAvail ? '🟢 Available' : '🛵 On Delivery'}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -483,24 +488,22 @@ export const OrderManagementScreen = ({ navigation }: any) => {
             )}
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
+              <Button
+                title="Cancel"
+                variant="outline"
+                size="md"
                 onPress={() => setDispatchModalVisible(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalConfirmBtn, { backgroundColor: '#F97316' }]}
+                style={styles.modalBtn}
+              />
+              <Button
+                title="Confirm Dispatch"
+                variant="primary"
+                size="md"
                 onPress={handleConfirmDispatch}
-                disabled={dispatchSubmitting || (availableRiders.length > 0 && !selectedRiderId)}
-              >
-                {dispatchSubmitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.modalConfirmBtnText}>Confirm Dispatch</Text>
-                )}
-              </TouchableOpacity>
+                isLoading={dispatchSubmitting}
+                disabled={!selectedRiderId || availableRiders.length === 0}
+                style={styles.modalBtn}
+              />
             </View>
           </View>
         </View>
@@ -531,31 +534,28 @@ export const OrderManagementScreen = ({ navigation }: any) => {
               style={styles.modalInput}
               value={cancellationReason}
               onChangeText={setCancellationReason}
-              placeholder="e.g. Out of stock, Customer request"
-              placeholderTextColor={COLORS.branchManager.muted}
+              placeholder="e.g. Out of stock item, Customer requested cancellation"
+              placeholderTextColor={COLORS.neutral400}
               multiline
               numberOfLines={3}
             />
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
+              <Button
+                title="Go Back"
+                variant="outline"
+                size="md"
                 onPress={() => setCancelModalVisible(false)}
-              >
-                <Text style={styles.modalCancelBtnText}>Go Back</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.modalConfirmBtn}
+                style={styles.modalBtn}
+              />
+              <Button
+                title="Confirm Cancel"
+                variant="destructive"
+                size="md"
                 onPress={handleConfirmCancel}
-                disabled={actionLoadingId !== null}
-              >
-                {actionLoadingId !== null ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.modalConfirmBtnText}>Confirm Cancel</Text>
-                )}
-              </TouchableOpacity>
+                isLoading={actionLoadingId !== null}
+                style={styles.modalBtn}
+              />
             </View>
           </View>
         </View>
@@ -571,43 +571,43 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: COLORS.branchManager.card,
+    backgroundColor: COLORS.card,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.branchManager.border,
+    borderBottomColor: COLORS.neutral200,
   },
   tab: {
     flex: 1,
     paddingVertical: SPACING.sm + 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: RADIUS.sm,
+    borderRadius: RADIUS.md,
     flexDirection: 'row',
   },
   tabActive: {
-    backgroundColor: 'rgba(234, 88, 12, 0.1)',
+    backgroundColor: COLORS.primaryTint,
   },
   tabText: {
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     fontSize: 13,
     fontWeight: '600',
   },
   tabTextActive: {
     color: COLORS.branchManager.primary,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  newBadge: {
-    backgroundColor: '#EF4444',
-    borderRadius: 10,
+  newPill: {
+    backgroundColor: COLORS.danger,
+    borderRadius: RADIUS.round,
     paddingHorizontal: 6,
     paddingVertical: 2,
     marginLeft: 4,
   },
-  newBadgeText: {
+  newPillText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   listContent: {
     padding: SPACING.md,
@@ -618,18 +618,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     marginTop: SPACING.sm,
     fontSize: 14,
   },
-  card: {
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
+  cardContainer: {
     marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
-    ...SHADOWS.small,
+  },
+  cardInner: {
+    padding: SPACING.md,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -637,48 +634,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xs,
   },
-  idContainer: {
+  idBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: SPACING.xs,
   },
   displayId: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
-    marginRight: SPACING.sm,
+    fontWeight: '700',
+    color: COLORS.dark,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-  },
-  statusBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: RADIUS.xs,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  slaBadge: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: RADIUS.xs,
-  },
-  slaText: {
-    fontSize: 11,
-    fontWeight: 'bold',
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: SPACING.xs,
   },
   customerName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: COLORS.branchManager.text,
+    color: COLORS.dark,
   },
   phoneText: {
     fontSize: 13,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral600,
   },
   metaRow: {
     flexDirection: 'row',
@@ -686,148 +666,155 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   typeBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    backgroundColor: COLORS.neutral100,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: RADIUS.xs,
     marginRight: SPACING.xs,
   },
   typeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: COLORS.branchManager.text,
+    color: COLORS.neutral700,
   },
   paymentBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    backgroundColor: COLORS.neutral100,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: RADIUS.xs,
     marginRight: SPACING.sm,
   },
   paymentText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.muted,
+    fontWeight: '700',
+    color: COLORS.neutral600,
   },
   totalPrice: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '700',
     color: COLORS.branchManager.primary,
     marginLeft: 'auto',
   },
   timeText: {
     fontSize: 11,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral400,
     marginBottom: SPACING.xs,
+  },
+  riderRow: {
+    backgroundColor: COLORS.infoLight,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+    marginTop: 2,
+    marginBottom: SPACING.xs,
+  },
+  riderText: {
+    fontSize: 12,
+    color: COLORS.info,
+    fontWeight: '600',
+  },
+  missingRiderRow: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    borderWidth: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: RADIUS.xs,
+    marginTop: 2,
+    marginBottom: SPACING.xs,
+  },
+  missingRiderText: {
+    fontSize: 12,
+    color: '#D97706',
+    fontWeight: '700',
   },
   expandedContent: {
     marginTop: SPACING.xs,
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.branchManager.border,
+    backgroundColor: COLORS.neutral200,
     marginVertical: SPACING.xs,
   },
   sectionHeader: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.muted,
+    fontWeight: '700',
+    color: COLORS.neutral500,
     marginBottom: 4,
   },
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 2,
+    alignItems: 'center',
+    paddingVertical: 3,
   },
   itemQty: {
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: COLORS.branchManager.primary,
     width: 24,
   },
   itemName: {
     fontSize: 13,
-    color: COLORS.branchManager.text,
+    color: COLORS.dark,
     flex: 1,
   },
   itemPrice: {
     fontSize: 13,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral600,
+    fontWeight: '600',
   },
   addressContainer: {
     marginTop: SPACING.xs,
-    backgroundColor: '#F8FAFC',
-    padding: SPACING.xs,
+    backgroundColor: COLORS.neutral50,
+    padding: SPACING.xs + 2,
     borderRadius: RADIUS.xs,
+    borderWidth: 1,
+    borderColor: COLORS.neutral200,
   },
   addressLabel: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.muted,
+    fontWeight: '700',
+    color: COLORS.neutral500,
   },
   addressText: {
     fontSize: 12,
-    color: COLORS.branchManager.text,
+    color: COLORS.dark,
+    marginTop: 1,
   },
   notesContainer: {
     marginTop: SPACING.xs,
     backgroundColor: '#FFFBEB',
-    padding: SPACING.xs,
+    padding: SPACING.xs + 2,
     borderRadius: RADIUS.xs,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   notesLabel: {
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#D97706',
   },
   notesText: {
     fontSize: 12,
-    color: '#B45309',
-  },
-  riderContainer: {
-    marginTop: SPACING.xs,
-    backgroundColor: '#F0F9FF',
-    padding: SPACING.xs,
-    borderRadius: RADIUS.xs,
-  },
-  riderLabel: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#0284C7',
-  },
-  riderText: {
-    fontSize: 12,
-    color: '#0369A1',
+    color: '#92400E',
+    marginTop: 1,
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: SPACING.sm,
-    paddingTop: SPACING.xs,
+    paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: COLORS.branchManager.border,
+    borderTopColor: COLORS.neutral100,
+    gap: SPACING.sm,
   },
-  primaryButton: {
+  actionPrimaryBtn: {
     flex: 1,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.xs,
-    alignItems: 'center',
-    marginRight: SPACING.sm,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-  cancelTextButton: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.sm,
-  },
-  cancelButtonText: {
-    color: '#EF4444',
-    fontSize: 12,
-    fontWeight: '600',
+  actionCancelBtn: {
+    paddingHorizontal: 12,
   },
   emptyState: {
     alignItems: 'center',
@@ -839,44 +826,43 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    ...TYPOGRAPHY.h2,
+    color: COLORS.dark,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     textAlign: 'center',
     marginTop: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,
   },
   modalCard: {
     width: '100%',
-    backgroundColor: COLORS.branchManager.card,
-    borderRadius: RADIUS.lg,
+    maxWidth: 400,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.xl,
     padding: SPACING.lg,
     ...SHADOWS.large,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    ...TYPOGRAPHY.h2,
+    color: COLORS.dark,
   },
   modalSubtitle: {
     fontSize: 13,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
     marginBottom: SPACING.md,
   },
   emptyRiderBox: {
     padding: SPACING.md,
     backgroundColor: '#FFFBEB',
-    borderRadius: RADIUS.xs,
+    borderRadius: RADIUS.sm,
     marginBottom: SPACING.md,
     alignItems: 'center',
   },
@@ -888,28 +874,29 @@ const styles = StyleSheet.create({
   },
   rosterShortcutBtn: {
     marginTop: SPACING.sm,
-    backgroundColor: '#F97316',
+    backgroundColor: COLORS.branchManager.primary,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    borderRadius: RADIUS.xs,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: RADIUS.sm,
   },
   rosterShortcutText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   riderOption: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.sm,
-    borderRadius: RADIUS.xs,
-    borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1.5,
+    borderColor: COLORS.neutral200,
     marginBottom: 6,
+    backgroundColor: COLORS.card,
   },
   riderOptionSelected: {
-    borderColor: '#F97316',
-    backgroundColor: 'rgba(249, 115, 22, 0.08)',
+    borderColor: COLORS.branchManager.primary,
+    backgroundColor: COLORS.primaryTint,
   },
   radioDot: {
     fontSize: 16,
@@ -917,66 +904,52 @@ const styles = StyleSheet.create({
   },
   riderOptionName: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontWeight: '700',
+    color: COLORS.dark,
   },
   riderOptionSub: {
     fontSize: 11,
-    color: COLORS.branchManager.muted,
+    color: COLORS.neutral500,
   },
   riderOptionStatus: {
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   modalErrorContainer: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    padding: SPACING.xs,
-    borderRadius: RADIUS.xs,
+    backgroundColor: COLORS.dangerLight,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.sm,
     marginBottom: SPACING.sm,
   },
   modalErrorText: {
-    color: '#EF4444',
+    color: COLORS.danger,
     fontSize: 12,
+    fontWeight: '600',
   },
   modalLabel: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: COLORS.branchManager.text,
+    fontWeight: '700',
+    color: COLORS.dark,
     marginBottom: 4,
   },
   modalInput: {
-    backgroundColor: COLORS.branchManager.bg,
+    backgroundColor: COLORS.neutral50,
     borderWidth: 1,
-    borderColor: COLORS.branchManager.border,
-    borderRadius: RADIUS.xs,
+    borderColor: COLORS.neutral300,
+    borderRadius: RADIUS.sm,
     padding: SPACING.sm,
     fontSize: 14,
-    color: COLORS.branchManager.text,
+    color: COLORS.dark,
     textAlignVertical: 'top',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    gap: SPACING.sm,
     marginTop: SPACING.sm,
   },
-  modalCancelBtn: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    marginRight: SPACING.sm,
-  },
-  modalCancelBtnText: {
-    color: COLORS.branchManager.muted,
-    fontWeight: '600',
-  },
-  modalConfirmBtn: {
-    backgroundColor: '#EF4444',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.xs,
-  },
-  modalConfirmBtnText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+  modalBtn: {
+    flex: 1,
   },
 });
