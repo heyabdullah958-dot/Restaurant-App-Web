@@ -63,7 +63,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow GetFood to use your location to find nearby restaurants."
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "runtimeVersion": {
       "policy": "appVersion"
