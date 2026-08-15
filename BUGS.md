@@ -397,6 +397,28 @@
   - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
   - Metro bundler compiled and served Android JS bundle (`index.ts`, 1066 modules) with HTTP 200 OK.
 
+---
+
+### Bug #32 — Customer App Local Dev Host Trapping & Inactive Brand Exposure
+- **Discovered**: 2026-08-16
+- **Status**: Fixed
+- **Severity**: Critical (Customer App)
+- **Component**: `app/src/services/api.js`, `HomeScreen.tsx`, `SuperDashboardScreen.tsx`, `MenuManagementScreen.tsx`
+- **Symptom**:
+  1. Running the Customer App (`/app`) in development mode on mobile devices or emulators immediately failed with `"Network Error"` / `Unable to reach API server`.
+  2. The home screen and operational dashboards were not strictly filtered to the Phase 1 launch brands, risking exposure of draft/hidden brands (`seenbanao`, `dineatblue`, `sandmelts`, `birdmanfoodspk`).
+- **Root Cause**:
+  1. In `app/src/services/api.js`, `getLocalOrProductionBaseUrl()` inspected `__DEV__` and forced base URLs to `http://${ip}:8000/api` or `http://10.0.2.2:8000/api` (local Django backend), which was not running or accessible over LAN, causing all requests to fail instantly.
+  2. Super Admin screens and brand selectors defaulted to hidden brands (`seenbanao`) instead of active launch brands.
+- **Fix Applied**:
+  1. Refactored `app/src/services/api.js` to always default to the live 24/7 Heroku production server (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`), with support for custom server storage (`@getfood_custom_api_url`), error sanitization (`sanitizeErrorMessage`), safe storage fallbacks, and 25s timeout.
+  2. Created customer UI feedback primitives: `ErrorState.tsx` and `LoadingState.tsx` in `app/src/components/`.
+  3. Scoped `SuperDashboardScreen.tsx`, `MenuManagementScreen.tsx`, and `NotificationCenterScreen.tsx` to the 3 active launch brands (**Jushh PK**, **Tandoori Stop**, **GetAFomo**).
+- **Verification Evidence**:
+  - `npx tsc --noEmit` passed with 0 errors across both `app` and `admin-app`.
+  - Android JS bundles compiled and served with HTTP 200 OK on port 8081 (`admin-app`) and port 8082 (`app`).
+
+
 
 
 

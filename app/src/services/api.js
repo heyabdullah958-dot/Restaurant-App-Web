@@ -1,58 +1,127 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Base URL — always use production Heroku backend.
-// NOTE: process.env.EXPO_PUBLIC_API_URL only loads correctly when running via QR code scan (Metro bundler).
-// When running Expo Go without QR (direct local), env vars don't inject — so we hardcode the production URL here.
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 export const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+export const CUSTOM_API_STORAGE_KEY = '@getfood_custom_api_url';
 
-const getLocalOrProductionBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+export const detectLocalLanUrl = () => {
+  const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || Constants?.experienceUrl;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+      return `http://${ip}:8000/api`;
+    }
   }
-
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const host = window.location.hostname;
-    return `http://${host}:8000/api`;
-  }
-
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || Constants?.experienceUrl;
-    if (hostUri) {
-      const ip = hostUri.split(':')[0];
-      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
-        return `http://${ip}:8000/api`;
-      }
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return `http://${host}:8000/api`;
     }
-
-    if (Platform.OS === 'android') {
-      return 'http://10.0.2.2:8000/api';
-    }
-
-    return 'http://127.0.0.1:8000/api';
   }
-
-  return PRODUCTION_API_URL;
+  return Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
 };
-export const API_BASE_URL = getLocalOrProductionBaseUrl();
 
+// Internal active URL state — ALWAYS default to 24/7 production server
+let activeBaseUrl = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+
+export const getActiveBaseUrl = () => activeBaseUrl;
+
+export const normalizeApiUrl = (url) => {
+  let cleaned = (url || '').trim();
+  if (!cleaned) return PRODUCTION_API_URL;
+  cleaned = cleaned.replace(/\/+$/, '');
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    cleaned = `https://${cleaned}`;
+  }
+  if (!cleaned.endsWith('/api')) {
+    cleaned = `${cleaned}/api`;
+  }
+  return cleaned;
+};
+
+export const API_BASE_URL = activeBaseUrl;
+
+// ─── Axios Setup ─────────────────────────────────────────────────────────────
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: activeBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 90000, // 90 seconds to allow Render cold-starts (45-60s) to complete
+  timeout: 25000,
 });
+
+// ─── Safe Storage Adapter ───────────────────────────────────────────────────
+const memoryStorage = new Map();
+
+export const safeGetItem = async (key) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const val = window.localStorage.getItem(key);
+      if (val !== null) return val;
+    }
+  } catch (e) {}
+  try {
+    const val = await AsyncStorage.getItem(key);
+    if (val !== null) return val;
+  } catch (e) {}
+  return memoryStorage.get(key) || null;
+};
+
+export const safeSetItem = async (key, value) => {
+  memoryStorage.set(key, value);
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, value);
+    }
+  } catch (e) {}
+  try {
+    await AsyncStorage.setItem(key, value);
+  } catch (e) {}
+};
+
+export const safeRemoveItem = async (key) => {
+  memoryStorage.delete(key);
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(key);
+    }
+  } catch (e) {}
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (e) {}
+};
+
+// Initialize custom URL from storage if previously saved
+safeGetItem(CUSTOM_API_STORAGE_KEY).then((savedUrl) => {
+  if (savedUrl) {
+    const normalized = normalizeApiUrl(savedUrl);
+    activeBaseUrl = normalized;
+    api.defaults.baseURL = normalized;
+  }
+});
+
+export const setApiBaseUrl = async (newUrl) => {
+  const normalized = normalizeApiUrl(newUrl);
+  activeBaseUrl = normalized;
+  api.defaults.baseURL = normalized;
+  await safeSetItem(CUSTOM_API_STORAGE_KEY, normalized);
+  return normalized;
+};
+
+export const resetApiBaseUrl = async () => {
+  activeBaseUrl = PRODUCTION_API_URL;
+  api.defaults.baseURL = PRODUCTION_API_URL;
+  await safeRemoveItem(CUSTOM_API_STORAGE_KEY);
+  return PRODUCTION_API_URL;
+};
 
 export const isPublicUrl = (url, method = 'get') => {
   if (!url) return false;
   const lowerUrl = url.toLowerCase();
   const lowerMethod = (method || 'get').toLowerCase();
 
-  // Review submission and branch availability management require authentication context
   if (lowerUrl.includes('/reviews') && lowerMethod === 'post') return false;
   if (lowerUrl.includes('/branch-item-availability')) return false;
 
@@ -72,48 +141,44 @@ export const isPublicUrl = (url, method = 'get') => {
     '/platform-settings',
   ];
 
-  // For GET requests to catalog endpoints, consider it public
   if (lowerMethod === 'get') {
-    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu');
+    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu', '/track');
   }
 
-  return publicPatterns.some(pattern => lowerUrl.includes(pattern));
+  return publicPatterns.some((pattern) => lowerUrl.includes(pattern));
 };
 
 // Request interceptor to attach JWT auth token
 api.interceptors.request.use(
   async (config) => {
-    // Do not attach token for public auth/search endpoints to avoid 401/403 on login/refresh with expired tokens
+    config.baseURL = activeBaseUrl;
+
     if (isPublicUrl(config.url, config.method)) {
-      // NOTE: Only delete from request-specific config.headers! NEVER mutate api.defaults.headers.common globally!
       delete config.headers['Authorization'];
       delete config.headers['authorization'];
     } else {
-      // Check if global default header exists first for fast synchronous resolution
       const defaultAuth = api.defaults.headers.common['Authorization'];
       if (defaultAuth && typeof defaultAuth === 'string') {
         config.headers['Authorization'] = defaultAuth;
       } else if (!config.headers['Authorization']) {
         try {
-          const token = await AsyncStorage.getItem('auth_token');
+          const token = await safeGetItem('auth_token');
           if (token) {
             const bearer = `Bearer ${token}`;
             config.headers['Authorization'] = bearer;
             api.defaults.headers.common['Authorization'] = bearer;
           }
         } catch (err) {
-          if (__DEV__) console.error('Error fetching token from AsyncStorage:', err);
+          if (__DEV__) console.log('Error reading auth_token:', err);
         }
       }
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Store reference to dispatch actions (e.g., logout on 401/403) without circular imports
+// Store reference for Redux dispatch without circular imports
 let storeInstance = null;
 
 export const setupInterceptors = (store) => {
@@ -134,42 +199,91 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Response interceptor to unwrap data and handle 401/403 & Network Errors / Cold Starts globally
+export const sanitizeErrorMessage = (error, baseUrl = activeBaseUrl) => {
+  if (!error) return 'An unexpected error occurred. Please try again.';
+
+  const isNetwork =
+    error.code === 'ERR_NETWORK' ||
+    error.code === 'ECONNABORTED' ||
+    error.code === 'ECONNREFUSED' ||
+    error.code === 'ENOTFOUND' ||
+    error.message?.includes('Network Error') ||
+    error.message?.includes('timeout') ||
+    error.message?.includes('Network request failed');
+
+  if (isNetwork) {
+    return 'Unable to reach backend server. Please check your internet connection and try again.';
+  }
+
+  if (error.response) {
+    const status = error.response.status;
+    const data = error.response.data;
+
+    if (typeof data === 'string') {
+      if (data.includes('<html') || data.trim().startsWith('<!')) {
+        if (status === 502 || status === 503 || status === 504) {
+          return 'Server is temporarily unavailable. Please try again in a few moments.';
+        }
+        if (status === 404) return 'Requested item or order was not found.';
+        return `Server returned HTTP ${status}. Please try again later.`;
+      }
+      return data;
+    }
+
+    if (data && typeof data === 'object') {
+      if (data.detail) return String(data.detail);
+      if (data.error) return String(data.error);
+      if (data.message) return String(data.message);
+      if (data.non_field_errors) {
+        return Array.isArray(data.non_field_errors)
+          ? data.non_field_errors.join('\n')
+          : String(data.non_field_errors);
+      }
+      const firstKey = Object.keys(data)[0];
+      if (firstKey && data[firstKey]) {
+        const val = data[firstKey];
+        return `${firstKey}: ${Array.isArray(val) ? val.join(', ') : val}`;
+      }
+    }
+  }
+
+  return error.message || 'Request failed. Please try again.';
+};
+
+// Response interceptor
 api.interceptors.response.use(
   (response) => response.data || response,
   async (error) => {
     const originalRequest = error.config || {};
     const requestUrl = originalRequest.url || '';
 
-    // Infer status code from error.response or error.message
+    // Attach userFriendlyMessage on every rejected promise
+    error.userFriendlyMessage = sanitizeErrorMessage(error, activeBaseUrl);
+
     let status = error.response ? error.response.status : null;
     if (!status && error?.message) {
       if (error.message.includes('403')) status = 403;
       else if (error.message.includes('401')) status = 401;
     }
 
-    // If request was to a public endpoint, pass error through without triggering auto-refresh / session expiry loops
     if (isPublicUrl(requestUrl)) {
       return Promise.reject(error);
     }
 
-    // 1. Auto-retry on Network Error / Timeout (e.g. Render/Heroku cold start)
-    if (!error.response && !status && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
+    // 1. Auto-retry on transient Network Error / Timeout (1 retry)
+    if (!error.response && !status && (!originalRequest._retryCount || originalRequest._retryCount < 1)) {
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
-      if (__DEV__) console.log(`[API Interceptor] Retrying request (attempt ${originalRequest._retryCount}) for ${requestUrl}...`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       return api(originalRequest);
     }
 
-    // 2. Handle 401 Unauthorized & 403 Forbidden globally for protected requests
+    // 2. Handle 401 Unauthorized globally for authenticated users
     if ((status === 401 || status === 403) && !originalRequest._retry) {
       const state = storeInstance?.getState()?.user;
       const isGuestUser = state?.user?.is_guest;
       const isAuthenticated = state?.isAuthenticated;
 
-      // If user is guest or not authenticated, don't trigger sessionExpired dispatch
       if (isGuestUser || !isAuthenticated) {
-        if (__DEV__) console.log('[API Interceptor] 401/403 encountered for guest/unauthenticated user — skipping sessionExpired dispatch');
         return Promise.reject(error);
       }
 
@@ -181,33 +295,29 @@ api.interceptors.response.use(
             originalRequest.headers['Authorization'] = `Bearer ${token}`;
             return api(originalRequest);
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const refreshToken = await AsyncStorage.getItem('refresh_token');
+        const refreshToken = await safeGetItem('refresh_token');
         if (refreshToken) {
-          const refreshUrl = `${API_BASE_URL}/auth/refresh/`;
-          // Standalone axios call without default headers for token refresh
-          const response = await axios.post(refreshUrl, { refresh: refreshToken }, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
+          const refreshUrl = `${activeBaseUrl}/auth/refresh/`;
+          const response = await axios.post(
+            refreshUrl,
+            { refresh: refreshToken },
+            { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
+          );
+
           const newAccessToken = response.data?.access || response.data?.data?.access;
-          // BUG FIX: Save rotated refresh token too. ROTATE_REFRESH_TOKENS=True on backend means
-          // every successful refresh issues a NEW refresh token and blacklists the old one.
-          // If we only save the new access token, the next 401 retry will send the now-blacklisted
-          // old refresh token → 401 again → sessionExpired loop → orders wiped infinitely.
           const newRefreshToken = response.data?.refresh || response.data?.data?.refresh;
+
           if (newAccessToken) {
-            await AsyncStorage.setItem('auth_token', newAccessToken);
+            await safeSetItem('auth_token', newAccessToken);
             if (newRefreshToken) {
-              await AsyncStorage.setItem('refresh_token', newRefreshToken);
+              await safeSetItem('refresh_token', newRefreshToken);
             }
             api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -215,62 +325,27 @@ api.interceptors.response.use(
             isRefreshing = false;
             return api(originalRequest);
           }
-
         }
       } catch (refreshError) {
-        if (__DEV__) console.log('[API Interceptor] Token refresh failed — session expired:', refreshError?.response?.data || refreshError?.message);
         processQueue(refreshError, null);
       } finally {
         isRefreshing = false;
       }
 
-      if (__DEV__) console.log('[API Interceptor] Unauthorized/Forbidden request — session expired. Purging tokens and resetting state...');
+      // If refresh failed, purge tokens and dispatch sessionExpired
       delete api.defaults.headers.common['Authorization'];
       try {
-        await AsyncStorage.multiRemove(['auth_token', 'refresh_token']);
-      } catch (e) {
-        if (__DEV__) console.log('Error clearing tokens:', e);
-      }
+        await safeRemoveItem('auth_token');
+        await safeRemoveItem('refresh_token');
+      } catch (e) {}
 
       if (storeInstance) {
         storeInstance.dispatch({ type: 'user/sessionExpired' });
       }
     }
 
-    // Sanitize non-JSON raw HTML error responses (e.g. 404/500 server HTML pages)
-    if (error.response && error.response.data && typeof error.response.data === 'string') {
-      const isHtml = error.response.data.includes('<html') ||
-                     error.response.data.trim().startsWith('<!') ||
-                     (error.response.headers && String(error.response.headers['content-type']).includes('text/html'));
-      if (isHtml) {
-        const cleanMsg = status === 404
-          ? 'Requested resource or order was not found.'
-          : 'Server encountered an error. Please try again later.';
-        error.response.data = { message: cleanMsg, detail: cleanMsg };
-      }
-    }
-
-    // Sanitize DRF non_field_errors & field error dictionary objects into clean readable messages
-    if (error.response && error.response.data && typeof error.response.data === 'object') {
-      const data = error.response.data;
-      if (data.non_field_errors) {
-        const cleanMsg = Array.isArray(data.non_field_errors) ? data.non_field_errors.join('\n') : String(data.non_field_errors);
-        error.response.data.message = cleanMsg;
-        error.response.data.detail = cleanMsg;
-      }
-    }
-
-    if (error.response && status !== 401 && status !== 403) {
-      if (__DEV__) console.log('API Error Response:', error.response.status, error.response.data);
-    } else if (error.request) {
-      if (__DEV__) console.log('API No Response (Backend waking up or offline):', error.message || 'Network timeout');
-    } else {
-      if (__DEV__) console.log('API Request Setup Error:', error.message);
-    }
     return Promise.reject(error);
   }
 );
 
 export default api;
-
-

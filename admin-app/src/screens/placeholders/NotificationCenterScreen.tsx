@@ -25,10 +25,12 @@ export const NotificationCenterScreen = () => {
     { id: string; title: string; body: string; target: string; time: string }[]
   >([]);
 
+  const LAUNCH_BRAND_SLUGS = ['jushhpk', 'tandooristoppk', 'getafomo'];
+
   useEffect(() => {
     fetchRestaurants().then((res) => {
       const list = Array.isArray(res) ? res : res?.results || [];
-      setRestaurants(list);
+      setRestaurants(list.filter((r: any) => !r.slug || LAUNCH_BRAND_SLUGS.includes(r.slug.toLowerCase())));
     });
   }, []);
 

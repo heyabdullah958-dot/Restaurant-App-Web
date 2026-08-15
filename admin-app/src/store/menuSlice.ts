@@ -24,7 +24,7 @@ export interface MenuState {
 const initialState: MenuState = {
   categories: [],
   selectedBrandId: null,
-  selectedBrandSlug: 'seenbanao',
+  selectedBrandSlug: 'jushhpk',
   isLoading: false,
   isRefreshing: false,
   error: null,

@@ -35,12 +35,8 @@ import { MenuCategoryData, MenuItemData, getFullImageUrl } from '../../services/
 import { LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 const BRAND_LIST = [
-  { id: 1, name: 'Seen Banao', slug: 'seenbanao', icon: '🍖' },
-  { id: 2, name: 'Dine At Blue', slug: 'dineatblue', icon: '🐟' },
   { id: 3, name: 'Jushh PK', slug: 'jushhpk', icon: '🍔' },
   { id: 4, name: 'Tandoori Stop', slug: 'tandooristoppk', icon: '🫓' },
-  { id: 5, name: 'Sand Melts', slug: 'sandmelts', icon: '🥪' },
-  { id: 6, name: 'Birdman Foods', slug: 'birdmanfoodspk', icon: '🍗' },
   { id: 7, name: 'Get A Fomo', slug: 'getafomo', icon: '☕' },
 ];
 
@@ -172,7 +168,7 @@ export const MenuManagementScreen = () => {
     ? selectedBrandSlug
     : restaurantId
     ? String(restaurantId)
-    : 'seenbanao';
+    : 'jushhpk';
 
   useEffect(() => {
     dispatch(fetchMenuThunk({ restaurantSlugOrId: activeSlug, branchId: branchId ?? undefined }));

@@ -175,6 +175,17 @@
   3. **Stale Concurrency Protection**: In high-velocity ordering environments, multiple managers or automated systems may accept or cancel an order concurrently. Alert overlays and order lists must auto-eject stale orders gracefully without leaving the operator stranded.
 - **Applies to**: `admin-app/src/components/ui/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx`, `NewOrderAlertOverlay.tsx`, all screen views.
 
+---
+
+## Lesson 20 — Development Base URL Trapping & Brand Scoping Invariants — 2026-08-16
+- **Pattern**: Dual-app deployment where backend runs in the cloud (Heroku) while mobile apps run in local development bundlers (`expo start`).
+- **Wrong assumption made**: Assuming that `if (__DEV__) return 'http://' + ip + ':8000/api'` is a helpful dev convenience. When the local machine is not running a local Django backend, mobile devices automatically fail with fatal "Network Error" on every network call.
+- **What actually mattered**: 
+  1. **Production-First Default**: Mobile apps must ALWAYS default to the live 24/7 cloud backend URL (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) across both `__DEV__` and production modes. Custom development URLs should be opt-in via AsyncStorage (`@getfood_custom_api_url`) or explicit environment injection.
+  2. **Launch Brand Scoping**: In multi-tenant systems launching in phases, active brand filtering must be enforced at both the UI presentation layer (filtering out `is_active: false` brands) and the Super Admin analytics layer so that draft tenants do not pollute live operational statistics.
+- **Applies to**: `app/src/services/api.js`, `app/src/screens/HomeScreen.tsx`, `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`, `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`.
+
+
 
 
 

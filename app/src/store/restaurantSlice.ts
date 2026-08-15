@@ -17,7 +17,7 @@ export const fetchRestaurants = createAsyncThunk(
       const response = await api.get(url);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch restaurants');
+      return rejectWithValue(error.userFriendlyMessage || error.response?.data?.message || error.response?.data?.detail || error.message || 'Failed to fetch restaurants');
     }
   }
 );
@@ -29,7 +29,7 @@ export const fetchRestaurantDetail = createAsyncThunk(
       const response = await api.get(`/restaurants/${slug}/`);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch restaurant details');
+      return rejectWithValue(error.userFriendlyMessage || error.response?.data?.message || error.response?.data?.detail || error.message || 'Failed to fetch restaurant details');
     }
   }
 );
@@ -74,7 +74,7 @@ const restaurantSlice = createSlice({
             list = list.results;
           }
         }
-        const parsed = Array.isArray(list) ? list.filter((r: any) => r && r.slug) : [];
+        const parsed = Array.isArray(list) ? list.filter((r: any) => r && r.slug && r.is_active !== false) : [];
         if (parsed.length > 0) {
           state.restaurants = parsed;
         }

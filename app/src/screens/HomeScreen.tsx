@@ -29,6 +29,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
 import NotificationModal from '../components/NotificationModal';
+import ErrorState from '../components/ErrorState';
 import api from '../services/api';
 import {
   loadInAppNotifications,
@@ -381,8 +382,7 @@ const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand:
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
-  const restaurants = useSelector((state: RootState) => state.restaurant.restaurants);
-  const loading = useSelector((state: RootState) => state.restaurant.loading);
+  const { restaurants, loading, error } = useSelector((state: RootState) => state.restaurant);
   const fulfillmentMode = useSelector((state: RootState) => state.cart.fulfillmentMode || 'DELIVERY');
   const insets = useSafeAreaInsets();
 
@@ -718,6 +718,16 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
 
   const ListEmpty = React.useMemo(() => {
+    if (error && (!restaurants || restaurants.length === 0)) {
+      return (
+        <ErrorState
+          title="Unable to Load Restaurants"
+          message={error}
+          onRetry={() => dispatch(fetchRestaurants() as any)}
+          retryLabel="Retry Feed"
+        />
+      );
+    }
     if ((loading || isTabSwitching) || filteredRestaurants.length === 0) {
       if (loading || isTabSwitching) {
         return (
@@ -750,7 +760,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         )}
       </View>
     );
-  }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory]);
+  }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory, error, restaurants, dispatch]);
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>

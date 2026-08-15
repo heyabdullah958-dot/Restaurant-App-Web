@@ -30,9 +30,14 @@ export const SuperDashboardScreen = () => {
     dispatch(fetchAnalyticsThunk({ isRefresh: true }));
   };
 
+  const LAUNCH_BRAND_SLUGS = ['jushhpk', 'tandooristoppk', 'getafomo'];
+
   const summary = data?.summary;
   const dailyTrend = data?.daily_trend || [];
-  const restaurantBreakdown = data?.restaurant_breakdown || [];
+  const rawRestaurantBreakdown = data?.restaurant_breakdown || [];
+  const restaurantBreakdown = rawRestaurantBreakdown.filter(
+    (r) => !r.slug || LAUNCH_BRAND_SLUGS.includes(r.slug.toLowerCase())
+  );
   const statusBreakdown = data?.status_breakdown || {};
 
   // Maximum revenue for trend scaling (with minimum scale of 1000)

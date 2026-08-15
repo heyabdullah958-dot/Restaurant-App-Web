@@ -1,6 +1,23 @@
 
 # Changelog
 
+## 2026-08-16 Phase 10 — 3-Brand Launch Scoping & Customer App Network Resilience
+- **3-Brand Launch Scoping**:
+  - Enforced strict Phase 1 brand visibility scoping across customer interfaces and Super Admin HQ operational statistics.
+  - **3 Active Launch Brands**: Jushh PK (`jushhpk`), Tandoori Stop (`tandooristoppk`), and GetAFomo (`getafomo`).
+  - **4 Hidden Phase 1 Brands**: Seen Banao (`seenbanao`), Dine At Blue (`dineatblue`), Sand Melts (`sandmelts`), and Birdman Foods (`birdmanfoodspk`) set to `is_active: false` and filtered out from the customer feed, category chips, and platform analytics rankings.
+  - Scoped `SuperDashboardScreen.tsx`, `MenuManagementScreen.tsx`, and `NotificationCenterScreen.tsx` brand pickers and analytics breakdowns.
+- **Customer App Network Resilience & Error Elimination (`app/src/services/api.js`)**:
+  - Eliminated the local dev host trapping that caused fatal `"Network Error"` / `Unable to reach API server` when running the app in development.
+  - Defaulted all HTTP networking directly to the live 24/7 Heroku production backend (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`).
+  - Implemented `sanitizeErrorMessage` providing humanized error messages and attached `error.userFriendlyMessage` to all rejected Axios promises.
+  - Integrated safe multi-tier storage fallback (`safeGetItem`, `safeSetItem`, `safeRemoveItem`) and token refresh queue interceptor with `ROTATE_REFRESH_TOKENS` support.
+  - Created reusable customer UI primitives: `ErrorState.tsx` (with "Try Again" retry action) and `LoadingState.tsx` in `app/src/components/`.
+  - Upgraded `HomeScreen.tsx` and `restaurantSlice.ts` to surface error and retry states gracefully.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` passed with 0 errors across both `app` and `admin-app`.
+  - Android JS bundles compiled and served with HTTP 200 OK on port 8081 (`admin-app`) and port 8082 (`app`).
+
 ## 2026-08-13 Phase 1 — Fix WELCOME1 Active Promo Validation & Production Deploy Chain Verification
 - **Stuck-Loop Deploy Chain Audit**: Identified uncommitted local git changes (`backend/promotions/serializers.py`, migration `promotions.0005`) that were never pushed to `origin/main` or deployed to Heroku (`git subtree push --prefix backend heroku main`), causing live Heroku API to reject brand slug strings (`"getafomo"`) with HTTP 400.
 - **Production PostgreSQL Database Seeding**: Executed `seed_welcome1_heroku.py` against live Heroku API to seed active `WELCOME1` promo code (15% OFF, GetAFomo brand, N/A expiry `valid_to=None`).
