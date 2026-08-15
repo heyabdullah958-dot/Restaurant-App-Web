@@ -115,6 +115,17 @@
   3. ALWAYS run live endpoint probes (`urllib.request` / `curl` against `https://getfoodpk-fd9b20442fcf.herokuapp.com/api/...`) to inspect exact production HTTP status codes and error bodies before concluding that application code is broken.
 - **Applies to**: `backend/promotions/serializers.py`, `backend/orders/views.py`, `seed_heroku_coupons.py`, Heroku production deployment workflow.
 
+---
+
+## Lesson 15 — Physical Device Expo Go API Base URL Resolution & Network Error Resilience — 2026-08-15
+- **Pattern**: Running mobile applications (React Native / Expo) on physical test devices via Expo Go LAN mode (`exp://192.168.x.x:8081`).
+- **Wrong assumption made**: Assuming that because `Constants.expoConfig.hostUri` contains a LAN IP (`192.168.100.202`), the mobile app should automatically default to sending API traffic to `http://192.168.100.202:8000/api`.
+- **What actually mattered**: 
+  1. If local backend servers (Django on port 8000) are not running on the development machine, mobile devices hitting port 8000 fail immediately with `ECONNREFUSED` / "Network Error".
+  2. Mobile apps must default to the production cloud backend (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) while providing an interactive **Server Configuration & Connection Probe Modal** (`ServerConfigModal.tsx`) so developers and staff can switch to local LAN/emulator servers on-the-fly with 1-tap presets and real-time ping testing.
+  3. Never leak raw Axios error strings (`ERR_NETWORK`, `ECONNABORTED`) to user interface error banners. Always sanitize errors through a centralized error parser (`sanitizeErrorMessage`) that explains the exact reason and offers recovery actions (e.g. "⚙️ Configure API Server").
+- **Applies to**: `admin-app/src/services/api.ts`, `admin-app/src/screens/LoginScreen.tsx`, `admin-app/src/components/ServerConfigModal.tsx`, `app/src/services/api.js`.
+
 
 
 

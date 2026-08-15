@@ -15,7 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../theme';
 import { useAppDispatch, useAppSelector } from '../store';
 import { loginStaffThunk, clearAuthError } from '../store/authSlice';
-import { changeOwnPassword } from '../services/api';
+import { changeOwnPassword, getActiveBaseUrl } from '../services/api';
+import { ServerConfigModal } from '../components/ServerConfigModal';
 
 export const LoginScreen = () => {
   const dispatch = useAppDispatch();
@@ -23,6 +24,8 @@ export const LoginScreen = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showServerModal, setShowServerModal] = useState(false);
+  const [activeServer, setActiveServer] = useState<string>(getActiveBaseUrl());
 
   // Password change state for first-time login
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -69,12 +72,32 @@ export const LoginScreen = () => {
     }
   };
 
+  const isNetworkError = error && (
+    error.toLowerCase().includes('unable to reach') ||
+    error.toLowerCase().includes('network') ||
+    error.toLowerCase().includes('timed out') ||
+    error.toLowerCase().includes('offline')
+  );
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar barStyle="light-content" backgroundColor={COLORS.superAdmin.bg} />
+
+      {/* Top Bar with Server Config Button */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => setShowServerModal(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+          <Text style={styles.settingsText}>Server</Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -99,6 +122,15 @@ export const LoginScreen = () => {
             {error ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
+                {isNetworkError ? (
+                  <TouchableOpacity
+                    style={styles.errorActionButton}
+                    onPress={() => setShowServerModal(true)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.errorActionText}>⚙️ Configure API Server</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
             ) : null}
 
@@ -138,6 +170,18 @@ export const LoginScreen = () => {
               ) : (
                 <Text style={styles.buttonText}>Sign In</Text>
               )}
+            </TouchableOpacity>
+
+            {/* Current Server Indicator */}
+            <TouchableOpacity
+              style={styles.serverIndicator}
+              onPress={() => setShowServerModal(true)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.serverDot} />
+              <Text style={styles.serverIndicatorText} numberOfLines={1}>
+                API: {activeServer.replace('https://', '').replace('http://', '')}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -192,6 +236,16 @@ export const LoginScreen = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* Interactive Server Configuration Modal */}
+      <ServerConfigModal
+        visible={showServerModal}
+        onClose={() => setShowServerModal(false)}
+        onServerChanged={(newUrl) => {
+          setActiveServer(newUrl);
+          dispatch(clearAuthError());
+        }}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -298,5 +352,63 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  topBar: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    right: SPACING.md,
+    zIndex: 10,
+  },
+  settingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.superAdmin.card,
+    borderColor: COLORS.superAdmin.border,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.sm + 4,
+    paddingVertical: SPACING.xs + 2,
+    borderRadius: RADIUS.round,
+    ...SHADOWS.small,
+  },
+  settingsIcon: {
+    fontSize: 13,
+    marginRight: 4,
+  },
+  settingsText: {
+    color: COLORS.superAdmin.text,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  errorActionButton: {
+    marginTop: SPACING.xs + 2,
+    backgroundColor: 'rgba(255, 71, 87, 0.25)',
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.xs,
+    alignSelf: 'flex-start',
+  },
+  errorActionText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  serverIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  serverDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.success,
+    marginRight: 6,
+  },
+  serverIndicatorText: {
+    color: COLORS.neutral400,
+    fontSize: 11,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

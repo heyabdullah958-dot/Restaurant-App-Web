@@ -272,10 +272,23 @@
   2. Updated `seed_heroku_coupons.py` and executed `seed_welcome1_on_heroku` to seed active `WELCOME1` coupon (15% OFF, GetAFomo, N/A expiry date `valid_to=None`).
   3. Committed changes to git `main` (`f387999`) and executed `git push origin main`.
   4. Deployed backend subtree to Heroku (`git subtree push --prefix backend heroku main`). Migration `promotions.0005` applied cleanly on Heroku.
+### Bug #27: GetFood Manager App "Network Error" on Sign In & Missing Resilience Layer (Resolved 2026-08-15)
+- **Symptom**: Signing into the GetFood Manager mobile app on a physical Android device via Expo Go fails with a red "Network Error" alert.
+- **Root Cause**:
+  1. `admin-app/src/services/api.ts` used `hostUri` from `Constants.expoConfig` (`192.168.100.202:8081`) and unconditionally computed `http://192.168.100.202:8000/api` when `__DEV__` was true, assuming a local Django server was running on port 8000 on the host PC. Because Django was only running on Heroku production (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`), device requests failed with `ECONNREFUSED`.
+  2. The mobile app lacked dynamic endpoint switching and live server connection probing.
+  3. Raw Axios errors (`ERR_NETWORK`, `ECONNABORTED`) were passed directly to UI states without human-friendly messaging or automatic idempotent retries.
+  4. `admin-app/app.json` lacked explicit Android internet permissions and `usesCleartextTraffic` config.
+- **Fix Applied**:
+  1. Updated `admin-app/src/services/api.ts` to default to `PRODUCTION_API_URL` (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`), allow persistent custom endpoints via `AsyncStorage` (`@admin_custom_api_url`), and provide `testApiConnectivity` for real-time latency probing.
+  2. Added centralized error sanitizer (`sanitizeErrorMessage`) transforming raw network/timeout/502/503/504 errors into clear, actionable advice.
+  3. Added single-retry mechanism on transient network drops for idempotent GET requests.
+  4. Built `ServerConfigModal.tsx` and integrated a top-right Settings Gear Icon and active server indicator in `LoginScreen.tsx`.
+  5. Configured `usesCleartextTraffic: true` and internet permissions in `admin-app/app.json`.
 - **Verification Evidence**:
-  - Live Heroku API `POST /api/coupons/validate/` returns `200 OK` with valid discount `Rs. 150.00` calculated for both brand slug `"getafomo"` and integer restaurant ID `7`.
-  - Brand scope mismatch (`seenbanao`) returns clean granular feedback: `{"success":false,"message":"Promo code 'WELCOME1' is only valid for GetAFomo."}`.
-  - Automated test suite `test_welcome1_null_expiry_suite.py` passed 100%.
+  - `npx tsc --noEmit` passed with 0 errors.
+  - Metro Bundler built Android bundle with HTTP 200 OK.
+  - Executed `test_api_resilience_suite.py` — verified Heroku production 200 OK (1302ms), auth validation 401/400 handling, and valid super-admin JWT token receipt.
 
 
 

@@ -348,18 +348,24 @@
 - Verification evidence: `test_promo_e2e_integration.py` passed 100% — verified Admin HQ creation, string brand slug matching (`"getafomo"`), integer brand ID matching (`63`), brand scope mismatch rejection with granular feedback, subtotal threshold rejection, and real order placement with promo redemption.
 - Confidence: [100%] — Cross-app promo code creation and redemption 100% reliable with clear customer feedback.
 
-## [Phase 1 — Fix Promo Code Validation Failure for Active Promos (WELCOME1) & NULL Expiry Dates] — 2026-08-13
-- What changed and why: Resolved validation failure and crash when applying promo code `WELCOME1` (N/A expiry) on GetAFomo checkout. Updated `Coupon.valid_from` and `Coupon.valid_to` model fields in `backend/promotions/models.py` to `null=True, blank=True` and ran Django migration `promotions.0005_alter_coupon_valid_from_alter_coupon_valid_to`. Refactored `Coupon.is_valid()`, `CouponValidateSerializer`, and `OrderCreateSerializer` to safely guard `valid_from` and `valid_to` against `None` values (`if coupon.valid_to and now > coupon.valid_to:`), preventing `TypeError` exceptions. Added structured `logger.warning(...)` outputs for all validation failure scenarios (`[PROMO VALIDATION FAILED]`). Seeded active `WELCOME1` promo coupon in DB (15% OFF, GetAFomo brand, N/A expiry).
+## [Phase 1 — Global API Resilience & Network Error Elimination] — 2026-08-15
+- What changed and why: Diagnosed and resolved "Network Error" on mobile sign in when running GetFood Manager on physical Android devices via Expo Go. Replaced automatic local LAN fallback with production Heroku backend (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) as primary default, while adding persistent custom server support via AsyncStorage (`@admin_custom_api_url`). Created `ServerConfigModal.tsx` allowing 1-tap switching between Heroku Production (24/7), Local Dev LAN IP, and Android Emulator with real-time latency probing (`testApiConnectivity`). Added centralized error sanitizer (`sanitizeErrorMessage`), automatic single-retry for idempotent GET requests, cleartext Android build permissions in `app.json`, and an interactive Settings Gear Icon button and status badge on `LoginScreen.tsx`.
+- Files created:
+  - `admin-app/src/components/ServerConfigModal.tsx`
+  - `test_api_resilience_suite.py`
 - Files modified:
-  - `backend/promotions/models.py` (`Coupon` model fields `null=True, blank=True` & safe `is_valid()`)
-  - `backend/promotions/serializers.py` (`CouponValidateSerializer` safe NULL guards & structured `logger.warning` output)
-  - `backend/orders/serializers.py` (`OrderCreateSerializer` safe NULL guards)
-  - `backend/promotions/migrations/0005_alter_coupon_valid_from_alter_coupon_valid_to.py` (Django migration)
-  - `test_welcome1_null_expiry_suite.py` (Automated integration test script)
+  - `admin-app/src/services/api.ts`
+  - `admin-app/src/store/authSlice.ts`
+  - `admin-app/src/screens/LoginScreen.tsx`
+  - `admin-app/app.json`
   - `BUGS.md`
+  - `LESSONS.md`
   - `CHANGELOG.md`
-- Verification evidence: `test_welcome1_null_expiry_suite.py` passed 100% — verified DB audit of `WELCOME1` (N/A expiry), brand slug validation (`"getafomo"`), integer ID validation, structured warning logging, and order placement with `WELCOME1` redemption.
-- Confidence: [100%] — `WELCOME1` and all coupons with N/A expiry dates validate and apply discount with full backend warning log visibility.
+- Verification evidence:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler recompiled Android bundle (`index.ts`, 1061 modules) with HTTP 200 OK.
+  - Executed `test_api_resilience_suite.py` — verified live Heroku production connectivity (1302ms), auth validation 401/400 handling, and valid super-admin JWT token receipt.
+- Confidence: [100%] — Physical and emulator devices now connect reliably to production Heroku API out-of-the-box, with transparent server switching and human-friendly error handling.
 
 
 

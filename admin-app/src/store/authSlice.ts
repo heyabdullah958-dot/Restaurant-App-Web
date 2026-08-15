@@ -11,6 +11,7 @@ import {
   decodeToken,
   JWTPayload,
   setSessionExpiredHandler,
+  sanitizeErrorMessage,
 } from '../services/api';
 
 export interface StaffUser {
@@ -100,7 +101,7 @@ export const loginStaffThunk = createAsyncThunk(
         branchId: decoded.branch_id ?? null,
       };
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.response?.data?.message || err?.message || 'Login failed';
+      const msg = sanitizeErrorMessage(err);
       return rejectWithValue(msg);
     }
   }

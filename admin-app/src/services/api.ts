@@ -6,36 +6,79 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 export const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/api';
+export const CUSTOM_API_STORAGE_KEY = '@admin_custom_api_url';
 
-const getLocalOrProductionBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+export const detectLocalLanUrl = (): string => {
+  const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || (Constants as any)?.experienceUrl;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+      return `http://${ip}:8000/api`;
+    }
   }
-
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const host = window.location.hostname;
-    return `http://${host}:8000/api`;
-  }
-
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || Constants?.experienceUrl;
-    if (hostUri) {
-      const ip = hostUri.split(':')[0];
-      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
-        return `http://${ip}:8000/api`;
-      }
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return `http://${host}:8000/api`;
     }
-
-    if (Platform.OS === 'android') {
-      return 'http://10.0.2.2:8000/api';
-    }
-
-    return 'http://127.0.0.1:8000/api';
   }
-
-  return PRODUCTION_API_URL;
+  return Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
 };
-export const BASE_URL = getLocalOrProductionBaseUrl();
+
+// Internal active URL state
+let activeBaseUrl = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+
+export const getActiveBaseUrl = (): string => {
+  return activeBaseUrl;
+};
+
+export const normalizeApiUrl = (url: string): string => {
+  let cleaned = (url || '').trim();
+  if (!cleaned) return PRODUCTION_API_URL;
+  // Remove trailing slash
+  cleaned = cleaned.replace(/\/+$/, '');
+  // Ensure protocol
+  if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    cleaned = `https://${cleaned}`;
+  }
+  // Ensure /api suffix if not already present
+  if (!cleaned.endsWith('/api')) {
+    cleaned = `${cleaned}/api`;
+  }
+  return cleaned;
+};
+
+export const getAvailablePresets = () => [
+  {
+    id: 'heroku_prod',
+    label: '🚀 Heroku Production (24/7)',
+    url: PRODUCTION_API_URL,
+    description: 'Live cloud backend on Heroku with PostgreSQL & Cloudinary',
+  },
+  {
+    id: 'local_lan',
+    label: '💻 Local Dev (LAN IP)',
+    url: detectLocalLanUrl(),
+    description: 'Local Django server running on your development machine',
+  },
+  {
+    id: 'emulator',
+    label: '📱 Android Emulator Loopback',
+    url: 'http://10.0.2.2:8000/api',
+    description: 'Direct alias for host localhost inside Android Virtual Device',
+  },
+];
+
+export const BASE_URL = activeBaseUrl;
+
+// ─── Axios Setup ─────────────────────────────────────────────────────────────
+export const api = axios.create({
+  baseURL: activeBaseUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 25000,
+});
 
 const TOKEN_KEY = 'admin_auth_token';
 const REFRESH_TOKEN_KEY = 'admin_refresh_token';
@@ -43,7 +86,7 @@ const REFRESH_TOKEN_KEY = 'admin_refresh_token';
 // ─── Safe Storage Adapter (Multi-tier: Native AsyncStorage + Web LocalStorage + Memory Fallback) ───
 const memoryStorage = new Map<string, string>();
 
-const safeGetItem = async (key: string): Promise<string | null> => {
+export const safeGetItem = async (key: string): Promise<string | null> => {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const val = window.localStorage.getItem(key);
@@ -59,7 +102,7 @@ const safeGetItem = async (key: string): Promise<string | null> => {
   return memoryStorage.get(key) || null;
 };
 
-const safeSetItem = async (key: string, value: string): Promise<void> => {
+export const safeSetItem = async (key: string, value: string): Promise<void> => {
   memoryStorage.set(key, value);
 
   try {
@@ -73,7 +116,7 @@ const safeSetItem = async (key: string, value: string): Promise<void> => {
   } catch (e) {}
 };
 
-const safeRemoveItem = async (key: string): Promise<void> => {
+export const safeRemoveItem = async (key: string): Promise<void> => {
   memoryStorage.delete(key);
 
   try {
@@ -85,6 +128,139 @@ const safeRemoveItem = async (key: string): Promise<void> => {
   try {
     await AsyncStorage.removeItem(key);
   } catch (e) {}
+};
+
+// Hydrate saved custom API URL asynchronously on module initialization
+(async () => {
+  try {
+    const savedUrl = await safeGetItem(CUSTOM_API_STORAGE_KEY);
+    if (savedUrl) {
+      activeBaseUrl = normalizeApiUrl(savedUrl);
+      api.defaults.baseURL = activeBaseUrl;
+    }
+  } catch (e) {}
+})();
+
+export const setActiveBaseUrl = async (url: string): Promise<string> => {
+  const normalized = normalizeApiUrl(url);
+  activeBaseUrl = normalized;
+  api.defaults.baseURL = normalized;
+  await safeSetItem(CUSTOM_API_STORAGE_KEY, normalized);
+  return normalized;
+};
+
+export const resetBaseUrlToDefault = async (): Promise<string> => {
+  activeBaseUrl = PRODUCTION_API_URL;
+  api.defaults.baseURL = PRODUCTION_API_URL;
+  await safeRemoveItem(CUSTOM_API_STORAGE_KEY);
+  return PRODUCTION_API_URL;
+};
+
+// ─── Live API Connectivity Probe ─────────────────────────────────────────────
+export interface ConnectivityTestResult {
+  success: boolean;
+  latencyMs: number;
+  statusCode?: number;
+  message: string;
+  url: string;
+  error?: string;
+}
+
+export const testApiConnectivity = async (targetUrl?: string): Promise<ConnectivityTestResult> => {
+  const urlToTest = normalizeApiUrl(targetUrl || activeBaseUrl);
+  const probeUrl = `${urlToTest}/restaurants/`;
+  const startTime = Date.now();
+
+  try {
+    const response = await axios.get(probeUrl, {
+      params: { all: 'true' },
+      timeout: 8000,
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    const latencyMs = Date.now() - startTime;
+    return {
+      success: true,
+      latencyMs,
+      statusCode: response.status,
+      message: `Connected successfully (${latencyMs}ms)`,
+      url: urlToTest,
+    };
+  } catch (err: any) {
+    const latencyMs = Date.now() - startTime;
+    const sanitizedMsg = sanitizeErrorMessage(err, urlToTest);
+    return {
+      success: false,
+      latencyMs,
+      statusCode: err?.response?.status,
+      message: sanitizedMsg,
+      url: urlToTest,
+      error: err?.message,
+    };
+  }
+};
+
+// ─── Human-Friendly Error Sanitizer ──────────────────────────────────────────
+export const sanitizeErrorMessage = (error: any, contextUrl?: string): string => {
+  if (!error) return 'An unknown error occurred.';
+
+  if (typeof error === 'string') return error;
+
+  const url = contextUrl || activeBaseUrl;
+
+  // 1. Check for specific Axios and Network errors
+  const isNetworkError =
+    error.message === 'Network Error' ||
+    error.code === 'ERR_NETWORK' ||
+    error.code === 'ECONNREFUSED' ||
+    error.code === 'ENOTFOUND' ||
+    (!error.response && !error.status);
+
+  if (isNetworkError) {
+    return `Unable to reach API server at ${url}.\n\nEnsure your device is connected to the internet, or verify that the server is online via Server Settings (⚙️).`;
+  }
+
+  if (error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout')) {
+    return `Request timed out (took > 20s). The server at ${url} took too long to respond. Please check your connection and try again.`;
+  }
+
+  // 2. HTTP Status Code Errors
+  const status = error.response?.status || error.status;
+  if (status === 502 || status === 503 || status === 504) {
+    return `The backend service is temporarily restarting or unreachable (HTTP ${status}). Please retry in a few moments.`;
+  }
+
+  if (status === 500) {
+    return `Server encountered an internal error (HTTP 500). Please try again shortly.`;
+  }
+
+  // 3. Structured DRF Response Errors
+  const data = error.response?.data;
+  if (data) {
+    if (typeof data.detail === 'string') return data.detail;
+    if (typeof data.message === 'string') return data.message;
+    if (typeof data.error === 'string') return data.error;
+
+    if (Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
+      return data.non_field_errors.join(' ');
+    }
+
+    if (typeof data === 'object') {
+      const messages: string[] = [];
+      for (const [key, value] of Object.entries(data)) {
+        if (Array.isArray(value)) {
+          const fieldName = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+          messages.push(`${fieldName}: ${value.join(', ')}`);
+        } else if (typeof value === 'string') {
+          messages.push(`${key}: ${value}`);
+        }
+      }
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+  }
+
+  return error.message || 'An error occurred during communication with the server.';
 };
 
 // ─── Token Management ────────────────────────────────────────────────────────
@@ -109,16 +285,6 @@ export const clearStoredTokens = async (): Promise<void> => {
   await safeRemoveItem(REFRESH_TOKEN_KEY);
 };
 
-// ─── Axios Setup ─────────────────────────────────────────────────────────────
-
-export const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 15000,
-});
-
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (error: any) => void }> = [];
 
@@ -129,7 +295,7 @@ export const setSessionExpiredHandler = (handler: () => void) => {
 };
 
 const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else if (token) {
@@ -139,9 +305,12 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request Interceptor: Attach Auth Token
+// Request Interceptor: Ensure dynamic baseURL and attach Auth Token
 api.interceptors.request.use(
   async (config) => {
+    // Dynamically assign activeBaseUrl so runtime changes take effect immediately
+    config.baseURL = activeBaseUrl;
+
     const isAuthPath = config.url?.includes('/auth/');
     if (!isAuthPath) {
       const token = await getStoredToken();
@@ -154,13 +323,27 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Token Rotation & 401 Handling
+// Response Interceptor: Token Rotation, Network Retry & Sanitized Errors
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean; _retryCount?: number };
     const isAuthPath = originalRequest?.url?.includes('/auth/');
 
+    // 1. Automatic single-retry for idempotent GET requests on transient network timeout/drop
+    const isGet = originalRequest?.method?.toLowerCase() === 'get';
+    const isTransientNetwork =
+      !error.response &&
+      (error.code === 'ECONNABORTED' || error.message === 'Network Error' || error.code === 'ERR_NETWORK');
+
+    if (isGet && isTransientNetwork && (!originalRequest._retryCount || originalRequest._retryCount < 1)) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      originalRequest.baseURL = activeBaseUrl;
+      return api(originalRequest);
+    }
+
+    // 2. HTTP 401 Interception & Token Rotation
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthPath) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -169,6 +352,7 @@ api.interceptors.response.use(
           if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${token}`;
           }
+          originalRequest.baseURL = activeBaseUrl;
           return api(originalRequest);
         });
       }
@@ -187,19 +371,20 @@ api.interceptors.response.use(
       }
 
       try {
-        const response = await axios.post(`${BASE_URL}/auth/refresh/`, { refresh });
+        const response = await axios.post(`${activeBaseUrl}/auth/refresh/`, { refresh }, { timeout: 15000 });
         const newAccess = response.data.access;
         const newRefresh = response.data.refresh || refresh; // ROTATE_REFRESH_TOKENS=True
 
         await setStoredTokens(newAccess, newRefresh);
         api.defaults.headers.common.Authorization = `Bearer ${newAccess}`;
-        
+
         processQueue(null, newAccess);
         isRefreshing = false;
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         }
+        originalRequest.baseURL = activeBaseUrl;
         return api(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);
@@ -212,6 +397,8 @@ api.interceptors.response.use(
       }
     }
 
+    // Attach sanitized message to error object for seamless UI consumption
+    error.userFriendlyMessage = sanitizeErrorMessage(error, activeBaseUrl);
     return Promise.reject(error);
   }
 );
