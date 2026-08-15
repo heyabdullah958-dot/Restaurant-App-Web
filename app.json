@@ -27,6 +27,11 @@
     },
     "web": {
       "favicon": "./app/src/assets/favicon.png"
+    },
+    "updates": {
+      "enabled": false,
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "NEVER"
     }
   }
 }

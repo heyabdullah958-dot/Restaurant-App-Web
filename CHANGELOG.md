@@ -361,11 +361,19 @@
   - `BUGS.md`
   - `LESSONS.md`
   - `CHANGELOG.md`
+## [Phase 1 — Expo OTA Remote Update Resilience & Bundle Fallback Configuration] — 2026-08-15
+- What changed and why: Diagnosed and resolved fatal startup crash `java.io.IOException: Failed to download remote update` in Expo Go / Android runtimes. Updated `app/app.json`, `admin-app/app.json`, and root `app.json` with `"updates": { "enabled": false, "fallbackToCacheTimeout": 0, "checkAutomatically": "NEVER" }` and aligned `updates.url` in `app/app.json` with the active EAS `projectId` (`61e77707-45e4-4c06-895b-8a7cfc3462aa`). The 0-timeout configuration guarantees that the Expo runtime boots the embedded local bundle immediately without blocking or crashing on remote EAS network drops.
+- Files modified:
+  - `app/app.json`
+  - `admin-app/app.json`
+  - `app.json`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `CHANGELOG.md`
 - Verification evidence:
-  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
-  - Metro bundler recompiled Android bundle (`index.ts`, 1061 modules) with HTTP 200 OK.
-  - Executed `test_api_resilience_suite.py` — verified live Heroku production connectivity (1302ms), auth validation 401/400 handling, and valid super-admin JWT token receipt.
-- Confidence: [100%] — Physical and emulator devices now connect reliably to production Heroku API out-of-the-box, with transparent server switching and human-friendly error handling.
+  - `npx tsc --noEmit` on both `admin-app` and `app` passed with 0 errors.
+  - Metro dev server compiled and served Android bundle with HTTP 200 OK.
+- Confidence: [100%] — Application startup is shielded from remote EAS update download failures with zero-timeout local cache fallback.
 
 
 

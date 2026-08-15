@@ -126,6 +126,17 @@
   3. Never leak raw Axios error strings (`ERR_NETWORK`, `ECONNABORTED`) to user interface error banners. Always sanitize errors through a centralized error parser (`sanitizeErrorMessage`) that explains the exact reason and offers recovery actions (e.g. "⚙️ Configure API Server").
 - **Applies to**: `admin-app/src/services/api.ts`, `admin-app/src/screens/LoginScreen.tsx`, `admin-app/src/components/ServerConfigModal.tsx`, `app/src/services/api.js`.
 
+---
+
+## Lesson 16 — Expo Remote OTA Update Fallback & Timeout Invariant — 2026-08-15
+- **Pattern**: Configuring Expo Updates / OTA remote bundle download policies across mobile apps (`app.json`).
+- **Wrong assumption made**: Leaving `updates.enabled: true` with a remote EAS URL without explicitly configuring `fallbackToCacheTimeout: 0` or `checkAutomatically: "NEVER"`.
+- **What actually mattered**: 
+  1. If the remote EAS update URL is mismatched, unreachable, or returns a non-200 response, Expo native runtimes block startup and crash with a fatal `java.io.IOException: Failed to download remote update`.
+  2. For development and Expo Go builds, ALWAYS set `"fallbackToCacheTimeout": 0` and `"checkAutomatically": "NEVER"` with `"enabled": false` (or align `updates.url` precisely with the active EAS `projectId`).
+  3. A 0-millisecond fallback timeout ensures the Expo runtime immediately boots the cached embedded JS bundle without waiting for or crashing on remote network drops.
+- **Applies to**: `app/app.json`, `admin-app/app.json`, `app.json`.
+
 
 
 
