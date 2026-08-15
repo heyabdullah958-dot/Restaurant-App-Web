@@ -25,11 +25,11 @@ import {
   deleteCouponThunk,
 } from '../../store/promoSlice';
 import { PromoCoupon, fetchRestaurants } from '../../services/api';
-import { Card, formatHumanDate } from '../../components/ui';
+import { Card, formatHumanDate, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const PromoManagementScreen = () => {
   const dispatch = useAppDispatch();
-  const { coupons, isLoading, isRefreshing } = useAppSelector((state) => state.promo);
+  const { coupons, isLoading, isRefreshing, error } = useAppSelector((state) => state.promo);
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
 
@@ -144,10 +144,19 @@ export const PromoManagementScreen = () => {
       </View>
 
       {/* Coupons List */}
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-        </View>
+      {error && coupons.length === 0 ? (
+        <ErrorState
+          title="Promo Engine Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Coupon Feed"
+          themeMode="super"
+        />
+      ) : isLoading && coupons.length === 0 ? (
+        <LoadingState
+          message="Loading Promotional Discount Engine..."
+          themeMode="super"
+        />
       ) : (
         <FlatList
           data={coupons}
@@ -158,6 +167,14 @@ export const PromoManagementScreen = () => {
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor={COLORS.superAdmin.accent}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon="🎟️"
+              title="No Promo Codes Created"
+              description="Create campaign discounts, flat vouchers, or percentage deals for any or all restaurant brands."
+              themeMode="super"
             />
           }
           renderItem={({ item }) => {

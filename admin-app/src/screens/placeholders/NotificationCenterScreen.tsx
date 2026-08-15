@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { sendPushBroadcast, fetchRestaurants } from '../../services/api';
-import { Card } from '../../components/ui';
+import { Card, EmptyState } from '../../components/ui';
 
 export const NotificationCenterScreen = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -72,7 +72,8 @@ export const NotificationCenterScreen = () => {
               setTitle('');
               setBody('');
             } catch (err: any) {
-              Alert.alert('Dispatch Error', err?.response?.data?.detail || err?.message || 'Failed to send push broadcast');
+              const msg = err?.userFriendlyMessage || err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Failed to send push broadcast';
+              Alert.alert('Dispatch Notice', msg);
             } finally {
               setIsSending(false);
             }
@@ -176,7 +177,12 @@ export const NotificationCenterScreen = () => {
         <Card style={styles.card} themeMode="super">
           <Text style={styles.cardTitle}>📋 Recent Dispatch Session Log</Text>
           {recentDispatches.length === 0 ? (
-            <Text style={styles.emptyLogText}>No notifications sent in this session yet.</Text>
+            <EmptyState
+              icon="📣"
+              title="No Broadcasts Sent This Session"
+              description="Push notifications and marketing broadcasts dispatched during this session will appear here."
+              themeMode="super"
+            />
           ) : (
             recentDispatches.map((log) => (
               <View key={log.id} style={styles.logItem}>

@@ -32,6 +32,7 @@ import {
   setSearchTerm,
 } from '../../store/menuSlice';
 import { MenuCategoryData, MenuItemData, getFullImageUrl } from '../../services/api';
+import { LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 const BRAND_LIST = [
   { id: 1, name: 'Seen Banao', slug: 'seenbanao', icon: '🍖' },
@@ -141,7 +142,7 @@ const MenuItemCard = React.memo<{
 export const MenuManagementScreen = () => {
   const dispatch = useAppDispatch();
   const { role, restaurantId, branchId } = useAppSelector((state) => state.auth);
-  const { categories, selectedBrandSlug, isLoading, isRefreshing, searchTerm } = useAppSelector((state) => state.menu);
+  const { categories, selectedBrandSlug, isLoading, isRefreshing, searchTerm, error } = useAppSelector((state) => state.menu);
 
   const isSuper = role === 'super_admin';
 
@@ -444,11 +445,19 @@ export const MenuManagementScreen = () => {
       </View>
 
       {/* Catalog Grouped List */}
-      {isLoading && categories.length === 0 ? (
-        <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={themeAccent} />
-          <Text style={[styles.loadingText, { color: themeMuted }]}>Loading Catalog...</Text>
-        </View>
+      {error && categories.length === 0 ? (
+        <ErrorState
+          title="Menu Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Catalog"
+          themeMode={isSuper ? 'super' : 'branch'}
+        />
+      ) : isLoading && categories.length === 0 ? (
+        <LoadingState
+          message="Loading Menu Catalog..."
+          themeMode={isSuper ? 'super' : 'branch'}
+        />
       ) : (
         <FlatList
           data={filteredCategories}
@@ -463,13 +472,16 @@ export const MenuManagementScreen = () => {
             <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={[themeAccent]} tintColor={themeAccent} />
           }
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>🍳</Text>
-              <Text style={[styles.emptyTitle, { color: themeText }]}>No Menu Items Found</Text>
-              <Text style={[styles.emptySubtitle, { color: themeMuted }]}>
-                {searchTerm ? `No items match "${searchTerm}"` : 'No categories or items configured for this brand.'}
-              </Text>
-            </View>
+            <EmptyState
+              icon={searchTerm ? '🔍' : '🍳'}
+              title={searchTerm ? 'No Matching Items' : 'No Menu Items Found'}
+              description={
+                searchTerm
+                  ? `No items match "${searchTerm}". Try searching another keyword.`
+                  : 'No categories or items configured for this brand yet.'
+              }
+              themeMode={isSuper ? 'super' : 'branch'}
+            />
           }
         />
       )}

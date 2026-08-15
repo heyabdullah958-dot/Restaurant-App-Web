@@ -441,6 +441,39 @@
   - Metro bundler compiled and served Android JS bundle (`index.ts`, 1063 modules) with HTTP 200 OK.
 - Confidence: [100%] — All 9 confirmed issues resolved, design system reused across all Super Admin screens with zero functional regression.
 
+## [Phase 9B — Network Resilience, Edge Cases & Empty States] — 2026-08-15
+- What changed and why: Established comprehensive network resilience, loading states, error states with retry actions, and context-specific empty states across all 12 views + Login in `admin-app`.
+  1. Built theme-aware (`themeMode="super" | "branch"`) reusable UI feedback components: `LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx` in `src/components/ui/`.
+  2. Implemented `ErrorState` with "Try Again" retry actions on all data-fetching screens (`OrderManagement`, `BranchDashboard`, `MenuManagement`, `RiderManagement`, `SuperDashboard`, `TenantManagement`, `ManagerManagement`, `CustomerManagement`, `PromoManagement`, `FlashDealManagement`, `NotificationCenter`).
+  3. Replaced raw empty lists with context-specific `EmptyState` cards (`📦` orders, `🛵` riders, `🍳` menu catalog, `👥` customer CRM, `🏢` brand registry, `🎟️` promo codes, `⚡` flash deals, `📣` FCM broadcasts).
+  4. Added defensive session-expiry audio teardown in `NewOrderAlertOverlay.tsx` to immediately stop ringing and release keep-awake if `!isAuthenticated`.
+  5. Implemented stale concurrent order ejection in `NewOrderAlertOverlay.tsx` so outdated orders don't block the manager interface.
+- Files created:
+  - `admin-app/src/components/ui/LoadingState.tsx`
+  - `admin-app/src/components/ui/ErrorState.tsx`
+  - `admin-app/src/components/ui/EmptyState.tsx`
+- Files modified:
+  - `admin-app/src/components/ui/index.ts`
+  - `admin-app/src/components/NewOrderAlertOverlay.tsx`
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/TenantManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/ManagerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/CustomerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/NotificationCenterScreen.tsx`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `CHANGELOG.md`
+- Verification evidence:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle (`index.ts`, 1066 modules) with HTTP 200 OK.
+- Confidence: [100%] — All 12 views + Login equipped with robust loading, error recovery, and empty states.
+
 
 
 

@@ -26,12 +26,12 @@ import {
   setStatusFilter,
 } from '../../store/riderSlice';
 import { BranchRider } from '../../services/api';
-import { StatusBadge } from '../../components/ui';
+import { StatusBadge, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const RiderManagementScreen = () => {
   const dispatch = useAppDispatch();
   const { role, branchId, restaurantId } = useAppSelector((state) => state.auth);
-  const { riders, isLoading, isRefreshing, searchQuery, statusFilter } = useAppSelector(
+  const { riders, isLoading, isRefreshing, searchQuery, statusFilter, error } = useAppSelector(
     (state) => state.riders
   );
 
@@ -288,11 +288,19 @@ export const RiderManagementScreen = () => {
       </View>
 
       {/* Rider List */}
-      {isLoading && riders.length === 0 ? (
-        <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={themeAccent} />
-          <Text style={[styles.loadingText, { color: themeMuted }]}>Loading Riders Fleet...</Text>
-        </View>
+      {error && riders.length === 0 ? (
+        <ErrorState
+          title="Rider Roster Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Fleet Feed"
+          themeMode={isSuper ? 'super' : 'branch'}
+        />
+      ) : isLoading && riders.length === 0 ? (
+        <LoadingState
+          message="Loading Riders Fleet..."
+          themeMode={isSuper ? 'super' : 'branch'}
+        />
       ) : (
         <FlatList
           data={filteredRiders}
@@ -308,15 +316,16 @@ export const RiderManagementScreen = () => {
             />
           }
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>🛵</Text>
-              <Text style={[styles.emptyTitle, { color: themeText }]}>No Riders Found</Text>
-              <Text style={[styles.emptySubtitle, { color: themeMuted }]}>
-                {searchQuery
-                  ? `No riders match "${searchQuery}"`
-                  : 'No riders registered for this branch yet.'}
-              </Text>
-            </View>
+            <EmptyState
+              icon={searchQuery ? '🔍' : '🛵'}
+              title={searchQuery ? 'No Matching Riders' : 'No Riders Registered'}
+              description={
+                searchQuery
+                  ? `No riders found matching "${searchQuery}".`
+                  : 'No delivery riders registered for this branch yet. Add your first rider to begin dispatching orders.'
+              }
+              themeMode={isSuper ? 'super' : 'branch'}
+            />
           }
         />
       )}

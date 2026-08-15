@@ -161,6 +161,20 @@
   4. **Sparse chart design**: Bar charts with low/zero historical data need an explicit baseline, zero-pips, and explanatory context so administrators know live tracking is working.
 - **Applies to**: `SuperDashboardScreen.tsx`, `TenantManagementScreen.tsx`, `ManagerManagementScreen.tsx`, `CustomerManagementScreen.tsx`, `PromoManagementScreen.tsx`, `FlashDealManagementScreen.tsx`, `NotificationCenterScreen.tsx`, `AppNavigator.tsx`.
 
+---
+
+## Lesson 19 — Network Resilience, Edge Cases & Empty State Design — 2026-08-15
+- **Pattern**: Handling network drops, initial data loading, empty data returns, and auth lifecycle events across all screens in an operations mobile app.
+- **Wrong assumption made**: Assuming that handling the happy path and having type-safe models is sufficient to prevent user confusion during transient network drops or empty data collections.
+- **What actually mattered**: 
+  1. **Triad of UI Feedback**: Every list/data screen must support 3 distinct non-happy states:
+     - **LoadingState**: Prominent feedback during initial fetch so the screen is never blank.
+     - **ErrorState**: Replaces raw stack traces with calm, humanized explanations and a clear "Try Again" / "Retry" action.
+     - **EmptyState**: Visually and textually communicates when a collection is legitimately empty vs broken, with helpful context and next-step actions.
+  2. **Defensive Background & Audio Teardown**: When authentication expires mid-session (HTTP 401), any foreground ringing alerts or audio players (`NewOrderAlertOverlay`) must be immediately stopped and torn down via reactive state watchers rather than relying solely on component unmount.
+  3. **Stale Concurrency Protection**: In high-velocity ordering environments, multiple managers or automated systems may accept or cancel an order concurrently. Alert overlays and order lists must auto-eject stale orders gracefully without leaving the operator stranded.
+- **Applies to**: `admin-app/src/components/ui/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx`, `NewOrderAlertOverlay.tsx`, all screen views.
+
 
 
 

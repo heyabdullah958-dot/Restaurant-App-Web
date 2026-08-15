@@ -374,6 +374,29 @@
   - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
   - Metro bundler compiled and served Android JS bundle (`index.ts`) with HTTP 200 OK.
 
+---
+
+### Bug #31: Network Resilience & Empty State Inconsistencies (Resolved 2026-08-15)
+- **Symptom**:
+  1. Failed network requests on open screens left users with blank lists or unhandled error text rather than clear, actionable error cards with a "Try Again" retry action.
+  2. Initial data fetches on several screens lacked standardized loading states or rendered raw unstyled spinners.
+  3. Legitimate empty data states (no orders, no riders, no customers, no promo codes, zero search results) were indistinguishable from broken network states.
+  4. If a manager's session expired while the `NewOrderAlertOverlay` was ringing, the audio could continue looping indefinitely.
+  5. Attempting to accept a stale or already-accepted order could leave the alert overlay in an unhandled state.
+- **Root Cause**:
+  1. Screens lacked centralized `LoadingState`, `ErrorState`, and `EmptyState` UI components.
+  2. Missing error state catch-blocks in local screen `loadData` functions.
+  3. `NewOrderAlertOverlay` lacked a defensive session-termination watcher and stale order ejection.
+- **Fix Applied**:
+  1. Created theme-aware (`themeMode="super" | "branch"`) reusable components in `src/components/ui/`: `LoadingState.tsx`, `ErrorState.tsx`, and `EmptyState.tsx`.
+  2. Integrated `ErrorState` with "Try Again" retry actions across all screens (`OrderManagement`, `BranchDashboard`, `MenuManagement`, `RiderManagement`, `SuperDashboard`, `TenantManagement`, `ManagerManagement`, `CustomerManagement`, `PromoManagement`, `FlashDealManagement`, `NotificationCenter`).
+  3. Replaced raw empty lists with context-specific `EmptyState` components (`📦`, `🛵`, `🍳`, `👥`, `🏢`, `🎟️`, `⚡`, `📣`).
+  4. Added defensive session-expiry cleanup in `NewOrderAlertOverlay.tsx` to immediately stop audio ringing and keep-awake if `!isAuthenticated`.
+  5. Handled stale concurrent order acceptance by auto-ejecting outdated orders from the pending queue.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` passed with 0 errors across `admin-app`.
+  - Metro bundler compiled and served Android JS bundle (`index.ts`, 1066 modules) with HTTP 200 OK.
+
 
 
 

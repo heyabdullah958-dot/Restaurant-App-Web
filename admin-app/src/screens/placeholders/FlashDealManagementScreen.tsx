@@ -24,11 +24,11 @@ import {
   deleteFlashDealThunk,
 } from '../../store/promoSlice';
 import { FlashDeal } from '../../services/api';
-import { Card, formatHumanDateTime } from '../../components/ui';
+import { Card, formatHumanDateTime, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const FlashDealManagementScreen = () => {
   const dispatch = useAppDispatch();
-  const { flashDeals, isLoading, isRefreshing } = useAppSelector((state) => state.promo);
+  const { flashDeals, isLoading, isRefreshing, error } = useAppSelector((state) => state.promo);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDeal, setEditingDeal] = useState<FlashDeal | null>(null);
@@ -126,11 +126,20 @@ export const FlashDealManagementScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Deals List */}
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-        </View>
+      {/* Flash Deals List */}
+      {error && flashDeals.length === 0 ? (
+        <ErrorState
+          title="Flash Deals Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Deals Feed"
+          themeMode="super"
+        />
+      ) : isLoading && flashDeals.length === 0 ? (
+        <LoadingState
+          message="Loading Time-Limited Flash Deals..."
+          themeMode="super"
+        />
       ) : (
         <FlatList
           data={flashDeals}
@@ -141,6 +150,14 @@ export const FlashDealManagementScreen = () => {
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor={COLORS.superAdmin.accent}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon="⚡"
+              title="No Active Flash Deals"
+              description="Create limited-time flash deals and happy hour discounts to boost peak order volume."
+              themeMode="super"
             />
           }
           renderItem={({ item }) => (

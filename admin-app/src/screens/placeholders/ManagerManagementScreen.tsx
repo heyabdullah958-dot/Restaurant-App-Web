@@ -23,7 +23,7 @@ import {
   changeManagerPasswordThunk,
 } from '../../store/tenantSlice';
 import { fetchRestaurants, fetchBranches, StaffManager } from '../../services/api';
-import { Card } from '../../components/ui';
+import { Card, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const ManagerManagementScreen = () => {
   const dispatch = useAppDispatch();
@@ -188,10 +188,19 @@ export const ManagerManagementScreen = () => {
       </View>
 
       {/* Roster List */}
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-        </View>
+      {error && managers.length === 0 ? (
+        <ErrorState
+          title="Staff Roster Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Staff Feed"
+          themeMode="super"
+        />
+      ) : isLoading && managers.length === 0 ? (
+        <LoadingState
+          message="Loading Staff Managers..."
+          themeMode="super"
+        />
       ) : (
         <FlatList
           data={filteredManagers}
@@ -202,6 +211,18 @@ export const ManagerManagementScreen = () => {
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor={COLORS.superAdmin.accent}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon={searchQuery ? '🔍' : '🔐'}
+              title={searchQuery ? 'No Matching Managers' : 'No Managers Registered'}
+              description={
+                searchQuery
+                  ? `No branch managers match "${searchQuery}".`
+                  : 'No branch managers have been registered yet. Tap "+ Provision Manager" to grant branch access.'
+              }
+              themeMode="super"
             />
           }
           renderItem={({ item }) => (

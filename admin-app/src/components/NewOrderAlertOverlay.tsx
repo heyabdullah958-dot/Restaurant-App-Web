@@ -183,6 +183,16 @@ export const NewOrderAlertOverlay = () => {
     };
   }, [isAuthenticated, role]);
 
+  // Defensive: Immediately terminate ringing & keep-awake if user logs out or session expires
+  useEffect(() => {
+    if (!isAuthenticated && visible) {
+      setVisible(false);
+      setPendingOrders([]);
+      setCurrentIndex(0);
+      stopRingingAndKeepAwake();
+    }
+  }, [isAuthenticated, visible]);
+
   if (!visible || pendingOrders.length === 0) {
     return null;
   }
@@ -205,8 +215,10 @@ export const NewOrderAlertOverlay = () => {
       if (currentIndex >= pendingOrders.length - 1) {
         setCurrentIndex(Math.max(0, pendingOrders.length - 2));
       }
-    } catch (err) {
-      console.warn('Failed to accept order from alert overlay:', err);
+    } catch (err: any) {
+      console.warn('Notice when accepting order from alert overlay:', err);
+      // Concurrency/Staleness protection: If another manager accepted or order was cancelled, clear it from queue
+      alertService.removeOrder(currentOrder.id);
     } finally {
       setAcceptLoading(false);
     }

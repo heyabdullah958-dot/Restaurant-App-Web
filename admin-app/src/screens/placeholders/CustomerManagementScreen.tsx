@@ -21,11 +21,11 @@ import {
   setCustomerSearchQuery,
 } from '../../store/customerSlice';
 import { CustomerProfile } from '../../services/api';
-import { Card } from '../../components/ui';
+import { Card, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const CustomerManagementScreen = () => {
   const dispatch = useAppDispatch();
-  const { customers, isLoading, isRefreshing, isSubmitting, searchQuery } = useAppSelector(
+  const { customers, isLoading, isRefreshing, isSubmitting, searchQuery, error } = useAppSelector(
     (state) => state.customer
   );
 
@@ -123,11 +123,20 @@ export const CustomerManagementScreen = () => {
         />
       </View>
 
-      {/* Customer Roster */}
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-        </View>
+      {/* Customer List */}
+      {error && customers.length === 0 ? (
+        <ErrorState
+          title="Customer CRM Sync Notice"
+          message={error}
+          onRetry={handleRefresh}
+          retryLabel="Retry Customer Feed"
+          themeMode="super"
+        />
+      ) : isLoading && customers.length === 0 ? (
+        <LoadingState
+          message="Loading Customer Directory & Loyalty Records..."
+          themeMode="super"
+        />
       ) : (
         <FlatList
           data={filteredCustomers}
@@ -138,6 +147,18 @@ export const CustomerManagementScreen = () => {
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor={COLORS.superAdmin.accent}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon={searchQuery ? '🔍' : '👥'}
+              title={searchQuery ? 'No Matching Customers' : 'No Customers Registered'}
+              description={
+                searchQuery
+                  ? `No customer profiles match "${searchQuery}".`
+                  : 'Customer accounts and order history will automatically populate here as orders are placed.'
+              }
+              themeMode="super"
             />
           }
           renderItem={({ item }) => (

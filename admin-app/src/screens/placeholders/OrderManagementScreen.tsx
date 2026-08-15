@@ -21,7 +21,7 @@ import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk, updateOrderStatusThunk } from '../../store/orderSlice';
 import { AdminOrder, fetchRiders, assignRiderToOrder, BranchRider } from '../../services/api';
-import { Card, StatusBadge, SlaBadge, Button } from '../../components/ui';
+import { Card, StatusBadge, SlaBadge, Button, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 if (
   Platform.OS === 'android' &&
@@ -35,7 +35,7 @@ if (
 
 export const OrderManagementScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
-  const { orders, isLoading, isRefreshing } = useAppSelector((state) => state.orders);
+  const { orders, isLoading, isRefreshing, error } = useAppSelector((state) => state.orders);
 
   const newOrderCount = orders.filter((o) => o.status === 'received').length;
 
@@ -398,11 +398,19 @@ export const OrderManagementScreen = ({ navigation }: any) => {
       </View>
 
       {/* Main Order List */}
-      {isLoading && orders.length === 0 ? (
-        <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={COLORS.branchManager.primary} />
-          <Text style={styles.loadingText}>Fetching Live Orders...</Text>
-        </View>
+      {error && orders.length === 0 ? (
+        <ErrorState
+          title="Orders Sync Failed"
+          message={error}
+          onRetry={() => dispatch(fetchOrdersThunk({ isRefresh: true }))}
+          retryLabel="Retry Live Feed"
+          themeMode="branch"
+        />
+      ) : isLoading && orders.length === 0 ? (
+        <LoadingState
+          message="Fetching live kitchen orders..."
+          themeMode="branch"
+        />
       ) : (
         <FlatList
           data={filteredOrders}
@@ -418,15 +426,16 @@ export const OrderManagementScreen = ({ navigation }: any) => {
             />
           }
           ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>📦</Text>
-              <Text style={styles.emptyTitle}>No Orders Found</Text>
-              <Text style={styles.emptySubtitle}>
-                {activeTab === 'active'
-                  ? 'No active orders requiring attention right now.'
-                  : `No ${activeTab} orders recorded.`}
-              </Text>
-            </View>
+            <EmptyState
+              icon={activeTab === 'active' ? '📦' : activeTab === 'delivered' ? '✅' : '🚫'}
+              title={activeTab === 'active' ? 'No Active Orders' : `No ${activeTab.toUpperCase()} Orders`}
+              description={
+                activeTab === 'active'
+                  ? 'No active orders requiring attention right now. New customer orders will ring here automatically.'
+                  : `No orders found in the ${activeTab} stage.`
+              }
+              themeMode="branch"
+            />
           }
         />
       )}

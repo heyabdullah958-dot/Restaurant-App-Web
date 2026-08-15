@@ -16,14 +16,14 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk } from '../../store/orderSlice';
 import { fetchRestaurants, AdminOrder } from '../../services/api';
 import { useOrderPolling } from '../../hooks/useOrderPolling';
-import { Card, StatusBadge, SlaBadge } from '../../components/ui';
+import { Card, StatusBadge, SlaBadge, ErrorState, EmptyState, LoadingState } from '../../components/ui';
 
 type Timeframe = 'today' | 'week' | 'month' | 'all';
 
 export const BranchDashboardScreen = ({ navigation }: any) => {
   const dispatch = useAppDispatch();
   const { user, restaurantId, branchId } = useAppSelector((state) => state.auth);
-  const { orders, isLoading, isRefreshing } = useAppSelector((state) => state.orders);
+  const { orders, isLoading, isRefreshing, error } = useAppSelector((state) => state.orders);
 
   // Poll orders every 15s
   useOrderPolling(15000);
@@ -207,10 +207,21 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
 
-        {recentOrders.length === 0 ? (
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No orders recorded yet.</Text>
-          </Card>
+        {error && orders.length === 0 ? (
+          <ErrorState
+            title="Dashboard Sync Notice"
+            message={error}
+            onRetry={handleRefresh}
+            retryLabel="Refresh Dashboard"
+            themeMode="branch"
+          />
+        ) : recentOrders.length === 0 ? (
+          <EmptyState
+            icon="📋"
+            title="No Orders Yet"
+            description="Incoming orders for your branch will appear here live with SLA tracking."
+            themeMode="branch"
+          />
         ) : (
           recentOrders.map((ord: AdminOrder) => (
             <Card

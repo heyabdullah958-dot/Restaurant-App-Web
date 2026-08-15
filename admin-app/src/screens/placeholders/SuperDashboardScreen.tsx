@@ -14,7 +14,7 @@ import {
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchAnalyticsThunk } from '../../store/analyticsSlice';
-import { Card, StatusBadge } from '../../components/ui';
+import { Card, StatusBadge, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 const { width } = Dimensions.get('window');
 
@@ -66,21 +66,22 @@ export const SuperDashboardScreen = () => {
           </View>
         </View>
 
-        {error ? (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
+        {error && !data ? (
+          <ErrorState
+            title="Analytics Sync Notice"
+            message={error}
+            onRetry={handleRefresh}
+            retryLabel="Retry Analytics"
+            themeMode="super"
+          />
         ) : null}
 
         {isLoading && !data ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-            <Text style={styles.loadingText}>Syncing Platform Metrics...</Text>
-          </View>
-        ) : (
+          <LoadingState
+            message="Connecting to HQ Analytics Command Center..."
+            themeMode="super"
+          />
+        ) : data ? (
           <>
             {/* Top 4 Summary Metric Cards (2x2 Grid) */}
             <View style={styles.grid}>
@@ -252,7 +253,7 @@ export const SuperDashboardScreen = () => {
               ))}
             </Card>
           </>
-        )}
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

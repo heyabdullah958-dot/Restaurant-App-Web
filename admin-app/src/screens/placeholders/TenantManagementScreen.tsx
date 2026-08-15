@@ -22,12 +22,13 @@ import {
   updateTenantRestaurant,
   deleteTenantRestaurant,
 } from '../../services/api';
-import { Card, formatHumanTime } from '../../components/ui';
+import { Card, formatHumanTime, LoadingState, ErrorState, EmptyState } from '../../components/ui';
 
 export const TenantManagementScreen = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Onboard Modal State
@@ -48,12 +49,13 @@ export const TenantManagementScreen = () => {
 
   const loadData = async (showSpinner: boolean = false) => {
     if (showSpinner) setIsLoading(true);
+    setFetchError(null);
     try {
       const response = await fetchRestaurants();
       const list = Array.isArray(response) ? response : response?.results || [];
       setRestaurants(list);
     } catch (err: any) {
-      Alert.alert('Error', err?.message || 'Failed to fetch restaurant brands');
+      setFetchError(err?.userFriendlyMessage || err?.message || 'Failed to fetch restaurant brands');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -227,10 +229,19 @@ export const TenantManagementScreen = () => {
       </View>
 
       {/* Brand Roster List */}
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.superAdmin.accent} />
-        </View>
+      {fetchError && restaurants.length === 0 ? (
+        <ErrorState
+          title="Brand Registry Sync Notice"
+          message={fetchError}
+          onRetry={() => loadData(true)}
+          retryLabel="Retry Brand Feed"
+          themeMode="super"
+        />
+      ) : isLoading && restaurants.length === 0 ? (
+        <LoadingState
+          message="Loading Registered Brands..."
+          themeMode="super"
+        />
       ) : (
         <FlatList
           data={filteredRestaurants}
@@ -241,6 +252,18 @@ export const TenantManagementScreen = () => {
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor={COLORS.superAdmin.accent}
+            />
+          }
+          ListEmptyComponent={
+            <EmptyState
+              icon={searchQuery ? '🔍' : '🏢'}
+              title={searchQuery ? 'No Matching Brands' : 'No Brands Onboarded'}
+              description={
+                searchQuery
+                  ? `No restaurant brands match "${searchQuery}".`
+                  : 'No restaurant brands have been onboarded yet. Tap "+ Onboard Brand" to create the first tenant.'
+              }
+              themeMode="super"
             />
           }
           renderItem={({ item }) => (
