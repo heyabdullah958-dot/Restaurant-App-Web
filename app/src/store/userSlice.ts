@@ -144,6 +144,9 @@ export const loadSavedToken = createAsyncThunk<
 
 
 const formatDRFErrorMessage = (error: any, fallback: string): string => {
+  if (error?.userFriendlyMessage) {
+    return error.userFriendlyMessage;
+  }
   if (error.response && error.response.data) {
     const data = error.response.data;
     if (typeof data === 'string') return data;
@@ -168,6 +171,9 @@ const formatDRFErrorMessage = (error: any, fallback: string): string => {
         if (parts.length > 0) return parts.join('\n');
       }
     }
+  }
+  if (error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') {
+    return 'Unable to connect to backend server. Tap the GetFood logo 3 times to check server settings.';
   }
   return error.message || fallback;
 };

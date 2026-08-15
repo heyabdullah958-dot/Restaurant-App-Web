@@ -93,6 +93,54 @@ export const safeRemoveItem = async (key) => {
   } catch (e) {}
 };
 
+export const getAvailablePresets = () => [
+  {
+    id: 'heroku_prod',
+    label: '🚀 Heroku Production (24/7)',
+    url: PRODUCTION_API_URL,
+    description: 'Live cloud backend on Heroku with PostgreSQL & Cloudinary',
+  },
+  {
+    id: 'local_lan',
+    label: '💻 Local Dev (LAN IP)',
+    url: detectLocalLanUrl(),
+    description: 'Local Django server running on your development machine',
+  },
+  {
+    id: 'emulator',
+    label: '📱 Android Emulator Loopback',
+    url: 'http://10.0.2.2:8000/api',
+    description: 'Direct alias for host localhost inside Android Virtual Device',
+  },
+];
+
+export const testApiConnectivity = async (targetUrl) => {
+  const normalized = normalizeApiUrl(targetUrl);
+  const startTime = Date.now();
+  try {
+    const testAxios = axios.create({
+      baseURL: normalized,
+      timeout: 6000,
+    });
+    await testAxios.get('/restaurants/');
+    const latencyMs = Date.now() - startTime;
+    return {
+      success: true,
+      latencyMs,
+      message: `Connected successfully (${latencyMs}ms)`,
+      url: normalized,
+    };
+  } catch (err) {
+    const latencyMs = Date.now() - startTime;
+    return {
+      success: false,
+      latencyMs,
+      message: err.code === 'ECONNABORTED' ? 'Request timed out after 6s' : (err.message || 'Unable to connect to server'),
+      url: normalized,
+    };
+  }
+};
+
 // Initialize custom URL from storage if previously saved
 safeGetItem(CUSTOM_API_STORAGE_KEY).then((savedUrl) => {
   if (savedUrl) {
@@ -102,20 +150,22 @@ safeGetItem(CUSTOM_API_STORAGE_KEY).then((savedUrl) => {
   }
 });
 
-export const setApiBaseUrl = async (newUrl) => {
+export const setActiveBaseUrl = async (newUrl) => {
   const normalized = normalizeApiUrl(newUrl);
   activeBaseUrl = normalized;
   api.defaults.baseURL = normalized;
   await safeSetItem(CUSTOM_API_STORAGE_KEY, normalized);
   return normalized;
 };
+export const setApiBaseUrl = setActiveBaseUrl;
 
-export const resetApiBaseUrl = async () => {
+export const resetBaseUrlToDefault = async () => {
   activeBaseUrl = PRODUCTION_API_URL;
   api.defaults.baseURL = PRODUCTION_API_URL;
   await safeRemoveItem(CUSTOM_API_STORAGE_KEY);
   return PRODUCTION_API_URL;
 };
+export const resetApiBaseUrl = resetBaseUrlToDefault;
 
 export const isPublicUrl = (url, method = 'get') => {
   if (!url) return false;

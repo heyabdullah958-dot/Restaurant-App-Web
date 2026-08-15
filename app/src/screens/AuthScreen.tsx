@@ -23,7 +23,8 @@ import { AppDispatch, RootState } from '../store';
 import { loginUser, registerUser, guestLogin, clearError, updateUserProfile } from '../store/userSlice';
 import { fetchMyOrders } from '../store/orderSlice';
 import { StatusBar } from 'expo-status-bar';
-import api from '../services/api';
+import api, { getActiveBaseUrl } from '../services/api';
+import ServerConfigModal from '../components/ServerConfigModal';
 
 const { width } = Dimensions.get('window');
 
@@ -68,6 +69,18 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
   const [googleModalVisible, setGoogleModalVisible] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [customGoogleName, setCustomGoogleName] = useState('');
+  const [showServerModal, setShowServerModal] = useState(false);
+  const [activeServer, setActiveServer] = useState<string>(getActiveBaseUrl());
+  const [logoTapCount, setLogoTapCount] = useState(0);
+
+  const handleLogoPress = () => {
+    const nextCount = logoTapCount + 1;
+    setLogoTapCount(nextCount);
+    if (nextCount >= 3) {
+      setLogoTapCount(0);
+      setShowServerModal(true);
+    }
+  };
 
   // Custom Alert State
   const [alertConfig, setAlertConfig] = useState<{
@@ -335,9 +348,13 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
 
         {/* Brand Header */}
         <View style={styles.headerContainer}>
-          <View style={styles.logoBadge}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleLogoPress}
+            style={styles.logoBadge}
+          >
             <Ionicons name="restaurant" size={32} color={COLORS.white} />
-          </View>
+          </TouchableOpacity>
           <Text style={styles.titleText}>
             Get<Text style={{ color: COLORS.primary }}>Food</Text>
           </Text>
@@ -362,10 +379,19 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
 
         {/* Global Server Error Display */}
         {error && (
-          <View style={styles.errorBanner}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setShowServerModal(true)}
+            style={styles.errorBanner}
+          >
             <Ionicons name="alert-circle" size={20} color={COLORS.danger} />
-            <Text style={styles.errorBannerText}>{error}</Text>
-          </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.errorBannerText}>{error}</Text>
+              <Text style={{ fontSize: 11, color: COLORS.primary, fontWeight: '700', marginTop: 4 }}>
+                ⚙️ Tap here to check server connection
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
 
         {/* Form Fields */}
@@ -633,6 +659,29 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
             </TouchableOpacity>
           </View>
 
+          {/* Active Backend Server Trigger */}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setShowServerModal(true)}
+            style={{
+              marginTop: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              gap: 6,
+              backgroundColor: COLORS.neutral100,
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              borderRadius: 20,
+              alignSelf: 'center',
+            }}
+          >
+            <Ionicons name="server-outline" size={13} color={COLORS.neutral500} />
+            <Text style={{ fontSize: 11, color: COLORS.neutral600, fontWeight: '600' }}>
+              Backend: {activeServer.includes('heroku') ? '🚀 Heroku Cloud (24/7)' : activeServer}
+            </Text>
+          </TouchableOpacity>
+
         </View>
 
       </ScrollView>
@@ -790,6 +839,13 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
         message={alertConfig.message}
         actions={alertConfig.actions}
         onDismiss={hideAlert}
+      />
+
+      {/* Backend Server Diagnostics Modal */}
+      <ServerConfigModal
+        visible={showServerModal}
+        onClose={() => setShowServerModal(false)}
+        onServerChanged={(newUrl) => setActiveServer(newUrl)}
       />
 
     </KeyboardAvoidingView>
