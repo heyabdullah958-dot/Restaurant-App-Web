@@ -295,16 +295,16 @@
 ### Bug #28: Expo Remote OTA Update Fatal Startup Crash "java.io.IOException: Failed to download remote update" (Resolved 2026-08-15)
 - **Symptom**: Expo Go / Android runtime crashes at launch with a blue error screen: `Uncaught Error: java.io.IOException: Failed to download remote update`.
 - **Root Cause**:
-  1. `app/app.json` had `"updates": { "enabled": true, "url": "https://u.expo.dev/c148418c-3d1b-4d90-ba37-5c942dbd2ca9" }` pointing to an unreachable/mismatched EAS project ID with no fallback timeout configured.
-  2. Because `fallbackToCacheTimeout` was omitted (or non-zero), the Expo runtime attempted a blocking download of the remote bundle on launch and threw a fatal unhandled native `IOException` when the remote EAS endpoint failed.
-  3. `admin-app/app.json` and root `app.json` lacked explicit `fallbackToCacheTimeout: 0` and `checkAutomatically: "NEVER"` safeguards.
+  1. `admin-app/app.json` had `"plugins": [["expo-build-properties", ...]]` declared, but `expo-build-properties` was NOT installed in `admin-app/node_modules` (`admin-app/package.json`). Whenever the phone requested the project manifest from Metro, Expo Config CLI threw `PluginError: Failed to resolve plugin for module "expo-build-properties"`, returning a 500 error to Expo Go. Expo Go interpreted the failed manifest download as a remote update failure and crashed with `java.io.IOException: Failed to download remote update`.
+  2. `app/app.json` had `"updates": { "enabled": true, "url": "https://u.expo.dev/c148418c-3d1b-4d90-ba37-5c942dbd2ca9" }` pointing to an outdated EAS project ID with no fallback timeout configured.
 - **Fix Applied**:
-  1. Updated `app/app.json`, `admin-app/app.json`, and root `app.json` with `"updates": { "enabled": false, "fallbackToCacheTimeout": 0, "checkAutomatically": "NEVER" }`.
-  2. Aligned `updates.url` in `app/app.json` with the active EAS `projectId` (`61e77707-45e4-4c06-895b-8a7cfc3462aa`).
-  3. Configured zero-timeout instant cache fallback so the application launches instantly with the embedded local bundle without crashing on network drops.
+  1. Ran `npm install expo-build-properties` in `admin-app`, resolving the `PluginError` and allowing Metro to serve the manifest cleanly.
+  2. Updated `app/app.json`, `admin-app/app.json`, and root `app.json` with `"updates": { "enabled": false, "fallbackToCacheTimeout": 0, "checkAutomatically": "NEVER" }`.
+  3. Restarted Metro bundler with `--clear`.
 - **Verification Evidence**:
-  - `npx tsc --noEmit` on both `admin-app` and `app` passed with 0 errors.
-  - Metro dev server on port 8081 compiled and served Android bundle with HTTP 200 OK.
+  - `admin-app/node_modules/expo-build-properties` verified installed.
+  - Manifest probe `HTTP GET http://127.0.0.1:8081/` with header `expo-platform: android` returns 200 OK without any `PluginError`.
+  - Android JS bundle downloaded via `http://127.0.0.1:8081/index.bundle?platform=android&dev=true` in 14.7s (1062 modules) with status 200 OK.
 
 
 
