@@ -191,10 +191,13 @@ export const isPublicUrl = (url, method = 'get') => {
     '/platform-settings',
     '/coupons/validate',
     '/coupons/active',
+    '/promotions',
+    '/flash-deals',
+    '/deals',
   ];
 
   if (lowerMethod === 'get') {
-    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu', '/track');
+    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu', '/track', '/promotions', '/flash-deals', '/deals');
   }
 
   return publicPatterns.some((pattern) => lowerUrl.includes(pattern));

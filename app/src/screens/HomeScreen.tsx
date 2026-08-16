@@ -124,7 +124,12 @@ const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => voi
     let isMounted = true;
     api.get('/promotions/flash-deals/')
       .then((res: any) => {
-        const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+        let data: any[] = [];
+        if (Array.isArray(res)) data = res;
+        else if (Array.isArray(res?.results)) data = res.results;
+        else if (Array.isArray(res?.data)) data = res.data;
+        else if (Array.isArray(res?.data?.results)) data = res.data.results;
+
         if (isMounted && data.length > 0) {
           setFlashDeals(data.filter((d: any) => !d.is_dine_in_only));
         }
@@ -210,7 +215,12 @@ const DineInBannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () 
     // Fetch live active flash deals (universal & dine-in)
     api.get('/promotions/flash-deals/')
       .then((res: any) => {
-        const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+        let data: any[] = [];
+        if (Array.isArray(res)) data = res;
+        else if (Array.isArray(res?.results)) data = res.results;
+        else if (Array.isArray(res?.data)) data = res.data;
+        else if (Array.isArray(res?.data?.results)) data = res.data.results;
+
         if (isMounted && data.length > 0) {
           setFlashDeals(data);
         }

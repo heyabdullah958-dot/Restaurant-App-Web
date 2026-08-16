@@ -52,10 +52,48 @@ const BRAND_DATA: Record<string, { name: string; slug: string; emoji: string; co
   'birdmanfoodspk': { name: 'Birdman Foods', slug: 'birdmanfoodspk', emoji: '🍗', colors: ['#7A0000', '#FF1744'] },
 };
 
+const ID_TO_SLUG: Record<number | string, string> = {
+  1: 'seenbanao',
+  2: 'dineatblue',
+  3: 'jushhpk',
+  4: 'tandooristoppk',
+  5: 'sandmelts',
+  6: 'birdmanfoodspk',
+  7: 'getafomo',
+  'seenbanao': 'seenbanao',
+  'dineatblue': 'dineatblue',
+  'jushhpk': 'jushhpk',
+  'tandooristoppk': 'tandooristoppk',
+  'sandmelts': 'sandmelts',
+  'birdmanfoodspk': 'birdmanfoodspk',
+  'getafomo': 'getafomo',
+};
+
+const parseDateSafe = (dateStr?: string): number => {
+  if (!dateStr) return Date.now() + 7 * 86400000;
+  let iso = String(dateStr).trim();
+  if (iso.includes(' ') && !iso.includes('T')) {
+    iso = iso.replace(' ', 'T');
+  }
+  const timestamp = new Date(iso).getTime();
+  if (isNaN(timestamp)) {
+    return Date.now() + 7 * 86400000;
+  }
+  return timestamp;
+};
+
 const resolveBrandInfo = (deal: FlashDealItem) => {
   if (typeof deal.restaurant === 'object' && deal.restaurant?.slug) {
     const key = deal.restaurant.slug.toLowerCase().replace(/\s+/g, '');
     return BRAND_DATA[key] || { name: deal.restaurant.name || 'FoodSphere', slug: deal.restaurant.slug, emoji: '🍽️', colors: ['#e11d48', '#f43f5e'] };
+  }
+  if (typeof deal.restaurant === 'number' && ID_TO_SLUG[deal.restaurant]) {
+    const key = ID_TO_SLUG[deal.restaurant];
+    return BRAND_DATA[key] || { name: 'FoodSphere', slug: key, emoji: '🍽️', colors: ['#e11d48', '#f43f5e'] };
+  }
+  if (deal.restaurant_id && ID_TO_SLUG[deal.restaurant_id]) {
+    const key = ID_TO_SLUG[deal.restaurant_id];
+    return BRAND_DATA[key] || { name: deal.restaurant_name || 'FoodSphere', slug: key, emoji: '🍽️', colors: ['#e11d48', '#f43f5e'] };
   }
   if (deal.restaurant_slug) {
     const key = deal.restaurant_slug.toLowerCase().replace(/\s+/g, '');
@@ -79,11 +117,11 @@ const useCountdown = (targetDateStr: string) => {
 
   useEffect(() => {
     const calculate = () => {
-      const now = new Date().getTime();
-      const target = new Date(targetDateStr).getTime();
+      const now = Date.now();
+      const target = parseDateSafe(targetDateStr);
       const diff = target - now;
 
-      if (diff <= 0 || isNaN(diff)) {
+      if (diff <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
         return;
       }
@@ -225,6 +263,16 @@ const DealCard = React.memo(({ deal, onClaim }: { deal: FlashDealItem; onClaim: 
   );
 });
 
+const extractDealsList = (res: any): FlashDealItem[] => {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.results)) return res.results;
+  if (Array.isArray(res.data)) return res.data;
+  if (Array.isArray(res.data?.results)) return res.data.results;
+  if (Array.isArray(res.data?.data)) return res.data.data;
+  return [];
+};
+
 export default function FlashDealsScreen() {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch();
@@ -239,8 +287,25 @@ export default function FlashDealsScreen() {
     else setLoading(true);
 
     try {
-      const res = await api.get('/promotions/flash-deals/');
-      const raw = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+      let raw: FlashDealItem[] = [];
+      try {
+        const res = await api.get('/promotions/flash-deals/');
+        raw = extractDealsList(res);
+      } catch (err) {
+        console.log('Error fetching from /promotions/flash-deals/:', err);
+      }
+
+      if (raw.length === 0) {
+        try {
+          const resFallback = await api.get('/flash-deals/');
+          const allDeals = extractDealsList(resFallback);
+          const now = Date.now();
+          raw = allDeals.filter(d => d.is_active && parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now);
+        } catch (errFallback) {
+          console.log('Error fetching fallback /flash-deals/:', errFallback);
+        }
+      }
+
       setDeals(raw);
     } catch (e) {
       console.warn('Failed to fetch flash deals:', e);
