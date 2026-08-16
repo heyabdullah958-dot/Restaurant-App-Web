@@ -810,6 +810,7 @@ export interface FlashDeal {
   menu_item?: number;
   menu_item_name?: string;
   is_active: boolean;
+  is_dine_in_only?: boolean;
   image_url?: string | null;
 }
 

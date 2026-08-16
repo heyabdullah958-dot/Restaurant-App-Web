@@ -137,6 +137,9 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class FlashDealSerializer(serializers.ModelSerializer):
+    restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
+    restaurant_slug = serializers.CharField(source='restaurant.slug', read_only=True)
+
     class Meta:
         model = FlashDeal
         fields = '__all__'

@@ -536,6 +536,32 @@ export default function RestaurantScreen() {
           <Text style={styles.descriptionText}>{restaurant.description}</Text>
         ) : null}
 
+        {(route.params as any)?.flashDealClaimed && (
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#FFF1F2',
+            borderColor: '#FECDD3',
+            borderWidth: 1,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            marginTop: 10,
+            gap: 8,
+          }}>
+            <Text style={{ fontSize: 16 }}>⚡</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: '#9F1239' }}>
+                Flash Deal Claimed! ({(route.params as any).flashDealClaimed.discount}% OFF)
+              </Text>
+              <Text style={{ fontSize: 10, color: '#BE123C', fontWeight: '500' }}>
+                Discount automatically applied to your basket!
+              </Text>
+            </View>
+            <Ionicons name="checkmark-circle" size={20} color="#16A34A" />
+          </View>
+        )}
+
         <View style={styles.specsContainer}>
           <View style={styles.specItem}>
             <Ionicons name="star" size={16} color={COLORS.warning} />

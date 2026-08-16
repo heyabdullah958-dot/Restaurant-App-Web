@@ -43,6 +43,7 @@ const { width } = Dimensions.get('window');
 
 const categories = [
   { id: 'All', name: 'All', icon: '🍽️' },
+  { id: 'FlashDeals', name: '⚡ Flash Deals', icon: '⚡' },
   { id: 'Tandoori', name: 'Tandoori', icon: '🍗' },
   { id: 'Burgers', name: 'Burgers', icon: '🍔' },
   { id: 'Café', name: 'Café', icon: '☕' },
@@ -608,15 +609,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [dispatch]);
 
   const handleSelectCategory = React.useCallback((id: string) => {
+    if (id === 'FlashDeals') {
+      navigation.navigate('FlashDeals');
+      return;
+    }
     setSelectedCategory(id);
-  }, []);
+  }, [navigation]);
 
   const handlePressBrand = React.useCallback((slug: string) => {
     navigation.navigate('Restaurant', { slug });
   }, [navigation]);
 
   const handlePressBanner = React.useCallback(() => {
-    navigation.navigate('Main', { screen: 'Search' });
+    navigation.navigate('FlashDeals');
   }, [navigation]);
 
   const renderCategoryChipItem = React.useCallback(({ item }: { item: typeof categories[0] }) => (

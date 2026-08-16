@@ -27,6 +27,29 @@ import {
 import { FlashDeal } from '../../services/api';
 import { Card, formatHumanDateTime, LoadingState, ErrorState, EmptyState, DateTimePickerModal } from '../../components/ui';
 
+const getDealStatus = (deal: FlashDeal) => {
+  if (!deal.is_active) {
+    return { label: 'DISABLED', bg: 'rgba(148, 163, 184, 0.15)', text: '#94a3b8', border: '#475569', icon: '⚪' };
+  }
+  const now = new Date();
+  const start = deal.start_time ? new Date(deal.start_time) : now;
+  const end = deal.end_time ? new Date(deal.end_time) : new Date(now.getTime() + 86400000);
+
+  if (end < now) {
+    return { label: 'EXPIRED', bg: 'rgba(239, 68, 68, 0.15)', text: '#ef4444', border: '#ef4444', icon: '🔴' };
+  }
+  if (start > now) {
+    const diffMs = start.getTime() - now.getTime();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+    const startsText = diffHours < 24 ? `Starts in ${diffHours}h` : `Starts in ${Math.round(diffHours / 24)}d`;
+    return { label: `SCHEDULED (${startsText})`, bg: 'rgba(245, 158, 11, 0.15)', text: '#f59e0b', border: '#f59e0b', icon: '🟡' };
+  }
+  const remainingMs = end.getTime() - now.getTime();
+  const remHours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const remText = remHours < 24 ? `${remHours}h left` : `${Math.floor(remHours / 24)}d left`;
+  return { label: `LIVE NOW · ${remText}`, bg: 'rgba(34, 197, 94, 0.15)', text: '#22c55e', border: '#22c55e', icon: '🟢' };
+};
+
 export const FlashDealManagementScreen = () => {
   const dispatch = useAppDispatch();
   const { flashDeals, isLoading, isRefreshing, error } = useAppSelector((state) => state.promo);
@@ -185,52 +208,80 @@ export const FlashDealManagementScreen = () => {
               themeMode="super"
             />
           }
-          renderItem={({ item }) => (
-            <Card style={styles.card} themeMode="super">
-              <View style={styles.cardHeader}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeIcon}>⚡</Text>
+          renderItem={({ item }) => {
+            const status = getDealStatus(item);
+            return (
+              <Card style={styles.card} themeMode="super">
+                <View style={styles.cardHeader}>
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeIcon}>⚡</Text>
+                  </View>
+
+                  <View style={styles.titleBox}>
+                    <Text style={styles.dealTitle}>{item.title}</Text>
+                    {item.menu_item_name ? (
+                      <Text style={styles.itemSub}>Item: {item.menu_item_name}</Text>
+                    ) : null}
+                  </View>
+
+                  <View style={styles.discountBadge}>
+                    <Text style={styles.discountText}>{item.discount_percentage}% OFF</Text>
+                  </View>
+
+                  <Switch
+                    value={item.is_active}
+                    onValueChange={() => handleToggleActive(item)}
+                    trackColor={{ false: '#334155', true: '#EF4444' }}
+                    thumbColor="#FFF"
+                  />
                 </View>
 
-                <View style={styles.titleBox}>
-                  <Text style={styles.dealTitle}>{item.title}</Text>
-                  {item.menu_item_name ? (
-                    <Text style={styles.itemSub}>Item: {item.menu_item_name}</Text>
-                  ) : null}
+                {/* Status Pill */}
+                <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: status.bg,
+                    borderColor: status.border,
+                    borderWidth: 1,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 12,
+                    gap: 5
+                  }}>
+                    <Text style={{ fontSize: 10 }}>{status.icon}</Text>
+                    <Text style={{ fontSize: 11, fontWeight: '800', color: status.text }}>
+                      {status.label}
+                    </Text>
+                  </View>
+                  {item.is_dine_in_only && (
+                    <View style={{ backgroundColor: 'rgba(124, 58, 237, 0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#7c3aed' }}>
+                      <Text style={{ fontSize: 10, fontWeight: '700', color: '#c4b5fd' }}>🍽️ Dine-In Only</Text>
+                    </View>
+                  )}
                 </View>
 
-                <View style={styles.discountBadge}>
-                  <Text style={styles.discountText}>{item.discount_percentage}% OFF</Text>
+                <View style={styles.timeBox}>
+                  <Text style={styles.timeText}>
+                    🕒 Start: {item.start_time ? formatHumanDateTime(item.start_time) : 'Active Now'}
+                  </Text>
+                  <Text style={styles.timeText}>
+                    🏁 End: {item.end_time ? formatHumanDateTime(item.end_time) : 'No end time'}
+                  </Text>
                 </View>
 
-                <Switch
-                  value={item.is_active}
-                  onValueChange={() => handleToggleActive(item)}
-                  trackColor={{ false: '#334155', true: '#EF4444' }}
-                  thumbColor="#FFF"
-                />
-              </View>
-
-              <View style={styles.timeBox}>
-                <Text style={styles.timeText}>
-                  🕒 Start: {item.start_time ? formatHumanDateTime(item.start_time) : 'Active Now'}
-                </Text>
-                <Text style={styles.timeText}>
-                  🏁 End: {item.end_time ? formatHumanDateTime(item.end_time) : 'No end time'}
-                </Text>
-              </View>
-
-              <View style={styles.actionRow}>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeleteDeal(item)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.deleteButtonText}>🗑️ Delete Deal</Text>
-                </TouchableOpacity>
-              </View>
-            </Card>
-          )}
+                <View style={styles.actionRow}>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteDeal(item)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.deleteButtonText}>🗑️ Delete Deal</Text>
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            );
+          }}
         />
       )}
 

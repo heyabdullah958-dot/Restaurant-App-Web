@@ -23,10 +23,11 @@ class Command(BaseCommand):
 
         try:
             from django.core.management import call_command
+            call_command('seed_flash_deals')
             call_command('consolidate_menu_variants')
-            self.stdout.write('Consolidated menu variants successfully.')
+            self.stdout.write('Consolidated menu variants and seeded flash deals successfully.')
         except Exception as e:
-            self.stdout.write(f'Note on variant consolidation: {e}')
+            self.stdout.write(f'Note on setup: {e}')
 
         if options.get('force'):
             self.stdout.write('Force flag detected. Clearing existing restaurant data...')

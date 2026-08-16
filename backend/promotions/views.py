@@ -96,7 +96,7 @@ class ActiveFlashDealsView(generics.ListAPIView):
     
     def get_queryset(self):
         now = timezone.now()
-        qs = FlashDeal.objects.filter(is_active=True, start_time__lte=now, end_time__gte=now)
+        qs = FlashDeal.objects.filter(is_active=True, start_time__lte=now, end_time__gte=now).order_by('-created_at')
         is_dine_in_only = self.request.query_params.get('is_dine_in_only')
         if is_dine_in_only is not None:
             if is_dine_in_only.lower() in ['true', '1']:

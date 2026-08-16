@@ -41,6 +41,7 @@ import OrderConfirmationScreen from './src/screens/OrderConfirmationScreen';
 import TrackingScreen from './src/screens/TrackingScreen';
 import RewardsScreen from './src/screens/RewardsScreen';
 import LegalScreen from './src/screens/LegalScreen';
+import FlashDealsScreen from './src/screens/FlashDealsScreen';
 
 // Type declarations for Stack Navigator
 type RootStackParamList = {
@@ -48,7 +49,8 @@ type RootStackParamList = {
   Onboarding: undefined;
   Auth: undefined;
   Main: undefined;
-  Restaurant: { slug: string };
+  Restaurant: { slug: string; flashDealClaimed?: any };
+  FlashDeals: undefined;
   Cart: undefined;
   Checkout: undefined;
   OrderConfirmation: { orderId: number; loyaltyPointsEarned?: number };
@@ -274,6 +276,7 @@ function AppContent() {
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+        <Stack.Screen name="FlashDeals" component={FlashDealsScreen} />
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="Checkout" component={CheckoutScreen} />
         <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
