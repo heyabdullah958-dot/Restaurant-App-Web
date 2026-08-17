@@ -16,8 +16,8 @@ urlpatterns = [
     path('coupons/active/', ActiveCouponsView.as_view(), name='coupons-active'),
     path('deals/', FlashDealListCreateView.as_view(), name='deal-list-create'),
     path('deals/active/', ActiveFlashDealsView.as_view(), name='deals-active'),
-    path('deals/<int:pk>/', FlashDealDetailView.as_view(), name='deal-detail'),
     path('flash-deals/', FlashDealListCreateView.as_view(), name='flash-deal-list-create'),
+    path('flash-deals/active/', ActiveFlashDealsView.as_view(), name='flash-deals-active'),
     path('flash-deals/<int:pk>/', FlashDealDetailView.as_view(), name='flash-deal-detail'),
 ]
 

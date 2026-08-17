@@ -192,6 +192,7 @@ FoodSphere/
 | Admin Mobile App Super Admin HQ Core (Phase 6A) | ✅ Completed (Platform analytics, multi-brand onboarding, branch manager provisioning & password reset) | Done |
 | Admin Mobile App Super Admin CRM & Growth Suite (Phase 6B) | ✅ Completed (Customer CRM with loyalty adjustment, Promo Coupons engine, Flash Deals, FCM Push Notification center) | Done |
 | Dual-App Integration, Merchant Alarm & Guest Gate | ✅ Completed (`test_dual_app_e2e.py` 100% pass, unstoppable merchant alarm, guest gate form restoration, account isolation) | Done |
+| Flash Deals Engine v2.0 (Option A + Recurring Midnight Specials) | ✅ Completed (6-step progressive admin modal, item scoping hierarchy, midnight rollover, FlashDealRedemption ledger, 39/39 test pass) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -240,6 +241,7 @@ FoodSphere/
 27. **Rider Dispatch Atomic Side-Effects Invariant:** Assigning a rider to a `preparing` order (`POST /api/orders/{id}/assign-rider/`) automatically sets `order.status = 'out_for_delivery'` and `rider.status = 'ON_DELIVERY'` server-side. Setting order status to `delivered` or `cancelled` automatically frees up the rider (`rider.status = 'AVAILABLE'`) in backend `orders/models.py`. The mobile app MUST NOT make secondary client-side status PATCH calls after rider assignment.
 28. **In-App Foreground Order Ringing Invariant:** `admin-app` uses `NewOrderAlertService` event bus singleton coupled to root-level `useOrderPolling` to trigger a full-screen takeover modal (`NewOrderAlertOverlay`) with looping sound (`expo-av` with `isLooping: true`) and screen keep-awake (`expo-keep-awake`) whenever new unaccepted orders arrive while foregrounded.
 29. **Admin Mobile App Comprehensive 12-View Suite:** All 12 views in `admin-app` (Login, OrderManagement, BranchDashboard, MenuManagement, RiderManagement, SuperDashboard, TenantManagement, ManagerManagement, CustomerManagement, PromoManagement, FlashDealManagement, NotificationCenter) are 100% implemented, role-scoped, wired to real DRF backend APIs, and verified with zero compilation errors (`npx tsc --noEmit`).
+30. **Flash Deals Engine v2.0 Invariant:** Flash deals support multi-tier item scoping (`ENTIRE_MENU`, `CATEGORY`, `SPECIFIC_ITEMS`), 3-way order modes (`ALL`, `DELIVERY`, `DINE_IN`), recurring daily schedules with timezone-aware midnight rollover (e.g. 10 PM – 2 AM with yesterday date boundary protection), priority conflict resolution (Priority integer -> Specificity -> Discount magnitude), and audit-ready `FlashDealRedemption` ledger tracking with customizable reset frequency (`DAILY` vs `LIFETIME`).
 
 ---
 

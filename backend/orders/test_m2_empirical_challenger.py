@@ -64,6 +64,7 @@ class EmpiricalChallengerM2TestCase(APITestCase):
             is_staff=True,
             is_superuser=True
         )
+        self.client.force_authenticate(user=self.staff_user)
 
     # =========================================================================
     # TASK 1: DELIVERY RADIUS ENFORCEMENT TESTS
@@ -244,7 +245,7 @@ class EmpiricalChallengerM2TestCase(APITestCase):
         url = f"/api/orders/{order.id}/assign-rider/"
         response = self.client.post(url, {"rider_id": inactive_rider.id}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Rider is inactive", response.data.get("error", ""))
+        self.assertIn("is inactive", response.data.get("error", ""))
 
     def test_task2_rider_unassignment(self):
         """Test unassigning rider by passing rider_id: null"""

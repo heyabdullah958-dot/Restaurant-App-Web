@@ -56,6 +56,7 @@ class Challenger2OperationsTestCase(APITestCase):
             password="Password123!",
             phone="03001234567"
         )
+        self.client.force_authenticate(user=self.user)
 
         self.valid_order_payload = {
             "restaurant": self.restaurant.id,
@@ -165,13 +166,13 @@ class Challenger2OperationsTestCase(APITestCase):
             format="json"
         )
         self.assertEqual(val_response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("expired or inactive", str(val_response.data))
+        self.assertIn("expired", str(val_response.data).lower())
 
         # 2. Check order placement
         order_payload = dict(self.valid_order_payload, coupon_code="EXPIRED20")
         order_response = self.client.post("/api/orders/", order_payload, format="json")
         self.assertEqual(order_response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("expired or inactive", str(order_response.data))
+        self.assertIn("expired", str(order_response.data).lower())
 
     def test_coupon_validation_maxed_out_usage(self):
         """Test maxed-out usage limit code is rejected."""

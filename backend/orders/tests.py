@@ -79,6 +79,7 @@ class OrderPIISecurityTestCase(APITestCase):
 
     def test_order_creation_returns_tracking_token(self):
         url = "/api/orders/"
+        self.client.force_authenticate(user=self.owner_user)
         payload = {
             "restaurant": self.restaurant.id,
             "guest_name": "New Guest",
@@ -188,6 +189,7 @@ class OrderPIISecurityTestCase(APITestCase):
             is_active=True
         )
         # Coordinates ~50km away in Kasur (31.1179, 74.4459)
+        self.client.force_authenticate(user=self.owner_user)
         payload = {
             "restaurant": self.restaurant.id,
             "branch": branch.id,
@@ -203,6 +205,7 @@ class OrderPIISecurityTestCase(APITestCase):
         self.assertIn("outside our service area", str(response.data))
 
     def test_coupon_usage_limit_and_atomic_increment(self):
+        self.client.force_authenticate(user=self.owner_user)
         coupon = Coupon.objects.create(
             code="TEST20",
             discount_type="PERCENTAGE",

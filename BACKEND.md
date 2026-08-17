@@ -21,17 +21,24 @@
   - `backend/orders/views.py`
   - `backend/users/views.py`
   - `backend/restaurants/migrations/0012_platformsettings.py`
-## Phase 2 — Pre-Ship Security Audit & Vulnerability Remediation — 2026-08-10
+## Phase 3 — Flash Deals Engine v2.0 & Recurring Specials — 2026-08-17
 - **What changed and why**:
-  - Enforced `permissions.IsAdminUser` on mutation methods (`POST`, `PUT`, `PATCH`, `DELETE`) across `CouponListCreateView`, `CouponDetailView`, `FlashDealListCreateView`, and `FlashDealDetailView` (rejected rejected alternative: keeping endpoints `AllowAny` for guest convenience, which posed critical unauthenticated coupon creation risk).
-  - Implemented automatic customer PII redaction (`guest_phone`, `delivery_address`, coordinates) in `OrderTrackView` when querying orders by integer ID `pk` without matching `tracking_token` UUID or owner authentication.
-  - Aligned loyalty cancellation refund signs (`abs(tx.points)`), restoring atomic point balance refunds to 100% accuracy.
-- **Files modified**:
+  - Upgraded `promotions.FlashDeal` model to support multi-tier item scoping (`ENTIRE_MENU`, `CATEGORY`, `SPECIFIC_ITEMS`), 3-way order fulfillment modes (`ALL`, `DELIVERY`, `DINE_IN`), and recurring daily timing with timezone-aware midnight rollover (`ZoneInfo('Asia/Karachi')`).
+  - Created `promotions.FlashDealRedemption` audit ledger model tracking individual user/order redemptions with configurable reset frequency (`DAILY` vs `LIFETIME`).
+  - Built `backend/promotions/deal_engine.py` with 3-tier specificity resolution algorithm (Priority Integer -> Specificity Scope -> Discount Magnitude).
+  - Wired live `active_flash_deal` computed serialization to `MenuItemSerializer` in `restaurants/serializers.py`.
+  - Added atomic `FlashDealRedemption` record creation to `OrderCreateSerializer` in `orders/serializers.py`.
+- **Files modified / created**:
+  - `backend/promotions/models.py`
+  - `backend/promotions/deal_engine.py` [NEW]
+  - `backend/promotions/serializers.py`
   - `backend/promotions/views.py`
-  - `backend/orders/views.py`
-  - `test_backend_local.py`
-- **How it was verified**: Ran `backend\venv\Scripts\python.exe test_backend_local.py` (23/23 tests passed, code 0)
-- **Confidence**: 100% — verified via automated integration suite and manual endpoint inspection
+  - `backend/promotions/urls.py`
+  - `backend/restaurants/serializers.py`
+  - `backend/orders/serializers.py`
+  - `backend/test_flash_deals_v2_engine_suite.py` [NEW]
+- **How it was verified**: Ran `manage.py test orders test_flash_deals_v2_engine_suite` (39/39 tests passed, 100% OK).
+- **Confidence**: 100% — verified across all timezone boundaries, rollover edge cases, and multi-tenant scoping rules.
 
 
 

@@ -146,26 +146,28 @@
 
 ---
 
-## Phase 1 — Dynamic Home Banner Synchronization & Static Deal Purge — 2026-08-17
+## Phase 2 — Flash Deals Engine v2.0: Progressive Admin Modals, Item Badging & Midnight Specials — 2026-08-17
 - **What changed and why**:
-  1. Purged legacy static promotional mock banner arrays (`BANNERS` with `"3 Brands, One Cart!"`, `"Earn Loyalty Points!"`, and `DINE_IN_FALLBACK_BANNERS` with `"Exclusive Dine-In Offers"`) from `HomeScreen.tsx`.
-  2. Implemented `DynamicHeroBannerSection` component that binds strictly to live backend promotional flash deals (`/promotions/flash-deals/`).
-  3. Integrated clean collapse behavior (`if (activeBanners.length === 0) return null;`) so when no promotions or flash deals are active, the banner area smoothly collapses to zero height without leaving orphan slides or visual gaps.
-  4. Wired active deal synchronization to `useFocusEffect` (focus re-evaluation & 30s background polling) and `handleRefresh` (pull-to-refresh), ensuring real-time deactivation/creation of promotions in Admin HQ immediately reflects on the mobile Customer Home Screen.
-  5. Added automatic promo code generation (`FLASH-{CODE}`) and 1-tap claim navigation on banner tap.
+  1. Upgraded `FlashDealManagementScreen.tsx` (`admin-app`) and `FlashDealManagement.tsx` (`admin` Web HQ) with a 6-step progressive creation modal:
+     - Step 1: Deal Identity (`title`, `description`)
+     - Step 2: Target Scope (Cascading Brand & Branch pickers, 3-way Order Mode chips: `ALL`, `DELIVERY`, `DINE_IN`)
+     - Step 3: Item Scope (Radio: `ENTIRE_MENU`, `CATEGORY` multi-select chips, `SPECIFIC_ITEMS` searchable dish checklist)
+     - Step 4: Deal Mechanics & Limits (`% Off` with Max Cap, `Flat Rs. Off`, `BOGO`, `Min Subtotal`, `Max Orders` cap with `Nightly Reset` vs `Lifetime Total` frequency)
+     - Step 5: Schedule & Timing (`One-Time Window` vs `Recurring Daily Schedule` with start/end time dropdowns, 1-tap day presets `[Every Day]`, `[Weekdays]`, `[Weekends]`, `valid_from`/`valid_until`, `priority` slider)
+     - Step 6: Customer Live Preview card
+  2. Upgraded customer app `MenuItemCard` in `app/src/screens/RestaurantScreen.tsx` to dynamically render flash deal badge (e.g. `⚡ 30% OFF`) and strike-through pricing (`Rs. 595` / `~Rs. 850~`).
+  3. Upgraded `HomeScreen.tsx` `DynamicHeroBannerSection` and `FlashDealsScreen.tsx` to render recurring midnight badges (`🌙 MIDNIGHT DEAL`), live countdown timers bound to `window_ends_at`, and claim progress bars (`🔥 X / Y claimed`).
 - **Files modified**:
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/services/api.ts`
+  - `admin/src/views/FlashDealManagement.tsx`
+  - `admin/src/services/api.ts`
+  - `app/src/services/fallbackData.ts`
+  - `app/src/screens/RestaurantScreen.tsx`
   - `app/src/screens/HomeScreen.tsx`
-  - `test_dynamic_home_banner_sync_suite.py` [NEW]
-  - `FRONTEND.md`
-  - `BUGS.md`
-  - `CHANGELOG.md`
-  - `LESSONS.md`
-- **Approaches considered**:
-  - Option A: Unified `DynamicHeroBannerSection` with direct prop binding, lifecycle hooks in `HomeScreen`, and conditional clean collapse (Chosen — zero latency, eliminates duplicate carousel logic, full focus synchronization).
-  - Option B: Isolated child component fetching with static placeholder cards on empty state (Rejected — leaves orphan slides and fails to synchronize with HomeScreen focus / pull-to-refresh).
-- **How it was verified**: Executed `npx tsc --noEmit` across `app`, `admin`, and `admin-app` (0 compilation errors, code 0) and ran `test_dynamic_home_banner_sync_suite.py` (5/5 tests passed, code 0) & `test_backend_local.py` (23/23 tests passed, code 0).
-- **Deploy status**: Saved, verified locally, ready for commit & push.
-- **Confidence**: 100% — verified through static analysis, full TypeScript compilation, and live DRF integration test suite.
+  - `app/src/screens/FlashDealsScreen.tsx`
+- **How it was verified**: Executed `npx tsc --noEmit` across `admin-app`, `admin`, and `app` (0 compilation errors, code 0) and ran `manage.py test orders test_flash_deals_v2_engine_suite` (39/39 tests passed, 100% OK).
+- **Confidence**: 100% — verified via strict TypeScript compilation, automated unit/integration suites, and multi-tenant schema verification.
 
 
 
