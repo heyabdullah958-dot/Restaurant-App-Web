@@ -395,6 +395,30 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     order=order
                 )
 
+            # Record FlashDealRedemption if active flash deals apply
+            try:
+                from promotions.models import FlashDeal, FlashDealRedemption
+                from promotions.deal_engine import resolve_active_deal_for_item
+                claimed_deal_ids = set()
+                for item_obj in order_items_to_create:
+                    m_item = item_obj['menu_item']
+                    b_id = validated_data.get('branch_id') or (validated_data.get('branch').id if validated_data.get('branch') else None)
+                    active_deal_info = resolve_active_deal_for_item(m_item, order_mode=ord_type, branch_id=b_id)
+                    if active_deal_info and active_deal_info.get('deal_id'):
+                        deal_id = active_deal_info['deal_id']
+                        if deal_id not in claimed_deal_ids:
+                            claimed_deal_ids.add(deal_id)
+                            deal_obj = FlashDeal.objects.filter(id=deal_id).first()
+                            if deal_obj:
+                                FlashDealRedemption.objects.create(
+                                    flash_deal=deal_obj,
+                                    order=order,
+                                    user=user if user and not user.is_guest else None,
+                                    discount_applied=Decimal(str(active_deal_info.get('discount_amount', 0)))
+                                )
+            except Exception as e:
+                logger.warning(f"[FLASH DEAL REDEMPTION LOGGING ERROR]: {e}")
+
             # Deduct loyalty points if redeemed
             if user and not user.is_guest and actual_pts_redeemed > 0:
                 from django.contrib.auth import get_user_model

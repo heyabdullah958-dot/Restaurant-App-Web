@@ -139,7 +139,63 @@ class CouponSerializer(serializers.ModelSerializer):
 class FlashDealSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
     restaurant_slug = serializers.CharField(source='restaurant.slug', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    is_currently_active = serializers.SerializerMethodField()
+    current_redemptions = serializers.SerializerMethodField()
+    redemptions_left = serializers.SerializerMethodField()
+    window_ends_at = serializers.SerializerMethodField()
+    discount_display_text = serializers.SerializerMethodField()
+    categories_details = serializers.SerializerMethodField()
+    menu_items_details = serializers.SerializerMethodField()
 
     class Meta:
         model = FlashDeal
-        fields = '__all__'
+        fields = [
+            'id', 'title', 'description', 'deal_type', 'discount_value', 'max_discount', 'min_subtotal',
+            'restaurant', 'restaurant_name', 'restaurant_slug', 'branch', 'branch_name', 'order_mode',
+            'item_scope_type', 'categories', 'categories_details', 'menu_items', 'menu_items_details',
+            'timing_type', 'start_time', 'end_time', 'daily_start_time', 'daily_end_time', 'active_days',
+            'valid_from', 'valid_until', 'timezone', 'max_orders', 'orders_used', 'current_redemptions',
+            'redemptions_left', 'redemption_reset_frequency', 'priority', 'image', 'is_active',
+            'is_currently_active', 'window_ends_at', 'discount_display_text', 'created_at'
+        ]
+
+    def get_is_currently_active(self, obj):
+        return obj.is_currently_active()
+
+    def get_current_redemptions(self, obj):
+        return obj.current_redemption_count()
+
+    def get_redemptions_left(self, obj):
+        if obj.max_orders > 0:
+            return max(0, obj.max_orders - obj.current_redemption_count())
+        return None
+
+    def get_window_ends_at(self, obj):
+        from .deal_engine import compute_window_ends_at
+        return compute_window_ends_at(obj)
+
+    def get_discount_display_text(self, obj):
+        if obj.deal_type == 'percentage':
+            cap_text = f" (Max Rs. {int(obj.max_discount)})" if obj.max_discount else ""
+            return f"{int(obj.discount_value)}% OFF{cap_text}"
+        elif obj.deal_type == 'flat':
+            return f"Flat Rs. {int(obj.discount_value)} OFF"
+        elif obj.deal_type == 'bogo':
+            return "Buy 1 Get 1 Free"
+        return f"{obj.title}"
+
+    def get_categories_details(self, obj):
+        return [{'id': c.id, 'name': c.name} for c in obj.categories.all()]
+
+    def get_menu_items_details(self, obj):
+        return [
+            {
+                'id': item.id,
+                'name': item.name,
+                'price': float(item.price),
+                'category_name': item.category.name if item.category else ''
+            }
+            for item in obj.menu_items.all()
+        ]
+

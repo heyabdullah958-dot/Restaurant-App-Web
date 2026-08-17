@@ -84,34 +84,60 @@ class FlashDealListCreateView(generics.ListCreateAPIView):
         return [permissions.IsAdminUser()]
 
     def get_queryset(self):
-        qs = FlashDeal.objects.all().order_by('-created_at')
+        qs = FlashDeal.objects.all().prefetch_related('categories', 'menu_items').order_by('-created_at')
         restaurant_id = self.request.query_params.get('restaurant_id')
+        branch_id = self.request.query_params.get('branch_id')
+        order_mode = self.request.query_params.get('order_mode')
+        
         if restaurant_id:
             qs = qs.filter(restaurant_id=restaurant_id)
+        if branch_id:
+            qs = qs.filter(branch_id=branch_id)
+        if order_mode:
+            qs = qs.filter(order_mode__in=[order_mode, 'ALL'])
         return qs
+
 
 class ActiveFlashDealsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = FlashDealSerializer
     
     def get_queryset(self):
-        now = timezone.now()
-        qs = FlashDeal.objects.filter(is_active=True, start_time__lte=now, end_time__gte=now).order_by('-created_at')
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        branch_id = self.request.query_params.get('branch_id')
+        order_mode = self.request.query_params.get('order_mode')
         is_dine_in_only = self.request.query_params.get('is_dine_in_only')
-        if is_dine_in_only is not None:
+
+        qs = FlashDeal.objects.filter(is_active=True).prefetch_related('categories', 'menu_items').order_by('-priority', '-created_at')
+
+        if restaurant_id:
+            from django.db.models import Q
+            qs = qs.filter(Q(restaurant_id=restaurant_id) | Q(restaurant__isnull=True))
+        if branch_id:
+            from django.db.models import Q
+            qs = qs.filter(Q(branch_id=branch_id) | Q(branch__isnull=True))
+
+        if order_mode:
+            qs = qs.filter(order_mode__in=[order_mode, 'ALL'])
+        elif is_dine_in_only is not None:
             if is_dine_in_only.lower() in ['true', '1']:
-                qs = qs.filter(is_dine_in_only=True)
+                qs = qs.filter(order_mode='DINE_IN')
             elif is_dine_in_only.lower() in ['false', '0']:
-                qs = qs.filter(is_dine_in_only=False)
-        return qs
+                qs = qs.filter(order_mode__in=['ALL', 'DELIVERY'])
+
+        # Filter in Python for exact timezone/midnight-rollover/redemption active check
+        active_deals = [d for d in qs if d.is_currently_active()]
+        return active_deals
+
 
 class FlashDealDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = FlashDeal.objects.all()
+    queryset = FlashDeal.objects.all().prefetch_related('categories', 'menu_items')
     serializer_class = FlashDealSerializer
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
+
 
 

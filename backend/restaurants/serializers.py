@@ -45,10 +45,12 @@ class MenuItemSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
     is_available = serializers.SerializerMethodField()
 
+    active_flash_deal = serializers.SerializerMethodField()
+
     class Meta:
         model = MenuItem
         fields = ('id', 'category', 'name', 'description', 'price', 'image', 'image_url',
-                  'is_available', 'is_featured', 'preparation_time', 'options')
+                  'is_available', 'is_featured', 'preparation_time', 'options', 'active_flash_deal')
 
     def get_image_url(self, obj):
         return build_absolute_image_url(obj.image, self.context)
@@ -69,6 +71,21 @@ class MenuItemSerializer(serializers.ModelSerializer):
             if override:
                 return override.is_available
         return True
+
+    def get_active_flash_deal(self, obj):
+        try:
+            from promotions.deal_engine import resolve_active_deal_for_item
+            request = self.context.get('request') if self.context else None
+            order_mode = 'ALL'
+            branch_id = None
+            if request:
+                order_mode = request.query_params.get('order_mode', 'ALL')
+                branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
+            if not branch_id and self.context:
+                branch_id = self.context.get('branch_id')
+            return resolve_active_deal_for_item(obj, order_mode=order_mode, branch_id=branch_id)
+        except Exception:
+            return None
 
 
 class MenuCategorySerializer(serializers.ModelSerializer):
