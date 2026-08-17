@@ -35,10 +35,25 @@ interface FlashDealItem {
   restaurant_id?: number;
   restaurant_name?: string;
   restaurant_slug?: string;
+  branch?: number;
+  branch_name?: string;
+  timing_type?: 'ONE_TIME' | 'RECURRING_DAILY';
+  daily_start_time?: string | null;
+  daily_end_time?: string | null;
+  active_days?: string[];
+  window_ends_at?: string | null;
   start_time: string;
   end_time: string;
+  max_orders?: number;
+  current_redemptions?: number;
+  orders_used?: number;
+  redemption_reset_frequency?: 'DAILY' | 'LIFETIME';
   is_active: boolean;
+  is_currently_active?: boolean;
   is_dine_in_only?: boolean;
+  order_mode?: 'ALL' | 'DELIVERY' | 'DINE_IN';
+  item_scope_type?: 'ENTIRE_MENU' | 'CATEGORY' | 'SPECIFIC_ITEMS';
+  discount_display_text?: string;
 }
 
 // Brand mapping helpers
@@ -144,9 +159,13 @@ const useCountdown = (targetDateStr: string) => {
 
 const DealCard = React.memo(({ deal, onClaim }: { deal: FlashDealItem; onClaim: (deal: FlashDealItem) => void }) => {
   const brand = useMemo(() => resolveBrandInfo(deal), [deal]);
-  const countdown = useCountdown(deal.end_time);
+  const countdown = useCountdown(deal.window_ends_at || deal.end_time);
+
+  const isDineIn = deal.order_mode === 'DINE_IN' || deal.is_dine_in_only;
+  const isRecurring = deal.timing_type === 'RECURRING_DAILY';
 
   const discountText = useMemo(() => {
+    if (deal.discount_display_text) return deal.discount_display_text;
     const val = deal.discount_value || deal.discount_percentage || 20;
     return deal.deal_type === 'flat' ? `Rs. ${val} OFF` : `${val}% OFF`;
   }, [deal]);
@@ -158,7 +177,10 @@ const DealCard = React.memo(({ deal, onClaim }: { deal: FlashDealItem; onClaim: 
     return 'No minimum order';
   }, [deal.min_subtotal]);
 
-  if (countdown.isExpired) {
+  const redemptionsClaimed = deal.current_redemptions ?? deal.orders_used ?? 0;
+  const maxCap = deal.max_orders ?? 0;
+
+  if (countdown.isExpired && !isRecurring) {
     return null;
   }
 
@@ -189,11 +211,34 @@ const DealCard = React.memo(({ deal, onClaim }: { deal: FlashDealItem; onClaim: 
       </LinearGradient>
 
       <View style={styles.cardBody}>
+        {/* Recurring Schedule Tag */}
+        {isRecurring && deal.daily_start_time && deal.daily_end_time && (
+          <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <Ionicons name="moon" size={12} color="#f59e0b" />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#b45309' }}>
+              Recurring: {deal.daily_start_time} – {deal.daily_end_time} ({(deal.active_days || []).join(', ')})
+            </Text>
+          </View>
+        )}
+
+        {/* Claim progress if max_orders > 0 */}
+        {maxCap > 0 && (
+          <View style={{ marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
+              <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '600' }}>🔥 Claimed: {redemptionsClaimed} / {maxCap}</Text>
+              <Text style={{ fontSize: 11, color: '#64748b' }}>{deal.redemption_reset_frequency === 'DAILY' ? 'Nightly Reset' : 'Lifetime'}</Text>
+            </View>
+            <View style={{ height: 4, backgroundColor: '#e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+              <View style={{ height: '100%', backgroundColor: '#e11d48', width: `${Math.min(100, Math.round((redemptionsClaimed / maxCap) * 100))}%` }} />
+            </View>
+          </View>
+        )}
+
         {/* Live Timer Row */}
         <View style={styles.timerRow}>
           <View style={styles.timerLabelWrap}>
             <Ionicons name="time-outline" size={16} color="#e11d48" />
-            <Text style={styles.timerLabel}>Ends In:</Text>
+            <Text style={styles.timerLabel}>{isRecurring ? 'Window Ends:' : 'Ends In:'}</Text>
           </View>
 
           <View style={styles.timerBoxesContainer}>
@@ -230,14 +275,14 @@ const DealCard = React.memo(({ deal, onClaim }: { deal: FlashDealItem; onClaim: 
             <Text style={styles.detailTagText}>{minOrderText}</Text>
           </View>
 
-          <View style={[styles.detailTag, deal.is_dine_in_only ? styles.dineInTag : styles.deliveryTag]}>
+          <View style={[styles.detailTag, isDineIn ? styles.dineInTag : styles.deliveryTag]}>
             <Ionicons
-              name={deal.is_dine_in_only ? 'restaurant-outline' : 'bicycle-outline'}
+              name={isDineIn ? 'restaurant-outline' : 'bicycle-outline'}
               size={13}
-              color={deal.is_dine_in_only ? '#7c3aed' : '#2563eb'}
+              color={isDineIn ? '#7c3aed' : '#2563eb'}
             />
-            <Text style={[styles.detailTagText, { color: deal.is_dine_in_only ? '#7c3aed' : '#2563eb', fontWeight: '700' }]}>
-              {deal.is_dine_in_only ? '🍽️ Dine-In Only' : '🛵 Delivery & Takeaway'}
+            <Text style={[styles.detailTagText, { color: isDineIn ? '#7c3aed' : '#2563eb', fontWeight: '700' }]}>
+              {isDineIn ? '🍽️ Dine-In Only' : '🛵 Delivery & Takeaway'}
             </Text>
           </View>
         </View>

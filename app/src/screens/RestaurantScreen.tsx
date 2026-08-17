@@ -86,6 +86,13 @@ const MenuItemCard = React.memo(({
       <View style={styles.menuItemTextContent}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={[styles.itemName, isUnavailable && { color: COLORS.gray }]}>{item.name}</Text>
+          {item.active_flash_deal ? (
+            <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.12)', borderColor: '#e11d48', borderWidth: 1, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+              <Text style={{ color: '#e11d48', fontSize: 10, fontWeight: '800' }}>
+                {item.active_flash_deal.badge || '⚡ FLASH DEAL'}
+              </Text>
+            </View>
+          ) : null}
           {isOutOfStock ? (
             <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
               <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
@@ -102,7 +109,18 @@ const MenuItemCard = React.memo(({
         <Text style={styles.itemDescription} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={[styles.itemPrice, isUnavailable && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
+        {item.active_flash_deal ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginVertical: 2 }}>
+            <Text style={[styles.itemPrice, { color: '#e11d48', fontWeight: '800' }]}>
+              Rs. {Math.round(item.active_flash_deal.discounted_price)}
+            </Text>
+            <Text style={{ fontSize: 13, color: '#94a3b8', textDecorationLine: 'line-through' }}>
+              Rs. {Number(item.price)}
+            </Text>
+          </View>
+        ) : (
+          <Text style={[styles.itemPrice, isUnavailable && { color: COLORS.gray }]}>Rs. {Number(item.price)}</Text>
+        )}
         
         {item.preparation_time > 0 && (
           <Text style={styles.itemPrepTime}>

@@ -184,16 +184,21 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
     const now = Date.now();
     const validDeals = deals.filter((d: any) => {
       if (d.is_active === false) return false;
-      const start = parseDateSafe(d.start_time);
-      const end = parseDateSafe(d.end_time);
-      return start <= now && end >= now;
+      if (d.is_currently_active !== undefined) {
+        if (!d.is_currently_active) return false;
+      } else {
+        const start = parseDateSafe(d.start_time);
+        const end = parseDateSafe(d.end_time);
+        if (start > now || end < now) return false;
+      }
+      return true;
     });
 
     if (fulfillmentMode === 'DINE_IN') {
-      const dineInDeals = validDeals.filter((d: any) => d.is_dine_in_only);
-      return dineInDeals.length > 0 ? dineInDeals : validDeals;
+      const dineInDeals = validDeals.filter((d: any) => d.order_mode === 'DINE_IN' || d.is_dine_in_only);
+      return dineInDeals.length > 0 ? dineInDeals : validDeals.filter((d: any) => d.order_mode !== 'DELIVERY');
     }
-    return validDeals.filter((d: any) => !d.is_dine_in_only);
+    return validDeals.filter((d: any) => d.order_mode !== 'DINE_IN' && !d.is_dine_in_only);
   }, [deals, fulfillmentMode]);
 
   // Keep index safely bounded
@@ -223,15 +228,21 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
 
   const currentDeal = activeBanners[bannerIndex] || activeBanners[0];
   const brand = resolveBrandInfo(currentDeal);
-  const isDineIn = currentDeal.is_dine_in_only || fulfillmentMode === 'DINE_IN';
+  const isDineIn = currentDeal.order_mode === 'DINE_IN' || currentDeal.is_dine_in_only || fulfillmentMode === 'DINE_IN';
+  const isRecurring = currentDeal.timing_type === 'RECURRING_DAILY';
 
-  const discountText = currentDeal.discount_value
+  const discountText = currentDeal.discount_display_text || (currentDeal.discount_value
     ? (currentDeal.deal_type === 'flat' ? `Flat Rs. ${Number(currentDeal.discount_value).toFixed(0)} OFF` : `${Number(currentDeal.discount_value).toFixed(0)}% OFF`)
-    : 'Special Discount';
+    : 'Special Discount');
 
   const tagText = isDineIn
     ? '🍽️ DINE-IN EXCLUSIVE'
+    : isRecurring
+    ? `🌙 MIDNIGHT DEAL • ${brand.name.toUpperCase()}`
     : `⚡ FLASH SALE • ${brand.name.toUpperCase()}`;
+
+  const redemptionsClaimed = currentDeal.current_redemptions ?? currentDeal.orders_used ?? 0;
+  const maxCap = currentDeal.max_orders ?? 0;
 
   return (
     <TouchableOpacity
@@ -253,7 +264,7 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
       <View style={styles.bannerContent}>
         <View style={{ flex: 1, paddingRight: SPACING.xs, zIndex: 2 }}>
           {/* Dynamic Category/Brand Tag */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
             <View style={{
               backgroundColor: 'rgba(255, 255, 255, 0.22)',
               paddingHorizontal: 8,
@@ -266,6 +277,18 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
                 {tagText}
               </Text>
             </View>
+            {maxCap > 0 && (
+              <View style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                paddingHorizontal: 6,
+                paddingVertical: 3,
+                borderRadius: 6,
+              }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#FFF' }}>
+                  🔥 {redemptionsClaimed}/{maxCap} claimed
+                </Text>
+              </View>
+            )}
           </View>
 
           <Text style={styles.bannerTitle} numberOfLines={2}>

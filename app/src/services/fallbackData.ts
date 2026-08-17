@@ -14,6 +14,18 @@ export interface MenuItem {
   preparation_time: number;
   options?: any;
   categoryName?: string;
+  active_flash_deal?: {
+    deal_id: number;
+    title: string;
+    description?: string;
+    badge: string;
+    deal_type: string;
+    discount_value: number;
+    original_price: number;
+    discount_amount: number;
+    discounted_price: number;
+    window_ends_at?: string | null;
+  } | null;
 }
 
 export interface MenuCategory {
