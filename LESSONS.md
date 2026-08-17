@@ -4,6 +4,16 @@
 
 ---
 
+## Lesson 13 — Phase 1 Launch Brands Whitelisting & Segmented Filter Control Design — 2026-08-17
+- **Pattern**: Multi-tenant brand visibility across phases and mobile UI segmented filter bar design.
+- **Wrong assumption made**: Assuming that `GET /api/restaurants/?all=true` can be passed raw to admin UI selectors without distinguishing between Phase 1 live launch brands and Phase 2 hidden draft brands, and rendering filter buttons as separate loose chips with inconsistent margins.
+- **What actually mattered**:
+  1. In a phased multi-tenant rollout where 3 brands are operational (Tandoori Stop, Jush PK, Get A Fomo) and 4 brands are hidden for Phase 2 (SeenBanao, DineAtBlue, SandMelts, Birdman), API wrappers (`api.ts`) MUST export a dedicated whitelist filter (`filterActiveLaunchBrands`) by default. Raw endpoints returning draft or inactive tenants must be gated to prevent staff from scoping deals, coupons, or riders to inactive brands.
+  2. Mobile status filters (e.g. `ALL | AVAILABLE | ON DELIVERY | OFFLINE`) must NEVER be rendered as free-floating individual chips with ad-hoc padding/margins. They must be wrapped in a single, fixed-height segmented control container (`filterBarContainer`) with uniform tab flexing (`filterTab`), cohesive background, and active tab elevation.
+- **Applies to**: `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`, `admin-app/src/services/api.ts`, `admin/src/services/api.ts`, `GEMINI.md`.
+
+---
+
 ## Lesson 12 — Dynamic Home Banner Synchronization, Focus Binding & Zero-Deal Collapse — 2026-08-17
 - **Pattern**: Promotional home banner carousels and marketing campaign state synchronization between Admin HQ and Mobile Customer Clients.
 - **Wrong assumption made**: Assuming that banner components can maintain their own isolated mount-only `useEffect` fetching queries with hardcoded static fallback slides (`BANNERS` array) for when backend deals are empty or unreturned.

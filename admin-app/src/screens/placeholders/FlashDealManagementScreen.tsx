@@ -24,7 +24,7 @@ import {
   updateFlashDealThunk,
   deleteFlashDealThunk,
 } from '../../store/promoSlice';
-import { FlashDeal, api } from '../../services/api';
+import { FlashDeal, api, fetchRestaurants } from '../../services/api';
 import { Card, formatHumanDateTime, LoadingState, ErrorState, EmptyState, DateTimePickerModal } from '../../components/ui';
 
 const DAYS_OF_WEEK = [
@@ -146,9 +146,8 @@ export const FlashDealManagementScreen = () => {
 
   const loadRestaurants = async () => {
     try {
-      const res = await api.get('/restaurants/');
-      const list = Array.isArray(res.data) ? res.data : (res.data?.results || []);
-      setRestaurantsList(list);
+      const res = await fetchRestaurants();
+      setRestaurantsList(res.results || []);
     } catch (e) {}
   };
 

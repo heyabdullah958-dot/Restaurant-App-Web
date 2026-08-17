@@ -375,23 +375,42 @@ export const RiderManagementScreen = () => {
       ) : null}
 
       {/* Status Filter Segmented Control */}
-      <View style={styles.filterBar}>
-        {['ALL', 'AVAILABLE', 'ON_DELIVERY', 'OFFLINE'].map((st) => (
-          <TouchableOpacity
-            key={st}
-            style={[styles.filterChip, statusFilter === st && { backgroundColor: themeAccent }]}
-            onPress={() => dispatch(setStatusFilter(st))}
-          >
-            <Text
+      <View
+        style={[
+          styles.filterBarContainer,
+          { backgroundColor: isSuper ? '#0F172A' : '#F1F5F9', borderColor: themeBorder },
+        ]}
+      >
+        {['ALL', 'AVAILABLE', 'ON_DELIVERY', 'OFFLINE'].map((st) => {
+          const isActive = statusFilter === st;
+          return (
+            <TouchableOpacity
+              key={st}
               style={[
-                styles.filterChipText,
-                { color: statusFilter === st ? '#FFFFFF' : themeMuted },
+                styles.filterTab,
+                isActive && { backgroundColor: themeAccent, ...SHADOWS.small },
               ]}
+              onPress={() => dispatch(setStatusFilter(st))}
+              activeOpacity={0.7}
             >
-              {st.replace('_', ' ')}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.filterTabText,
+                  { color: isActive ? '#FFFFFF' : themeMuted, fontWeight: isActive ? '800' : '600' },
+                ]}
+                numberOfLines={1}
+              >
+                {st === 'ALL'
+                  ? 'ALL'
+                  : st === 'AVAILABLE'
+                  ? 'AVAILABLE'
+                  : st === 'ON_DELIVERY'
+                  ? 'ON DELIVERY'
+                  : 'OFFLINE'}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Rider List */}
@@ -622,21 +641,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  filterBar: {
+  filterBarContainer: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.sm,
-    marginBottom: SPACING.xs,
+    marginHorizontal: SPACING.sm,
+    marginBottom: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: 3,
+    gap: 4,
   },
-  filterChip: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
-    borderRadius: RADIUS.round,
-    marginRight: 6,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+  filterTab: {
+    flex: 1,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: RADIUS.sm,
   },
-  filterChipText: {
+  filterTabText: {
     fontSize: 11,
-    fontWeight: 'bold',
+    letterSpacing: 0.3,
   },
   listContent: {
     padding: SPACING.sm,

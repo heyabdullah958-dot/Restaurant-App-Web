@@ -167,11 +167,23 @@
   - `app/src/screens/HomeScreen.tsx`
   - `app/src/screens/FlashDealsScreen.tsx`
 - **How it was verified**: Executed `npx tsc --noEmit` across `admin-app`, `admin`, and `app` (0 compilation errors, code 0) and ran `manage.py test orders test_flash_deals_v2_engine_suite` (39/39 tests passed, 100% OK).
-- **Confidence**: 100% — verified via strict TypeScript compilation, automated unit/integration suites, and multi-tenant schema verification.
+---
 
-
-
-
-
-
-
+## Phase 3 — Riders Segmented Control UI Polish & Phase 1 Active Launch Brands Invariant — 2026-08-17
+- **What changed and why**:
+  1. **Riders Screen Filter Bar Polish (`admin-app`)**: Replaced individual fragmented chips with a unified Segmented Tab Bar (`filterBarContainer` with `filterTab`) featuring smooth background padding, active pill elevation, and clean alignment across `ALL`, `AVAILABLE`, `ON DELIVERY`, and `OFFLINE`.
+  2. **Phase 1 Active Launch Brands Invariant (3 Active Brands Only)**:
+     - All restaurant list APIs, brand picker filters, coupon/flash deal scoping modals, and manager dropdowns across `admin-app` and `admin` now strictly filter and display ONLY the **3 live Phase 1 launch brands**:
+       - 🍗 **Tandoori Stop (`tandooristoppk`)** — 3 Branches (Johar Town, Lake City, GT Road Baghbanpura)
+       - 🍔 **Jush PK (`jushhpk`)** — 3 Branches (DHA Phase 1, Johar Town, Lake City)
+       - ☕ **Get A Fomo (`getafomo`)** — 1 Branch (Gulberg III)
+     - All 4 inactive Phase 2 brands (`seenbanao`, `dineatblue`, `sandmelts`, `birdmanfoodspk`) are strictly hidden by default using `filterActiveLaunchBrands` in `api.ts`.
+  3. **Flash Deals Modal Refinement**: `FlashDealManagementScreen.tsx` modal now presents ONLY the 3 active launch brands and their 7 real physical branches in the Target Scope tab.
+- **Files modified**:
+  - `admin-app/src/services/api.ts`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin/src/services/api.ts`
+  - `GEMINI.md`
+- **How it was verified**: Executed `npx tsc --noEmit` across `admin-app`, `admin`, and `app` (0 TypeScript compilation errors) and verified build output.
+- **Confidence**: 100% — verified via strict TypeScript compilation and production bundle build.

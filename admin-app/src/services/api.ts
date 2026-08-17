@@ -532,9 +532,27 @@ export const getFullImageUrl = (path: string | null | undefined): string => {
   return `${BASE_URL}${cleanPath}`;
 };
 
-export const fetchRestaurants = async (): Promise<{ results: any[]; count: number }> => {
+export const ACTIVE_LAUNCH_BRAND_SLUGS = ['tandooristoppk', 'jushhpk', 'getafomo'];
+
+export const filterActiveLaunchBrands = (list: any[]): any[] => {
+  if (!Array.isArray(list)) return [];
+  return list.filter((r) => {
+    const slug = (r.slug || '').toLowerCase();
+    const name = (r.name || '').toLowerCase();
+    return (
+      ACTIVE_LAUNCH_BRAND_SLUGS.includes(slug) ||
+      name.includes('jush') ||
+      name.includes('tandoori') ||
+      name.includes('fomo')
+    );
+  });
+};
+
+export const fetchRestaurants = async (includeHidden = false): Promise<{ results: any[]; count: number }> => {
   const response = await api.get('/restaurants/', { params: { all: 'true' } });
-  return response.data;
+  const rawList = Array.isArray(response.data) ? response.data : (response.data?.results || []);
+  const filtered = includeHidden ? rawList : filterActiveLaunchBrands(rawList);
+  return { results: filtered, count: filtered.length };
 };
 
 export const fetchBranches = async (restaurantId?: number): Promise<any> => {

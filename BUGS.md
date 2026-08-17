@@ -2,6 +2,30 @@
 
 ## Resolved Bugs Log
 
+### Bug #14: Riders Filter Chip Fragmentation & Inactive Phase 2 Brands in Admin Modals
+- **Severity**: Low / UI-UX Polish
+- **Status**: FIXED
+- **Reported In**: Phase 3 — Riders Segmented Control UI Polish & Phase 1 Active Launch Brands Invariant
+- **Symptoms**:
+  1. Riders screen status filter buttons (`ALL | AVAILABLE | ON DELIVERY | OFFLINE`) were displayed as uneven loose chips without cohesive container padding, causing visual fragmentation.
+  2. Brand pickers and target modals across the admin app (e.g. Riders and Flash Deals) listed inactive Phase 2 brands (`SeenBanao`, `DineAtBlue`, `SandMelts`, `Birdman`) instead of strictly scoping to the 3 active Phase 1 launch brands.
+- **Root Cause**:
+  1. `RiderManagementScreen.tsx` used individual `filterChip` elements with `marginRight` rather than a unified segmented tab container.
+  2. `fetchRestaurants()` in `api.ts` passed `all=true` without applying a whitelist filter for the 3 active launch brands (`jushhpk`, `tandooristoppk`, `getafomo`).
+- **Fix Applied**:
+  1. Rebuilt status filters in `RiderManagementScreen.tsx` using a unified `filterBarContainer` and flexed `filterTab` elements with active elevation and cohesive theme background.
+  2. Exported `filterActiveLaunchBrands` in `admin-app/src/services/api.ts` and `admin/src/services/api.ts`, ensuring all brand selectors and target modals strictly return the 3 active launch brands and their 7 real operational branches.
+- **Files Modified**:
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/services/api.ts`
+  - `admin/src/services/api.ts`
+  - `GEMINI.md`
+  - `FRONTEND.md`
+  - `CHANGELOG.md`
+  - `LESSONS.md`
+- **Verification**: `npx tsc --noEmit` across `admin-app`, `admin`, and `app` (0 errors).
+
 ### Bug #13: Super Admin Rider Modal Missing Branch Selector & Customer CRM Zero Spend Metrics
 - **Severity**: Medium
 - **Status**: FIXED

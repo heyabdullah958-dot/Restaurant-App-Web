@@ -1,6 +1,21 @@
 
 # Changelog
 
+## 2026-08-17 Phase 3 — Riders Segmented Control UI Polish & Phase 1 Active Launch Brands Invariant
+- **Riders Fleet Screen UI Overhaul (`admin-app/src/screens/placeholders/RiderManagementScreen.tsx`)**:
+  - Replaced un-encapsulated filter chips with a sleek, unified Segmented Control Bar (`filterBarContainer` & `filterTab`) supporting `ALL`, `AVAILABLE`, `ON DELIVERY`, and `OFFLINE` status filtering with active pill elevation and clear typography.
+  - Polished Super Admin brand selector chips and modal restaurant assignment picker.
+- **Phase 1 Active Launch Brands Invariant (3 Active Brands Only)**:
+  - Enforced strict global filter `filterActiveLaunchBrands` across `admin-app/src/services/api.ts` and `admin/src/services/api.ts`.
+  - All restaurant pickers, brand filter chips, coupon modals, and flash deal target scopes now strictly show ONLY the **3 active launch brands** (`tandooristoppk`, `jushhpk`, `getafomo`) and their 7 real operational branches.
+  - Hidden Phase 2 brands (`seenbanao`, `dineatblue`, `sandmelts`, `birdmanfoodspk`) are completely suppressed.
+- **Flash Deals Target Scoping Fix (`admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`)**:
+  - Re-wired `loadRestaurants` to consume filtered active brands so Step 1 Target Scope only lists `Jush PK`, `Tandoori Stop`, and `Get A Fomo`.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npm run build` in `admin` (0 errors, production build verified).
+  - `npx tsc --noEmit` in `app` (0 errors).
+
 ## 2026-08-17 Phase 1 — Dynamic Home Banner Synchronization & Static Deal Purge
 - **Static Mock Banner Purge & Dynamic Component Architecture (`app/src/screens/HomeScreen.tsx`)**:
   - Completely purged legacy hardcoded fallback arrays (`BANNERS` with `"3 Brands, One Cart!"`, `"Earn Loyalty Points!"`, and `DINE_IN_FALLBACK_BANNERS` with `"Exclusive Dine-In Offers"`).

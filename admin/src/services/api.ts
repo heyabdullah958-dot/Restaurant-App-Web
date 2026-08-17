@@ -197,8 +197,28 @@ export interface ApiRestaurant {
   branches?: any[];
 }
 
-export const fetchRestaurants = () =>
-  apiFetch<{ results: ApiRestaurant[]; count: number }>('/api/restaurants/?all=true');
+export const ACTIVE_LAUNCH_BRAND_SLUGS = ['tandooristoppk', 'jushhpk', 'getafomo'];
+
+export const filterActiveLaunchBrands = <T extends { slug?: string; name?: string }>(list: T[]): T[] => {
+  if (!Array.isArray(list)) return [];
+  return list.filter((r) => {
+    const slug = (r.slug || '').toLowerCase();
+    const name = (r.name || '').toLowerCase();
+    return (
+      ACTIVE_LAUNCH_BRAND_SLUGS.includes(slug) ||
+      name.includes('jush') ||
+      name.includes('tandoori') ||
+      name.includes('fomo')
+    );
+  });
+};
+
+export const fetchRestaurants = async (includeHidden = false) => {
+  const data = await apiFetch<{ results: ApiRestaurant[]; count: number }>('/api/restaurants/?all=true');
+  const rawList = Array.isArray(data) ? data : (data?.results || []);
+  const filtered = includeHidden ? rawList : filterActiveLaunchBrands(rawList);
+  return { results: filtered, count: filtered.length };
+};
 
 export const fetchRestaurantMenu = (slug: string) =>
   apiFetch<any>(`/api/restaurants/${slug}/menu/`);
