@@ -79,11 +79,20 @@ const getDealStatus = (deal: FlashDeal) => {
   return { label: 'LIVE NOW', bg: 'rgba(34, 197, 94, 0.15)', text: '#22c55e', border: '#22c55e', icon: '🟢' };
 };
 
+const STEPS = [
+  { step: 1, title: 'Target', icon: '🎯' },
+  { step: 2, title: 'Menu', icon: '🍔' },
+  { step: 3, title: 'Discount', icon: '💰' },
+  { step: 4, title: 'Timing', icon: '⏰' },
+  { step: 5, title: 'Preview', icon: '👁️' },
+];
+
 export const FlashDealManagementScreen = () => {
   const dispatch = useAppDispatch();
   const { flashDeals, isLoading, isRefreshing, error } = useAppSelector((state) => state.promo);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalStep, setModalStep] = useState(1);
   const [editingDeal, setEditingDeal] = useState<FlashDeal | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -208,6 +217,7 @@ export const FlashDealManagementScreen = () => {
 
   const openAddModal = () => {
     setEditingDeal(null);
+    setModalStep(1);
     setTitle('');
     setDescription('');
     setDealType('percentage');
@@ -241,6 +251,7 @@ export const FlashDealManagementScreen = () => {
 
   const openEditModal = (deal: FlashDeal) => {
     setEditingDeal(deal);
+    setModalStep(1);
     setTitle(deal.title || '');
     setDescription(deal.description || '');
     setDealType((deal.deal_type as any) || 'percentage');
@@ -286,37 +297,51 @@ export const FlashDealManagementScreen = () => {
     );
   };
 
+  const handleNextStep = () => {
+    if (modalStep === 1) {
+      if (!title.trim()) {
+        Alert.alert('Validation Error', 'Please enter a campaign title.');
+        return;
+      }
+    } else if (modalStep === 2) {
+      if (itemScopeType === 'CATEGORY' && selectedCategoryIds.length === 0) {
+        Alert.alert('Validation Error', 'Please select at least one menu category.');
+        return;
+      }
+      if (itemScopeType === 'SPECIFIC_ITEMS' && selectedMenuItemIds.length === 0) {
+        Alert.alert('Validation Error', 'Please select at least one menu item.');
+        return;
+      }
+    } else if (modalStep === 3) {
+      if (!discountValue.trim() || isNaN(Number(discountValue)) || Number(discountValue) <= 0) {
+        Alert.alert('Validation Error', 'Please enter a valid positive discount value.');
+        return;
+      }
+    } else if (modalStep === 4) {
+      if (timingType === 'ONE_TIME') {
+        const sDate = new Date(startTime);
+        const eDate = new Date(endTime);
+        if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
+          Alert.alert('Validation Error', 'Please select valid start and end dates.');
+          return;
+        }
+        if (eDate <= sDate) {
+          Alert.alert('Validation Error', 'End Time must strictly be after Start Time.');
+          return;
+        }
+      } else {
+        if (activeDays.length === 0) {
+          Alert.alert('Validation Error', 'Please select at least one active day for recurring deals.');
+          return;
+        }
+      }
+    }
+    setModalStep((prev) => Math.min(5, prev + 1));
+  };
+
   const handleSaveDeal = async () => {
     if (!title.trim() || !discountValue.trim()) {
       Alert.alert('Validation Error', 'Please enter flash deal title and discount value.');
-      return;
-    }
-
-    if (timingType === 'ONE_TIME') {
-      const sDate = new Date(startTime);
-      const eDate = new Date(endTime);
-      if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
-        Alert.alert('Validation Error', 'Please select valid start and end dates.');
-        return;
-      }
-      if (eDate <= sDate) {
-        Alert.alert('Validation Error', 'End Time must strictly be after Start Time.');
-        return;
-      }
-    } else {
-      if (activeDays.length === 0) {
-        Alert.alert('Validation Error', 'Please select at least one active day for recurring deals.');
-        return;
-      }
-    }
-
-    if (itemScopeType === 'CATEGORY' && selectedCategoryIds.length === 0) {
-      Alert.alert('Validation Error', 'Please select at least one menu category.');
-      return;
-    }
-
-    if (itemScopeType === 'SPECIFIC_ITEMS' && selectedMenuItemIds.length === 0) {
-      Alert.alert('Validation Error', 'Please select at least one menu item.');
       return;
     }
 
@@ -387,12 +412,14 @@ export const FlashDealManagementScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerTitleContainer}>
           <Text style={styles.title}>Flash Deals Engine</Text>
-          <Text style={styles.subtitle}>Multi-Tenant Specials, Item Scoping & Midnight Deals</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            Multi-Tenant Specials, Item Scoping & Midnight Deals
+          </Text>
         </View>
         <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
-          <Text style={styles.addButtonText}>+ Create Deal</Text>
+          <Text style={styles.addButtonText}>+ Create</Text>
         </TouchableOpacity>
       </View>
 
@@ -439,40 +466,52 @@ export const FlashDealManagementScreen = () => {
 
             return (
               <Card style={styles.card} themeMode="super">
-                <View style={styles.cardHeader}>
+                {/* 1. Header Top Row: Icon + Title/Desc + Switch */}
+                <View style={styles.cardTopRow}>
                   <View style={styles.badge}>
                     <Text style={styles.badgeIcon}>{isRecurring ? '🌙' : '⚡'}</Text>
                   </View>
 
                   <View style={styles.titleBox}>
-                    <Text style={styles.dealTitle}>{item.title}</Text>
+                    <Text style={styles.dealTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
                     <Text style={styles.dealDesc} numberOfLines={1}>
                       {item.description || 'Exclusive limited-time customer deal'}
                     </Text>
                   </View>
 
+                  <View style={styles.switchWrapper}>
+                    <Switch
+                      value={item.is_active}
+                      onValueChange={() => handleToggleActive(item)}
+                      trackColor={{ false: '#334155', true: '#EF4444' }}
+                      thumbColor="#FFF"
+                    />
+                  </View>
+                </View>
+
+                {/* 2. Scope & Status Badges */}
+                <View style={styles.scopePillRow}>
                   <View style={styles.discountBadge}>
                     <Text style={styles.discountText}>
                       {item.discount_display_text || `${item.discount_value}% OFF`}
                     </Text>
                   </View>
 
-                  <Switch
-                    value={item.is_active}
-                    onValueChange={() => handleToggleActive(item)}
-                    trackColor={{ false: '#334155', true: '#EF4444' }}
-                    thumbColor="#FFF"
-                  />
-                </View>
+                  <View style={[styles.statusPill, { backgroundColor: status.bg, borderColor: status.border }]}>
+                    <Text style={[styles.statusPillText, { color: status.text }]}>
+                      {status.icon} {status.label}
+                    </Text>
+                  </View>
 
-                {/* Scope & Schedule Badges */}
-                <View style={styles.scopePillRow}>
                   <View style={styles.scopePill}>
                     <Text style={styles.scopePillText}>
                       🏪 {item.restaurant_name || 'All Brands'}
                       {item.branch_name ? ` · 📍 ${item.branch_name}` : ''}
                     </Text>
                   </View>
+
                   <View style={[styles.scopePill, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
                     <Text style={[styles.scopePillText, { color: '#60a5fa' }]}>
                       {item.item_scope_type === 'SPECIFIC_ITEMS'
@@ -482,6 +521,7 @@ export const FlashDealManagementScreen = () => {
                         : '🍽️ Entire Menu'}
                     </Text>
                   </View>
+
                   {item.order_mode && item.order_mode !== 'ALL' && (
                     <View style={[styles.scopePill, { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
                       <Text style={[styles.scopePillText, { color: '#c084fc' }]}>
@@ -491,30 +531,16 @@ export const FlashDealManagementScreen = () => {
                   )}
                 </View>
 
-                {/* Timing Row */}
+                {/* 3. Timing Row */}
                 <View style={styles.timingRow}>
                   <Text style={styles.timingText}>
                     {isRecurring
                       ? `🌙 ${formatTimeLabel(item.daily_start_time || '00:00')} – ${formatTimeLabel(item.daily_end_time || '06:00')} (${(item.active_days || []).join(', ')})`
                       : `📅 ${formatHumanDateTime(item.start_time)} → ${formatHumanDateTime(item.end_time)}`}
                   </Text>
-                  <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: status.bg,
-                    borderColor: status.border,
-                    borderWidth: 1,
-                    paddingHorizontal: 8,
-                    paddingVertical: 3,
-                    borderRadius: 10,
-                  }}>
-                    <Text style={{ color: status.text, fontSize: 11, fontWeight: '700' }}>
-                      {status.icon} {status.label}
-                    </Text>
-                  </View>
                 </View>
 
-                {/* Stock Progress Bar (if max_orders > 0) */}
+                {/* 4. Budget & Stock Progress */}
                 {maxCap > 0 && (
                   <View style={styles.stockProgressContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -527,7 +553,7 @@ export const FlashDealManagementScreen = () => {
                   </View>
                 )}
 
-                {/* Card Actions */}
+                {/* 5. Card Actions */}
                 <View style={styles.cardActions}>
                   <TouchableOpacity style={styles.editButton} onPress={() => openEditModal(item)}>
                     <Text style={styles.editButtonText}>✏️ Edit Scopes & Times</Text>
@@ -542,478 +568,581 @@ export const FlashDealManagementScreen = () => {
         />
       )}
 
-      {/* 6-Step Progressive Create / Edit Modal */}
+      {/* 5-Step Wizard Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {editingDeal ? 'Edit Flash Deal' : 'Create Flash Deal'}
-              </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <View>
+                <Text style={styles.modalTitle}>
+                  {editingDeal ? 'Edit Flash Deal' : 'Create Flash Deal'}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  Step {modalStep} of 5 — {STEPS[modalStep - 1].title}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
                 <Text style={styles.closeIcon}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
-              {/* STEP 1: Deal Identity */}
-              <Text style={styles.stepHeading}>1. Deal Identity</Text>
-              <Text style={styles.label}>Campaign Title *</Text>
-              <TextInput
-                style={styles.input}
-                value={title}
-                onChangeText={setTitle}
-                placeholder="e.g. Midnight Burger Special, BBQ Hour"
-                placeholderTextColor="#64748B"
-              />
-
-              <Text style={styles.label}>Description</Text>
-              <TextInput
-                style={[styles.input, { height: 60 }]}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="e.g. 30% off all smash burgers between 12am - 6am"
-                placeholderTextColor="#64748B"
-                multiline
-              />
-
-              {/* STEP 2: Target Scope */}
-              <Text style={styles.stepHeading}>2. Target Scope (Brand & Branch)</Text>
-              <Text style={styles.label}>Target Restaurant Brand</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
-                <TouchableOpacity
-                  style={[styles.chip, selectedBrandId === null && styles.chipActive]}
-                  onPress={() => {
-                    setSelectedBrandId(null);
-                    setSelectedBranchId(null);
-                  }}
-                >
-                  <Text style={[styles.chipText, selectedBrandId === null && styles.chipTextActive]}>
-                    🌐 All Brands (Global)
-                  </Text>
-                </TouchableOpacity>
-                {restaurantsList.map((r) => (
+            {/* Step Navigation Indicator Tabs */}
+            <View style={styles.stepIndicatorRow}>
+              {STEPS.map((s) => {
+                const isActive = modalStep === s.step;
+                const isPassed = modalStep > s.step;
+                return (
                   <TouchableOpacity
-                    key={r.id}
-                    style={[styles.chip, selectedBrandId === r.id && styles.chipActive]}
-                    onPress={() => {
-                      setSelectedBrandId(r.id);
-                      setSelectedBranchId(null);
-                    }}
+                    key={s.step}
+                    style={[
+                      styles.stepTab,
+                      isActive && styles.stepTabActive,
+                      isPassed && styles.stepTabPassed,
+                    ]}
+                    onPress={() => setModalStep(s.step)}
                   >
-                    <Text style={[styles.chipText, selectedBrandId === r.id && styles.chipTextActive]}>
-                      🏪 {r.name}
+                    <Text style={[styles.stepTabIcon]}>{s.icon}</Text>
+                    <Text
+                      style={[
+                        styles.stepTabLabel,
+                        isActive && styles.stepTabLabelActive,
+                        isPassed && styles.stepTabLabelPassed,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {s.title}
                     </Text>
                   </TouchableOpacity>
-                ))}
-              </ScrollView>
+                );
+              })}
+            </View>
 
-              {/* Cascading Branch Selector */}
-              {selectedBrandId && branchesForSelectedBrand.length > 0 && (
-                <>
-                  <Text style={styles.label}>Target Branch</Text>
+            {/* Step Content Container */}
+            <ScrollView
+              style={styles.formScroll}
+              contentContainerStyle={styles.formScrollContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* STEP 1: Identity & Target Scope */}
+              {modalStep === 1 && (
+                <View>
+                  <Text style={styles.sectionTitle}>Campaign Identity</Text>
+                  <Text style={styles.label}>Deal Title *</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={title}
+                    onChangeText={setTitle}
+                    placeholder="e.g. Midnight Burger Special, BBQ Hour"
+                    placeholderTextColor="#64748B"
+                  />
+
+                  <Text style={styles.label}>Marketing Description</Text>
+                  <TextInput
+                    style={[styles.input, { height: 64, textAlignVertical: 'top' }]}
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder="e.g. 30% off all smash burgers between 12am - 6am"
+                    placeholderTextColor="#64748B"
+                    multiline
+                  />
+
+                  <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Target Restaurant Brand</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
                     <TouchableOpacity
-                      style={[styles.chip, selectedBranchId === null && styles.chipActive]}
-                      onPress={() => setSelectedBranchId(null)}
+                      style={[styles.chip, selectedBrandId === null && styles.chipActive]}
+                      onPress={() => {
+                        setSelectedBrandId(null);
+                        setSelectedBranchId(null);
+                      }}
                     >
-                      <Text style={[styles.chipText, selectedBranchId === null && styles.chipTextActive]}>
-                        📍 All Branches
+                      <Text style={[styles.chipText, selectedBrandId === null && styles.chipTextActive]}>
+                        🌐 All Brands (Global)
                       </Text>
                     </TouchableOpacity>
-                    {branchesForSelectedBrand.map((b: any) => (
+                    {restaurantsList.map((r) => (
                       <TouchableOpacity
-                        key={b.id}
-                        style={[styles.chip, selectedBranchId === b.id && styles.chipActive]}
-                        onPress={() => setSelectedBranchId(b.id)}
+                        key={r.id}
+                        style={[styles.chip, selectedBrandId === r.id && styles.chipActive]}
+                        onPress={() => {
+                          setSelectedBrandId(r.id);
+                          setSelectedBranchId(null);
+                        }}
                       >
-                        <Text style={[styles.chipText, selectedBranchId === b.id && styles.chipTextActive]}>
-                          📍 {b.name}
+                        <Text style={[styles.chipText, selectedBrandId === r.id && styles.chipTextActive]}>
+                          🏪 {r.name}
                         </Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
-                </>
-              )}
 
-              <Text style={styles.label}>Order Fulfillment Mode</Text>
-              <View style={styles.segmentedRow}>
-                {[
-                  { key: 'ALL', label: 'All Orders' },
-                  { key: 'DELIVERY', label: '🛵 Delivery Only' },
-                  { key: 'DINE_IN', label: '🍽️ Dine-In Only' },
-                ].map((mode) => (
-                  <TouchableOpacity
-                    key={mode.key}
-                    style={[styles.segmentBtn, orderMode === mode.key && styles.segmentBtnActive]}
-                    onPress={() => setOrderMode(mode.key as any)}
-                  >
-                    <Text style={[styles.segmentText, orderMode === mode.key && styles.segmentTextActive]}>
-                      {mode.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* STEP 3: Item Scope */}
-              <Text style={styles.stepHeading}>3. Item / Menu Scope</Text>
-              <View style={styles.segmentedRow}>
-                {[
-                  { key: 'ENTIRE_MENU', label: 'Entire Menu' },
-                  { key: 'CATEGORY', label: 'By Category' },
-                  { key: 'SPECIFIC_ITEMS', label: 'Specific Items' },
-                ].map((scope) => (
-                  <TouchableOpacity
-                    key={scope.key}
-                    style={[styles.segmentBtn, itemScopeType === scope.key && styles.segmentBtnActive]}
-                    onPress={() => setItemScopeType(scope.key as any)}
-                  >
-                    <Text style={[styles.segmentText, itemScopeType === scope.key && styles.segmentTextActive]}>
-                      {scope.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Category Picker */}
-              {itemScopeType === 'CATEGORY' && (
-                <View style={styles.scopeBox}>
-                  <Text style={styles.subLabel}>Select Applicable Categories:</Text>
-                  {isLoadingMenu ? (
-                    <ActivityIndicator color={COLORS.superAdmin.accent} size="small" />
-                  ) : brandCategories.length === 0 ? (
-                    <Text style={styles.hintText}>Please select a specific brand above to load categories.</Text>
-                  ) : (
-                    <View style={styles.wrapChipRow}>
-                      {brandCategories.map((c) => {
-                        const isSelected = selectedCategoryIds.includes(c.id);
-                        return (
+                  {/* Cascading Branch Selector */}
+                  {selectedBrandId && branchesForSelectedBrand.length > 0 && (
+                    <>
+                      <Text style={styles.label}>Target Branch</Text>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
+                        <TouchableOpacity
+                          style={[styles.chip, selectedBranchId === null && styles.chipActive]}
+                          onPress={() => setSelectedBranchId(null)}
+                        >
+                          <Text style={[styles.chipText, selectedBranchId === null && styles.chipTextActive]}>
+                            📍 All Branches
+                          </Text>
+                        </TouchableOpacity>
+                        {branchesForSelectedBrand.map((b: any) => (
                           <TouchableOpacity
-                            key={c.id}
-                            style={[styles.multiChip, isSelected && styles.multiChipActive]}
-                            onPress={() => toggleCategorySelection(c.id)}
+                            key={b.id}
+                            style={[styles.chip, selectedBranchId === b.id && styles.chipActive]}
+                            onPress={() => setSelectedBranchId(b.id)}
                           >
-                            <Text style={[styles.multiChipText, isSelected && styles.multiChipTextActive]}>
-                              {isSelected ? '✓ ' : ''}{c.name}
+                            <Text style={[styles.chipText, selectedBranchId === b.id && styles.chipTextActive]}>
+                              📍 {b.name}
                             </Text>
                           </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+                        ))}
+                      </ScrollView>
+                    </>
                   )}
-                </View>
-              )}
 
-              {/* Specific Items Searchable Checklist */}
-              {itemScopeType === 'SPECIFIC_ITEMS' && (
-                <View style={styles.scopeBox}>
-                  <Text style={styles.subLabel}>Search & Select Specific Dishes:</Text>
-                  <TextInput
-                    style={styles.searchInput}
-                    value={searchItemQuery}
-                    onChangeText={setSearchItemQuery}
-                    placeholder="🔍 Search dishes by name or category..."
-                    placeholderTextColor="#64748B"
-                  />
-                  {isLoadingMenu ? (
-                    <ActivityIndicator color={COLORS.superAdmin.accent} size="small" />
-                  ) : brandMenuItems.length === 0 ? (
-                    <Text style={styles.hintText}>Please select a specific brand above to load dishes.</Text>
-                  ) : (
-                    <View style={styles.itemsListContainer}>
-                      {filteredMenuItems.slice(0, 30).map((dish) => {
-                        const isSelected = selectedMenuItemIds.includes(dish.id);
-                        return (
-                          <TouchableOpacity
-                            key={dish.id}
-                            style={[styles.itemCheckRow, isSelected && styles.itemCheckRowActive]}
-                            onPress={() => toggleMenuItemSelection(dish.id)}
-                          >
-                            <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
-                              {isSelected && <Text style={styles.checkMark}>✓</Text>}
-                            </View>
-                            <View style={{ flex: 1 }}>
-                              <Text style={styles.itemName}>{dish.name}</Text>
-                              <Text style={styles.itemCat}>{dish.category_name} · Rs. {dish.price}</Text>
-                            </View>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  )}
-                </View>
-              )}
-
-              {/* STEP 4: Deal Mechanics & Budget Limits */}
-              <Text style={styles.stepHeading}>4. Deal Mechanics & Limits</Text>
-              <Text style={styles.label}>Deal Type</Text>
-              <View style={styles.segmentedRow}>
-                {[
-                  { key: 'percentage', label: '% Off' },
-                  { key: 'flat', label: 'Flat Rs. Off' },
-                  { key: 'bogo', label: 'Buy 1 Get 1' },
-                ].map((t) => (
-                  <TouchableOpacity
-                    key={t.key}
-                    style={[styles.segmentBtn, dealType === t.key && styles.segmentBtnActive]}
-                    onPress={() => setDealType(t.key as any)}
-                  >
-                    <Text style={[styles.segmentText, dealType === t.key && styles.segmentTextActive]}>
-                      {t.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <View style={styles.rowInputs}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>
-                    {dealType === 'percentage' ? 'Discount % *' : 'Discount Amount (Rs.) *'}
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    value={discountValue}
-                    onChangeText={setDiscountValue}
-                    keyboardType="numeric"
-                    placeholder="25"
-                    placeholderTextColor="#64748B"
-                  />
-                </View>
-                {dealType === 'percentage' && (
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={styles.label}>Max Cap (Rs.)</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={maxDiscount}
-                      onChangeText={setMaxDiscount}
-                      keyboardType="numeric"
-                      placeholder="e.g. 200"
-                      placeholderTextColor="#64748B"
-                    />
+                  <Text style={styles.label}>Order Fulfillment Mode</Text>
+                  <View style={styles.segmentedRow}>
+                    {[
+                      { key: 'ALL', label: 'All Orders' },
+                      { key: 'DELIVERY', label: '🛵 Delivery' },
+                      { key: 'DINE_IN', label: '🍽️ Dine-In' },
+                    ].map((mode) => (
+                      <TouchableOpacity
+                        key={mode.key}
+                        style={[styles.segmentBtn, orderMode === mode.key && styles.segmentBtnActive]}
+                        onPress={() => setOrderMode(mode.key as any)}
+                      >
+                        <Text style={[styles.segmentText, orderMode === mode.key && styles.segmentTextActive]}>
+                          {mode.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
-                )}
-              </View>
+                </View>
+              )}
 
-              <View style={styles.rowInputs}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>Min Subtotal (Rs.)</Text>
+              {/* STEP 2: Menu / Item Scoping */}
+              {modalStep === 2 && (
+                <View>
+                  <Text style={styles.sectionTitle}>Menu / Item Scope</Text>
+                  <Text style={styles.subLabel}>Choose how this flash deal applies to the restaurant's menu:</Text>
+
+                  <View style={styles.segmentedRow}>
+                    {[
+                      { key: 'ENTIRE_MENU', label: 'Entire Menu' },
+                      { key: 'CATEGORY', label: 'By Category' },
+                      { key: 'SPECIFIC_ITEMS', label: 'Specific Items' },
+                    ].map((scope) => (
+                      <TouchableOpacity
+                        key={scope.key}
+                        style={[styles.segmentBtn, itemScopeType === scope.key && styles.segmentBtnActive]}
+                        onPress={() => setItemScopeType(scope.key as any)}
+                      >
+                        <Text style={[styles.segmentText, itemScopeType === scope.key && styles.segmentTextActive]}>
+                          {scope.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {itemScopeType === 'ENTIRE_MENU' && (
+                    <View style={styles.infoBox}>
+                      <Text style={styles.infoBoxText}>
+                        ✨ This deal will automatically apply across all dishes and drinks in the menu.
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Category Picker */}
+                  {itemScopeType === 'CATEGORY' && (
+                    <View style={styles.scopeBox}>
+                      <Text style={styles.subLabel}>Tap categories to include in this deal:</Text>
+                      {isLoadingMenu ? (
+                        <ActivityIndicator color={COLORS.superAdmin.accent} size="small" style={{ marginVertical: 12 }} />
+                      ) : brandCategories.length === 0 ? (
+                        <Text style={styles.hintText}>
+                          {selectedBrandId
+                            ? 'No categories found for this brand.'
+                            : 'Please select a specific brand in Step 1 to load categories.'}
+                        </Text>
+                      ) : (
+                        <View style={styles.wrapChipRow}>
+                          {brandCategories.map((c) => {
+                            const isSelected = selectedCategoryIds.includes(c.id);
+                            return (
+                              <TouchableOpacity
+                                key={c.id}
+                                style={[styles.multiChip, isSelected && styles.multiChipActive]}
+                                onPress={() => toggleCategorySelection(c.id)}
+                              >
+                                <Text style={[styles.multiChipText, isSelected && styles.multiChipTextActive]}>
+                                  {isSelected ? '✓ ' : ''}{c.name}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  {/* Specific Items Searchable Checklist */}
+                  {itemScopeType === 'SPECIFIC_ITEMS' && (
+                    <View style={styles.scopeBox}>
+                      <Text style={styles.subLabel}>Search and select dishes:</Text>
+                      <TextInput
+                        style={styles.searchInput}
+                        value={searchItemQuery}
+                        onChangeText={setSearchItemQuery}
+                        placeholder="🔍 Search dishes by name..."
+                        placeholderTextColor="#64748B"
+                      />
+                      <Text style={styles.selectedCountBadge}>
+                        Selected: {selectedMenuItemIds.length} dishes
+                      </Text>
+
+                      {isLoadingMenu ? (
+                        <ActivityIndicator color={COLORS.superAdmin.accent} size="small" style={{ marginVertical: 12 }} />
+                      ) : brandMenuItems.length === 0 ? (
+                        <Text style={styles.hintText}>
+                          {selectedBrandId
+                            ? 'No dishes found for this brand.'
+                            : 'Please select a specific brand in Step 1 to load dishes.'}
+                        </Text>
+                      ) : (
+                        <View style={styles.itemsListContainer}>
+                          <ScrollView nestedScrollEnabled style={{ maxHeight: 220 }} showsVerticalScrollIndicator={true}>
+                            {filteredMenuItems.map((dish) => {
+                              const isSelected = selectedMenuItemIds.includes(dish.id);
+                              return (
+                                <TouchableOpacity
+                                  key={dish.id}
+                                  style={[styles.itemCheckRow, isSelected && styles.itemCheckRowActive]}
+                                  onPress={() => toggleMenuItemSelection(dish.id)}
+                                >
+                                  <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
+                                    {isSelected && <Text style={styles.checkMark}>✓</Text>}
+                                  </View>
+                                  <View style={{ flex: 1 }}>
+                                    <Text style={styles.itemName}>{dish.name}</Text>
+                                    <Text style={styles.itemCat}>{dish.category_name} · Rs. {dish.price}</Text>
+                                  </View>
+                                </TouchableOpacity>
+                              );
+                            })}
+                          </ScrollView>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* STEP 3: Deal Mechanics & Budget Limits */}
+              {modalStep === 3 && (
+                <View>
+                  <Text style={styles.sectionTitle}>Deal Mechanics & Discount</Text>
+
+                  <Text style={styles.label}>Discount Type</Text>
+                  <View style={styles.segmentedRow}>
+                    {[
+                      { key: 'percentage', label: '% Percentage' },
+                      { key: 'flat', label: 'Flat Rs. Off' },
+                      { key: 'bogo', label: 'Buy 1 Get 1' },
+                    ].map((t) => (
+                      <TouchableOpacity
+                        key={t.key}
+                        style={[styles.segmentBtn, dealType === t.key && styles.segmentBtnActive]}
+                        onPress={() => setDealType(t.key as any)}
+                      >
+                        <Text style={[styles.segmentText, dealType === t.key && styles.segmentTextActive]}>
+                          {t.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <View style={styles.rowInputs}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.label}>{dealType === 'percentage' ? 'Discount % *' : 'Discount Amount (Rs.) *'}</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={discountValue}
+                        onChangeText={setDiscountValue}
+                        keyboardType="numeric"
+                        placeholder="25"
+                        placeholderTextColor="#64748B"
+                      />
+                    </View>
+                    {dealType === 'percentage' && (
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.label}>Max Cap (Rs.)</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={maxDiscount}
+                          onChangeText={setMaxDiscount}
+                          keyboardType="numeric"
+                          placeholder="e.g. 500"
+                          placeholderTextColor="#64748B"
+                        />
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.rowInputs}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={styles.label}>Min Subtotal (Rs.)</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={minSubtotal}
+                        onChangeText={setMinSubtotal}
+                        keyboardType="numeric"
+                        placeholder="0"
+                        placeholderTextColor="#64748B"
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.label}>Max Orders Cap</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={maxOrders}
+                        onChangeText={setMaxOrders}
+                        keyboardType="numeric"
+                        placeholder="0 (Unlimited)"
+                        placeholderTextColor="#64748B"
+                      />
+                    </View>
+                  </View>
+
+                  {parseInt(maxOrders, 10) > 0 && (
+                    <View style={{ marginTop: 12 }}>
+                      <Text style={styles.label}>Cap Reset Frequency</Text>
+                      <View style={styles.segmentedRow}>
+                        <TouchableOpacity
+                          style={[styles.segmentBtn, redemptionResetFrequency === 'DAILY' && styles.segmentBtnActive]}
+                          onPress={() => setRedemptionResetFrequency('DAILY')}
+                        >
+                          <Text style={[styles.segmentText, redemptionResetFrequency === 'DAILY' && styles.segmentTextActive]}>
+                            🌙 Nightly Reset
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.segmentBtn, redemptionResetFrequency === 'LIFETIME' && styles.segmentBtnActive]}
+                          onPress={() => setRedemptionResetFrequency('LIFETIME')}
+                        >
+                          <Text style={[styles.segmentText, redemptionResetFrequency === 'LIFETIME' && styles.segmentTextActive]}>
+                            🔒 Lifetime Total
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* STEP 4: Timing & Recurring Schedule */}
+              {modalStep === 4 && (
+                <View>
+                  <Text style={styles.sectionTitle}>Timing & Schedule</Text>
+
+                  <Text style={styles.label}>Schedule Type</Text>
+                  <View style={styles.segmentedRow}>
+                    <TouchableOpacity
+                      style={[styles.segmentBtn, timingType === 'ONE_TIME' && styles.segmentBtnActive]}
+                      onPress={() => setTimingType('ONE_TIME')}
+                    >
+                      <Text style={[styles.segmentText, timingType === 'ONE_TIME' && styles.segmentTextActive]}>
+                        📅 One-Time Window
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.segmentBtn, timingType === 'RECURRING_DAILY' && styles.segmentBtnActive]}
+                      onPress={() => setTimingType('RECURRING_DAILY')}
+                    >
+                      <Text style={[styles.segmentText, timingType === 'RECURRING_DAILY' && styles.segmentTextActive]}>
+                        🌙 Recurring Daily (Midnight)
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {timingType === 'ONE_TIME' ? (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={styles.label}>Start Date & Time</Text>
+                      <View style={styles.dateSelectorRow}>
+                        <Text style={styles.dateText}>{formatHumanDateTime(startTime)}</Text>
+                        <TouchableOpacity style={styles.changeDateBtn} onPress={() => setPickerTarget('start')}>
+                          <Text style={styles.changeDateText}>Change</Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <Text style={styles.label}>Expiry End Date & Time</Text>
+                      <View style={styles.dateSelectorRow}>
+                        <Text style={styles.dateText}>{formatHumanDateTime(endTime)}</Text>
+                        <TouchableOpacity style={styles.changeDateBtn} onPress={() => setPickerTarget('end')}>
+                          <Text style={styles.changeDateText}>Change</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={{ marginTop: 10 }}>
+                      <Text style={styles.label}>Daily Active Hours</Text>
+                      <View style={styles.rowInputs}>
+                        <View style={{ flex: 1, marginRight: 8 }}>
+                          <Text style={styles.subLabel}>Starts at:</Text>
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
+                            {TIME_OPTIONS.map((t) => (
+                              <TouchableOpacity
+                                key={`start_${t}`}
+                                style={[styles.timeChip, dailyStartTime === t && styles.timeChipActive]}
+                                onPress={() => setDailyStartTime(t)}
+                              >
+                                <Text style={[styles.timeChipText, dailyStartTime === t && styles.timeChipTextActive]}>
+                                  {formatTimeLabel(t)}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.subLabel}>Ends at:</Text>
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
+                            {TIME_OPTIONS.map((t) => (
+                              <TouchableOpacity
+                                key={`end_${t}`}
+                                style={[styles.timeChip, dailyEndTime === t && styles.timeChipActive]}
+                                onPress={() => setDailyEndTime(t)}
+                              >
+                                <Text style={[styles.timeChipText, dailyEndTime === t && styles.timeChipTextActive]}>
+                                  {formatTimeLabel(t)}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
+                        </View>
+                      </View>
+
+                      <Text style={[styles.label, { marginTop: 14 }]}>Active Days of the Week</Text>
+                      <View style={styles.presetRow}>
+                        <TouchableOpacity
+                          style={styles.presetBtn}
+                          onPress={() => setActiveDays(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])}
+                        >
+                          <Text style={styles.presetBtnText}>Every Day</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.presetBtn}
+                          onPress={() => setActiveDays(['MON', 'TUE', 'WED', 'THU', 'FRI'])}
+                        >
+                          <Text style={styles.presetBtnText}>Weekdays</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.presetBtn}
+                          onPress={() => setActiveDays(['SAT', 'SUN'])}
+                        >
+                          <Text style={styles.presetBtnText}>Weekends</Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={styles.daysRow}>
+                        {DAYS_OF_WEEK.map((d) => {
+                          const isDayActive = activeDays.includes(d.key);
+                          return (
+                            <TouchableOpacity
+                              key={d.key}
+                              style={[styles.dayCircle, isDayActive && styles.dayCircleActive]}
+                              onPress={() => toggleDaySelection(d.key)}
+                            >
+                              <Text style={[styles.dayCircleText, isDayActive && styles.dayCircleTextActive]}>
+                                {d.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
+
+                  <Text style={[styles.label, { marginTop: 14 }]}>Priority Rank (0 = Normal, 10 = Highest)</Text>
                   <TextInput
                     style={styles.input}
-                    value={minSubtotal}
-                    onChangeText={setMinSubtotal}
+                    value={priority}
+                    onChangeText={setPriority}
                     keyboardType="numeric"
                     placeholder="0"
                     placeholderTextColor="#64748B"
                   />
                 </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.label}>Max Orders Cap</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={maxOrders}
-                    onChangeText={setMaxOrders}
-                    keyboardType="numeric"
-                    placeholder="0 = unlimited"
-                    placeholderTextColor="#64748B"
-                  />
-                </View>
-              </View>
+              )}
 
-              {parseInt(maxOrders, 10) > 0 && (
-                <View style={{ marginTop: 6 }}>
-                  <Text style={styles.label}>Redemption Cap Reset Frequency</Text>
-                  <View style={styles.segmentedRow}>
-                    <TouchableOpacity
-                      style={[styles.segmentBtn, redemptionResetFrequency === 'DAILY' && styles.segmentBtnActive]}
-                      onPress={() => setRedemptionResetFrequency('DAILY')}
-                    >
-                      <Text style={[styles.segmentText, redemptionResetFrequency === 'DAILY' && styles.segmentTextActive]}>
-                        🌙 Daily/Nightly Reset
+              {/* STEP 5: Live Preview & Publish */}
+              {modalStep === 5 && (
+                <View>
+                  <Text style={styles.sectionTitle}>Customer App Live Preview</Text>
+
+                  <View style={styles.previewCard}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={styles.previewBadge}>
+                        ⚡ {discountValue}% OFF {maxDiscount ? `(Max Rs. ${maxDiscount})` : ''}
                       </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.segmentBtn, redemptionResetFrequency === 'LIFETIME' && styles.segmentBtnActive]}
-                      onPress={() => setRedemptionResetFrequency('LIFETIME')}
-                    >
-                      <Text style={[styles.segmentText, redemptionResetFrequency === 'LIFETIME' && styles.segmentTextActive]}>
-                        ♾️ Lifetime Total
+                      <Text style={styles.previewTimer}>
+                        {timingType === 'RECURRING_DAILY' ? '🌙 MIDNIGHT SPECIAL' : '⏳ ENDS IN 2h 45m'}
                       </Text>
-                    </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.previewTitle}>{title || 'Midnight Deal Title'}</Text>
+                    <Text style={styles.previewDesc}>
+                      {description || 'Exclusive promotional flash deal for customers'}
+                    </Text>
+
+                    <View style={styles.previewSummaryBox}>
+                      <Text style={styles.previewSummaryText}>
+                        🏪 Brand: {selectedBrandObj ? selectedBrandObj.name : 'All Brands (Global)'}
+                      </Text>
+                      <Text style={styles.previewSummaryText}>
+                        🍽️ Scope: {itemScopeType === 'SPECIFIC_ITEMS' ? `${selectedMenuItemIds.length} Dishes` : itemScopeType === 'CATEGORY' ? `${selectedCategoryIds.length} Categories` : 'Entire Menu'}
+                      </Text>
+                      <Text style={styles.previewSummaryText}>
+                        🛵 Mode: {orderMode === 'DINE_IN' ? 'Dine-In Only' : orderMode === 'DELIVERY' ? 'Delivery Only' : 'All Orders'}
+                      </Text>
+                      <Text style={styles.previewSummaryText}>
+                        ⏰ Timing: {timingType === 'RECURRING_DAILY' ? `${formatTimeLabel(dailyStartTime)} – ${formatTimeLabel(dailyEndTime)} (${activeDays.join(', ')})` : `${formatHumanDateTime(startTime)} → ${formatHumanDateTime(endTime)}`}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               )}
-
-              {/* STEP 5: Schedule Type & Recurrence */}
-              <Text style={styles.stepHeading}>5. Schedule & Timing</Text>
-              <View style={styles.segmentedRow}>
-                <TouchableOpacity
-                  style={[styles.segmentBtn, timingType === 'ONE_TIME' && styles.segmentBtnActive]}
-                  onPress={() => setTimingType('ONE_TIME')}
-                >
-                  <Text style={[styles.segmentText, timingType === 'ONE_TIME' && styles.segmentTextActive]}>
-                    📅 One-Time Window
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.segmentBtn, timingType === 'RECURRING_DAILY' && styles.segmentBtnActive]}
-                  onPress={() => setTimingType('RECURRING_DAILY')}
-                >
-                  <Text style={[styles.segmentText, timingType === 'RECURRING_DAILY' && styles.segmentTextActive]}>
-                    🌙 Recurring Daily Schedule
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {timingType === 'ONE_TIME' ? (
-                <>
-                  <Text style={styles.label}>Start Date & Time</Text>
-                  <View style={styles.dateSelectorRow}>
-                    <Text style={styles.dateText}>📅 {formatHumanDateTime(startTime)}</Text>
-                    <TouchableOpacity style={styles.changeDateBtn} onPress={() => setPickerTarget('start')}>
-                      <Text style={styles.changeDateText}>Change</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <Text style={styles.label}>End Date & Time (Expiry)</Text>
-                  <View style={styles.dateSelectorRow}>
-                    <Text style={styles.dateText}>🏁 {formatHumanDateTime(endTime)}</Text>
-                    <TouchableOpacity style={styles.changeDateBtn} onPress={() => setPickerTarget('end')}>
-                      <Text style={styles.changeDateText}>Change</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <View style={styles.rowInputs}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.label}>Daily Start Time</Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
-                        {TIME_OPTIONS.map((t) => (
-                          <TouchableOpacity
-                            key={t}
-                            style={[styles.chip, dailyStartTime === t && styles.chipActive]}
-                            onPress={() => setDailyStartTime(t)}
-                          >
-                            <Text style={[styles.chipText, dailyStartTime === t && styles.chipTextActive]}>
-                              {formatTimeLabel(t)}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  </View>
-
-                  <View style={styles.rowInputs}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.label}>Daily End Time (Supports Midnight Rollover)</Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
-                        {TIME_OPTIONS.map((t) => (
-                          <TouchableOpacity
-                            key={t}
-                            style={[styles.chip, dailyEndTime === t && styles.chipActive]}
-                            onPress={() => setDailyEndTime(t)}
-                          >
-                            <Text style={[styles.chipText, dailyEndTime === t && styles.chipTextActive]}>
-                              {formatTimeLabel(t)}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  </View>
-
-                  <Text style={styles.label}>Active Days (1-Tap Presets)</Text>
-                  <View style={styles.presetRow}>
-                    <TouchableOpacity
-                      style={styles.presetBtn}
-                      onPress={() => setActiveDays(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])}
-                    >
-                      <Text style={styles.presetBtnText}>Every Day</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.presetBtn}
-                      onPress={() => setActiveDays(['MON', 'TUE', 'WED', 'THU', 'FRI'])}
-                    >
-                      <Text style={styles.presetBtnText}>Weekdays</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.presetBtn}
-                      onPress={() => setActiveDays(['SAT', 'SUN'])}
-                    >
-                      <Text style={styles.presetBtnText}>Weekends</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.daysRow}>
-                    {DAYS_OF_WEEK.map((d) => {
-                      const isDayActive = activeDays.includes(d.key);
-                      return (
-                        <TouchableOpacity
-                          key={d.key}
-                          style={[styles.dayCircle, isDayActive && styles.dayCircleActive]}
-                          onPress={() => toggleDaySelection(d.key)}
-                        >
-                          <Text style={[styles.dayCircleText, isDayActive && styles.dayCircleTextActive]}>
-                            {d.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </>
-              )}
-
-              {/* Priority Input */}
-              <Text style={styles.label}>Deal Priority (0–100, higher wins overlapping deals)</Text>
-              <TextInput
-                style={styles.input}
-                value={priority}
-                onChangeText={setPriority}
-                keyboardType="numeric"
-                placeholder="0"
-                placeholderTextColor="#64748B"
-              />
-
-              {/* STEP 6: Live Preview Card */}
-              <Text style={styles.stepHeading}>6. Customer Live Preview</Text>
-              <View style={styles.previewCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={styles.previewBadge}>
-                    ⚡ {dealType === 'percentage' ? `${discountValue || 0}% OFF` : `Flat Rs. ${discountValue || 0} OFF`}
-                  </Text>
-                  <Text style={styles.previewTimer}>
-                    {timingType === 'RECURRING_DAILY' ? `🌙 Ends ${formatTimeLabel(dailyEndTime)}` : '⚡ Live Special'}
-                  </Text>
-                </View>
-                <Text style={styles.previewTitle}>{title || 'Your Deal Campaign Title'}</Text>
-                <Text style={styles.previewPrice}>
-                  Sample Item Price: <Text style={{ textDecorationLine: 'line-through', color: '#94a3b8' }}>Rs. 850</Text>{' '}
-                  <Text style={{ fontWeight: '800', color: '#22c55e' }}>
-                    Rs. {Math.round(850 - (850 * (parseFloat(discountValue) || 0)) / 100)}
-                  </Text>
-                </Text>
-              </View>
             </ScrollView>
 
+            {/* Modal Bottom Action Buttons */}
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-                disabled={isSubmitting}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveDeal}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={styles.saveButtonText}>{editingDeal ? 'Update Deal' : 'Publish Deal'}</Text>
-                )}
-              </TouchableOpacity>
+              {modalStep > 1 ? (
+                <TouchableOpacity style={styles.backButton} onPress={() => setModalStep((prev) => prev - 1)}>
+                  <Text style={styles.backButtonText}>← Back</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              )}
+
+              {modalStep < 5 ? (
+                <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>
+                  <Text style={styles.nextButtonText}>Next Step →</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveDeal} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>{editingDeal ? 'Update Deal' : 'Publish Deal ⚡'}</Text>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -1044,35 +1173,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.superAdmin.border,
   },
+  headerTitleContainer: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: COLORS.superAdmin.text,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.superAdmin.textSecondary,
     marginTop: 2,
   },
   addButton: {
     backgroundColor: '#EF4444',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingVertical: 7,
     borderRadius: RADIUS.md,
     ...SHADOWS.small,
   },
   addButtonText: {
     color: '#FFF',
     fontWeight: '700',
-    fontSize: 13,
+    fontSize: 12,
   },
   listContent: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
     gap: SPACING.md,
   },
   card: {
@@ -1081,59 +1214,75 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
-    gap: SPACING.sm,
+    gap: 8,
   },
-  cardHeader: {
+  cardTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
+    alignItems: 'flex-start',
+    gap: 10,
   },
   badge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: 'rgba(239, 68, 68, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 2,
   },
   badgeIcon: {
     fontSize: 18,
   },
   titleBox: {
     flex: 1,
+    paddingRight: 4,
   },
   dealTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.superAdmin.text,
+    lineHeight: 20,
   },
   dealDesc: {
     fontSize: 12,
     color: COLORS.superAdmin.textSecondary,
     marginTop: 2,
   },
+  switchWrapper: {
+    paddingTop: 2,
+  },
   discountBadge: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   discountText: {
     color: '#EF4444',
     fontWeight: '800',
-    fontSize: 12,
+    fontSize: 11,
+  },
+  statusPill: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  statusPillText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   scopePillRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 6,
-    marginTop: 4,
   },
   scopePill: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   scopePillText: {
     color: '#e2e8f0',
@@ -1142,16 +1291,13 @@ const styles = StyleSheet.create({
   },
   timingRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
   },
   timingText: {
     color: '#94a3b8',
-    fontSize: 12,
+    fontSize: 11,
   },
   stockProgressContainer: {
-    marginTop: 6,
     backgroundColor: 'rgba(0,0,0,0.2)',
     padding: 8,
     borderRadius: 8,
@@ -1162,7 +1308,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   progressBarBg: {
-    height: 6,
+    height: 5,
     backgroundColor: '#334155',
     borderRadius: 3,
     overflow: 'hidden',
@@ -1175,10 +1321,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: SPACING.sm,
-    marginTop: 8,
     borderTopWidth: 1,
     borderTopColor: COLORS.superAdmin.border,
     paddingTop: 8,
+    marginTop: 2,
   },
   editButton: {
     paddingHorizontal: 10,
@@ -1188,7 +1334,7 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: '#cbd5e1',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   deleteButton: {
@@ -1199,45 +1345,98 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: '#ef4444',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     justifyContent: 'center',
-    padding: SPACING.md,
+    padding: SPACING.sm,
   },
   modalContent: {
     backgroundColor: '#1E293B',
     borderRadius: RADIUS.xl,
-    maxHeight: '92%',
-    padding: SPACING.lg,
+    maxHeight: '94%',
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: '#FFF',
   },
+  modalSubtitle: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 1,
+  },
+  closeBtn: {
+    padding: 4,
+  },
   closeIcon: {
-    fontSize: 20,
+    fontSize: 18,
     color: '#94A3B8',
   },
-  formScroll: {
-    maxHeight: 520,
+  stepIndicatorRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+    gap: 4,
   },
-  stepHeading: {
-    fontSize: 14,
+  stepTab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#0F172A',
+  },
+  stepTabActive: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderColor: '#EF4444',
+    borderWidth: 1,
+  },
+  stepTabPassed: {
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  stepTabIcon: {
+    fontSize: 12,
+  },
+  stepTabLabel: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  stepTabLabelActive: {
+    color: '#EF4444',
+    fontWeight: '800',
+  },
+  stepTabLabelPassed: {
+    color: '#22c55e',
+  },
+  formScroll: {
+    maxHeight: 400,
+  },
+  formScrollContent: {
+    paddingVertical: 12,
+  },
+  sectionTitle: {
+    fontSize: 13,
     fontWeight: '800',
     color: '#60a5fa',
-    marginTop: SPACING.md,
-    marginBottom: SPACING.xs,
+    marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -1245,7 +1444,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#94A3B8',
-    marginTop: 10,
+    marginTop: 8,
     marginBottom: 4,
   },
   subLabel: {
@@ -1260,8 +1459,8 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     color: '#FFF',
     paddingHorizontal: SPACING.md,
-    paddingVertical: Platform.OS === 'ios' ? SPACING.sm : 8,
-    fontSize: 14,
+    paddingVertical: Platform.OS === 'ios' ? SPACING.sm : 7,
+    fontSize: 13,
   },
   rowInputs: {
     flexDirection: 'row',
@@ -1275,9 +1474,9 @@ const styles = StyleSheet.create({
     borderColor: '#334155',
     borderWidth: 1,
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    marginRight: 8,
+    paddingVertical: 6,
+    borderRadius: 18,
+    marginRight: 6,
   },
   chipActive: {
     backgroundColor: '#EF4444',
@@ -1285,7 +1484,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     color: '#94A3B8',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   chipTextActive: {
@@ -1309,18 +1508,31 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     color: '#94A3B8',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   segmentTextActive: {
     color: '#FFF',
     fontWeight: '700',
   },
+  infoBox: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  infoBoxText: {
+    color: '#93c5fd',
+    fontSize: 12,
+    lineHeight: 16,
+  },
   scopeBox: {
     backgroundColor: '#0F172A',
     padding: 10,
     borderRadius: 8,
-    marginTop: 6,
+    marginTop: 8,
   },
   wrapChipRow: {
     flexDirection: 'row',
@@ -1341,7 +1553,7 @@ const styles = StyleSheet.create({
   },
   multiChipText: {
     color: '#94A3B8',
-    fontSize: 12,
+    fontSize: 11,
   },
   multiChipTextActive: {
     color: '#EF4444',
@@ -1354,23 +1566,34 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     color: '#FFF',
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     fontSize: 12,
-    marginBottom: 8,
+    marginBottom: 6,
+  },
+  selectedCountBadge: {
+    color: '#60a5fa',
+    fontSize: 11,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   itemsListContainer: {
-    maxHeight: 180,
+    backgroundColor: '#1E293B',
+    borderRadius: 8,
+    padding: 6,
+    overflow: 'hidden',
   },
   itemCheckRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
+    paddingHorizontal: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: '#334155',
     gap: 8,
+    borderRadius: 4,
   },
   itemCheckRowActive: {
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
   },
   checkbox: {
     width: 18,
@@ -1387,74 +1610,99 @@ const styles = StyleSheet.create({
   },
   checkMark: {
     color: '#FFF',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
   },
   itemName: {
     color: '#F8FAFC',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   itemCat: {
     color: '#64748B',
-    fontSize: 11,
+    fontSize: 10,
   },
   hintText: {
     color: '#64748B',
-    fontSize: 12,
+    fontSize: 11,
     fontStyle: 'italic',
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   dateSelectorRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#0F172A',
-    padding: 10,
+    padding: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#334155',
   },
   dateText: {
     color: '#FFF',
-    fontSize: 13,
+    fontSize: 12,
   },
   changeDateBtn: {
     backgroundColor: '#334155',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 6,
   },
   changeDateText: {
     color: '#60a5fa',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
+  },
+  timeScroll: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  timeChip: {
+    backgroundColor: '#0F172A',
+    borderColor: '#334155',
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  timeChipActive: {
+    backgroundColor: '#EF4444',
+    borderColor: '#EF4444',
+  },
+  timeChipText: {
+    color: '#94a3b8',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  timeChipTextActive: {
+    color: '#FFF',
   },
   presetRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     marginBottom: 8,
   },
   presetBtn: {
     backgroundColor: '#334155',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   presetBtnText: {
     color: '#cbd5e1',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
   },
   daysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   dayCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#0F172A',
     borderColor: '#334155',
     borderWidth: 1,
@@ -1467,7 +1715,7 @@ const styles = StyleSheet.create({
   },
   dayCircleText: {
     color: '#94a3b8',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   dayCircleTextActive: {
@@ -1479,7 +1727,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 12,
-    marginTop: 6,
     gap: 4,
   },
   previewBadge: {
@@ -1488,53 +1735,88 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     alignSelf: 'flex-start',
   },
   previewTimer: {
     color: '#fbbf24',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   previewTitle: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     marginTop: 4,
   },
-  previewPrice: {
+  previewDesc: {
     color: '#94a3b8',
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: 11,
+    marginBottom: 6,
+  },
+  previewSummaryBox: {
+    backgroundColor: '#1E293B',
+    padding: 8,
+    borderRadius: 6,
+    gap: 3,
+    marginTop: 4,
+  },
+  previewSummaryText: {
+    color: '#cbd5e1',
+    fontSize: 11,
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: SPACING.md,
-    marginTop: SPACING.lg,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#334155',
-    paddingTop: SPACING.md,
+    paddingTop: 10,
+  },
+  backButton: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 7,
+    borderRadius: RADIUS.md,
+    backgroundColor: '#334155',
+  },
+  backButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   cancelButton: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 7,
   },
   cancelButtonText: {
     color: '#94A3B8',
+    fontSize: 12,
     fontWeight: '600',
+  },
+  nextButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+  },
+  nextButtonText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
   saveButton: {
     backgroundColor: '#EF4444',
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 8,
     borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   saveButtonText: {
     color: '#FFF',
+    fontSize: 12,
     fontWeight: '700',
   },
 });
