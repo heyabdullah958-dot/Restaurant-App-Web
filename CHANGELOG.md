@@ -1,7 +1,22 @@
 
 # Changelog
 
-## 2026-08-16 Phase 1 — Basket-Level Threshold & Loyalty Relocation, Dummy Data Purge, and Flash Deal Engine Overhaul
+## 2026-08-17 Phase 1 — Dynamic Home Banner Synchronization & Static Deal Purge
+- **Static Mock Banner Purge & Dynamic Component Architecture (`app/src/screens/HomeScreen.tsx`)**:
+  - Completely purged legacy hardcoded fallback arrays (`BANNERS` with `"3 Brands, One Cart!"`, `"Earn Loyalty Points!"`, and `DINE_IN_FALLBACK_BANNERS` with `"Exclusive Dine-In Offers"`).
+  - Replaced isolated child carousels with unified `DynamicHeroBannerSection` bound directly to live backend flash deals state and fulfillment mode.
+  - Implemented clean collapse: returning `null` when `activeBanners.length === 0` to prevent orphan cards or visual gaps on empty states.
+- **HomeScreen Lifecycle & Refresh Synchronization (`app/src/screens/HomeScreen.tsx`)**:
+  - Wired `fetchFlashDeals` directly into `useFocusEffect` (focus re-evaluation and 30-second interval polling) and `handleRefresh` (pull-to-refresh).
+  - Ensured creating, modifying, or deactivating deals in Admin HQ immediately propagates to the Customer Mobile Home Screen.
+  - Added 1-tap claim navigation (`handlePressBanner`), auto-applying promo codes to cart and routing directly to the target restaurant brand menu.
+- **Verification Evidence**:
+  - `test_dynamic_home_banner_sync_suite.py` passed 100% (5/5 steps verified).
+  - `test_backend_local.py` passed 100% (23/23 tests passed).
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npx tsc --noEmit` in `admin` (0 errors).
+
 - **Basket-Level Loyalty Points Redemption (`app/src/screens/CartScreen.tsx`, `app/src/store/cartSlice.ts`, `app/src/screens/CheckoutScreen.tsx`)**:
   - Relocated loyalty points redemption UI completely to the Basket screen (`CartScreen.tsx`), adding live balance preview, toggle action, and real-time discount calculation.
   - Integrated `useLoyaltyPoints` and `redeemedLoyaltyPoints` into Redux `cartSlice.ts`, ensuring basket mutations automatically recalibrate loyalty points deductions.

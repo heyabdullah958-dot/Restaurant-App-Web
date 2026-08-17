@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { fetchRestaurants } from '../store/restaurantSlice';
-import { setFulfillmentMode } from '../store/cartSlice';
+import { setFulfillmentMode, applyPromo, AppliedPromo } from '../store/cartSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { StatusBar } from 'expo-status-bar';
@@ -84,27 +84,6 @@ const isBrandOpen = (brand: any): boolean => {
 
 // --- MEMOIZED SUB-COMPONENTS FOR 60 FPS PERFORMANCE ---
 
-const BANNERS = [
-  {
-    icon: 'fast-food' as const,
-    title: '3 Brands, One Cart!',
-    subtitle: 'Mix cuisines in a single order.',
-    bg: COLORS.primary,
-  },
-  {
-    icon: 'gift' as const,
-    title: 'Earn Loyalty Points!',
-    subtitle: '1 point per Rs.100 — redeem anytime.',
-    bg: COLORS.accent,
-  },
-  {
-    icon: 'bicycle' as const,
-    title: 'Fast Delivery!',
-    subtitle: 'Hot & fresh at your doorstep.',
-    bg: COLORS.secondary,
-  },
-];
-
 const PROTOTYPE_STYLES: Record<string, { colors: readonly [string, string, ...string[]], emoji?: string }> = {
   'seenbanao': { colors: ['#3E1F00', '#FF5722'] as const, emoji: '🔥' },
   'jushhpk': { colors: ['#1A0A00', '#D2691E'] as const, emoji: '🍔' },
@@ -115,185 +94,218 @@ const PROTOTYPE_STYLES: Record<string, { colors: readonly [string, string, ...st
   'default': { colors: ['#FF5722', '#E91E63'] as const, emoji: '🍽️' }
 };
 
-// Isolated Banner Carousel — dynamically consumes live active flash deals & promotional banners
-const BannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => void }) => {
+const BRAND_DATA: Record<string, { name: string; slug: string; emoji: string; colors: readonly [string, string, ...string[]] }> = {
+  'jushhpk': { name: 'Jush PK', slug: 'jushhpk', emoji: '🍔', colors: ['#1A0A00', '#D2691E'] },
+  'tandooristoppk': { name: 'Tandoori Stop', slug: 'tandooristoppk', emoji: '🍗🔥', colors: ['#FF9900', '#E65100'] },
+  'getafomo': { name: 'Get A Fomo', slug: 'getafomo', emoji: '☕🍰', colors: ['#8b5cf6', '#6d28d9'] },
+  'seenbanao': { name: 'Seen Banao', slug: 'seenbanao', emoji: '🔥', colors: ['#3E1F00', '#FF5722'] },
+  'dineatblue': { name: 'Dine At Blue', slug: 'dineatblue', emoji: '🐟', colors: ['#001529', '#0055A4'] },
+  'sandmelts': { name: 'Sand Melts', slug: 'sandmelts', emoji: '🥪', colors: ['#FF6B00', '#FF3CAC'] },
+  'birdmanfoodspk': { name: 'Birdman Foods', slug: 'birdmanfoodspk', emoji: '🍗', colors: ['#7A0000', '#FF1744'] },
+};
+
+const ID_TO_SLUG: Record<number | string, string> = {
+  1: 'seenbanao',
+  2: 'dineatblue',
+  3: 'jushhpk',
+  4: 'tandooristoppk',
+  5: 'sandmelts',
+  6: 'birdmanfoodspk',
+  7: 'getafomo',
+  'seenbanao': 'seenbanao',
+  'dineatblue': 'dineatblue',
+  'jushhpk': 'jushhpk',
+  'tandooristoppk': 'tandooristoppk',
+  'sandmelts': 'sandmelts',
+  'birdmanfoodspk': 'birdmanfoodspk',
+  'getafomo': 'getafomo',
+};
+
+const parseDateSafe = (dateStr?: string): number => {
+  if (!dateStr) return Date.now() + 7 * 86400000;
+  let iso = String(dateStr).trim();
+  if (iso.includes(' ') && !iso.includes('T')) {
+    iso = iso.replace(' ', 'T');
+  }
+  const timestamp = new Date(iso).getTime();
+  if (isNaN(timestamp)) {
+    return Date.now() + 7 * 86400000;
+  }
+  return timestamp;
+};
+
+const extractDealsList = (res: any): any[] => {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.results)) return res.results;
+  if (Array.isArray(res.data)) return res.data;
+  if (Array.isArray(res.data?.results)) return res.data.results;
+  if (Array.isArray(res.data?.data)) return res.data.data;
+  return [];
+};
+
+const resolveBrandInfo = (deal: any) => {
+  if (!deal) return { name: 'GetFood', slug: '', emoji: '⚡', colors: ['#e11d48', '#be123c'] as const };
+  if (typeof deal.restaurant === 'object' && deal.restaurant?.slug) {
+    const key = deal.restaurant.slug.toLowerCase().replace(/\s+/g, '');
+    return BRAND_DATA[key] || { name: deal.restaurant.name || 'GetFood', slug: deal.restaurant.slug, emoji: '🍽️', colors: ['#e11d48', '#be123c'] as const };
+  }
+  if (typeof deal.restaurant === 'number' && ID_TO_SLUG[deal.restaurant]) {
+    const key = ID_TO_SLUG[deal.restaurant];
+    return BRAND_DATA[key] || { name: 'GetFood', slug: key, emoji: '🍽️', colors: ['#e11d48', '#be123c'] as const };
+  }
+  if (deal.restaurant_id && ID_TO_SLUG[deal.restaurant_id]) {
+    const key = ID_TO_SLUG[deal.restaurant_id];
+    return BRAND_DATA[key] || { name: deal.restaurant_name || 'GetFood', slug: key, emoji: '🍽️', colors: ['#e11d48', '#be123c'] as const };
+  }
+  if (deal.restaurant_slug) {
+    const key = deal.restaurant_slug.toLowerCase().replace(/\s+/g, '');
+    return BRAND_DATA[key] || { name: deal.restaurant_name || 'GetFood', slug: deal.restaurant_slug, emoji: '🍽️', colors: ['#e11d48', '#be123c'] as const };
+  }
+  if (deal.title?.toLowerCase().includes('burger') || deal.title?.toLowerCase().includes('jush')) return BRAND_DATA['jushhpk'];
+  if (deal.title?.toLowerCase().includes('tandoori') || deal.title?.toLowerCase().includes('boti') || deal.title?.toLowerCase().includes('naan')) return BRAND_DATA['tandooristoppk'];
+  if (deal.title?.toLowerCase().includes('coffee') || deal.title?.toLowerCase().includes('fomo') || deal.title?.toLowerCase().includes('dessert')) return BRAND_DATA['getafomo'];
+  return { name: 'GetFood Exclusive', slug: '', emoji: '⚡', colors: ['#e11d48', '#be123c'] as const };
+};
+
+interface DynamicHeroBannerProps {
+  deals: any[];
+  fulfillmentMode: string;
+  onPressBanner: (deal?: any) => void;
+}
+
+// Unified Dynamic Hero Banner Container — binds strictly to live backend promotional flash deals
+const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBanner }: DynamicHeroBannerProps) => {
   const [bannerIndex, setBannerIndex] = React.useState(0);
-  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
 
-  React.useEffect(() => {
-    let isMounted = true;
-    api.get('/promotions/flash-deals/')
-      .then((res: any) => {
-        let data: any[] = [];
-        if (Array.isArray(res)) data = res;
-        else if (Array.isArray(res?.results)) data = res.results;
-        else if (Array.isArray(res?.data)) data = res.data;
-        else if (Array.isArray(res?.data?.results)) data = res.data.results;
-
-        if (isMounted && data.length > 0) {
-          setFlashDeals(data.filter((d: any) => !d.is_dine_in_only));
-        }
-      })
-      .catch(() => {});
-    return () => { isMounted = false; };
-  }, []);
-
+  // Filter active deals according to mode and active date
   const activeBanners = React.useMemo(() => {
-    if (flashDeals.length > 0) {
-      return flashDeals.map((deal: any) => ({
-        icon: 'flash-outline' as const,
-        title: deal.title || 'Flash Deal Special',
-        subtitle: deal.description || `${deal.discount_value}% OFF on all orders!`,
-        bg: '#e11d48',
-        tag: '⚡ FLASH SALE',
-      }));
-    }
-    return BANNERS;
-  }, [flashDeals]);
+    if (!deals || deals.length === 0) return [];
+    const now = Date.now();
+    const validDeals = deals.filter((d: any) => {
+      if (d.is_active === false) return false;
+      const start = parseDateSafe(d.start_time);
+      const end = parseDateSafe(d.end_time);
+      return start <= now && end >= now;
+    });
 
+    if (fulfillmentMode === 'DINE_IN') {
+      const dineInDeals = validDeals.filter((d: any) => d.is_dine_in_only);
+      return dineInDeals.length > 0 ? dineInDeals : validDeals;
+    }
+    return validDeals.filter((d: any) => !d.is_dine_in_only);
+  }, [deals, fulfillmentMode]);
+
+  // Keep index safely bounded
   React.useEffect(() => {
+    if (activeBanners.length === 0) {
+      setBannerIndex(0);
+      return;
+    }
+    if (bannerIndex >= activeBanners.length) {
+      setBannerIndex(0);
+    }
+  }, [activeBanners.length, bannerIndex]);
+
+  // Auto rotate every 4 seconds if more than 1 deal
+  React.useEffect(() => {
+    if (activeBanners.length <= 1) return;
     const timer = setInterval(() => {
       setBannerIndex(prev => (prev + 1) % activeBanners.length);
-    }, 3500);
+    }, 4000);
     return () => clearInterval(timer);
   }, [activeBanners.length]);
 
-  const banner = activeBanners[bannerIndex] || activeBanners[0];
+  // Clean collapse when no active promotions exist (zero height / no orphan mock slides)
+  if (activeBanners.length === 0) {
+    return null;
+  }
+
+  const currentDeal = activeBanners[bannerIndex] || activeBanners[0];
+  const brand = resolveBrandInfo(currentDeal);
+  const isDineIn = currentDeal.is_dine_in_only || fulfillmentMode === 'DINE_IN';
+
+  const discountText = currentDeal.discount_value
+    ? (currentDeal.deal_type === 'flat' ? `Flat Rs. ${Number(currentDeal.discount_value).toFixed(0)} OFF` : `${Number(currentDeal.discount_value).toFixed(0)}% OFF`)
+    : 'Special Discount';
+
+  const tagText = isDineIn
+    ? '🍽️ DINE-IN EXCLUSIVE'
+    : `⚡ FLASH SALE • ${brand.name.toUpperCase()}`;
 
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
-      style={[styles.promoBanner, { backgroundColor: banner.bg }, SHADOWS.medium]}
-      onPress={onPressBanner}
+      activeOpacity={0.92}
+      style={[
+        styles.promoBanner,
+        { backgroundColor: isDineIn ? '#6d28d9' : '#be123c' },
+        SHADOWS.medium
+      ]}
+      onPress={() => onPressBanner(currentDeal)}
     >
+      <LinearGradient
+        colors={isDineIn ? ['#7c3aed', '#4c1d95'] : (brand.colors || ['#e11d48', '#be123c'])}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[StyleSheet.absoluteFill, { borderRadius: 20, opacity: 0.95 }]}
+      />
+
       <View style={styles.bannerContent}>
-        <View style={{ flex: 1, paddingRight: SPACING.xs }}>
-          <Text style={styles.bannerTitle}>{banner.title}</Text>
-          <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
-          <View style={styles.bannerCTARow}>
-            <Text style={styles.bannerCTAText}>Order Now</Text>
-            <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
-          </View>
-        </View>
-        <View style={styles.bannerIconWrap}>
-          <Ionicons name={banner.icon as any} size={72} color="rgba(255,255,255,0.25)" />
-        </View>
-      </View>
-      {/* Dot Indicators */}
-      <View style={styles.bannerDots}>
-        {activeBanners.map((_, i) => (
-          <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
-        ))}
-      </View>
-    </TouchableOpacity>
-  );
-});
-
-const DINE_IN_FALLBACK_BANNERS = [
-  {
-    icon: 'restaurant-outline' as const,
-    title: 'Exclusive Dine-In Offers',
-    subtitle: 'Flat 15% OFF when you eat in at DHA Phase 1 & Johar Town!',
-    bg: '#7c3aed',
-    tag: 'DINE-IN EXCLUSIVE',
-  },
-  {
-    icon: 'wine-outline' as const,
-    title: 'Table Service Perks',
-    subtitle: 'Complimentary Welcome Drinks & Free Dessert over Rs.1500!',
-    bg: '#4c1d95',
-    tag: 'TABLE SERVICE SPECIAL',
-  },
-];
-
-const DineInBannerCarousel = React.memo(({ onPressBanner }: { onPressBanner: () => void }) => {
-  const [bannerIndex, setBannerIndex] = React.useState(0);
-  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
-
-  React.useEffect(() => {
-    let isMounted = true;
-    // Fetch live active flash deals (universal & dine-in)
-    api.get('/promotions/flash-deals/')
-      .then((res: any) => {
-        let data: any[] = [];
-        if (Array.isArray(res)) data = res;
-        else if (Array.isArray(res?.results)) data = res.results;
-        else if (Array.isArray(res?.data)) data = res.data;
-        else if (Array.isArray(res?.data?.results)) data = res.data.results;
-
-        if (isMounted && data.length > 0) {
-          setFlashDeals(data);
-        }
-      })
-      .catch((err: any) => {
-        // Safe fallback
-      });
-    return () => { isMounted = false; };
-  }, []);
-
-  const activeBanners = React.useMemo(() => {
-    if (flashDeals.length > 0) {
-      return flashDeals.map((deal: any) => ({
-        icon: 'restaurant-outline' as const,
-        title: deal.title || deal.name || 'Exclusive Dine-In Deal',
-        subtitle: deal.description || `${deal.discount_value}% OFF on Dine-In orders!`,
-        bg: '#6d28d9',
-        tag: deal.tag || 'DINE-IN EXCLUSIVE',
-      }));
-    }
-    return DINE_IN_FALLBACK_BANNERS;
-  }, [flashDeals]);
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setBannerIndex(prev => (prev + 1) % activeBanners.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, [activeBanners.length]);
-
-  const banner = activeBanners[bannerIndex] || activeBanners[0];
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      style={[styles.promoBanner, { backgroundColor: banner.bg }, SHADOWS.medium]}
-      onPress={onPressBanner}
-    >
-      <View style={styles.bannerContent}>
-        <View style={{ flex: 1, paddingRight: SPACING.xs }}>
+        <View style={{ flex: 1, paddingRight: SPACING.xs, zIndex: 2 }}>
+          {/* Dynamic Category/Brand Tag */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <View style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
+            <View style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.22)',
+              paddingHorizontal: 8,
+              paddingVertical: 3,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.35)'
+            }}>
               <Text style={{ fontSize: 10, fontWeight: '800', color: '#fef08a', letterSpacing: 0.5 }}>
-                🍽️ {banner.tag || 'DINE-IN EXCLUSIVE'}
+                {tagText}
               </Text>
             </View>
           </View>
-          <Text style={styles.bannerTitle}>{banner.title}</Text>
-          <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+
+          <Text style={styles.bannerTitle} numberOfLines={2}>
+            {currentDeal.title}
+          </Text>
+
+          <Text style={styles.bannerSubtitle} numberOfLines={2}>
+            {currentDeal.description || `${discountText} on all orders!`}
+          </Text>
+
           <View style={styles.bannerCTARow}>
-            <Text style={styles.bannerCTAText}>Explore Dine-In Deals</Text>
+            <Text style={styles.bannerCTAText}>
+              {isDineIn ? 'Explore Dine-In Deal' : 'Claim Deal & Order'}
+            </Text>
             <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
           </View>
         </View>
-        <View style={styles.bannerIconWrap}>
-          <Ionicons name={banner.icon || 'restaurant-outline'} size={72} color="rgba(255,255,255,0.25)" />
+
+        <View style={[styles.bannerIconWrap, { zIndex: 1 }]}>
+          <Text style={{ fontSize: 44, opacity: 0.9 }}>{brand.emoji || '⚡'}</Text>
         </View>
       </View>
-      <View style={styles.bannerDots}>
-        {activeBanners.map((_, i) => (
-          <View key={i} style={[styles.bannerDot, i === bannerIndex && styles.bannerDotActive]} />
-        ))}
-      </View>
+
+      {/* Dot Indicators */}
+      {activeBanners.length > 1 && (
+        <View style={styles.bannerDots}>
+          {activeBanners.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.bannerDot,
+                i === bannerIndex && styles.bannerDotActive,
+                { backgroundColor: i === bannerIndex ? COLORS.white : 'rgba(255,255,255,0.45)' }
+              ]}
+            />
+          ))}
+        </View>
+      )}
     </TouchableOpacity>
   );
-});
-
-// Unified Hero Banner Container — smooth transition between Delivery/Takeaway and Dine-In without container unmounting
-const HeroBannerSection = React.memo(({ fulfillmentMode, onPressBanner }: { fulfillmentMode: string, onPressBanner: () => void }) => {
-  if (fulfillmentMode === 'DINE_IN') {
-    return <DineInBannerCarousel onPressBanner={onPressBanner} />;
-  }
-  return <BannerCarousel onPressBanner={onPressBanner} />;
 });
 
 // Memoized Category Chip Component
@@ -431,8 +443,29 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
+  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
   const [activeGuestOrder, setActiveGuestOrder] = React.useState<any>(null);
   const [isTabSwitching, setIsTabSwitching] = React.useState(false);
+
+  const fetchFlashDeals = React.useCallback(async () => {
+    try {
+      let raw: any[] = [];
+      try {
+        const res = await api.get('/promotions/flash-deals/');
+        raw = extractDealsList(res);
+      } catch (err) {
+        try {
+          const resFallback = await api.get('/flash-deals/');
+          raw = extractDealsList(resFallback);
+        } catch {}
+      }
+      const now = Date.now();
+      const valid = raw.filter((d: any) => d.is_active !== false && parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now);
+      setFlashDeals(valid);
+    } catch (e) {
+      if (__DEV__) console.log('Flash deals fetch error', e);
+    }
+  }, []);
 
   const checkActiveGuestOrder = React.useCallback(async () => {
     try {
@@ -580,6 +613,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   useFocusEffect(
     React.useCallback(() => {
       dispatch(fetchRestaurants() as any);
+      fetchFlashDeals();
       if (user && !user.is_guest) {
         dispatch(fetchUserProfile() as any);
       }
@@ -588,6 +622,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       checkActiveGuestOrder();
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
+        fetchFlashDeals();
         if (user && !user.is_guest) {
           dispatch(fetchUserProfile() as any);
         }
@@ -596,7 +631,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         checkActiveGuestOrder();
       }, 30000);
       return () => clearInterval(interval);
-    }, [dispatch, user, checkUnratedDeliveredOrders, checkActiveGuestOrder])
+    }, [dispatch, user, fetchFlashDeals, checkUnratedDeliveredOrders, checkActiveGuestOrder])
   );
 
 
@@ -614,9 +649,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    await dispatch(fetchRestaurants());
+    await Promise.all([
+      dispatch(fetchRestaurants()),
+      fetchFlashDeals(),
+    ]);
     setRefreshing(false);
-  }, [dispatch]);
+  }, [dispatch, fetchFlashDeals]);
 
   const handleSelectCategory = React.useCallback((id: string) => {
     if (id === 'FlashDeals') {
@@ -630,9 +668,35 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     navigation.navigate('Restaurant', { slug });
   }, [navigation]);
 
-  const handlePressBanner = React.useCallback(() => {
+  const handlePressBanner = React.useCallback((deal?: any) => {
+    if (deal) {
+      const brand = resolveBrandInfo(deal);
+      const promoCode = `FLASH-${(deal.title || 'SALE').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8)}`;
+      const promoPayload: AppliedPromo = {
+        code: promoCode,
+        discount_type: deal.deal_type === 'flat' ? 'fixed' : 'percentage',
+        discount_value: Number(deal.discount_value || deal.discount_percentage || 20),
+        max_discount: deal.max_discount ? Number(deal.max_discount) : null,
+        min_subtotal: Number(deal.min_subtotal || 0),
+        discount: 0,
+      };
+      dispatch(applyPromo(promoPayload));
+
+      if (brand?.slug) {
+        navigation.navigate('Restaurant', {
+          slug: brand.slug,
+          flashDealClaimed: {
+            id: deal.id,
+            title: deal.title,
+            discount: promoPayload.discount_value,
+            type: promoPayload.discount_type,
+          }
+        });
+        return;
+      }
+    }
     navigation.navigate('FlashDeals');
-  }, [navigation]);
+  }, [dispatch, navigation]);
 
   const renderCategoryChipItem = React.useCallback(({ item }: { item: typeof categories[0] }) => (
     <CategoryChip 
@@ -656,7 +720,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const ListHeader = React.useMemo(() => (
     <View>
-      <HeroBannerSection fulfillmentMode={fulfillmentMode} onPressBanner={handlePressBanner} />
+      <DynamicHeroBannerSection
+        deals={flashDeals}
+        fulfillmentMode={fulfillmentMode}
+        onPressBanner={handlePressBanner}
+      />
 
       {activeGuestOrder && (
         <TouchableOpacity

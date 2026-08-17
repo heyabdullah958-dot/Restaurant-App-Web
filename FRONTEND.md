@@ -144,6 +144,30 @@
 - **Deploy status**: Saved, committed, and ready for fresh Metro runtime / release APK build.
 - **Confidence**: 100% — verified via TypeScript compilation and automated integration test suite.
 
+---
+
+## Phase 1 — Dynamic Home Banner Synchronization & Static Deal Purge — 2026-08-17
+- **What changed and why**:
+  1. Purged legacy static promotional mock banner arrays (`BANNERS` with `"3 Brands, One Cart!"`, `"Earn Loyalty Points!"`, and `DINE_IN_FALLBACK_BANNERS` with `"Exclusive Dine-In Offers"`) from `HomeScreen.tsx`.
+  2. Implemented `DynamicHeroBannerSection` component that binds strictly to live backend promotional flash deals (`/promotions/flash-deals/`).
+  3. Integrated clean collapse behavior (`if (activeBanners.length === 0) return null;`) so when no promotions or flash deals are active, the banner area smoothly collapses to zero height without leaving orphan slides or visual gaps.
+  4. Wired active deal synchronization to `useFocusEffect` (focus re-evaluation & 30s background polling) and `handleRefresh` (pull-to-refresh), ensuring real-time deactivation/creation of promotions in Admin HQ immediately reflects on the mobile Customer Home Screen.
+  5. Added automatic promo code generation (`FLASH-{CODE}`) and 1-tap claim navigation on banner tap.
+- **Files modified**:
+  - `app/src/screens/HomeScreen.tsx`
+  - `test_dynamic_home_banner_sync_suite.py` [NEW]
+  - `FRONTEND.md`
+  - `BUGS.md`
+  - `CHANGELOG.md`
+  - `LESSONS.md`
+- **Approaches considered**:
+  - Option A: Unified `DynamicHeroBannerSection` with direct prop binding, lifecycle hooks in `HomeScreen`, and conditional clean collapse (Chosen — zero latency, eliminates duplicate carousel logic, full focus synchronization).
+  - Option B: Isolated child component fetching with static placeholder cards on empty state (Rejected — leaves orphan slides and fails to synchronize with HomeScreen focus / pull-to-refresh).
+- **How it was verified**: Executed `npx tsc --noEmit` across `app`, `admin`, and `admin-app` (0 compilation errors, code 0) and ran `test_dynamic_home_banner_sync_suite.py` (5/5 tests passed, code 0) & `test_backend_local.py` (23/23 tests passed, code 0).
+- **Deploy status**: Saved, verified locally, ready for commit & push.
+- **Confidence**: 100% — verified through static analysis, full TypeScript compilation, and live DRF integration test suite.
+
+
 
 
 

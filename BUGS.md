@@ -585,3 +585,31 @@
   - `npx tsc --noEmit` in `app` (0 errors).
   - `npx tsc --noEmit` in `admin-app` (0 errors).
   - `npm run build` in `admin` (0 errors).
+
+---
+
+### Bug #36 — Persistent Mock Banners & Missing Dynamic HomeScreen Lifecycle Synchronization
+- **Discovered**: 2026-08-17
+- **Status**: Fixed
+- **Severity**: Medium (Customer App UI Promotion Integrity & Lifecycle Binding)
+- **Component**: `app/src/screens/HomeScreen.tsx`, `test_dynamic_home_banner_sync_suite.py`
+- **Symptom**:
+  1. Customer mobile Home Screen displayed hardcoded mock promotional banner cards (e.g. `"3 Brands, One Cart!"`, `"Earn Loyalty Points!"`, `"Exclusive Dine-In Offers"`, `"Table Service Perks"`).
+  2. When flash deals were created, modified, or deleted in the Admin panel, the Customer Home Screen failed to re-evaluate active promotions on screen focus or pull-to-refresh without closing and re-opening the app.
+  3. When all deals were deleted or expired (`deals.length === 0`), the banner area rendered static mock slides rather than cleanly collapsing to zero height.
+- **Root Cause**:
+  1. `BannerCarousel` and `DineInBannerCarousel` in `HomeScreen.tsx` had separate hardcoded fallback arrays (`BANNERS`, `DINE_IN_FALLBACK_BANNERS`) and separate local `useEffect([], ...)` queries that only ran on initial component mount.
+  2. `HomeScreen.tsx` lacked focus (`useFocusEffect`) and pull-to-refresh (`handleRefresh`) lifecycle binding for promotional deals.
+  3. Carousels lacked a clean collapse check (`activeBanners.length === 0 -> return null`).
+- **Fix Applied**:
+  1. Purged all hardcoded mock banner arrays (`BANNERS`, `DINE_IN_FALLBACK_BANNERS`) from `HomeScreen.tsx`.
+  2. Implemented unified `DynamicHeroBannerSection` component that binds directly to live parent `flashDeals` state and fulfillment mode.
+  3. Hooked `fetchFlashDeals` to `useFocusEffect` (focus re-evaluation and 30-second interval polling) and `handleRefresh` (pull-to-refresh).
+  4. Added clean collapse check: returning `null` when `activeBanners.length === 0` to ensure zero empty container height.
+  5. Wired 1-tap claim navigation on banner tap (`handlePressBanner`), auto-applying promo codes and routing to target restaurant brand menus.
+- **Verification Evidence**:
+  - `test_dynamic_home_banner_sync_suite.py` passed 100% (5/5 tests passed).
+  - `test_backend_local.py` passed 100% (23/23 tests passed).
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `npx tsc --noEmit` in `admin` (0 errors).

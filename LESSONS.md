@@ -4,6 +4,18 @@
 
 ---
 
+## Lesson 12 — Dynamic Home Banner Synchronization, Focus Binding & Zero-Deal Collapse — 2026-08-17
+- **Pattern**: Promotional home banner carousels and marketing campaign state synchronization between Admin HQ and Mobile Customer Clients.
+- **Wrong assumption made**: Assuming that banner components can maintain their own isolated mount-only `useEffect` fetching queries with hardcoded static fallback slides (`BANNERS` array) for when backend deals are empty or unreturned.
+- **What actually mattered**:
+  1. Isolated child components that fetch in `useEffect([], ...)` are immune to screen navigation focus (`useFocusEffect`) and pull-to-refresh (`handleRefresh`), causing stale promotional data to persist indefinitely on user devices until app process termination.
+  2. Fallback mock arrays (e.g. `"3 Brands, One Cart!"`, `"Flat Rs. 250 OFF"`) trick user interfaces into rendering outdated campaigns even when all promotions are intentionally deleted or deactivated in Admin HQ.
+  3. Promotional carousel components MUST evaluate the real active deals length and **cleanly return `null`** when `activeBanners.length === 0`, allowing the mobile layout to smoothly collapse without orphan cards or empty container whitespace.
+  4. Promotional state MUST be managed at the screen container level and wired to `useFocusEffect`, background polling intervals, and pull-to-refresh handlers.
+- **Applies to**: `app/src/screens/HomeScreen.tsx`, `app/src/screens/FlashDealsScreen.tsx`, `admin/src/views/FlashDealManagement.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`.
+
+---
+
 ## Lesson 11 — Super Admin Multi-Tenant Modal Provisioning & Delivered-Only CRM Annotation — 2026-08-16
 - **Pattern**: Modal entity creation in role-differentiated apps (Super Admin vs Branch Manager) and CRM user metric aggregation.
 - **Wrong assumption made**: Assuming that creation modals designed for branch managers (where branch context is implicitly known from `auth.branchId`) can be rendered unchanged for Super Admin, and assuming customer lists only need raw user model counts.
