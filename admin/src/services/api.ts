@@ -541,12 +541,12 @@ export const updateCoupon = (id: number, data: any) => apiFetch<any>(`/api/coupo
 export const deleteCoupon = (id: number) => apiFetch<any>(`/api/coupons/${id}/`, { method: 'DELETE' });
 
 export const fetchFlashDeals = async () => {
-  const data = await apiFetch<any>('/api/deals/active/');
+  const data = await apiFetch<any>('/api/promotions/flash-deals/');
   return Array.isArray(data) ? data : (data?.results || []);
 };
-export const createFlashDeal = (data: any) => apiFetch<any>('/api/deals/', { method: 'POST', body: JSON.stringify(data) });
-export const updateFlashDeal = (id: number, data: any) => apiFetch<any>(`/api/deals/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
-export const deleteFlashDeal = (id: number) => apiFetch<any>(`/api/deals/${id}/`, { method: 'DELETE' });
+export const createFlashDeal = (data: any) => apiFetch<any>('/api/promotions/flash-deals/', { method: 'POST', body: JSON.stringify(data) });
+export const updateFlashDeal = (id: number, data: any) => apiFetch<any>(`/api/promotions/flash-deals/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteFlashDeal = (id: number) => apiFetch<any>(`/api/promotions/flash-deals/${id}/`, { method: 'DELETE' });
 
 export const fetchReviews = async (params?: { restaurant_id?: number | string; restaurant_slug?: string }) => {
   let url = '/api/admin/reviews/';

@@ -805,13 +805,41 @@ export interface FlashDeal {
   deal_type?: 'percentage' | 'flat' | 'bogo' | 'combo';
   discount_value?: number | string;
   discount_percentage?: number;
-  start_time: string;
-  end_time: string;
-  menu_item?: number;
-  menu_item_name?: string;
+  max_discount?: number | null;
+  min_subtotal?: number;
+  restaurant?: number | null;
+  restaurant_name?: string | null;
+  restaurant_slug?: string | null;
+  branch?: number | null;
+  branch_name?: string | null;
+  order_mode?: 'ALL' | 'DELIVERY' | 'DINE_IN';
+  item_scope_type?: 'ENTIRE_MENU' | 'CATEGORY' | 'SPECIFIC_ITEMS';
+  categories?: number[];
+  categories_details?: Array<{ id: number; name: string }>;
+  menu_items?: number[];
+  menu_items_details?: Array<{ id: number; name: string; price: number; category_name?: string }>;
+  timing_type?: 'ONE_TIME' | 'RECURRING_DAILY';
+  start_time?: string;
+  end_time?: string;
+  daily_start_time?: string | null;
+  daily_end_time?: string | null;
+  active_days?: string[];
+  valid_from?: string | null;
+  valid_until?: string | null;
+  timezone?: string;
+  max_orders?: number;
+  orders_used?: number;
+  current_redemptions?: number;
+  redemptions_left?: number | null;
+  redemption_reset_frequency?: 'DAILY' | 'LIFETIME';
+  priority?: number;
   is_active: boolean;
+  is_currently_active?: boolean;
   is_dine_in_only?: boolean;
+  image?: string;
   image_url?: string | null;
+  discount_display_text?: string;
+  window_ends_at?: string | null;
 }
 
 export const fetchCustomers = async (search?: string): Promise<CustomerProfile[]> => {
@@ -893,27 +921,27 @@ export const fetchFlashDeals = async (): Promise<FlashDeal[]> => {
 };
 
 const formatFlashDealPayload = (data: Partial<FlashDeal>) => {
-  const payload: any = {};
+  const payload: any = { ...data };
   if (data.title !== undefined) payload.title = data.title.trim();
   if (data.description !== undefined) payload.description = data.description.trim();
   payload.deal_type = data.deal_type || 'percentage';
   const val = data.discount_value ?? data.discount_percentage ?? 0;
   payload.discount_value = parseFloat(String(val)) || 0;
-
-  if (data.start_time) {
-    payload.start_time = data.start_time.includes('T') ? new Date(data.start_time).toISOString() : new Date(`${data.start_time}T00:00:00Z`).toISOString();
-  } else {
-    payload.start_time = new Date().toISOString();
+  if (data.max_discount !== undefined) {
+    payload.max_discount = data.max_discount ? parseFloat(String(data.max_discount)) : null;
   }
-
-  if (data.end_time) {
-    payload.end_time = data.end_time.includes('T') ? new Date(data.end_time).toISOString() : new Date(`${data.end_time}T23:59:59Z`).toISOString();
-  } else {
-    payload.end_time = new Date(Date.now() + 7 * 86400000).toISOString();
+  if (data.min_subtotal !== undefined) {
+    payload.min_subtotal = data.min_subtotal ? parseFloat(String(data.min_subtotal)) : 0;
   }
-
+  if (data.timing_type === 'ONE_TIME') {
+    if (data.start_time) {
+      payload.start_time = data.start_time.includes('T') ? new Date(data.start_time).toISOString() : new Date(`${data.start_time}T00:00:00Z`).toISOString();
+    }
+    if (data.end_time) {
+      payload.end_time = data.end_time.includes('T') ? new Date(data.end_time).toISOString() : new Date(`${data.end_time}T23:59:59Z`).toISOString();
+    }
+  }
   if (data.is_active !== undefined) payload.is_active = data.is_active;
-  if (data.menu_item !== undefined) payload.menu_items = data.menu_item ? [data.menu_item] : [];
   return payload;
 };
 
