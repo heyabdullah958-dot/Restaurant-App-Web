@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2, UploadCloud,
-  Info, RefreshCw, Link as LinkIcon, Search, Clock, Calendar, Store, Layers, Flame
+  Zap, Plus, Edit2, Trash2, CheckCircle2, XCircle, Loader2,
+  RefreshCw, Search, Clock, Calendar
 } from 'lucide-react';
 import { useAdmin } from '../AdminContext';
 import {
@@ -54,10 +54,6 @@ export const FlashDealManagement: React.FC = () => {
   const [brandMenuItems, setBrandMenuItems] = useState<any[]>([]);
   const [loadingMenu, setLoadingMenu] = useState<boolean>(false);
   const [searchItemQuery, setSearchItemQuery] = useState<string>('');
-
-  // Image Upload States
-  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
-  const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
 
   // Form Data
   const [formData, setFormData] = useState({
@@ -154,49 +150,6 @@ export const FlashDealManagement: React.FC = () => {
       item => item.name.toLowerCase().includes(q) || (item.category_name && item.category_name.toLowerCase().includes(q))
     );
   }, [brandMenuItems, searchItemQuery]);
-
-  const handleImageUpload = async (file: File) => {
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      showToast('File size exceeds 2MB limit.', 'error');
-      return;
-    }
-
-    setUploadingImage(true);
-    try {
-      const body = new FormData();
-      body.append('file', file);
-      body.append('upload_preset', 'foodsphere_preset');
-
-      const res = await fetch('https://api.cloudinary.com/v1_1/depa8gfnk/image/upload', {
-        method: 'POST',
-        body,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.secure_url) {
-          setFormData(prev => ({ ...prev, image: data.secure_url }));
-          showToast('Banner uploaded successfully!', 'success');
-          setUploadingImage(false);
-          return;
-        }
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setFormData(prev => ({ ...prev, image: reader.result as string }));
-          showToast('Image loaded successfully!', 'success');
-        }
-        setUploadingImage(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (err: any) {
-      setUploadingImage(false);
-      showToast('Failed to upload image.', 'error');
-    }
-  };
 
   const openAddModal = () => {
     setEditingDeal(null);

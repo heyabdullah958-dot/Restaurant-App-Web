@@ -76,7 +76,7 @@ async function performTokenRefresh(): Promise<string> {
   return newAccess;
 }
 
-async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const isAuthEndpoint = endpoint.includes('/api/auth/') || endpoint.includes('/api/token/');
   const token = isAuthEndpoint ? null : getToken();
   let method = options.method || 'GET';
