@@ -24,9 +24,15 @@ export const fetchRestaurants = createAsyncThunk(
 
 export const fetchRestaurantDetail = createAsyncThunk(
   'restaurant/fetchRestaurantDetail',
-  async (slug: string, { rejectWithValue }) => {
+  async (arg: string | { slug: string; branchId?: number }, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/restaurants/${slug}/`);
+      const slug = typeof arg === 'string' ? arg : arg.slug;
+      const branchId = typeof arg === 'object' ? arg.branchId : undefined;
+      let url = `/restaurants/${slug}/`;
+      if (branchId) {
+        url += `?branch_id=${branchId}`;
+      }
+      const response = await api.get(url);
       return response;
     } catch (error: any) {
       return rejectWithValue(error.userFriendlyMessage || error.response?.data?.message || error.response?.data?.detail || error.message || 'Failed to fetch restaurant details');

@@ -844,7 +844,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <Text style={styles.sectionTitle}>
           {fulfillmentMode === 'DINE_IN' ? '🍽️ Dine-In Restaurants' : 'Explore Brands'}
         </Text>
-        <Text style={styles.sectionLink}>View All</Text>
       </View>
     </View>
   ), [fulfillmentMode, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
@@ -934,7 +933,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             activeOpacity={0.75}
           >
             <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
-            {notifications.filter((n) => !n.read).length > 0 && (
+            {isAuthenticated && !user?.is_guest && notifications.filter((n) => !n.read).length > 0 && (
               <View style={styles.notifBadge}>
                 <Text style={styles.notifBadgeText}>
                   {notifications.filter((n) => !n.read).length > 9
@@ -1060,6 +1059,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         onClose={() => setShowNotifModal(false)}
         notifications={notifications}
         navigation={navigation}
+        isGuest={!isAuthenticated || user?.is_guest}
       />
     </View>
   );

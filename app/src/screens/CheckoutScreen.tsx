@@ -79,6 +79,10 @@ export default function CheckoutScreen() {
   const [isLoadingBranches, setIsLoadingBranches] = useState<boolean>(true);
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
 
+  const selectedBranch = useMemo(() => {
+    return branches.find((b: any) => b.id === selectedBranchId) || null;
+  }, [branches, selectedBranchId]);
+
   // Delivery scheduling states
   const [isScheduled, setIsScheduled] = useState(false);
   const [schedDate, setSchedDate] = useState('Today');
@@ -206,6 +210,44 @@ export default function CheckoutScreen() {
       branchName: selectedBranch.name,
     };
   }, [fulfillmentMode, customerCoords, selectedBranchId, branches]);
+
+  // Real-time branch inventory pre-flight validation
+  const [unavailableItems, setUnavailableItems] = React.useState<string[]>([]);
+  const [isCheckingStock, setIsCheckingStock] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!restaurant?.slug || !selectedBranchId || !cart.items || cart.items.length === 0) {
+      setUnavailableItems([]);
+      return;
+    }
+
+    let isMounted = true;
+    setIsCheckingStock(true);
+    api.get(`/restaurants/${restaurant.slug}/?branch_id=${selectedBranchId}`)
+      .then((res: any) => {
+        if (!isMounted) return;
+        const restData = res?.data?.data || res?.data || {};
+        const categories = restData.categories || [];
+        const allItems = categories.flatMap((c: any) => c.items || []);
+        
+        const outOfStock: string[] = [];
+        for (const cartItem of cart.items) {
+          const matched = allItems.find((i: any) => i.id === cartItem.id);
+          if (matched && matched.is_available === false) {
+            outOfStock.push(cartItem.name || matched.name);
+          }
+        }
+        setUnavailableItems(outOfStock);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setIsCheckingStock(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [restaurant?.slug, selectedBranchId, cart.items]);
 
   // Hydrate user profile or saved checkout form info on mount / post-auth
   React.useEffect(() => {
@@ -467,6 +509,14 @@ export default function CheckoutScreen() {
             onPress: hideAlert,
           },
         ]
+      );
+      return;
+    }
+
+    if (unavailableItems.length > 0) {
+      showAlert(
+        'Items Out of Stock',
+        `The following item(s) are currently sold out at ${selectedBranch?.name || 'this branch'}:\n\n• ${unavailableItems.join('\n• ')}\n\nPlease remove them from your cart or select a different branch to proceed.`
       );
       return;
     }
@@ -1020,13 +1070,37 @@ export default function CheckoutScreen() {
             </View>
           )}
 
+          {unavailableItems.length > 0 && (
+            <View style={{
+              backgroundColor: '#fef2f2',
+              borderColor: '#f87171',
+              borderWidth: 1,
+              borderRadius: 10,
+              padding: 10,
+              marginBottom: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <Ionicons name="alert-circle" size={20} color="#dc2626" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#991b1b' }}>
+                  Items Sold Out at {selectedBranch?.name || 'Branch'}
+                </Text>
+                <Text style={{ fontSize: 11, color: '#b91c1c', marginTop: 2 }}>
+                  {unavailableItems.join(', ')} {unavailableItems.length === 1 ? 'is' : 'are'} out of stock. Remove from cart to proceed.
+                </Text>
+              </View>
+            </View>
+          )}
+
           <TouchableOpacity activeOpacity={0.9}
             style={[
               styles.placeOrderBtn,
-              (isSubmitting || areAllBranchesClosed || distanceInfo?.isOutOfRadius) && styles.placeOrderBtnDisabled
+              (isSubmitting || areAllBranchesClosed || distanceInfo?.isOutOfRadius || unavailableItems.length > 0) && styles.placeOrderBtnDisabled
             ]}
             onPress={handlePlaceOrder}
-            disabled={isSubmitting || areAllBranchesClosed || Boolean(distanceInfo?.isOutOfRadius)}
+            disabled={isSubmitting || areAllBranchesClosed || Boolean(distanceInfo?.isOutOfRadius) || unavailableItems.length > 0}
           >
             {isSubmitting ? (
               <ActivityIndicator color={COLORS.white} />
@@ -1035,11 +1109,13 @@ export default function CheckoutScreen() {
                 <Text style={styles.placeOrderText}>
                   {areAllBranchesClosed
                     ? 'All Branches Closed'
+                    : unavailableItems.length > 0
+                    ? 'Item Sold Out at Branch'
                     : distanceInfo?.isOutOfRadius
                     ? 'Outside Delivery Radius'
                     : `Place Order (Rs. ${finalTotal.toFixed(2)})`}
                 </Text>
-                <Ionicons name={areAllBranchesClosed || distanceInfo?.isOutOfRadius ? "lock-closed-outline" : "checkbox-outline"} size={20} color={COLORS.white} />
+                <Ionicons name={areAllBranchesClosed || distanceInfo?.isOutOfRadius || unavailableItems.length > 0 ? "lock-closed-outline" : "checkbox-outline"} size={20} color={COLORS.white} />
               </>
             )}
           </TouchableOpacity>

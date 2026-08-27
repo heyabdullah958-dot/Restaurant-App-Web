@@ -199,6 +199,7 @@ FoodSphere/
 ### 🔗 Deployed Prototypes
 
 #### ⛅️ Cloudflare Pages & Vercel (Active)
+- **GetFood Customer App (Web Preview):** [https://getfood-app.pages.dev](https://getfood-app.pages.dev)
 - **admin panel website:** [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev) (Vercel Primary: [https://admin-orpin-psi.vercel.app](https://admin-orpin-psi.vercel.app))
 - **seenbanao website:** [https://seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev)
 - **dineatblue website:** [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev)

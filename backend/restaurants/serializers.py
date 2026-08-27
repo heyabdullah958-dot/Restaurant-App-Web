@@ -67,7 +67,15 @@ class MenuItemSerializer(serializers.ModelSerializer):
             
         if branch_id:
             from .models import BranchMenuItemAvailability
-            override = BranchMenuItemAvailability.objects.filter(branch_id=branch_id, menu_item=obj).first()
+            val = str(branch_id).strip()
+            if val.isdigit():
+                override = BranchMenuItemAvailability.objects.filter(branch_id=int(val), menu_item=obj).first()
+            else:
+                from django.db.models import Q
+                override = BranchMenuItemAvailability.objects.filter(
+                    Q(branch__slug__iexact=val) | Q(branch__name__iexact=val),
+                    menu_item=obj
+                ).first()
             if override:
                 return override.is_available
         return True

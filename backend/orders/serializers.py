@@ -118,7 +118,21 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"You only have {user_pts} loyalty points available (requested {pts_to_redeem})."
                 )
 
+        # Resolve target branch early to enforce branch-specific stock and radius rules
+        branch = attrs.get('branch')
+        if not branch and restaurant:
+            from config.admin_utils import resolve_branch_for_order
+            branch = resolve_branch_for_order(
+                restaurant,
+                attrs.get('delivery_address', ''),
+                attrs.get('delivery_lat'),
+                attrs.get('delivery_lng')
+            )
+            if branch:
+                attrs['branch'] = branch
+
         items = attrs.get('items', [])
+        from restaurants.models import BranchMenuItemAvailability
         for item_data in items:
             menu_item = item_data['menu_item']
             if not menu_item.is_available:
@@ -126,6 +140,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     f"'{menu_item.name}' is currently unavailable. "
                     f"Please remove it from your cart and try again."
                 )
+            if branch:
+                branch_override = BranchMenuItemAvailability.objects.filter(
+                    branch=branch,
+                    menu_item=menu_item
+                ).first()
+                if branch_override and not branch_override.is_available:
+                    raise serializers.ValidationError(
+                        f"'{menu_item.name}' is currently out of stock at {branch.name}. "
+                        f"Please remove it from your cart and try again."
+                    )
 
         # Minimum order amount validation
         subtotal = Decimal('0.00')
@@ -286,6 +310,23 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         f"Menu item '{menu_item.name}' does not belong to restaurant '{restaurant.name}'."
                     )
+
+                if not menu_item.is_available:
+                    raise serializers.ValidationError(
+                        f"Menu item '{menu_item.name}' is currently unavailable."
+                    )
+
+                branch_obj = validated_data.get('branch')
+                if branch_obj:
+                    from restaurants.models import BranchMenuItemAvailability
+                    branch_override = BranchMenuItemAvailability.objects.filter(
+                        branch=branch_obj,
+                        menu_item=menu_item
+                    ).first()
+                    if branch_override and not branch_override.is_available:
+                        raise serializers.ValidationError(
+                            f"'{menu_item.name}' is currently out of stock at {branch_obj.name}."
+                        )
 
                 unit_price = menu_item.price
                 selected_opts = item_data.get('selected_options', [])

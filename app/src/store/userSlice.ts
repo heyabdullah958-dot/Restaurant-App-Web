@@ -43,6 +43,8 @@ export const purgeGuestSessionStorage = async (): Promise<void> => {
     'guest_tracking_token',
     '@getfood_active_guest_order',
     'foodsphere_guest_active_order_id',
+    'foodsphere_in_app_notifications',
+    'foodsphere_order_status_tracker',
   ];
   await AsyncStorage.multiRemove(keys).catch(() => {});
 };

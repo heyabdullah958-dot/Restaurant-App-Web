@@ -264,11 +264,13 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
         )}
 
         {/* Customer Reviews & Feedback Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>💬 Customer Reviews & Ratings</Text>
-          <Text style={styles.sectionSubtitle}>
-            {reviews.length} feedback received
-          </Text>
+        <View style={styles.reviewsSectionHeader}>
+          <Text style={styles.reviewsSectionTitle}>💬 Customer Reviews & Ratings</Text>
+          <View style={styles.reviewsCountPill}>
+            <Text style={styles.reviewsCountPillText}>
+              {reviews.length} feedback received
+            </Text>
+          </View>
         </View>
 
         {loadingReviews ? (
@@ -476,6 +478,34 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.branchManager.primary,
+  },
+  reviewsSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  reviewsSectionTitle: {
+    ...TYPOGRAPHY.h3,
+    fontSize: 16,
+    color: COLORS.dark,
+    flexShrink: 1,
+  },
+  reviewsCountPill: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignSelf: 'flex-start',
+  },
+  reviewsCountPillText: {
+    fontSize: 11,
+    color: COLORS.neutral600,
+    fontWeight: '700',
   },
   sectionSubtitle: {
     fontSize: 12,

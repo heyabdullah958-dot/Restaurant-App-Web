@@ -4,6 +4,17 @@
 
 ---
 
+## Lesson 14 — Branch-Level Availability Gate, Session Notification Isolation & Mobile Tab Layout Balance — 2026-08-27
+- **Pattern**: Multi-tenant branch item availability checkout enforcement, session notification isolation, and mobile tab bar layout resilience.
+- **Wrong assumption made**: Assuming that checking master `MenuItem.is_available` is sufficient during order creation without joining branch availability overrides (`BranchMenuItemAvailability`), and assuming local in-app notifications can persist unconditionally across anonymous/guest sessions.
+- **What actually mattered**:
+  1. In a multi-branch restaurant system, items may be in stock globally at the brand level but sold out at specific branches. `OrderCreateSerializer.validate()` and `create()` MUST check both `menu_item.is_available` and `BranchMenuItemAvailability` for the target branch, failing with clear out-of-stock messages.
+  2. Guest and unauthenticated users must never see order history or unread count badges from previous sessions. Notification bottom sheets must render dedicated auth prompt views with zero order data leaked.
+  3. Mobile tab bars with dynamic counters and alert pills (`Active (15) 🔥 11 NEW`) must use structured column/row badge layouts with minimum heights and explicit gaps rather than raw horizontal flex text strings, preventing text clipping on narrow mobile screens.
+- **Applies to**: `backend/orders/serializers.py`, `backend/restaurants/serializers.py`, `app/src/components/NotificationModal.tsx`, `app/src/screens/HomeScreen.tsx`, `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`, `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`.
+
+---
+
 ## Lesson 13 — Phase 1 Launch Brands Whitelisting & Segmented Filter Control Design — 2026-08-17
 - **Pattern**: Multi-tenant brand visibility across phases and mobile UI segmented filter bar design.
 - **Wrong assumption made**: Assuming that `GET /api/restaurants/?all=true` can be passed raw to admin UI selectors without distinguishing between Phase 1 live launch brands and Phase 2 hidden draft brands, and rendering filter buttons as separate loose chips with inconsistent margins.

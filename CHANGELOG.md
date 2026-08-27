@@ -1,7 +1,24 @@
 
 # Changelog
 
-## 2026-08-17 Phase 3 — Riders Segmented Control UI Polish & Phase 1 Active Launch Brands Invariant
+## 2026-08-27 Phase 1 — Universal Branch Item Availability Enforcement, Guest Notification Guard & UI Polish
+- **Universal Multi-Tenant Branch Item Availability Sync & Checkout Gate**:
+  - **Backend Serialization & Lookup (`backend/restaurants/serializers.py`)**: `MenuItemSerializer.get_is_available` enhanced to support branch slug, branch name, and integer branch ID query lookups against `BranchMenuItemAvailability`.
+  - **Backend Atomic Checkout Enforcement (`backend/orders/serializers.py`)**: `OrderCreateSerializer.validate()` and `create()` both enforce strict real-time branch item availability, rejecting checkout with an explicit `out of stock at {branch.name}` error if an item is toggled off for that branch.
+  - **Manager Availability Permissions (`backend/restaurants/views.py`)**: `BranchItemAvailabilityView` supports both branch managers and restaurant managers for updating branch stock overrides.
+- **Guest State Notification Guard & Session Storage Isolation**:
+  - **Guest Notification Guard (`app/src/components/NotificationModal.tsx`)**: Replaced leaked order history with a dedicated, polished Guest Auth Prompt ("Sign In to View Notifications") with zero order notifications and no unread badges for guests.
+  - **Header Notification Badge Guard (`app/src/screens/HomeScreen.tsx`)**: Bell icon unread badge is strictly hidden for guest and unauthenticated users.
+  - **Session Storage Purging (`app/src/store/userSlice.ts`)**: Added `foodsphere_in_app_notifications` and `foodsphere_order_status_tracker` to `purgeGuestSessionStorage` array, preventing cross-user alert leakage on shared devices.
+- **UI & Layout Polish (Images 1, 2, 4)**:
+  - **Reviews Header Wrap Fix (`admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`) (Pic 1)**: Redesigned the "💬 Customer Reviews & Ratings" header with a responsive flex-wrap layout and clean badge pill (`reviewsCountPill`), eliminating text collision and right-edge clipping.
+  - **Order Tabs Alignment & Badge Overhaul (`admin-app/src/screens/placeholders/OrderManagementScreen.tsx`) (Pic 2)**: Overhauled the 3-tab segmented control (`Active`, `Delivered`, `Cancelled`) into a balanced layout with individual count badges and centered `🔥 {newOrderCount} NEW` pill, resolving text crowding and overflow.
+  - **Explore Brands View All Removal (`app/src/screens/HomeScreen.tsx`) (Pic 4)**: Removed the "View All" link next to "Explore Brands" header.
+- **Verification Evidence**:
+  - `npx tsc --noEmit` in `app` (0 errors).
+  - `npx tsc --noEmit` in `admin-app` (0 errors).
+  - `test_backend_local.py` passed 100% (23/23 tests passed).
+  - Automated branch stock checkout test passed (confirmed HTTP 400 rejection on disabled branch items).
 - **Riders Fleet Screen UI Overhaul (`admin-app/src/screens/placeholders/RiderManagementScreen.tsx`)**:
   - Replaced un-encapsulated filter chips with a sleek, unified Segmented Control Bar (`filterBarContainer` & `filterTab`) supporting `ALL`, `AVAILABLE`, `ON DELIVERY`, and `OFFLINE` status filtering with active pill elevation and clear typography.
   - Polished Super Admin brand selector chips and modal restaurant assignment picker.

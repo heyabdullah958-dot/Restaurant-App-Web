@@ -384,14 +384,23 @@ export const OrderManagementScreen = ({ navigation }: any) => {
           onPress={() => setActiveTab('active')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>
-            Active ({orders.filter((o) => o.status === 'received' || o.status === 'preparing' || o.status === 'out_for_delivery').length})
-          </Text>
-          {newOrderCount > 0 ? (
-            <View style={styles.newPill}>
-              <Text style={styles.newPillText}>🔥 {newOrderCount} NEW</Text>
+          <View style={styles.tabContentCol}>
+            <View style={styles.tabTitleRow}>
+              <Text style={[styles.tabText, activeTab === 'active' && styles.tabTextActive]}>
+                Active
+              </Text>
+              <View style={[styles.countBadge, activeTab === 'active' && styles.countBadgeActive]}>
+                <Text style={[styles.countBadgeText, activeTab === 'active' && styles.countBadgeTextActive]}>
+                  {orders.filter((o) => o.status === 'received' || o.status === 'preparing' || o.status === 'out_for_delivery').length}
+                </Text>
+              </View>
             </View>
-          ) : null}
+            {newOrderCount > 0 ? (
+              <View style={styles.newPill}>
+                <Text style={styles.newPillText}>🔥 {newOrderCount} NEW</Text>
+              </View>
+            ) : null}
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -399,9 +408,16 @@ export const OrderManagementScreen = ({ navigation }: any) => {
           onPress={() => setActiveTab('delivered')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.tabText, activeTab === 'delivered' && styles.tabTextActive]}>
-            Delivered ({orders.filter((o) => o.status === 'delivered').length})
-          </Text>
+          <View style={styles.tabTitleRow}>
+            <Text style={[styles.tabText, activeTab === 'delivered' && styles.tabTextActive]}>
+              Delivered
+            </Text>
+            <View style={[styles.countBadge, activeTab === 'delivered' && styles.countBadgeActive]}>
+              <Text style={[styles.countBadgeText, activeTab === 'delivered' && styles.countBadgeTextActive]}>
+                {orders.filter((o) => o.status === 'delivered').length}
+              </Text>
+            </View>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -409,9 +425,16 @@ export const OrderManagementScreen = ({ navigation }: any) => {
           onPress={() => setActiveTab('cancelled')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.tabText, activeTab === 'cancelled' && styles.tabTextActive]}>
-            Cancelled ({orders.filter((o) => o.status === 'cancelled').length})
-          </Text>
+          <View style={styles.tabTitleRow}>
+            <Text style={[styles.tabText, activeTab === 'cancelled' && styles.tabTextActive]}>
+              Cancelled
+            </Text>
+            <View style={[styles.countBadge, activeTab === 'cancelled' && styles.countBadgeActive]}>
+              <Text style={[styles.countBadgeText, activeTab === 'cancelled' && styles.countBadgeTextActive]}>
+                {orders.filter((o) => o.status === 'cancelled').length}
+              </Text>
+            </View>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -626,43 +649,79 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: COLORS.card,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.xs + 2,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.neutral200,
+    gap: 6,
   },
   tab: {
     flex: 1,
-    paddingVertical: SPACING.sm + 2,
+    paddingVertical: SPACING.xs + 4,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: RADIUS.md,
-    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    minHeight: 46,
   },
   tabActive: {
     backgroundColor: COLORS.primaryTint,
+    borderColor: 'rgba(234, 88, 12, 0.4)',
+    borderWidth: 1.5,
+  },
+  tabContentCol: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
   },
   tabText: {
-    color: COLORS.neutral500,
-    fontSize: 13,
+    color: COLORS.neutral600,
+    fontSize: 12,
     fontWeight: '600',
   },
   tabTextActive: {
     color: COLORS.branchManager.primary,
     fontWeight: '700',
   },
+  countBadge: {
+    backgroundColor: '#E2E8F0',
+    borderRadius: RADIUS.round,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    minWidth: 18,
+    alignItems: 'center',
+  },
+  countBadgeActive: {
+    backgroundColor: COLORS.branchManager.primary,
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.neutral700,
+  },
+  countBadgeTextActive: {
+    color: '#FFFFFF',
+  },
   newPill: {
     backgroundColor: COLORS.danger,
     borderRadius: RADIUS.round,
     paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginLeft: 4,
+    paddingVertical: 1.5,
+    marginTop: 2,
   },
   newPillText: {
     color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9,
+    fontWeight: '800',
   },
   listContent: {
     padding: SPACING.md,

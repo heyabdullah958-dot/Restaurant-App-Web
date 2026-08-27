@@ -24,6 +24,7 @@ interface NotificationModalProps {
   onClose: () => void;
   notifications: InAppNotification[];
   navigation: any;
+  isGuest?: boolean;
 }
 
 const getNotificationIcon = (notif: InAppNotification) => {
@@ -62,8 +63,10 @@ export default function NotificationModal({
   onClose,
   notifications,
   navigation,
+  isGuest = false,
 }: NotificationModalProps) {
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const effectiveNotifications = isGuest ? [] : notifications;
+  const unreadCount = effectiveNotifications.filter((n) => !n.read).length;
 
   const handlePressItem = async (item: InAppNotification) => {
     await markNotificationRead(item.id);
@@ -94,7 +97,7 @@ export default function NotificationModal({
             <View style={styles.headerTitleRow}>
               <Ionicons name="notifications" size={24} color="#ea580c" />
               <Text style={styles.title}>Notifications</Text>
-              {unreadCount > 0 && (
+              {!isGuest && unreadCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{unreadCount} new</Text>
                 </View>
@@ -106,8 +109,8 @@ export default function NotificationModal({
             </TouchableOpacity>
           </View>
 
-          {/* Action Bar */}
-          {notifications.length > 0 && (
+          {/* Action Bar (Authenticated Only) */}
+          {!isGuest && effectiveNotifications.length > 0 && (
             <View style={styles.actionBar}>
               <TouchableOpacity onPress={() => markAllNotificationsRead()} style={styles.actionBtn}>
                 <Ionicons name="checkmark-done" size={16} color="#0284c7" />
@@ -121,21 +124,44 @@ export default function NotificationModal({
             </View>
           )}
 
-          {/* Notifications List */}
-          <FlatList
-            data={notifications}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="notifications-off-outline" size={54} color="#cbd5e1" />
-                <Text style={styles.emptyTitle}>No Notifications Yet</Text>
-                <Text style={styles.emptySub}>
-                  Order status updates, live delivery tracking, and special promos will appear here.
-                </Text>
+          {/* Guest State View */}
+          {isGuest ? (
+            <View style={styles.guestContainer}>
+              <View style={styles.guestIconCircle}>
+                <Ionicons name="notifications-outline" size={44} color="#ea580c" />
               </View>
-            }
+              <Text style={styles.guestTitle}>Sign In to View Notifications</Text>
+              <Text style={styles.guestSub}>
+                Sign in to track your live order delivery, receive kitchen updates, earn loyalty points, and get exclusive brand flash deals.
+              </Text>
+              <TouchableOpacity
+                style={styles.guestSignInBtn}
+                activeOpacity={0.85}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('Auth');
+                }}
+              >
+                <Ionicons name="log-in-outline" size={20} color="#FFFFFF" />
+                <Text style={styles.guestSignInBtnText}>Sign In / Register</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* Notifications List (Authenticated) */
+            <FlatList
+              data={effectiveNotifications}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Ionicons name="notifications-off-outline" size={54} color="#cbd5e1" />
+                  <Text style={styles.emptyTitle}>No Notifications Yet</Text>
+                  <Text style={styles.emptySub}>
+                    Order status updates, live delivery tracking, and special promos will appear here.
+                  </Text>
+                </View>
+              }
             renderItem={({ item }) => {
               const iconName = getNotificationIcon(item);
               const themeColor = getNotificationColor(item);
@@ -175,6 +201,7 @@ export default function NotificationModal({
               );
             }}
           />
+          )}
         </View>
       </View>
     </Modal>
@@ -357,5 +384,57 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  guestContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 24,
+  },
+  guestIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#ffedd5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#fed7aa',
+  },
+  guestTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  guestSub: {
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  guestSignInBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#ea580c',
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 14,
+    width: '100%',
+    shadowColor: '#ea580c',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  guestSignInBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

@@ -26,7 +26,7 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from '../store/restaurantSlice';
 import CustomAlertModal from '../components/CustomAlertModal';
-import { addItemToCart, updateQuantity, removeItemFromCart } from '../store/cartSlice';
+import { addItemToCart, updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { resolveItemImage, resolveItemImageWithLogoFallback } from '../services/mediaAssetService';
 import api from '../services/api';
@@ -232,6 +232,8 @@ export default function RestaurantScreen() {
   }, []);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
+  const [showBranchModal, setShowBranchModal] = useState(false);
 
   const hideAlert = useCallback(() => setAlertConfig(prev => ({ ...prev, visible: false })), []);
 
@@ -242,6 +244,26 @@ export default function RestaurantScreen() {
     const localFallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
     return localFallback || null;
   }, [currentRestaurant, slug]);
+
+  const currentBranch = useMemo(() => {
+    if (!restaurant || !restaurant.branches || restaurant.branches.length === 0) return null;
+    if (selectedBranchId) {
+      const found = restaurant.branches.find((b: any) => b.id === selectedBranchId);
+      if (found) return found;
+    }
+    return restaurant.branches.find((b: any) => b.is_active !== false) || restaurant.branches[0];
+  }, [restaurant, selectedBranchId]);
+
+  // Auto-initialize selectedBranchId if not yet set
+  useEffect(() => {
+    if (restaurant && restaurant.branches && restaurant.branches.length > 0 && !selectedBranchId) {
+      const activeBranches = restaurant.branches.filter((b: any) => b.is_active !== false);
+      const defaultBranch = activeBranches[0] || restaurant.branches[0];
+      if (defaultBranch) {
+        setSelectedBranchId(defaultBranch.id);
+      }
+    }
+  }, [restaurant, selectedBranchId]);
 
   const confirmAddVariantToCart = useCallback((item: MenuItem | null, variant: any) => {
     if (!restaurant || !item) return;
@@ -259,14 +281,14 @@ export default function RestaurantScreen() {
 
     if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
       showAlert(
-        'Reset Cart?',
-        'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
+        'Start New Order?',
+        `Your cart contains items from another brand. Do you want to clear your cart and order from ${restaurant.name}?`,
         [
-          { text: 'Cancel', style: 'cancel', onPress: hideAlert },
+          { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Yes, Reset',
+            text: 'Yes, Start New Order',
             onPress: () => {
-              hideAlert();
+              dispatch(clearCart());
               dispatch(
                 addItemToCart({
                   item: itemToAdd,
@@ -291,22 +313,22 @@ export default function RestaurantScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurantDetail(selectedBranchId ? { slug, branchId: selectedBranchId } : slug));
       dispatch(fetchRestaurants() as any);
-    }, [dispatch, slug])
+    }, [dispatch, slug, selectedBranchId])
   );
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      dispatch(fetchRestaurantDetail(slug));
+      dispatch(fetchRestaurantDetail(selectedBranchId ? { slug, branchId: selectedBranchId } : slug));
       dispatch(fetchRestaurants() as any);
-    }, 5000);
+    }, 10000);
 
     return () => {
       clearInterval(intervalId);
       dispatch(clearCurrentRestaurant());
     };
-  }, [dispatch, slug]);
+  }, [dispatch, slug, selectedBranchId]);
 
   const [reviews, setReviews] = useState<any[]>([]);
 
@@ -323,7 +345,7 @@ export default function RestaurantScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await dispatch(fetchRestaurantDetail(slug));
+    await dispatch(fetchRestaurantDetail(selectedBranchId ? { slug, branchId: selectedBranchId } : slug));
     if (slug) {
       api.get(`/restaurants/${slug}/reviews/`)
         .then((res: any) => {
@@ -333,7 +355,7 @@ export default function RestaurantScreen() {
         .catch(() => {});
     }
     setRefreshing(false);
-  }, [dispatch, slug]);
+  }, [dispatch, slug, selectedBranchId]);
 
   useEffect(() => {
     if (restaurant && restaurant.categories && restaurant.categories.length > 0) {
@@ -605,12 +627,32 @@ export default function RestaurantScreen() {
         </View>
 
         <View style={styles.moreInfoSection}>
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={14} color={COLORS.gray} />
-            <Text style={styles.moreInfoText} numberOfLines={1}>
-              {(restaurant as any).branches?.find((b: any) => b.is_active !== false)?.address || restaurant.address}
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={styles.branchSelectRow}
+            activeOpacity={restaurant.branches && restaurant.branches.length > 1 ? 0.75 : 1}
+            onPress={() => {
+              if (restaurant.branches && restaurant.branches.length > 1) {
+                setShowBranchModal(true);
+              }
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: 6 }}>
+              <Ionicons name="location-sharp" size={16} color={COLORS.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.branchSelectLabel}>
+                  Branch: <Text style={{ fontWeight: '800', color: COLORS.dark }}>{currentBranch?.name || restaurant.name}</Text>
+                </Text>
+                <Text style={styles.moreInfoText} numberOfLines={1}>
+                  {currentBranch?.address || restaurant.address}
+                </Text>
+              </View>
+            </View>
+            {restaurant.branches && restaurant.branches.length > 1 && (
+              <View style={styles.changeBranchBadge}>
+                <Text style={styles.changeBranchBadgeText}>Change ▾</Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
           <View style={[styles.infoRow, { marginTop: 6 }]}>
             <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
@@ -845,6 +887,89 @@ export default function RestaurantScreen() {
           </View>
         </Modal>
       )}
+      {/* Branch Selection Modal */}
+      {restaurant && restaurant.branches && restaurant.branches.length > 0 && (
+        <Modal
+          visible={showBranchModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowBranchModal(false)}
+        >
+          <View style={styles.branchModalOverlay}>
+            <View style={styles.branchModalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Branch</Text>
+                <TouchableOpacity
+                  onPress={() => setShowBranchModal(false)}
+                  style={styles.modalCloseBtn}
+                >
+                  <Ionicons name="close" size={24} color={COLORS.dark} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.branchModalSub}>
+                Choose your nearest branch to see real-time menu availability and fast delivery.
+              </Text>
+
+              <ScrollView style={{ maxHeight: 350, marginVertical: 8 }}>
+                {restaurant.branches
+                  .filter((b: any) => b.is_active !== false)
+                  .map((b: any) => {
+                    const isSelected = (currentBranch?.id === b.id);
+                    return (
+                      <TouchableOpacity
+                        key={b.id}
+                        style={[
+                          styles.branchOptionCard,
+                          isSelected && styles.branchOptionCardSelected,
+                        ]}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          setSelectedBranchId(b.id);
+                          setShowBranchModal(false);
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Ionicons
+                              name="business"
+                              size={16}
+                              color={isSelected ? COLORS.primary : COLORS.gray}
+                            />
+                            <Text
+                              style={[
+                                styles.branchOptionName,
+                                isSelected && styles.branchOptionNameSelected,
+                              ]}
+                            >
+                              {b.name}
+                            </Text>
+                          </View>
+                          {b.address ? (
+                            <Text style={styles.branchOptionAddress} numberOfLines={2}>
+                              {b.address}
+                            </Text>
+                          ) : null}
+                          {b.phone ? (
+                            <Text style={styles.branchOptionPhone}>📞 {b.phone}</Text>
+                          ) : null}
+                        </View>
+                        {isSelected && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={22}
+                            color={COLORS.primary}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <CustomAlertModal
         visible={alertConfig.visible}
         title={alertConfig.title}
@@ -1430,5 +1555,89 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.gray,
     fontStyle: 'italic',
+  },
+  branchSelectRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fafc',
+    padding: SPACING.sm,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  branchSelectLabel: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginBottom: 2,
+  },
+  changeBranchBadge: {
+    backgroundColor: '#ffedd5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(234, 88, 12, 0.3)',
+    marginLeft: 6,
+  },
+  changeBranchBadgeText: {
+    color: COLORS.primary,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  branchModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  branchModalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : SPACING.lg,
+    maxHeight: '80%',
+  },
+  branchModalSub: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  branchOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    borderRadius: 12,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: SPACING.sm,
+  },
+  branchOptionCardSelected: {
+    backgroundColor: '#ffedd5',
+    borderColor: COLORS.primary,
+    borderWidth: 1.5,
+  },
+  branchOptionName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.dark,
+  },
+  branchOptionNameSelected: {
+    color: COLORS.primary,
+  },
+  branchOptionAddress: {
+    fontSize: 12,
+    color: COLORS.gray,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  branchOptionPhone: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 3,
+    fontWeight: '600',
   },
 });

@@ -449,9 +449,21 @@ class BranchItemAvailabilityView(generics.GenericAPIView):
 
         user = request.user
         if not user.is_superuser:
-            from config.admin_utils import get_managed_branch
+            from config.admin_utils import get_managed_branch, get_managed_restaurant
             managed_branch = get_managed_branch(user)
-            if not managed_branch or managed_branch.id != branch.id:
+            managed_restaurant = get_managed_restaurant(user)
+            has_permission = False
+            if managed_branch and managed_branch.id == branch.id:
+                has_permission = True
+            elif managed_restaurant and branch.restaurant_id == managed_restaurant.id:
+                has_permission = True
+            elif user.is_staff and (
+                user.groups.filter(name__icontains=branch.restaurant.slug).exists() or
+                (hasattr(user, 'manager_profile') and user.manager_profile and user.manager_profile.branch_id == branch.id)
+            ):
+                has_permission = True
+
+            if not has_permission:
                 return Response({'error': 'You do not manage this branch.'}, status=403)
 
         override, created = BranchMenuItemAvailability.objects.update_or_create(
