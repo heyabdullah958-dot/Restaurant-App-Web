@@ -43,6 +43,7 @@ export const fetchRestaurantDetail = createAsyncThunk(
 const initialState = {
   restaurants: [] as any[],
   currentRestaurant: null as any | null,
+  restaurantDetailsBySlug: {} as Record<string, any>,
   loading: false,
   error: null as string | null,
 };
@@ -83,6 +84,11 @@ const restaurantSlice = createSlice({
         const parsed = Array.isArray(list) ? list.filter((r: any) => r && r.slug && r.is_active !== false) : [];
         if (parsed.length > 0) {
           state.restaurants = parsed;
+          parsed.forEach((r: any) => {
+            if (r.slug && r.categories && r.categories.length > 0) {
+              state.restaurantDetailsBySlug[r.slug] = r;
+            }
+          });
         }
       })
       .addCase(fetchRestaurants.rejected, (state, action) => {
@@ -90,8 +96,9 @@ const restaurantSlice = createSlice({
         state.error = action.payload as string;
       })
       // Fetch Restaurant Detail
-      .addCase(fetchRestaurantDetail.pending, (state) => {
-        if (!state.currentRestaurant) {
+      .addCase(fetchRestaurantDetail.pending, (state, action) => {
+        const slug = typeof action.meta.arg === 'string' ? action.meta.arg : action.meta.arg?.slug;
+        if (!state.currentRestaurant && (!slug || !state.restaurantDetailsBySlug[slug])) {
           state.loading = true;
         }
         state.error = null;
@@ -104,6 +111,9 @@ const restaurantSlice = createSlice({
           detail = payload.data;
         }
         state.currentRestaurant = detail;
+        if (detail && detail.slug) {
+          state.restaurantDetailsBySlug[detail.slug] = detail;
+        }
       })
       .addCase(fetchRestaurantDetail.rejected, (state, action) => {
         state.loading = false;

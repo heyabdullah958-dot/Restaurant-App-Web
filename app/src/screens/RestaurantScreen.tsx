@@ -29,6 +29,7 @@ import CustomAlertModal from '../components/CustomAlertModal';
 import { addItemToCart, updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { resolveItemImage, resolveItemImageWithLogoFallback } from '../services/mediaAssetService';
+import { MenuItemSkeleton } from '../components/SkeletonLoader';
 import api from '../services/api';
 
 type RootStackParamList = {
@@ -265,11 +266,23 @@ export default function RestaurantScreen() {
     setAlertConfig({ visible: true, title, message, actions });
   }, []);
 
+  const cachedRestaurant = useSelector((state: RootState) => {
+    if (state.restaurant.restaurantDetailsBySlug?.[slug]) {
+      return state.restaurant.restaurantDetailsBySlug[slug];
+    }
+    if (state.restaurant.currentRestaurant?.slug === slug) {
+      return state.restaurant.currentRestaurant;
+    }
+    const homeRest = state.restaurant.restaurants?.find((r: any) => r.slug === slug);
+    if (homeRest && homeRest.categories && homeRest.categories.length > 0) {
+      return homeRest;
+    }
+    return null;
+  });
+
   const [refreshing, setRefreshing] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState<number | null>(() => {
-    const initialRes = (currentRestaurant && currentRestaurant.slug === slug) 
-      ? currentRestaurant 
-      : FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
+    const initialRes = cachedRestaurant || FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
     if (initialRes && initialRes.branches && initialRes.branches.length > 0) {
       const active = initialRes.branches.find((b: any) => b.is_active !== false);
       return (active || initialRes.branches[0])?.id || null;
@@ -281,12 +294,12 @@ export default function RestaurantScreen() {
   const hideAlert = useCallback(() => setAlertConfig(prev => ({ ...prev, visible: false })), []);
 
   const restaurant: Restaurant | null = useMemo(() => {
-    if (currentRestaurant && currentRestaurant.slug === slug) {
-      return currentRestaurant;
+    if (cachedRestaurant) {
+      return cachedRestaurant;
     }
     const localFallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
     return localFallback || null;
-  }, [currentRestaurant, slug]);
+  }, [cachedRestaurant, slug]);
 
   const currentBranch = useMemo(() => {
     if (!restaurant || !restaurant.branches || restaurant.branches.length === 0) return null;
@@ -390,7 +403,6 @@ export default function RestaurantScreen() {
 
     return () => {
       clearInterval(intervalId);
-      dispatch(clearCurrentRestaurant());
     };
   }, [dispatch, slug, selectedBranchId]);
 
@@ -575,12 +587,25 @@ export default function RestaurantScreen() {
     index,
   }), []);
 
-  if (loading && !restaurant) {
+  if (loading && !cachedRestaurant && (!restaurant || !restaurant.categories || restaurant.categories.length === 0)) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Preparing menu...</Text>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={{ padding: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <TouchableOpacity activeOpacity={0.75} style={styles.circleButton} onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={20} color={COLORS.dark} />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 18, fontWeight: '700', marginLeft: 12, color: COLORS.dark }}>
+              {restaurant?.name || 'Loading Menu...'}
+            </Text>
+          </View>
+          <View style={{ gap: 12 }}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <MenuItemSkeleton key={i} />
+            ))}
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 

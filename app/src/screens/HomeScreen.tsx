@@ -18,7 +18,7 @@ import { logoutUser, fetchUserProfile } from '../store/userSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
-import { fetchRestaurants } from '../store/restaurantSlice';
+import { fetchRestaurants, fetchRestaurantDetail } from '../store/restaurantSlice';
 import { setFulfillmentMode, applyPromo, AppliedPromo } from '../store/cartSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
@@ -643,6 +643,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       checkUnratedDeliveredOrders();
       checkOrderStatusUpdates();
       checkActiveGuestOrder();
+
+      // Pre-warm in-memory menu cache for active launch brands for 0ms instant opening
+      ['tandooristoppk', 'jushhpk', 'getafomo'].forEach((brandSlug) => {
+        dispatch(fetchRestaurantDetail({ slug: brandSlug }) as any);
+      });
+
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
         fetchFlashDeals();
