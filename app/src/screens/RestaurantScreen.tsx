@@ -265,8 +265,19 @@ export default function RestaurantScreen() {
     }
   }, [restaurant, selectedBranchId]);
 
+  // Whenever selectedBranchId is set or changed, fetch menu with that branch context
+  useEffect(() => {
+    if (slug && selectedBranchId) {
+      dispatch(fetchRestaurantDetail({ slug, branchId: selectedBranchId }));
+    }
+  }, [dispatch, slug, selectedBranchId]);
+
   const confirmAddVariantToCart = useCallback((item: MenuItem | null, variant: any) => {
     if (!restaurant || !item) return;
+    if (item.is_available === false) {
+      showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
+      return;
+    }
     const itemToAdd = {
       id: item.id,
       name: `${item.name} (${variant.name})`,
@@ -309,7 +320,7 @@ export default function RestaurantScreen() {
       );
       setSelectedItemForOptions(null);
     }
-  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch]);
 
   useFocusEffect(
     useCallback(() => {
@@ -396,6 +407,10 @@ export default function RestaurantScreen() {
 
   const handleAddToCart = useCallback((item: MenuItem) => {
     if (!restaurant) return;
+    if (item.is_available === false) {
+      showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
+      return;
+    }
     if (!isRestaurantOpen(restaurant)) {
       showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
       return;
@@ -443,9 +458,13 @@ export default function RestaurantScreen() {
         })
       );
     }
-  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch]);
 
   const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
+    if (item.is_available === false) {
+      showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
+      return;
+    }
     if (restaurant && !isRestaurantOpen(restaurant)) {
       showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
       return;
@@ -457,7 +476,7 @@ export default function RestaurantScreen() {
         quantity: currentQty + 1,
       })
     );
-  }, [restaurant, dispatch, showAlert]);
+  }, [restaurant, dispatch, showAlert, currentBranch]);
 
   const handleDecrement = useCallback((item: MenuItem, currentQty: number) => {
     if (currentQty <= 1) {
@@ -927,6 +946,7 @@ export default function RestaurantScreen() {
                         onPress={() => {
                           setSelectedBranchId(b.id);
                           setShowBranchModal(false);
+                          dispatch(fetchRestaurantDetail({ slug, branchId: b.id }));
                         }}
                       >
                         <View style={{ flex: 1 }}>

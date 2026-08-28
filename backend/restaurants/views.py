@@ -98,10 +98,15 @@ class RestaurantMenuView(generics.GenericAPIView):
             categories.sort(key=lambda c: (c.order, c.name))
             
             # Admin/staff users get all items (including unavailable ones)
+            ctx = {'request': request}
+            if not request.query_params.get('branch_id') and not request.query_params.get('branch'):
+                first_branch = restaurant.branches.filter(is_active=True).first() or restaurant.branches.first()
+                if first_branch:
+                    ctx['branch_id'] = first_branch.id
             if request.user and request.user.is_authenticated and request.user.is_staff:
-                serializer = AdminMenuCategorySerializer(categories, many=True, context={'request': request})
+                serializer = AdminMenuCategorySerializer(categories, many=True, context=ctx)
             else:
-                serializer = MenuCategorySerializer(categories, many=True, context={'request': request})
+                serializer = MenuCategorySerializer(categories, many=True, context=ctx)
             return Response({
                 'success': True,
                 'data': serializer.data
