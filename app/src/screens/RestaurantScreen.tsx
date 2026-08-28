@@ -82,15 +82,14 @@ const MenuItemCard = React.memo(({
   onDecrement: (item: MenuItem, qty: number) => void;
   onSwitchBranch?: (branchId: number) => void;
 }) => {
-  let isOutOfStock = item.is_available === false;
-  if (selectedBranchId && item.branch_availability_map) {
-    if (item.branch_availability_map[String(selectedBranchId)] === false) {
-      isOutOfStock = true;
-    } else {
-      isOutOfStock = false;
-    }
-  } else if (item.is_available === false && !item.branch_availability_map) {
-    isOutOfStock = true;
+  let isOutOfStock = false;
+  if (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] !== undefined) {
+    isOutOfStock = item.branch_availability_map[String(selectedBranchId)] === false;
+  } else if (item.branch_availability_map && Object.keys(item.branch_availability_map).length > 0) {
+    const firstBranchKey = Object.keys(item.branch_availability_map)[0];
+    isOutOfStock = item.branch_availability_map[firstBranchKey] === false;
+  } else {
+    isOutOfStock = item.is_available === false;
   }
   
   const isUnavailable = isOutOfStock || isClosed;
@@ -267,7 +266,16 @@ export default function RestaurantScreen() {
   }, []);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(() => {
+    const initialRes = (currentRestaurant && currentRestaurant.slug === slug) 
+      ? currentRestaurant 
+      : FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
+    if (initialRes && initialRes.branches && initialRes.branches.length > 0) {
+      const active = initialRes.branches.find((b: any) => b.is_active !== false);
+      return (active || initialRes.branches[0])?.id || null;
+    }
+    return null;
+  });
   const [showBranchModal, setShowBranchModal] = useState(false);
 
   const hideAlert = useCallback(() => setAlertConfig(prev => ({ ...prev, visible: false })), []);
@@ -288,6 +296,10 @@ export default function RestaurantScreen() {
     }
     return restaurant.branches.find((b: any) => b.is_active !== false) || restaurant.branches[0];
   }, [restaurant, selectedBranchId]);
+
+  const effectiveBranchId = useMemo(() => {
+    return selectedBranchId || currentBranch?.id || (restaurant?.branches && restaurant.branches[0]?.id) || null;
+  }, [selectedBranchId, currentBranch, restaurant]);
 
   // Auto-initialize or reconcile selectedBranchId if not valid for this restaurant
   useEffect(() => {
@@ -326,7 +338,9 @@ export default function RestaurantScreen() {
         name: variant.name,
         price_modifier: Number(variant.price) - Number(item.price),
         specifications: variant.specifications || {}
-      }]
+      }],
+      branch_availability_map: item.branch_availability_map,
+      other_available_branches: item.other_available_branches,
     };
 
     if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
@@ -359,7 +373,7 @@ export default function RestaurantScreen() {
       );
       setSelectedItemForOptions(null);
     }
-  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch]);
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch, selectedBranchId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -455,6 +469,16 @@ export default function RestaurantScreen() {
       showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
       return;
     }
+    const itemToAdd = {
+      id: item.id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: 1,
+      selectedOptions: [],
+      branch_availability_map: item.branch_availability_map,
+      other_available_branches: item.other_available_branches,
+    };
+
     if (item.options?.has_variants && item.options.variants && item.options.variants.length > 0) {
       setSelectedItemForOptions(item);
       setSelectedVariant(item.options.variants[0]);
@@ -470,13 +494,7 @@ export default function RestaurantScreen() {
               hideAlert();
               dispatch(
                 addItemToCart({
-                  item: {
-                    id: item.id,
-                    name: item.name,
-                    price: Number(item.price),
-                    quantity: 1,
-                    selectedOptions: [],
-                  },
+                  item: itemToAdd,
                   restaurantId: restaurant.id,
                 })
               );
@@ -487,18 +505,12 @@ export default function RestaurantScreen() {
     } else {
       dispatch(
         addItemToCart({
-          item: {
-            id: item.id,
-            name: item.name,
-            price: Number(item.price),
-            quantity: 1,
-            selectedOptions: [],
-          },
+          item: itemToAdd,
           restaurantId: restaurant.id,
         })
       );
     }
-  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch]);
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch, selectedBranchId]);
 
   const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
     const isOutOfStock = (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] === false) || (!item.branch_availability_map && item.is_available === false);
@@ -517,7 +529,7 @@ export default function RestaurantScreen() {
         quantity: currentQty + 1,
       })
     );
-  }, [restaurant, dispatch, showAlert, currentBranch]);
+  }, [restaurant, dispatch, showAlert, currentBranch, selectedBranchId]);
 
   const handleDecrement = useCallback((item: MenuItem, currentQty: number) => {
     if (currentQty <= 1) {
@@ -547,13 +559,13 @@ export default function RestaurantScreen() {
       showCategoryName={selectedCategory === 'All'}
       isClosed={!isOpen}
       restaurantSlug={restaurant?.slug || restaurant?.id}
-      selectedBranchId={selectedBranchId}
+      selectedBranchId={effectiveBranchId}
       onAddToCart={handleAddToCart}
       onIncrement={handleIncrement}
       onDecrement={handleDecrement}
       onSwitchBranch={(branchId) => setSelectedBranchId(branchId)}
     />
-  ), [cartQuantityMap, selectedCategory, isOpen, handleAddToCart, handleIncrement, handleDecrement, selectedBranchId, restaurant]);
+  ), [cartQuantityMap, selectedCategory, isOpen, handleAddToCart, handleIncrement, handleDecrement, effectiveBranchId, restaurant]);
 
   const keyExtractor = useCallback((item: MenuItem) => String(item.id), []);
 

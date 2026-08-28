@@ -211,13 +211,31 @@ export default function CheckoutScreen() {
     };
   }, [fulfillmentMode, customerCoords, selectedBranchId, branches]);
 
+  const currentRestaurant = useSelector((state: RootState) => state.restaurant.currentRestaurant);
+  const liveMenuLookup = useMemo(() => {
+    const map: Record<number, Record<string, boolean>> = {};
+    if (currentRestaurant && currentRestaurant.categories) {
+      currentRestaurant.categories.forEach((cat: any) => {
+        if (cat.items) {
+          cat.items.forEach((item: any) => {
+            if (item.branch_availability_map) {
+              map[item.id] = item.branch_availability_map;
+            }
+          });
+        }
+      });
+    }
+    return map;
+  }, [currentRestaurant]);
+
   // Smart Checkout Branch Selection Guard
   const branchEligibilityMap = useMemo(() => {
     const map: Record<number, { isEligible: boolean; unavailableCount: number; unavailableNames: string[] }> = {};
     branches.forEach((branch) => {
       const unavailable: string[] = [];
       cart.items.forEach((item) => {
-        if (item.branch_availability_map && item.branch_availability_map[String(branch.id)] === false) {
+        const itemMap = item.branch_availability_map || liveMenuLookup[item.id];
+        if (itemMap && itemMap[String(branch.id)] === false) {
           unavailable.push(item.name || 'Unknown Item');
         }
       });
@@ -228,7 +246,7 @@ export default function CheckoutScreen() {
       };
     });
     return map;
-  }, [branches, cart.items]);
+  }, [branches, cart.items, liveMenuLookup]);
 
   React.useEffect(() => {
     if (selectedBranchId && branchEligibilityMap[selectedBranchId] && !branchEligibilityMap[selectedBranchId].isEligible) {
