@@ -60,16 +60,21 @@ class MenuItemSerializer(serializers.ModelSerializer):
             return False
         request = self.context.get('request') if self.context else None
         branch_id = None
-        if request:
-            branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
-        if not branch_id and self.context:
+        if self.context and self.context.get('branch_id'):
             branch_id = self.context.get('branch_id')
+        elif request:
+            branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
             
         if branch_id:
             from .models import BranchMenuItemAvailability
             val = str(branch_id).strip()
             if val.isdigit():
-                override = BranchMenuItemAvailability.objects.filter(branch_id=int(val), menu_item=obj).first()
+                bid = int(val)
+                # Verify branch belongs to this item's restaurant
+                if not obj.category.restaurant.branches.filter(id=bid).exists():
+                    first_branch = obj.category.restaurant.branches.filter(is_active=True).first()
+                    bid = first_branch.id if first_branch else bid
+                override = BranchMenuItemAvailability.objects.filter(branch_id=bid, menu_item=obj).first()
             else:
                 from django.db.models import Q
                 override = BranchMenuItemAvailability.objects.filter(
