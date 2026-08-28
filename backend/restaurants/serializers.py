@@ -299,15 +299,23 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         active_cats.sort(key=lambda c: (c.order, c.name))
 
         ctx = dict(self.context) if self.context else {}
-        if not ctx.get('branch_id'):
-            request = ctx.get('request')
-            req_branch = (request.query_params.get('branch_id') or request.query_params.get('branch')) if request else None
-            if req_branch:
-                ctx['branch_id'] = req_branch
-            else:
-                first_branch = obj.branches.filter(is_active=True).first() or obj.branches.first()
-                if first_branch:
-                    ctx['branch_id'] = first_branch.id
+        request = ctx.get('request')
+        req_branch = ctx.get('branch_id') or ((request.query_params.get('branch_id') or request.query_params.get('branch')) if request else None)
+        
+        valid_branch_id = None
+        if req_branch:
+            try:
+                if obj.branches.filter(id=req_branch).exists():
+                    valid_branch_id = req_branch
+            except Exception:
+                valid_branch_id = None
+
+        if not valid_branch_id:
+            first_branch = obj.branches.filter(is_active=True).first() or obj.branches.first()
+            if first_branch:
+                valid_branch_id = first_branch.id
+
+        ctx['branch_id'] = valid_branch_id
         return MenuCategorySerializer(active_cats, many=True, context=ctx).data
 
 

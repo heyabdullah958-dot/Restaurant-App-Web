@@ -254,13 +254,16 @@ export default function RestaurantScreen() {
     return restaurant.branches.find((b: any) => b.is_active !== false) || restaurant.branches[0];
   }, [restaurant, selectedBranchId]);
 
-  // Auto-initialize selectedBranchId if not yet set
+  // Auto-initialize or reconcile selectedBranchId if not valid for this restaurant
   useEffect(() => {
-    if (restaurant && restaurant.branches && restaurant.branches.length > 0 && !selectedBranchId) {
+    if (restaurant && restaurant.branches && restaurant.branches.length > 0) {
       const activeBranches = restaurant.branches.filter((b: any) => b.is_active !== false);
-      const defaultBranch = activeBranches[0] || restaurant.branches[0];
-      if (defaultBranch) {
-        setSelectedBranchId(defaultBranch.id);
+      const isCurrentBranchValid = activeBranches.some((b: any) => b.id === selectedBranchId);
+      if (!selectedBranchId || !isCurrentBranchValid) {
+        const defaultBranch = activeBranches[0] || restaurant.branches[0];
+        if (defaultBranch && defaultBranch.id !== selectedBranchId) {
+          setSelectedBranchId(defaultBranch.id);
+        }
       }
     }
   }, [restaurant, selectedBranchId]);

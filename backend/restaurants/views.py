@@ -99,10 +99,21 @@ class RestaurantMenuView(generics.GenericAPIView):
             
             # Admin/staff users get all items (including unavailable ones)
             ctx = {'request': request}
-            if not request.query_params.get('branch_id') and not request.query_params.get('branch'):
+            req_branch = request.query_params.get('branch_id') or request.query_params.get('branch')
+            valid_branch_id = None
+            if req_branch:
+                try:
+                    if restaurant.branches.filter(id=req_branch).exists():
+                        valid_branch_id = req_branch
+                except Exception:
+                    valid_branch_id = None
+
+            if not valid_branch_id:
                 first_branch = restaurant.branches.filter(is_active=True).first() or restaurant.branches.first()
                 if first_branch:
-                    ctx['branch_id'] = first_branch.id
+                    valid_branch_id = first_branch.id
+
+            ctx['branch_id'] = valid_branch_id
             if request.user and request.user.is_authenticated and request.user.is_staff:
                 serializer = AdminMenuCategorySerializer(categories, many=True, context=ctx)
             else:
