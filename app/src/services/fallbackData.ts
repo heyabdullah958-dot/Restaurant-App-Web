@@ -26,6 +26,8 @@ export interface MenuItem {
     discounted_price: number;
     window_ends_at?: string | null;
   } | null;
+  branch_availability_map?: Record<string, boolean>;
+  other_available_branches?: Array<{ id: number; name: string }>;
 }
 
 export interface MenuCategory {

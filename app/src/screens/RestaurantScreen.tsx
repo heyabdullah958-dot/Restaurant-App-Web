@@ -65,20 +65,34 @@ const MenuItemCard = React.memo(({
   showCategoryName,
   isClosed,
   restaurantSlug,
+  selectedBranchId,
   onAddToCart, 
   onIncrement, 
-  onDecrement 
+  onDecrement,
+  onSwitchBranch
 }: {
   item: MenuItem & { categoryName?: string };
   quantity: number;
   showCategoryName: boolean;
   isClosed?: boolean;
   restaurantSlug?: string | number;
+  selectedBranchId?: number | null;
   onAddToCart: (item: MenuItem) => void;
   onIncrement: (item: MenuItem, qty: number) => void;
   onDecrement: (item: MenuItem, qty: number) => void;
+  onSwitchBranch?: (branchId: number) => void;
 }) => {
-  const isOutOfStock = item.is_available === false;
+  let isOutOfStock = item.is_available === false;
+  if (selectedBranchId && item.branch_availability_map) {
+    if (item.branch_availability_map[String(selectedBranchId)] === false) {
+      isOutOfStock = true;
+    } else {
+      isOutOfStock = false;
+    }
+  } else if (item.is_available === false && !item.branch_availability_map) {
+    isOutOfStock = true;
+  }
+  
   const isUnavailable = isOutOfStock || isClosed;
 
   return (
@@ -126,6 +140,27 @@ const MenuItemCard = React.memo(({
           <Text style={styles.itemPrepTime}>
             ⏱️ Ready in {item.preparation_time} mins
           </Text>
+        )}
+
+        {isOutOfStock && item.other_available_branches && item.other_available_branches.length > 0 && (
+          <TouchableOpacity
+            style={{ marginTop: 6, backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, borderWidth: 1, borderColor: '#bbf7d0', alignSelf: 'flex-start' }}
+            onPress={() => {
+              const firstBranch = item.other_available_branches![0];
+              Alert.alert(
+                "Switch Branch?",
+                `This item is in stock at ${firstBranch.name}. Would you like to switch your active branch to ${firstBranch.name}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Switch Branch', onPress: () => onSwitchBranch && onSwitchBranch(firstBranch.id) }
+                ]
+              );
+            }}
+          >
+            <Text style={{ fontSize: 11, color: '#166534', fontWeight: '600' }}>
+              📍 In stock at {item.other_available_branches.map(b => b.name).join(', ')} · Tap to switch
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -277,7 +312,8 @@ export default function RestaurantScreen() {
 
   const confirmAddVariantToCart = useCallback((item: MenuItem | null, variant: any) => {
     if (!restaurant || !item) return;
-    if (item.is_available === false) {
+    const isOutOfStock = (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] === false) || (!item.branch_availability_map && item.is_available === false);
+    if (isOutOfStock) {
       showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
       return;
     }
@@ -410,7 +446,8 @@ export default function RestaurantScreen() {
 
   const handleAddToCart = useCallback((item: MenuItem) => {
     if (!restaurant) return;
-    if (item.is_available === false) {
+    const isOutOfStock = (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] === false) || (!item.branch_availability_map && item.is_available === false);
+    if (isOutOfStock) {
       showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
       return;
     }
@@ -464,7 +501,8 @@ export default function RestaurantScreen() {
   }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch]);
 
   const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
-    if (item.is_available === false) {
+    const isOutOfStock = (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] === false) || (!item.branch_availability_map && item.is_available === false);
+    if (isOutOfStock) {
       showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
       return;
     }
@@ -509,11 +547,13 @@ export default function RestaurantScreen() {
       showCategoryName={selectedCategory === 'All'}
       isClosed={!isOpen}
       restaurantSlug={restaurant?.slug || restaurant?.id}
+      selectedBranchId={selectedBranchId}
       onAddToCart={handleAddToCart}
       onIncrement={handleIncrement}
       onDecrement={handleDecrement}
+      onSwitchBranch={(branchId) => setSelectedBranchId(branchId)}
     />
-  ), [cartQuantityMap, selectedCategory, isOpen, handleAddToCart, handleIncrement, handleDecrement]);
+  ), [cartQuantityMap, selectedCategory, isOpen, handleAddToCart, handleIncrement, handleDecrement, selectedBranchId, restaurant]);
 
   const keyExtractor = useCallback((item: MenuItem) => String(item.id), []);
 
