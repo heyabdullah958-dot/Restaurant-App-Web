@@ -48,7 +48,7 @@ def compute_window_ends_at(deal, current_dt=None):
         return None
 
 
-def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, current_dt=None):
+def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, current_dt=None, preloaded_deals=None):
     """
     Finds the highest-priority active flash deal applicable to a specific menu item.
     Applies 3-level deterministic precedence:
@@ -64,7 +64,7 @@ def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, cu
     category_id = menu_item.category_id
 
     # Fetch candidate active flash deals
-    deals = FlashDeal.objects.filter(is_active=True).prefetch_related('categories', 'menu_items')
+    deals = preloaded_deals if preloaded_deals is not None else FlashDeal.objects.filter(is_active=True).prefetch_related('categories', 'menu_items')
     
     applicable_candidates = []
     

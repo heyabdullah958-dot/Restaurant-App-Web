@@ -70,24 +70,40 @@ class MenuItemSerializer(serializers.ModelSerializer):
             branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
             
         if branch_id:
-            from .models import BranchMenuItemAvailability
             val = str(branch_id).strip()
             if val.isdigit():
                 bid = int(val)
-                # Verify branch belongs to this item's restaurant
-                if not obj.category.restaurant.branches.filter(id=bid).exists():
-                    first_branch = obj.category.restaurant.branches.filter(is_active=True).first()
-                    bid = first_branch.id if first_branch else bid
-                override = BranchMenuItemAvailability.objects.filter(branch_id=bid, menu_item=obj).first()
+                # Use context map if available
+                overrides = self.context.get('branch_overrides_map')
+                if overrides is not None:
+                    override_val = overrides.get((bid, obj.id))
+                    if override_val is not None:
+                        return override_val
+                else:
+                    from .models import BranchMenuItemAvailability
+                    # Verify branch belongs to this item's restaurant
+                    branches = self.context.get('restaurant_branches')
+                    if branches is not None:
+                        if not any(b.id == bid for b in branches):
+                            first_branch = next((b for b in branches if b.is_active), None) or (branches[0] if branches else None)
+                            bid = first_branch.id if first_branch else bid
+                    else:
+                        if not obj.category.restaurant.branches.filter(id=bid).exists():
+                            first_branch = obj.category.restaurant.branches.filter(is_active=True).first()
+                            bid = first_branch.id if first_branch else bid
+                    override = BranchMenuItemAvailability.objects.filter(branch_id=bid, menu_item=obj).first()
+                    if override:
+                        return override.is_available
             else:
                 from django.db.models import Q
+                from .models import BranchMenuItemAvailability
                 override = BranchMenuItemAvailability.objects.filter(
                     Q(branch__slug__iexact=val) | Q(branch__name__iexact=val),
                     menu_item=obj
                 ).first()
-            if override:
-                return override.is_available
-        return True
+                if override:
+                    return override.is_available
+        return obj.is_available
 
     def get_active_flash_deal(self, obj):
         try:
@@ -100,14 +116,19 @@ class MenuItemSerializer(serializers.ModelSerializer):
                 branch_id = request.query_params.get('branch_id') or request.query_params.get('branch')
             if not branch_id and self.context:
                 branch_id = self.context.get('branch_id')
-            return resolve_active_deal_for_item(obj, order_mode=order_mode, branch_id=branch_id)
+            
+            preloaded_deals = self.context.get('active_deals')
+            return resolve_active_deal_for_item(obj, order_mode=order_mode, branch_id=branch_id, preloaded_deals=preloaded_deals)
         except Exception:
             return None
 
     def get_branch_availability_map(self, obj):
         res = {}
         overrides = self.context.get('branch_overrides_map')
-        for branch in obj.category.restaurant.branches.all():
+        branches = self.context.get('restaurant_branches')
+        if branches is None:
+            branches = obj.category.restaurant.branches.all()
+        for branch in branches:
             if overrides is not None:
                 val = overrides.get((branch.id, obj.id))
                 res[str(branch.id)] = val if val is not None else obj.is_available
@@ -124,7 +145,10 @@ class MenuItemSerializer(serializers.ModelSerializer):
             
         res = []
         overrides = self.context.get('branch_overrides_map')
-        for branch in obj.category.restaurant.branches.all():
+        branches = self.context.get('restaurant_branches')
+        if branches is None:
+            branches = obj.category.restaurant.branches.all()
+        for branch in branches:
             if not branch.is_active:
                 continue
             
@@ -351,6 +375,12 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         from .models import BranchMenuItemAvailability
         all_overrides = BranchMenuItemAvailability.objects.filter(branch__restaurant=obj).values('branch_id', 'menu_item_id', 'is_available')
         ctx['branch_overrides_map'] = {(ov['branch_id'], ov['menu_item_id']): ov['is_available'] for ov in all_overrides}
+        
+        ctx['restaurant_branches'] = list(obj.branches.all())
+        
+        from promotions.models import FlashDeal
+        ctx['active_deals'] = list(FlashDeal.objects.filter(is_active=True).prefetch_related('categories', 'menu_items'))
+        
         request = ctx.get('request')
         req_branch = ctx.get('branch_id') or ((request.query_params.get('branch_id') or request.query_params.get('branch')) if request else None)
         
