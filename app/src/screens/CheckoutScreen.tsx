@@ -211,6 +211,34 @@ export default function CheckoutScreen() {
     };
   }, [fulfillmentMode, customerCoords, selectedBranchId, branches]);
 
+  // Smart Checkout Branch Selection Guard
+  const branchEligibilityMap = useMemo(() => {
+    const map: Record<number, { isEligible: boolean; unavailableCount: number; unavailableNames: string[] }> = {};
+    branches.forEach((branch) => {
+      const unavailable: string[] = [];
+      cart.items.forEach((item) => {
+        if (item.branch_availability_map && item.branch_availability_map[String(branch.id)] === false) {
+          unavailable.push(item.name || 'Unknown Item');
+        }
+      });
+      map[branch.id] = {
+        isEligible: unavailable.length === 0,
+        unavailableCount: unavailable.length,
+        unavailableNames: unavailable,
+      };
+    });
+    return map;
+  }, [branches, cart.items]);
+
+  React.useEffect(() => {
+    if (selectedBranchId && branchEligibilityMap[selectedBranchId] && !branchEligibilityMap[selectedBranchId].isEligible) {
+      const firstEligible = branches.find((b) => branchEligibilityMap[b.id]?.isEligible);
+      if (firstEligible) {
+        setSelectedBranchId(firstEligible.id);
+      }
+    }
+  }, [branchEligibilityMap, selectedBranchId, branches]);
+
   // Real-time branch inventory pre-flight validation
   const [unavailableItems, setUnavailableItems] = React.useState<string[]>([]);
   const [isCheckingStock, setIsCheckingStock] = React.useState(false);
@@ -698,12 +726,26 @@ export default function CheckoutScreen() {
         setIsSubmitting(false);
         isSubmittingRef.current = false;
         const rawPayload = resultAction.payload;
-        let errMsg = 'Failed to place order';
-        if (typeof rawPayload === 'string') {
-          errMsg = rawPayload;
-        } else if (rawPayload && typeof rawPayload === 'object') {
-          errMsg = (rawPayload as any).message || (rawPayload as any).detail || JSON.stringify(rawPayload);
-        }
+        const formatCheckoutError = (payload: any): string => {
+          if (!payload) return 'Failed to place order. Please try again.';
+          if (typeof payload === 'string') return payload;
+          if (payload.non_field_errors) {
+            return Array.isArray(payload.non_field_errors) ? payload.non_field_errors.join(' ') : String(payload.non_field_errors);
+          }
+          if (payload.items) {
+            return Array.isArray(payload.items) ? payload.items.join(' ') : String(payload.items);
+          }
+          if (payload.message) return String(payload.message);
+          if (payload.detail) return String(payload.detail);
+          if (typeof payload === 'object') {
+            const values = Object.values(payload).flat();
+            if (values.length > 0) {
+              return values.map(v => String(v)).join(' ');
+            }
+          }
+          return 'An unexpected error occurred during checkout.';
+        };
+        const errMsg = formatCheckoutError(rawPayload);
         showAlert('Checkout Error', errMsg);
       }
     } catch (err: any) {
@@ -858,6 +900,8 @@ export default function CheckoutScreen() {
             {/* Specific Active Operational Branches */}
             {branches.map((b) => {
               const isSelected = selectedBranchId === b.id;
+              const eligibility = branchEligibilityMap[b.id];
+              const isEligible = !eligibility || eligibility.isEligible;
               return (
                 <TouchableOpacity 
                   key={b.id}
@@ -865,17 +909,29 @@ export default function CheckoutScreen() {
                   style={[
                     styles.branchCardOption,
                     isSelected && styles.branchCardSelected,
+                    !isEligible && { opacity: 0.55, borderColor: '#fcd34d', backgroundColor: '#fffbeb' }
                   ]}
-                  onPress={() => setSelectedBranchId(b.id)}
+                  onPress={() => {
+                    if (!isEligible) {
+                      showAlert('Branch Unavailable for Cart', `The following item(s) in your cart are currently out of stock at ${b.name} Branch:\n\n${eligibility.unavailableNames.map(n => '• ' + n).join('\n')}\n\nPlease select another branch or adjust your cart items.`);
+                      return;
+                    }
+                    setSelectedBranchId(b.id);
+                  }}
                 >
                   <Ionicons 
                     name={isSelected ? "radio-button-on" : "radio-button-off"} 
                     size={20} 
-                    color={isSelected ? COLORS.primary : COLORS.gray} 
+                    color={isSelected ? COLORS.primary : (!isEligible ? '#f59e0b' : COLORS.gray)} 
                   />
                   <View style={{ flex: 1, marginLeft: SPACING.sm }}>
                     <Text style={styles.branchOptionTitle}>{b.name} Branch</Text>
                     {!!b.address && <Text style={styles.branchOptionDesc}>{b.address}</Text>}
+                    {!isEligible && (
+                      <View style={{ marginTop: 4, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start' }}>
+                        <Text style={{ fontSize: 10, color: '#b45309', fontWeight: 'bold' }}>⚠️ {eligibility.unavailableCount} item{eligibility.unavailableCount > 1 ? 's' : ''} sold out here</Text>
+                      </View>
+                    )}
                   </View>
                   {isSelected && (
                     <View style={styles.selectedCheckBadge}>
