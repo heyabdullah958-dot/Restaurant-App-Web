@@ -99,6 +99,11 @@ class RestaurantMenuView(generics.GenericAPIView):
             
             # Admin/staff users get all items (including unavailable ones)
             ctx = {'request': request}
+            
+            from .models import BranchMenuItemAvailability
+            all_overrides = BranchMenuItemAvailability.objects.filter(branch__restaurant=restaurant).values('branch_id', 'menu_item_id', 'is_available')
+            ctx['branch_overrides_map'] = {(ov['branch_id'], ov['menu_item_id']): ov['is_available'] for ov in all_overrides}
+
             req_branch = request.query_params.get('branch_id') or request.query_params.get('branch')
             valid_branch_id = None
             if req_branch:

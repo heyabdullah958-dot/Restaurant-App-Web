@@ -704,6 +704,62 @@ def main():
 
     track_ord.delete()
 
+    # 20. Test Batch Availability Serialization & Instant Stock UI Guards
+    print("\nTesting Batch Availability Serialization & Instant Stock UI Guards...")
+    from restaurants.views import RestaurantMenuView
+    from restaurants.models import BranchMenuItemAvailability
+    
+    tandoori_menu_item = MenuItem.objects.filter(category__restaurant=tandoori, is_available=True).first()
+    
+    jt_override, _ = BranchMenuItemAvailability.objects.update_or_create(
+        branch=jt_branch,
+        menu_item=tandoori_menu_item,
+        defaults={'is_available': False}
+    )
+    
+    lc_branch = tandoori.branches.exclude(id=jt_branch.id).filter(is_active=True).first()
+    if lc_branch:
+        BranchMenuItemAvailability.objects.update_or_create(
+            branch=lc_branch,
+            menu_item=tandoori_menu_item,
+            defaults={'is_available': True}
+        )
+
+    req_menu = factory.get(f"/api/restaurants/{tandoori.slug}/menu/?branch_id={jt_branch.id}")
+    resp_menu = RestaurantMenuView.as_view()(req_menu, slug=tandoori.slug)
+    
+    passed_stock_guards = False
+    if resp_menu.status_code == 200:
+        data = resp_menu.data.get('data', [])
+        found_item = None
+        for cat in data:
+            for item in cat.get('items', []):
+                if item['id'] == tandoori_menu_item.id:
+                    found_item = item
+                    break
+            if found_item:
+                break
+        
+        if found_item:
+            avail_map = found_item.get('branch_availability_map', {})
+            other_branches = found_item.get('other_available_branches', [])
+            
+            if avail_map.get(str(jt_branch.id)) is False and lc_branch and avail_map.get(str(lc_branch.id)) is True:
+                if any(b['id'] == lc_branch.id for b in other_branches) and not any(b['id'] == jt_branch.id for b in other_branches):
+                    passed_stock_guards = True
+                    print(f"  [PASSED] Menu Serialization returned accurate availability maps and fallback branches.")
+                else:
+                    print(f"  [FAILED] other_branches incorrect: {other_branches}")
+            else:
+                print(f"  [FAILED] branch_availability_map incorrect: {avail_map}")
+        else:
+            print(f"  [FAILED] Item not found in menu response.")
+    else:
+        print(f"  [FAILED] Menu view returned HTTP {resp_menu.status_code}")
+        
+    if not passed_stock_guards:
+        all_passed = False
+
     if all_passed:
         print("\n[SUCCESS] All local integration & security governance tests PASSED successfully!")
     else:
