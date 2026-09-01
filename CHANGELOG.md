@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 2026-09-01 Phase 3 — Merchant Manager App Standalone APK Startup Crash Fix
+- **Native Gesture Handler & Navigation Architecture (`admin-app/index.ts` & `admin-app/App.tsx`)**:
+  - Imported `'react-native-gesture-handler'` at the top of the entry file `index.ts`.
+  - Wrapped root app in `<GestureHandlerRootView style={{ flex: 1 }}>` and initialized `enableScreens(true)`.
+- **Production Crash Recovery Error Boundary (`admin-app/src/components/ErrorBoundary.tsx`)**:
+  - Created dark-themed React class `ErrorBoundary` catching unhandled render exceptions and rendering diagnostics with instant "Reload" and "Reset Cache" recovery actions.
+- **Android Manifest Permissions & Build Properties (`admin-app/app.json`)**:
+  - Added `"android.permission.VIBRATE"`, `"android.permission.WAKE_LOCK"`, `"android.permission.POST_NOTIFICATIONS"`.
+  - Added plugins `"expo-font"`, `"expo-status-bar"`, and configured `buildArchs: ["arm64-v8a", "armeabi-v7a", "x86_64"]`.
+
 ## 2026-09-01 Phase 2 — Home Header Layout Alignment & Fulfillment Toggle Cleanup
 - **Top Header Flexbox Layout Restructure (`HomeScreen.tsx`)**:
   - Separated header into responsive `headerLeft` (`flex: 1`, `marginRight: SPACING.sm`) and `headerActions` (`flexShrink: 0`, `gap: 6`).
