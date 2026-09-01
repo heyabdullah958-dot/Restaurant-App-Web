@@ -4,6 +4,50 @@
 
 ---
 
+## Lesson 18 — Strict Foreign Key Isolation vs Heuristic/Substring Auto-Linking in Multi-Tenant REST APIs — 2026-09-01
+- **Pattern**: Multi-tenant customer identity isolation, order history querysets, and Redux cache lifecycle management.
+- **Wrong assumption made**: Assuming that matching historical unassigned guest orders by username prefix or substring (`guest_name__icontains=base_name`) and running `update(user=user)` during `GET /api/orders/my-orders/` is a helpful customer convenience feature.
+- **What actually mattered**:
+  1. Heuristic or substring matching on user names is catastrophic for privacy and database integrity. If user `malik121` signs up, a substring search for `malik` matches every guest order in the DB with "Malik" in the name, permanently re-assigning foreign keys to that user in the database.
+  2. Customer order listing endpoints MUST strictly filter by `Order.objects.filter(user=request.user)`. Re-assigning or claiming guest orders must ONLY ever occur through explicit order tracking tokens or authenticated checkout linkages.
+  3. Frontend Redux thunks (`fetchMyOrders.fulfilled`) must construct order state maps strictly from the active user's API response (`fetchedArray`) rather than pre-populating with old session state, preventing cross-user data bleeding when switching accounts on shared devices.
+- **Applies to**: `backend/orders/views.py`, `app/src/store/orderSlice.ts`, `app/src/screens/OrdersScreen.tsx`.
+
+---
+
+## Lesson 17 — React Navigation Stack vs Nested Tab Routing & Post-Auth Resets — 2026-09-01
+- **Pattern**: React Navigation root stack resets, nested bottom tab state projection, and auth flow transitions.
+- **Wrong assumption made**: Assuming that `navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'Profile' }] })` will reset the root stack to `Main` and focus the `Profile` tab.
+- **What actually mattered**:
+  1. `navigation.reset` operates strictly on the routes registered in the *current* navigator. If `'Profile'` is a nested screen inside `'Main'` (and not a direct child of the root stack), passing it at the top-level causes React Navigation to reject the action: `The action 'RESET' with payload ... was not handled by any navigator.`
+  2. Because the navigation action fails silently or halts execution, the authentication screen remains stuck on its loading spinner indefinitely.
+  3. Redirection helpers MUST distinguish between nested tab targets and root stack screens. For nested tabs, root stack MUST be reset to `Main` with nested state projection (`state: { routes: [{ name: returnScreen, params }] }`), with a defensive `try/catch` fallback to direct `navigation.navigate`.
+- **Applies to**: `app/src/screens/AuthScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `app/src/screens/ProfileScreen.tsx`.
+
+---
+
+## Lesson 16 — Cross-Platform Vector Icons vs Raw Unicode Emojis in Native Mobile Navigation — 2026-09-01
+- **Pattern**: Native mobile bottom navigation bar rendering and OS font metrics stability.
+- **Wrong assumption made**: Assuming that rendering unicode emojis (`🏪`, `📦`, `🍳`, `🛵`) inside React Native `Text` components produces clean, centered, and consistent tab bar icons across all mobile devices.
+- **What actually mattered**:
+  1. On Android OEM distributions (Samsung OneUI, Xiaomi MIUI, Google Pixel), native font line-height calculations clip and distort emoji characters when rendered inside fixed-height tab containers, creating sliced and misaligned UI.
+  2. Production native apps MUST use standardized vector glyph libraries (`@expo/vector-icons` / `Ionicons` / `Feather`) with explicit pixel sizing (22–24pt), active/inactive theme color tokens, and pill highlight containers.
+  3. Route names in navigation actions (e.g. `navigation.navigate('RiderManagement')`) must strictly match the registered screen name in the navigator, never informal shorthand like `'Riders'`.
+- **Applies to**: `admin-app/src/navigation/AppNavigator.tsx`, `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`.
+
+---
+
+## Lesson 15 — Standalone Native Mobile Entry Points & Android APK Initialization Safety — 2026-09-01
+- **Pattern**: Standalone compiled Android APK stability, native gesture handler lifecycle, and error boundaries.
+- **Wrong assumption made**: Assuming that an Expo app that runs cleanly in Expo Go will automatically launch without issues as a standalone production Android APK.
+- **What actually mattered**:
+  1. Expo Go automatically injects certain native shims and wrappers that standalone production APKs lack. Standalone APKs running React Navigation stack and bottom tabs REQUIRE `import 'react-native-gesture-handler';` at line 1 of the bundle entry point (`index.ts`) and MUST wrap the root tree in `<GestureHandlerRootView style={{ flex: 1 }}>`.
+  2. Native modules like `expo-keep-awake` and `Vibration.vibrate` throw fatal Android OS `SecurityException` crashes if `"android.permission.VIBRATE"`, `"android.permission.WAKE_LOCK"`, and `"android.permission.POST_NOTIFICATIONS"` are not declared in `app.json`.
+  3. Every production mobile app MUST include a top-level React class `ErrorBoundary` that intercepts unhandled render exceptions and provides user-accessible recovery actions ("Reload App", "Clear Local Storage") instead of terminating the Android OS process.
+- **Applies to**: `admin-app/index.ts`, `admin-app/App.tsx`, `admin-app/app.json`, `admin-app/src/components/ErrorBoundary.tsx`.
+
+---
+
 ## Lesson 14 — Branch-Level Availability Gate, Session Notification Isolation & Mobile Tab Layout Balance — 2026-08-27
 - **Pattern**: Multi-tenant branch item availability checkout enforcement, session notification isolation, and mobile tab bar layout resilience.
 - **Wrong assumption made**: Assuming that checking master `MenuItem.is_available` is sufficient during order creation without joining branch availability overrides (`BranchMenuItemAvailability`), and assuming local in-app notifications can persist unconditionally across anonymous/guest sessions.

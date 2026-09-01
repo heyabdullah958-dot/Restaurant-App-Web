@@ -2,6 +2,88 @@
 
 ## Resolved Bugs Log
 
+### Bug #18: Cross-User Order History Bleed via Fuzzy Substring Auto-Linking in DRF Backend (Resolved 2026-09-01)
+- **Severity**: Critical / Security & Privacy
+- **Status**: FIXED
+- **Reported In**: Phase 6 — Customer Order History User-Scoping & Cross-Account Cache Isolation
+- **Symptoms**:
+  - Newly registered customer accounts (e.g., `malik121`) navigated to "My Orders" and found historical orders from previous months (July and August) and other customers appearing in their order feed.
+- **Root Cause**:
+  1. In `MyOrdersListView.get_queryset` (`backend/orders/views.py`), legacy auto-linking code extracted `base_name = user.username.replace('1','').replace('2','')` and executed `link_query = Q(guest_name__icontains=base_name)`. It then ran `Order.objects.filter(link_query).update(user=user)`. Any historical guest order in the DB matching "malik" was re-assigned to `malik121`.
+  2. In `app/src/store/orderSlice.ts`, `fetchMyOrders.fulfilled` pre-populated its Map from `state.myOrders` (existing local Redux state) before iterating `fetchedArray`, causing previous session orders on shared devices to persist in state.
+- **Fix Applied**:
+  1. Refactored `MyOrdersListView.get_queryset` to strictly query `Order.objects.filter(user=user)` with no guest name guessing, no substring searches, and zero mutations.
+  2. Refactored Redux `orderSlice.ts` to construct state maps strictly from `fetchedArray` (the active user's authenticated response) and added full cache purges on `guestLogin.fulfilled`.
+  3. Deployed release v85 to live Heroku production.
+- **Files Modified**:
+  - `backend/orders/views.py`
+  - `app/src/store/orderSlice.ts`
+- **Verification**: `test_dual_app_e2e.py` Step 5 verified 100% multi-account isolation.
+
+---
+
+### Bug #17: Customer App Post-Authentication Hanging Spinner on Flat Root Reset (Resolved 2026-09-01)
+- **Severity**: High / Navigation Blocker
+- **Status**: FIXED
+- **Reported In**: Phase 5 — Auth Navigation Reset & Post-Login Redirection Fix
+- **Symptoms**:
+  - Logging in or registering a new customer account successfully authenticated with the server, but the screen became permanently stuck on the loading spinner without redirecting away from `AuthScreen.tsx`.
+- **Root Cause**:
+  - `AuthScreen.tsx` was executing `navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: returnScreen }] })`. When `returnScreen` was `'Profile'` (or any nested tab inside `'Main'`), React Navigation rejected the action because `'Profile'` is not a direct root stack screen, causing unhandled action rejections.
+- **Fix Applied**:
+  - Built `handlePostAuthNavigation` distinguishing nested tab targets (`'Home'`, `'Map'`, `'Search'`, `'Cart'`, `'Orders'`, `'Profile'`) from root stack screens (`'Checkout'`, `'Restaurant'`). For nested tabs, resets root to `Main` with nested state projection (`state: { routes: [{ name: returnScreen, params }] }`).
+  - Wrapped in defensive `try/catch` with fallback `navigate`.
+- **Files Modified**:
+  - `app/src/screens/AuthScreen.tsx`
+- **Verification**: `npx tsc --noEmit` (0 errors), Android Hermes bundle export (0 errors).
+
+---
+
+### Bug #16: Manager App Rider Modal Unhandled Navigation Exception & Distorted Tab Bar Emojis (Resolved 2026-09-01)
+- **Severity**: Medium / UI & Navigation
+- **Status**: FIXED
+- **Reported In**: Phase 4 — Manager App Rider Navigation Route Fix & Bottom Tab Icon Standardization
+- **Symptoms**:
+  1. Tapping "Go to Rider Roster" in the dispatch modal on `OrderManagementScreen.tsx` threw `The action 'NAVIGATE' with payload {"name":"Riders"} was not handled by any navigator.`
+  2. Bottom navigation tab bar icons appeared vertically cropped, distorted, and sliced on physical Android devices.
+- **Root Cause**:
+  1. The bottom tab screen was registered as `name="RiderManagement"` in `AppNavigator.tsx`, but `OrderManagementScreen.tsx` called `navigation.navigate('Riders')`.
+  2. Bottom tab bar rendered raw unicode emojis inside text components, which are clipped by Android font line-height metrics.
+- **Fix Applied**:
+  1. Updated `OrderManagementScreen.tsx` line 507 to `navigation.navigate('RiderManagement')`.
+  2. Installed `@expo/vector-icons` and replaced raw emojis with standardized vector `Ionicons` and styled active pill highlights across all manager and super admin tab bars.
+- **Files Modified**:
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin-app/package.json`
+- **Verification**: `npx tsc --noEmit` in `admin-app` (0 errors), Android production export (0 errors).
+
+---
+
+### Bug #15: Merchant Manager App Cold Launch Crash on Standalone Android APK (Resolved 2026-09-01)
+- **Severity**: Critical / Production Build Stability
+- **Status**: FIXED
+- **Reported In**: Phase 3 — Merchant Manager App Standalone APK Startup Crash Fix
+- **Symptoms**:
+  - Standalone compiled Android APK of the Merchant Manager App crashed immediately on cold launch before reaching the login screen, while working inside Expo Go.
+- **Root Cause**:
+  1. Missing `import 'react-native-gesture-handler';` at top of `index.ts`.
+  2. Root component tree lacked `<GestureHandlerRootView style={{ flex: 1 }}>`.
+  3. Missing Android permissions (`"android.permission.VIBRATE"`, `"android.permission.WAKE_LOCK"`, `"android.permission.POST_NOTIFICATIONS"`) used by foreground alarms.
+  4. Lacked top-level React Error Boundary.
+- **Fix Applied**:
+  1. Added `react-native-gesture-handler` entry import and wrapped root in `GestureHandlerRootView` and `enableScreens(true)`.
+  2. Built dark-mode `ErrorBoundary.tsx` with diagnostic details and restart actions.
+  3. Added native permissions, build architectures (`arm64-v8a`, `armeabi-v7a`, `x86_64`), and plugins to `admin-app/app.json`.
+- **Files Modified**:
+  - `admin-app/index.ts`
+  - `admin-app/App.tsx`
+  - `admin-app/app.json`
+  - `admin-app/src/components/ErrorBoundary.tsx` [NEW]
+- **Verification**: `npx tsc --noEmit` (0 errors), `npx expo export --platform android` (0 errors).
+
+---
+
 ### Bug #14: Riders Filter Chip Fragmentation & Inactive Phase 2 Brands in Admin Modals
 - **Severity**: Low / UI-UX Polish
 - **Status**: FIXED

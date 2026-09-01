@@ -1,73 +1,37 @@
-# React + TypeScript + Vite
+# 👑 FoodSphere — Admin HQ Web Command Center
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The web-based management dashboard for Super Admins and Branch Managers, built with React 18, Vite, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Deployments
+- **Primary (Vercel)**: [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app)
+- **Backup (Cloudflare Pages)**: [https://foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev)
+- **Backend API**: [https://getfoodpk-fd9b20442fcf.herokuapp.com/api/](https://getfoodpk-fd9b20442fcf.herokuapp.com/api/)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Key Views & Modules
+- **SuperDashboard**: Real-time cross-brand revenue, active orders, live tenant metrics, and customer reviews.
+- **BranchDashboard**: Branch manager operational command center for tracking live orders, toggling branch online status, and updating branch contact info.
+- **OrderManagement**: Live Kanban and table views with multi-stage status progression and rider assignment.
+- **MenuManagement**: Restaurant catalog management, item availability toggles, price editing, and Cloudinary image uploads.
+- **FlashDealManagement**: 6-step progressive creation modal supporting multi-tier item scoping (`ENTIRE_MENU`, `CATEGORY`, `SPECIFIC_ITEMS`) and recurring midnight specials.
+- **PromoManagement**: Promo coupon creation, percentage/fixed discounts, expiration, and minimum spend rules.
+- **CustomerManagement**: Customer CRM with lifetime metrics aggregation and manual loyalty point adjustments.
+- **NotificationCenter**: Push notification composer with targeted topic dispatch via FCM.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 💻 Local Development & Build
+```bash
+# Install dependencies
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Run local development server
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```

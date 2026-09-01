@@ -62,6 +62,22 @@
 - **How it was verified**: Executed `python manage.py migrate restaurants` (migration 0015 OK), verified `generate_display_order_id()` output for all 3 branches, ran `test_backend_local.py` (all tests passed), and ran `test_dual_app_e2e.py` (100% passed).
 - **Confidence**: 100% — verified via database migration execution and end-to-end multi-tenant test suites.
 
+---
+
+## Phase 6 — Customer Order History User-Scoping & Queryset Isolation — 2026-09-01
+- **What changed and why**:
+  1. **Strict User Scoping in `MyOrdersListView` (`backend/orders/views.py`)**:
+     - Removed legacy heuristic auto-linking code that executed `guest_name__icontains=base_name` and `update(user=user)` on GET requests.
+     - Scoped `get_queryset()` strictly to `Order.objects.filter(user=request.user)` with `select_related('restaurant', 'branch', 'rider')` and `prefetch_related('items__menu_item')`.
+     - Returns `Order.objects.none()` for unauthenticated or guest callers.
+  2. **Production Heroku Deployment**:
+     - Released backend build **v85** live to `https://getfoodpk-fd9b20442fcf.herokuapp.com`.
+- **Files modified**:
+  - `backend/orders/views.py`
+- **How it was verified**: Ran `test_dual_app_e2e.py` Step 5 (Multi-Account Isolation) with 100% pass rate.
+- **Confidence**: 100% — verified via multi-user integration tests and live Heroku release.
+
+
 
 
 

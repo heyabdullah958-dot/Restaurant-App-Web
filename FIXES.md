@@ -58,10 +58,27 @@ We ported the visual alignments to the mobile application codebase to ensure par
 
 ### 5. App Rebranding for 3 Active Brands
 * **AuthScreen Layout**: [AuthScreen.tsx](file:///d:/sitesdata/Resturent App/app/src/screens/AuthScreen.tsx)
-* **Changes**: Updated the subtitle text from "7 premium dining spots" to "3 premium dining spots" to accurately reflect the current launch scope.
+* **Changes**: Updated the subtitle text to reflect the 3 active launch brands.
 
 ---
 
-## 🌐 Web Prototype URL
-The local prototype development server is running and accessible at:
-👉 **[http://localhost:8000](http://localhost:8000)**
+## 📱 Phases 1 – 6 Multi-Platform Fixes (2026-09-01)
+
+### Phase 1: Guest Mode Profile Screen State & Auth Call-to-Action
+* **ProfileScreen**: Bifurcated the profile screen into dedicated Guest and Authenticated modes. Guests see a clean welcome card with loyalty benefits summary, Sign In / Sign Up buttons, and support links, hiding all account-specific actions (e.g. Log Out, Address Editor).
+
+### Phase 2: Home Header Layout Alignment & Fulfillment Toggle Cleanup
+* **HomeScreen**: Restructured top navigation bar using responsive flexbox with compact Sign In pill and address truncation. Removed obsolete Takeaway and Dine-In toggle switcher.
+
+### Phase 3: Merchant Manager App Standalone APK Startup Crash Fix
+* **admin-app**: Added `react-native-gesture-handler` top-of-bundle import, `<GestureHandlerRootView>`, dark-mode `ErrorBoundary.tsx`, and declared Android OS native permissions (`VIBRATE`, `WAKE_LOCK`, `POST_NOTIFICATIONS`) in `app.json`.
+
+### Phase 4: Manager App Rider Navigation & Bottom Tab Vector Icons
+* **admin-app**: Fixed dispatch modal navigation route mismatch to `'RiderManagement'`. Installed `@expo/vector-icons` and replaced clipped emojis with crisp `Ionicons` and active pill indicators.
+
+### Phase 5: Auth Navigation Reset & Post-Login Redirection Fix
+* **app/AuthScreen.tsx**: Replaced malformed flat root reset payload with hierarchy-aware `handlePostAuthNavigation`, accurately distinguishing nested tab targets from root stack screens and eliminating hanging post-auth spinners.
+
+### Phase 6: Customer Order History User-Scoping & Cross-Account Cache Isolation
+* **backend/orders/views.py & app/store/orderSlice.ts**: Removed flawed fuzzy substring auto-linking queries from DRF `MyOrdersListView`, scoping querysets strictly to `Order.objects.filter(user=user)`. Refactored Redux map merging to build strictly from the active user's payload.
+

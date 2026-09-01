@@ -63,7 +63,8 @@
 
 ### ☁️ Hosting & Infrastructure
 ![Cloudflare](https://img.shields.io/badge/Cloudflare_Pages-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white)
-![Render](https://img.shields.io/badge/Render-Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Admin%20HQ-black?style=for-the-badge&logo=vercel&logoColor=white)
+![Heroku](https://img.shields.io/badge/Heroku-Backend%2024%2F7-430098?style=for-the-badge&logo=heroku&logoColor=white)
 
 ---
 
@@ -71,21 +72,29 @@
 
 ```
 FoodSphere/
-├── 📱 /app                  # React Native / Expo Mobile App
-│   ├── /screens             # Home, Menu, Cart, Checkout, Tracking, Rewards
-│   ├── /components          # Shared UI components
-│   ├── /store               # Redux Toolkit state management
-│   └── /services            # API calls (axios)
+├── 📱 /app                  # React Native / Expo Customer Mobile App (GetFood)
+│   ├── /screens             # Home, Restaurant, Menu, Cart, Checkout, Tracking, Rewards, Profile
+│   ├── /components          # Shared UI components, NotificationToast, ErrorBoundary
+│   ├── /store               # Redux Toolkit state management (user, cart, order slices)
+│   └── /services            # API calls (Axios JWT auth wrapper & session isolation)
 │
-├── 🖥️  /admin               # React + Vite Admin Dashboard
-│   ├── /views               # SuperDashboard, Orders, Menu, Customers
-│   ├── /components          # Charts, Sidebar, Notifications
+├── 📲 /admin-app            # React Native / Expo Merchant Manager Mobile App
+│   ├── /screens             # Login, OrderManagement, BranchDashboard, Menu, Riders, SuperDashboard
+│   ├── /components          # NewOrderAlertOverlay, RiderAssignmentModal, ErrorBoundary
+│   ├── /navigation          # Role-differentiated bottom tabs (Vector Ionicons)
+│   ├── /store               # Redux Toolkit (auth, orders, menu, riders slices)
+│   └── /services            # api.ts & NewOrderAlertService foreground ringing
+│
+├── 🖥️  /admin               # React + Vite Admin Dashboard (Web HQ)
+│   ├── /views               # SuperDashboard, BranchDashboard, Orders, Menu, Customers, Flash Deals
+│   ├── /components          # Charts, Sidebar, Notifications, Modals
 │   └── /services            # api.ts (JWT auth wrapper)
 │
 ├── 🐍 /backend              # Django REST Framework API
-│   ├── /restaurants         # Menu, categories, multi-tenant config
-│   ├── /orders              # Order placement & tracking
-│   ├── /users               # Auth, profiles, loyalty points
+│   ├── /restaurants         # Menu, categories, multi-tenant branch overrides
+│   ├── /orders              # Order placement, monotonic tracking, strict user scoping
+│   ├── /users               # Auth, customer CRM, loyalty points
+│   ├── /promotions          # Flash Deals v2.0 engine, Promo coupons
 │   └── /payments            # Stripe + PayFast + COD
 │
 └── 🌐 /websites             # 7 Individual Restaurant Sites
@@ -104,15 +113,17 @@ FoodSphere/
 
 | Service | URL | Status |
 |---|---|---|
-| 🖥️ **Admin Panel** | [foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| 👑 **Admin HQ (Vercel Primary)** | [foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| 🖥️ **Admin Panel (Cloudflare)** | [foodsphere-admin.pages.dev](https://foodsphere-admin.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| 📱 **Customer App (Web Preview)** | [getfood-app.pages.dev](https://getfood-app.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| 🚀 **Backend API (Heroku 24/7)** | [getfoodpk-fd9b20442fcf.herokuapp.com](https://getfoodpk-fd9b20442fcf.herokuapp.com) | ![Live](https://img.shields.io/badge/-Live%20v85-brightgreen) |
+| 🫓 TandooriStoppk | [tandooristoppk-foodsphere.pages.dev](https://tandooristoppk-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| 🍔 JushhPK | [jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
+| ☕ GetAFomo | [getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
 | 🔥 SeenBanao | [seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
 | 🦞 DineAtBlue | [dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
-| 🍔 JushhPK | [jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
-| 🫓 TandooriStoppk | [tandooristoppk-foodsphere.pages.dev](https://tandooristoppk-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
 | 🥪 Sandmelts | [sandmelts-foodsphere.pages.dev](https://sandmelts-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
 | 🍗 BirdmanFoodsPK | [birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
-| ☕ GetAFomo | [getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev) | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
-| 🐍 **Backend API** | Hosted on Render.com | ![Live](https://img.shields.io/badge/-Live-brightgreen) |
 
 ---
 

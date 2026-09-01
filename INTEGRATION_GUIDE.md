@@ -53,11 +53,39 @@ To run both applications in tandem locally without encountering CORS issues, we 
    ```
    This starts Vite on `http://localhost:5173`. Any call to relative endpoint `/api/*` is automatically proxied to `http://localhost:8000/api/*`, bypassing CORS.
 
+### 📱 3. Customer Mobile App (`/app`) Setup
+1. Open a terminal and navigate to the customer app:
+   ```bash
+   cd app
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Expo development server on port 8081:
+   ```bash
+   npx expo start --port 8081 --clear
+   ```
+
+### 📲 4. Merchant Manager Mobile App (`/admin-app`) Setup
+1. Open a terminal and navigate to the manager app:
+   ```bash
+   cd admin-app
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Expo development server on port 8082:
+   ```bash
+   npx expo start --port 8082 --clear
+   ```
+
 ---
 
 ## 🔑 Environment Variable Reference
 
-### 1. Backend (`backend/.env` / Render Env Vars)
+### 1. Backend (`backend/.env` / Heroku Config Vars)
 | Variable | Description | Default / Example |
 |---|---|---|
 | `SECRET_KEY` | Django standard security hash | `django-insecure-...` |
@@ -69,31 +97,18 @@ To run both applications in tandem locally without encountering CORS issues, we 
 | `CLOUDINARY_API_SECRET` | Cloudinary Storage API Secret | Required for permanent images |
 | `FCM_SERVICE_ACCOUNT_JSON` | Firebase service account credentials | Required for push alerts |
 
-### 2. React Admin (`admin/.env` / `.env.local`)
+### 2. React Admin & Mobile Apps
 | Variable | Description | Example |
 |---|---|---|
-| `VITE_API_URL` | Points to the backend base API endpoint | `https://getfoodpk-fd9b20442fcf.herokuapp.com` |
+| `VITE_API_URL` (Admin HQ) | Points to the backend base API endpoint | `https://getfoodpk-fd9b20442fcf.herokuapp.com/api` |
+| `EXPO_PUBLIC_API_URL` (Mobile Apps) | Fallback API endpoint for Expo clients | `https://getfoodpk-fd9b20442fcf.herokuapp.com/api` |
 
 ---
 
-## 🔄 Authentication & Token Refresh Flow
+## 🧪 Automated Testing Suite
 
-1. **Login (`POST /api/auth/login/`):**
-   * Authenticates user and returns an `access` (60 min lifespan) and a `refresh` token.
-2. **Auto-Refresh:**
-   * React's `apiFetch` interceptor automatically checks API responses. If a request returns `401 Unauthorized` and a refresh token is present, it freezes the request, sends a single call to `/api/auth/refresh/`, updates the access token, and retries the original request.
-   * Concurrent 401s are deduplicated (merged) into a single refresh request.
-3. **Idempotent Logout (`POST /api/auth/logout/`):**
-   * Pings the blacklist endpoint to blacklist the refresh token on the server.
-   * Client-side localStorage is cleared immediately. If the token is already expired or invalid, it gracefully returns success.
+To verify full multi-tenant integration across customer checkout, merchant alarms, rider assignments, and account isolation, run:
+```bash
+python test_dual_app_e2e.py
+```
 
----
-
-## 🚦 Troubleshooting & Connection Issues
-
-### ⚠️ Preflight CORS errors in Local Dev
-* **Fix:** Make sure you are accessing the dashboard on `http://localhost:5173` (Vite dev server) and your `VITE_API_URL` in `admin/.env.local` is **empty/blank**. This forces the app to make relative queries to the same origin, letting Vite's `server.proxy` handle the forwarding.
-
-### ⏱️ 50-Second Load Times on First Request
-* **Reason:** Render.com's free-tier instances sleep after 15 minutes of inactivity. The first request triggers a cold-start boot.
-* **Fix:** Set up a free monitoring cron-job on [UptimeRobot.com](https://uptimerobot.com) or [Cron-Job.org](https://cron-job.org) targeting the health check endpoint: `https://restaurant-app-web.onrender.com/health/` every 10 minutes.

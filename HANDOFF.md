@@ -53,27 +53,26 @@ All in `D:\sitesdata\Resturent App\websites\`
 - Implemented all 12 core screens with full UI and REST API integrations.
 - Verified TypeScript compilation: passes with **0 errors** (`npx tsc --noEmit`).
 
+### Phase 6 — React Native Merchant Manager Mobile App (`/admin-app`) ✅
+- Created dedicated Expo TypeScript mobile application for Super Admins and Branch Managers.
+- Full 12-screen suite: Login, OrderManagement (Live Kanban + tap-to-dispatch), BranchDashboard, MenuManagement, RiderManagement, SuperDashboard, TenantManagement, ManagerManagement, CustomerManagement, PromoManagement, FlashDealManagement, NotificationCenter.
+- Role-differentiated theming (Super Admin dark vs Branch Manager light), continuous audio/haptic order alerts, vector `Ionicons` tabs, and standalone APK stability.
+
+### Phase 7 — Production Backend Deployment (Heroku 24/7) ✅
+- Deployed Django REST Framework API live to Heroku PostgreSQL (Release v85).
+- **Live URL**: https://getfoodpk-fd9b20442fcf.herokuapp.com
+- Configured WhiteNoise static collection, Gunicorn multi-threading, SimpleJWT token rotation, and strict multi-tenant customer isolation.
+
 ### Phase 8 — React Vite HQ Admin Dashboard ✅
 - Created TypeScript React.js admin interface inside `/admin`.
 - Connected to Django REST Backend with JWT Authentication and real-time dashboard data syncing.
-- Integrated Audit Logging, Custom Platform Analytics, Customer Loyalty Point editor, and target topic FCM Push Notification dispatch.
-- **Live Deployment:** https://foodsphere-admin.pages.dev
+- Integrated Audit Logging, Custom Platform Analytics, Customer Loyalty Point editor, and Flash Deals v2.0 creation engine.
+- **Live Deployment:** https://foodsphere-admin.vercel.app (Cloudflare backup: https://foodsphere-admin.pages.dev)
 
 ---
 
-## ⏳ REMAINING PHASES TO BUILD
+## ⏳ REMAINING ITEMS FOR CLIENT HANDOFF
+1. **Firebase Push Notifications**: Client needs to supply `firebase_credentials.json` for live production FCM push dispatch.
+2. **Custom Domain DNS**: Point client domains (`foodsphere.pk`, `tandooristop.pk`, etc.) to Cloudflare/Vercel.
+3. **App Store Submission**: Client developer accounts for Google Play Store and Apple App Store.
 
-### 🔵 Phase 6 — Online Payments (Integration Setup)
-- COD is fully functional in frontend and backend.
-- Need to implement production Stripe elements gateway and PayFast redirect loops.
-
-### 🟢 Phase 7 — Production Deployment (Live Hosting Launch)
-- Create a project on Render, Railway, Heroku, or AWS VPS.
-- Connect the Git repository and provision a PostgreSQL database.
-- Configure production environment variables:
-  - `DATABASE_URL` (obtained from PostgreSQL database connection URI)
-  - `SECRET_KEY` (secure random hash)
-  - `DEBUG` (`False`)
-  - `ALLOWED_HOSTS` (domain name of deployed API)
-  - `CORS_ALLOWED_ORIGINS` (comma-separated URL(s) of the React Native web build or frontend applications)
-- Trigger build/deploy on the PaaS/container dashboard.
