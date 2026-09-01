@@ -1,6 +1,14 @@
 
 # Changelog
 
+## 2026-09-01 Phase 7 — Legal Screens (Privacy Policy & Terms of Service) Theme & UI Standardization
+- **Native Warm Light Legal UI (`app/src/screens/LegalScreen.tsx`)**:
+  - Replaced external WebView wrapper with a 100% native React Native legal screen conforming to Customer App warm light tokens (`#F8FAFC`, `#FFFFFF`, `#FFF1F2`, `#E94124`, `#1F1A17`).
+  - Added interactive segmented pill switcher (`[ 🛡️ Privacy Policy | 📜 Terms of Service ]`) with instant offline tab transitions.
+  - Standardized hero badges, metadata rows, clause cards, bullet points, callout boxes, and light copyright footer, removing all dark slate artifacts.
+- **Web & Hosted HTML Legal Document Styling (`admin/public/` & `websites/legal/`)**:
+  - Refactored `privacy-policy.html` and `terms-of-service.html` stylesheets to use warm light gradients and clean footers.
+
 ## 2026-09-01 Phase 6 — Customer Order History User-Scoping & Cross-Account Cache Isolation Fix
 - **Strict Customer Order Queryset Scoping (`backend/orders/views.py`)**:
   - Removed flawed fuzzy guest name substring search (`guest_name__icontains`) and automatic `update(user=user)` mutations from `MyOrdersListView`.

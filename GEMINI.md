@@ -198,6 +198,7 @@ FoodSphere/
 | Merchant Manager App Standalone APK Startup Crash Fix (Phase 3) | ✅ Completed (`react-native-gesture-handler` root entry, `GestureHandlerRootView`, `ErrorBoundary`, native permissions) | Done |
 | Merchant Manager App Rider Modal Navigation & Vector Tabs (Phase 4) | ✅ Completed (Route mismatch fix to `'RiderManagement'`, `@expo/vector-icons` Ionicons integration with active pills) | Done |
 | Customer Order History User-Scoping & Cache Isolation (Phase 6) | ✅ Completed (Strict `Order.objects.filter(user=user)` in DRF, Redux map isolation, Heroku v85 deploy) | Done |
+| Legal Screens Theme & UI Standardization (Phase 7) | ✅ Completed (100% native warm light UI, interactive segmented switcher, zero dark slate artifacts) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 

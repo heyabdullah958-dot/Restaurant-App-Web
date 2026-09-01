@@ -1,53 +1,540 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Service — GetFood Platform</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — GetFood (FoodSphere)</title>
+  <meta name="description" content="Official Terms of Service for GetFood (FoodSphere) food aggregator platform. Read our operational guidelines, ordering terms, payment terms, and user agreements." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 800px; margin: 0 auto; padding: 32px 20px; background-color: #f9fafb; }
-    .card { background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    h1 { color: #e8364e; font-size: 28px; margin-bottom: 8px; }
-    h2 { color: #111827; font-size: 20px; margin-top: 24px; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
-    p, li { font-size: 15px; color: #4b5563; }
-    ul { padding-left: 20px; }
-    .footer { margin-top: 32px; font-size: 13px; color: #9ca3af; text-align: center; }
+    :root {
+      --primary: #E94124;
+      --primary-hover: #D02B41;
+      --bg-dark: #1F1A17;
+      --bg-card: #FFFFFF;
+      --bg-body: #F8FAFC;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --text-light: #64748B;
+      --border-color: #E2E8F0;
+      --callout-bg: #F0F9FF;
+      --callout-border: #0284C7;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: linear-gradient(135deg, #FFF8F6 0%, #FFFFFF 100%);
+      color: #1F1A17;
+      padding: 2.5rem 1.5rem 2rem 1.5rem;
+      border-bottom: 2px solid #FEE2E2;
+    }
+
+    .header-container {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #FFF1F2;
+      border: 1px solid #FECDD3;
+      color: #E94124;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: fit-content;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #1F1A17;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      color: #64748B;
+    }
+
+    .header-meta span strong {
+      color: #1F1A17;
+    }
+
+    .nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary);
+      background: rgba(232, 54, 78, 0.08);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 960px;
+      margin: 2rem auto 4rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .toc-sidebar {
+        display: none;
+      }
+    }
+
+    /* Sidebar TOC */
+    .toc-sidebar {
+      position: sticky;
+      top: 5rem;
+      height: fit-content;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .toc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .toc-list a {
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      transition: color 0.15s ease;
+      display: block;
+      padding: 0.2rem 0;
+    }
+
+    .toc-list a:hover {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* Content Area */
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 2.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+    }
+
+    section:last-child {
+      margin-bottom: 0;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--bg-dark);
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid #F1F5F9;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1.25rem 0 0.5rem 0;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    strong {
+      font-weight: 600;
+      color: var(--bg-dark);
+    }
+
+    /* Callout Box */
+    .callout {
+      background: var(--callout-bg);
+      border-left: 4px solid var(--callout-border);
+      padding: 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #0369A1;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: #0C4A6E;
+    }
+
+    /* Footer */
+    footer {
+      background: #F8FAFC;
+      color: #64748B;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Terms of Service for GetFood</h1>
-    <p><strong>Last Updated: July 2026</strong></p>
-    
-    <p>Welcome to <strong>GetFood</strong>. By downloading, accessing, or using our mobile application and food ordering services, you agree to be bound by these Terms of Service.</p>
 
-    <h2>1. Order Placement & Acceptance</h2>
-    <p>All orders placed via GetFood are subject to availability and acceptance by the respective partner restaurant branch. Once an order is confirmed by the restaurant, preparation begins immediately.</p>
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="brand-badge">
+        <span>📜 GetFood (FoodSphere) Aggregator</span>
+      </div>
+      <h1 class="header-title">Terms of Service</h1>
+      <div class="header-meta">
+        <span>Effective Date: <strong>July 26, 2026</strong></span>
+        <span>Version: <strong>1.0.0</strong></span>
+        <span>Binding Agreement: <strong>User Terms</strong></span>
+      </div>
+    </div>
+  </header>
 
-    <h2>2. Cash on Delivery (COD) & Payment Terms</h2>
-    <ul>
-      <li>Cash on Delivery (COD) is the primary payment method available at launch.</li>
-      <li>You agree to pay the exact total bill amount (including food items, tax, and delivery fee) in cash to the assigned rider upon arrival.</li>
-      <li>Refusal to pay for confirmed orders upon delivery may result in immediate suspension of your GetFood account.</li>
-    </ul>
+  <!-- Sticky Navbar -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <div class="nav-links">
+        <a href="privacy-policy.html" class="nav-link">Privacy Policy</a>
+        <a href="terms-of-service.html" class="nav-link active">Terms of Service</a>
+      </div>
+      <a href="/" class="nav-link" style="color: var(--primary); font-weight: 600;">← Return to GetFood Platform</a>
+    </div>
+  </nav>
 
-    <h2>3. Order Cancellations & Refunds</h2>
-    <p>Orders can only be cancelled while in the <em>Pending</em> status. Once a restaurant branch updates an order to <em>Preparing</em>, cancellations are no longer accepted. For issues regarding missing or incorrect items, please contact customer support immediately.</p>
+  <!-- Main Grid Layout -->
+  <main>
+    <!-- Table of Contents Sidebar -->
+    <aside class="toc-sidebar">
+      <div class="toc-title">Table of Contents</div>
+      <ul class="toc-list">
+        <li><a href="#acceptance">1. Acceptance of Terms</a></li>
+        <li><a href="#platform-architecture">2. Platform Architecture</a></li>
+        <li><a href="#accounts-guest">3. Accounts & Guest Checkout</a></li>
+        <li><a href="#pricing-availability">4. Pricing & Availability</a></li>
+        <li><a href="#delivery-radius">5. Delivery & Haversine Limits</a></li>
+        <li><a href="#payment-cod">6. Payment & COD Obligations</a></li>
+        <li><a href="#loyalty-program">7. Loyalty Rewards Program</a></li>
+        <li><a href="#cancellations">8. Cancellations & Hygiene</a></li>
+        <li><a href="#intellectual-property">9. IP & Conduct Rules</a></li>
+        <li><a href="#limitation-liability">10. Limitation of Liability</a></li>
+        <li><a href="#termination">11. Account Termination</a></li>
+        <li><a href="#governing-law">12. Governing Law</a></li>
+        <li><a href="#modifications">13. Modifications to Terms</a></li>
+        <li><a href="#contact">14. Legal Contact</a></li>
+      </ul>
+    </aside>
 
-    <h2>4. Loyalty Rewards & Promo Codes</h2>
-    <p>Loyalty points and coupon discounts are non-transferable and have no monetary cash value outside the GetFood app platform. We reserve the right to revoke fraudulent points or cancel orders utilizing expired or invalid promo codes.</p>
+    <!-- Main Content Area -->
+    <article class="content-card">
 
-    <h2>5. User Conduct</h2>
-    <p>Users must provide accurate delivery addresses and reachable contact numbers. Providing false information or misusing the platform may lead to permanent termination of access.</p>
+      <section id="acceptance">
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+          These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you", or "your") and <strong>GetFood Platform</strong> (operating on the <strong>FoodSphere</strong> multi-tenant architecture).
+        </p>
+        <p>
+          By downloading, installing, accessing, or using the GetFood mobile application or any of our affiliated brand web portals, you explicitly agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must immediately cease accessing or using our services.
+        </p>
+      </section>
 
-    <h2>6. Governing Law</h2>
-    <p>These terms are governed by and construed in accordance with the laws of Pakistan.</p>
+      <section id="platform-architecture">
+        <h2>2. Platform Architecture & Aggregator Model</h2>
+        <p>
+          GetFood functions as a multi-tenant food aggregator platform. We connect users with seven distinct restaurant brands operating within our ecosystem:
+        </p>
+        <ul>
+          <li><strong>Jushh PK:</strong> Fast food, gourmet burgers & combo meals.</li>
+          <li><strong>Tandoori Stop:</strong> Desi tandoori specialties, naan, and traditional grills.</li>
+          <li><strong>GetAFomo:</strong> Café items, specialty beverages & event experiences.</li>
+          <li><strong>Seen Banao:</strong> Desi BBQ & handi dishes.</li>
+          <li><strong>Dine At Blue:</strong> Seafood specialties.</li>
+          <li><strong>SandMelts:</strong> Sandwiches, melts & shakes.</li>
+          <li><strong>Birdman Foods:</strong> Grilled & fried chicken.</li>
+        </ul>
+        <p>
+          Each restaurant branch prepares items independently while relying on GetFood for order routing, customer support, and delivery dispatch.
+        </p>
+      </section>
 
-    <h2>7. Contact Support</h2>
-    <p>For questions or assistance regarding these Terms, contact us at <a href="mailto:support@getfood.pk">support@getfood.pk</a>.</p>
-  </div>
-  <div class="footer">
-    &copy; 2026 GetFood Platform. All rights reserved.
-  </div>
+      <section id="accounts-guest">
+        <h2>3. User Account Registration & Guest Checkout</h2>
+        <h3>3.1 Account Creation & Confidentiality</h3>
+        <p>
+          To access loyalty points, address saving, and order history tracking, you may register an account. You are responsible for maintaining the security of your account login credentials and for all activities occurring under your account.
+        </p>
+
+        <h3>3.2 Guest Checkout Protocol</h3>
+        <p>
+          GetFood permits guest checkout without prior registration. Guest orders are bound to a secure UUID tracking token. Guest users are bound by these Terms to the same legal extent as registered users.
+        </p>
+      </section>
+
+      <section id="pricing-availability">
+        <h2>4. Pricing, Item Availability & Operating Hours</h2>
+        <h3>4.1 Menu Prices & Verification</h3>
+        <p>
+          Prices listed on GetFood reflect the current menu prices established by each restaurant branch. All orders undergo server-side verification to validate prices, selected add-ons/modifiers, and promotional codes prior to order confirmation.
+        </p>
+
+        <h3>4.2 Out-of-Stock Items</h3>
+        <p>
+          Item availability is updated dynamically. If an item becomes unavailable at a specific branch, it will display an <strong>"OUT OF STOCK"</strong> indicator on the menu screen and cannot be added to cart.
+        </p>
+
+        <h3>4.3 Operating Hours Enforcement</h3>
+        <p>
+          Each branch operates within defined opening and closing hours. Cart additions and checkout are restricted when a branch status indicates <em>Closed</em>.
+        </p>
+      </section>
+
+      <section id="delivery-radius">
+        <h2>5. Delivery Rules & Distance Radius Restrictions</h2>
+        <p>
+          Delivery services are governed by strict geographic boundaries designed to preserve food quality and temperature:
+        </p>
+
+        <div class="callout">
+          <div class="callout-title">🛵 Haversine Distance & Delivery Radius Limits</div>
+          <p>
+            Each restaurant branch specifies a maximum delivery radius (e.g. 5.0 km). Order placement is validated using the mathematical Haversine distance algorithm based on your delivery coordinates. Orders exceeding the maximum branch radius will be blocked during checkout.
+          </p>
+        </div>
+
+        <p>
+          Users are solely responsible for providing an accurate street address and active telephone contact number. Delivery riders will make up to two attempts to contact you upon arrival. If a user is unreachable after 10 minutes, the order may be cancelled without refund eligibility.
+        </p>
+      </section>
+
+      <section id="payment-cod">
+        <h2>6. Payment Terms & Cash on Delivery (COD) Obligations</h2>
+        <h3>6.1 Cash on Delivery (COD)</h3>
+        <p>
+          Cash on Delivery is the primary payment method. By placing a COD order, you explicitly undertake to pay the exact total order amount in cash to the delivery rider upon arrival.
+        </p>
+
+        <h3>6.2 Online Digital Payments</h3>
+        <p>
+          Digital payments processed via Stripe or PayFast are charged immediately upon order confirmation. Online payments are handled strictly through certified PCI-DSS payment gateways.
+        </p>
+
+        <h3>6.3 Refusal of COD Delivery</h3>
+        <p>
+          Fraudulent placement of COD orders or willful refusal to accept and pay for confirmed COD deliveries may result in immediate suspension of your phone number and device ID from the GetFood platform.
+        </p>
+      </section>
+
+      <section id="loyalty-program">
+        <h2>7. Loyalty Points & Promotional Rewards</h2>
+        <p>Registered GetFood accounts participate in our Loyalty Rewards Program subject to the following rules:</p>
+        <ul>
+          <li><strong>Earning:</strong> Points accrue automatically on completed and paid orders at backend-configured earn rates.</li>
+          <li><strong>Redemption:</strong> Points may be redeemed at checkout for monetary discounts on eligible menu items.</li>
+          <li><strong>No Cash Value:</strong> Loyalty points carry zero monetary cash value outside the GetFood platform and cannot be withdrawn or exchanged for legal currency.</li>
+          <li><strong>Cancellation Reversal:</strong> If an order involving point redemption or point earning is cancelled, redeemed points are automatically refunded to your balance, and unearned points are deducted.</li>
+        </ul>
+      </section>
+
+      <section id="cancellations">
+        <h2>8. Cancellations, Hygiene & Food Quality Disclaimers</h2>
+        <h3>8.1 Order Cancellations</h3>
+        <p>
+          You may request order cancellation within 3 minutes of placement if the restaurant branch has not yet initiated food preparation. Once food preparation has commenced, orders cannot be cancelled.
+        </p>
+
+        <h3>8.2 Food Hygiene & Preparation Disclaimer</h3>
+        <p>
+          GetFood acts as an aggregator and logistics facilitator. Each independent restaurant branch is solely responsible for food preparation, hygiene standards, ingredient selection, and allergen compliance. If you have severe food allergies, you must specify them in order notes or contact the restaurant directly prior to ordering.
+        </p>
+      </section>
+
+      <section id="intellectual-property">
+        <h2>9. Intellectual Property & User Conduct Rules</h2>
+        <h3>9.1 Proprietary Rights</h3>
+        <p>
+          All logos, trademarks, mobile application code, website designs, graphic assets, and brand identities across GetFood, FoodSphere, and the 7 aggregated brands are the exclusive intellectual property of GetFood Aggregator Services.
+        </p>
+
+        <h3>9.2 Prohibited User Conduct</h3>
+        <p>Users agree NOT to:</p>
+        <ul>
+          <li>Attempt automated data scraping, reverse engineering, or decompiling of the app or backend APIs.</li>
+          <li>Inject negative prices or modify client-side payloads to manipulate order pricing.</li>
+          <li>Place fake or malicious orders designed to disrupt restaurant operations.</li>
+          <li>Bypass branch delivery radiuses using spoofed GPS coordinates.</li>
+        </ul>
+      </section>
+
+      <section id="limitation-liability">
+        <h2>10. Limitation of Liability</h2>
+        <p>
+          To the maximum extent permitted by applicable law, GetFood, its officers, directors, employees, and software engineers shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from:
+        </p>
+        <ul>
+          <li>Use or inability to use the platform or delivery service.</li>
+          <li>Delays in food preparation or delivery caused by traffic, weather, or force majeure events.</li>
+          <li>Inaccuracies in food item descriptions or ingredient representations provided by restaurant branches.</li>
+        </ul>
+      </section>
+
+      <section id="termination">
+        <h2>11. Account Suspension & Termination</h2>
+        <p>
+          We reserve the right to suspend or permanently terminate user accounts, ban device IDs, or block phone numbers without prior notice if we detect violations of these Terms, fraudulent activity, payment default, or abusive behavior toward delivery personnel.
+        </p>
+      </section>
+
+      <section id="governing-law">
+        <h2>12. Governing Law & Dispute Resolution</h2>
+        <p>
+          These Terms shall be governed by and construed in accordance with the laws of Pakistan. Any legal dispute, claim, or controversy arising out of or relating to these Terms or the platform shall be submitted to binding arbitration in Lahore, Pakistan, or resolved before courts of competent jurisdiction in Lahore.
+        </p>
+      </section>
+
+      <section id="modifications">
+        <h2>13. Modifications to Terms</h2>
+        <p>
+          We reserve the right to revise or update these Terms at any time. Updated versions will be posted publicly on this page with a revised "Effective Date". Continued use of the platform following the posting of modifications constitutes acceptance of the updated Terms.
+        </p>
+      </section>
+
+      <section id="contact">
+        <h2>14. Legal Contact Information</h2>
+        <p>
+          For formal legal notices, questions regarding these Terms, or service inquiries, please contact our Legal Department:
+        </p>
+        <div style="background: #F1F5F9; padding: 1.25rem; border-radius: 0.5rem; margin-top: 1rem;">
+          <p style="margin-bottom: 0.3rem;"><strong>GetFood Platform Legal Operations</strong></p>
+          <p style="margin-bottom: 0.3rem;">Email: <a href="mailto:legal@getfood.pk" style="color: var(--primary);">legal@getfood.pk</a></p>
+          <p style="margin-bottom: 0.3rem;">Support Desk: <a href="mailto:support@getfood.pk" style="color: var(--primary);">support@getfood.pk</a></p>
+          <p style="margin-bottom: 0;">Address: FoodSphere Aggregator Services, Lahore, Pakistan</p>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 960px; margin: 0 auto;">
+      <p>© 2026 GetFood (FoodSphere Platform). All rights reserved.</p>
+      <p style="margin-top: 0.5rem; color: #64748B;">
+        Operating 7 Brands: Jushh PK · Tandoori Stop · GetAFomo · Seen Banao · Dine At Blue · SandMelts · Birdman Foods
+      </p>
+    </div>
+  </footer>
+
 </body>
 </html>

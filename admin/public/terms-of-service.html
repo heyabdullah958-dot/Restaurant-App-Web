@@ -10,14 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #E8364E;
+      --primary: #E94124;
       --primary-hover: #D02B41;
-      --bg-dark: #0F0F1A;
+      --bg-dark: #1F1A17;
       --bg-card: #FFFFFF;
       --bg-body: #F8FAFC;
       --text-main: #1E293B;
       --text-muted: #64748B;
-      --text-light: #94A3B8;
+      --text-light: #64748B;
       --border-color: #E2E8F0;
       --callout-bg: #F0F9FF;
       --callout-border: #0284C7;
@@ -43,10 +43,10 @@
 
     /* Header & Navigation */
     header {
-      background: var(--bg-dark);
-      color: #FFFFFF;
+      background: linear-gradient(135deg, #FFF8F6 0%, #FFFFFF 100%);
+      color: #1F1A17;
       padding: 2.5rem 1.5rem 2rem 1.5rem;
-      border-bottom: 3px solid var(--primary);
+      border-bottom: 2px solid #FEE2E2;
     }
 
     .header-container {
@@ -61,13 +61,13 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(232, 54, 78, 0.15);
-      border: 1px solid rgba(232, 54, 78, 0.4);
-      color: #FF6B7D;
+      background: #FFF1F2;
+      border: 1px solid #FECDD3;
+      color: #E94124;
       padding: 0.35rem 0.85rem;
       border-radius: 9999px;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       width: fit-content;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -77,7 +77,7 @@
       font-size: 2.25rem;
       font-weight: 800;
       letter-spacing: -0.025em;
-      color: #FFFFFF;
+      color: #1F1A17;
     }
 
     .header-meta {
@@ -85,11 +85,11 @@
       flex-wrap: wrap;
       gap: 1.5rem;
       font-size: 0.9rem;
-      color: var(--text-light);
+      color: #64748B;
     }
 
     .header-meta span strong {
-      color: #FFFFFF;
+      color: #1F1A17;
     }
 
     .nav-bar {
@@ -272,16 +272,16 @@
 
     /* Footer */
     footer {
-      background: var(--bg-dark);
-      color: var(--text-light);
+      background: #F8FAFC;
+      color: #64748B;
       padding: 2.5rem 1.5rem;
       text-align: center;
       font-size: 0.875rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid #E2E8F0;
     }
 
     footer a {
-      color: #FFFFFF;
+      color: var(--primary);
       text-decoration: underline;
     }
   </style>

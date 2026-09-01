@@ -375,6 +375,34 @@
   - Executed `python test_dual_app_e2e.py` -> Verified Step 5 (Multi-Account Order History Isolation): Customer A sees their 6 orders, freshly registered Customer B sees 0 orders.
 - **Confidence**: 100% — verified via zero-error TypeScript typechecking and end-to-end multi-account integration tests.
 
+---
+
+## Phase 7 — Legal Screens (Privacy Policy & Terms of Service) Theme & UI Standardization — 2026-09-01
+- **What changed and why**:
+  1. **100% Native Customer App Legal UI (`app/src/screens/LegalScreen.tsx`)**:
+     - Refactored `LegalScreen.tsx` from an external WebView wrapper into a first-class native React Native component using Customer App warm light tokens (`#F8FAFC`, `#FFFFFF`, `#FFF1F2`, `#E94124`, `#1F1A17`).
+     - Added an interactive segmented tab control (`[ 🛡️ Privacy Policy | 📜 Terms of Service ]`) allowing instant, offline-capable switching without webview reload flickers.
+     - Built a warm hero card with platform badge (`🛡️ GETFOOD PLATFORM IDENTITY` / `📦 GETFOOD LEGAL TERMS`), dynamic title, and metadata badges (Effective Date, Version 1.0.0, Scope: Mobile App & Web).
+     - Standardized clause cards with clean rounded white containers, section number badges, bullet lists, and warm callout alert boxes (e.g. Haversine distance and Account Deletion).
+     - Integrated a clean light footer (`© 2026 GetFood (FoodSphere Multi-Tenant Platform)`) eliminating all dark slate (`#0F172A`) artifacts.
+  2. **Web & Hosted Legal HTML Theme Standardization**:
+     - Updated `admin/public/privacy-policy.html`, `admin/public/terms-of-service.html`, `websites/legal/privacy-policy.html`, and `websites/legal/terms-of-service.html` to align with the warm light design (`#FFF8F6` gradient header, `#1F1A17` typography, `#F8FAFC` footer).
+- **Files modified**:
+  - `app/src/screens/LegalScreen.tsx`
+  - `admin/public/privacy-policy.html`
+  - `admin/public/terms-of-service.html`
+  - `websites/legal/privacy-policy.html`
+  - `websites/legal/terms-of-service.html`
+- **Approaches considered**:
+  - Option A: Only edit the HTML CSS inside `admin/public/` (Rejected - still incurs webview loading latency and spinner flickers inside mobile app).
+  - Option B: Native React Native legal screen with instant offline tab switching + synchronized HTML files (Chosen).
+- **How it was verified**:
+  - `npx tsc --noEmit` in `app/` (0 compilation errors).
+  - Production Android Hermes export: `npx expo export --platform android` -> 1425 modules, 4.5MB `.hbc` bundle compiled with zero errors.
+  - `npm run build` in `admin/` -> 1758 modules built in 2.2s with zero errors.
+- **Confidence**: 100% — verified via TypeScript compilation and production Android bytecode bundling.
+
+
 
 
 
