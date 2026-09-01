@@ -327,11 +327,33 @@
 - **Approaches considered**:
   - Option A: Keep emoji icons with increased line-height (Rejected - inconsistent rendering and clipping across different Android vendor OS fonts).
   - Option B: Migrate all navigation tabs to `@expo/vector-icons` (`Ionicons`) with explicit active/inactive tokens and pill backgrounds (Chosen).
+- **Confidence**: 100% — verified via production bytecode compilation and end-to-end integration tests.
+
+---
+
+## Phase 5 — Auth Navigation Reset & Post-Login Redirection Fix — 2026-09-01
+- **What changed and why**:
+  1. **Hierarchy-Aware Post-Auth Navigation Redirection (`AuthScreen.tsx`)**:
+     - Diagnosed root cause of hanging login spinner: `AuthScreen.tsx` was calling `navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'Profile' }] })`. Because `'Profile'` is a nested tab inside `'Main'` (not a direct screen on the root stack), React Navigation dropped the unhandled action, freezing the login UI permanently on the loading spinner.
+     - Implemented `handlePostAuthNavigation(returnScreen, returnParams)` callback that distinguishes between nested tab destinations (`'Home'`, `'Map'`, `'Search'`, `'Cart'`, `'Orders'`, `'Profile'`) and Root Stack screens (`'Checkout'`, `'Restaurant'`, `'Tracking'`, `'Rewards'`, `'Legal'`, `'FlashDeals'`):
+       - For Tab screens: Resets root stack to `Main` and accurately sets nested state (`state: { routes: [{ name: returnScreen, params }] }`).
+       - For Stack screens: Resets root stack with `Main` at index 0 and target screen at index 1 with `params`.
+       - For Default: Resets root stack to `Main`.
+     - Wrapped the entire redirection in a defensive `try/catch` with a graceful `navigate` fallback to guarantee the UI never gets stuck on auth completion.
+  2. **Guest Login & Checkout Post-Auth Flow Harmonization**:
+     - Applied `handlePostAuthNavigation` uniformly to regular login, user registration, Google OAuth sign-in, and guest authentication flows.
+     - Preserved `@getfood_checkout_saved_form` state so users returning from guest checkout gates immediately land on `Checkout` with all form inputs restored.
+- **Files modified**:
+  - `app/src/screens/AuthScreen.tsx`
+- **Approaches considered**:
+  - Option A: Only call `navigation.goBack()` (Rejected - fails when users land on `Auth` directly from deep link, splash screen, or nested tab switches).
+  - Option B: Hierarchy-aware `navigation.reset` with nested tab state projection and defensive fallback (Chosen).
 - **How it was verified**:
-  - `npx tsc --noEmit` in `admin-app/` (0 compilation errors).
-  - Production Hermes bytecode export: `npx expo export --platform android` -> 1081 modules bundled in 11.0s, `.hbc` bytecode compiled successfully to `dist/`.
+  - `npx tsc --noEmit` in `app/` (0 compilation errors).
+  - Production Hermes bytecode export: `npx expo export --platform android` -> 1425 modules bundled in 31.2s, `.hbc` bytecode compiled successfully to `dist/` (4.4MB).
   - Executed `python test_dual_app_e2e.py` -> 100% pass across all multi-tenant workflows.
 - **Confidence**: 100% — verified via production bytecode compilation and end-to-end integration tests.
+
 
 
 

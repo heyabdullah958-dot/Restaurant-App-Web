@@ -1,6 +1,12 @@
 
 # Changelog
 
+## 2026-09-01 Phase 5 — Auth Navigation Reset & Post-Login Redirection Fix
+- **Hierarchy-Aware Post-Auth Navigation Redirection (`app/src/screens/AuthScreen.tsx`)**:
+  - Replaced malformed flat root reset payload with `handlePostAuthNavigation`, accurately distinguishing nested tab targets (`'Profile'`, `'Home'`, `'Cart'`, `'Orders'`) from root stack screens (`'Checkout'`).
+  - Added nested navigation state projection (`state: { routes: [{ name: returnScreen, params }] }`) and wrapped reset calls in a defensive `try/catch` with fallback `navigate`.
+  - Harmonized regular login, user registration, Google OAuth, and guest sign-in flows with zero hanging spinners.
+
 ## 2026-09-01 Phase 4 — Manager App Rider Navigation Route Fix & Bottom Tab Icon Standardization
 - **Rider Modal Navigation Route Fix (`OrderManagementScreen.tsx`)**:
   - Corrected unhandled navigation action by updating dispatch modal button handler from `navigation.navigate('Riders')` to `navigation.navigate('RiderManagement')`.

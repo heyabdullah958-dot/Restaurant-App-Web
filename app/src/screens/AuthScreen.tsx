@@ -194,6 +194,56 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
     }
   };
 
+  const handlePostAuthNavigation = React.useCallback(
+    (returnScreen?: string, returnParams?: any) => {
+      const MAIN_TAB_SCREENS = ['Home', 'Map', 'Search', 'Cart', 'Orders', 'Profile'];
+      const params = returnParams || {};
+
+      try {
+        if (!returnScreen) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          });
+          return;
+        }
+
+        if (MAIN_TAB_SCREENS.includes(returnScreen)) {
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Main',
+                state: {
+                  routes: [{ name: returnScreen, params }],
+                  index: 0,
+                },
+              },
+            ],
+          });
+        } else {
+          navigation.reset({
+            index: 1,
+            routes: [
+              { name: 'Main' },
+              { name: returnScreen as any, params },
+            ],
+          });
+        }
+      } catch (err) {
+        console.warn('[AuthScreen] Navigation reset fallback:', err);
+        if (returnScreen && MAIN_TAB_SCREENS.includes(returnScreen)) {
+          (navigation as any).navigate('Main', { screen: returnScreen, params });
+        } else if (returnScreen) {
+          (navigation as any).navigate(returnScreen, params);
+        } else {
+          (navigation as any).navigate('Main');
+        }
+      }
+    },
+    [navigation]
+  );
+
   useEffect(() => {
     // If authenticated, perform atomic navigation reset to Main App Flow or target returnScreen
     if (isAuthenticated) {
@@ -201,23 +251,10 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
         dispatch(fetchMyOrders());
       }
       const returnScreen = route?.params?.returnScreen;
-      const returnParams = route?.params?.returnParams || {};
-      if (returnScreen) {
-        navigation.reset({
-          index: 1,
-          routes: [
-            { name: 'Main' },
-            { name: returnScreen as any, params: returnParams },
-          ],
-        });
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
-      }
+      const returnParams = route?.params?.returnParams;
+      handlePostAuthNavigation(returnScreen, returnParams);
     }
-  }, [isAuthenticated, user, navigation, dispatch, route]);
+  }, [isAuthenticated, user, dispatch, route, handlePostAuthNavigation]);
 
   useEffect(() => {
     // Clear any stale Redux errors from background operations (loadSavedToken)
@@ -306,21 +343,8 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
     const result = await dispatch(guestLogin());
     if (guestLogin.fulfilled.match(result)) {
       const returnScreen = route?.params?.returnScreen;
-      const returnParams = route?.params?.returnParams || {};
-      if (returnScreen) {
-        navigation.reset({
-          index: 1,
-          routes: [
-            { name: 'Main' },
-            { name: returnScreen as any, params: returnParams },
-          ],
-        });
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
-      }
+      const returnParams = route?.params?.returnParams;
+      handlePostAuthNavigation(returnScreen, returnParams);
     }
   };
 
