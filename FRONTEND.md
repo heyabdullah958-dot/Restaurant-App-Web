@@ -187,3 +187,40 @@
   - `GEMINI.md`
 - **How it was verified**: Executed `npx tsc --noEmit` across `admin-app`, `admin`, and `app` (0 TypeScript compilation errors) and verified build output.
 - **Confidence**: 100% — verified via strict TypeScript compilation and production bundle build.
+
+---
+
+## Phase 1 — GetFood Visual Identity Integration & Design Tokens Extraction — 2026-09-01
+- **What changed and why**:
+  1. Extracted complete visual design tokens from `GetFood.pdf`:
+     - Primary Brand Color: `#E94124` (Vibrant GetFood Red-Orange)
+     - Secondary Accent: `#FF5738`
+     - Background / Light Surface: `#FCF3E4` (Warm Cream / Ivory)
+     - Typography: Poppins (Poppins-Regular, Poppins-SemiBold, Poppins-Bold, Poppins-Light)
+     - Corner Radius / Geometry: Squircles and rounded radii (`RADIUS.sm: 8`, `RADIUS.md: 12`, `RADIUS.lg: 16`, `RADIUS.xl: 24`, `RADIUS.round: 999`)
+  2. Generated high-resolution, vector-crisp transparent and solid branding assets from PDF using PyMuPDF:
+     - `app/src/assets/images/getfood_logo.png` (Horizontal transparent lockup)
+     - `app/src/assets/images/getfood_logo_white.png` (White horizontal logo)
+     - `app/src/assets/images/getfood_icon.png` (Squircle running chicken app badge)
+     - `app/assets/icon.png` (1024x1024 master app icon)
+     - `app/assets/splash.png` (2048x2048 high-res splash on `#FCF3E4`)
+     - `app/assets/splash-icon.png` & `favicon.png`
+     - Synchronized assets across `app/`, `admin-app/`, and `admin/public/`.
+  3. Replaced generic placeholder icons and old gradient palettes in `SplashScreen.tsx` and `AuthScreen.tsx` with official GetFood branding marks.
+  4. Updated `app/src/theme.ts` `COLORS` to the source-of-truth GetFood brand identity tokens.
+  5. Updated `app/app.json` `adaptiveIcon.backgroundColor` to `#E94124`.
+  6. Updated `app/src/services/fallbackData.ts` to reflect the 3 operational Tandoori Stop branches (Lake City, Mozang Chungi, Baghbanpura).
+- **Files modified**:
+  - `app/src/theme.ts`
+  - `app/app.json`
+  - `app/src/screens/SplashScreen.tsx`
+  - `app/src/screens/AuthScreen.tsx`
+  - `app/src/services/fallbackData.ts`
+  - `app/assets/icon.png`, `app/assets/splash.png`, `app/assets/splash-icon.png`, `app/assets/favicon.png`
+  - `app/src/assets/images/getfood_logo.png`, `app/src/assets/images/getfood_logo_white.png`, `app/src/assets/images/getfood_icon.png`
+  - `admin/public/getfood_logo.png`, `admin/public/getfood_logo_white.png`, `admin/public/getfood_icon.png`, `admin/public/favicon.png`
+- **Approaches considered**:
+  - Option A: Overwrite role-scoped admin theme palettes with customer palette (Rejected - internal dark slate `#0F172A` and manager warm `#FFF7ED` are purpose-built for role ergonomics).
+  - Option B: Maintain customer app as the primary brand surface with `#E94124` + `#FCF3E4`, and propagate GetFood logo marks and accent tokens to Admin HQ & Brand websites header platforms (Chosen).
+- **How it was verified**: Executed `npx tsc --noEmit` on `app/` (0 errors), `npx tsc --noEmit` on `admin-app/` (0 errors), `npm run build` on `admin/` (production bundle built in 9.9s with 0 errors).
+- **Confidence**: 100% — verified via asset generation and full multi-app TypeScript compilation.

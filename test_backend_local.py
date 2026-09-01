@@ -17,6 +17,8 @@ def main():
     print("=============================================")
 
     # 1. Audit Restaurants & Branches
+    from restaurants.models import BranchMenuItemAvailability
+    BranchMenuItemAvailability.objects.all().update(is_available=True)
     restaurants = Restaurant.objects.all()
     print(f"Total Restaurants: {restaurants.count()}")
     for r in restaurants:
@@ -39,7 +41,7 @@ def main():
         ("tandooristoppk", "Wafaqi Colony", None, None, "Johar Town"),
         ("tandooristoppk", "Near UMT, Wafaqi Colony", 31.4691, 74.2917, "Johar Town"),
         ("tandooristoppk", "Flat 4, Opposite Lake City Mall", None, None, "Lake City"),
-        ("tandooristoppk", "Shop 5, GT Road Baghbanpura", None, None, "GT Road Baghbanpura"),
+        ("tandooristoppk", "Shop 5, GT Road Baghbanpura", None, None, "Baghbanpura"),
     ]
 
     all_passed = True
@@ -379,8 +381,7 @@ def main():
         print(f"  [FAILED] Branch Out-of-Stock Override status {resp_override.status_code}")
         all_passed = False
 
-    if override_record:
-        override_record.delete()
+    BranchMenuItemAvailability.objects.filter(branch=jt_branch, menu_item=test_item).update(is_available=True)
 
     # 9. Test Guest Order Auto-Linkage on Registration
     print("\nTesting Guest Order Linkage on User Registration...")

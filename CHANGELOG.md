@@ -1,7 +1,30 @@
 
 # Changelog
 
-## 2026-08-27 Phase 1 — Universal Branch Item Availability Enforcement, Guest Notification Guard & UI Polish
+## 2026-09-01 Phase 1 — GetFood Visual Identity Integration & Tandoori Stop Branch Seeding
+- **Design Token Extraction & Brand Re-theme (`GetFood.pdf` -> Customer App & Platform)**:
+  - **Source of Truth Tokens (`app/src/theme.ts`)**: Extracted primary brand color `#E94124`, secondary accent `#FF5738`, warm cream surface `#FCF3E4`, dark charcoal `#1F1A17`, and Poppins typography directly from vector analysis of `GetFood.pdf`.
+  - **Asset Synchronization (`app/`, `admin-app/`, `admin/public/`)**: Extracted high-resolution PNGs and SVGs including squircle running chicken app icons (1024x1024), horizontal transparent logos, white logo lockups, splash screen (2048x2048), and favicons.
+  - **Screen Brand Updates**: Updated `SplashScreen.tsx` and `AuthScreen.tsx` with official GetFood branding marks and warm cream backgrounds, replacing legacy generic icon circles and multi-color gradients.
+  - **App Config (`app/app.json`)**: Synchronized Android adaptive icon background color to `#E94124`.
+- **Tandoori Stop Operational Branch Seeding & Scoped Order ID Mapping**:
+  - **Django Data Migration (`0015_seed_tandoori_stop_branches.py`)**: Seeded 3 physical branches for Tandoori Stop with verified coordinates:
+    - `Lake City`: Sector M7 Lake City, Lahore (lat `31.3521664`, lng `74.2529319`)
+    - `Mozang Chungi`: 16-B Temple Road, Shoukat Plaza, Mozang Chungi, Lahore (lat `31.5577696`, lng `74.3173073`)
+    - `Baghbanpura`: Ghass Mandi Stop, Baghbanpura, Lahore, 54000 (lat `31.5808224`, lng `74.3732920`)
+  - **Deterministic Availability Defaults**: Automatically initialized `BranchMenuItemAvailability` records for all Tandoori Stop menu items across the seeded branches with `is_available=True`.
+  - **Order ID Branch Code Mapping (`backend/orders/models.py`)**: Added `mozang chungi` (`MC`), `baghbanpura` (`BP`), and `lake city` (`LC`) mappings in `Order.generate_display_order_id()` (producing `TS-LC-1001`, `TS-MC-1001`, `TS-BP-1001`).
+  - **Management Command Sync (`backend/restaurants/management/commands/seed_branches.py`)**: Updated `seed_branches` with verified coordinates, addresses, and comprehensive Lahore area keyword dictionaries.
+  - **Fallback Catalog Data (`app/src/services/fallbackData.ts`)**: Synchronized fallback branches array for Tandoori Stop.
+- **Verification Evidence**:
+  - `python manage.py migrate restaurants` applied migration 0015 successfully.
+  - `npx tsc --noEmit` in `app/` (0 errors).
+  - `npx tsc --noEmit` in `admin-app/` (0 errors).
+  - `npm run build` in `admin/` (production bundle built in 9.9s with 0 errors).
+  - `test_backend_local.py` passed 100%.
+  - `test_dual_app_e2e.py` passed 100%.
+  - `test_flash_deals_api_suite.py` & `test_promo_e2e_integration.py` passed 100%.
+
 - **Universal Multi-Tenant Branch Item Availability Sync & Checkout Gate**:
   - **Backend Serialization & Lookup (`backend/restaurants/serializers.py`)**: `MenuItemSerializer.get_is_available` enhanced to support branch slug, branch name, and integer branch ID query lookups against `BranchMenuItemAvailability`.
   - **Backend Atomic Checkout Enforcement (`backend/orders/serializers.py`)**: `OrderCreateSerializer.validate()` and `create()` both enforce strict real-time branch item availability, rejecting checkout with an explicit `out of stock at {branch.name}` error if an item is toggled off for that branch.

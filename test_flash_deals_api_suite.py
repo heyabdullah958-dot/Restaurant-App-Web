@@ -44,8 +44,8 @@ class TestFlashDealsApiSuite(unittest.TestCase):
             discount_value=Decimal('25.00'),
             restaurant=self.restaurant,
             timing_type='ONE_TIME',
-            start_time=datetime(2026, 8, 1, 0, 0, tzinfo=self.tz),
-            end_time=datetime(2026, 8, 30, 0, 0, tzinfo=self.tz),
+            start_time=datetime.now(tz=self.tz) - timedelta(days=1),
+            end_time=datetime.now(tz=self.tz) + timedelta(days=30),
             max_orders=10,
             priority=5
         )
@@ -68,8 +68,8 @@ class TestFlashDealsApiSuite(unittest.TestCase):
             restaurant=self.restaurant,
             item_scope_type='SPECIFIC_ITEMS',
             timing_type='ONE_TIME',
-            start_time=datetime(2026, 8, 1, 0, 0, tzinfo=self.tz),
-            end_time=datetime(2026, 8, 30, 0, 0, tzinfo=self.tz),
+            start_time=datetime.now(tz=self.tz) - timedelta(days=1),
+            end_time=datetime.now(tz=self.tz) + timedelta(days=30),
             priority=10
         )
         deal.menu_items.add(self.item)

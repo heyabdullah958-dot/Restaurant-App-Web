@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, Animated, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Animated, Dimensions, Image } from 'react-native';
 import { useSelector } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, SPACING } from '../theme';
+import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../theme';
 import { RootState } from '../store';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -13,7 +11,7 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
   
   // Animation values
-  const logoScale = useRef(new Animated.Value(0.5)).current;
+  const logoScale = useRef(new Animated.Value(0.8)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
   const subtextOpacity = useRef(new Animated.Value(0)).current;
@@ -24,24 +22,24 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
-          tension: 10,
-          friction: 4,
+          tension: 14,
+          friction: 5,
           useNativeDriver: true,
         }),
         Animated.timing(logoOpacity, {
           toValue: 1,
-          duration: 800,
+          duration: 700,
           useNativeDriver: true,
         }),
       ]),
       Animated.timing(textOpacity, {
         toValue: 1,
-        duration: 500,
+        duration: 400,
         useNativeDriver: true,
       }),
       Animated.timing(subtextOpacity, {
         toValue: 1,
-        duration: 500,
+        duration: 400,
         useNativeDriver: true,
       }),
     ]).start();
@@ -55,21 +53,16 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
         // Otherwise, show the onboarding screen
         navigation.replace('Onboarding');
       }
-    }, 1800);
+    }, 1900);
 
     return () => clearTimeout(timer);
   }, [isAuthenticated, navigation]);
 
   return (
-    <LinearGradient
-      colors={['#FF5722', '#FF9800', '#E91E63']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
-    >
-      <StatusBar style="light" />
+    <View style={styles.container}>
+      <StatusBar style="dark" />
       <View style={styles.contentContainer}>
-        {/* Animated Brand Logo Icon */}
+        {/* Animated Brand Logo Icon from PDF */}
         <Animated.View
           style={[
             styles.logoContainer,
@@ -79,42 +72,38 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
             },
           ]}
         >
-          <View style={styles.iconCircle}>
-            <Ionicons name="restaurant" size={54} color={COLORS.primary} />
-          </View>
-        </Animated.View>
-
-        {/* Animated Brand Name */}
-        <Animated.View style={{ opacity: textOpacity }}>
-          <Text style={styles.brandName}>
-            Get<Text style={styles.brandHighlight}>Food</Text>
-          </Text>
+          <Image
+            source={require('../assets/images/getfood_logo.png')}
+            style={styles.brandLogoImage}
+            resizeMode="contain"
+          />
         </Animated.View>
 
         {/* Animated Subtitle */}
-        <Animated.View style={{ opacity: subtextOpacity }}>
-          <Text style={styles.tagline}>One App · Seven Unique Dining Experiences</Text>
+        <Animated.View style={{ opacity: subtextOpacity, marginTop: SPACING.md }}>
+          <Text style={styles.tagline}>Fast Food & Dining, Delivered</Text>
         </Animated.View>
 
         {/* Food Popups */}
         <View style={styles.foodPopups}>
-          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🥤</Animated.Text>
-          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🍔</Animated.Text>
-          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity, transform: [{ translateY: subtextOpacity.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>🍟</Animated.Text>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity }]}>🍗</Animated.Text>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity }]}>🍔</Animated.Text>
+          <Animated.Text style={[styles.foodEmoji, { opacity: subtextOpacity }]}>☕</Animated.Text>
         </View>
       </View>
 
-      {/* Loading Indicator or Footer */}
+      {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Premium Restaurant Aggregator</Text>
+        <Text style={styles.footerText}>GetFood Multi-Brand Dining</Text>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.cream,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -124,39 +113,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
   },
   logoContainer: {
-    marginBottom: SPACING.md,
-  },
-  iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
   },
-  brandName: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: COLORS.white,
-    letterSpacing: 1.2,
-    textShadowColor: 'rgba(0, 0, 0, 0.15)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  brandHighlight: {
-    color: COLORS.dark,
+  brandLogoImage: {
+    width: Math.min(width * 0.78, 320),
+    height: 90,
   },
   tagline: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: SPACING.sm,
-    fontWeight: '500',
+    fontSize: 15,
+    color: COLORS.neutral600,
+    fontWeight: '600',
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
   footer: {
     position: 'absolute',
@@ -165,17 +134,17 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: 1.5,
+    color: COLORS.neutral500,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   foodPopups: {
     flexDirection: 'row',
-    marginTop: SPACING.xl,
+    marginTop: SPACING.lg,
     gap: SPACING.md,
   },
   foodEmoji: {
-    fontSize: 32,
+    fontSize: 26,
   },
 });

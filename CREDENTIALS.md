@@ -54,9 +54,10 @@ These accounts grant branch-specific order management and order status tracking 
 ### 🍗 Tandoori Stop Branches
 | Branch Name | Location / Address | Username | Default Password | Contact Phone |
 |---|---|---|---|---|
-| **Johar Town** | PIA Road, Hakim Chowk, Johar Town | `manager_tandooristoppk_johar_town` | `admin123` | `0327-4945947` |
-| **Lake City** | Opposite Lake City Mall, Raiwind Road | `manager_tandooristoppk_lake_city` | `admin123` | `0324-4441735` |
-| **Baghbanpura** | GT Road, Baghbanpura, Lahore | `manager_tandooristoppk_gt_road_baghbanpura` | `admin123` | `0326-6811177` |
+| **Lake City** | Sector M7 Lake City, Lahore | `manager_tandooristoppk_lake_city` | `admin123` / `Branch@Tandoo2025!` | `0324-4441735` |
+| **Mozang Chungi** | 16-B Temple Road, Shoukat Plaza, Mozang Chungi | `manager_tandooristoppk_mozang_chungi` | `admin123` / `Branch@Tandoo2025!` | `0327-4945947` |
+| **Baghbanpura** | Ghass Mandi Stop, Baghbanpura, Lahore | `manager_tandooristoppk_baghbanpura` | `admin123` / `Branch@Tandoo2025!` | `0326-6811177` |
+| **Johar Town** | PIA Road, Hakim Chowk, Johar Town | `manager_tandooristoppk_johar_town` | `admin123` / `Branch@Tandoo2025!` | `0327-4945947` |
 
 ---
 

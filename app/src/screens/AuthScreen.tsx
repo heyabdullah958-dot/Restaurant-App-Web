@@ -349,15 +349,21 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
         {/* Brand Header */}
         <View style={styles.headerContainer}>
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.85}
             onPress={handleLogoPress}
             style={styles.logoBadge}
           >
-            <Ionicons name="restaurant" size={32} color={COLORS.white} />
+            <Image
+              source={require('../assets/images/getfood_icon.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
-          <Text style={styles.titleText}>
-            Get<Text style={{ color: COLORS.primary }}>Food</Text>
-          </Text>
+          <Image
+            source={require('../assets/images/getfood_logo.png')}
+            style={styles.logoWordmarkImage}
+            resizeMode="contain"
+          />
           <Text style={styles.subtitleText}>Sign in to access 3 premium dining spots</Text>
         </View>
 
@@ -868,18 +874,27 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   logoBadge: {
-    backgroundColor: COLORS.primary,
-    width: 60,
-    height: 60,
+    width: 64,
+    height: 64,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.sm,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 5,
+  },
+  logoImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+  },
+  logoWordmarkImage: {
+    width: 170,
+    height: 48,
+    marginTop: 2,
   },
   titleText: {
     ...FONTS.title,

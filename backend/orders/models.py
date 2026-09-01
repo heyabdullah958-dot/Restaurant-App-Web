@@ -106,6 +106,9 @@ class Order(models.Model):
             'lake city': 'LC',
             'dha phase 1': 'DHA1',
             'gt road baghbanpura': 'GTR',
+            'baghbanpura': 'BP',
+            'mozang chungi': 'MC',
+            'mozang': 'MC',
             'gulberg iii': 'G3',
         }
 

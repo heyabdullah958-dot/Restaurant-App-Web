@@ -259,9 +259,9 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     rating: 4.5,
     total_reviews: 154,
     branches: [
-      { id: 1, name: "Johar Town Branch", address: "PIA Road, Hakim Chowk, Johar Town, Lahore", phone: "0327-4945947", is_active: true },
-      { id: 2, name: "Lake City Branch", address: "Opposite Lake City Mall, Raiwind Road, Lahore", phone: "0324-4441735", is_active: true },
-      { id: 3, name: "GT Road Baghbanpura Branch", address: "GT Road, Baghbanpura, Lahore", phone: "0326-6811177", is_active: true }
+      { id: 2, name: "Lake City", address: "Sector M7 Lake City, Lahore", phone: "0324-4441735", is_active: true },
+      { id: 48, name: "Mozang Chungi", address: "16-B Temple Road, Shoukat Plaza, Mozang Chungi, Lahore", phone: "0327-4945947", is_active: true },
+      { id: 3, name: "Baghbanpura", address: "Ghass Mandi Stop, Baghbanpura, Lahore, 54000", phone: "0326-6811177", is_active: true }
     ],
     categories: [
 

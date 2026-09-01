@@ -53,24 +53,37 @@ class Command(BaseCommand):
             "sarwar road", "mall road"
         ]
 
+        MOZANG_KEYWORDS = [
+            "mozang", "mozang chungi", "temple road", "shoukat plaza", "safanwala chowk",
+            "shadman", "jail road", "queen road", "mall road", "anarkali", "lahore hotel",
+            "chauburji", "civil lines", "nabha road", "fane road", "fatima jinnah medical university",
+            "ganga ram", "litton road", "mazang", "mozing"
+        ]
+
         seed_data = {
             'tandooristoppk': [
                 {
-                    'name': "Johar Town",
-                    'address': "PIA Road, Hakim Chowk, Johar Town, Lahore",
-                    'phone': "0327-4945947",
-                    'area_keywords': JOHAR_TOWN_KEYWORDS
-                },
-                {
                     'name': "Lake City",
-                    'address': "Opposite Lake City Mall, Raiwind Road, Lahore",
+                    'address': "Sector M7 Lake City, Lahore",
                     'phone': "0324-4441735",
+                    'latitude': 31.3521664,
+                    'longitude': 74.2529319,
                     'area_keywords': LAKE_CITY_KEYWORDS
                 },
                 {
-                    'name': "GT Road Baghbanpura",
-                    'address': "GT Road, Baghbanpura, Lahore",
+                    'name': "Mozang Chungi",
+                    'address': "16-B Temple Road, Shoukat Plaza, Mozang Chungi, Lahore",
+                    'phone': "0327-4945947",
+                    'latitude': 31.5577696,
+                    'longitude': 74.3173073,
+                    'area_keywords': MOZANG_KEYWORDS
+                },
+                {
+                    'name': "Baghbanpura",
+                    'address': "Ghass Mandi Stop, Baghbanpura, Lahore, 54000",
                     'phone': "0326-6811177",
+                    'latitude': 31.5808224,
+                    'longitude': 74.3732920,
                     'area_keywords': BAGHBANPURA_KEYWORDS
                 }
             ],
@@ -111,11 +124,6 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"Restaurant with slug '{slug}' does not exist. Skipping."))
                 continue
 
-            valid_names = [b['name'] for b in branches]
-            
-            # Completely delete old / draft branches not in the real list
-            Branch.objects.filter(restaurant=restaurant).exclude(name__in=valid_names).delete()
-
             for branch_data in branches:
                 branch, created = Branch.objects.get_or_create(
                     restaurant=restaurant,
@@ -123,19 +131,35 @@ class Command(BaseCommand):
                     defaults={
                         'address': branch_data['address'],
                         'phone': branch_data['phone'],
+                        'latitude': branch_data.get('latitude'),
+                        'longitude': branch_data.get('longitude'),
                         'area_keywords': branch_data['area_keywords'],
                         'is_active': True
                     }
                 )
 
+                branch.address = branch_data['address']
+                branch.phone = branch_data['phone']
+                if 'latitude' in branch_data:
+                    branch.latitude = branch_data['latitude']
+                if 'longitude' in branch_data:
+                    branch.longitude = branch_data['longitude']
+                branch.area_keywords = branch_data['area_keywords']
+                branch.is_active = True
+                branch.save()
+
                 if created:
                     self.stdout.write(self.style.SUCCESS(f"Created branch '{branch.name}' for restaurant '{restaurant.name}'"))
                 else:
-                    branch.address = branch_data['address']
-                    branch.phone = branch_data['phone']
-                    branch.area_keywords = branch_data['area_keywords']
-                    branch.is_active = True
-                    branch.save(update_fields=['address', 'phone', 'area_keywords', 'is_active'])
                     self.stdout.write(self.style.SUCCESS(f"Updated branch '{branch.name}' for restaurant '{restaurant.name}'"))
 
-        self.stdout.write(self.style.SUCCESS("Seed branches completed successfully with real addresses and phone numbers."))
+                # Ensure BranchMenuItemAvailability defaults exist
+                from restaurants.models import MenuItem, BranchMenuItemAvailability
+                for item in MenuItem.objects.filter(category__restaurant=restaurant):
+                    BranchMenuItemAvailability.objects.get_or_create(
+                        branch=branch,
+                        menu_item=item,
+                        defaults={'is_available': True}
+                    )
+
+        self.stdout.write(self.style.SUCCESS("Seed branches completed successfully with real addresses, coordinates, and availability defaults."))

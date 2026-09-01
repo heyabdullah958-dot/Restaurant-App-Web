@@ -40,5 +40,28 @@
 - **How it was verified**: Ran `manage.py test orders test_flash_deals_v2_engine_suite` (39/39 tests passed, 100% OK).
 - **Confidence**: 100% — verified across all timezone boundaries, rollover edge cases, and multi-tenant scoping rules.
 
+---
+
+## Phase 1 — Tandoori Stop Branch Seeding, Verified Coordinates & Availability Defaults — 2026-09-01
+- **What changed and why**:
+  1. Created reproducible Django data migration `backend/restaurants/migrations/0015_seed_tandoori_stop_branches.py` to seed and update the 3 operational Tandoori Stop branches with verified coordinates:
+     - **Lake City**: `Sector M7 Lake City, Lahore` (lat `31.3521664`, lng `74.2529319`)
+     - **Mozang Chungi**: `16-B Temple Road, Shoukat Plaza, Mozang Chungi, Lahore` (lat `31.5577696`, lng `74.3173073`)
+     - **Baghbanpura**: `Ghass Mandi Stop, Baghbanpura, Lahore, 54000` (lat `31.5808224`, lng `74.3732920`)
+  2. Initialized `BranchMenuItemAvailability` records with default `is_available=True` for all menu items across the new branches to ensure stock overrides function deterministically without silent inheritance bugs.
+  3. Updated `branch_map` in `Order.generate_display_order_id()` in `backend/orders/models.py` to map:
+     - `'lake city'` -> `LC` (e.g. `TS-LC-1001`)
+     - `'mozang chungi'`, `'mozang'` -> `MC` (e.g. `TS-MC-1001`)
+     - `'baghbanpura'`, `'gt road baghbanpura'` -> `BP` / `GTR` (e.g. `TS-BP-1001`)
+  4. Updated `seed_branches.py` management command with verified addresses, phone numbers, coordinates, and comprehensive area keyword maps.
+- **Files modified / created**:
+  - `backend/restaurants/migrations/0015_seed_tandoori_stop_branches.py` [NEW]
+  - `backend/orders/models.py`
+  - `backend/restaurants/management/commands/seed_branches.py`
+  - `test_backend_local.py`
+- **How it was verified**: Executed `python manage.py migrate restaurants` (migration 0015 OK), verified `generate_display_order_id()` output for all 3 branches, ran `test_backend_local.py` (all tests passed), and ran `test_dual_app_e2e.py` (100% passed).
+- **Confidence**: 100% — verified via database migration execution and end-to-end multi-tenant test suites.
+
+
 
 
