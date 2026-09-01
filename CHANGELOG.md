@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 2026-09-01 Phase 2 — Home Header Layout Alignment & Fulfillment Toggle Cleanup
+- **Top Header Flexbox Layout Restructure (`HomeScreen.tsx`)**:
+  - Separated header into responsive `headerLeft` (`flex: 1`, `marginRight: SPACING.sm`) and `headerActions` (`flexShrink: 0`, `gap: 6`).
+  - Added `flexShrink: 1`, `numberOfLines={1}`, and `ellipsizeMode="tail"` to `locationText`, preventing text overflow collisions across varying device viewports.
+  - Re-styled guest **"Sign In"** button into a clean, compact pill (`height: 32`, `borderRadius: 16`, `paddingHorizontal: 12`, `fontSize: 12`, `fontWeight: 'bold'`) placed cleanly beside the Notification bell and Search icons.
+  - Restricted loyalty points rewards button rendering strictly to authenticated accounts (`!user?.is_guest`), eliminating button crowd for guest users.
+- **Fulfillment Toggle Removal (`HomeScreen.tsx`)**:
+  - Removed unused `[🛵 Delivery | 🛍️ Takeaway | 🍽️ Dine-In]` segmented toggle bar from the Home screen top bar, keeping the feed 100% streamlined for delivery restaurant discovery.
+  - Cleaned up obsolete segment styles from StyleSheet (`fulfillmentSegmentContainer`, `segmentBtn`, `segmentBtnActive`, `segmentText`, `segmentTextActive`).
+
 ## 2026-09-01 Phase 1 — Guest Mode Profile Screen State & Auth Call-to-Action
 - **Conditional Profile Screen Architecture (`app/src/screens/ProfileScreen.tsx`)**:
   - **Redux State Inspection**: Wired `useSelector((state: RootState) => state.user)` with `isGuest = !isAuthenticated || !user || user.is_guest`.

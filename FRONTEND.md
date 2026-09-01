@@ -251,3 +251,26 @@
   - Verified Redux state transitions between guest and authenticated accounts.
 - **Confidence**: 100% — verified via TypeScript compilation and dual-mode layout separation.
 
+---
+
+## Phase 2 — Home Header Layout Alignment & Fulfillment Toggle Cleanup — 2026-09-01
+- **What changed and why**:
+  1. **Top Header Flexbox Layout Restructure (`HomeScreen.tsx`)**:
+     - Separated header into distinct `headerLeft` (`flex: 1`, `marginRight: SPACING.sm`) and `headerActions` (`flexShrink: 0`, `gap: 6`).
+     - Added `flexShrink: 1`, `numberOfLines={1}`, and `ellipsizeMode="tail"` to `locationText`, preventing text overflow from colliding with adjacent action buttons on compact Android/iOS screens.
+     - Redesigned the guest **"Sign In"** button (`styles.signInBtn`) into a clean, compact pill (`height: 32`, `borderRadius: 16`, `paddingHorizontal: 12`, `fontSize: 12`, `fontWeight: 'bold'`) placed cleanly beside the Notification bell and Search icons.
+     - Restricted loyalty points rewards button rendering strictly to authenticated accounts (`!user?.is_guest`), eliminating button crowd for guest users.
+  2. **Fulfillment Toggle Removal (`HomeScreen.tsx`)**:
+     - Removed the unused `[🛵 Delivery | 🛍️ Takeaway | 🍽️ Dine-In]` segmented toggle bar from the Home screen top bar, keeping the feed 100% streamlined for delivery restaurant discovery.
+     - Cleaned up obsolete segment styles from StyleSheet (`fulfillmentSegmentContainer`, `segmentBtn`, `segmentBtnActive`, `segmentText`, `segmentTextActive`).
+- **Files modified**:
+  - `app/src/screens/HomeScreen.tsx`
+- **Approaches considered**:
+  - Option A: Retain empty single-item "Delivery" chip bar (Rejected - adds redundant vertical padding without functional purpose).
+  - Option B: Remove fulfillment segment bar entirely from Home feed to maximize vertical real estate for Flash Deals and restaurant cards (Chosen).
+- **How it was verified**:
+  - `npx tsc --noEmit` in `app/` (0 compilation errors).
+  - Fast Metro module reload (207ms) verified with zero errors or warnings.
+- **Confidence**: 100% — verified via TypeScript compilation and layout simulation.
+
+

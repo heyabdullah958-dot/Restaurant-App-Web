@@ -906,7 +906,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       
       {/* Top Welcome Header */}
       <View style={styles.header}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.headerLeft}>
           <Text style={styles.welcomeText}>
             Deliver to {user?.is_guest ? 'Guest' : user?.username || 'Guest'}
           </Text>
@@ -915,30 +915,31 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             activeOpacity={0.7} 
             onPress={() => setShowLocationPrompt(true)}
           >
-            <Ionicons name="location-sharp" size={16} color={COLORS.primary} />
-            <Text style={styles.locationText} numberOfLines={1}>
+            <Ionicons name="location-sharp" size={15} color={COLORS.primary} />
+            <Text style={styles.locationText} numberOfLines={1} ellipsizeMode="tail">
               {currentAddress || (user?.addresses && user.addresses.length > 0 ? user.addresses[0] : 'Set your delivery location')}
             </Text>
-            <Ionicons name="chevron-down" size={14} color={COLORS.gray} />
+            <Ionicons name="chevron-down" size={13} color={COLORS.gray} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.headerActions}>
           {(!isAuthenticated || user?.is_guest) && (
             <TouchableOpacity
-              style={{ backgroundColor: COLORS.primary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, marginRight: 6 }}
+              style={styles.signInBtn}
               onPress={() => navigation.navigate('Auth')}
               activeOpacity={0.8}
             >
-              <Text style={{ color: COLORS.white, fontSize: 11, fontWeight: '700' }}>Sign In</Text>
+              <Text style={styles.signInBtnText}>Sign In</Text>
             </TouchableOpacity>
           )}
+
           <TouchableOpacity
             style={styles.headerIconBtn}
             onPress={() => setShowNotifModal(true)}
             activeOpacity={0.75}
           >
-            <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
+            <Ionicons name="notifications-outline" size={20} color={COLORS.dark} />
             {isAuthenticated && !user?.is_guest && notifications.filter((n) => !n.read).length > 0 && (
               <View style={styles.notifBadge}>
                 <Text style={styles.notifBadgeText}>
@@ -955,48 +956,24 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
             onPress={() => navigation.navigate('Main', { screen: 'Search' })}
             activeOpacity={0.75}
           >
-            <Ionicons name="search-outline" size={22} color={COLORS.dark} />
+            <Ionicons name="search-outline" size={20} color={COLORS.dark} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.rewardsButton}
-            onPress={() => navigation.navigate('Rewards')}
-            activeOpacity={0.75}
-          >
-            <Ionicons name="ribbon-sharp" size={22} color={COLORS.primary} />
-            {!user?.is_guest && (user?.loyalty_points ?? 0) > 0 && (
-              <View style={styles.pointsBadge}>
-                <Text style={styles.pointsText}>{user?.loyalty_points || 0}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+
+          {!user?.is_guest && (
+            <TouchableOpacity
+              style={styles.rewardsButton}
+              onPress={() => navigation.navigate('Rewards')}
+              activeOpacity={0.75}
+            >
+              <Ionicons name="ribbon-sharp" size={20} color={COLORS.primary} />
+              {(user?.loyalty_points ?? 0) > 0 && (
+                <View style={styles.pointsBadge}>
+                  <Text style={styles.pointsText}>{user?.loyalty_points || 0}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
-      </View>
-
-      {/* Universal Top Bar Fulfillment Switcher (Delivery / Takeaway / Dine-In) */}
-      <View style={styles.fulfillmentSegmentContainer}>
-        <TouchableOpacity
-          style={[styles.segmentBtn, fulfillmentMode === 'DELIVERY' && styles.segmentBtnActive]}
-          onPress={() => handleSwitchFulfillmentMode('DELIVERY')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.segmentText, fulfillmentMode === 'DELIVERY' && styles.segmentTextActive]}>🛵 Delivery</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.segmentBtn, fulfillmentMode === 'TAKEAWAY' && styles.segmentBtnActive]}
-          onPress={() => handleSwitchFulfillmentMode('TAKEAWAY')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.segmentText, fulfillmentMode === 'TAKEAWAY' && styles.segmentTextActive]}>🛍️ Takeaway</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.segmentBtn, fulfillmentMode === 'DINE_IN' && styles.segmentBtnActive]}
-          onPress={() => handleSwitchFulfillmentMode('DINE_IN')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.segmentText, fulfillmentMode === 'DINE_IN' && styles.segmentTextActive]}>🍽️ Dine-In</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
@@ -1081,34 +1058,43 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingTop: 10,
-    paddingBottom: SPACING.md,
+    paddingTop: 8,
+    paddingBottom: 10,
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
   },
+  headerLeft: {
+    flex: 1,
+    marginRight: SPACING.sm,
+    justifyContent: 'center',
+  },
   welcomeText: {
     ...FONTS.caption,
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.gray,
+    letterSpacing: 0.3,
+    marginBottom: 1,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
   locationText: {
     ...FONTS.body,
-    fontSize: 14,
-    fontWeight: '600',
-    maxWidth: width * 0.5,
-    marginHorizontal: 4,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.dark,
+    marginHorizontal: 3,
+    flexShrink: 1,
   },
   rewardsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.light,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(233, 65, 36, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -1272,12 +1258,27 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
+    gap: 6,
+    flexShrink: 0,
+  },
+  signInBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.small,
+  },
+  signInBtnText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   headerIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: COLORS.light,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1504,41 +1505,6 @@ const styles = StyleSheet.create({
     color: '#166534',
     fontWeight: 'bold',
     fontSize: 12,
-  },
-  fulfillmentSegmentContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f5f9',
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.xs,
-    marginBottom: SPACING.xs,
-    borderRadius: 12,
-    padding: 3,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 9,
-  },
-  segmentBtnActive: {
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  segmentText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  segmentTextActive: {
-    color: '#0f172a',
-    fontWeight: '800',
   },
   activeGuestOrderBanner: {
     backgroundColor: '#10B981',
