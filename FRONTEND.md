@@ -354,6 +354,28 @@
   - Executed `python test_dual_app_e2e.py` -> 100% pass across all multi-tenant workflows.
 - **Confidence**: 100% — verified via production bytecode compilation and end-to-end integration tests.
 
+---
+
+## Phase 6 — Customer Order History User-Scoping & Cross-Account Cache Isolation Fix — 2026-09-01
+- **What changed and why**:
+  1. **Strict Backend Customer Order Scoping (`backend/orders/views.py`)**:
+     - Diagnosed root cause of cross-user order leakage: `MyOrdersListView.get_queryset` previously contained legacy auto-linking logic that performed fuzzy substring queries on guest names (`guest_name__icontains=base_name`) and called `update(user=user)`. When a user with a common prefix like `malik121` registered, all historical orders in the database containing "malik" in the guest name were re-assigned to that user and returned in their feed.
+     - Refactored `MyOrdersListView.get_queryset` to strictly filter by `Order.objects.filter(user=user)`, with no substring matching, no guest name guessing, and zero cross-user mutations.
+  2. **Frontend Redux Cache Isolation & Monotonic Merging (`app/src/store/orderSlice.ts`)**:
+     - In `fetchMyOrders.fulfilled`, refactored the array merge to construct the map strictly from `fetchedArray` (the active user's backend response) rather than pre-populating with old session state, preventing cross-account state bleeding.
+     - Added explicit cache wiping on `guestLogin.fulfilled` (`state.myOrders = []`, `state.currentOrder = null`, `state.activeOrder = null`).
+- **Files modified**:
+  - `backend/orders/views.py`
+  - `app/src/store/orderSlice.ts`
+- **Approaches considered**:
+  - Option A: Only clear Redux state in React components on unmount (Rejected - does not prevent backend queryset bleeding or background polling leaks).
+  - Option B: Full-stack isolation: Strict DRF `Order.objects.filter(user=user)` + Redux `fetchedArray` scoping + auth boundary cache purges (Chosen).
+- **How it was verified**:
+  - `npx tsc --noEmit` in `app/` (0 compilation errors).
+  - Executed `python test_dual_app_e2e.py` -> Verified Step 5 (Multi-Account Order History Isolation): Customer A sees their 6 orders, freshly registered Customer B sees 0 orders.
+- **Confidence**: 100% — verified via zero-error TypeScript typechecking and end-to-end multi-account integration tests.
+
+
 
 
 

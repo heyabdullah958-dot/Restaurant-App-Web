@@ -1,6 +1,14 @@
 
 # Changelog
 
+## 2026-09-01 Phase 6 — Customer Order History User-Scoping & Cross-Account Cache Isolation Fix
+- **Strict Customer Order Queryset Scoping (`backend/orders/views.py`)**:
+  - Removed flawed fuzzy guest name substring search (`guest_name__icontains`) and automatic `update(user=user)` mutations from `MyOrdersListView`.
+  - Replaced with strict `Order.objects.filter(user=user)` queries ensuring customers only see orders placed on their authenticated account.
+- **Frontend Redux Cache Isolation & Monotonic Merging (`app/src/store/orderSlice.ts`)**:
+  - Refactored `fetchMyOrders.fulfilled` to populate order maps strictly from `fetchedArray`, preventing previous session orders from bleeding into new user state.
+  - Added full order state reset on `guestLogin.fulfilled`.
+
 ## 2026-09-01 Phase 5 — Auth Navigation Reset & Post-Login Redirection Fix
 - **Hierarchy-Aware Post-Auth Navigation Redirection (`app/src/screens/AuthScreen.tsx`)**:
   - Replaced malformed flat root reset payload with `handlePostAuthNavigation`, accurately distinguishing nested tab targets (`'Profile'`, `'Home'`, `'Cart'`, `'Orders'`) from root stack screens (`'Checkout'`).

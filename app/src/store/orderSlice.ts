@@ -454,6 +454,12 @@ const orderSlice = createSlice({
       .addCase(guestLogin.pending, (state) => {
         state.loading = true;
       })
+      .addCase(guestLogin.fulfilled, (state) => {
+        state.loading = false;
+        state.myOrders = [];
+        state.currentOrder = null;
+        state.activeOrder = null;
+      })
 
       .addCase(logoutUser.pending, (state) => {
         state.myOrders = [];
@@ -482,11 +488,13 @@ const orderSlice = createSlice({
       })
       .addCase(placeOrder.fulfilled, (state, action) => {
         state.loading = false;
+        state.currentOrder = action.payload;
         state.activeOrder = action.payload;
-        if (action.payload && action.payload.id) {
-          const exists = state.myOrders.some((o: any) => String(o.id) === String(action.payload.id));
+        const newOrder = action.payload;
+        if (newOrder && newOrder.id) {
+          const exists = state.myOrders.some((o: any) => String(o.id) === String(newOrder.id));
           if (!exists) {
-            state.myOrders = [action.payload, ...state.myOrders];
+            state.myOrders = [newOrder, ...state.myOrders];
           }
         }
       })
@@ -496,17 +504,18 @@ const orderSlice = createSlice({
       })
       // Fetch Live Order Track (Silent Background Refresh — prevents UI spinner flicker on polling)
       .addCase(fetchOrderTrack.pending, (state) => {
-        if (!state.currentOrder) {
-          state.loading = true;
-        }
         state.error = null;
       })
       .addCase(fetchOrderTrack.fulfilled, (state, action) => {
-        state.loading = false;
         state.currentOrder = mergeMonotonicOrder(state.currentOrder, action.payload);
+        if (action.payload && action.payload.id) {
+          const idx = state.myOrders.findIndex((o: any) => String(o.id) === String(action.payload.id));
+          if (idx >= 0) {
+            state.myOrders[idx] = mergeMonotonicOrder(state.myOrders[idx], action.payload);
+          }
+        }
       })
       .addCase(fetchOrderTrack.rejected, (state, action) => {
-        state.loading = false;
         if (!state.currentOrder) {
           state.error = action.payload as string;
         }
@@ -559,13 +568,11 @@ const orderSlice = createSlice({
           fetchedArray = payload;
         }
 
+        // Strictly build map from active user's fetchedArray to prevent cross-account cache bleed
         const map = new Map<string, any>();
-        state.myOrders.forEach((o: any) => {
-          if (o && o.id) map.set(String(o.id), o);
-        });
         fetchedArray.forEach((o: any) => {
           if (o && o.id) {
-            const existing = map.get(String(o.id));
+            const existing = state.myOrders.find((prev: any) => String(prev.id) === String(o.id));
             map.set(String(o.id), existing ? mergeMonotonicOrder(existing, o) : o);
           }
         });
