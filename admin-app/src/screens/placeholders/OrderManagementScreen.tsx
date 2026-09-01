@@ -504,7 +504,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
                   style={styles.rosterShortcutBtn}
                   onPress={() => {
                     setDispatchModalVisible(false);
-                    if (navigation) navigation.navigate('Riders');
+                    if (navigation) navigation.navigate('RiderManagement');
                   }}
                 >
                   <Text style={styles.rosterShortcutText}>Go to Rider Roster →</Text>

@@ -1,6 +1,14 @@
 
 # Changelog
 
+## 2026-09-01 Phase 4 — Manager App Rider Navigation Route Fix & Bottom Tab Icon Standardization
+- **Rider Modal Navigation Route Fix (`OrderManagementScreen.tsx`)**:
+  - Corrected unhandled navigation action by updating dispatch modal button handler from `navigation.navigate('Riders')` to `navigation.navigate('RiderManagement')`.
+- **Bottom Navigation Vector Icon Standardization (`AppNavigator.tsx`)**:
+  - Replaced clipped and distorted emoji text icons across both Branch Manager and Super Admin tab bars with crisp `@expo/vector-icons` (`Ionicons`).
+  - Implemented `TabBarIcon` component with custom active pill tinting (`tabIconPill`) and centered glyph sizing (22pt).
+  - Modernized `HeaderLogoutButton` with vector `log-out-outline` icon.
+
 ## 2026-09-01 Phase 3 — Merchant Manager App Standalone APK Startup Crash Fix
 - **Native Gesture Handler & Navigation Architecture (`admin-app/index.ts` & `admin-app/App.tsx`)**:
   - Imported `'react-native-gesture-handler'` at the top of the entry file `index.ts`.

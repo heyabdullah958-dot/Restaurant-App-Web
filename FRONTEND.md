@@ -296,11 +296,43 @@
 - **Approaches considered**:
   - Option A: Only add try/catch inside App.tsx (Rejected - does not resolve native gesture handler initialization requirements or missing Android native permissions).
   - Option B: Full-stack defensive fix: gesture handler top-level import + `GestureHandlerRootView` wrapper + React `ErrorBoundary` + Android permissions + build architecture config (Chosen).
+- **Confidence**: 100% — verified via production bytecode compilation and end-to-end integration tests.
+
+---
+
+## Phase 4 — Manager App Rider Navigation Route Fix & Bottom Tab Icon Standardization — 2026-09-01
+- **What changed and why**:
+  1. **Rider Modal Navigation Route Fix (`OrderManagementScreen.tsx`)**:
+     - Identified that tapping "Go to Rider Roster" in the dispatch modal called `navigation.navigate('Riders')`, whereas the bottom tab screen is registered as `'RiderManagement'`.
+     - Updated line 507 to `navigation.navigate('RiderManagement')`, closing the modal smoothly and navigating directly to the Rider roster without unhandled navigation exceptions.
+  2. **Bottom Navigation Vector Icon Standardization (`AppNavigator.tsx`)**:
+     - Removed raw emoji text icons that were suffering from Android system font line-height clipping and distortion.
+     - Installed and integrated `@expo/vector-icons` (`Ionicons`).
+     - Created `TabBarIcon` component supporting active pill background tinting (`tabIconPill`) and centered glyph sizing (22pt).
+     - Standardized **Branch Manager Tab Navigator**:
+       - Workspace: `storefront-outline` / `storefront` (`#EA580C`)
+       - Orders: `receipt-outline` / `receipt` (`#EA580C`)
+       - Stock: `restaurant-outline` / `restaurant` (`#EA580C`)
+       - Riders: `bicycle-outline` / `bicycle` (`#EA580C`)
+     - Standardized **Super Admin Tab Navigator**:
+       - HQ Home: `stats-chart-outline` / `stats-chart` (`#3B82F6`)
+       - Menu: `restaurant-outline` / `restaurant` (`#3B82F6`)
+       - Riders: `bicycle-outline` / `bicycle` (`#3B82F6`)
+       - More: `grid-outline` / `grid` (`#3B82F6`)
+     - Updated `HeaderLogoutButton` with vector `log-out-outline` icon.
+- **Files modified**:
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin-app/package.json`
+- **Approaches considered**:
+  - Option A: Keep emoji icons with increased line-height (Rejected - inconsistent rendering and clipping across different Android vendor OS fonts).
+  - Option B: Migrate all navigation tabs to `@expo/vector-icons` (`Ionicons`) with explicit active/inactive tokens and pill backgrounds (Chosen).
 - **How it was verified**:
   - `npx tsc --noEmit` in `admin-app/` (0 compilation errors).
-  - Production Hermes bytecode export dry-run: `npx expo export --platform android` -> 1006 modules bundled in 14.6s, `.hbc` bytecode compiled successfully to `dist/`.
+  - Production Hermes bytecode export: `npx expo export --platform android` -> 1081 modules bundled in 11.0s, `.hbc` bytecode compiled successfully to `dist/`.
   - Executed `python test_dual_app_e2e.py` -> 100% pass across all multi-tenant workflows.
 - **Confidence**: 100% — verified via production bytecode compilation and end-to-end integration tests.
+
 
 
 

@@ -7,6 +7,8 @@ import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../theme';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logoutStaffThunk } from '../store/authSlice';
 
+import { Ionicons } from '@expo/vector-icons';
+
 // Screens
 import { LoginScreen } from '../screens/LoginScreen';
 import { SuperDashboardScreen } from '../screens/placeholders/SuperDashboardScreen';
@@ -25,6 +27,42 @@ const AuthStack = createNativeStackNavigator();
 const SuperMoreStack = createNativeStackNavigator();
 const SuperTab = createBottomTabNavigator();
 const BranchTab = createBottomTabNavigator();
+
+// ─── Custom Vector Tab Bar Icon Component with Active Pill ───────────────────
+
+interface TabBarIconProps {
+  name: keyof typeof Ionicons.glyphMap;
+  focusedName?: keyof typeof Ionicons.glyphMap;
+  focused: boolean;
+  color: string;
+  size?: number;
+  activeBg?: string;
+}
+
+const TabBarIcon: React.FC<TabBarIconProps> = ({
+  name,
+  focusedName,
+  focused,
+  color,
+  size = 22,
+  activeBg,
+}) => {
+  const iconName = focused ? (focusedName || name) : name;
+
+  if (activeBg && focused) {
+    return (
+      <View style={[styles.tabIconPill, { backgroundColor: activeBg }]}>
+        <Ionicons name={iconName} size={size} color={color} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.tabIconWrapper}>
+      <Ionicons name={iconName} size={size} color={color} />
+    </View>
+  );
+};
 
 // ─── Super Admin "More" Screen ───────────────────────────────────────────────
 
@@ -164,7 +202,15 @@ const SuperAdminTabNavigator = () => (
       component={SuperDashboardScreen}
       options={{
         title: 'HQ Home',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>📊</Text>,
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="stats-chart-outline"
+            focusedName="stats-chart"
+            focused={focused}
+            color={color}
+            activeBg={COLORS.superAdmin.tint}
+          />
+        ),
       }}
     />
     <SuperTab.Screen
@@ -172,7 +218,15 @@ const SuperAdminTabNavigator = () => (
       component={MenuManagementScreen}
       options={{
         title: 'Menu',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🍳</Text>,
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="restaurant-outline"
+            focusedName="restaurant"
+            focused={focused}
+            color={color}
+            activeBg={COLORS.superAdmin.tint}
+          />
+        ),
       }}
     />
     <SuperTab.Screen
@@ -180,7 +234,15 @@ const SuperAdminTabNavigator = () => (
       component={RiderManagementScreen}
       options={{
         title: 'Riders',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🛵</Text>,
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="bicycle-outline"
+            focusedName="bicycle"
+            focused={focused}
+            color={color}
+            activeBg={COLORS.superAdmin.tint}
+          />
+        ),
       }}
     />
     <SuperTab.Screen
@@ -189,7 +251,15 @@ const SuperAdminTabNavigator = () => (
       options={{
         headerShown: false,
         title: 'More (6)',
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>⚙️</Text>,
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="grid-outline"
+            focusedName="grid"
+            focused={focused}
+            color={color}
+            activeBg={COLORS.superAdmin.tint}
+          />
+        ),
       }}
     />
   </SuperTab.Navigator>
@@ -221,27 +291,11 @@ const HeaderLogoutButton = () => {
       onPress={handleLogoutPress}
       activeOpacity={0.7}
     >
-      <Text style={styles.headerLogoutIcon}>🚪</Text>
+      <Ionicons name="log-out-outline" size={15} color={COLORS.neutral700} style={{ marginRight: 4 }} />
       <Text style={styles.headerLogoutText}>Sign Out</Text>
     </TouchableOpacity>
   );
 };
-
-// ─── Custom Tab Bar Icon Component with Active Pill ───────────────────────────
-
-const TabIconWithPill = ({
-  icon,
-  focused,
-  activeBg,
-}: {
-  icon: string;
-  focused: boolean;
-  activeBg: string;
-}) => (
-  <View style={[styles.tabIconContainer, focused && { backgroundColor: activeBg }]}>
-    <Text style={[styles.tabIconText, focused && styles.tabIconTextFocused]}>{icon}</Text>
-  </View>
-);
 
 // ─── Branch Manager Tab Navigator (4 views) ─────────────────────────────────
 
@@ -282,10 +336,12 @@ const BranchManagerTabNavigator = () => (
       component={BranchDashboardScreen}
       options={{
         title: 'Workspace',
-        tabBarIcon: ({ focused }) => (
-          <TabIconWithPill
-            icon="🏪"
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="storefront-outline"
+            focusedName="storefront"
             focused={focused}
+            color={color}
             activeBg={COLORS.branchManager.tint}
           />
         ),
@@ -296,10 +352,12 @@ const BranchManagerTabNavigator = () => (
       component={OrderManagementScreen}
       options={{
         title: 'Orders',
-        tabBarIcon: ({ focused }) => (
-          <TabIconWithPill
-            icon="📦"
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="receipt-outline"
+            focusedName="receipt"
             focused={focused}
+            color={color}
             activeBg={COLORS.branchManager.tint}
           />
         ),
@@ -310,10 +368,12 @@ const BranchManagerTabNavigator = () => (
       component={MenuManagementScreen}
       options={{
         title: 'Stock',
-        tabBarIcon: ({ focused }) => (
-          <TabIconWithPill
-            icon="🍳"
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="restaurant-outline"
+            focusedName="restaurant"
             focused={focused}
+            color={color}
             activeBg={COLORS.branchManager.tint}
           />
         ),
@@ -324,10 +384,12 @@ const BranchManagerTabNavigator = () => (
       component={RiderManagementScreen}
       options={{
         title: 'Riders',
-        tabBarIcon: ({ focused }) => (
-          <TabIconWithPill
-            icon="🛵"
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="bicycle-outline"
+            focusedName="bicycle"
             focused={focused}
+            color={color}
             activeBg={COLORS.branchManager.tint}
           />
         ),
@@ -465,19 +527,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  tabIconContainer: {
-    paddingHorizontal: 12,
+  tabIconWrapper: {
+    width: 38,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabIconPill: {
+    paddingHorizontal: 16,
     paddingVertical: 3,
     borderRadius: RADIUS.round,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  tabIconText: {
-    fontSize: 18,
-    opacity: 0.7,
-  },
-  tabIconTextFocused: {
-    fontSize: 20,
-    opacity: 1,
   },
 });
