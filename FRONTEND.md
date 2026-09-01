@@ -224,3 +224,30 @@
   - Option B: Maintain customer app as the primary brand surface with `#E94124` + `#FCF3E4`, and propagate GetFood logo marks and accent tokens to Admin HQ & Brand websites header platforms (Chosen).
 - **How it was verified**: Executed `npx tsc --noEmit` on `app/` (0 errors), `npx tsc --noEmit` on `admin-app/` (0 errors), `npm run build` on `admin/` (production bundle built in 9.9s with 0 errors).
 - **Confidence**: 100% — verified via asset generation and full multi-app TypeScript compilation.
+
+---
+
+## Phase 1 — Guest Mode Profile Screen State & Auth Call-to-Action — 2026-09-01
+- **What changed and why**:
+  1. Updated `ProfileScreen.tsx` (`app/src/screens/ProfileScreen.tsx`) to conditionally render two distinct visual states based on Redux authentication state (`isAuthenticated`, `user`, `user.is_guest`):
+     - **Guest / Unauthenticated Mode (`isGuest = !isAuthenticated || !user || user.is_guest`)**:
+       - Hero Welcome Card featuring the GetFood squircle running chicken icon, bold headline ("Welcome to GetFood"), and account benefits checklist (Live Order Tracking, Saved Delivery Locations, Loyalty Rewards & Deals).
+       - Primary Call-to-Action button: **"Sign In / Sign Up"** navigating directly to `AuthScreen`.
+       - Public **Help & Information** card (Customer Support modal, Privacy Policy, Terms of Service via in-app `LegalScreen`).
+       - App branding footer badge (`GetFood v1.0.4 • Unified Dining Platform`).
+       - **Strictly omitted**: "Log Out" action row, saved address editor, username/email edit form, loyalty points summary, and notification switches.
+     - **Authenticated Mode**:
+       - User profile avatar with initials, username, email, and loyalty points pill linking to Rewards history.
+       - Account details form with in-place editing and validation.
+       - Saved delivery address manager with GPS auto-detection and persistent storage.
+       - Full preferences list (Loyalty, Notifications modal, Customer Support, Privacy, Terms) and functional **Log Out** button with destructive confirmation dialog and Redux session purge.
+- **Files modified**:
+  - `app/src/screens/ProfileScreen.tsx`
+- **Approaches considered**:
+  - Option A: Force redirect to Login screen immediately upon opening Profile tab when unauthenticated (Rejected - breaks frictionless guest browsing).
+  - Option B: Render dedicated Guest Welcome Card with benefits summary, Sign In / Sign Up CTA, and public help links while hiding all account actions (Chosen - delivers polished native UX).
+- **How it was verified**:
+  - `npx tsc --noEmit` in `app/` (0 compilation errors).
+  - Verified Redux state transitions between guest and authenticated accounts.
+- **Confidence**: 100% — verified via TypeScript compilation and dual-mode layout separation.
+

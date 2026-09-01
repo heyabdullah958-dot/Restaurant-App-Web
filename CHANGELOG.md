@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 2026-09-01 Phase 1 — Guest Mode Profile Screen State & Auth Call-to-Action
+- **Conditional Profile Screen Architecture (`app/src/screens/ProfileScreen.tsx`)**:
+  - **Redux State Inspection**: Wired `useSelector((state: RootState) => state.user)` with `isGuest = !isAuthenticated || !user || user.is_guest`.
+  - **Guest Mode Layout**: Built hero welcome card with official GetFood branding squircle, account benefits summary (Live Order Tracking, Saved Delivery Locations, Loyalty Rewards), high-visibility **"Sign In / Sign Up"** CTA button, and public Help & Information section (Customer Support hotline/email modal, Privacy Policy, Terms of Service).
+  - **Authenticated State Security**: Strictly hid "Log Out" action row, saved address editor, account details editing form, and loyalty balance from unauthenticated guest users while preserving full functionality and destructive session reset for logged-in accounts.
+  - **Visual Design & Typography**: Integrated `#E94124` primary brand color, warm cream `#FCF3E4` backgrounds, and Poppins font tokens with responsive shadow cards.
+
 ## 2026-09-01 Phase 1 — GetFood Visual Identity Integration & Tandoori Stop Branch Seeding
 - **Design Token Extraction & Brand Re-theme (`GetFood.pdf` -> Customer App & Platform)**:
   - **Source of Truth Tokens (`app/src/theme.ts`)**: Extracted primary brand color `#E94124`, secondary accent `#FF5738`, warm cream surface `#FCF3E4`, dark charcoal `#1F1A17`, and Poppins typography directly from vector analysis of `GetFood.pdf`.

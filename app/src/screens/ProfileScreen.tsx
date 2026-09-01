@@ -7,17 +7,17 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Modal,
   Switch,
   Linking,
+  Image,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
+import { COLORS, FONTS, SPACING, SHADOWS, RADIUS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { logoutUser, updateProfile, updateUserProfile } from '../store/userSlice';
 import { StatusBar } from 'expo-status-bar';
@@ -26,7 +26,10 @@ import CustomAlertModal from '../components/CustomAlertModal';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>();
-  const { user, loading } = useSelector((state: RootState) => state.user);
+  const { user, loading, isAuthenticated } = useSelector((state: RootState) => state.user);
+
+  // Determine if the active user is an unauthenticated guest
+  const isGuest = !isAuthenticated || !user || user.is_guest;
 
   // Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
@@ -37,7 +40,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   // Sync local input fields whenever Redux user profile updates
   React.useEffect(() => {
-    if (user) {
+    if (user && !user.is_guest) {
       setUsername(user.username || '');
       setEmail(user.email || '');
       setPhone(user.phone || '');
@@ -118,15 +121,6 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     }
   };
 
-  React.useEffect(() => {
-    if (user) {
-      setUsername(user.username || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || '');
-      setAddress(user.addresses?.[0] || '');
-    }
-  }, [user]);
-
   const handleSaveAddress = async () => {
     if (!address.trim()) {
       showAlert('Validation Error', 'Delivery address cannot be empty.');
@@ -149,23 +143,28 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   const handleLogout = () => {
     showAlert(
-      'Logout',
-      'Are you sure you want to log out?',
+      'Log Out',
+      'Are you sure you want to log out of your GetFood account?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Logout',
+          text: 'Log Out',
           style: 'destructive',
           onPress: async () => {
             await dispatch(logoutUser());
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Auth' }],
-            });
+            showAlert('Logged Out', 'You have been logged out. You can continue browsing as a guest.');
           },
         },
       ]
     );
+  };
+
+  const handleOpenLegal = (url: string, title: string) => {
+    try {
+      navigation.navigate('Legal', { uri: url, title });
+    } catch (e) {
+      Linking.openURL(url).catch(() => {});
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -208,7 +207,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   };
 
   const getInitials = () => {
-    if (!user || !user.username) return 'G';
+    if (!user || !user.username) return 'GF';
     return user.username.slice(0, 2).toUpperCase();
   };
 
@@ -223,256 +222,382 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* User Card */}
-        <View style={[styles.profileCard, SHADOWS.medium]}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{getInitials()}</Text>
-            </View>
-            {/* Camera icon overlay — for future photo upload */}
-            {!user?.is_guest && (
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.cameraOverlay}
-                onPress={() => showAlert('Coming Soon', 'Profile photo upload will be available soon!')}
-              >
-                <Ionicons name="camera" size={14} color={COLORS.white} />
-              </TouchableOpacity>
-            )}
-            {user?.is_guest && (
-              <View style={styles.guestBadge}>
-                <Text style={styles.guestBadgeText}>GUEST</Text>
+        {/* ========================================================================= */}
+        {/* GUEST MODE: Clean Hero Banner & Auth Call-to-Action                       */}
+        {/* ========================================================================= */}
+        {isGuest ? (
+          <>
+            {/* Guest Hero Card */}
+            <View style={[styles.guestHeroCard, SHADOWS.medium]}>
+              <View style={styles.guestIconWrapper}>
+                <Image
+                  source={require('../assets/images/getfood_icon.png')}
+                  style={styles.guestHeroIcon}
+                  resizeMode="contain"
+                />
               </View>
-            )}
-          </View>
 
-          <Text style={styles.userName}>
-            {user?.is_guest ? 'Guest Customer' : user?.username}
-          </Text>
-          <Text style={styles.userSub}>
-            {user?.is_guest ? 'Sign in to sync orders & rewards' : user?.email}
-          </Text>
-
-          {!user?.is_guest && (
-            <TouchableOpacity 
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('Rewards')}
-              style={[styles.loyaltySummary, { justifyContent: 'space-between', width: '100%' }]}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="ribbon" size={20} color={COLORS.primary} />
-                <Text style={styles.loyaltyText}>
-                  Loyalty Points:{' '}
-                  <Text style={styles.pointsHighlight}>{user?.loyalty_points || 0}</Text>
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 11, color: COLORS.primary, fontWeight: 'bold', marginRight: 2 }}>History</Text>
-                <Ionicons name="chevron-forward" size={14} color={COLORS.primary} />
-              </View>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Guest Promo / Sign In Link */}
-        {user?.is_guest && (
-          <View style={[styles.promoCard, SHADOWS.small]}>
-            <Ionicons name="gift-outline" size={32} color={COLORS.primary} />
-            <View style={styles.promoTextContainer}>
-              <Text style={styles.promoTitle}>Unlock All Features</Text>
-              <Text style={styles.promoDescription}>
-                Sign up to save multiple delivery addresses, track your order history, and earn loyalty rewards.
+              <Text style={styles.guestHeroTitle}>Welcome to GetFood</Text>
+              <Text style={styles.guestHeroSubtitle}>
+                Sign in or create an account to unlock full benefits and seamless food ordering across all our brands.
               </Text>
-            </View>
-            <TouchableOpacity activeOpacity={0.75}
-              style={styles.promoCTA}
-              onPress={() => navigation.navigate('Auth')}
-            >
-              <Text style={styles.promoCTAText}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        )}
 
-        {/* Profile Editing Form / Details Card */}
-        {!user?.is_guest && (
-          <View style={[styles.sectionCard, SHADOWS.small]}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Account Details</Text>
-              <TouchableOpacity activeOpacity={0.75}
-                style={styles.editButton}
-                onPress={() => setIsEditing(!isEditing)}
+              {/* Benefits Checklist */}
+              <View style={styles.benefitsContainer}>
+                <View style={styles.benefitRow}>
+                  <View style={styles.benefitIconBg}>
+                    <Ionicons name="bicycle" size={18} color={COLORS.primary} />
+                  </View>
+                  <View style={styles.benefitTextContainer}>
+                    <Text style={styles.benefitTitle}>Live Order Tracking</Text>
+                    <Text style={styles.benefitDesc}>Watch your hot food travel from kitchen to your door.</Text>
+                  </View>
+                </View>
+
+                <View style={styles.benefitRow}>
+                  <View style={styles.benefitIconBg}>
+                    <Ionicons name="location" size={18} color={COLORS.primary} />
+                  </View>
+                  <View style={styles.benefitTextContainer}>
+                    <Text style={styles.benefitTitle}>Saved Delivery Locations</Text>
+                    <Text style={styles.benefitDesc}>Store home, office & frequent spots for 1-tap checkout.</Text>
+                  </View>
+                </View>
+
+                <View style={styles.benefitRow}>
+                  <View style={styles.benefitIconBg}>
+                    <Ionicons name="gift" size={18} color={COLORS.primary} />
+                  </View>
+                  <View style={styles.benefitTextContainer}>
+                    <Text style={styles.benefitTitle}>Loyalty Points & Deals</Text>
+                    <Text style={styles.benefitDesc}>Earn redeemable points and get exclusive member discounts.</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Primary Sign In / Sign Up CTA */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.primaryAuthBtn, SHADOWS.medium]}
+                onPress={() => navigation.navigate('Auth', { returnScreen: 'Profile' })}
               >
-                <Text style={styles.editBtnText}>
-                  {isEditing ? 'Cancel' : 'Edit'}
-                </Text>
+                <Text style={styles.primaryAuthBtnText}>Sign In / Sign Up</Text>
+                <Ionicons name="arrow-forward" size={18} color={COLORS.white} style={{ marginLeft: 8 }} />
               </TouchableOpacity>
             </View>
 
-            {isEditing ? (
-              <View style={styles.form}>
-                <Text style={styles.label}>Username</Text>
-                <TextInput
-                  style={[styles.input, errors.username && styles.inputError]}
-                  value={username}
-                  onChangeText={setUsername}
-                  placeholder="Username"
-                />
-                {errors.username && <Text style={styles.errorMsg}>{errors.username}</Text>}
+            {/* Public Help & Information Card */}
+            <View style={[styles.sectionCard, SHADOWS.small]}>
+              <Text style={styles.sectionTitle}>Help & Information</Text>
 
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="Email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                {errors.email && <Text style={styles.errorMsg}>{errors.email}</Text>}
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => setShowSupportModal(true)}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(233, 65, 36, 0.08)' }]}>
+                    <Ionicons name="headset-outline" size={20} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.actionLabel}>Customer Support & Hotline</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
 
-                <Text style={styles.label}>Phone</Text>
-                <TextInput
-                  style={[styles.input, errors.phone && styles.inputError]}
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="Phone Number"
-                  keyboardType="phone-pad"
-                />
-                {errors.phone && <Text style={styles.errorMsg}>{errors.phone}</Text>}
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => handleOpenLegal('https://foodsphere-admin.pages.dev/privacy-policy.html', 'Privacy Policy')}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(33, 150, 243, 0.08)' }]}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color="#2196F3" />
+                  </View>
+                  <Text style={styles.actionLabel}>Privacy Policy</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
 
-                <TouchableOpacity activeOpacity={0.9}
-                  style={[styles.saveBtn, SHADOWS.small]}
-                  onPress={handleSaveProfile}
-                  disabled={loading}
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={[styles.actionItem, { borderBottomWidth: 0 }]}
+                onPress={() => handleOpenLegal('https://foodsphere-admin.pages.dev/terms-of-service.html', 'Terms of Service')}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(76, 175, 80, 0.08)' }]}>
+                    <Ionicons name="document-text-outline" size={20} color="#4CAF50" />
+                  </View>
+                  <Text style={styles.actionLabel}>Terms of Service</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+            </View>
+
+            {/* App Branding Footer */}
+            <View style={styles.appFooter}>
+              <Text style={styles.appFooterText}>GetFood v1.0.4 • Unified Dining Platform</Text>
+              <Text style={styles.appFooterSubtext}>One App · Seven Unique Dining Experiences</Text>
+            </View>
+          </>
+        ) : (
+          /* ========================================================================= */
+          /* AUTHENTICATED MODE: Complete User Profile, Addresses, Settings & Log Out  */
+          /* ========================================================================= */
+          <>
+            {/* User Card */}
+            <View style={[styles.profileCard, SHADOWS.medium]}>
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{getInitials()}</Text>
+                </View>
+                {/* Camera icon overlay */}
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  style={styles.cameraOverlay}
+                  onPress={() => showAlert('Coming Soon', 'Profile photo upload will be available soon!')}
                 >
-                  {loading ? (
-                    <ActivityIndicator color={COLORS.white} />
-                  ) : (
-                    <Text style={styles.saveBtnText}>Save Changes</Text>
-                  )}
+                  <Ionicons name="camera" size={14} color={COLORS.white} />
                 </TouchableOpacity>
               </View>
-            ) : (
-              <View style={styles.detailsList}>
-                <View style={styles.detailItem}>
-                  <Ionicons name="person-outline" size={18} color={COLORS.gray} />
-                  <Text style={styles.detailText}>{user?.username}</Text>
+
+              <Text style={styles.userName}>{user?.username || user?.name || 'Customer'}</Text>
+              <Text style={styles.userSub}>{user?.email}</Text>
+
+              {/* Loyalty Summary */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Rewards')}
+                style={[styles.loyaltySummary, { justifyContent: 'space-between', width: '100%' }]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="ribbon" size={20} color={COLORS.primary} />
+                  <Text style={styles.loyaltyText}>
+                    Loyalty Points:{' '}
+                    <Text style={styles.pointsHighlight}>{user?.loyalty_points || 0}</Text>
+                  </Text>
                 </View>
-                <View style={styles.detailItem}>
-                  <Ionicons name="mail-outline" size={18} color={COLORS.gray} />
-                  <Text style={styles.detailText}>{user?.email || 'No email set'}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 11, color: COLORS.primary, fontWeight: 'bold', marginRight: 2 }}>History</Text>
+                  <Ionicons name="chevron-forward" size={14} color={COLORS.primary} />
                 </View>
-                <View style={styles.detailItem}>
-                  <Ionicons name="call-outline" size={18} color={COLORS.gray} />
-                  <Text style={styles.detailText}>{user?.phone || 'No phone number set'}</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Profile Editing Form / Details Card */}
+            <View style={[styles.sectionCard, SHADOWS.small]}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Account Details</Text>
+                <TouchableOpacity
+                  activeOpacity={0.75}
+                  style={styles.editButton}
+                  onPress={() => setIsEditing(!isEditing)}
+                >
+                  <Text style={styles.editBtnText}>
+                    {isEditing ? 'Cancel' : 'Edit'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {isEditing ? (
+                <View style={styles.form}>
+                  <Text style={styles.label}>Username</Text>
+                  <TextInput
+                    style={[styles.input, errors.username && styles.inputError]}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="Username"
+                  />
+                  {errors.username && <Text style={styles.errorMsg}>{errors.username}</Text>}
+
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={[styles.input, errors.email && styles.inputError]}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  {errors.email && <Text style={styles.errorMsg}>{errors.email}</Text>}
+
+                  <Text style={styles.label}>Phone</Text>
+                  <TextInput
+                    style={[styles.input, errors.phone && styles.inputError]}
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Phone Number"
+                    keyboardType="phone-pad"
+                  />
+                  {errors.phone && <Text style={styles.errorMsg}>{errors.phone}</Text>}
+
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={[styles.saveBtn, SHADOWS.small]}
+                    onPress={handleSaveProfile}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color={COLORS.white} />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save Changes</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.detailsList}>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="person-outline" size={18} color={COLORS.gray} />
+                    <Text style={styles.detailText}>{user?.username || user?.name}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="mail-outline" size={18} color={COLORS.gray} />
+                    <Text style={styles.detailText}>{user?.email || 'No email set'}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="call-outline" size={18} color={COLORS.gray} />
+                    <Text style={styles.detailText}>{user?.phone || 'No phone number set'}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* Saved Delivery Address Card */}
+            <View style={[styles.sectionCard, SHADOWS.small]}>
+              <Text style={styles.sectionTitle}>Saved Delivery Address</Text>
+              <View style={styles.addressContainer}>
+                <View style={styles.addressIconContainer}>
+                  <Ionicons name="location" size={24} color={COLORS.primary} />
+                </View>
+                <View style={styles.addressTextContainer}>
+                  <Text style={styles.addressLabel}>Primary Address</Text>
+                  <TextInput
+                    style={styles.addressInput}
+                    value={address}
+                    onChangeText={setAddress}
+                    placeholder="Enter your delivery address (e.g. House 5, Block B, DHA Lahore)"
+                    multiline
+                  />
                 </View>
               </View>
-            )}
-          </View>
+              
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={[styles.detectLocationBtn, isDetectingLocation && { opacity: 0.7 }]}
+                onPress={handleDetectLocation}
+                disabled={isDetectingLocation}
+              >
+                {isDetectingLocation ? (
+                  <ActivityIndicator size="small" color={COLORS.primary} style={{ marginRight: 6 }} />
+                ) : (
+                  <Ionicons name="locate-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
+                )}
+                <Text style={styles.detectLocationBtnText}>
+                  {isDetectingLocation ? 'Detecting Location...' : 'Auto-Detect Address'}
+                </Text>
+              </TouchableOpacity>
+
+              {isAddressDirty && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.addressSaveBtn}
+                  onPress={handleSaveAddress}
+                >
+                  <Text style={styles.addressSaveBtnText}>Save Delivery Address</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Preferences & Settings */}
+            <View style={[styles.sectionCard, SHADOWS.small]}>
+              <Text style={styles.sectionTitle}>Preferences & Settings</Text>
+
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => navigation.navigate('Rewards')}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(233, 65, 36, 0.08)' }]}>
+                    <Ionicons name="ribbon-outline" size={20} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.actionLabel}>Loyalty & Rewards</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => setShowNotificationsModal(true)}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(156, 39, 176, 0.08)' }]}>
+                    <Ionicons name="notifications-outline" size={20} color="#9C27B0" />
+                  </View>
+                  <Text style={styles.actionLabel}>Notification Preferences</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => setShowSupportModal(true)}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(233, 65, 36, 0.08)' }]}>
+                    <Ionicons name="headset-outline" size={20} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.actionLabel}>Customer Support</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => handleOpenLegal('https://foodsphere-admin.pages.dev/privacy-policy.html', 'Privacy Policy')}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(33, 150, 243, 0.08)' }]}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color="#2196F3" />
+                  </View>
+                  <Text style={styles.actionLabel}>Privacy Policy</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={styles.actionItem}
+                onPress={() => handleOpenLegal('https://foodsphere-admin.pages.dev/terms-of-service.html', 'Terms of Service')}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(76, 175, 80, 0.08)' }]}>
+                    <Ionicons name="document-text-outline" size={20} color="#4CAF50" />
+                  </View>
+                  <Text style={styles.actionLabel}>Terms of Service</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
+              </TouchableOpacity>
+
+              {/* Logout Button (Authenticated Only) */}
+              <TouchableOpacity
+                activeOpacity={0.75}
+                style={[styles.actionItem, styles.logoutItem]}
+                onPress={handleLogout}
+              >
+                <View style={styles.actionLeft}>
+                  <View style={[styles.actionIconCircle, { backgroundColor: 'rgba(229, 57, 53, 0.08)' }]}>
+                    <Ionicons name="log-out-outline" size={20} color={COLORS.danger} />
+                  </View>
+                  <Text style={[styles.actionLabel, { color: COLORS.danger, fontWeight: '700' }]}>Log Out</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.danger} />
+              </TouchableOpacity>
+            </View>
+          </>
         )}
-
-        {/* Address Card */}
-        <View style={[styles.sectionCard, SHADOWS.small]}>
-          <Text style={styles.sectionTitle}>Active Delivery Address</Text>
-          <View style={styles.addressContainer}>
-            <View style={styles.addressIconContainer}>
-              <Ionicons name="location" size={24} color={COLORS.primary} />
-            </View>
-            <View style={styles.addressTextContainer}>
-              <Text style={styles.addressLabel}>Current Location</Text>
-              <TextInput
-                style={styles.addressInput}
-                value={address}
-                onChangeText={setAddress}
-                placeholder="Enter your delivery address (e.g. House 5, Block B, DHA Lahore)"
-                multiline
-              />
-            </View>
-          </View>
-          
-          <TouchableOpacity activeOpacity={0.8}
-            style={[styles.detectLocationBtn, isDetectingLocation && { opacity: 0.7 }]}
-            onPress={handleDetectLocation}
-            disabled={isDetectingLocation}
-          >
-            {isDetectingLocation ? (
-              <ActivityIndicator size="small" color={COLORS.primary} style={{ marginRight: 6 }} />
-            ) : (
-              <Ionicons name="locate-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
-            )}
-            <Text style={styles.detectLocationBtnText}>
-              {isDetectingLocation ? 'Detecting Location...' : 'Auto-Detect Address'}
-            </Text>
-          </TouchableOpacity>
-
-          {isAddressDirty && (
-            <TouchableOpacity activeOpacity={0.8}
-              style={styles.addressSaveBtn}
-              onPress={handleSaveAddress}
-            >
-              <Text style={styles.addressSaveBtnText}>Save Delivery Address</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Quick Actions List */}
-        <View style={[styles.sectionCard, SHADOWS.small]}>
-          <Text style={styles.sectionTitle}>Preferences & Settings</Text>
-
-          {!user?.is_guest && (
-            <TouchableOpacity activeOpacity={0.75}
-              style={styles.actionItem}
-              onPress={() => navigation.navigate('Rewards')}
-            >
-              <View style={styles.actionLeft}>
-                <Ionicons name="ribbon-outline" size={22} color={COLORS.dark} />
-                <Text style={styles.actionLabel}>Loyalty & Rewards</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => setShowNotificationsModal(true)}>
-            <View style={styles.actionLeft}>
-              <Ionicons name="notifications-outline" size={22} color={COLORS.dark} />
-              <Text style={styles.actionLabel}>Notification Preferences</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => setShowSupportModal(true)}>
-            <View style={styles.actionLeft}>
-              <Ionicons name="help-circle-outline" size={22} color={COLORS.dark} />
-              <Text style={styles.actionLabel}>Customer Support</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => Linking.openURL('https://foodsphere-admin.pages.dev/privacy-policy.html')}>
-            <View style={styles.actionLeft}>
-              <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.dark} />
-              <Text style={styles.actionLabel}>Privacy Policy</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionItem} onPress={() => Linking.openURL('https://foodsphere-admin.pages.dev/terms-of-service.html')}>
-            <View style={styles.actionLeft}>
-              <Ionicons name="document-text-outline" size={22} color={COLORS.dark} />
-              <Text style={styles.actionLabel}>Terms of Service</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.gray} />
-          </TouchableOpacity>
-
-          {/* Logout Button */}
-          <TouchableOpacity activeOpacity={0.75} style={[styles.actionItem, styles.logoutItem]} onPress={handleLogout}>
-            <View style={styles.actionLeft}>
-              <Ionicons name="log-out-outline" size={22} color={COLORS.danger} />
-              <Text style={[styles.actionLabel, { color: COLORS.danger }]}>Log Out</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.danger} />
-          </TouchableOpacity>
-        </View>
-
       </ScrollView>
 
       {/* Notification Preferences Modal */}
@@ -1054,5 +1179,119 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: 13,
     fontWeight: 'bold',
+  },
+  guestHeroCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 24,
+    padding: SPACING.lg,
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(233, 65, 36, 0.08)',
+  },
+  guestIconWrapper: {
+    width: 84,
+    height: 84,
+    borderRadius: 22,
+    backgroundColor: 'rgba(233, 65, 36, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(233, 65, 36, 0.15)',
+  },
+  guestHeroIcon: {
+    width: 64,
+    height: 64,
+  },
+  guestHeroTitle: {
+    ...FONTS.title,
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  guestHeroSubtitle: {
+    ...FONTS.body,
+    fontSize: 13.5,
+    color: COLORS.gray,
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
+  },
+  benefitsContainer: {
+    width: '100%',
+    backgroundColor: 'rgba(252, 243, 228, 0.6)',
+    borderRadius: 16,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(233, 65, 36, 0.1)',
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+  },
+  benefitIconBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(233, 65, 36, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+    marginTop: 2,
+  },
+  benefitTextContainer: {
+    flex: 1,
+  },
+  benefitTitle: {
+    fontSize: 13.5,
+    fontWeight: 'bold',
+    color: COLORS.dark,
+    marginBottom: 2,
+  },
+  benefitDesc: {
+    fontSize: 12,
+    color: COLORS.gray,
+    lineHeight: 16,
+  },
+  primaryAuthBtn: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 52,
+    borderRadius: 16,
+  },
+  primaryAuthBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  actionIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appFooter: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+  },
+  appFooterText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: COLORS.gray,
+  },
+  appFooterSubtext: {
+    fontSize: 11,
+    color: '#9E9E9E',
+    marginTop: 3,
   },
 });
