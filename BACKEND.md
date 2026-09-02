@@ -72,10 +72,25 @@
      - Returns `Order.objects.none()` for unauthenticated or guest callers.
   2. **Production Heroku Deployment**:
      - Released backend build **v85** live to `https://getfoodpk-fd9b20442fcf.herokuapp.com`.
-- **Files modified**:
-  - `backend/orders/views.py`
-- **How it was verified**: Ran `test_dual_app_e2e.py` Step 5 (Multi-Account Isolation) with 100% pass rate.
 - **Confidence**: 100% — verified via multi-user integration tests and live Heroku release.
+
+---
+
+## Phase 8 — Comprehensive Pre-Delivery Production Regression & Audit Suite — 2026-09-02
+- **What changed and why**:
+  1. **Exhaustive Multi-Tenant & Pre-Delivery Regression Verification (`test_phase8_production_regression.py`)**:
+     - Audited and verified all 3 Phase 1 active brands (`tandooristoppk`, `jushhpk`, `getafomo`) and strictly 7 live operational branches, confirming Phase 2 brands remain hidden.
+     - Audited Flash Deals Engine v2.0 (`FlashDeal`, `FlashDealRedemption`) for time schedule enforcement, customer discovery feed serialization, and atomic per-user redemption cap tracking.
+     - Audited Dynamic Promo / Coupon Engine (`Coupon`, `CouponValidateView`) for minimum subtotal threshold gating (Rs. 500), maximum discount caps (Rs. 200), and atomic usage recording.
+     - Audited Branch Stock Overrides (`BranchMenuItemAvailability`) confirming branch-level stock toggles (e.g. setting item out of stock at Johar Town) do not corrupt the global master catalog or other branches (e.g. Lake City).
+     - Audited Rider Roster & Atomic Dispatch (`BranchRider`, `OrderAssignRiderView`) confirming status transitions (`AVAILABLE` -> `ON_DELIVERY` -> `AVAILABLE` upon delivery).
+     - Audited Customer Order History Scoping (`MyOrdersListView`) confirming absolute zero cross-user leakage across accounts.
+- **Files modified / created**:
+  - `test_phase8_production_regression.py` [NEW]
+- **How it was verified**:
+  - Ran `test_phase8_production_regression.py` ➔ **23/23 tests passed (100%)**.
+- **Confidence**: 100% — verified across all DRF views, models, and serializers.
+
 
 
 

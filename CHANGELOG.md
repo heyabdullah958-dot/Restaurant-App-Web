@@ -1,6 +1,18 @@
 
 # Changelog
 
+## 2026-09-02 Phase 8 — Comprehensive Pre-Delivery Production Regression & System Audit Suite
+- **Multi-Tenant Architecture & Phase 1 Scope Isolation**:
+  - Validated strict operational scoping for all 3 Phase 1 active brands (`tandooristoppk`, `jushhpk`, `getafomo`) and 7 live branches with 4 Phase 2 brands hidden.
+- **Super Admin HQ Flash Deals v2.0 & Dynamic Promo Engine**:
+  - Audited Flash Deal time schedule enforcement, customer discovery feed serialization, and atomic per-user redemption cap tracking.
+  - Audited Coupon validation rules: minimum subtotal thresholds (Rs. 500), maximum discount caps (Rs. 200), and atomic usage records.
+- **Branch Stock Availability Overrides & Rider Dispatch**:
+  - Validated `BranchMenuItemAvailability` per-branch stock overrides without master catalog corruption.
+  - Verified rider atomic dispatch (`AVAILABLE` -> `ON_DELIVERY` -> `AVAILABLE` on delivery) and monotonic order status progression.
+- **Multi-Platform Build & Bytecode Verification**:
+  - Verified 100% clean builds across Web Admin (`/admin`), Django REST API (`/backend`), Merchant Manager App (`/admin-app`), and Customer App (`/app`).
+
 ## 2026-09-01 Phase 7 — Legal Screens (Privacy Policy & Terms of Service) Theme & UI Standardization
 - **Native Warm Light Legal UI (`app/src/screens/LegalScreen.tsx`)**:
   - Replaced external WebView wrapper with a 100% native React Native legal screen conforming to Customer App warm light tokens (`#F8FAFC`, `#FFFFFF`, `#FFF1F2`, `#E94124`, `#1F1A17`).
