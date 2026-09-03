@@ -89,6 +89,30 @@
 - **Self-corrections used**: 0/3.
 - **Confidence score**: 100%.
 
+---
+
+## Phase 8 — Comprehensive Regression, Invariant Matrix & Standalone APK Builds — 2026-09-02 / 2026-09-03
+- **What was done**:
+  1. **Standalone Production Android APK Compilation**:
+     - Assembled **Customer App Release APK** (`app/android/gradlew.bat assembleRelease`) ➔ `D:\GetFood-Customer.apk` (55.6 MB).
+     - Assembled **Merchant Manager App Release APK** (`admin-app/android/gradlew.bat assembleRelease`) ➔ `D:\GetFood-Manager.apk` (35.5 MB).
+     - Copies placed in `D:\` root drive and project directory `D:\sitesdata\Resturent App\`.
+  2. **Exhaustive Automated Test Coverage (90/90 Tests Passing - 100%)**:
+     - `test_phase8_production_regression.py` (23/23 tests pass): Multi-tenant scoping, Flash Deals v2.0, Coupon validation caps, branch stock overrides, rider atomic lifecycle.
+     - `test_deep_invariant_matrix.py` (21/21 tests pass): OWASP Negative price injection attack defense, loyalty points cancellation refund, Dine-In table modes, Haversine bounds, SimpleJWT rotation.
+     - `test_security_concurrency_penetration.py` (18/18 tests pass): OWASP IDOR protection, SQLi & XSS parameterized safety, quantity tampering defense, concurrent single-use coupon DB locks, Redux monotonic rank merging.
+     - `test_live_heroku_e2e_deep.py` (11/11 tests pass): Live Heroku API discovery, branch nested serializers, popular tags, live flash deals and coupon validation.
+     - `test_live_heroku_auth_order_flow.py` (12/12 tests pass): Live registration, JWT login, Bearer profile, empty order history isolation, and live SimpleJWT token rotation.
+  3. **Multi-Platform Clean Compilation**:
+     - `admin` Web HQ: `npm run build` (1758 modules, 0 errors).
+     - `admin-app` Manager Mobile: `npx tsc --noEmit` & `npx expo export` (1081 modules, 3.2MB Hermes `.hbc`, 0 errors).
+     - `app` Customer Mobile: `npx tsc --noEmit` & `npx expo export` (1425 modules, 4.5MB Hermes `.hbc`, 0 errors).
+- **Files created**: `test_phase8_production_regression.py`, `test_deep_invariant_matrix.py`, `test_security_concurrency_penetration.py`, `test_live_heroku_e2e_deep.py`, `test_live_heroku_auth_order_flow.py`.
+- **Files modified**: `BUILD.md`, `CHANGELOG.md`, `FRONTEND.md`, `BACKEND.md`, `GEMINI.md`.
+- **Self-corrections used**: 0/3.
+- **Confidence score**: 100%.
+
+
 
 
 

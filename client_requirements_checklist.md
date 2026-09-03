@@ -63,17 +63,18 @@
 
 ## 📞 5. PHONE NUMBERS — URGENT 🚨
 
-> **Yeh ab bhi fake numbers lage hain code mein — order koi bhi kare to kisi ke paas nahi jayega!**
+> **Phase 1 Active Brands ke Real Numbers Database & Apps mein Active Hain:**
 
-| Restaurant | Problem | Kya Chahiye |
+| Restaurant / Branch | Active Real Number | Status |
 |---|---|---|
-| **GetAFomo** | `+92 300 0000000` laga hai ← FAKE | ✅ Real WhatsApp number |
-| **TandooriStopPK** | `+92 300 1234567` laga hai ← FAKE | ✅ Johar Town branch ka number |
-| **TandooriStopPK** | ← FAKE | ✅ Lake City branch ka number |
-| **SeenBanao** | Koi number nahi | ✅ WhatsApp number |
-| **DineAtBlue** | Koi number nahi | ✅ Phone/WhatsApp number |
-| **SandMelts** | Koi number nahi | ✅ WhatsApp number |
-| **BirdManFoodsPK** | Koi number nahi | ✅ WhatsApp number |
+| **Tandoori Stop - Johar Town** | `0327-4945947` | ✅ Active & Linked |
+| **Tandoori Stop - Lake City** | `0324-4441735` | ✅ Active & Linked |
+| **Tandoori Stop - Baghbanpura** | `0326-6811177` | ✅ Active & Linked |
+| **Jush PK - DHA Phase 1** | `03257217221` | ✅ Active & Linked |
+| **Jush PK - Johar Town** | `03269946142` | ✅ Active & Linked |
+| **Jush PK - Lake City** | `03244441735` | ✅ Active & Linked |
+| **Get A Fomo - Gulberg III** | `03212784841` | ✅ Active & Linked |
+| **Phase 2 Brands (Seenbanao, Dineatblue, Sandmelts, Birdman)** | Phase 2 launch ke waqt chahiye | ⏳ Phase 2 Handoff |
 
 ---
 

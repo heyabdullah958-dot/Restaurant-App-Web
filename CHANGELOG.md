@@ -1,6 +1,32 @@
 
 # Changelog
 
+## 2026-09-03 Phase 8 — Standalone Production Android APK Build Compilation & Delivery
+- **Customer Mobile App Standalone Release APK (`GetFood-Customer.apk`)**:
+  - Successfully compiled standalone release Android APK via Gradle (`app/android/gradlew.bat assembleRelease`) with Hermes bytecode (`1425 modules`), embedded assets, and native C++ binary dependencies (`react-native-maps`, `stripe-react-native`, `react-native-reanimated`, `react-native-gesture-handler`).
+  - Size: **55.6 MB** (`55,597,144 bytes`).
+  - Copied to `D:\GetFood-Customer.apk` and `D:\sitesdata\Resturent App\GetFood-Customer.apk`.
+- **Merchant Manager Mobile App Standalone Release APK (`GetFood-Manager.apk`)**:
+  - Successfully compiled standalone release Android APK via Gradle (`admin-app/android/gradlew.bat assembleRelease`) with root `GestureHandlerRootView`, Hermes bytecode (`1081 modules`), and foreground alarm engine.
+  - Size: **35.5 MB** (`35,470,252 bytes`).
+  - Copied to `D:\GetFood-Manager.apk` and `D:\sitesdata\Resturent App\GetFood-Manager.apk`.
+
+## 2026-09-02 Phase 8 — Invariant Matrix, Concurrency Penetration & Live Cloud Verification
+- **Deep Invariant Matrix & OWASP Attack Defense Suite (`test_deep_invariant_matrix.py` - 21/21 passed)**:
+  - Neutralization of negative price injection & option modifier spoofing (Invariant 12).
+  - Loyalty points cancellation refund & reversal via atomic `F()` expressions (Invariant 13).
+  - Dine-In mode table validation and automatic 0 delivery fee application (Invariant 19).
+  - Monotonic order status progression guard across polling updates (Invariant 15).
+  - SimpleJWT bearer token rotation, lifespan expiration, and payload decoding (Invariant 24).
+- **Extreme Stress, Concurrency & Penetration Suite (`test_security_concurrency_penetration.py` - 18/18 passed)**:
+  - OWASP IDOR cross-customer order inspection defense.
+  - Parameterized query sanitization against SQL injection and XSS fuzzing (`'; DROP TABLE...`, `<script>alert(1)</script>`).
+  - Quantity tampering defense: rejection of zero and negative quantities (`0`, `-1`, `-99`).
+  - High-concurrency race condition testing for single-use coupons with database `select_for_update()` row locks.
+- **Live Heroku Cloud Backend Verification (`test_live_heroku_e2e_deep.py` & `test_live_heroku_auth_order_flow.py` - 23/23 passed)**:
+  - Validated live restaurant catalog with nested branches, popular search tags, live flash deals, and unauthenticated order tracking on `https://getfoodpk-fd9b20442fcf.herokuapp.com`.
+  - Validated live customer registration, SimpleJWT authentication, Bearer profile envelope, and empty order history isolation for new accounts.
+
 ## 2026-09-02 Phase 8 — Comprehensive Pre-Delivery Production Regression & System Audit Suite
 - **Multi-Tenant Architecture & Phase 1 Scope Isolation**:
   - Validated strict operational scoping for all 3 Phase 1 active brands (`tandooristoppk`, `jushhpk`, `getafomo`) and 7 live branches with 4 Phase 2 brands hidden.
@@ -12,6 +38,7 @@
   - Verified rider atomic dispatch (`AVAILABLE` -> `ON_DELIVERY` -> `AVAILABLE` on delivery) and monotonic order status progression.
 - **Multi-Platform Build & Bytecode Verification**:
   - Verified 100% clean builds across Web Admin (`/admin`), Django REST API (`/backend`), Merchant Manager App (`/admin-app`), and Customer App (`/app`).
+
 
 ## 2026-09-01 Phase 7 — Legal Screens (Privacy Policy & Terms of Service) Theme & UI Standardization
 - **Native Warm Light Legal UI (`app/src/screens/LegalScreen.tsx`)**:

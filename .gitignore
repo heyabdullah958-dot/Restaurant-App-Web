@@ -31,3 +31,8 @@ backend/staticfiles/
 
 # Chrome Temporary Profiles
 chrome_temp_profile/
+
+# Built Android APK Binaries
+*.apk
+app/android/app/build/
+admin-app/android/app/build/

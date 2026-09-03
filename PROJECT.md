@@ -74,8 +74,18 @@
 4. **Flash Deals Engine v2.0 & Recurring Midnight Specials**:
    - Implemented multi-tier item scoping (`ENTIRE_MENU`, `CATEGORY`, `SPECIFIC_ITEMS`), 3-way order modes, and midnight schedule rollover.
 
-5. **100% Automated Multi-Tenant End-to-End Test Suite**:
-   - Passed all tests in `test_dual_app_e2e.py` covering full order lifecycles, merchant alarms, guest checkout gates, and cross-account isolation.
+5. **Exhaustive Multi-Platform Regression, Invariants & Security Suite (90/90 Tests Passed)**:
+   - **100% Pass** across 5 automated suites:
+     - `test_phase8_production_regression.py` (23/23 tests)
+     - `test_deep_invariant_matrix.py` (21/21 tests)
+     - `test_security_concurrency_penetration.py` (18/18 tests)
+     - `test_live_heroku_e2e_deep.py` (11/11 tests)
+     - `test_live_heroku_auth_order_flow.py` (12/12 tests)
+     - `test_dual_app_e2e.py` (5/5 steps)
+
+6. **Standalone Production Android APKs Built**:
+   - **GetFood Customer App**: `D:\GetFood-Customer.apk` (55.6 MB)
+   - **GetFood Merchant Manager App**: `D:\GetFood-Manager.apk` (35.5 MB)
 
 ---
 
@@ -86,3 +96,4 @@
 | 🔔 **Firebase Notifications** | Production push notifications for order updates & promos | Client Firebase `firebase_credentials.json` private key |
 | 🌐 **Custom Domains** | Linking custom domain names (e.g. `foodsphere.pk`, `seenbanao.pk`) | Domain Registrar DNS access (Namecheap/GoDaddy/PKNIC) |
 | 📱 **Store Deployment** | Google Play Store & Apple App Store submission | Client Google Play Console & Apple Developer accounts |
+

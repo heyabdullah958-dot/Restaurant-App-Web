@@ -169,16 +169,18 @@ FoodSphere/
 
 ## 📦 Deliverables
 
-- [x] Android APK / AAB (Google Play Store ready)
-- [x] iOS build configuration
+- [x] **GetFood Customer Android APK** (`D:\GetFood-Customer.apk` - 55.6 MB)
+- [x] **GetFood Merchant Manager Android APK** (`D:\GetFood-Manager.apk` - 35.5 MB)
+- [x] iOS build configuration & standalone export
 - [x] Payment integration (Stripe + PayFast + COD)
-- [x] Loyalty Points System
-- [x] React Admin Dashboard (real-time, live)
-- [x] Super-admin dashboard (live charts & order polling)
-- [x] 7 fully responsive websites (live on Cloudflare Pages)
-- [x] Django backend (live on Render)
-- [x] Full GitHub repository access
-- [x] Automated integration testing suite
+- [x] Loyalty Points System (Atomic `F()` expressions)
+- [x] React Admin Dashboard HQ (Live on Vercel & Cloudflare)
+- [x] Super-admin dashboard (Live charts, Flash Deals v2.0 & Promo coupons)
+- [x] 7 fully responsive websites (Live on Cloudflare Pages)
+- [x] Django REST backend (Live 24/7 on Heroku Release v85)
+- [x] Full GitHub repository access (`main` branch synced)
+- [x] Automated integration & regression testing suite (90/90 tests passing - 100%)
+
 
 ---
 

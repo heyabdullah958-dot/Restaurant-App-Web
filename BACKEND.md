@@ -91,6 +91,39 @@
   - Ran `test_phase8_production_regression.py` ➔ **23/23 tests passed (100%)**.
 - **Confidence**: 100% — verified across all DRF views, models, and serializers.
 
+---
+
+## Phase 8 — Invariant Matrix, Concurrency Penetration & Live Cloud Verification — 2026-09-02 / 2026-09-03
+- **What changed and why**:
+  1. **Deep Invariant Matrix & Attack Defense Suite (`test_deep_invariant_matrix.py`)**:
+     - Verified Invariant 12: OWASP Negative price injection and option tampering defense in `OrderCreateSerializer`.
+     - Verified Invariant 13: Atomic loyalty points refund & reversal on order cancellation (`F('loyalty_points') + points`).
+     - Verified Invariant 19: Dine-In order type table number validation and zero delivery fee application.
+     - Verified Invariant 15: Monotonic status rank ordering guard preventing out-of-order state regressions.
+     - Verified Invariant 24: SimpleJWT bearer token rotation, lifespan expiration, and payload decoding.
+  2. **Extreme Stress, Concurrency & OWASP Penetration Suite (`test_security_concurrency_penetration.py`)**:
+     - Verified OWASP IDOR protection: Non-owners cannot inspect other customers' orders.
+     - Verified Non-manager rider dispatch tamper blocking: Only assigned branch managers can dispatch riders.
+     - Verified Parameterized query safety against SQL Injection and XSS payloads (`'; DROP TABLE...`, `<script>alert(1)</script>`).
+     - Verified Quantity tampering defense: Rejection of zero, negative, and nonsensical quantities (`0`, `-1`, `-99`).
+     - Verified High-concurrency race condition testing for single-use promo coupons with `select_for_update()` database row locks.
+  3. **Live Heroku Cloud Production Backend Verification (`test_live_heroku_e2e_deep.py` & `test_live_heroku_auth_order_flow.py`)**:
+     - Verified live endpoints on `https://getfoodpk-fd9b20442fcf.herokuapp.com`:
+       - `GET /api/restaurants/` (Phase 1 active brands with nested `branches` arrays).
+       - `GET /api/v1/search/popular-tags/` (Live dynamic search suggestions).
+       - `GET /api/flash-deals/` (Live flash deal countdowns and discount preview).
+       - `GET /api/v1/orders/<pk>/track/` (Universal unauthenticated real-time order tracking).
+       - `POST /api/auth/register/` & `POST /api/auth/login/` (Live JWT authentication lifecycle, initial 50 loyalty points allocation, empty order history isolation, and token rotation).
+- **Files created**:
+  - `test_deep_invariant_matrix.py`
+  - `test_security_concurrency_penetration.py`
+  - `test_live_heroku_e2e_deep.py`
+  - `test_live_heroku_auth_order_flow.py`
+- **How it was verified**:
+  - Ran all 5 test suites ➔ **90/90 tests passed (100% pass rate)**.
+- **Confidence**: 100% — verified against both local test database and production Heroku cloud API.
+
+
 
 
 

@@ -148,16 +148,18 @@ FoodSphere/
 
 ## 📦 Deliverables Checklist
 
-- [x] Android APK / AAB (Google Play Store ready)
-- [x] iOS build configuration
+- [x] **GetFood Customer Android APK** (`D:\GetFood-Customer.apk` - 55.6 MB)
+- [x] **GetFood Merchant Manager Android APK** (`D:\GetFood-Manager.apk` - 35.5 MB)
+- [x] iOS build configuration & Hermes export
 - [x] Payment integration (Stripe + PayFast + COD)
 - [x] Loyalty Points System (F() expressions based)
 - [x] Restaurant admin panel (Django Jazzmin + React Dashboard)
 - [x] Super-admin dashboard (real-time order polling & live charts)
 - [x] 7 fully responsive websites (live on Cloudflare Pages)
 - [x] Full GitHub repository access
-- [x] Automated integration testing suite (`test_backend.py`)
+- [x] Automated integration & regression testing suite (90/90 tests passing - 100%)
 - [x] Session & Auth Lifecycle Protection (Cross-user state leak isolation)
+
 
 ---
 
@@ -200,8 +202,13 @@ FoodSphere/
 | Customer Order History User-Scoping & Cache Isolation (Phase 6) | ✅ Completed (Strict `Order.objects.filter(user=user)` in DRF, Redux map isolation, Heroku v85 deploy) | Done |
 | Legal Screens Theme & UI Standardization (Phase 7) | ✅ Completed (100% native warm light UI, interactive segmented switcher, zero dark slate artifacts) | Done |
 | Pre-Delivery Production Regression & System Audit (Phase 8) | ✅ Completed (Multi-platform verification, 23/23 audit tests pass, 100% clean builds across all 4 surfaces) | Done |
+| Invariant Matrix & OWASP Attack Defense Suite (Phase 8) | ✅ Completed (21/21 passed: Negative price spoofing defense, loyalty refund, Dine-In zero fee, monotonic status, SimpleJWT) | Done |
+| Security, Concurrency & Pen-Testing Suite (Phase 8) | ✅ Completed (18/18 passed: OWASP IDOR, SQLi/XSS fuzzing, quantity tampering, single-use coupon DB row locks) | Done |
+| Live Heroku 24/7 Deep & Auth Journey Verification (Phase 8) | ✅ Completed (23/23 passed: Live Heroku API discovery, registration, Bearer profile, token rotation) | Done |
+| Standalone Production Android APK Builds (Phase 8) | ✅ Completed (Customer App `D:\GetFood-Customer.apk` [55.6 MB] & Manager App `D:\GetFood-Manager.apk` [35.5 MB]) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
+
 
 ### 🔗 Deployed Prototypes
 
