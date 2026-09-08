@@ -1,6 +1,6 @@
 # 🍽️ PROJECT.md — GetFood (FoodSphere) Multi-Tenant Platform Overview
 > **Project Completion Status**: 100% Launch Ready (Core Code, Security & Features: 100% Finished)  
-> **Last Updated**: 2026-09-01
+> **Last Updated**: 2026-09-08
 
 ---
 
@@ -83,9 +83,11 @@
      - `test_live_heroku_auth_order_flow.py` (12/12 tests)
      - `test_dual_app_e2e.py` (5/5 steps)
 
-6. **Standalone Production Android APKs Built**:
-   - **GetFood Customer App**: `D:\GetFood-Customer.apk` (55.6 MB)
-   - **GetFood Merchant Manager App**: `D:\GetFood-Manager.apk` (35.5 MB)
+6. **Standalone Production Android APKs Built & Universal Multi-Architecture Support (Phase 9)**:
+   - **GetFood Customer App Release APK**: `D:\GetFood-Customer.apk` (93.0 MB, `arm64-v8a`, `armeabi-v7a`, `x86_64`).
+   - **GetFood Merchant Manager App Release APK**: `D:\GetFood-Manager.apk` (66.1 MB, `arm64-v8a`, `armeabi-v7a`, `x86_64`).
+   - Hardened root startup lifecycles, entry-point gesture handler precedence, global `ErrorUtils` crash interception, root `ErrorBoundary` components wrapping `<Provider>`, and defensive splash screen navigation timers.
+   - 101/101 automated tests passing across 6 comprehensive suites including `test_phase9_apk_crash_guard_suite.py` (11/11).
 
 ---
 

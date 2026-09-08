@@ -321,4 +321,17 @@
   4. **Strict Temporal Guards on DateTime Pickers**: Date/time picker modals for time-bound promotions must strictly enforce `minDate = new Date()`, disable previous month navigation when viewing the current month, and reject any configuration where `end_time <= start_time`.
 - **Applies to**: `app/src/screens/CartScreen.tsx`, `app/src/screens/CheckoutScreen.tsx`, `app/src/store/cartSlice.ts`, `admin/src/views/ManagerManagement.tsx`, `admin-app/src/components/ui/DateTimePickerModal.tsx`, `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`.
 
+---
+
+## Lesson 24 — Standalone Release APK Cold Launch Crash Prevention, Multi-ABI Packaging & Splash Navigation Guards — 2026-09-08
+- **Pattern**: Standalone compiled Android APK stability, multi-architecture ABI packaging (`reactNativeArchitectures`), native gesture handler precedence, splash screen navigation race guards, and global error boundaries.
+- **Wrong assumption made**: Assuming that configuring multi-architecture compilation (`arm64-v8a,armeabi-v7a,x86_64`) and manifest permissions in one app (`app/`) is sufficient without applying identical properties to the companion app (`admin-app/`), and assuming `SplashScreen` navigation timers can safely depend on reactive auth states (`isAuthenticated`).
+- **What actually mattered**:
+  1. Standalone production Android APKs crash immediately on startup with `UnsatisfiedLinkError` on non-arm64 hardware (32-bit devices or emulators) if `reactNativeArchitectures` only includes `arm64-v8a`. Both customer and manager `gradle.properties` must declare `reactNativeArchitectures=arm64-v8a,armeabi-v7a,x86_64`.
+  2. Native Android permissions (`WAKE_LOCK`, `POST_NOTIFICATIONS`, `ACCESS_NETWORK_STATE`) must be explicitly declared in both `app.json` and `android/app/src/main/AndroidManifest.xml` to prevent fatal runtime `SecurityException` crashes on Android 13/14+.
+  3. Splash screen navigation timers must use single-fire refs (`hasNavigated = useRef(false)`) independent of volatile authentication states, preventing double-timer resets (~3.8s delays) or erratic redirects to onboarding.
+  4. Root `<ErrorBoundary>` components must wrap the entire component tree *outside* `<Provider store={store}>` so that store initialization errors or state rehydration faults are caught gracefully with a recovery screen instead of terminating the Android activity.
+- **Applies to**: `app/index.ts`, `admin-app/index.ts`, `app/App.tsx`, `admin-app/App.tsx`, `app/src/screens/SplashScreen.tsx`, `app/src/components/ErrorBoundary.tsx`, `admin-app/src/components/ErrorBoundary.tsx`, `app/android/gradle.properties`, `admin-app/android/gradle.properties`, `app/android/app/src/main/AndroidManifest.xml`, `admin-app/android/app/src/main/AndroidManifest.xml`.
+
+
 
