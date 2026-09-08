@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -71,15 +72,18 @@ export default function OnboardingScreen({ navigation }: { navigation: any }) {
       flatListRef.current?.scrollToOffset({ offset });
       setCurrentSlideIndex(nextSlideIndex);
     } else {
+      AsyncStorage.setItem('@getfood_has_seen_onboarding', 'true').catch(() => {});
       navigation.replace('Main');
     }
   };
 
   const handleSkip = () => {
+    AsyncStorage.setItem('@getfood_has_seen_onboarding', 'true').catch(() => {});
     navigation.replace('Main');
   };
 
   const handleSignInDirect = () => {
+    AsyncStorage.setItem('@getfood_has_seen_onboarding', 'true').catch(() => {});
     navigation.replace('Auth');
   };
 

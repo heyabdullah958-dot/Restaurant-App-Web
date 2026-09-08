@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Animated, Dimensions, Image } from 'react-native';
 import { useSelector } from 'react-redux';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../theme';
 import { RootState } from '../store';
 
@@ -9,7 +10,10 @@ const { width } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }: { navigation: any }) {
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
-  
+  const authRef = useRef(isAuthenticated);
+  authRef.current = isAuthenticated;
+  const hasNavigated = useRef(false);
+
   // Animation values
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -17,6 +21,8 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
   const subtextOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let isMounted = true;
+
     // Run animations in sequence
     Animated.sequence([
       Animated.parallel([
@@ -44,14 +50,23 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
       }),
     ]).start();
 
-    // Navigate safely after a delay
-    const timer = setTimeout(() => {
+    // Navigate safely after animations complete
+    const performNavigation = async () => {
+      if (hasNavigated.current || !isMounted) return;
+      hasNavigated.current = true;
+
       try {
-        if (isAuthenticated) {
-          // Navigate to the main/tab screen if already authenticated
+        let hasSeenOnboarding = false;
+        try {
+          const val = await AsyncStorage.getItem('@getfood_has_seen_onboarding');
+          hasSeenOnboarding = val === 'true';
+        } catch (e) {}
+
+        if (authRef.current || hasSeenOnboarding) {
+          // Navigate to the main/tab screen if authenticated or has completed onboarding
           navigation.replace('Main');
         } else {
-          // Otherwise, show the onboarding screen
+          // Otherwise, show the onboarding screen for first-time visitors
           navigation.replace('Onboarding');
         }
       } catch (navErr) {
@@ -62,10 +77,15 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
           console.error('[SplashScreen] Fatal fallback navigation error:', fallbackErr);
         }
       }
-    }, 1900);
+    };
 
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, navigation]);
+    const timer = setTimeout(performNavigation, 1900);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [navigation]);
 
   return (
     <View style={styles.container}>

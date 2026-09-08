@@ -51,11 +51,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
-          <ErrorBoundary>
+        <ErrorBoundary>
+          <Provider store={store}>
             <AppInitializer />
-          </ErrorBoundary>
-        </Provider>
+          </Provider>
+        </ErrorBoundary>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

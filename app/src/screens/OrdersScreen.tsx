@@ -475,7 +475,13 @@ export default function OrdersScreen() {
 
           <TouchableOpacity activeOpacity={0.75}
             style={[styles.loginButton, { width: '100%', flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
-            onPress={() => navigation.navigate('Auth')}
+            onPress={() => {
+              try {
+                navigation.navigate('Auth', { returnScreen: 'Orders' });
+              } catch (e) {
+                navigation.getParent()?.navigate('Auth', { returnScreen: 'Orders' });
+              }
+            }}
           >
             <Ionicons name="log-in-outline" size={18} color={COLORS.white} />
             <Text style={styles.loginButtonText}>Sign In / Register</Text>
