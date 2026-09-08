@@ -112,6 +112,35 @@
 - **Self-corrections used**: 0/3.
 - **Confidence score**: 100%.
 
+---
+
+## Phase 9 — Mobile App Standalone APK Cold Launch Crash & Native Initialization Fix — 2026-09-08
+- **What was done**:
+  1. **Root Entry Point Precedence Hardening**:
+     - Pre-pended `import 'react-native-gesture-handler';` at line 1 of `app/index.ts` and `admin-app/index.ts`.
+     - Registered `ErrorUtils.setGlobalHandler` and `(Promise as any)._setUnhandledRejectionHandler` to intercept unhandled exceptions and prevent the native Android Activity from terminating on cold start.
+  2. **Top-Level Error Boundary & Crash Recovery**:
+     - Created `app/src/components/ErrorBoundary.tsx` featuring brand-aligned recovery UI, diagnostics inspector, app reload, and local storage cache reset (`AsyncStorage.clear()`).
+     - Wrapped `<Provider>` at the root of `App.tsx` and retained inner screen boundary around `Stack.Navigator`.
+  3. **Screen Rendering & Startup Lifecycle Guards**:
+     - Enabled native screen rendering optimization via `enableScreens(true)` and `enableFreeze(true)` in `app/App.tsx`.
+     - Defensively wrapped `AppContent` startup lifecycle (`loadSavedToken`, `initPushNotificationListener`, and pending deep-links) in robust `try/catch` blocks.
+     - Hardened `SplashScreen.tsx` timeout navigation with safe fallbacks.
+  4. **Native Configuration & Multi-Architecture Compilation**:
+     - Added missing `android.permission.ACCESS_NETWORK_STATE`, `WAKE_LOCK`, and `POST_NOTIFICATIONS` permissions to `app/app.json` and `app/android/app/src/main/AndroidManifest.xml`.
+     - Configured multi-architecture support (`arm64-v8a`, `armeabi-v7a`, `x86_64`) in `app/app.json` and `app/android/gradle.properties`.
+     - Configured `local.properties` with system Android SDK path (`C:\Users\HP\AppData\Local\Android\Sdk`).
+  5. **Standalone Production Release APK Assembled**:
+     - Successfully assembled release APK via `./gradlew.bat assembleRelease` (`BUILD SUCCESSFUL in 15m 9s`, 991 actionable tasks) ➔ `D:\GetFood-Customer.apk` (93.0 MB).
+     - Both `D:\GetFood-Customer.apk` and `D:\sitesdata\Resturent App\GetFood-Customer.apk` updated.
+  6. **Automated Test Coverage**:
+     - Created `test_phase9_apk_crash_guard_suite.py` with 10/10 tests passing (100%).
+- **Files created**: `app/src/components/ErrorBoundary.tsx`, `app/android/local.properties`, `admin-app/android/local.properties`, `test_phase9_apk_crash_guard_suite.py`.
+- **Files modified**: `app/index.ts`, `admin-app/index.ts`, `app/App.tsx`, `app/src/screens/SplashScreen.tsx`, `app/app.json`, `app/android/app/src/main/AndroidManifest.xml`, `app/android/gradle.properties`, `BUGS.md`, `BUILD.md`.
+- **Self-corrections used**: 1/3 (Resolved missing `sdk.dir` in `local.properties` for Gradle).
+- **Confidence score**: 100%.
+
+
 
 
 

@@ -148,7 +148,7 @@ FoodSphere/
 
 ## 📦 Deliverables Checklist
 
-- [x] **GetFood Customer Android APK** (`D:\GetFood-Customer.apk` - 55.6 MB)
+- [x] **GetFood Customer Android APK** (`D:\GetFood-Customer.apk` - 93.0 MB, multi-arch arm64/armv7/x86_64)
 - [x] **GetFood Merchant Manager Android APK** (`D:\GetFood-Manager.apk` - 35.5 MB)
 - [x] iOS build configuration & Hermes export
 - [x] Payment integration (Stripe + PayFast + COD)
@@ -206,6 +206,7 @@ FoodSphere/
 | Security, Concurrency & Pen-Testing Suite (Phase 8) | ✅ Completed (18/18 passed: OWASP IDOR, SQLi/XSS fuzzing, quantity tampering, single-use coupon DB row locks) | Done |
 | Live Heroku 24/7 Deep & Auth Journey Verification (Phase 8) | ✅ Completed (23/23 passed: Live Heroku API discovery, registration, Bearer profile, token rotation) | Done |
 | Standalone Production Android APK Builds (Phase 8) | ✅ Completed (Customer App `D:\GetFood-Customer.apk` [55.6 MB] & Manager App `D:\GetFood-Manager.apk` [35.5 MB]) | Done |
+| Customer App Standalone APK Cold Launch Crash & Native Precedence Fix (Phase 9) | ✅ Completed (Gesture handler precedence, ErrorUtils global interception, dedicated ErrorBoundary, multi-arch APK 93.0MB) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 

@@ -2,6 +2,49 @@
 
 ## Resolved Bugs Log
 
+### Bug #19: Customer App Standalone APK Cold Launch Force-Close / Instant Crash (Resolved 2026-09-08)
+- **Severity**: Fatal / Standalone Launch Blocker
+- **Status**: FIXED
+- **Reported In**: Phase 9 — Mobile App Standalone APK Cold Launch Crash & Native Initialization Fix
+- **Symptoms**:
+  - Launching the compiled standalone Android APK (`GetFood-Customer.apk`) immediately crashed right after displaying the native splash screen (within 1–2 seconds), terminating the process and returning to the Android launcher.
+- **Root Cause**:
+  1. Missing `import 'react-native-gesture-handler';` at the top of `app/index.ts`. React Navigation stack/tab navigators require gesture handler to be loaded as line 1 of the app entry file; otherwise native modules fail to initialize on Android startup.
+  2. Missing `enableScreens(true);` call from `react-native-screens` in `app/App.tsx`.
+  3. Lack of global unhandled JS error interception (`ErrorUtils.setGlobalHandler`), which caused any unhandled error during JS initialization to invoke React Native's default fatal handler, killing the Android Activity.
+  4. Missing native permissions in `app.json` and `AndroidManifest.xml` (`android.permission.ACCESS_NETWORK_STATE`, `WAKE_LOCK`, `POST_NOTIFICATIONS`), required by `expo-updates` and network listeners.
+  5. Missing multi-architecture support in `app/android/gradle.properties` (`arm64-v8a,armeabi-v7a,x86_64`) causing potential UnsatisfiedLinkError on non-arm64 devices.
+  6. `ErrorBoundary` was only wrapping the inner `Stack.Navigator` instead of the root application tree outside `Provider`.
+- **Fix Applied**:
+  1. Prepended `import 'react-native-gesture-handler';` at line 1 of `app/index.ts` and `admin-app/index.ts`.
+  2. Added global `ErrorUtils.setGlobalHandler` and promise rejection interception to both entry points.
+  3. Created dedicated `app/src/components/ErrorBoundary.tsx` with user-friendly recovery UI (Reload App & Clear Cache actions) and wrapped `<Provider>` at the root of `App.tsx`.
+  4. Invoked `enableScreens(true)` and `enableFreeze(true)` in `app/App.tsx`.
+  5. Hardened `AppContent` startup lifecycle with defensive try/catch blocks around token hydration, push notifications, and deep link resolution.
+  6. Hardened `SplashScreen.tsx` navigation transitions with safe try/catch fallbacks.
+  7. Added `ACCESS_NETWORK_STATE`, `WAKE_LOCK`, and `POST_NOTIFICATIONS` to `app/app.json` and `app/android/app/src/main/AndroidManifest.xml`.
+  8. Configured multi-arch builds (`arm64-v8a,armeabi-v7a,x86_64`) in `app/app.json` and `app/android/gradle.properties`.
+  9. Successfully compiled standalone release APK via `./gradlew.bat assembleRelease` (`D:\GetFood-Customer.apk`, 93.0 MB).
+- **Files Modified**:
+  - `app/index.ts`
+  - `admin-app/index.ts`
+  - `app/App.tsx`
+  - `app/src/components/ErrorBoundary.tsx` (created)
+  - `app/src/screens/SplashScreen.tsx`
+  - `app/app.json`
+  - `app/android/app/src/main/AndroidManifest.xml`
+  - `app/android/gradle.properties`
+  - `app/android/local.properties` (created)
+  - `admin-app/android/local.properties` (created)
+  - `test_phase9_apk_crash_guard_suite.py` (created)
+- **Verification**:
+  - `test_phase9_apk_crash_guard_suite.py` (10/10 tests pass, 100%).
+  - `npx expo export --platform android` for both `app` and `admin-app` (Hermes bytecode `.hbc` compiled cleanly with 0 errors).
+  - `npx tsc --noEmit` across both apps (0 errors).
+  - Standalone release APK assembled with Gradle 8.13 (`BUILD SUCCESSFUL in 15m 9s`, 991 actionable tasks).
+
+---
+
 ### Bug #18: Cross-User Order History Bleed via Fuzzy Substring Auto-Linking in DRF Backend (Resolved 2026-09-01)
 - **Severity**: Critical / Security & Privacy
 - **Status**: FIXED

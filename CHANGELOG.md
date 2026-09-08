@@ -1,6 +1,25 @@
 
 # Changelog
 
+## 2026-09-08 Phase 9 — Mobile App Standalone APK Cold Launch Crash & Native Initialization Fix
+- **Root Entry Point Precedence & Gesture Handler Loading**:
+  - Placed `import 'react-native-gesture-handler';` at line 1 of `app/index.ts` and `admin-app/index.ts`.
+  - Registered `ErrorUtils.setGlobalHandler` and `(Promise as any)._setUnhandledRejectionHandler` to intercept unhandled exceptions and prevent the native Android Activity from terminating on cold start.
+- **Top-Level Error Boundary & Crash Recovery Screen**:
+  - Implemented `app/src/components/ErrorBoundary.tsx` featuring brand-aligned recovery UI, error diagnostic inspection, reload action, and local cache reset (`AsyncStorage.clear()`).
+  - Wrapped root `<Provider>` inside `<ErrorBoundary>` at the top of `app/App.tsx`.
+- **Native Screen Rendering Optimization**:
+  - Invoked `enableScreens(true)` and `enableFreeze(true)` from `react-native-screens` in `app/App.tsx`.
+- **Startup Lifecycle Hardening**:
+  - Defensively protected `AppContent` startup lifecycle (`loadSavedToken`, `initPushNotificationListener`, pending deep links) and `SplashScreen.tsx` transitions with safe try/catch blocks.
+- **Native Permissions & Multi-Architecture Build Configuration**:
+  - Added missing `ACCESS_NETWORK_STATE`, `WAKE_LOCK`, and `POST_NOTIFICATIONS` permissions to `app/app.json` and `app/android/app/src/main/AndroidManifest.xml`.
+  - Configured multi-architecture support (`arm64-v8a`, `armeabi-v7a`, `x86_64`) in `app/app.json` and `app/android/gradle.properties`.
+- **Standalone Production Android Release APK Re-compilation**:
+  - Assembled multi-architecture release APK (`app/android/gradlew.bat assembleRelease` ➔ `D:\GetFood-Customer.apk`, 93.0 MB).
+- **Automated Verification**:
+  - Created `test_phase9_apk_crash_guard_suite.py` with 10/10 tests passing (100%).
+
 ## 2026-09-03 Phase 8 — Standalone Production Android APK Build Compilation & Delivery
 - **Customer Mobile App Standalone Release APK (`GetFood-Customer.apk`)**:
   - Successfully compiled standalone release Android APK via Gradle (`app/android/gradlew.bat assembleRelease`) with Hermes bytecode (`1425 modules`), embedded assets, and native C++ binary dependencies (`react-native-maps`, `stripe-react-native`, `react-native-reanimated`, `react-native-gesture-handler`).

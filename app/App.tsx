@@ -17,8 +17,11 @@ import { setNavigationRef, initPushNotificationListener } from './src/services/n
 import { COLORS } from './src/theme';
 
 
-import { enableFreeze } from 'react-native-screens';
+import { enableScreens, enableFreeze } from 'react-native-screens';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
+// Optimize native screen rendering performance & stability
+enableScreens(true);
 // Enable freeze on unfocused screens for 60 FPS transition performance
 enableFreeze(true);
 
@@ -71,50 +74,6 @@ type MainTabParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Global Error Boundary — catches unhandled render errors in any screen
-// Must be a class component: React hooks do NOT support getDerivedStateFromError
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (__DEV__) {
-      console.error('ErrorBoundary caught:', error, errorInfo);
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8F9FA', padding: 24 }}>
-          <Text style={{ fontSize: 48, marginBottom: 16 }}>😵</Text>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1E293B', textAlign: 'center' }}>
-            Something went wrong
-          </Text>
-          <Text style={{ fontSize: 14, color: '#64748B', textAlign: 'center', marginTop: 8, marginBottom: 24 }}>
-            The app encountered an unexpected error. Please try again.
-          </Text>
-          <TouchableOpacity
-            onPress={() => this.setState({ hasError: false, error: null })}
-            style={{ backgroundColor: '#FF6B35', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12 }}
-          >
-            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 16 }}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 function MainTabs() {
   const insets = useSafeAreaInsets();
@@ -236,54 +195,71 @@ function AppContent() {
   const navRef = useNavigationContainerRef();
 
   useEffect(() => {
-    // Load saved auth token from AsyncStorage on app startup
-    dispatch(loadSavedToken());
+    // 1. Load saved auth token from AsyncStorage on app startup
+    try {
+      dispatch(loadSavedToken());
+    } catch (err) {
+      if (__DEV__) console.warn('[AppContent] loadSavedToken error:', err);
+    }
 
-    // Register navigation reference for push notification deep-linking
-    setNavigationRef(navRef);
-    const cleanup = initPushNotificationListener();
+    // 2. Register navigation reference for push notification deep-linking
+    let cleanup: (() => void) | undefined;
+    try {
+      setNavigationRef(navRef);
+      cleanup = initPushNotificationListener();
+    } catch (err) {
+      if (__DEV__) console.warn('[AppContent] initPushNotificationListener error:', err);
+    }
 
-    // Check for any pending notification deep-link stored in AsyncStorage
-    AsyncStorage.getItem('pending_deep_link').then((val) => {
-      if (val) {
-        try {
-          const link = JSON.parse(val);
-          AsyncStorage.removeItem('pending_deep_link');
-          if (navRef.isReady() && link?.screen) {
-            (navRef as any).navigate(link.screen, link.params);
+    // 3. Check for any pending notification deep-link stored in AsyncStorage
+    try {
+      AsyncStorage.getItem('pending_deep_link')
+        .then((val) => {
+          if (val) {
+            try {
+              const link = JSON.parse(val);
+              AsyncStorage.removeItem('pending_deep_link');
+              if (navRef.isReady() && link?.screen) {
+                (navRef as any).navigate(link.screen, link.params);
+              }
+            } catch (e) {}
           }
-        } catch (e) {}
-      }
-    });
+        })
+        .catch(() => {});
+    } catch (err) {
+      if (__DEV__) console.warn('[AppContent] deep link reading error:', err);
+    }
 
     return () => {
-      if (cleanup) cleanup();
+      try {
+        if (cleanup) cleanup();
+      } catch (e) {}
     };
   }, [dispatch, navRef]);
 
   return (
     <NavigationContainer ref={navRef}>
       <ErrorBoundary>
-      <Stack.Navigator
-        initialRouteName="Splash"
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#F8F9FA' },
-        }}
-      >
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="Auth" component={AuthScreen} />
-        <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen name="Restaurant" component={RestaurantScreen} />
-        <Stack.Screen name="FlashDeals" component={FlashDealsScreen} />
-        <Stack.Screen name="Cart" component={CartScreen} />
-        <Stack.Screen name="Checkout" component={CheckoutScreen} />
-        <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
-        <Stack.Screen name="Tracking" component={TrackingScreen} />
-        <Stack.Screen name="Rewards" component={RewardsScreen} />
-        <Stack.Screen name="Legal" component={LegalScreen} />
-      </Stack.Navigator>
+        <Stack.Navigator
+          initialRouteName="Splash"
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#F8F9FA' },
+          }}
+        >
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <Stack.Screen name="Auth" component={AuthScreen} />
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+          <Stack.Screen name="FlashDeals" component={FlashDealsScreen} />
+          <Stack.Screen name="Cart" component={CartScreen} />
+          <Stack.Screen name="Checkout" component={CheckoutScreen} />
+          <Stack.Screen name="OrderConfirmation" component={OrderConfirmationScreen} />
+          <Stack.Screen name="Tracking" component={TrackingScreen} />
+          <Stack.Screen name="Rewards" component={RewardsScreen} />
+          <Stack.Screen name="Legal" component={LegalScreen} />
+        </Stack.Navigator>
       </ErrorBoundary>
       <NotificationToast navigationRef={navRef} />
       <StatusBar style="auto" />
@@ -291,15 +267,17 @@ function AppContent() {
   );
 }
 
-
 export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
-          <AppContent />
-        </Provider>
+        <ErrorBoundary>
+          <Provider store={store}>
+            <AppContent />
+          </Provider>
+        </ErrorBoundary>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 }
+

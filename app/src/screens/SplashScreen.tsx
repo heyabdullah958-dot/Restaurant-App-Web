@@ -44,14 +44,23 @@ export default function SplashScreen({ navigation }: { navigation: any }) {
       }),
     ]).start();
 
-    // Navigate after a delay
+    // Navigate safely after a delay
     const timer = setTimeout(() => {
-      if (isAuthenticated) {
-        // Navigate to the main/tab screen if already authenticated
-        navigation.replace('Main');
-      } else {
-        // Otherwise, show the onboarding screen
-        navigation.replace('Onboarding');
+      try {
+        if (isAuthenticated) {
+          // Navigate to the main/tab screen if already authenticated
+          navigation.replace('Main');
+        } else {
+          // Otherwise, show the onboarding screen
+          navigation.replace('Onboarding');
+        }
+      } catch (navErr) {
+        console.warn('[SplashScreen] Navigation error:', navErr);
+        try {
+          navigation.navigate('Main');
+        } catch (fallbackErr) {
+          console.error('[SplashScreen] Fatal fallback navigation error:', fallbackErr);
+        }
       }
     }, 1900);
 
