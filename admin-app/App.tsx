@@ -35,16 +35,25 @@ const OrderPollingProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 const AppInitializer = () => {
   const dispatch = useAppDispatch();
+  const { isAuthenticated, role } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(loadSavedSessionThunk());
+    try {
+      dispatch(loadSavedSessionThunk());
+    } catch (e) {
+      if (__DEV__) console.warn('[AppInitializer] loadSavedSessionThunk error:', e);
+    }
   }, [dispatch]);
 
   return (
-    <OrderPollingProvider>
+    <>
       <AppNavigator />
-      <NewOrderAlertOverlay />
-    </OrderPollingProvider>
+      {isAuthenticated && role === 'branch_manager' && (
+        <OrderPollingProvider>
+          <NewOrderAlertOverlay />
+        </OrderPollingProvider>
+      )}
+    </>
   );
 };
 

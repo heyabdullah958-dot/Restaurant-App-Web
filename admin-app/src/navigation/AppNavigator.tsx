@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '../store';
 import { logoutStaffThunk } from '../store/authSlice';
 
 import { Ionicons } from '@expo/vector-icons';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 // Screens
 import { LoginScreen } from '../screens/LoginScreen';
@@ -405,15 +406,17 @@ export const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      {!isAuthenticated ? (
-        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-          <AuthStack.Screen name="Login" component={LoginScreen} />
-        </AuthStack.Navigator>
-      ) : role === 'super_admin' ? (
-        <SuperAdminTabNavigator />
-      ) : (
-        <BranchManagerTabNavigator />
-      )}
+      <ErrorBoundary>
+        {!isAuthenticated ? (
+          <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+            <AuthStack.Screen name="Login" component={LoginScreen} />
+          </AuthStack.Navigator>
+        ) : role === 'super_admin' ? (
+          <SuperAdminTabNavigator />
+        ) : (
+          <BranchManagerTabNavigator />
+        )}
+      </ErrorBoundary>
     </NavigationContainer>
   );
 };

@@ -231,14 +231,16 @@ export const LoginScreen = () => {
       </ScrollView>
 
       {/* Interactive Server Configuration Modal */}
-      <ServerConfigModal
-        visible={showServerModal}
-        onClose={() => setShowServerModal(false)}
-        onServerChanged={(newUrl) => {
-          setActiveServer(newUrl);
-          dispatch(clearAuthError());
-        }}
-      />
+      {showServerModal && (
+        <ServerConfigModal
+          visible={showServerModal}
+          onClose={() => setShowServerModal(false)}
+          onServerChanged={(newUrl) => {
+            setActiveServer(newUrl);
+            dispatch(clearAuthError());
+          }}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };

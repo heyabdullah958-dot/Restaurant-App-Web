@@ -9,19 +9,21 @@ export const PRODUCTION_API_URL = 'https://getfoodpk-fd9b20442fcf.herokuapp.com/
 export const CUSTOM_API_STORAGE_KEY = '@admin_custom_api_url';
 
 export const detectLocalLanUrl = (): string => {
-  const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || (Constants as any)?.experienceUrl;
-  if (hostUri) {
-    const ip = hostUri.split(':')[0];
-    if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
-      return `http://${ip}:8000/api`;
+  try {
+    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest?.debuggerHost || (Constants as any)?.experienceUrl;
+    if (hostUri) {
+      const ip = hostUri.split(':')[0];
+      if (ip && ip !== 'localhost' && ip !== '127.0.0.1') {
+        return `http://${ip}:8000/api`;
+      }
     }
-  }
-  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    const host = window.location.hostname;
-    if (host && host !== 'localhost' && host !== '127.0.0.1') {
-      return `http://${host}:8000/api`;
+    if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+      const host = window.location.hostname;
+      if (host && host !== 'localhost' && host !== '127.0.0.1') {
+        return `http://${host}:8000/api`;
+      }
     }
-  }
+  } catch (e) {}
   return Platform.OS === 'android' ? 'http://10.0.2.2:8000/api' : 'http://127.0.0.1:8000/api';
 };
 

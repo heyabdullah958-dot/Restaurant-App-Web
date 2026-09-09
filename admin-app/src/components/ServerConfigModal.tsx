@@ -39,7 +39,7 @@ export const ServerConfigModal: React.FC<ServerConfigModalProps> = ({
   const [testResult, setTestResult] = useState<ConnectivityTestResult | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const presets = getAvailablePresets();
+  const presets = React.useMemo(() => (visible ? getAvailablePresets() : []), [visible]);
 
   useEffect(() => {
     if (visible) {
