@@ -2,6 +2,40 @@
 
 ## Resolved Bugs Log
 
+### Bug #20: Merchant Manager App Standalone APK Cold Launch Native Crash in Android Dark Mode (Resolved 2026-09-09)
+- **Severity**: Fatal / Standalone Launch Blocker
+- **Status**: FIXED
+- **Reported In**: Phase 9 — Manager App Standalone APK Cold Launch Crash
+- **Symptoms**:
+  - Launching `GetFood-Manager.apk` on a Samsung Galaxy device in Dark Mode (video `1.mp4`) crashed within ~240ms of splash screen appearance, terminating the process before React or JS error handlers mounted.
+- **Root Cause**:
+  1. `admin-app/android/app/src/main/res/values-night/colors.xml` contained an empty `<resources/>` stub. In Android DayNight mode on Samsung devices, resolving `@color/colorPrimary` from an empty `values-night` table triggered an uncaught native `Resources$NotFoundException` inside `MainActivity.onCreate()` (`setTheme(R.style.AppTheme)`). The Customer App worked because it had no `values-night` directory, causing Android to resolve from `values/colors.xml`.
+  2. Manifest declared `RECORD_AUDIO`, imposing an implicit `android.hardware.microphone` hardware requirement, and camera requirement without `android:required="false"`.
+  3. `OrderPollingProvider` mounted unconditionally on unauthenticated cold boot, initiating polling and AppState listeners while storage hydration was still in-flight.
+- **Fix Applied**:
+  1. Populated `values-night/colors.xml` with complete color tokens matching `values/colors.xml`.
+  2. Wrapped `setTheme(R.style.AppTheme)` in defensive `try/catch` in `MainActivity.kt`.
+  3. Purged `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, and `SYSTEM_ALERT_WINDOW` from `AndroidManifest.xml` and added `uses-feature-not-required` camera flags.
+  4. Guarded `OrderPollingProvider` and `NewOrderAlertOverlay` in `admin-app/App.tsx` behind `isAuthenticated && role === 'branch_manager'`.
+  5. Wrapped navigators in `AppNavigator.tsx` inside an `<ErrorBoundary>` directly within `<NavigationContainer>`.
+  6. Recompiled standalone release APK ➔ `D:\GetFood-Manager.apk` (63.4 MB).
+- **Files Modified**:
+  - `admin-app/android/app/src/main/res/values-night/colors.xml`
+  - `admin-app/android/app/src/main/java/com/abdullah958/getfoodmanager/MainActivity.kt`
+  - `admin-app/android/app/src/main/AndroidManifest.xml`
+  - `admin-app/App.tsx`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin-app/src/screens/LoginScreen.tsx`
+  - `admin-app/src/components/ServerConfigModal.tsx`
+  - `admin-app/src/services/api.ts`
+- **Verification**:
+  - `@expo/cli export:embed` (1066 modules bundled with 0 errors).
+  - `.\gradlew assembleRelease` (Build successful in 1m 30s, binary 63,375,869 bytes).
+  - `aapt2 dump badging GetFood-Manager.apk` (features, permissions, and ABIs verified).
+  - 101/101 automated tests passing across test suites.
+
+---
+
 ### Bug #19: Customer App Standalone APK Cold Launch Force-Close / Instant Crash (Resolved 2026-09-08)
 - **Severity**: Fatal / Standalone Launch Blocker
 - **Status**: FIXED
