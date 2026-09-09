@@ -13,23 +13,6 @@ import {
   NativeModules,
 } from 'react-native';
 
-const getExpoAudio = () => {
-  try {
-    if (Platform.OS === 'web') return null;
-    // Check if ExponentAV native module exists in NativeModules
-    const hasNativeAV = Boolean(
-      NativeModules?.ExponentAV ||
-      (globalThis as any)?.expo?.modules?.ExponentAV
-    );
-    if (!hasNativeAV) {
-      return null;
-    }
-    const av = require('expo-av');
-    return av?.Audio || null;
-  } catch (e) {
-    return null;
-  }
-};
 
 const getExpoKeepAwake = () => {
   try {
@@ -176,36 +159,9 @@ export const NewOrderAlertOverlay = () => {
         return;
       }
 
-      // Native Mobile (Android / iOS)
-      const ExpoAudio = getExpoAudio();
-      if (ExpoAudio && ExpoAudio.setAudioModeAsync) {
-        try {
-          await ExpoAudio.setAudioModeAsync({
-            allowsRecordingIOS: false,
-            playsInSilentModeIOS: true,
-            staysActiveInBackground: false,
-            shouldDuckAndroid: false,
-          });
-
-          if (!soundRef.current) {
-            const { sound } = await ExpoAudio.Sound.createAsync(
-              { uri: ALERT_SOUND_URL },
-              { shouldPlay: true, isLooping: true, volume: 1.0 }
-            );
-            soundRef.current = sound;
-          } else {
-            await soundRef.current.setIsLoopingAsync(true);
-            await soundRef.current.setVolumeAsync(1.0);
-            await soundRef.current.playAsync();
-          }
-        } catch (nativeAudioErr) {
-          console.warn('[NewOrderAlertOverlay] Native audio execution notice:', nativeAudioErr);
-        }
-      } else {
-        console.warn('[NewOrderAlertOverlay] Native ExponentAV not available in runtime. Visual and vibration alert active.');
-      }
+      // Native Mobile (Android / iOS): Visual and continuous haptic vibration alerts are active
     } catch (err) {
-      console.warn('[NewOrderAlertOverlay] Audio playback notice (visual alert active):', err);
+      console.warn('[NewOrderAlertOverlay] Alert notice (visual and vibration active):', err);
     }
   };
 
@@ -227,7 +183,7 @@ export const NewOrderAlertOverlay = () => {
       console.warn('[NewOrderAlertOverlay] Keep-awake deactivation notice:', e);
     }
 
-    // 3. HTML5 Audio release
+    // 3. HTML5 Audio release (Web)
     if (htmlAudioRef.current) {
       try {
         htmlAudioRef.current.pause();
@@ -236,17 +192,8 @@ export const NewOrderAlertOverlay = () => {
       htmlAudioRef.current = null;
     }
 
-    // 4. Web Audio Synth release
+    // 4. Web Audio Synth release (Web)
     stopWebAudioSynth();
-
-    // 5. Expo Audio release
-    if (soundRef.current) {
-      try {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-      } catch (err) {}
-      soundRef.current = null;
-    }
   };
 
   // Subscribe to Alert Service events

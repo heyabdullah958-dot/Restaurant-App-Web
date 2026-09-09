@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import json
 from decimal import Decimal
@@ -94,6 +94,8 @@ def run_phase8_audit():
         }
     )
     test_deal.is_active = True
+    test_deal.start_time = now - timedelta(hours=1)
+    test_deal.end_time = now + timedelta(hours=5)
     test_deal.save()
     
     assert_test(test_deal.is_currently_active(), "Flash Deal is currently active and valid within time schedule")

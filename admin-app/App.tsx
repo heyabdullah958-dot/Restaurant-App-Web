@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { enableScreens } from 'react-native-screens';
+import { enableScreens, enableFreeze } from 'react-native-screens';
 import { store, useAppDispatch, useAppSelector } from './src/store';
 import { loadSavedSessionThunk } from './src/store/authSlice';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -13,6 +13,7 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 // Optimize native screen rendering performance & stability
 enableScreens(true);
+enableFreeze(true);
 
 const OrderPollingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { newOrderIds, clearNewOrderAlerts } = useOrderPolling(15000);
