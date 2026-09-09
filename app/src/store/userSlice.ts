@@ -175,7 +175,7 @@ const formatDRFErrorMessage = (error: any, fallback: string): string => {
     }
   }
   if (error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') {
-    return 'Unable to connect to backend server. Tap the GetFood logo 3 times to check server settings.';
+    return 'Unable to connect to GetFood servers. Please check your internet connection and try again.';
   }
   return error.message || fallback;
 };
@@ -201,13 +201,15 @@ export const loginUser = createAsyncThunk<
       // Set the default auth header
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      // Fetch user profile info
-      const profileResponse = await api.get('/users/profile/') as any;
-      let user = profileResponse;
-      if (profileResponse && typeof profileResponse === 'object') {
-        if ('data' in profileResponse) {
-          user = profileResponse.data;
+      // Hydrate user profile from login response or /users/profile/ endpoint
+      let user: UserProfile = loginData.user || null;
+      try {
+        const profileResponse = await api.get('/users/profile/') as any;
+        if (profileResponse && typeof profileResponse === 'object') {
+          user = 'data' in profileResponse ? profileResponse.data : profileResponse;
         }
+      } catch (profileErr) {
+        if (!user) throw profileErr;
       }
       
       try {

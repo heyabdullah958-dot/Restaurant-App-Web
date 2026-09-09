@@ -90,8 +90,18 @@ class UserRegisterView(APIView):
                     'tokens': tokens
                 }
             }, status=status.HTTP_201_CREATED)
-        # Exception handler will format this into { "success": False, "message": "..." }
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Format validation errors cleanly into standard response contract
+        err_msgs = []
+        for field, err_list in serializer.errors.items():
+            if isinstance(err_list, list):
+                err_msgs.append(f"{field}: {', '.join(str(e) for e in err_list)}")
+            else:
+                err_msgs.append(f"{field}: {str(err_list)}")
+        return Response({
+            'success': False,
+            'message': '; '.join(err_msgs) if err_msgs else 'Registration failed',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 class GuestAuthView(APIView):
     authentication_classes = []

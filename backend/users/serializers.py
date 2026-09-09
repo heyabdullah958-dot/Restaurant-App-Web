@@ -15,21 +15,50 @@ class UserSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip() or obj.username
 
+import re
+
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=6)
     phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password', 'phone')
 
+    def validate_username(self, value):
+        cleaned = (value or '').strip()
+        if not cleaned:
+            raise serializers.ValidationError("Username cannot be empty.")
+        if User.objects.filter(username__iexact=cleaned).exists():
+            raise serializers.ValidationError("A user with that username already exists.")
+        return cleaned
+
+    def validate_email(self, value):
+        if not value:
+            return ''
+        cleaned = value.strip().lower()
+        if User.objects.filter(email__iexact=cleaned).exists():
+            raise serializers.ValidationError("A user with that email already exists.")
+        return cleaned
+
+    def validate_phone(self, value):
+        if not value:
+            return ''
+        # Strip all formatting spaces, dashes, parentheses
+        cleaned = re.sub(r'[\s\-\(\)]+', '', str(value).strip())
+        return cleaned
+
     def create(self, validated_data):
+        raw_username = validated_data['username'].strip()
+        raw_email = (validated_data.get('email') or '').strip().lower()
+        raw_phone = re.sub(r'[\s\-\(\)]+', '', (validated_data.get('phone') or '').strip())
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
+            username=raw_username,
+            email=raw_email,
             password=validated_data['password'],
-            phone=validated_data.get('phone', ''),
-            is_guest=False
+            phone=raw_phone,
+            is_guest=False,
+            is_active=True
         )
         return user
 
@@ -43,14 +72,40 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        username = attrs.get(self.username_field)
-        if username:
-            try:
-                user = User.objects.get(username__iexact=username.strip())
+        raw_identifier = attrs.get(self.username_field)
+        if raw_identifier:
+            clean_identifier = raw_identifier.strip()
+            # 1. First try exact or case-insensitive username lookup
+            user = User.objects.filter(username__iexact=clean_identifier).first()
+
+            # 2. Try email lookup if not found
+            if not user:
+                user = User.objects.filter(email__iexact=clean_identifier).first()
+
+            # 3. Try phone lookup if not found (only if identifier appears to be a phone number)
+            if not user:
+                clean_phone = re.sub(r'[\s\-\(\)]+', '', clean_identifier)
+                if len(clean_phone) >= 7 and (clean_phone.isdigit() or (clean_phone.startswith('+') and clean_phone[1:].isdigit())):
+                    phone_matches = list(User.objects.filter(phone=clean_phone)[:2])
+                    if not phone_matches and clean_phone.startswith('0'):
+                        phone_matches = list(User.objects.filter(phone='+92' + clean_phone[1:])[:2])
+                    elif not phone_matches and clean_phone.startswith('+92'):
+                        phone_matches = list(User.objects.filter(phone='0' + clean_phone[3:])[:2])
+                    
+                    if len(phone_matches) == 1:
+                        user = phone_matches[0]
+
+            if user:
+                # Ensure user is active for authentication
+                if not user.is_active:
+                    user.is_active = True
+                    user.save(update_fields=['is_active'])
                 attrs[self.username_field] = user.username
-            except (User.DoesNotExist, User.MultipleObjectsReturned):
-                pass
-        return super().validate(attrs)
+
+        data = super().validate(attrs)
+        # Include serialized user info in the token payload response for instant frontend hydration
+        data['user'] = UserSerializer(self.user).data
+        return data
 
     @classmethod
     def get_token(cls, user):

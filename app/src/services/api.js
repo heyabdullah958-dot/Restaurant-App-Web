@@ -24,9 +24,12 @@ export const detectLocalLanUrl = () => {
 };
 
 // Internal active URL state — ALWAYS default to 24/7 production server
-let activeBaseUrl = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+let activeBaseUrl = PRODUCTION_API_URL;
 
-export const getActiveBaseUrl = () => activeBaseUrl;
+export const getActiveBaseUrl = () => {
+  if (!__DEV__) return PRODUCTION_API_URL;
+  return activeBaseUrl;
+};
 
 export const normalizeApiUrl = (url) => {
   let cleaned = (url || '').trim();
@@ -141,16 +144,29 @@ export const testApiConnectivity = async (targetUrl) => {
   }
 };
 
-// Initialize custom URL from storage if previously saved
-safeGetItem(CUSTOM_API_STORAGE_KEY).then((savedUrl) => {
-  if (savedUrl) {
-    const normalized = normalizeApiUrl(savedUrl);
-    activeBaseUrl = normalized;
-    api.defaults.baseURL = normalized;
-  }
-});
+// Strict production hard-lock: release builds always target Heroku production API
+if (!__DEV__) {
+  activeBaseUrl = PRODUCTION_API_URL;
+  api.defaults.baseURL = PRODUCTION_API_URL;
+  safeRemoveItem(CUSTOM_API_STORAGE_KEY).catch(() => {});
+} else {
+  // Initialize custom URL from storage if previously saved in development
+  safeGetItem(CUSTOM_API_STORAGE_KEY).then((savedUrl) => {
+    if (savedUrl) {
+      const normalized = normalizeApiUrl(savedUrl);
+      activeBaseUrl = normalized;
+      api.defaults.baseURL = normalized;
+    }
+  });
+}
 
 export const setActiveBaseUrl = async (newUrl) => {
+  if (!__DEV__) {
+    activeBaseUrl = PRODUCTION_API_URL;
+    api.defaults.baseURL = PRODUCTION_API_URL;
+    await safeRemoveItem(CUSTOM_API_STORAGE_KEY).catch(() => {});
+    return PRODUCTION_API_URL;
+  }
   const normalized = normalizeApiUrl(newUrl);
   activeBaseUrl = normalized;
   api.defaults.baseURL = normalized;

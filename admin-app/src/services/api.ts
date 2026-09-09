@@ -132,9 +132,15 @@ export const safeRemoveItem = async (key: string): Promise<void> => {
   } catch (e) {}
 };
 
-// Hydrate saved custom API URL asynchronously on module initialization
+// Hydrate saved custom API URL asynchronously on module initialization (DEV only)
 (async () => {
   try {
+    if (!__DEV__) {
+      activeBaseUrl = PRODUCTION_API_URL;
+      api.defaults.baseURL = PRODUCTION_API_URL;
+      await safeRemoveItem(CUSTOM_API_STORAGE_KEY).catch(() => {});
+      return;
+    }
     const savedUrl = await safeGetItem(CUSTOM_API_STORAGE_KEY);
     if (savedUrl) {
       activeBaseUrl = normalizeApiUrl(savedUrl);
@@ -144,6 +150,12 @@ export const safeRemoveItem = async (key: string): Promise<void> => {
 })();
 
 export const setActiveBaseUrl = async (url: string): Promise<string> => {
+  if (!__DEV__) {
+    activeBaseUrl = PRODUCTION_API_URL;
+    api.defaults.baseURL = PRODUCTION_API_URL;
+    await safeRemoveItem(CUSTOM_API_STORAGE_KEY).catch(() => {});
+    return PRODUCTION_API_URL;
+  }
   const normalized = normalizeApiUrl(url);
   activeBaseUrl = normalized;
   api.defaults.baseURL = normalized;

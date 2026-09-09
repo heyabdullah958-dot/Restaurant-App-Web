@@ -74,11 +74,13 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
   const [logoTapCount, setLogoTapCount] = useState(0);
 
   const handleLogoPress = () => {
-    const nextCount = logoTapCount + 1;
-    setLogoTapCount(nextCount);
-    if (nextCount >= 3) {
-      setLogoTapCount(0);
-      setShowServerModal(true);
+    if (__DEV__) {
+      const nextCount = logoTapCount + 1;
+      setLogoTapCount(nextCount);
+      if (nextCount >= 3) {
+        setLogoTapCount(0);
+        setShowServerModal(true);
+      }
     }
   };
 
@@ -321,13 +323,19 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
     }
 
     if (activeTab === 'login') {
-      dispatch(loginUser({ username: username.trim(), password }));
+      const cleanUsername = username.trim();
+      const cleanPassword = password.trim();
+      dispatch(loginUser({ username: cleanUsername, password: cleanPassword }));
     } else {
+      const cleanUsername = username.trim();
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPhone = phone.trim();
+      const cleanPassword = password.trim();
       const result = await dispatch(registerUser({ 
-        username: username.trim(), 
-        email: email.trim().toLowerCase(), 
-        password: password.trim(),
-        phone: phone.trim() 
+        username: cleanUsername, 
+        email: cleanEmail, 
+        password: cleanPassword,
+        phone: cleanPhone 
       }));
       if (registerUser.fulfilled.match(result)) {
         showAlert(
@@ -407,21 +415,14 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
           </TouchableOpacity>
         </View>
 
-        {/* Global Server Error Display */}
+        {/* Global Error Display */}
         {error && (
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => setShowServerModal(true)}
-            style={styles.errorBanner}
-          >
+          <View style={styles.errorBanner}>
             <Ionicons name="alert-circle" size={20} color={COLORS.danger} />
             <View style={{ flex: 1 }}>
               <Text style={styles.errorBannerText}>{error}</Text>
-              <Text style={{ fontSize: 11, color: COLORS.primary, fontWeight: '700', marginTop: 4 }}>
-                ⚙️ Tap here to check server connection
-              </Text>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
 
         {/* Form Fields */}
@@ -489,12 +490,14 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
             <>
               {/* Standard Username/Password Fields */}
               {/* Username Field */}
-              <Text style={styles.fieldLabel}>Username</Text>
+              <Text style={styles.fieldLabel}>
+                {activeTab === 'login' ? 'Username, Email or Phone' : 'Username'}
+              </Text>
               <View style={[styles.inputWrapper, validationErrors.username ? styles.inputError : null]}>
                 <Ionicons name="person-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your username"
+                  placeholder={activeTab === 'login' ? "Enter username, email or phone" : "Choose a username"}
                   value={username}
                   onChangeText={(text) => {
                     setUsername(text);
@@ -503,6 +506,7 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
                     }
                   }}
                   autoCapitalize="none"
+                  autoCorrect={false}
                 />
               </View>
               {validationErrors.username && (
@@ -527,6 +531,7 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
                         }
                       }}
                       autoCapitalize="none"
+                      autoCorrect={false}
                     />
                   </View>
                   {validationErrors.email && (
@@ -552,6 +557,7 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
                           setValidationErrors(prev => ({ ...prev, phone: '' }));
                         }
                       }}
+                      autoCorrect={false}
                     />
                   </View>
                   {validationErrors.phone && (
@@ -576,6 +582,8 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
                     }
                   }}
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="password"
                 />
                 <TouchableOpacity activeOpacity={0.75} onPress={() => setShowPassword(!showPassword)}>
                   <Ionicons
@@ -688,30 +696,6 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
               <Text style={{ fontSize: 12, color: COLORS.primary, fontWeight: '600', textDecorationLine: 'underline' }}>Privacy Policy</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Active Backend Server Trigger */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setShowServerModal(true)}
-            style={{
-              marginTop: 16,
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'row',
-              gap: 6,
-              backgroundColor: COLORS.neutral100,
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 20,
-              alignSelf: 'center',
-            }}
-          >
-            <Ionicons name="server-outline" size={13} color={COLORS.neutral500} />
-            <Text style={{ fontSize: 11, color: COLORS.neutral600, fontWeight: '600' }}>
-              Backend: {activeServer.includes('heroku') ? '🚀 Heroku Cloud (24/7)' : activeServer}
-            </Text>
-          </TouchableOpacity>
-
         </View>
 
       </ScrollView>
@@ -871,12 +855,14 @@ export default function AuthScreen({ navigation, route }: { navigation: any; rou
         onDismiss={hideAlert}
       />
 
-      {/* Backend Server Diagnostics Modal */}
-      <ServerConfigModal
-        visible={showServerModal}
-        onClose={() => setShowServerModal(false)}
-        onServerChanged={(newUrl) => setActiveServer(newUrl)}
-      />
+      {/* Backend Server Diagnostics Modal - DEV ONLY */}
+      {__DEV__ && (
+        <ServerConfigModal
+          visible={showServerModal}
+          onClose={() => setShowServerModal(false)}
+          onServerChanged={(newUrl) => setActiveServer(newUrl)}
+        />
+      )}
 
     </KeyboardAvoidingView>
   );
