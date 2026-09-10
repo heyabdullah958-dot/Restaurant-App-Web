@@ -104,8 +104,32 @@ def run_phase10_verification():
     dup_data = dup_resp.json()
     print(f"  Duplicate rejection message: {dup_data.get('message')}")
 
+    # 8. Registration with whitespace-only email (should register cleanly without duplicate error)
+    print('\n[STEP 8] Testing live registration with whitespace-only email...')
+    ws_user = f'wsemail{ts}'
+    ws_resp = requests.post(f'{HEROKU_BASE_URL}/auth/register/', json={
+        'username': ws_user,
+        'email': '   ',
+        'password': password
+    }, timeout=15)
+    print('Whitespace email registration status:', ws_resp.status_code)
+    assert ws_resp.status_code == 201, f'Expected 201 Created for whitespace email, got {ws_resp.status_code}: {ws_resp.text}'
+    ws_data = ws_resp.json()
+    assert ws_data['data']['user']['email'] == '', 'Email should be empty string'
+    print('  Whitespace email registered cleanly as empty string!')
+
+    # 9. Invalid credentials rejection
+    print('\n[STEP 9] Testing login with wrong credentials...')
+    bad_login = requests.post(f'{HEROKU_BASE_URL}/auth/login/', json={
+        'username': username,
+        'password': 'WrongPassword999!'
+    }, timeout=15)
+    print('Wrong login status:', bad_login.status_code)
+    assert bad_login.status_code == 401, f'Expected 401 Unauthorized, got {bad_login.status_code}'
+    print('  Wrong password properly rejected with 401 Unauthorized!')
+
     print('\n' + '=' * 75)
-    print('ALL 7 LIVE HEROKU V86 VERIFICATION TESTS PASSED (100%)!')
+    print('ALL 9 LIVE HEROKU V87 VERIFICATION TESTS PASSED (100%)!')
     print('=' * 75)
 
 if __name__ == '__main__':
