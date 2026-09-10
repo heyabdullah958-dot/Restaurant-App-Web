@@ -4,6 +4,21 @@
 
 ---
 
+## Lesson 19 — Production Network Hard-Locking, Multi-Identifier Authentication & Mobile Keyboard Normalization — 2026-09-10
+- **Pattern**: Production environment hardening, user registration lifecycle, and tolerant authentication resolution.
+- **Wrong assumption made**:
+  1. Assuming that exposing a developer server config modal and bottom server indicator in mobile layouts is a harmless diagnostic aid in case of connection failure.
+  2. Assuming that users always log in with the exact casing of their registered username and never enter their email address or phone number in the username field.
+  3. Assuming that keyboard autocorrect won't inject whitespace or capitalize inputs, and that asymmetric trimming (`password.trim()` on register but not on login) won't cause credential hash verification failures.
+- **What actually mattered**:
+  1. Production release APKs must NEVER expose developer server switchers, environment presets, or clickable connection error diagnostics. The network layer must be strictly immutable in release builds (`!__DEV__`), defaulting to the live Heroku URL (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) and purging any legacy development overrides from `AsyncStorage`.
+  2. End-users frequently enter their email address or phone number when prompted for login credentials. The authentication backend (`CustomTokenObtainPairSerializer`) must resolve credentials across all 3 user identifiers: exact/case-insensitive username, email address, and normalized phone numbers (with +92 and 0 prefix tolerance).
+  3. Mobile keyboards (Samsung Keyboard, Gboard) auto-suggest words and append trailing spaces to inputs. Setting `autoCorrect={false}`, `autoCapitalize="none"`, and symmetrically trimming inputs on both registration and login ensures 100% credential consistency.
+  4. Embedding the serialized `user` object directly inside the SimpleJWT login response payload guarantees instant profile hydration and eliminates a secondary round-trip network dependency during authentication.
+- **Applies to**: `app/src/services/api.js`, `app/src/screens/AuthScreen.tsx`, `app/src/store/userSlice.ts`, `backend/users/serializers.py`, `backend/users/views.py`.
+
+---
+
 ## Lesson 18 — Strict Foreign Key Isolation vs Heuristic/Substring Auto-Linking in Multi-Tenant REST APIs — 2026-09-01
 - **Pattern**: Multi-tenant customer identity isolation, order history querysets, and Redux cache lifecycle management.
 - **Wrong assumption made**: Assuming that matching historical unassigned guest orders by username prefix or substring (`guest_name__icontains=base_name`) and running `update(user=user)` during `GET /api/orders/my-orders/` is a helpful customer convenience feature.

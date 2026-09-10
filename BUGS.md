@@ -2,7 +2,47 @@
 
 ## Resolved Bugs Log
 
-### Bug #20: Merchant Manager App Standalone APK Cold Launch Native Crash in Android Dark Mode (Resolved 2026-09-09)
+### Bug #21: Exposed Debug Server Selector in Production & Registration/Login Credential Resolution (Resolved 2026-09-10)
+- **Severity**: Critical / Production UX & Authentication Blocker
+- **Status**: FIXED
+- **Reported In**: Phase 10 — Production Server Hard-Lock & New User Registration/Login Lifecycle Resolution
+- **Symptoms**:
+  - In `AuthScreen.tsx`, an active backend server button (`Backend: 🚀 Heroku Cloud (24/7)`) was mounted at the bottom of the screen, and the error banner prompted `⚙️ Tap here to check server connection`, opening the `ServerConfigModal` with developer presets (Local Dev LAN IP, Android Emulator Loopback, Custom URL).
+  - Newly registered users attempting to log in with their credentials experienced authentication errors if username casing differed, if email/phone was entered into the login identifier field, or if keyboard autocorrect injected whitespace.
+- **Root Cause**:
+  1. `ServerConfigModal` and server trigger touchables were left un-guarded by `__DEV__` in production layouts, and `api.js` allowed `@getfood_custom_api_url` to override the production Heroku URL.
+  2. `UserRegisterSerializer` did not strip whitespace from username/email/phone, and `CustomTokenObtainPairSerializer` only looked up users by `username__iexact`, failing if users entered their email, phone number, or formatted digits.
+  3. `AuthScreen.tsx` trimmed passwords on registration (`password.trim()`) but not on login, creating credential hash mismatches if whitespace was entered during login.
+- **Fix Applied**:
+  1. Removed the bottom backend trigger button completely from `AuthScreen.tsx` and converted the error banner to a clean, non-clickable error card.
+  2. Guarded `ServerConfigModal` and logo triple-tap diagnostics behind `__DEV__` checks.
+  3. Hard-locked `api.js` and `admin-app/src/services/api.ts` to `PRODUCTION_API_URL` (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) in `!__DEV__`, purging legacy custom URL storage keys.
+  4. Enhanced `UserRegisterSerializer` to strip/lowercase fields, enforce PBKDF2 password hashing via `User.objects.create_user(..., is_active=True)`, and reject duplicate usernames/emails case-insensitively with 400 Bad Request.
+  5. Enhanced `CustomTokenObtainPairSerializer` with multi-identifier resolution (exact/case-insensitive username, email, and normalized phone numbers with +92 / 0 prefix tolerance) and embedded the user payload directly in the login response for instant profile hydration.
+  6. Symmetrically trimmed inputs on login/register in `AuthScreen.tsx` and added `autoCorrect={false}` to username, email, phone, and password fields.
+  7. Deployed release **v86** live to Heroku 24/7 backend (`git subtree push --prefix backend heroku main`).
+  8. Re-assembled release APK (`app/android/gradlew.bat assembleRelease`) ➔ `D:\GetFood-Customer.apk` (93.0 MB).
+- **Files Modified**:
+  - `app/src/services/api.js`
+  - `app/src/screens/AuthScreen.tsx`
+  - `app/src/store/userSlice.ts`
+  - `admin-app/src/services/api.ts`
+  - `backend/users/serializers.py`
+  - `backend/users/views.py`
+  - `test_phase10_live_auth_hardlock.py`
+- **Verification**:
+  - `test_phase10_live_auth_hardlock.py` (7/7 tests pass, 100% on live Heroku v86).
+  - `test_live_heroku_auth_order_flow.py` (12/12 tests pass, 100%).
+  - `test_live_heroku_e2e_deep.py` (11/11 tests pass, 100%).
+  - `test_backend_local.py` (all audits pass, 100%).
+  - `test_phase8_production_regression.py` (23/23 tests pass, 100%).
+  - `test_security_concurrency_penetration.py` (18/18 tests pass, 100%).
+  - `test_deep_invariant_matrix.py` (21/21 tests pass, 100%).
+  - `npx tsc --noEmit` on `app` and `admin-app` (0 errors).
+  - `npx expo export --platform android` on `app` and `admin-app` (Hermes bytecode compiled cleanly with 0 errors).
+  - Standalone release APK assembled with Gradle 8.13 (`BUILD SUCCESSFUL in 2m 29s`, 991 tasks).
+
+---
 - **Severity**: Fatal / Standalone Launch Blocker
 - **Status**: FIXED
 - **Reported In**: Phase 9 — Manager App Standalone APK Cold Launch Crash

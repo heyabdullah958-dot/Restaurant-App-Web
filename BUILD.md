@@ -140,6 +140,49 @@
 - **Self-corrections used**: 1/3 (Resolved missing `sdk.dir` in `local.properties` for Gradle).
 - **Confidence score**: 100%.
 
+---
+
+## Phase 10 — Production Server Hard-Lock & Registration/Login Lifecycle Resolution — 2026-09-10
+- **What was done**:
+  1. **Production UI Clean-Up & Server Selector Removal**:
+     - Removed the bottom backend trigger button (`Backend: 🚀 Heroku Cloud (24/7)`) completely from `AuthScreen.tsx`.
+     - Converted the error banner to a clean, non-clickable error card, eliminating the `⚙️ Tap here to check server connection` trigger.
+     - Guarded `ServerConfigModal` and logo triple-tap diagnostics behind `__DEV__` checks so they never render in production builds.
+  2. **Production API Hard-Locking & Storage Purge**:
+     - In `app/src/services/api.js` and `admin-app/src/services/api.ts`, enforced `PRODUCTION_API_URL` (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) as the immutable base URL in release builds (`!__DEV__`).
+     - Added automatic purging of legacy custom server keys (`@getfood_custom_api_url`, `@admin_custom_api_url`) from `AsyncStorage`.
+  3. **Backend Registration Password Hashing & Serialization Normalization**:
+     - In `backend/users/serializers.py` (`UserRegisterSerializer`), normalized and stripped inputs (`username.strip()`, `email.strip().lower()`, `phone` formatting stripped).
+     - Ensured user creation explicitly uses `User.objects.create_user(..., is_active=True)`, guaranteeing PBKDF2 password hashing and active status.
+     - Added case-insensitive duplicate username and email validation with clean 400 Bad Request error responses.
+  4. **Tolerant Multi-Identifier Authentication & Embedded User Payload**:
+     - Upgraded `CustomTokenObtainPairSerializer` to resolve credentials across exact/case-insensitive username, email, and normalized phone numbers (with +92 / 0 prefix tolerance).
+     - Guaranteed `is_active=True` on resolved user accounts to eliminate manual admin activation blocks.
+     - Embedded the serialized `user` object directly into the token response payload (`data['user']`), giving the frontend instant profile hydration without a secondary network round-trip.
+  5. **Mobile Auth Form Normalization**:
+     - In `AuthScreen.tsx`, added `autoCorrect={false}` to username, email, phone, and password inputs to prevent Samsung/Gboard keyboards from auto-suggesting or mutating credentials.
+     - Updated username label to `Username, Email or Phone` and placeholder to `Enter username, email or phone`.
+     - Symmetrically trimmed username and password inputs on both login and registration dispatch.
+  6. **Live Heroku Backend Deployment (Release v86)**:
+     - Deployed release **v86** live to Heroku 24/7 backend (`git subtree push --prefix backend heroku main`).
+  7. **Standalone Release APK Reassembly**:
+     - Recompiled production release APK via `./gradlew.bat assembleRelease` (`BUILD SUCCESSFUL in 2m 29s`, 991 tasks) ➔ `D:\GetFood-Customer.apk` (93.0 MB).
+     - Synchronized binary to `D:\GetFood-Customer.apk`, `GetFood-Customer.apk`, and `D:\get\GetFood-Customer.apk`.
+  8. **Comprehensive Automated Verification**:
+     - `test_phase10_live_auth_hardlock.py` (7/7 tests pass, 100% on live Heroku v86).
+     - `test_live_heroku_auth_order_flow.py` (12/12 tests pass, 100%).
+     - `test_live_heroku_e2e_deep.py` (11/11 tests pass, 100%).
+     - `test_backend_local.py` (all audits pass, 100%).
+     - `test_phase8_production_regression.py` (23/23 tests pass, 100%).
+     - `test_security_concurrency_penetration.py` (18/18 tests pass, 100%).
+     - `test_deep_invariant_matrix.py` (21/21 tests pass, 100%).
+     - `npx tsc --noEmit` on both apps (0 errors).
+     - `npx expo export --platform android` on both apps (Hermes bytecode compiled cleanly with 0 errors).
+- **Files created**: `test_phase10_live_auth_hardlock.py`.
+- **Files modified**: `app/src/services/api.js`, `app/src/screens/AuthScreen.tsx`, `app/src/store/userSlice.ts`, `admin-app/src/services/api.ts`, `backend/users/serializers.py`, `backend/users/views.py`, `BUGS.md`, `BUILD.md`, `CHANGELOG.md`, `GEMINI.md`, `LESSONS.md`.
+- **Self-corrections used**: 0/3.
+- **Confidence score**: 100%.
+
 
 
 
