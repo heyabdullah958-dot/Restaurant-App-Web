@@ -38,11 +38,13 @@ export const LoginScreen = () => {
   const [logoTapCount, setLogoTapCount] = useState(0);
 
   const handleLogoPress = () => {
-    const nextCount = logoTapCount + 1;
-    setLogoTapCount(nextCount);
-    if (nextCount >= 3) {
-      setLogoTapCount(0);
-      setShowServerModal(true);
+    if (__DEV__) {
+      const nextCount = logoTapCount + 1;
+      setLogoTapCount(nextCount);
+      if (nextCount >= 3) {
+        setLogoTapCount(0);
+        setShowServerModal(true);
+      }
     }
   };
 
@@ -127,7 +129,7 @@ export const LoginScreen = () => {
             {error ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
-                {isNetworkError ? (
+                {__DEV__ && isNetworkError ? (
                   <TouchableOpacity
                     style={styles.errorActionButton}
                     onPress={() => setShowServerModal(true)}
@@ -230,8 +232,8 @@ export const LoginScreen = () => {
         )}
       </ScrollView>
 
-      {/* Interactive Server Configuration Modal */}
-      {showServerModal && (
+      {/* Interactive Server Configuration Modal - DEV ONLY */}
+      {__DEV__ && showServerModal && (
         <ServerConfigModal
           visible={showServerModal}
           onClose={() => setShowServerModal(false)}

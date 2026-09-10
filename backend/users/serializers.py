@@ -37,6 +37,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         if not value:
             return ''
         cleaned = value.strip().lower()
+        if not cleaned:
+            return ''
         if User.objects.filter(email__iexact=cleaned).exists():
             raise serializers.ValidationError("A user with that email already exists.")
         return cleaned
@@ -78,9 +80,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             # 1. First try exact or case-insensitive username lookup
             user = User.objects.filter(username__iexact=clean_identifier).first()
 
-            # 2. Try email lookup if not found
-            if not user:
-                user = User.objects.filter(email__iexact=clean_identifier).first()
+            # 2. Try email lookup if not found (only if identifier appears to be an email address)
+            if not user and '@' in clean_identifier:
+                email_matches = list(User.objects.filter(email__iexact=clean_identifier)[:2])
+                if len(email_matches) == 1:
+                    user = email_matches[0]
 
             # 3. Try phone lookup if not found (only if identifier appears to be a phone number)
             if not user:
@@ -96,10 +100,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                         user = phone_matches[0]
 
             if user:
-                # Ensure user is active for authentication
-                if not user.is_active:
-                    user.is_active = True
-                    user.save(update_fields=['is_active'])
                 attrs[self.username_field] = user.username
 
         data = super().validate(attrs)

@@ -153,7 +153,12 @@ const formatDRFErrorMessage = (error: any, fallback: string): string => {
     const data = error.response.data;
     if (typeof data === 'string') return data;
     if (data.message) return data.message;
-    if (data.detail) return data.detail;
+    if (data.detail) {
+      if (typeof data.detail === 'string' && data.detail.toLowerCase().includes('no active account')) {
+        return 'Incorrect username, email, phone, or password. Please verify your credentials and try again.';
+      }
+      return data.detail;
+    }
     if (data.error) return data.error;
     
     // DRF Field errors e.g. { username: ["Enter a valid username..."], email: [...] }
