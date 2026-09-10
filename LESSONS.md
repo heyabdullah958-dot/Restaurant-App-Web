@@ -4,6 +4,21 @@
 
 ---
 
+## Lesson 20 — Strict Stacking Hierarchies, Mobile Viewport Resiliency & Serializer Invariant Bounds — 2026-09-10
+- **Pattern**: Web Tailwind z-index discipline, mobile flexbox wrapping tolerances, and REST API serializer data boundary validation.
+- **Wrong assumption made**:
+  1. Assuming that arbitrary z-index values (`z-20` on badges, `z-20` on headers, `z-[100]` on modals) work fine as long as things look okay in a desktop test window.
+  2. Assuming that header actions and buttons in React Native will naturally fit next to titles on all device widths without explicitly wrapping text and setting `flexShrink: 0`.
+  3. Assuming that database checks alone or frontend inputs are sufficient to prevent negative coupon values or >100% discounts.
+- **What actually mattered**:
+  1. A disciplined global z-index scale is mandatory for full-stack admin interfaces: in-page elements (`z-10`), sticky navigation (`z-30`), sidebar backdrop/drawer (`z-40`/`z-45`), dialog modals (`z-50`), and feedback notifications/toasts (`z-60`). IMPORTANT: Custom z-index numbers like `z-45` and `z-60` MUST be explicitly declared in `tailwind.config.js` (`extend.zIndex`) or written with arbitrary brackets (`z-[45]`, `z-[60]`). Otherwise, Tailwind v3 silently skips generating the CSS rules, causing toasts and sidebar drawers to have no z-index (`auto`) and get trapped behind backdrops!
+  2. Every modal MUST implement outer backdrop click-dismiss and an accessible `✕` close button. On web, use `onClick={() => setOpen(false)}` on the overlay and `onClick={(e) => e.stopPropagation()}` on the dialog. On mobile (React Native), avoid wrapping `<ScrollView>` or modal cards in nested `<TouchableOpacity>` with no-op `e.stopPropagation?.()`; instead, place a `<TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onDismiss} />` behind the card inside a `<View style={styles.modalOverlay}>` flex container.
+  3. On mobile screens, headers containing titles, status badges, and action buttons must ALWAYS isolate the title container with `flex: 1` and `numberOfLines={1}`, while giving action buttons `flexShrink: 0`. Toggles that have distinct destructive consequences (like Force Close) require interactive confirmation dialogs to prevent accidental outages.
+  4. Backend DRF serializers (`ModelSerializer`) MUST validate business boundary rules (`validate()`) directly on payloads: percentage discounts must not exceed 100%, amounts must be positive, end dates must follow start dates, and minimum subtotal thresholds cannot be negative. Be vigilant with model choice values (e.g. `FlashDeal.TIMING_TYPES` uses `ONE_TIME`, not hallucinated `fixed_window`).
+- **Applies to**: `admin/tailwind.config.js`, `admin/src/App.tsx`, `admin/src/components/Sidebar.tsx`, `admin/src/views/`, `admin-app/src/screens/placeholders/`, `backend/promotions/serializers.py`.
+
+---
+
 ## Lesson 19 — Production Network Hard-Locking, Multi-Identifier Authentication & Mobile Keyboard Normalization — 2026-09-10
 - **Pattern**: Production environment hardening, user registration lifecycle, and tolerant authentication resolution.
 - **Wrong assumption made**:

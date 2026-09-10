@@ -316,6 +316,10 @@ export const FlashDealManagementScreen = () => {
         Alert.alert('Validation Error', 'Please enter a valid positive discount value.');
         return;
       }
+      if (dealType === 'percentage' && Number(discountValue) > 100) {
+        Alert.alert('Validation Error', 'Percentage discount cannot exceed 100%.');
+        return;
+      }
     } else if (modalStep === 4) {
       if (timingType === 'ONE_TIME') {
         const sDate = new Date(startTime);
@@ -345,6 +349,15 @@ export const FlashDealManagementScreen = () => {
     }
 
     const val = parseFloat(discountValue) || 0;
+    if (val <= 0) {
+      Alert.alert('Validation Error', 'Discount value must be greater than zero.');
+      return;
+    }
+    if (dealType === 'percentage' && val > 100) {
+      Alert.alert('Validation Error', 'Percentage discount cannot exceed 100%.');
+      return;
+    }
+
     const payload: any = {
       title: title.trim(),
       description: description.trim(),
@@ -568,8 +581,13 @@ export const FlashDealManagementScreen = () => {
       )}
 
       {/* 5-Step Wizard Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
+      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
           <View style={styles.modalContent}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
@@ -990,39 +1008,37 @@ export const FlashDealManagementScreen = () => {
                   ) : (
                     <View style={{ marginTop: 10 }}>
                       <Text style={styles.label}>Daily Active Hours</Text>
-                      <View style={styles.rowInputs}>
-                        <View style={{ flex: 1, marginRight: 8 }}>
-                          <Text style={styles.subLabel}>Starts at:</Text>
-                          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
-                            {TIME_OPTIONS.map((t) => (
-                              <TouchableOpacity
-                                key={`start_${t}`}
-                                style={[styles.timeChip, dailyStartTime === t && styles.timeChipActive]}
-                                onPress={() => setDailyStartTime(t)}
-                              >
-                                <Text style={[styles.timeChipText, dailyStartTime === t && styles.timeChipTextActive]}>
-                                  {formatTimeLabel(t)}
-                                </Text>
-                              </TouchableOpacity>
-                            ))}
-                          </ScrollView>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.subLabel}>Ends at:</Text>
-                          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
-                            {TIME_OPTIONS.map((t) => (
-                              <TouchableOpacity
-                                key={`end_${t}`}
-                                style={[styles.timeChip, dailyEndTime === t && styles.timeChipActive]}
-                                onPress={() => setDailyEndTime(t)}
-                              >
-                                <Text style={[styles.timeChipText, dailyEndTime === t && styles.timeChipTextActive]}>
-                                  {formatTimeLabel(t)}
-                                </Text>
-                              </TouchableOpacity>
-                            ))}
-                          </ScrollView>
-                        </View>
+                      <View style={{ marginBottom: SPACING.md }}>
+                        <Text style={styles.subLabel}>Starts at:</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
+                          {TIME_OPTIONS.map((t) => (
+                            <TouchableOpacity
+                              key={`start_${t}`}
+                              style={[styles.timeChip, dailyStartTime === t && styles.timeChipActive]}
+                              onPress={() => setDailyStartTime(t)}
+                            >
+                              <Text style={[styles.timeChipText, dailyStartTime === t && styles.timeChipTextActive]}>
+                                {formatTimeLabel(t)}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      </View>
+                      <View style={{ marginBottom: SPACING.md }}>
+                        <Text style={styles.subLabel}>Ends at:</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timeScroll}>
+                          {TIME_OPTIONS.map((t) => (
+                            <TouchableOpacity
+                              key={`end_${t}`}
+                              style={[styles.timeChip, dailyEndTime === t && styles.timeChipActive]}
+                              onPress={() => setDailyEndTime(t)}
+                            >
+                              <Text style={[styles.timeChipText, dailyEndTime === t && styles.timeChipTextActive]}>
+                                {formatTimeLabel(t)}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
                       </View>
 
                       <Text style={[styles.label, { marginTop: 14 }]}>Active Days of the Week</Text>

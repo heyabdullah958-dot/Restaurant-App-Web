@@ -139,11 +139,11 @@ export const PromoManagementScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1, marginRight: SPACING.sm }}>
           <Text style={styles.title}>Promo Code Engine</Text>
-          <Text style={styles.subtitle}>Discount Vouchers & Campaign Codes</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>Discount Vouchers & Campaign Codes</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
+        <TouchableOpacity style={[styles.addButton, { flexShrink: 0 }]} onPress={openAddModal}>
           <Text style={styles.addButtonText}>+ Create Code</Text>
         </TouchableOpacity>
       </View>
@@ -250,166 +250,182 @@ export const PromoManagementScreen = () => {
       )}
 
       {/* Create Coupon Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
+      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create Promo Coupon</Text>
-
-            <Text style={styles.inputLabel}>Coupon Code (Uppercase)</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. WELCOME500, SUMMER20"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={code}
-              onChangeText={(v) => setCode(v.toUpperCase())}
-              autoCapitalize="characters"
-            />
-
-            <Text style={styles.inputLabel}>Discount Type</Text>
-            <View style={styles.typeSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.typeOption,
-                  discountType === 'FLAT' && styles.typeOptionActive,
-                ]}
-                onPress={() => setDiscountType('FLAT')}
-              >
-                <Text
-                  style={[
-                    styles.typeText,
-                    discountType === 'FLAT' && styles.typeTextActive,
-                  ]}
-                >
-                  Flat Amount (Rs)
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.typeOption,
-                  discountType === 'PERCENTAGE' && styles.typeOptionActive,
-                ]}
-                onPress={() => setDiscountType('PERCENTAGE')}
-              >
-                <Text
-                  style={[
-                    styles.typeText,
-                    discountType === 'PERCENTAGE' && styles.typeTextActive,
-                  ]}
-                >
-                  Percentage (%)
-                </Text>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Create Promo Coupon</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.modalCloseIcon}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.formRow}>
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>
-                  {discountType === 'FLAT' ? 'Discount (Rs)' : 'Discount (%)'}
-                </Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={discountValue}
-                  onChangeText={setDiscountValue}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>Min Order (Rs)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={minOrderAmount}
-                  onChangeText={setMinOrderAmount}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <Text style={styles.inputLabel}>Expiration Date</Text>
-            <TouchableOpacity
-              style={styles.datePickerTrigger}
-              onPress={() => setShowDatePicker(true)}
-              activeOpacity={0.8}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: SPACING.sm }}
             >
-              <Text style={styles.datePickerIcon}>📅</Text>
-              <View style={styles.datePickerCol}>
-                <Text style={styles.datePickerHuman}>{formatHumanDate(validUntil)}</Text>
-                <Text style={styles.datePickerIso}>{validUntil}</Text>
-              </View>
-              <Text style={styles.datePickerEdit}>Change</Text>
-            </TouchableOpacity>
+              <Text style={styles.inputLabel}>Coupon Code (Uppercase)</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. WELCOME500, SUMMER20"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={code}
+                onChangeText={(v) => setCode(v.toUpperCase())}
+                autoCapitalize="characters"
+              />
 
-            <DateTimePickerModal
-              visible={showDatePicker}
-              onClose={() => setShowDatePicker(false)}
-              onSelect={(dateStr) => setValidUntil(dateStr)}
-              initialDate={validUntil}
-              mode="date"
-              title="Set Coupon Expiration Date"
-              themeMode="super"
-            />
-
-            <Text style={styles.inputLabel}>Scope (Brand Restriction)</Text>
-            <View style={styles.pickerContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.pickerOption,
-                  selectedRestId === null && styles.pickerOptionActive,
-                ]}
-                onPress={() => setSelectedRestId(null)}
-              >
-                <Text
-                  style={[
-                    styles.pickerOptionText,
-                    selectedRestId === null && styles.pickerOptionTextActive,
-                  ]}
-                >
-                  Global (All Brands)
-                </Text>
-              </TouchableOpacity>
-              {restaurants.map((r) => (
+              <Text style={styles.inputLabel}>Discount Type</Text>
+              <View style={styles.typeSelector}>
                 <TouchableOpacity
-                  key={r.id}
+                  style={[
+                    styles.typeOption,
+                    discountType === 'FLAT' && styles.typeOptionActive,
+                  ]}
+                  onPress={() => setDiscountType('FLAT')}
+                >
+                  <Text
+                    style={[
+                      styles.typeText,
+                      discountType === 'FLAT' && styles.typeTextActive,
+                    ]}
+                  >
+                    Flat Amount (Rs)
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.typeOption,
+                    discountType === 'PERCENTAGE' && styles.typeOptionActive,
+                  ]}
+                  onPress={() => setDiscountType('PERCENTAGE')}
+                >
+                  <Text
+                    style={[
+                      styles.typeText,
+                      discountType === 'PERCENTAGE' && styles.typeTextActive,
+                    ]}
+                  >
+                    Percentage (%)
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>
+                    {discountType === 'FLAT' ? 'Discount (Rs)' : 'Discount (%)'}
+                  </Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={discountValue}
+                    onChangeText={setDiscountValue}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Min Order (Rs)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={minOrderAmount}
+                    onChangeText={setMinOrderAmount}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.inputLabel}>Expiration Date</Text>
+              <TouchableOpacity
+                style={styles.datePickerTrigger}
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.datePickerIcon}>📅</Text>
+                <View style={styles.datePickerCol}>
+                  <Text style={styles.datePickerHuman}>{formatHumanDate(validUntil)}</Text>
+                  <Text style={styles.datePickerIso}>{validUntil}</Text>
+                </View>
+                <Text style={styles.datePickerEdit}>Change</Text>
+              </TouchableOpacity>
+
+              <DateTimePickerModal
+                visible={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                onSelect={(dateStr) => setValidUntil(dateStr)}
+                initialDate={validUntil}
+                mode="date"
+                title="Set Coupon Expiration Date"
+                themeMode="super"
+              />
+
+              <Text style={styles.inputLabel}>Scope (Brand Restriction)</Text>
+              <View style={styles.pickerContainer}>
+                <TouchableOpacity
                   style={[
                     styles.pickerOption,
-                    selectedRestId === r.id && styles.pickerOptionActive,
+                    selectedRestId === null && styles.pickerOptionActive,
                   ]}
-                  onPress={() => setSelectedRestId(r.id)}
+                  onPress={() => setSelectedRestId(null)}
                 >
                   <Text
                     style={[
                       styles.pickerOptionText,
-                      selectedRestId === r.id && styles.pickerOptionTextActive,
+                      selectedRestId === null && styles.pickerOptionTextActive,
                     ]}
                   >
-                    {r.name}
+                    Global (All Brands)
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
+                {restaurants.map((r) => (
+                  <TouchableOpacity
+                    key={r.id}
+                    style={[
+                      styles.pickerOption,
+                      selectedRestId === r.id && styles.pickerOptionActive,
+                    ]}
+                    onPress={() => setSelectedRestId(r.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerOptionText,
+                        selectedRestId === r.id && styles.pickerOptionTextActive,
+                      ]}
+                    >
+                      {r.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelModalButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelModalText}>Cancel</Text>
-              </TouchableOpacity>
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelModalButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.cancelModalText}>Cancel</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.submitModalButton}
-                onPress={handleSaveCoupon}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={styles.submitModalText}>Create Coupon</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+                <TouchableOpacity
+                  style={styles.submitModalButton}
+                  onPress={handleSaveCoupon}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.submitModalText}>Create Coupon</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -527,6 +543,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.md,
   },
+  modalCard: {
+    backgroundColor: COLORS.superAdmin.card,
+    borderColor: COLORS.superAdmin.border,
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg,
+    maxHeight: '90%',
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  modalCloseIcon: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 4,
+  },
   modalContent: {
     backgroundColor: COLORS.superAdmin.card,
     borderColor: COLORS.superAdmin.border,
@@ -538,7 +574,6 @@ const styles = StyleSheet.create({
     color: COLORS.superAdmin.text,
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: SPACING.md,
   },
   inputLabel: {
     color: COLORS.superAdmin.muted,

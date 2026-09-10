@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
 import { fetchRiders, createRider, updateRider, deleteRider } from '../services/api';
-import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, Loader2 } from 'lucide-react';
+import { Bike, Plus, Search, MessageSquare, Trash2, Edit2, Loader2, X } from 'lucide-react';
 
 interface Rider {
   id: number;
@@ -366,11 +366,26 @@ export const RiderManagement: React.FC = () => {
 
       {/* Add / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-slate-100">
-              {editingRider ? 'Edit Branch Rider' : 'Add New Branch Rider'}
-            </h3>
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-slate-100">
+                {editingRider ? 'Edit Branch Rider' : 'Add New Branch Rider'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="text-zinc-400 hover:text-zinc-600 dark:text-slate-500 dark:hover:text-slate-300 p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

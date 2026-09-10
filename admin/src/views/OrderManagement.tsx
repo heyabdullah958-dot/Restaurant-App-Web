@@ -1023,8 +1023,14 @@ export const OrderManagement: React.FC = () => {
 
       {/* Cancellation Reason Requirement Modal */}
       {cancelModalOrder && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setCancelModalOrder(null)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-black text-white flex items-center gap-2">
                 <span className="text-rose-500">🛑</span> Cancel Order #{cancelModalOrder.id}
@@ -1079,8 +1085,14 @@ export const OrderManagement: React.FC = () => {
 
       {/* Rider Assignment Requirement Modal */}
       {assignRiderModalOrder && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setAssignRiderModalOrder(null)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-black text-white flex items-center gap-2">
                 <Bike className="text-sky-400" size={16} /> Assign Rider to Order {assignRiderModalOrder.display_order_id || `#${assignRiderModalOrder.id}`}

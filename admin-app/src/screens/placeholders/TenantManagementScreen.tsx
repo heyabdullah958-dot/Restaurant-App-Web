@@ -89,19 +89,37 @@ export const TenantManagementScreen = () => {
   };
 
   const handleToggleForceClosed = async (restaurant: any) => {
-    const previousState = [...restaurants];
     const nextClosed = !restaurant.is_force_closed;
+    const actionText = nextClosed ? 'force close' : 'reopen';
 
-    setRestaurants((prev) =>
-      prev.map((r) => (r.id === restaurant.id ? { ...r, is_force_closed: nextClosed } : r))
+    Alert.alert(
+      'Confirm Status Change',
+      `Are you sure you want to ${actionText} "${restaurant.name}"? ${
+        nextClosed
+          ? 'Customers will immediately be blocked from ordering from this brand.'
+          : 'Customers will be able to place orders from this brand again.'
+      }`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: nextClosed ? 'Force Close' : 'Reopen',
+          style: nextClosed ? 'destructive' : 'default',
+          onPress: async () => {
+            const previousState = [...restaurants];
+            setRestaurants((prev) =>
+              prev.map((r) => (r.id === restaurant.id ? { ...r, is_force_closed: nextClosed } : r))
+            );
+
+            try {
+              await updateTenantRestaurant(restaurant.id, { is_force_closed: nextClosed });
+            } catch (err: any) {
+              setRestaurants(previousState);
+              Alert.alert('Update Failed', err?.message || 'Failed to toggle brand status');
+            }
+          },
+        },
+      ]
     );
-
-    try {
-      await updateTenantRestaurant(restaurant.id, { is_force_closed: nextClosed });
-    } catch (err: any) {
-      setRestaurants(previousState);
-      Alert.alert('Update Failed', err?.message || 'Failed to toggle brand status');
-    }
   };
 
   const openAddModal = () => {
@@ -208,11 +226,11 @@ export const TenantManagementScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1, marginRight: SPACING.sm }}>
           <Text style={styles.title}>Brand Registry</Text>
-          <Text style={styles.subtitle}>Multi-Tenant Onboarding & Operational Control</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>Multi-Tenant Onboarding & Operational Control</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
+        <TouchableOpacity style={[styles.addButton, { flexShrink: 0 }]} onPress={openAddModal}>
           <Text style={styles.addButtonText}>+ Onboard Brand</Text>
         </TouchableOpacity>
       </View>
@@ -348,122 +366,141 @@ export const TenantManagementScreen = () => {
       )}
 
       {/* Onboard / Edit Brand Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
+      <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingRestaurant ? 'Edit Brand Config' : 'Onboard New Restaurant Brand'}
-            </Text>
-
-            <Text style={styles.inputLabel}>Brand Name</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. Seen Banao, Jushh PK..."
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={name}
-              onChangeText={setName}
-            />
-
-            <Text style={styles.inputLabel}>Slug (Identifier)</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. seenbanao, jushhpk"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={slug}
-              onChangeText={setSlug}
-            />
-
-            <Text style={styles.inputLabel}>Cuisine Type</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. Desi BBQ & Handi, Fast Food..."
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={cuisineType}
-              onChangeText={setCuisineType}
-            />
-
-            <Text style={styles.inputLabel}>City</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="e.g. Lahore"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={city}
-              onChangeText={setCity}
-            />
-
-            <Text style={styles.inputLabel}>Contact Phone</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="+92 300 1234567"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-
-            <View style={styles.formRow}>
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>Delivery Fee (Rs)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={deliveryFee}
-                  onChangeText={setDeliveryFee}
-                  keyboardType="numeric"
-                />
-              </View>
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>Min Order (Rs)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={minOrderAmount}
-                  onChangeText={setMinOrderAmount}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <View style={styles.formRow}>
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>Opens At (HH:MM)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={opensAt}
-                  onChangeText={setOpensAt}
-                />
-              </View>
-              <View style={styles.halfInput}>
-                <Text style={styles.inputLabel}>Closes At (HH:MM)</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={closesAt}
-                  onChangeText={setClosesAt}
-                />
-              </View>
-            </View>
-
-            <View style={styles.modalActions}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>
+                {editingRestaurant ? 'Edit Brand Config' : 'Onboard New Restaurant Brand'}
+              </Text>
               <TouchableOpacity
-                style={styles.cancelModalButton}
                 onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.cancelModalText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.submitModalButton}
-                onPress={handleSaveBrand}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={styles.submitModalText}>
-                    {editingRestaurant ? 'Save Changes' : 'Onboard Brand'}
-                  </Text>
-                )}
+                <Text style={styles.modalCloseIcon}>✕</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: SPACING.sm }}
+            >
+              <Text style={styles.inputLabel}>Brand Name</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. Seen Banao, Jushh PK..."
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={name}
+                onChangeText={setName}
+              />
+
+              <Text style={styles.inputLabel}>Slug (Identifier)</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. seenbanao, jushhpk"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={slug}
+                onChangeText={setSlug}
+              />
+
+              <Text style={styles.inputLabel}>Cuisine Type</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. Desi BBQ & Handi, Fast Food..."
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={cuisineType}
+                onChangeText={setCuisineType}
+              />
+
+              <Text style={styles.inputLabel}>City</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="e.g. Lahore"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={city}
+                onChangeText={setCity}
+              />
+
+              <Text style={styles.inputLabel}>Contact Phone</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="+92 300 1234567"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+
+              <View style={styles.formRow}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Delivery Fee (Rs)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={deliveryFee}
+                    onChangeText={setDeliveryFee}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Min Order (Rs)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={minOrderAmount}
+                    onChangeText={setMinOrderAmount}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Opens At (HH:MM)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={opensAt}
+                    onChangeText={setOpensAt}
+                  />
+                </View>
+                <View style={styles.halfInput}>
+                  <Text style={styles.inputLabel}>Closes At (HH:MM)</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={closesAt}
+                    onChangeText={setClosesAt}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelModalButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.cancelModalText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.submitModalButton}
+                  onPress={handleSaveBrand}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.submitModalText}>
+                      {editingRestaurant ? 'Save Changes' : 'Onboard Brand'}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -583,23 +620,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    gap: SPACING.xs,
     marginBottom: SPACING.md,
   },
   toggleItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.superAdmin.bg,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: RADIUS.sm,
-    flex: 0.48,
     justifyContent: 'space-between',
   },
   toggleLabel: {
     color: COLORS.superAdmin.text,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
   },
   actionRow: {
@@ -640,18 +676,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.md,
   },
-  modalContent: {
+  modalCard: {
     backgroundColor: COLORS.superAdmin.card,
     borderColor: COLORS.superAdmin.border,
     borderWidth: 1,
     borderRadius: RADIUS.md,
     padding: SPACING.lg,
+    maxHeight: '90%',
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   modalTitle: {
     color: COLORS.superAdmin.text,
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: SPACING.md,
+    flex: 1,
+  },
+  modalCloseIcon: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 4,
   },
   inputLabel: {
     color: COLORS.superAdmin.muted,

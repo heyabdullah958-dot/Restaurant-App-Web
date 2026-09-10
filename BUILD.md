@@ -183,6 +183,70 @@
 - **Self-corrections used**: 0/3.
 - **Confidence score**: 100%.
 
+---
+
+## Phase 11 — Web Admin HQ Viewport Layout De-Cluttering, Stacking Overflows & Enterprise Feature Polish — 2026-09-10
+- **What was done**:
+  1. **Mobile Admin App Layout Hardening (`/admin-app`)**:
+     - Standardized screen headers in `TenantManagementScreen`, `ManagerManagementScreen`, `SuperDashboardScreen`, `CustomerManagementScreen`, and `PromoManagementScreen`: wrapped title/subtitle in `<View style={{ flex: 1, marginRight: SPACING.sm }}>` with `<Text numberOfLines={1}>` on subtitles.
+     - Added `style={[styles.addButton, { flexShrink: 0 }]}` to action buttons (`+ Onboard Brand`, `+ Provision Account`) so they are 100% visible and never truncated.
+     - In `TenantManagementScreen`: refactored `toggleRow` from side-by-side `flex: 0.48` into stacked full-width rows with dedicated padding. Added native confirmation alert modal before applying Force Closed. Wrapped modals with backdrop dismiss, `✕` close button, and `ScrollView` (`keyboardShouldPersistTaps="handled"`).
+     - In `ManagerManagementScreen`: added email regex validation and 8-character password checks to `handleCreateManager` and `handleConfirmPasswordReset`. Added backdrop dismiss and `✕` close buttons across all 3 modals.
+     - In `FlashDealManagementScreen`: added discount validation (`<= 100` and `> 0` for percentage deals) and stacked Daily Active Hours containers.
+     - In `RiderManagementScreen`: added dedicated container padding to `brandChipsScroll` and modal backdrop dismiss with `✕` close button.
+     - In `AppNavigator.tsx`: added `headerShown: false` to `SuperMoreStack.Navigator` screenOptions to eliminate double-header clash.
+  2. **Web Admin HQ Viewport Stacking & Modal Ergonomics (`/admin`)**:
+     - Standardized global Tailwind z-index scale: in-page elements (`z-10`), sticky navbar (`z-30`), sidebar backdrop/drawer (`z-40`/`z-45`), modals (`z-50`), toasts (`z-60`).
+     - In `admin/tailwind.config.js`: extended `zIndex` with `45` and `60` so custom classes compile into production CSS.
+     - In `App.tsx`: updated sticky navbar from `z-20` to `z-30`.
+     - In `Sidebar.tsx`: updated mobile backdrop to `z-40`, drawer to `z-45`, and added backdrop click-dismiss to modal.
+     - In `Toast.tsx`: updated toast container to `z-60`.
+     - In `TenantManagement.tsx`: normalized in-page buttons to `z-10`, preview modal to `z-50`, and added interactive confirmation modal for Force Closed.
+     - In `BranchDashboard.tsx`: normalized banner buttons to `z-10`, preview modal and edit modal to `z-50`, and added backdrop click-dismiss.
+     - In `RiderManagement.tsx`: added backdrop click-dismiss, inner `stopPropagation()`, and `✕` close button in modal header.
+     - In `PromoManagement.tsx`: added backdrop click-dismiss, inner `stopPropagation()`, and `✕` close button in modal header; updated local toast to `z-60`.
+     - In `CustomerManagement.tsx`, `MenuManagement.tsx`, `FlashDealManagement.tsx`, `OrderManagement.tsx`, and `ManagerManagement.tsx`: added backdrop click-dismiss and `✕` close buttons across all modals.
+  3. **Backend Promotions Serializer Validation & Test Alignment (`/backend`)**:
+     - In `promotions/serializers.py`: implemented `validate()` in `CouponSerializer` and `FlashDealSerializer`, enforcing `discount_value > 0`, `discount_value <= 100` for percentage deals, valid date sequences (`valid_to >= valid_from`, `end_time > start_time`), and `min_subtotal >= 0`. Fixed timing validation by removing invalid `'fixed_window'` check.
+     - In `test_flash_deals_v2_engine_suite.py`: fixed hardcoded midnight rollover dates using `datetime.combine(today, ...)` relative to `timezone.now().date()`, added `test_09_serializer_validation_rules` verifying all serializer error bounds, and added database cleanup in `setUp()` for complete test isolation.
+  4. **Compilation, Standalone APK Build & Test Verification**:
+     - `.\venv\Scripts\python.exe manage.py test`: 40/40 tests passed (100%).
+     - `.\venv\Scripts\python.exe -m unittest test_flash_deals_v2_engine_suite.py`: 6/6 tests passed (100%).
+     - `npx tsc --noEmit` across `admin-app/`, `admin/`, and `app/`: 0 errors.
+     - Compiled standalone Manager APK: `.\gradlew.bat assembleRelease` in `admin-app/android` (`BUILD SUCCESSFUL in 49s`, 450 tasks) ➔ `D:\GetFood-Manager.apk` and `D:\get\GetFood-Manager.apk` (63.4 MB).
+- **Files modified**:
+  - `admin-app/src/screens/placeholders/TenantManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/ManagerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/CustomerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin/tailwind.config.js`
+  - `admin/src/App.tsx`
+  - `admin/src/components/Sidebar.tsx`
+  - `admin/src/components/Toast.tsx`
+  - `admin/src/views/TenantManagement.tsx`
+  - `admin/src/views/BranchDashboard.tsx`
+  - `admin/src/views/RiderManagement.tsx`
+  - `admin/src/views/PromoManagement.tsx`
+  - `admin/src/views/CustomerManagement.tsx`
+  - `admin/src/views/MenuManagement.tsx`
+  - `admin/src/views/FlashDealManagement.tsx`
+  - `admin/src/views/OrderManagement.tsx`
+  - `admin/src/views/ManagerManagement.tsx`
+  - `backend/promotions/serializers.py`
+  - `backend/test_flash_deals_v2_engine_suite.py`
+  - `BUGS.md`
+  - `LESSONS.md`
+  - `BUILD.md`
+  - `PROJECT.md`
+- **Self-corrections used**: 1/3.
+- **Confidence score**: 100%.
+
 
 
 

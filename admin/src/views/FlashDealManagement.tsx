@@ -478,8 +478,14 @@ export const FlashDealManagement: React.FC = () => {
 
       {/* 6-Step Progressive Create / Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/60">
               <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-rose-500" />

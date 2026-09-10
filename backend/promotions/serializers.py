@@ -135,6 +135,26 @@ class CouponSerializer(serializers.ModelSerializer):
             data_copy['code'] = data_copy['code'].upper().strip()
         return super().to_internal_value(data_copy)
 
+    def validate(self, data):
+        discount_type = data.get('discount_type') or getattr(self.instance, 'discount_type', None)
+        discount_value = data.get('discount_value', getattr(self.instance, 'discount_value', None))
+        if discount_value is not None:
+            if discount_value <= 0:
+                raise serializers.ValidationError({"discount_value": "Discount value must be greater than 0."})
+            if discount_type == 'percentage' and discount_value > 100:
+                raise serializers.ValidationError({"discount_value": "Percentage discount cannot exceed 100%."})
+
+        min_subtotal = data.get('min_subtotal', getattr(self.instance, 'min_subtotal', None))
+        if min_subtotal is not None and min_subtotal < 0:
+            raise serializers.ValidationError({"min_subtotal": "Minimum subtotal cannot be negative."})
+
+        valid_from = data.get('valid_from', getattr(self.instance, 'valid_from', None))
+        valid_to = data.get('valid_to', getattr(self.instance, 'valid_to', None))
+        if valid_from and valid_to and valid_to < valid_from:
+            raise serializers.ValidationError({"valid_to": "Expiration date must be after start date."})
+
+        return data
+
 
 class FlashDealSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
@@ -159,6 +179,31 @@ class FlashDealSerializer(serializers.ModelSerializer):
             'redemptions_left', 'redemption_reset_frequency', 'priority', 'image', 'is_active',
             'is_currently_active', 'window_ends_at', 'discount_display_text', 'created_at'
         ]
+
+    def validate(self, data):
+        deal_type = data.get('deal_type') or getattr(self.instance, 'deal_type', None)
+        discount_value = data.get('discount_value', getattr(self.instance, 'discount_value', None))
+        if discount_value is not None:
+            if discount_value <= 0 and deal_type != 'bogo':
+                raise serializers.ValidationError({"discount_value": "Discount value must be greater than 0."})
+            if deal_type == 'percentage' and discount_value > 100:
+                raise serializers.ValidationError({"discount_value": "Percentage discount cannot exceed 100%."})
+
+        min_subtotal = data.get('min_subtotal', getattr(self.instance, 'min_subtotal', None))
+        if min_subtotal is not None and min_subtotal < 0:
+            raise serializers.ValidationError({"min_subtotal": "Minimum subtotal cannot be negative."})
+
+        start_time = data.get('start_time', getattr(self.instance, 'start_time', None))
+        end_time = data.get('end_time', getattr(self.instance, 'end_time', None))
+        if start_time and end_time and end_time <= start_time:
+            raise serializers.ValidationError({"end_time": "End time must be after start time."})
+
+        valid_from = data.get('valid_from', getattr(self.instance, 'valid_from', None))
+        valid_until = data.get('valid_until', getattr(self.instance, 'valid_until', None))
+        if valid_from and valid_until and valid_until < valid_from:
+            raise serializers.ValidationError({"valid_until": "Valid until must be on or after valid from date."})
+
+        return data
 
     def get_is_currently_active(self, obj):
         return obj.is_currently_active()

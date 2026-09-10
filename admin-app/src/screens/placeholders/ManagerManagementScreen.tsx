@@ -98,6 +98,17 @@ export const ManagerManagementScreen = () => {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(notificationEmail.trim())) {
+      Alert.alert('Validation Error', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (customPassword.trim() && customPassword.trim().length < 8) {
+      Alert.alert('Validation Error', 'Password must be at least 8 characters long.');
+      return;
+    }
+
     try {
       const res = await dispatch(
         createManagerThunk({
@@ -135,6 +146,11 @@ export const ManagerManagementScreen = () => {
       return;
     }
 
+    if (newPassword.trim().length < 8) {
+      Alert.alert('Validation Error', 'New password must be at least 8 characters long.');
+      return;
+    }
+
     try {
       await dispatch(
         changeManagerPasswordThunk({
@@ -167,11 +183,11 @@ export const ManagerManagementScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1, marginRight: SPACING.sm }}>
           <Text style={styles.title}>Manager Accounts</Text>
-          <Text style={styles.subtitle}>Branch Manager Provisioning & Access Control</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>Branch Manager Provisioning & Access Control</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={handleOpenCreateModal}>
+        <TouchableOpacity style={[styles.addButton, { flexShrink: 0 }]} onPress={handleOpenCreateModal}>
           <Text style={styles.addButtonText}>+ Provision Account</Text>
         </TouchableOpacity>
       </View>
@@ -296,118 +312,148 @@ export const ManagerManagementScreen = () => {
       )}
 
       {/* Create Manager Modal */}
-      <Modal visible={createModalVisible} animationType="slide" transparent>
+      <Modal visible={createModalVisible} animationType="slide" transparent onRequestClose={() => setCreateModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.modalContent}>
-            <Text style={styles.modalTitle}>Provision Branch Manager Account</Text>
-            <Text style={styles.modalSubtitle}>
-              Generates formatted username manager_&#123;slug&#125;_&#123;branch&#125;
-            </Text>
-
-            <Text style={styles.inputLabel}>Select Restaurant Brand</Text>
-            <View style={styles.pickerContainer}>
-              {restaurants.map((r) => (
-                <TouchableOpacity
-                  key={r.id}
-                  style={[
-                    styles.pickerOption,
-                    selectedRestId === r.id && styles.pickerOptionActive,
-                  ]}
-                  onPress={() => setSelectedRestId(r.id)}
-                >
-                  <Text
-                    style={[
-                      styles.pickerOptionText,
-                      selectedRestId === r.id && styles.pickerOptionTextActive,
-                    ]}
-                  >
-                    {r.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.inputLabel}>Select Branch</Text>
-            <View style={styles.pickerContainer}>
-              {branches.map((b) => (
-                <TouchableOpacity
-                  key={b.id}
-                  style={[
-                    styles.pickerOption,
-                    selectedBranchId === b.id && styles.pickerOptionActive,
-                  ]}
-                  onPress={() => setSelectedBranchId(b.id)}
-                >
-                  <Text
-                    style={[
-                      styles.pickerOptionText,
-                      selectedBranchId === b.id && styles.pickerOptionTextActive,
-                    ]}
-                  >
-                    {b.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.inputLabel}>Notification Email</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="manager@restaurant.com"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={notificationEmail}
-              onChangeText={setNotificationEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <Text style={styles.inputLabel}>Custom Password (Optional)</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Leave blank to auto-generate"
-              placeholderTextColor={COLORS.superAdmin.muted}
-              value={customPassword}
-              onChangeText={setCustomPassword}
-              secureTextEntry
-            />
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelModalButton}
-                onPress={() => setCreateModalVisible(false)}
-              >
-                <Text style={styles.cancelModalText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.submitModalButton}
-                onPress={handleCreateManager}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={styles.submitModalText}>Provision Account</Text>
-                )}
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setCreateModalVisible(false)}
+          />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Provision Branch Manager Account</Text>
+                <Text style={styles.modalSubtitle}>
+                  Generates formatted username manager_&#123;slug&#125;_&#123;branch&#125;
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setCreateModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.modalCloseIcon}>✕</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: SPACING.sm }}
+            >
+              <Text style={styles.inputLabel}>Select Restaurant Brand</Text>
+              <View style={styles.pickerContainer}>
+                {restaurants.map((r) => (
+                  <TouchableOpacity
+                    key={r.id}
+                    style={[
+                      styles.pickerOption,
+                      selectedRestId === r.id && styles.pickerOptionActive,
+                    ]}
+                    onPress={() => setSelectedRestId(r.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerOptionText,
+                        selectedRestId === r.id && styles.pickerOptionTextActive,
+                      ]}
+                    >
+                      {r.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.inputLabel}>Select Branch</Text>
+              <View style={styles.pickerContainer}>
+                {branches.map((b) => (
+                  <TouchableOpacity
+                    key={b.id}
+                    style={[
+                      styles.pickerOption,
+                      selectedBranchId === b.id && styles.pickerOptionActive,
+                    ]}
+                    onPress={() => setSelectedBranchId(b.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerOptionText,
+                        selectedBranchId === b.id && styles.pickerOptionTextActive,
+                      ]}
+                    >
+                      {b.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.inputLabel}>Notification Email</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="manager@restaurant.com"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={notificationEmail}
+                onChangeText={setNotificationEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <Text style={styles.inputLabel}>Custom Password (Optional, min 8 chars)</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Leave blank to auto-generate (or min 8 chars)"
+                placeholderTextColor={COLORS.superAdmin.muted}
+                value={customPassword}
+                onChangeText={setCustomPassword}
+                secureTextEntry
+              />
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelModalButton}
+                  onPress={() => setCreateModalVisible(false)}
+                >
+                  <Text style={styles.cancelModalText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.submitModalButton}
+                  onPress={handleCreateManager}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.submitModalText}>Provision Account</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       </Modal>
 
       {/* Reset Password Modal */}
-      <Modal visible={resetModalVisible} animationType="fade" transparent>
+      <Modal visible={resetModalVisible} animationType="fade" transparent onRequestClose={() => setResetModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Reset Manager Password</Text>
-            <Text style={styles.modalSubtitle}>
-              User: {resetTargetManager?.username} ({resetTargetManager?.restaurant_name})
-            </Text>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setResetModalVisible(false)}
+          />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Reset Manager Password</Text>
+                <Text style={styles.modalSubtitle}>
+                  User: {resetTargetManager?.username} ({resetTargetManager?.restaurant_name})
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setResetModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.modalCloseIcon}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-            <Text style={styles.inputLabel}>New Password</Text>
+            <Text style={styles.inputLabel}>New Password (min 8 characters)</Text>
             <TextInput
               style={styles.modalInput}
-              placeholder="Enter new secure password"
+              placeholder="Enter new secure password (min 8 chars)"
               placeholderTextColor={COLORS.superAdmin.muted}
               value={newPassword}
               onChangeText={setNewPassword}
@@ -439,13 +485,25 @@ export const ManagerManagementScreen = () => {
       </Modal>
 
       {/* Credentials Output Modal */}
-      <Modal visible={credentialsModalVisible} animationType="fade" transparent>
+      <Modal visible={credentialsModalVisible} animationType="fade" transparent onRequestClose={() => setCredentialsModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>🎉 Account Provisioned!</Text>
-            <Text style={styles.modalSubtitle}>
-              Save these login credentials — the password will not be shown again.
-            </Text>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setCredentialsModalVisible(false)}
+          />
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>🎉 Account Provisioned!</Text>
+                <Text style={styles.modalSubtitle}>
+                  Save these login credentials — the password will not be shown again.
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setCredentialsModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.modalCloseIcon}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.credBox}>
               <Text style={styles.credText}>
@@ -642,6 +700,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'center',
     padding: SPACING.md,
+  },
+  modalCard: {
+    backgroundColor: COLORS.superAdmin.card,
+    borderColor: COLORS.superAdmin.border,
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    padding: SPACING.lg,
+    maxHeight: '90%',
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+  },
+  modalCloseIcon: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 4,
   },
   modalContent: {
     backgroundColor: COLORS.superAdmin.card,

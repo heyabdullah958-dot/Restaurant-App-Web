@@ -8,7 +8,7 @@ export const Toast: React.FC = () => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full">
+    <div className="fixed bottom-5 right-5 z-60 flex flex-col gap-2 max-w-sm w-full">
       {toasts.map((toast) => {
         const isSuccess = toast.type === 'success';
         const isError = toast.type === 'error';

@@ -260,7 +260,7 @@ export const BranchDashboard: React.FC = () => {
         <button
           type="button"
           onClick={() => document.getElementById(`banner-input-${restaurant.id}`)?.click()}
-          className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+          className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-10 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
           title="Upload Cover Banner"
         >
           <Camera size={14} />
@@ -271,7 +271,7 @@ export const BranchDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => removeRestaurantBanner(restaurant.id)}
-            className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-20 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-10 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
             title="Remove Cover Banner"
           >
             <Trash2 size={14} />
@@ -283,7 +283,7 @@ export const BranchDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setPreviewImage(restaurant.banner_url || null)}
-            className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+            className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-10 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
             title="Preview Cover Banner"
           >
             <Eye size={14} />
@@ -564,7 +564,7 @@ export const BranchDashboard: React.FC = () => {
       {/* Image Preview Modal */}
       {previewImage && (
         <div 
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
           onClick={() => setPreviewImage(null)}
         >
           <div 
@@ -589,8 +589,14 @@ export const BranchDashboard: React.FC = () => {
 
       {/* Edit Branch Settings Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-5 animate-in fade-in zoom-in duration-150">
+        <div 
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-5 animate-in fade-in zoom-in duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">

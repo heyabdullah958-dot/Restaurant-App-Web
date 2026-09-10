@@ -75,11 +75,11 @@ export const SuperDashboardScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1, marginRight: SPACING.sm }}>
             <Text style={styles.headerTitle}>HQ Command Center</Text>
-            <Text style={styles.headerSubtitle}>Real-time Platform Aggregate Intelligence</Text>
+            <Text style={styles.headerSubtitle} numberOfLines={1}>Real-time Platform Aggregate Intelligence</Text>
           </View>
-          <View style={styles.liveBadge}>
+          <View style={[styles.liveBadge, { flexShrink: 0 }]}>
             <View style={styles.liveDot} />
             <Text style={styles.liveBadgeText}>LIVE API</Text>
           </View>

@@ -102,11 +102,11 @@ export const CustomerManagementScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1, marginRight: SPACING.sm }}>
           <Text style={styles.title}>Customer CRM</Text>
-          <Text style={styles.subtitle}>Profiles, Spend Metrics & Loyalty Balance Control</Text>
+          <Text style={styles.subtitle} numberOfLines={1}>Profiles, Spend Metrics & Loyalty Balance Control</Text>
         </View>
-        <View style={styles.countBadge}>
+        <View style={[styles.countBadge, { flexShrink: 0 }]}>
           <Text style={styles.countBadgeText}>{customers.length} Profiles</Text>
         </View>
       </View>
@@ -206,13 +206,25 @@ export const CustomerManagementScreen = () => {
       )}
 
       {/* Adjust Loyalty Modal */}
-      <Modal visible={modalVisible} animationType="fade" transparent>
+      <Modal visible={modalVisible} animationType="fade" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Adjust Loyalty Balance</Text>
-            <Text style={styles.modalSubtitle}>
-              Customer: {targetCustomer?.name || targetCustomer?.username} (Current: {targetCustomer?.loyalty_points} pts)
-            </Text>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Adjust Loyalty Balance</Text>
+                <Text style={styles.modalSubtitle}>
+                  Customer: {targetCustomer?.name || targetCustomer?.username} (Current: {targetCustomer?.loyalty_points} pts)
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.modalCloseIcon}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.inputLabel}>New Loyalty Points Balance</Text>
             <TextInput
@@ -427,6 +439,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: RADIUS.md,
     padding: SPACING.lg,
+    maxHeight: '90%',
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.xs,
+  },
+  modalCloseIcon: {
+    color: COLORS.superAdmin.muted,
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 4,
   },
   modalTitle: {
     color: COLORS.superAdmin.text,

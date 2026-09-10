@@ -154,13 +154,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen max-h-screen z-40 w-64 flex flex-col justify-between border-r shadow-sm transition-transform duration-300 md:translate-x-0 overflow-hidden ${
+        className={`fixed md:sticky top-0 left-0 h-screen max-h-screen z-45 w-64 flex flex-col justify-between border-r shadow-sm transition-transform duration-300 md:translate-x-0 overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } ${
           isSuper 
@@ -392,8 +392,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
       {/* Update Credentials Modal */}
       {showPassModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => { setShowPassModal(false); setModalError(''); }}
+        >
           <div 
+            onClick={(e) => e.stopPropagation()}
             className={`w-full max-w-md rounded-xl border p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 ${
               isSuper 
                 ? 'bg-slate-900 border-slate-800 text-white shadow-blue-500/5' 

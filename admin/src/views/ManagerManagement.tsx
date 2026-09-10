@@ -575,18 +575,39 @@ export const ManagerManagement: React.FC = () => {
 
       {/* 6. CREDENTIALS REVEAL MODAL */}
       {createdCredentials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => {
+            setCreatedCredentials(null);
+            setShowPassword(false);
+          }}
+        >
           <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" />
 
-          <div className="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative z-10 overflow-hidden space-y-4">
+          <div 
+            className="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-2xl shadow-2xl p-6 relative z-10 overflow-hidden space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-blue-500" />
             
             {/* Header */}
             <div>
-              <h3 className="font-bold text-emerald-400 text-lg flex items-center gap-2">
-                <CheckCircle2 size={20} />
-                Manager Created Successfully!
-              </h3>
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-emerald-400 text-lg flex items-center gap-2">
+                  <CheckCircle2 size={20} />
+                  Manager Created Successfully!
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreatedCredentials(null);
+                    setShowPassword(false);
+                  }}
+                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                >
+                  <X size={18} />
+                </button>
+              </div>
               <div className="mt-2 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-amber-400 text-xs flex items-center gap-2">
                 <ShieldAlert size={16} className="shrink-0" />
                 <span>⚠️ Save these credentials now. The password is shown ONCE.</span>

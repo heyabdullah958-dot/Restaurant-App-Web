@@ -2,6 +2,66 @@
 
 ## Resolved Bugs Log
 
+### Bug #22: Web Admin & Mobile Admin Viewport Layout Stacking, Modal Overflow & Validation Hardening (Resolved 2026-09-10)
+- **Severity**: High / Enterprise UX & Navigation Polish
+- **Status**: FIXED
+- **Reported In**: Phase 11 — Web Admin HQ Viewport Layout De-Cluttering, Stacking Overflows & Enterprise Feature Polish
+- **Symptoms**:
+  - Header actions on narrow mobile viewports in `admin-app` (`TenantManagementScreen`, `ManagerManagementScreen`, `SuperDashboardScreen`, `CustomerManagementScreen`, `PromoManagementScreen`) collided with title/subtitle text or caused truncation.
+  - In `TenantManagementScreen`, `toggleRow` side-by-side layout cramped `is_active` switches and lacked confirmation when toggling emergency Force Close status.
+  - In Web Admin HQ (`/admin`), z-index clashes occurred across in-page buttons (`z-20`), sticky navbar (`z-20`), mobile sidebar backdrop (`z-40`/`z-45`), modals (`z-50`), and toasts (`z-50`), and several modals lacked backdrop click-dismiss and explicit `✕` close buttons.
+  - In DRF backend `CouponSerializer` and `FlashDealSerializer`, missing model-level serializer validation allowed negative subtotal or discounts > 100%, and hardcoded date logic in `test_02_midnight_rollover_and_active_days` caused recurring rollover tests to fail past August 2026.
+- **Root Cause**:
+  1. Lack of `flex: 1` wrapping on title/subtitle headers and missing `flexShrink: 0` on action buttons.
+  2. Unstandardized z-index scale in Tailwind layouts allowing in-page components to overlap navbars or modals.
+  3. Modals omitted outer backdrop `onClick` handlers and inner `stopPropagation()`.
+  4. Missing `validate()` checks in `promotions/serializers.py` and static `datetime(2026, 8, 17, ...)` references in test assertions.
+- **Fix Applied**:
+  1. Wrapped headers across all `admin-app` management screens with `flex: 1` and `numberOfLines={1}`, and added `flexShrink: 0` to action buttons.
+  2. Refactored `toggleRow` into stacked full-width rows with native confirmation alerts before toggling Force Close.
+  3. Hardened `ManagerManagementScreen` with email regex format validation and 8-character password checks.
+  4. Extended `zIndex` in `admin/tailwind.config.js` (`45: '45'`, `60: '60'`) ensuring `.z-45` and `.z-60` are compiled into production CSS, restoring proper stacking for toasts and sidebar drawers.
+  5. Standardized Web Admin z-index scale: in-page controls (`z-10`), sticky navbar (`z-30`), sidebar backdrop/drawer (`z-40`/`z-45`), modals (`z-50`), toasts (`z-60`).
+  6. Added backdrop click-dismiss and `✕` close buttons across all modals in Web Admin (`TenantManagement`, `BranchDashboard`, `RiderManagement`, `PromoManagement`, `CustomerManagement`, `MenuManagement`, `FlashDealManagement`, `OrderManagement`, `ManagerManagement`, `Sidebar`).
+  7. Hardened mobile modals in `admin-app` with the `StyleSheet.absoluteFill` backdrop touchable and pure `<View style={styles.modalCard}>` pattern, eliminating Android touch responder conflicts with nested `<ScrollView>` elements.
+  8. Implemented `validate()` in DRF `CouponSerializer` and `FlashDealSerializer`, enforcing positive values, percentage bounds (≤ 100%), valid date chronologies (fixed timing validation to remove nonexistent `'fixed_window'` check), and non-negative subtotals.
+  9. Fixed dynamic midnight test dates in `test_flash_deals_v2_engine_suite.py` and added `test_09_serializer_validation_rules` with comprehensive assertions, plus `FlashDeal.objects.all().delete()` in `setUp()` for complete test isolation.
+  10. Recompiled standalone manager release APK ➔ `D:\GetFood-Manager.apk` (63.4 MB).
+- **Files Modified**:
+  - `admin-app/src/screens/placeholders/TenantManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/ManagerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/SuperDashboardScreen.tsx`
+  - `admin-app/src/screens/placeholders/FlashDealManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/CustomerManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/PromoManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`
+  - `admin-app/src/screens/placeholders/MenuManagementScreen.tsx`
+  - `admin-app/src/navigation/AppNavigator.tsx`
+  - `admin/tailwind.config.js`
+  - `admin/src/App.tsx`
+  - `admin/src/components/Sidebar.tsx`
+  - `admin/src/components/Toast.tsx`
+  - `admin/src/views/TenantManagement.tsx`
+  - `admin/src/views/BranchDashboard.tsx`
+  - `admin/src/views/RiderManagement.tsx`
+  - `admin/src/views/PromoManagement.tsx`
+  - `admin/src/views/CustomerManagement.tsx`
+  - `admin/src/views/MenuManagement.tsx`
+  - `admin/src/views/FlashDealManagement.tsx`
+  - `admin/src/views/OrderManagement.tsx`
+  - `admin/src/views/ManagerManagement.tsx`
+  - `backend/promotions/serializers.py`
+  - `backend/test_flash_deals_v2_engine_suite.py`
+- **Verification**:
+  - `.\venv\Scripts\python.exe manage.py test` (40/40 tests passed, 100%).
+  - `.\venv\Scripts\python.exe -m unittest test_flash_deals_v2_engine_suite.py` (6/6 tests passed, 100%).
+  - `npx tsc --noEmit` in `admin-app/`, `admin/`, and `app/` (0 errors across all 3 codebases).
+  - Web Admin production build verified: `npm run build` in `admin/` generated valid `.z-45` and `.z-60` CSS rules.
+  - Standalone Manager APK recompiled cleanly (`gradlew assembleRelease` successful, 63.4 MB).
+
+---
+
 ### Bug #21: Exposed Debug Server Selector in Production & Registration/Login Credential Resolution (Resolved 2026-09-10)
 - **Severity**: Critical / Production UX & Authentication Blocker
 - **Status**: FIXED

@@ -489,11 +489,23 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         onRequestClose={() => setDispatchModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setDispatchModalVisible(false)}
+          />
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Assign Delivery Rider</Text>
-            <Text style={styles.modalSubtitle}>
-              Order ID: {dispatchTargetOrder?.display_order_id || `#${dispatchTargetOrder?.id}`}
-            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Assign Delivery Rider</Text>
+                <Text style={styles.modalSubtitle}>
+                  Order ID: {dispatchTargetOrder?.display_order_id || `#${dispatchTargetOrder?.id}`}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setDispatchModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ color: COLORS.neutral500, fontSize: 18, fontWeight: 'bold', padding: 4 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
             {loadingRiders ? (
               <ActivityIndicator color={COLORS.branchManager.primary} style={{ marginVertical: SPACING.md }} />
@@ -595,11 +607,23 @@ export const OrderManagementScreen = ({ navigation }: any) => {
         onRequestClose={() => setCancelModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setCancelModalVisible(false)}
+          />
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Cancel Order</Text>
-            <Text style={styles.modalSubtitle}>
-              Order ID: {cancelTargetOrder?.display_order_id || `#${cancelTargetOrder?.id}`}
-            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>Cancel Order</Text>
+                <Text style={styles.modalSubtitle}>
+                  Order ID: {cancelTargetOrder?.display_order_id || `#${cancelTargetOrder?.id}`}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setCancelModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ color: COLORS.neutral500, fontSize: 18, fontWeight: 'bold', padding: 4 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
             {cancelError ? (
               <View style={styles.modalErrorContainer}>

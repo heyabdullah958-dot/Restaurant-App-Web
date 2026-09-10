@@ -49,7 +49,11 @@ export default {
       },
       backdropBlur: {
         'xs': '2px',
-      }
+      },
+      zIndex: {
+        '45': '45',
+        '60': '60',
+      },
     },
   },
   plugins: [],

@@ -138,6 +138,7 @@ const SuperAdminMoreMain = ({ navigation }: any) => {
 const SuperAdminMoreStackNavigator = () => (
   <SuperMoreStack.Navigator
     screenOptions={{
+      headerShown: false,
       headerStyle: { backgroundColor: COLORS.superAdmin.bg },
       headerTintColor: COLORS.superAdmin.text,
       headerTitleStyle: { fontWeight: 'bold' },

@@ -473,8 +473,14 @@ const EditItemModal: React.FC<EditModalProps> = ({ categoryId, categoryName, ite
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 overflow-y-auto p-4 animate-fadeIn">
-      <div className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-6 shadow-2xl space-y-6">
+    <div 
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 overflow-y-auto p-4 animate-fadeIn"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col p-6 shadow-2xl space-y-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Modal Header */}
         <div className="flex justify-between items-center border-b border-zinc-150 dark:border-slate-800 pb-4">

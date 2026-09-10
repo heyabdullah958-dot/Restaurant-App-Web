@@ -10,7 +10,8 @@ django.setup()
 from django.test import TestCase
 from django.utils import timezone
 from restaurants.models import Restaurant, Branch, MenuCategory, MenuItem
-from promotions.models import FlashDeal, FlashDealRedemption
+from promotions.models import FlashDeal, FlashDealRedemption, Coupon
+from promotions.serializers import CouponSerializer, FlashDealSerializer
 from promotions.deal_engine import resolve_active_deal_for_item
 from orders.models import Order, OrderItem
 from users.models import User
@@ -18,6 +19,7 @@ from users.models import User
 class FlashDealsV2EngineComprehensiveSuite(TestCase):
     def setUp(self):
         self.tz = ZoneInfo('Asia/Karachi')
+        FlashDeal.objects.all().delete()
         
         # 1. Create Unique Test Brands & Branches
         self.jush = Restaurant.objects.create(
@@ -151,16 +153,17 @@ class FlashDealsV2EngineComprehensiveSuite(TestCase):
             is_active=True
         )
 
+        today = timezone.now().date()
         # 1. At 23:30 (Day 1) -> active
-        t_2330 = datetime(2026, 8, 17, 23, 30, tzinfo=self.tz)
+        t_2330 = datetime.combine(today, time(23, 30)).replace(tzinfo=self.tz)
         self.assertTrue(deal_midnight.is_currently_active(current_dt=t_2330))
 
         # 2. At 01:30 (Day 2 early morning) -> active (belongs to previous night session)
-        t_0130 = datetime(2026, 8, 18, 1, 30, tzinfo=self.tz)
+        t_0130 = datetime.combine(today + timedelta(days=1), time(1, 30)).replace(tzinfo=self.tz)
         self.assertTrue(deal_midnight.is_currently_active(current_dt=t_0130))
 
         # 3. At 14:00 (afternoon) -> NOT active
-        t_1400 = datetime(2026, 8, 17, 14, 0, tzinfo=self.tz)
+        t_1400 = datetime.combine(today, time(14, 0)).replace(tzinfo=self.tz)
         self.assertFalse(deal_midnight.is_currently_active(current_dt=t_1400))
 
     def test_03_multi_tenant_brand_and_branch_isolation(self):
@@ -261,6 +264,124 @@ class FlashDealsV2EngineComprehensiveSuite(TestCase):
         res_after_exhaustion = resolve_active_deal_for_item(self.item_mighty, branch_id=self.jush_dha.id, order_mode='ALL')
         self.assertIsNone(res_after_exhaustion)
 
+    def test_09_serializer_validation_rules(self):
+        """Test validation rules for CouponSerializer and FlashDealSerializer."""
+        # 1. CouponSerializer validations
+        # Negative / Zero discount_value
+        c_bad_disc = CouponSerializer(data={
+            'code': 'TESTZERO',
+            'discount_type': 'percentage',
+            'discount_value': 0,
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+        })
+        self.assertFalse(c_bad_disc.is_valid())
+        self.assertIn('discount_value', c_bad_disc.errors)
+
+        # Percentage > 100
+        c_over_100 = CouponSerializer(data={
+            'code': 'TEST120',
+            'discount_type': 'percentage',
+            'discount_value': 120,
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+        })
+        self.assertFalse(c_over_100.is_valid())
+        self.assertIn('discount_value', c_over_100.errors)
+
+        # Negative min_subtotal
+        c_neg_sub = CouponSerializer(data={
+            'code': 'TESTNEGSUB',
+            'discount_type': 'flat',
+            'discount_value': 50,
+            'min_subtotal': -100,
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+        })
+        self.assertFalse(c_neg_sub.is_valid())
+        self.assertIn('min_subtotal', c_neg_sub.errors)
+
+        # valid_to < valid_from
+        now = timezone.now()
+        c_bad_dates = CouponSerializer(data={
+            'code': 'TESTBADDATE',
+            'discount_type': 'flat',
+            'discount_value': 50,
+            'valid_from': (now + timedelta(days=5)).isoformat(),
+            'valid_to': (now + timedelta(days=1)).isoformat(),
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+        })
+        self.assertFalse(c_bad_dates.is_valid())
+        self.assertIn('valid_to', c_bad_dates.errors)
+
+        # Valid coupon passes
+        c_valid = CouponSerializer(data={
+            'code': 'TESTVALID10',
+            'discount_type': 'percentage',
+            'discount_value': 10,
+            'min_subtotal': 500,
+            'valid_from': now.isoformat(),
+            'valid_to': (now + timedelta(days=10)).isoformat(),
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+        })
+        self.assertTrue(c_valid.is_valid(), c_valid.errors)
+
+        # 2. FlashDealSerializer validations
+        # Percentage > 100
+        fd_over_100 = FlashDealSerializer(data={
+            'title': 'Over 100 Deal',
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+            'deal_type': 'percentage',
+            'discount_value': 150,
+        })
+        self.assertFalse(fd_over_100.is_valid())
+        self.assertIn('discount_value', fd_over_100.errors)
+
+        # End time before start time (ONE_TIME fixed window)
+        fd_bad_time = FlashDealSerializer(data={
+            'title': 'Inverted Time Deal',
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+            'deal_type': 'flat',
+            'discount_value': 50,
+            'timing_type': 'ONE_TIME',
+            'start_time': (now + timedelta(hours=3)).isoformat(),
+            'end_time': (now + timedelta(hours=1)).isoformat(),
+        })
+        self.assertFalse(fd_bad_time.is_valid())
+        self.assertIn('end_time', fd_bad_time.errors)
+
+        # valid_until before valid_from
+        fd_bad_dates = FlashDealSerializer(data={
+            'title': 'Inverted Dates Deal',
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+            'deal_type': 'flat',
+            'discount_value': 50,
+            'valid_from': (now.date() + timedelta(days=5)).isoformat(),
+            'valid_until': (now.date() + timedelta(days=1)).isoformat(),
+        })
+        self.assertFalse(fd_bad_dates.is_valid())
+        self.assertIn('valid_until', fd_bad_dates.errors)
+
+        # Valid flash deal passes
+        fd_valid = FlashDealSerializer(data={
+            'title': 'Valid Test Deal',
+            'restaurant': self.jush.id,
+            'branch': self.jush_dha.id,
+            'deal_type': 'percentage',
+            'discount_value': 20,
+            'min_subtotal': 300,
+            'timing_type': 'ONE_TIME',
+            'start_time': now.isoformat(),
+            'end_time': (now + timedelta(hours=4)).isoformat(),
+        })
+        self.assertTrue(fd_valid.is_valid(), fd_valid.errors)
+
 if __name__ == '__main__':
     import unittest
     unittest.main()
+

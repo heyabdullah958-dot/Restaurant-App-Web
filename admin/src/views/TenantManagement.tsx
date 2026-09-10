@@ -6,6 +6,7 @@ export const TenantManagement: React.FC = () => {
   const { restaurants, onboardNewRestaurant, removeRestaurant, updateRestaurantBanner, removeRestaurantBanner, updateRestaurantDetails } = useAdmin();
   const [showWizard, setShowWizard] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [confirmForceCloseRestaurant, setConfirmForceCloseRestaurant] = useState<any | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -117,7 +118,7 @@ export const TenantManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => document.getElementById(`banner-input-${restaurant.id}`)?.click()}
-                className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                className="absolute top-3 right-3 bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-10 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
                 title="Upload Cover Banner"
               >
                 <Camera size={14} />
@@ -128,7 +129,7 @@ export const TenantManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => removeRestaurantBanner(restaurant.id)}
-                  className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-20 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                  className="absolute top-3 right-12 bg-rose-950/70 hover:bg-rose-900 backdrop-blur-md text-rose-300 hover:text-rose-200 p-2 rounded-xl transition-all z-10 border border-rose-500/30 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
                   title="Remove Cover Banner"
                 >
                   <Trash2 size={14} />
@@ -140,7 +141,7 @@ export const TenantManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPreviewImage(restaurant.banner_url || null)}
-                  className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-20 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
+                  className="absolute top-3 right-[84px] bg-slate-900/70 hover:bg-slate-900 backdrop-blur-md text-slate-200 hover:text-white p-2 rounded-xl transition-all z-10 border border-slate-700/50 shadow-lg flex items-center justify-center hover:scale-[1.04] active:scale-[0.98]"
                   title="Preview Cover Banner"
                 >
                   <Eye size={14} />
@@ -224,7 +225,7 @@ export const TenantManagement: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => updateRestaurantDetails(restaurant.id, { is_force_closed: !restaurant.is_force_closed })}
+                    onClick={() => setConfirmForceCloseRestaurant(restaurant)}
                     className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-extrabold border transition-all ${
                       restaurant.is_force_closed
                         ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
@@ -250,8 +251,14 @@ export const TenantManagement: React.FC = () => {
 
       {/* Onboarding Sliding Modal Panel / Dialog */}
       {showWizard && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700/70 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-zoom-in">
+        <div 
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowWizard(false)}
+        >
+          <div 
+            className="bg-slate-800 border border-slate-700/70 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-zoom-in"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6 border-b border-slate-700/60 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Sparkles size={18} className="text-blue-500" />
@@ -427,10 +434,80 @@ export const TenantManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Force Close Confirmation Modal */}
+      {confirmForceCloseRestaurant && (
+        <div
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setConfirmForceCloseRestaurant(null)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-800 max-w-md w-full rounded-2xl shadow-2xl p-6 space-y-4 animate-zoom-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-white text-base flex items-center gap-2">
+                <Power size={18} className={confirmForceCloseRestaurant.is_force_closed ? 'text-emerald-400' : 'text-amber-400'} />
+                Confirm Status Change
+              </h3>
+              <button
+                type="button"
+                onClick={() => setConfirmForceCloseRestaurant(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-300">
+              Are you sure you want to{' '}
+              <strong className={confirmForceCloseRestaurant.is_force_closed ? 'text-emerald-400' : 'text-amber-400'}>
+                {confirmForceCloseRestaurant.is_force_closed ? 're-open' : 'force close'}
+              </strong>{' '}
+              <strong className="text-white">{confirmForceCloseRestaurant.name}</strong>?
+            </p>
+
+            <div className={`p-3 rounded-xl text-xs border ${
+              confirmForceCloseRestaurant.is_force_closed
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                : 'bg-amber-500/10 border-amber-500/20 text-amber-300'
+            }`}>
+              {confirmForceCloseRestaurant.is_force_closed
+                ? 'Customers will be able to place orders from this brand again.'
+                : 'Customers will immediately be blocked from ordering from this brand across all apps & websites.'}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmForceCloseRestaurant(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const target = confirmForceCloseRestaurant;
+                  setConfirmForceCloseRestaurant(null);
+                  await updateRestaurantDetails(target.id, { is_force_closed: !target.is_force_closed });
+                }}
+                className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-lg transition-all ${
+                  confirmForceCloseRestaurant.is_force_closed
+                    ? 'bg-emerald-600 hover:bg-emerald-500'
+                    : 'bg-amber-600 hover:bg-amber-500'
+                }`}
+              >
+                {confirmForceCloseRestaurant.is_force_closed ? 'Confirm Re-Open' : 'Confirm Force Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Preview Modal */}
       {previewImage && (
         <div 
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
           onClick={() => setPreviewImage(null)}
         >
           <div 

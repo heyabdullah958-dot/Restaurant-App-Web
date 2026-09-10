@@ -1,6 +1,6 @@
 # 🍽️ PROJECT.md — GetFood (FoodSphere) Multi-Tenant Platform Overview
 > **Project Completion Status**: 100% Launch Ready (Core Code, Security & Features: 100% Finished)  
-> **Last Updated**: 2026-09-08
+> **Last Updated**: 2026-09-10
 
 ---
 
@@ -83,11 +83,17 @@
      - `test_live_heroku_auth_order_flow.py` (12/12 tests)
      - `test_dual_app_e2e.py` (5/5 steps)
 
-6. **Standalone Production Android APKs Built & Universal Multi-Architecture Support (Phase 9)**:
+6. **Standalone Production Android APKs Built & Universal Multi-Architecture Support (Phase 9 & 10)**:
    - **GetFood Customer App Release APK**: `D:\GetFood-Customer.apk` (93.0 MB, `arm64-v8a`, `armeabi-v7a`, `x86_64`).
-   - **GetFood Merchant Manager App Release APK**: `D:\GetFood-Manager.apk` (66.1 MB, `arm64-v8a`, `armeabi-v7a`, `x86_64`).
+   - **GetFood Merchant Manager App Release APK**: `D:\GetFood-Manager.apk` (63.4 MB, `arm64-v8a`, `armeabi-v7a`, `x86_64`).
    - Hardened root startup lifecycles, entry-point gesture handler precedence, global `ErrorUtils` crash interception, root `ErrorBoundary` components wrapping `<Provider>`, and defensive splash screen navigation timers.
    - 101/101 automated tests passing across 6 comprehensive suites including `test_phase9_apk_crash_guard_suite.py` (11/11).
+
+7. **Web Admin HQ Viewport Layout De-Cluttering, Stacking Overflows & Enterprise Polish (Phase 11)**:
+   - Hardened mobile admin app layouts across 8 views: flex wrapping and non-truncating headers, stacked full-width controls, Force Close confirmation alerts, and regex email/password validation. Standardized `StyleSheet.absoluteFill` modal backdrop touch dismiss and `modalCard` View isolation to prevent touch responder conflicts with nested scroll views.
+   - Standardized Web Admin z-index hierarchy (`z-10` in-page, `z-30` navbar, `z-40`/`z-45` drawer, `z-50` modals, `z-60` toasts) and extended `tailwind.config.js` to ensure custom z-indices generate valid CSS rules. Added modal backdrop click-dismiss and accessible close buttons across all 8 web modals.
+   - Implemented DRF promotions serializer validation (`CouponSerializer`, `FlashDealSerializer`) and dynamic test timezones (40/40 tests passing, 100%).
+   - Recompiled and verified standalone Manager APK ➔ `D:\GetFood-Manager.apk` and `D:\get\GetFood-Manager.apk` (63.4 MB).
 
 ---
 

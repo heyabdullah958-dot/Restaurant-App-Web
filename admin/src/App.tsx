@@ -115,7 +115,7 @@ const MainLayout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
 
         {/* Top Navbar */}
-        <header className={`sticky top-0 z-20 flex h-16 items-center justify-between px-6 border-b transition-colors duration-200 ${
+        <header className={`sticky top-0 z-30 flex h-16 items-center justify-between px-6 border-b transition-colors duration-200 ${
           isSuper 
             ? 'bg-slate-900 border-slate-800 text-slate-100' 
             : 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-zinc-200/50 dark:border-slate-800/50 text-zinc-800 dark:text-slate-100'

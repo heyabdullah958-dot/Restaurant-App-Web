@@ -485,8 +485,18 @@ export const MenuManagementScreen = () => {
       {/* Add Category Modal (Super Admin) */}
       <Modal visible={addCatModalVisible} transparent animationType="fade" onRequestClose={() => setAddCatModalVisible(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setAddCatModalVisible(false)}
+          />
           <View style={[styles.modalCard, { backgroundColor: themeCard }]}>
-            <Text style={[styles.modalTitle, { color: themeText }]}>Add Menu Category</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
+              <Text style={[styles.modalTitle, { color: themeText, marginBottom: 0 }]}>Add Menu Category</Text>
+              <TouchableOpacity onPress={() => setAddCatModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ color: themeMuted, fontSize: 18, fontWeight: 'bold' }}>✕</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
               placeholder="Category Name (e.g. Desserts, BBQ Combos)"
@@ -509,11 +519,21 @@ export const MenuManagementScreen = () => {
       {/* Add / Edit Item Modal (Super Admin) */}
       <Modal visible={itemModalVisible} transparent animationType="slide" onRequestClose={() => setItemModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <ScrollView contentContainerStyle={styles.itemModalScroll}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setItemModalVisible(false)}
+          />
+          <ScrollView contentContainerStyle={styles.itemModalScroll} keyboardShouldPersistTaps="handled">
             <View style={[styles.modalCard, { backgroundColor: themeCard }]}>
-              <Text style={[styles.modalTitle, { color: themeText }]}>
-                {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
-              </Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md }}>
+                <Text style={[styles.modalTitle, { color: themeText, marginBottom: 0 }]}>
+                  {editingItem ? 'Edit Menu Item' : 'Add New Menu Item'}
+                </Text>
+                <TouchableOpacity onPress={() => setItemModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Text style={{ color: themeMuted, fontSize: 18, fontWeight: 'bold' }}>✕</Text>
+                </TouchableOpacity>
+              </View>
 
               <Text style={[styles.inputLabel, { color: themeMuted }]}>Item Name *</Text>
               <TextInput

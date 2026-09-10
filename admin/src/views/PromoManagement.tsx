@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tag, Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Building2, Store, ShieldCheck } from 'lucide-react';
+import { Tag, Plus, Edit2, Trash2, CheckCircle2, XCircle, Search, Building2, Store, ShieldCheck, X } from 'lucide-react';
 import { fetchCoupons, createCoupon, updateCoupon, deleteCoupon, fetchRestaurantsList, fetchBranches } from '../services/api';
 
 export const PromoManagement: React.FC = () => {
@@ -212,7 +212,7 @@ export const PromoManagement: React.FC = () => {
     <div className="p-6 max-w-7xl mx-auto relative">
       {/* Toast Notification Banner */}
       {toast && (
-        <div className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl border font-medium text-sm transition-all animate-bounce ${
+        <div className={`fixed top-6 right-6 z-60 px-4 py-3 rounded-xl shadow-xl border font-medium text-sm transition-all animate-bounce ${
           toast.type === 'success'
             ? 'bg-emerald-600 text-white border-emerald-500'
             : 'bg-red-600 text-white border-red-500'
@@ -356,11 +356,26 @@ export const PromoManagement: React.FC = () => {
 
       {/* Create / Edit Promo Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto my-8">
-            <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white flex items-center gap-2">
-              <Tag className="text-red-500" /> {editingCoupon ? 'Edit Enterprise Promo Code' : 'Create Enterprise Promo Code'}
-            </h2>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-slate-700 pb-3 mb-4">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Tag className="text-red-500" /> {editingCoupon ? 'Edit Enterprise Promo Code' : 'Create Enterprise Promo Code'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
             <form onSubmit={handleSave} className="space-y-4 text-sm">
               {/* Code & Status */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

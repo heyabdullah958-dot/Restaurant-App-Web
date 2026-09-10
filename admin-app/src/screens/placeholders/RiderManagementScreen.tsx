@@ -457,146 +457,163 @@ export const RiderManagementScreen = () => {
       )}
 
       {/* Add / Edit Rider Modal */}
+      {/* Add / Edit Rider Modal */}
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
           <View style={[styles.modalCard, { backgroundColor: themeCard }]}>
-            <Text style={[styles.modalTitle, { color: themeText }]}>
-              {editingRider ? 'Edit Rider Profile' : 'Add New Branch Rider'}
-            </Text>
+            <View style={styles.modalHeaderRow}>
+              <Text style={[styles.modalTitle, { color: themeText, marginBottom: 0, flex: 1 }]}>
+                {editingRider ? 'Edit Rider Profile' : 'Add New Branch Rider'}
+              </Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ color: themeMuted, fontSize: 18, fontWeight: 'bold' }}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-            <Text style={[styles.inputLabel, { color: themeMuted }]}>Rider Full Name *</Text>
-            <TextInput
-              style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
-              placeholder="e.g. Tariq Mehmood"
-              placeholderTextColor={themeMuted}
-              value={name}
-              onChangeText={setName}
-            />
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: SPACING.sm }}
+            >
+              <Text style={[styles.inputLabel, { color: themeMuted }]}>Rider Full Name *</Text>
+              <TextInput
+                style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
+                placeholder="e.g. Tariq Mehmood"
+                placeholderTextColor={themeMuted}
+                value={name}
+                onChangeText={setName}
+              />
 
-            <Text style={[styles.inputLabel, { color: themeMuted }]}>Phone Number *</Text>
-            <TextInput
-              style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
-              placeholder="e.g. 03001234567"
-              placeholderTextColor={themeMuted}
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-            />
+              <Text style={[styles.inputLabel, { color: themeMuted }]}>Phone Number *</Text>
+              <TextInput
+                style={[styles.modalInput, { color: themeText, borderColor: themeBorder, backgroundColor: themeBg }]}
+                placeholder="e.g. 03001234567"
+                placeholderTextColor={themeMuted}
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+              />
 
-            {/* Super Admin Brand & Branch Picker */}
-            {isSuper ? (
-              <>
-                <Text style={[styles.inputLabel, { color: themeMuted }]}>Assigned Restaurant Brand *</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
-                  {restaurantsList.map((rest) => (
-                    <TouchableOpacity
-                      key={rest.id}
-                      style={[
-                        styles.modalChip,
-                        modalBrandId === rest.id && { backgroundColor: themeAccent, borderColor: themeAccent },
-                      ]}
-                      onPress={() => {
-                        setModalBrandId(rest.id);
-                        const firstBr = rest.branches?.[0];
-                        if (firstBr) setModalBranchId(firstBr.id);
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.modalChipText,
-                          { color: modalBrandId === rest.id ? '#FFFFFF' : themeText },
-                        ]}
-                      >
-                        🏪 {rest.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-
-                <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.xs }]}>Assigned Branch *</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
-                  {(() => {
-                    const currentBrandObj = restaurantsList.find((r) => r.id === modalBrandId) || restaurantsList[0];
-                    const branches = currentBrandObj?.branches || [];
-                    if (branches.length === 0) {
-                      return <Text style={{ color: themeMuted, fontSize: 11, fontStyle: 'italic' }}>No active branches found</Text>;
-                    }
-                    return branches.map((br: any) => (
+              {/* Super Admin Brand & Branch Picker */}
+              {isSuper ? (
+                <>
+                  <Text style={[styles.inputLabel, { color: themeMuted }]}>Assigned Restaurant Brand *</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
+                    {restaurantsList.map((rest) => (
                       <TouchableOpacity
-                        key={br.id}
+                        key={rest.id}
                         style={[
                           styles.modalChip,
-                          modalBranchId === br.id && { backgroundColor: themeAccent, borderColor: themeAccent },
+                          modalBrandId === rest.id && { backgroundColor: themeAccent, borderColor: themeAccent },
                         ]}
-                        onPress={() => setModalBranchId(br.id)}
+                        onPress={() => {
+                          setModalBrandId(rest.id);
+                          const firstBr = rest.branches?.[0];
+                          if (firstBr) setModalBranchId(firstBr.id);
+                        }}
                       >
                         <Text
                           style={[
                             styles.modalChipText,
-                            { color: modalBranchId === br.id ? '#FFFFFF' : themeText },
+                            { color: modalBrandId === rest.id ? '#FFFFFF' : themeText },
                           ]}
                         >
-                          📍 {br.name}
+                          🏪 {rest.name}
                         </Text>
                       </TouchableOpacity>
-                    ));
-                  })()}
-                </ScrollView>
-              </>
-            ) : null}
+                    ))}
+                  </ScrollView>
 
-            <Text style={[styles.inputLabel, { color: themeMuted }]}>Vehicle Type</Text>
-            <View style={styles.vehicleRow}>
-              {(['BIKE', 'CAR', 'SCOOTER', 'BICYCLE'] as const).map((v) => (
-                <TouchableOpacity
-                  key={v}
-                  style={[
-                    styles.vehicleChip,
-                    vehicleType === v && { backgroundColor: themeAccent },
-                  ]}
-                  onPress={() => setVehicleType(v)}
-                >
-                  <Text style={{ color: vehicleType === v ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
-                    {v}
-                  </Text>
+                  <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.xs }]}>Assigned Branch *</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.modalChipsScroll}>
+                    {(() => {
+                      const currentBrandObj = restaurantsList.find((r) => r.id === modalBrandId) || restaurantsList[0];
+                      const branches = currentBrandObj?.branches || [];
+                      if (branches.length === 0) {
+                        return <Text style={{ color: themeMuted, fontSize: 11, fontStyle: 'italic' }}>No active branches found</Text>;
+                      }
+                      return branches.map((br: any) => (
+                        <TouchableOpacity
+                          key={br.id}
+                          style={[
+                            styles.modalChip,
+                            modalBranchId === br.id && { backgroundColor: themeAccent, borderColor: themeAccent },
+                          ]}
+                          onPress={() => setModalBranchId(br.id)}
+                        >
+                          <Text
+                            style={[
+                              styles.modalChipText,
+                              { color: modalBranchId === br.id ? '#FFFFFF' : themeText },
+                            ]}
+                          >
+                            📍 {br.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ));
+                    })()}
+                  </ScrollView>
+                </>
+              ) : null}
+
+              <Text style={[styles.inputLabel, { color: themeMuted }]}>Vehicle Type</Text>
+              <View style={styles.vehicleRow}>
+                {(['BIKE', 'CAR', 'SCOOTER', 'BICYCLE'] as const).map((v) => (
+                  <TouchableOpacity
+                    key={v}
+                    style={[
+                      styles.vehicleChip,
+                      vehicleType === v && { backgroundColor: themeAccent },
+                    ]}
+                    onPress={() => setVehicleType(v)}
+                  >
+                    <Text style={{ color: vehicleType === v ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
+                      {v}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.sm }]}>Rider Status</Text>
+              <View style={styles.vehicleRow}>
+                {(['AVAILABLE', 'OFFLINE'] as const).map((s) => (
+                  <TouchableOpacity
+                    key={s}
+                    style={[
+                      styles.vehicleChip,
+                      status === s && { backgroundColor: s === 'AVAILABLE' ? '#10B981' : '#EF4444' },
+                    ]}
+                    onPress={() => setStatus(s)}
+                  >
+                    <Text style={{ color: status === s ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
+                      {s}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setModalVisible(false)}>
+                  <Text style={{ color: themeMuted }}>Cancel</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={[styles.inputLabel, { color: themeMuted, marginTop: SPACING.sm }]}>Rider Status</Text>
-            <View style={styles.vehicleRow}>
-              {(['AVAILABLE', 'OFFLINE'] as const).map((s) => (
                 <TouchableOpacity
-                  key={s}
-                  style={[
-                    styles.vehicleChip,
-                    status === s && { backgroundColor: s === 'AVAILABLE' ? '#10B981' : '#EF4444' },
-                  ]}
-                  onPress={() => setStatus(s)}
+                  style={[styles.modalSaveBtn, { backgroundColor: themeAccent }]}
+                  onPress={handleSaveRider}
+                  disabled={isSubmitting}
                 >
-                  <Text style={{ color: status === s ? '#FFFFFF' : themeMuted, fontSize: 11, fontWeight: 'bold' }}>
-                    {s}
-                  </Text>
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>Save Rider</Text>
+                  )}
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setModalVisible(false)}>
-                <Text style={{ color: themeMuted }}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSaveBtn, { backgroundColor: themeAccent }]}
-                onPress={handleSaveRider}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>Save Rider</Text>
-                )}
-              </TouchableOpacity>
-            </View>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -801,9 +818,16 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
+    maxHeight: '90%',
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
     ...SHADOWS.large,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   modalTitle: {
     fontSize: 18,
@@ -850,7 +874,8 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xs,
   },
   brandChipsScroll: {
-    marginBottom: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    marginVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm,
   },
   brandChipsContainer: {
