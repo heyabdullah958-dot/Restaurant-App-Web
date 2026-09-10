@@ -149,7 +149,7 @@ FoodSphere/
 ## 📦 Deliverables Checklist
 
 - [x] **GetFood Customer Android APK** (`D:\GetFood-Customer.apk` - 93.0 MB, multi-arch arm64/armv7/x86_64)
-- [x] **GetFood Merchant Manager Android APK** (`D:\GetFood-Manager.apk` - 35.5 MB)
+- [x] **GetFood Merchant Manager Android APK** (`D:\GetFood-Manager.apk` - 63.4 MB, synced to `D:\get\GetFood-Manager.apk`)
 - [x] iOS build configuration & Hermes export
 - [x] Payment integration (Stripe + PayFast + COD)
 - [x] Loyalty Points System (F() expressions based)
@@ -208,6 +208,8 @@ FoodSphere/
 | Standalone Production Android APK Builds (Phase 8) | ✅ Completed (Customer App `D:\GetFood-Customer.apk` [55.6 MB] & Manager App `D:\GetFood-Manager.apk` [35.5 MB]) | Done |
 | Customer App Standalone APK Cold Launch Crash & Native Precedence Fix (Phase 9) | ✅ Completed (Gesture handler precedence, ErrorUtils global interception, dedicated ErrorBoundary, multi-arch APK 93.0MB) | Done |
 | Production Server Hard-Lock & Registration/Login Lifecycle Resolution (Phase 10) | ✅ Completed (Server selector removed, Heroku API hard-locked, multi-identifier auth, 7/7 live Heroku v86 tests pass, APK 93.0MB) | Done |
+| Web Admin HQ Viewport Layout De-Cluttering & Stacking Hierarchy (Phase 11) | ✅ Completed (Header/modal z-index fixed, rider brand filter restored, manager card polish, cross-app deals synced) | Done |
+| Web Admin HQ Brand Filter Scroll, Viewport Clippings, Bottom Nav Padding & Brand Drill-Down Analytics (Phase 12) | ✅ Completed (Rider/Menu brand horizontal scroll, 7d trend right clip fix, 130px bottom nav clearance, interactive brand/branch analytics drill-down & Heroku v89 deploy, Manager APK 63.4MB) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
@@ -267,6 +269,7 @@ FoodSphere/
 36. **Bottom Navigation Vector Icon Standardization Invariant:** All bottom navigation tab bars across `admin-app` and `app` MUST use vector glyphs (`@expo/vector-icons` / `Ionicons`) with explicit theme active/inactive tokens and pill background highlights (`tabIconPill`), NEVER raw emoji unicode characters inside text containers.
 37. **React Native New Architecture & Deprecated Native Module Exclusion Invariant:** Projects running React Native 0.86 with New Architecture enabled (`newArchEnabled=true` / Fabric / TurboModules / Bridgeless) MUST NOT include deprecated legacy packages containing pre-0.76 C++ JNI bridges such as `expo-av` (`libexpo-av.so`). When loaded via `System.loadLibrary` during `MainApplication` startup, incompatible legacy JNI modules crash the native Android process immediately on cold launch before JavaScript execution. Standalone release APKs must use modern New Architecture packages or native vibration/keep-awake haptic alerts, and all multi-architecture ABIs (`arm64-v8a`, `armeabi-v7a`, `x86_64`) must be compiled cleanly.
 38. **Production Server Hard-Lock & Multi-Identifier Auth Normalization Invariant:** The network layer across Customer Mobile (`/app`) and Manager Mobile (`/admin-app`) MUST be strictly immutable in production release builds (`!__DEV__`), defaulting to `https://getfoodpk-fd9b20442fcf.herokuapp.com/api` and purging legacy debug storage keys (`@getfood_custom_api_url`, `@admin_custom_api_url`). Production screens MUST NEVER mount server selectors, debug environment badges, or clickable diagnostics. Backend `CustomTokenObtainPairSerializer` MUST resolve credentials across exact/case-insensitive username, email, and normalized phone numbers (+92 / 0 prefix tolerance), and embed user profile data in the token response for instant hydration. Inputs MUST be normalized symmetrically (`.trim()`, `autoCorrect={false}`) on mobile clients.
+39. **Brand Filter Scroll, Viewport Clippings & Bottom Nav Padding Invariant:** In `admin-app`, horizontal brand filter rows (`ScrollView horizontal`) MUST be wrapped in a non-collapsing container (`styles.brandBar`) with `flexShrink: 0`, and chip items MUST set `flexShrink: 0` and explicit `minHeight` to prevent vertical compression on Android. Dashboard cards with multi-column headers (such as 7-day trend) MUST constrain right-aligned indicator pills (`maxWidth`, `flexShrink: 0`) and wrap left titles in `flex: 1` with text truncation to prevent viewport clipping. All scrollable screens with a floating bottom navigation bar MUST apply at least `paddingBottom: 120` to prevent content cards from being covered by the bottom bar.
 
 ---
 

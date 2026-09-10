@@ -1,6 +1,37 @@
 
 # Changelog
 
+## 2026-09-10 Phase 12 — Brand Filter Scroll, Viewport Clippings, Bottom Nav Padding & Brand Drill-Down Analytics
+- **Brand Filter Horizontal Scroll & Flex-Shrink Protection**:
+  - In `admin-app/src/screens/RiderManagementScreen.tsx`, wrapped horizontal ScrollView within `styles.brandBar` container with `flexShrink: 0`, applied `flexGrow: 0` to `brandChipsScroll`, and styled `brandChip` with `minHeight: 34`, `paddingHorizontal: 14`, `paddingVertical: 7`, `flexShrink: 0`, and `numberOfLines={1}` on text. Prevents Android flexbox height collapse and text squishing.
+  - In `admin-app/src/screens/MenuManagementScreen.tsx`, added `flexShrink: 0` and `minHeight: 34` to brand selector pills and `flexGrow: 0` to `brandScroll`.
+- **7-Day Trend Header Viewport Clipping Fix**:
+  - In `admin-app/src/screens/SuperDashboardScreen.tsx`, restructured `trendHeader` flex layout: wrapped left title & subtitle in `<View style={{ flex: 1, marginRight: SPACING.xs }}>` with `numberOfLines={1}` / `numberOfLines={2}` truncation; constrained right summary pill with `flexShrink: 0` and `maxWidth: 175`. Completely prevents the currency/order count pill (`Rs. X (Y ord)`) from being pushed past the right viewport boundary on mobile screens.
+- **Bottom Navigation Bar Overlap & Viewport Padding**:
+  - Applied generous `paddingBottom: 120` to `130` on `SuperDashboardScreen`, `BranchDashboardScreen`, `RiderManagementScreen`, and `MenuManagementScreen`. Ensures status breakdown cards, brand ranking lists, rider rosters, and menu catalogs scroll completely clear of the floating bottom navigation bar.
+- **Interactive Brand & Branch Drill-Down Analytics**:
+  - Upgraded backend `RestaurantAnalyticsView` (`GET /api/analytics/restaurant/<id>/`) to return comprehensive operational branch breakdowns: branch ID, name, address, phone, `is_active`, 30-day revenue (`revenue_30d`), 30-day orders (`orders_30d`), revenue contribution percentage (`revenue_share_pct`), assigned branch manager (`manager_username`), and active riders count (`active_riders_count`).
+  - Deployed backend updates to Heroku 24/7 backend (**Release v89** live at `https://getfoodpk-fd9b20442fcf.herokuapp.com/api`).
+  - In `admin-app/src/screens/SuperDashboardScreen.tsx`, wired brand ranking cards with interactive tap handlers opening a full-featured drill-down modal (`selectedBrandModal`). Displays 30-day revenue, total volume, average order value (AOV), platform share %, all-time revenue/order strips, and individual operational branch breakdown cards complete with direct manager contact, active rider count, and a 1-tap `📞 Call Branch` button.
+  - Wired "Global Order Status Breakdown" pills with interactive modal (`selectedStatusModal`) displaying exact order volume, pipeline share %, and operational SLA benchmark guidance.
+- **Standalone Production Android Release APK Assembly**:
+  - Rebuilt production release APK via `./gradlew.bat assembleRelease` (`BUILD SUCCESSFUL in 1m`, 450 tasks) ➔ `D:\GetFood-Manager.apk` (63.4 MB) and synchronized to `D:\get\GetFood-Manager.apk`.
+  - Customer APK maintained at `D:\GetFood-Customer.apk` and `D:\get\GetFood-Customer.apk` (93.0 MB).
+
+---
+
+## 2026-09-10 Phase 11 — Web Admin HQ Layout De-Cluttering, Stacking Hierarchy & Cross-App Verification
+- **Header & Modal Stacking Conflicts Resolved**:
+  - Audited and resolved header z-index conflicts across Web Admin HQ (`/admin`) and Manager Mobile App (`admin-app`).
+  - Fixed rider assignment modal dropdown collision and guaranteed underlying interactive elements remain clickable.
+- **Riders Tab Brand Filter & Manager Account UI Polish**:
+  - Eliminated brand filter collision with adjacent containers in web admin.
+  - Fixed text truncation in manager account provisioning cards.
+- **Comprehensive Cross-App Feature Verification**:
+  - Verified full end-to-end integration between Manager App and Customer App: Flash deals and midnight specials created by managers reflect immediately in Customer App with active countdowns, proper priority ordering, and branch stock overrides honored.
+
+---
+
 ## 2026-09-10 Phase 10 — Production Server Hard-Lock & Registration/Login Lifecycle Resolution
 - **Production Server Selector Removal & UI Hardening**:
   - Removed the active backend server button (`Backend: 🚀 Heroku Cloud (24/7)`) completely from `AuthScreen.tsx`.
