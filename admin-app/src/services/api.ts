@@ -755,8 +755,39 @@ export interface StaffManager {
   notification_email: string;
 }
 
+export interface BranchAnalyticsData {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  is_active: boolean;
+  orders_30d: number;
+  revenue_30d: number;
+  revenue_share_pct: number;
+  manager_username: string;
+  active_riders_count: number;
+}
+
+export interface RestaurantAnalyticsData {
+  restaurant: { id: number; name: string; slug: string };
+  summary: {
+    orders_today: number;
+    orders_7d: number;
+    orders_30d: number;
+    revenue_30d: number;
+    avg_order: number;
+  };
+  daily_trend: { date: string; orders: number; revenue: number }[];
+  branches: BranchAnalyticsData[];
+}
+
 export const fetchPlatformAnalytics = async (): Promise<PlatformAnalyticsData> => {
   const response = await api.get('/analytics/platform/');
+  return response.data;
+};
+
+export const fetchRestaurantAnalytics = async (restaurantId: number): Promise<RestaurantAnalyticsData> => {
+  const response = await api.get(`/analytics/restaurant/${restaurantId}/`);
   return response.data;
 };
 

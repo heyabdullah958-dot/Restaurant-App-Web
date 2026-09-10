@@ -581,6 +581,10 @@ export const fetchReviews = async (params?: { restaurant_id?: number | string; r
   return Array.isArray(data) ? data : (data?.results || []);
 };
 
+export const fetchRestaurantAnalytics = async (restaurantId: number) => {
+  return apiFetch<any>(`/api/analytics/restaurant/${restaurantId}/`);
+};
+
 export const fetchRiders = async (params?: { branch_id?: number | string; restaurant_id?: number | string; status?: string; is_active?: boolean; allow_global?: boolean }) => {
   let url = '/api/admin/riders/';
   if (params) {

@@ -607,14 +607,17 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   brandScroll: {
+    flexGrow: 0,
     paddingHorizontal: SPACING.sm,
   },
   brandChip: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#1E293B',
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm + 4,
+    paddingVertical: 7,
+    minHeight: 34,
     borderRadius: RADIUS.round,
     marginRight: SPACING.xs,
     borderWidth: 1,
@@ -678,6 +681,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.sm,
+    paddingBottom: 120,
   },
   loadingCenter: {
     flex: 1,

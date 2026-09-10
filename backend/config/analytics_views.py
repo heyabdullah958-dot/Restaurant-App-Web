@@ -11,8 +11,8 @@ from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
 from orders.models import Order
-from restaurants.models import Restaurant
-from users.models import User
+from restaurants.models import Restaurant, Branch, BranchRider
+from users.models import User, ManagerProfile
 
 
 class PlatformAnalyticsView(APIView):
@@ -170,15 +170,41 @@ class RestaurantAnalyticsView(APIView):
                 'revenue': float(stat['revenue_sum'] or 0) if stat else 0.0,
             })
 
+        brand_revenue_30d = float(orders_30d.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0)
+        branches = Branch.objects.filter(restaurant=restaurant)
+        branch_stats = []
+
+        for b in branches:
+            b_orders_30d = Order.objects.filter(branch=b, created_at__date__gte=last_30)
+            b_rev = float(b_orders_30d.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0)
+            b_orders_count = b_orders_30d.count()
+            manager = ManagerProfile.objects.filter(branch=b).first()
+            active_riders = BranchRider.objects.filter(branch=b, is_active=True).count()
+            rev_share = round((b_rev / brand_revenue_30d * 100), 1) if brand_revenue_30d > 0 else 0.0
+
+            branch_stats.append({
+                'id': b.id,
+                'name': b.name,
+                'address': b.address or '',
+                'phone': b.phone or '',
+                'is_active': b.is_active,
+                'orders_30d': b_orders_count,
+                'revenue_30d': b_rev,
+                'revenue_share_pct': rev_share,
+                'manager_username': manager.user.username if manager and manager.user else 'Unassigned',
+                'active_riders_count': active_riders,
+            })
+
         return Response({
             'restaurant': {'id': restaurant.id, 'name': restaurant.name, 'slug': restaurant.slug},
             'summary': {
                 'orders_today': Order.objects.filter(restaurant=restaurant, created_at__date=today).count(),
                 'orders_7d': Order.objects.filter(restaurant=restaurant, created_at__date__gte=last_7).count(),
                 'orders_30d': orders_30d.count(),
-                'revenue_30d': float(orders_30d.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0),
+                'revenue_30d': brand_revenue_30d,
                 'avg_order': float(orders_30d.filter(status='delivered').aggregate(Avg('total'))['total__avg'] or 0),
             },
             'daily_trend': daily_trend,
+            'branches': branch_stats,
         })
 

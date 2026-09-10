@@ -330,48 +330,57 @@ export const RiderManagementScreen = () => {
 
       {/* Super Admin Brand Filter Chips */}
       {isSuper && restaurantsList.length > 0 ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.brandChipsScroll}
-          contentContainerStyle={styles.brandChipsContainer}
-        >
-          <TouchableOpacity
-            style={[
-              styles.brandChip,
-              brandFilter === 'ALL' && { backgroundColor: themeAccent },
-            ]}
-            onPress={() => setBrandFilter('ALL')}
+        <View style={styles.brandBar}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.brandChipsScroll}
+            contentContainerStyle={styles.brandChipsContainer}
           >
-            <Text
-              style={[
-                styles.brandChipText,
-                { color: brandFilter === 'ALL' ? '#FFFFFF' : themeMuted },
-              ]}
-            >
-              All Brands ({riders.length})
-            </Text>
-          </TouchableOpacity>
-          {restaurantsList.map((rest) => (
             <TouchableOpacity
-              key={rest.id}
               style={[
                 styles.brandChip,
-                String(brandFilter) === String(rest.id) && { backgroundColor: themeAccent },
+                brandFilter === 'ALL' && { backgroundColor: themeAccent, borderColor: themeAccent },
               ]}
-              onPress={() => setBrandFilter(String(rest.id))}
+              onPress={() => setBrandFilter('ALL')}
+              activeOpacity={0.7}
             >
               <Text
+                numberOfLines={1}
                 style={[
                   styles.brandChipText,
-                  { color: String(brandFilter) === String(rest.id) ? '#FFFFFF' : themeMuted },
+                  { color: brandFilter === 'ALL' ? '#FFFFFF' : themeMuted },
                 ]}
               >
-                🏪 {rest.name}
+                🌐 All Brands ({riders.length})
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            {restaurantsList.map((rest) => {
+              const isSelected = String(brandFilter) === String(rest.id);
+              return (
+                <TouchableOpacity
+                  key={rest.id}
+                  style={[
+                    styles.brandChip,
+                    isSelected && { backgroundColor: themeAccent, borderColor: themeAccent },
+                  ]}
+                  onPress={() => setBrandFilter(String(rest.id))}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.brandChipText,
+                      { color: isSelected ? '#FFFFFF' : themeMuted },
+                    ]}
+                  >
+                    🏪 {rest.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       ) : null}
 
       {/* Status Filter Segmented Control */}
@@ -680,6 +689,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: SPACING.sm,
+    paddingBottom: 120,
   },
   loadingCenter: {
     flex: 1,
@@ -873,26 +883,34 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.xs,
   },
+  brandBar: {
+    flexShrink: 0,
+    marginBottom: SPACING.xs,
+  },
   brandChipsScroll: {
-    paddingVertical: SPACING.xs,
-    marginVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
+    flexGrow: 0,
   },
   brandChipsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    gap: 8,
   },
   brandChip: {
-    paddingHorizontal: SPACING.sm + 2,
-    paddingVertical: 5,
+    flexShrink: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    minHeight: 34,
     borderRadius: RADIUS.round,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.12)',
   },
   brandChipText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   brandTagContainer: {
