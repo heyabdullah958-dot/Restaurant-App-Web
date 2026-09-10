@@ -2,7 +2,7 @@ from django.urls import path
 from .views import UserRegisterView, GuestAuthView, UserProfileView, LoyaltyHistoryView, CustomTokenObtainPairView, CustomTokenRefreshView, LogoutView, ChangeOwnPasswordView, ForgotPasswordView, ResetPasswordConfirmView
 from .admin_views import AdminCustomerListView, AdminCustomerLoyaltyView, AdminCustomerDetailView, AdminManagerListView, AdminManagerChangePasswordView, AdminManagerCreateView, AdminBranchListView, UserFirstPasswordChangeView
 from config.analytics_views import PlatformAnalyticsView, RestaurantAnalyticsView
-from config.notification_views import SendNotificationView
+from config.notification_views import SendNotificationView, NotificationHistoryView
 
 urlpatterns = [
     # Auth endpoints
@@ -41,4 +41,5 @@ urlpatterns = [
 
     # ── Notifications ──────────────────────────────────────
     path('admin/notifications/send/', SendNotificationView.as_view(), name='admin_notify_send'),
+    path('admin/notifications/history/', NotificationHistoryView.as_view(), name='admin_notify_history'),
 ]

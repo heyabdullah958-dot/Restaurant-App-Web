@@ -42,8 +42,8 @@ interface FlashDealItem {
   daily_end_time?: string | null;
   active_days?: string[];
   window_ends_at?: string | null;
-  start_time: string;
-  end_time: string;
+  start_time?: string | null;
+  end_time?: string | null;
   max_orders?: number;
   current_redemptions?: number;
   orders_used?: number;
@@ -84,7 +84,7 @@ const ID_TO_SLUG: Record<number | string, string> = {
   'getafomo': 'getafomo',
 };
 
-const parseDateSafe = (dateStr?: string): number => {
+const parseDateSafe = (dateStr?: string | null): number => {
   if (!dateStr) return Date.now() + 7 * 86400000;
   let iso = String(dateStr).trim();
   if (iso.includes(' ') && !iso.includes('T')) {
@@ -121,7 +121,7 @@ const resolveBrandInfo = (deal: FlashDealItem) => {
   return BRAND_DATA['jushhpk'];
 };
 
-const useCountdown = (targetDateStr: string) => {
+const useCountdown = (targetDateStr?: string | null) => {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; isExpired: boolean }>({
     days: 0,
     hours: 0,
@@ -345,7 +345,12 @@ export default function FlashDealsScreen() {
           const resFallback = await api.get('/flash-deals/');
           const allDeals = extractDealsList(resFallback);
           const now = Date.now();
-          raw = allDeals.filter(d => d.is_active && parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now);
+          raw = allDeals.filter(d => {
+            if (d.is_active === false) return false;
+            if (d.is_currently_active !== undefined) return Boolean(d.is_currently_active);
+            if (d.timing_type === 'RECURRING_DAILY') return true;
+            return parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now;
+          });
         } catch (errFallback) {
           console.log('Error fetching fallback /flash-deals/:', errFallback);
         }

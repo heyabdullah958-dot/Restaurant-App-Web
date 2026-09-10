@@ -124,6 +124,10 @@ class FlashDeal(AuditLogMixin, models.Model):
         """Backward compatibility property."""
         return self.order_mode == 'DINE_IN'
 
+    @is_dine_in_only.setter
+    def is_dine_in_only(self, value):
+        self.order_mode = 'DINE_IN' if value else 'ALL'
+
     def get_effective_timezone(self):
         return self.timezone or 'Asia/Karachi'
 

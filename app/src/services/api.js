@@ -24,7 +24,7 @@ export const detectLocalLanUrl = () => {
 };
 
 // Internal active URL state — ALWAYS default to 24/7 production server
-let activeBaseUrl = PRODUCTION_API_URL;
+let activeBaseUrl = process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 
 export const getActiveBaseUrl = () => {
   if (!__DEV__) return PRODUCTION_API_URL;

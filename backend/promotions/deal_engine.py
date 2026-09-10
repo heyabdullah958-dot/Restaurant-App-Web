@@ -69,7 +69,9 @@ def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, cu
     applicable_candidates = []
     
     for deal in deals:
-        if not deal.is_currently_active(current_dt=current_dt):
+        if getattr(deal, '_cached_is_active', None) is None:
+            deal._cached_is_active = deal.is_currently_active(current_dt=current_dt)
+        if not deal._cached_is_active:
             continue
 
         # 1. Target Scope Check
@@ -92,11 +94,15 @@ def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, cu
             is_item_match = True
             scope_score = 1
         elif deal.item_scope_type == 'CATEGORY':
-            if deal.categories.filter(id=category_id).exists():
+            if not hasattr(deal, '_cached_cat_ids'):
+                deal._cached_cat_ids = {c.id for c in deal.categories.all()}
+            if category_id in deal._cached_cat_ids:
                 is_item_match = True
                 scope_score = 2
         elif deal.item_scope_type == 'SPECIFIC_ITEMS':
-            if deal.menu_items.filter(id=menu_item.id).exists():
+            if not hasattr(deal, '_cached_item_ids'):
+                deal._cached_item_ids = {m.id for m in deal.menu_items.all()}
+            if menu_item.id in deal._cached_item_ids:
                 is_item_match = True
                 scope_score = 3
 

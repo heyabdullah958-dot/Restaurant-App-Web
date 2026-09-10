@@ -186,6 +186,8 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
       if (d.is_active === false) return false;
       if (d.is_currently_active !== undefined) {
         if (!d.is_currently_active) return false;
+      } else if (d.timing_type === 'RECURRING_DAILY') {
+        // Recurring deal with no explicit is_currently_active field
       } else {
         const start = parseDateSafe(d.start_time);
         const end = parseDateSafe(d.end_time);
@@ -483,7 +485,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         } catch {}
       }
       const now = Date.now();
-      const valid = raw.filter((d: any) => d.is_active !== false && parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now);
+      const valid = raw.filter((d: any) => {
+        if (d.is_active === false) return false;
+        if (d.is_currently_active !== undefined) return Boolean(d.is_currently_active);
+        if (d.timing_type === 'RECURRING_DAILY') return true;
+        return parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now;
+      });
       setFlashDeals(valid);
     } catch (e) {
       if (__DEV__) console.log('Flash deals fetch error', e);
