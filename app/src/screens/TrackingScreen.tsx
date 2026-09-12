@@ -410,7 +410,7 @@ export default function TrackingScreen() {
     };
   }, [isResolvingCredentials, effectiveOrderId, effectiveToken, fetchLiveTrack, dispatch]);
 
-  // Set up polling (refreshes order status every 3 seconds while active)
+  // Set up polling (refreshes order status every 8 seconds while active, retaining instant manual pull-to-refresh)
   useEffect(() => {
     const status = currentOrder?.status?.toLowerCase();
     if (isResolvingCredentials || (!effectiveOrderId && !effectiveToken) || status === 'delivered' || status === 'cancelled') {
@@ -419,7 +419,7 @@ export default function TrackingScreen() {
 
     const interval = setInterval(() => {
       fetchLiveTrack();
-    }, 3000);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, [fetchLiveTrack, isResolvingCredentials, effectiveOrderId, effectiveToken, currentOrder?.status]);

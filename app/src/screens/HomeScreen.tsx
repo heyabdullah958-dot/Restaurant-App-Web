@@ -651,11 +651,6 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       checkOrderStatusUpdates();
       checkActiveGuestOrder();
 
-      // Pre-warm in-memory menu cache for active launch brands for 0ms instant opening
-      ['tandooristoppk', 'jushhpk', 'getafomo'].forEach((brandSlug) => {
-        dispatch(fetchRestaurantDetail({ slug: brandSlug }) as any);
-      });
-
       const interval = setInterval(() => {
         dispatch(fetchRestaurants() as any);
         fetchFlashDeals();

@@ -395,16 +395,6 @@ export default function RestaurantScreen() {
     }, [dispatch, slug, selectedBranchId])
   );
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      dispatch(fetchRestaurantDetail(selectedBranchId ? { slug, branchId: selectedBranchId } : slug));
-      dispatch(fetchRestaurants() as any);
-    }, 10000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [dispatch, slug, selectedBranchId]);
 
   const [reviews, setReviews] = useState<any[]>([]);
 

@@ -136,17 +136,37 @@ class Order(models.Model):
         else:
             existing_orders = Order.objects.none()
 
+        prefix = f"{brand_code}-{branch_code}-"
+
+        # Efficient indexed query: lookup latest order matching this prefix by descending primary key id
+        latest_order = existing_orders.filter(display_order_id__startswith=prefix).order_by('-id').first()
         max_seq = 1000
-        for ord_obj in existing_orders.only('display_order_id', 'id'):
-            if ord_obj.display_order_id:
-                parts = ord_obj.display_order_id.split('-')
-                if parts and parts[-1].isdigit():
-                    val = int(parts[-1])
-                    if val > max_seq:
-                        max_seq = val
+
+        if latest_order and latest_order.display_order_id:
+            parts = latest_order.display_order_id.split('-')
+            if parts and parts[-1].isdigit():
+                max_seq = max(max_seq, int(parts[-1]))
+        else:
+            # Fallback for existing/legacy orders with differing prefix
+            recent_orders = existing_orders.order_by('-id')[:5]
+            for ord_obj in recent_orders:
+                if ord_obj.display_order_id:
+                    parts = ord_obj.display_order_id.split('-')
+                    if parts and parts[-1].isdigit():
+                        val = int(parts[-1])
+                        if val > max_seq:
+                            max_seq = val
+                            break
 
         next_seq = max_seq + 1
-        return f"{brand_code}-{branch_code}-{next_seq}"
+        new_display_id = f"{prefix}{next_seq}"
+
+        # Collision guard to ensure atomic sequence integrity
+        while Order.objects.filter(display_order_id=new_display_id).exists():
+            next_seq += 1
+            new_display_id = f"{prefix}{next_seq}"
+
+        return new_display_id
 
     def save(self, *args, **kwargs):
         from restaurants.models import BranchRider

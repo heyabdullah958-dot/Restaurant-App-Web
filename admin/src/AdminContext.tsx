@@ -1256,18 +1256,35 @@ const isEqualUser = (prev: User | null, next: User | null): boolean => {
   useEffect(() => { loadAppDataRef.current = loadAppData; });
   useEffect(() => { refreshOrdersRef.current = refreshOrders; });
 
-  // 5-second quiet background polling loop for live real-time sync across admin panel.
-  // Uses refs so the interval callback always calls the latest version of each function,
-  // eliminating stale-closure bugs without adding them to the dependency array.
+  // 15-second quiet background polling loop for live real-time order sync across admin panel.
+  // Uses refs so the interval callback always calls the latest version of refreshOrders.
+  // Page visibility check ensures background tabs do not continuously poll the Heroku backend.
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (getToken()) {
-        loadAppDataRef.current(false);
+    const pollOrders = () => {
+      const isVisible = typeof document === 'undefined' || document.visibilityState === 'visible';
+      if (getToken() && isVisible) {
         refreshOrdersRef.current();
       }
-    }, 5000);
+    };
 
-    return () => clearInterval(interval);
+    const interval = setInterval(pollOrders, 15000);
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        pollOrders();
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -1,3 +1,5 @@
+import logging
+from concurrent.futures import ThreadPoolExecutor
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -9,6 +11,82 @@ from .serializers import (
     OrderCreateSerializer, OrderDetailSerializer, OrderListSerializer,
     AdminOrderListSerializer
 )
+
+logger = logging.getLogger(__name__)
+
+# Non-blocking background worker pool for email and FCM notifications.
+# Offloads slow Gmail SMTP / Firebase network latency to prevent blocking HTTP 201 responses.
+_notification_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="order_notify")
+
+
+def _dispatch_order_notifications(
+    order_id,
+    restaurant_id,
+    fcm_title,
+    fcm_body,
+    branch_subject,
+    branch_message,
+    branch_emails,
+    rest_subject,
+    rest_message,
+    rest_emails,
+):
+    """
+    Background worker function for FCM push and email dispatch.
+    Runs asynchronously and logs errors defensively without impacting client order responses.
+    """
+    # 1. FCM Push Notification
+    try:
+        from config.notification_views import get_firebase_app
+        app = get_firebase_app()
+        if app:
+            from firebase_admin import messaging
+            topic = f'restaurant_{restaurant_id}'
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=fcm_title,
+                    body=fcm_body,
+                ),
+                topic=topic,
+            )
+            messaging.send(message)
+            logger.info(f"Order #{order_id} FCM dispatched to topic {topic}")
+    except Exception as e:
+        logger.error(f"Failed to send order FCM for Order #{order_id}: {e}")
+
+    # 2. Email Notifications (Branch Manager & Restaurant Manager)
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        if branch_emails and branch_subject and branch_message:
+            send_mail(
+                branch_subject,
+                branch_message,
+                settings.DEFAULT_FROM_EMAIL,
+                branch_emails,
+                fail_silently=True,
+            )
+            logger.info(f"Order #{order_id} branch email sent to: {branch_emails}")
+
+        if rest_emails and rest_subject and rest_message:
+            send_mail(
+                rest_subject,
+                rest_message,
+                settings.DEFAULT_FROM_EMAIL,
+                rest_emails,
+                fail_silently=True,
+            )
+            logger.info(f"Order #{order_id} restaurant summary email sent to: {rest_emails}")
+    except Exception as e:
+        logger.error(f"Failed to send email notifications for Order #{order_id}: {e}")
+    finally:
+        try:
+            from django.db import connection
+            connection.close()
+        except Exception:
+            pass
+
 
 
 
@@ -72,55 +150,34 @@ class OrderListCreateView(generics.ListCreateAPIView):
         if serializer.is_valid():
             order = serializer.save()
             
-            # Send FCM push notification
-            from config.notification_views import get_firebase_app
-            app = get_firebase_app()
-            if app:
-                from firebase_admin import messaging
-                try:
-                    topic = f'restaurant_{order.restaurant.id}'
-                    message = messaging.Message(
-                        notification=messaging.Notification(
-                            title=f"New Order #{order.id}",
-                            body=f"New order received from {order.guest_name or getattr(order.user, 'username', 'Customer')} for Rs. {order.total}"
-                        ),
-                        topic=topic,
-                    )
-                    messaging.send(message)
-                except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).error(f"Failed to send order FCM: {e}")
-            
-            # Send email notifications (Branch Manager: Full details | Restaurant Manager: Summary)
+            # Offload FCM and email notifications to non-blocking background thread pool
             try:
-                from users.models import ManagerProfile, User
-                from django.core.mail import send_mail
-                from django.conf import settings
-                import logging
-                logger = logging.getLogger(__name__)
-                
                 customer_name = (
                     order.guest_name or 
                     getattr(order.user, 'username', 'Customer')
                 )
-                
+                fcm_title = f"New Order #{order.id}"
+                fcm_body = f"New order received from {customer_name} for Rs. {order.total}"
+
                 order_items_text = '\n'.join([
                     f"  - {item.menu_item.name} x{item.quantity} = Rs. {item.total_price}"
                     for item in order.items.select_related('menu_item').all()
                 ])
 
-                # 1. Branch Manager Email (Full Order Details)
+                # 1. Branch Manager Email Payload
+                branch_emails = []
+                branch_subject = None
+                branch_message = None
                 if order.branch:
+                    from users.models import ManagerProfile
                     branch_managers = ManagerProfile.objects.filter(
                         branch=order.branch
                     ).select_related('user')
-                    
                     branch_emails = [
                         mp.notification_email 
                         for mp in branch_managers 
                         if mp.notification_email
                     ]
-                    
                     if branch_emails:
                         branch_subject = f"🛵 [Branch Order] Order #{order.id} — {order.branch.name} Branch"
                         branch_message = f"""New order received at your branch!
@@ -150,29 +207,20 @@ https://foodsphere-admin.pages.dev
 
 — FoodSphere Platform
 """
-                        send_mail(
-                            branch_subject,
-                            branch_message,
-                            settings.DEFAULT_FROM_EMAIL,
-                            branch_emails,
-                            fail_silently=True,
-                        )
-                        logger.info(f"Order #{order.id} branch email sent to: {branch_emails}")
 
-                # 2. Restaurant Manager Email (Order Summary)
+                # 2. Restaurant Manager Email Payload
+                from users.models import User
                 rest_group_name = f"manager_{order.restaurant.slug}"
                 rest_managers = User.objects.filter(
                     groups__name=rest_group_name,
                     is_staff=True
                 ).exclude(manager_profile__isnull=False)
-                
                 rest_emails = [u.email for u in rest_managers if u.email]
                 if not rest_emails:
                     rest_emails = [f"manager.{order.restaurant.slug}@foodsphere.com"]
-                
-                if rest_emails:
-                    rest_subject = f"📊 [Restaurant Summary] Order #{order.id} — {order.restaurant.name}"
-                    rest_message = f"""New order placed across {order.restaurant.name}!
+
+                rest_subject = f"📊 [Restaurant Summary] Order #{order.id} — {order.restaurant.name}"
+                rest_message = f"""New order placed across {order.restaurant.name}!
 
 ORDER SUMMARY
 ─────────────────────────────
@@ -189,20 +237,22 @@ https://foodsphere-admin.pages.dev
 
 — FoodSphere Platform
 """
-                    send_mail(
-                        rest_subject,
-                        rest_message,
-                        settings.DEFAULT_FROM_EMAIL,
-                        rest_emails,
-                        fail_silently=True,
-                    )
-                    logger.info(f"Order #{order.id} restaurant summary email sent to: {rest_emails}")
 
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).error(
-                    f"Failed to send email notifications for Order #{order.id}: {e}"
+                _notification_executor.submit(
+                    _dispatch_order_notifications,
+                    order.id,
+                    order.restaurant.id,
+                    fcm_title,
+                    fcm_body,
+                    branch_subject,
+                    branch_message,
+                    branch_emails,
+                    rest_subject,
+                    rest_message,
+                    rest_emails,
                 )
+            except Exception as e:
+                logger.error(f"Failed to enqueue notifications for Order #{order.id}: {e}")
 
                     
             return Response({
@@ -223,6 +273,7 @@ class OrderTrackView(APIView):
     """
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
+    throttle_classes = []
 
     def get(self, request, pk=None):
         token = request.query_params.get('token') or request.query_params.get('tracking_token')

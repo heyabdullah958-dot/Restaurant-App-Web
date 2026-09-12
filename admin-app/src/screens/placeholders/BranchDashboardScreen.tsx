@@ -15,7 +15,6 @@ import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchOrdersThunk } from '../../store/orderSlice';
 import { fetchRestaurants, fetchReviews, AdminOrder, CustomerReview } from '../../services/api';
-import { useOrderPolling } from '../../hooks/useOrderPolling';
 import { Card, StatusBadge, SlaBadge, ErrorState, EmptyState, LoadingState } from '../../components/ui';
 
 type Timeframe = 'today' | 'week' | 'month' | 'all';
@@ -25,9 +24,7 @@ export const BranchDashboardScreen = ({ navigation }: any) => {
   const { user, restaurantId, branchId } = useAppSelector((state) => state.auth);
   const { orders, isLoading, isRefreshing, error } = useAppSelector((state) => state.orders);
 
-  // Poll orders every 15s
-  useOrderPolling(15000);
-
+  // Global background polling is handled by root App.tsx (15s interval)
   const [timeframe, setTimeframe] = useState<Timeframe>('today');
   const [restaurantData, setRestaurantData] = useState<any | null>(null);
   const [branchDetail, setBranchDetail] = useState<any | null>(null);
