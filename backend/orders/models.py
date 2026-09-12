@@ -136,19 +136,41 @@ class Order(models.Model):
         else:
             existing_orders = Order.objects.none()
 
-        prefix = f"{brand_code}-{branch_code}-"
+        # Concurrency guard: lock branch or restaurant row if inside atomic transaction
+        # to ensure serialized sequence generation without ID collision
+        from django.db import transaction
+        if transaction.get_connection().in_atomic_block:
+            if self.branch_id:
+                try:
+                    from restaurants.models import Branch
+                    Branch.objects.select_for_update().filter(id=self.branch_id).first()
+                except Exception:
+                    pass
+            elif self.restaurant_id:
+                try:
+                    from restaurants.models import Restaurant
+                    Restaurant.objects.select_for_update().filter(id=self.restaurant_id).first()
+                except Exception:
+                    pass
 
-        # Efficient indexed query: lookup latest order matching this prefix by descending primary key id
-        latest_order = existing_orders.filter(display_order_id__startswith=prefix).order_by('-id').first()
+        prefix = f"{brand_code}-{branch_code}-"
         max_seq = 1000
 
-        if latest_order and latest_order.display_order_id:
-            parts = latest_order.display_order_id.split('-')
-            if parts and parts[-1].isdigit():
-                max_seq = max(max_seq, int(parts[-1]))
-        else:
-            # Fallback for existing/legacy orders with differing prefix
-            recent_orders = existing_orders.order_by('-id')[:5]
+        # Efficient indexed queries: scan top recent orders by descending ID and descending display_order_id
+        matching_by_id = list(existing_orders.filter(display_order_id__startswith=prefix).order_by('-id')[:15].only('display_order_id'))
+        matching_by_disp = list(existing_orders.filter(display_order_id__startswith=prefix).order_by('-display_order_id')[:15].only('display_order_id'))
+
+        found_any = False
+        for ord_obj in matching_by_id + matching_by_disp:
+            if ord_obj.display_order_id:
+                parts = ord_obj.display_order_id.split('-')
+                if parts and parts[-1].isdigit():
+                    max_seq = max(max_seq, int(parts[-1]))
+                    found_any = True
+
+        if not found_any:
+            # Fallback for existing/legacy orders with differing prefix (evaluate all recent candidates)
+            recent_orders = existing_orders.order_by('-id')[:15].only('display_order_id')
             for ord_obj in recent_orders:
                 if ord_obj.display_order_id:
                     parts = ord_obj.display_order_id.split('-')
@@ -156,7 +178,6 @@ class Order(models.Model):
                         val = int(parts[-1])
                         if val > max_seq:
                             max_seq = val
-                            break
 
         next_seq = max_seq + 1
         new_display_id = f"{prefix}{next_seq}"

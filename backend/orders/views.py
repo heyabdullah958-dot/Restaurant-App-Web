@@ -156,7 +156,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     order.guest_name or 
                     getattr(order.user, 'username', 'Customer')
                 )
-                fcm_title = f"New Order #{order.id}"
+                disp_order_id = order.display_order_id or f"#{order.id}"
+                fcm_title = f"New Order {disp_order_id}"
                 fcm_body = f"New order received from {customer_name} for Rs. {order.total}"
 
                 order_items_text = '\n'.join([
@@ -179,12 +180,12 @@ class OrderListCreateView(generics.ListCreateAPIView):
                         if mp.notification_email
                     ]
                     if branch_emails:
-                        branch_subject = f"🛵 [Branch Order] Order #{order.id} — {order.branch.name} Branch"
+                        branch_subject = f"🛵 [Branch Order] Order {disp_order_id} — {order.branch.name} Branch"
                         branch_message = f"""New order received at your branch!
 
 ORDER DETAILS
 ─────────────────────────────
-Order #:     {order.id}
+Order #:     {disp_order_id}
 Branch:      {order.branch.name}
 Restaurant:  {order.restaurant.name}
 Customer:    {customer_name}
@@ -219,12 +220,12 @@ https://foodsphere-admin.pages.dev
                 if not rest_emails:
                     rest_emails = [f"manager.{order.restaurant.slug}@foodsphere.com"]
 
-                rest_subject = f"📊 [Restaurant Summary] Order #{order.id} — {order.restaurant.name}"
+                rest_subject = f"📊 [Restaurant Summary] Order {disp_order_id} — {order.restaurant.name}"
                 rest_message = f"""New order placed across {order.restaurant.name}!
 
 ORDER SUMMARY
 ─────────────────────────────
-Order #:     {order.id}
+Order #:     {disp_order_id}
 Restaurant:  {order.restaurant.name}
 Branch:      {order.branch.name if order.branch else 'Unassigned'}
 Customer:    {customer_name}
@@ -284,12 +285,17 @@ class OrderTrackView(APIView):
                 query = Q(display_order_id__iexact=str(pk).strip())
                 if str(pk).isdigit():
                     query |= Q(pk=int(pk))
-                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(query)
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').filter(query).order_by('-id').first()
+                if not order:
+                    return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
             elif token:
-                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').get(tracking_token=str(token).strip())
+                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').filter(tracking_token=str(token).strip()).first()
+                if not order:
+                    return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
             else:
                 return Response({'success': False, 'message': 'order_id or token required'}, status=status.HTTP_400_BAD_REQUEST)
-        except Order.DoesNotExist:
+        except Exception as e:
+            logger.error(f"Error fetching tracking data for pk={pk}: {e}")
             return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
         data = OrderDetailSerializer(order, context={'request': request}).data

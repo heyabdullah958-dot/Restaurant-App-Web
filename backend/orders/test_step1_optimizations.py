@@ -155,3 +155,107 @@ class Step1OptimizationsTestCase(APITestCase):
         order = Order.objects.get(id=created_id)
         self.assertEqual(order.branch_id, self.branch_lc.id)
         self.assertTrue(order.display_order_id.startswith("TS-LC-"))
+
+    def test_display_order_id_highest_sequence_preservation(self):
+        """Verify display_order_id finds the true max sequence even when order IDs and sequence numbers deviate."""
+        Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            display_order_id="TS-LC-1025",
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Address 1"
+        )
+        # An order with a higher PK id but lower sequence number (e.g. from branch transfer or manual entry)
+        Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            display_order_id="TS-LC-1005",
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Address 2"
+        )
+        # Next order MUST be TS-LC-1026, NOT TS-LC-1006
+        new_order = Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Address 3"
+        )
+        self.assertEqual(new_order.display_order_id, "TS-LC-1026")
+
+    def test_order_track_view_multiple_objects_returned_resilience(self):
+        """Verify OrderTrackView safely handles ambiguous pk lookups without throwing 500 MultipleObjectsReturned."""
+        # Create order 1 with a specific display_order_id that matches another order's numeric ID
+        order_num = Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Num Address"
+        )
+        Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            display_order_id=str(order_num.id),
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Disp Address"
+        )
+        anon_client = self.client_class()
+        # Querying with pk=order_num.id matches BOTH orders
+        res = anon_client.get(f"/api/orders/{order_num.id}/track/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_display_order_id_fallback_inspects_all_recent_orders(self):
+        """Verify fallback scans all recent orders without prematurely breaking on the first match."""
+        Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            display_order_id="OLD-LC-1002",
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Legacy 1"
+        )
+        Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            display_order_id="OLD-LC-1020",
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="Legacy 2"
+        )
+        new_order = Order.objects.create(
+            user=self.user,
+            restaurant=self.restaurant,
+            branch=self.branch_lc,
+            subtotal=450.00,
+            total=450.00,
+            delivery_address="New 1"
+        )
+        self.assertEqual(new_order.display_order_id, "TS-LC-1021")
+
+    def test_rapid_sequential_display_order_id_generation(self):
+        """Verify rapid order creation generates unique, strictly increasing sequence IDs."""
+        orders = [
+            Order.objects.create(
+                user=self.user,
+                restaurant=self.restaurant,
+                branch=self.branch_lc,
+                subtotal=450.00,
+                total=450.00,
+                delivery_address=f"Rapid {i}"
+            )
+            for i in range(10)
+        ]
+        display_ids = [o.display_order_id for o in orders]
+        expected_ids = [f"TS-LC-{1001 + i}" for i in range(10)]
+        self.assertEqual(display_ids, expected_ids)
