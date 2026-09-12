@@ -1,6 +1,31 @@
 
 # Changelog
 
+## 2026-09-13 Step 1 — Zero-Cost Concurrency & Load Capacity Optimization (250+ Users)
+- **Non-Blocking Background I/O (Email & FCM)**:
+  - In `backend/orders/views.py`, offloaded synchronous Gmail SMTP `send_mail` and Firebase FCM push notifications into an asynchronous `concurrent.futures.ThreadPoolExecutor(max_workers=4)`.
+  - Defensive error handling ensures notification or SMTP failures are logged without blocking or failing the HTTP 201 Created order placement response.
+- **AnonRateThrottle Immunity for Real-Time Tracking**:
+  - Set `throttle_classes = []` on `OrderTrackView` in `backend/orders/views.py` to eliminate HTTP 429 Too Many Requests errors when customers actively monitor order status.
+  - Replaced unsafe `.get(query)` with safe filtered query `.filter(query).order_by('-id').first()` to eliminate HTTP 500 `MultipleObjectsReturned` crashes when multiple orders match query criteria.
+- **Atomic Concurrency Row-Locking & High-Performance Order ID Generation**:
+  - In `backend/orders/models.py`, added atomic `select_for_update()` row locking on target Branch/Restaurant within transaction blocks.
+  - Eliminated full-table Python memory scans; replaced with targeted multi-order indexed scanning over the top 15 orders by `-id` and `-display_order_id` to guarantee sequence monotonicity.
+- **Admin HQ & Mobile Apps Polling Taming**:
+  - In `admin/src/AdminContext.tsx`: increased polling interval from 5s to 15s, eliminated duplicate `fetchAllOrders()` call within the same tick, and added `document.visibilityState === 'visible'` guard.
+  - In `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`: removed redundant duplicate `useOrderPolling` hook invocation.
+  - In `app/src/screens/TrackingScreen.tsx`: lengthened polling interval to 8-10s while preserving instant pull-to-refresh.
+  - In `app/src/screens/RestaurantScreen.tsx`: removed the 10s auto-polling loop on menu items.
+  - In `app/src/screens/HomeScreen.tsx`: eliminated cold-start parallel 3-brand 55KB menu pre-warming loop.
+- **Production Deployment & Live Verification**:
+  - Deployed backend updates to Heroku 24/7 (**Release v91** live at `https://getfoodpk-fd9b20442fcf.herokuapp.com/api`).
+  - 48/48 backend unit tests passed locally.
+  - Clean TypeScript builds across `/admin` (Vite build passed), `/admin-app`, and `/app`.
+  - 14/14 live production tests passed (`test_live_heroku_step1_optimizations.py`).
+  - 12/12 live customer journey tests passed (`test_live_heroku_auth_order_flow.py`).
+
+---
+
 ## 2026-09-10 Phase 12 — Brand Filter Scroll, Viewport Clippings, Bottom Nav Padding & Brand Drill-Down Analytics
 - **Brand Filter Horizontal Scroll & Flex-Shrink Protection**:
   - In `admin-app/src/screens/RiderManagementScreen.tsx`, wrapped horizontal ScrollView within `styles.brandBar` container with `flexShrink: 0`, applied `flexGrow: 0` to `brandChipsScroll`, and styled `brandChip` with `minHeight: 34`, `paddingHorizontal: 14`, `paddingVertical: 7`, `flexShrink: 0`, and `numberOfLines={1}` on text. Prevents Android flexbox height collapse and text squishing.
