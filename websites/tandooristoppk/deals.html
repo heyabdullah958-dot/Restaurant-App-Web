@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TANDOORI STOP — Exclusive Deals & Value Platters | Lahore</title>
+  <meta name="description" content="Feast together with Tandoori Stop's exclusive family platters, sajji combos, and BBQ bundles. Great value for gatherings and celebrations in Lahore."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20260913"/>
+</head>
+<body>
+  <div id="scroll-progress"></div>
+
+  <!-- Luxury Entrance Reveal Animation -->
+  <div id="ts-entrance">
+    <div class="ts-splash-seal">
+      <div class="ts-splash-ring"></div>
+      <div class="ts-splash-ring-inner"></div>
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Emblem" class="ts-splash-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+    </div>
+    <div class="ts-splash-title">Tandoori <span>Deals</span></div>
+    <div class="ts-splash-sub">Exclusive Value Platters</div>
+  </div>
+
+  <header class="ts-topbar">
+    <div class="ts-topbar-left">
+      <span class="ts-topbar-pill">Promotions</span>
+      <span>✨ Limited-Time Tandoori Combos & Family Feasts</span>
+    </div>
+    <div class="ts-topbar-right">
+      <a href="tel:03274945947" class="ts-topbar-link">📞 Johar Town: 0327-4945947</a>
+      <a href="tel:03244441735" class="ts-topbar-link">📞 Lake City: 0324-4441735</a>
+      <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="ts-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Nav -->
+  <nav class="ts-nav">
+    <a href="index.html" class="ts-brand-link">
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Logo" class="ts-brand-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+      <div class="ts-brand-text">
+        <div class="ts-brand-title">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
+      </div>
+    </a>
+
+    <ul class="ts-nav-links">
+      <li class="ts-nav-item"><a href="index.html">Home</a></li>
+      <li class="ts-nav-item"><a href="menu.html">Menu</a></li>
+      <li class="ts-nav-item active"><a href="deals.html">Deals & Combos</a></li>
+      <li class="ts-nav-item"><a href="about.html">Brand Story</a></li>
+      <li class="ts-nav-item"><a href="locations.html">Locations</a></li>
+    </ul>
+
+    <div class="ts-nav-actions">
+      <button onclick="window.CartDrawer && window.CartDrawer.openDrawer()" class="ts-btn-primary">
+        <span>🛍️ View Cart</span>
+      </button>
+      <button class="ts-hamburger" id="ts-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="ts-mobile-nav" id="ts-mobile-nav">
+    <a href="index.html" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" onclick="closeMobileNav()">Menu & Catalog</a>
+    <a href="deals.html" class="active" onclick="closeMobileNav()">Deals & Platters</a>
+    <a href="about.html" onclick="closeMobileNav()">Our Brand Story</a>
+    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
+    <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="ts-btn-primary" style="margin-top:16px;">🛍️ View Cart</button>
+  </div>
+
+  <!-- DEALS HEADER -->
+  <header style="padding:60px 5% 40px; background:radial-gradient(circle at 50% 10%, rgba(234, 88, 12, 0.2) 0%, transparent 70%), #140A06; border-bottom:1px solid var(--ts-border); text-align:center;">
+    <div style="max-width:800px; margin:0 auto;">
+      <div class="ts-eyebrow">✨ Handcrafted Bundles & Combos</div>
+      <h1 class="ts-sec-title" style="font-size:clamp(32px, 5vw, 52px); margin-bottom:12px;">
+        Exclusive <span>Tandoori Platters</span> & Deals
+      </h1>
+      <p class="ts-sec-desc" style="margin:0 auto 24px;">
+        Designed for families, gatherings, and midnight cravings. Premium cuts, piping hot clay oven naans, and authentic Lahori spices at unbeatable bundled value.
+      </p>
+
+      <!-- Promo Code Banner -->
+      <div style="display:inline-flex; align-items:center; gap:12px; background:rgba(245,158,11,0.1); border:1px dashed var(--ts-saffron); border-radius:50px; padding:8px 24px;">
+        <span style="font-size:13px; color:var(--ts-ivory);">Special Offer: Use code <strong style="color:var(--ts-gold); letter-spacing:1px;">FOODSPHERE</strong></span>
+        <button onclick="navigator.clipboard.writeText('FOODSPHERE'); alert('Coupon code FOODSPHERE copied!');" style="background:var(--ts-terracotta); color:white; border:none; border-radius:20px; padding:4px 12px; font-size:11px; font-weight:800; cursor:pointer;">Copy</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DEALS LIST SECTION -->
+  <section class="ts-section">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:30px;">
+      
+      <!-- Deal 1: Grand Family Platter -->
+      <div class="ts-menu-card" style="border:2px solid var(--ts-border-strong);">
+        <div class="ts-card-img-wrap" style="height:230px;">
+          <img src="./images/IMG_7589.JPG.jpeg" alt="Grand Family Tandoori Platter" class="ts-card-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <span class="ts-card-badge" style="background:var(--ts-terracotta); color:white;">🔥 Grand Mega Feast</span>
+        </div>
+        <div class="ts-card-body">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div class="ts-card-name" style="font-size:20px;">Family Tandoori Platter</div>
+            <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">Serves 6–8</span>
+          </div>
+          <div class="ts-card-desc" style="font-size:13px; line-height:1.7;">
+            The ultimate Lahori feast: Half Traditional Sajji, 1 Chicken Handi, 4 Clay Oven Rotis, 2 Malai Boti Seekhs, 2 Tikka Boti Seekhs, 4 Seekh Kababs, fresh salad, mint raita, and 6 chilled mocktails.
+          </div>
+          <div style="background:#140A06; border-radius:10px; padding:12px; margin-bottom:18px; border:1px solid var(--ts-border);">
+            <div style="font-size:11.5px; color:var(--ts-gold); font-weight:700; margin-bottom:4px;">✨ Platter Includes:</div>
+            <div style="font-size:11.5px; color:var(--ts-muted);">• Half Sajji + 1 Handi<br/>• 4 Seekh Kabab + 2 Malai Boti + 2 Tikka Boti<br/>• 4 Fresh Rotis + Salad + Raita + 6 Mojitos</div>
+          </div>
+          <div class="ts-card-foot" style="margin-top:auto;">
+            <div>
+              <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Regular: Rs. 8,200</div>
+              <div class="ts-card-price" style="font-size:22px;">Rs. 7,000</div>
+            </div>
+            <button class="ts-btn-primary" onclick="addToOrderForm('Family Tandoori Platter', 7000, './images/IMG_7589.JPG.jpeg')">
+              + Add Deal to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deal 2: Sajji Feast Combo -->
+      <div class="ts-menu-card">
+        <div class="ts-card-img-wrap" style="height:230px;">
+          <img src="./images/IMG_7587.JPG.jpeg" alt="Sajji Feast Combo" class="ts-card-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <span class="ts-card-badge">🍗 Top Seller</span>
+        </div>
+        <div class="ts-card-body">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div class="ts-card-name" style="font-size:20px;">Sajji Feast Box</div>
+            <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">Serves 3–4</span>
+          </div>
+          <div class="ts-card-desc" style="font-size:13px; line-height:1.7;">
+            Slow-roasted Full Traditional Chicken Sajji cooked on charcoal embers, accompanied by 4 fresh Roghni Naans, seasonal crisp salad, and 2 Mint Margaritas.
+          </div>
+          <div style="background:#140A06; border-radius:10px; padding:12px; margin-bottom:18px; border:1px solid var(--ts-border);">
+            <div style="font-size:11.5px; color:var(--ts-gold); font-weight:700; margin-bottom:4px;">✨ Platter Includes:</div>
+            <div style="font-size:11.5px; color:var(--ts-muted);">• 1x Full Traditional Chicken Sajji<br/>• 4x Fluffy Roghni Naans<br/>• 2x Mint Margaritas + Herb Raita</div>
+          </div>
+          <div class="ts-card-foot" style="margin-top:auto;">
+            <div>
+              <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Regular: Rs. 3,900</div>
+              <div class="ts-card-price" style="font-size:22px;">Rs. 3,350</div>
+            </div>
+            <button class="ts-btn-primary" onclick="addToOrderForm('Sajji Feast Box (Full Sajji + 4 Roghni Naan + 2 Mojitos)', 3350, './images/IMG_7587.JPG.jpeg')">
+              + Add Deal to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deal 3: BBQ & Naan Lovers Duo -->
+      <div class="ts-menu-card">
+        <div class="ts-card-img-wrap" style="height:230px;">
+          <img src="./images/IMG_7583.JPG.jpeg" alt="BBQ Lovers Duo" class="ts-card-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <span class="ts-card-badge">🍢 BBQ Special</span>
+        </div>
+        <div class="ts-card-body">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div class="ts-card-name" style="font-size:20px;">BBQ Charcoal Duo</div>
+            <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">Serves 2</span>
+          </div>
+          <div class="ts-card-desc" style="font-size:13px; line-height:1.7;">
+            2 Skewers of creamy Malai Boti + 2 Skewers of spiced Tikka Boti + 2 Molten Cheese Naans + 2 Chilled Soft Drinks. Pure bliss.
+          </div>
+          <div style="background:#140A06; border-radius:10px; padding:12px; margin-bottom:18px; border:1px solid var(--ts-border);">
+            <div style="font-size:11.5px; color:var(--ts-gold); font-weight:700; margin-bottom:4px;">✨ Platter Includes:</div>
+            <div style="font-size:11.5px; color:var(--ts-muted);">• 2x Malai Boti Seekh + 2x Tikka Boti Seekh<br/>• 2x Cheese Naans<br/>• 2x Soft Drinks (300ml)</div>
+          </div>
+          <div class="ts-card-foot" style="margin-top:auto;">
+            <div>
+              <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Regular: Rs. 3,000</div>
+              <div class="ts-card-price" style="font-size:22px;">Rs. 2,499</div>
+            </div>
+            <button class="ts-btn-primary" onclick="addToOrderForm('BBQ Charcoal Duo (2 Malai + 2 Tikka + 2 Cheese Naan)', 2499, './images/IMG_7583.JPG.jpeg')">
+              + Add Deal to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deal 4: Paratha Roll Box -->
+      <div class="ts-menu-card">
+        <div class="ts-card-img-wrap" style="height:230px;">
+          <img src="./images/IMG_7591.JPG.jpeg" alt="Paratha Roll Box" class="ts-card-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <span class="ts-card-badge">🌯 Roll Feast</span>
+        </div>
+        <div class="ts-card-body">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div class="ts-card-name" style="font-size:20px;">Tandoori Roll Box</div>
+            <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:4px 8px; border-radius:6px;">Serves 3</span>
+          </div>
+          <div class="ts-card-desc" style="font-size:13px; line-height:1.7;">
+            1 Full Stop Giant Roll + 1 Tandoori Chicken Paratha Roll + 1 Malai Boti Roll + 3 Chilled Soft Drinks. The perfect lunch or late-night fix.
+          </div>
+          <div style="background:#140A06; border-radius:10px; padding:12px; margin-bottom:18px; border:1px solid var(--ts-border);">
+            <div style="font-size:11.5px; color:var(--ts-gold); font-weight:700; margin-bottom:4px;">✨ Platter Includes:</div>
+            <div style="font-size:11.5px; color:var(--ts-muted);">• 1x Full Stop Roll<br/>• 1x Tandoori Chicken Roll + 1x Malai Boti Roll<br/>• 3x Soft Drinks (300ml)</div>
+          </div>
+          <div class="ts-card-foot" style="margin-top:auto;">
+            <div>
+              <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Regular: Rs. 2,170</div>
+              <div class="ts-card-price" style="font-size:22px;">Rs. 1,850</div>
+            </div>
+            <button class="ts-btn-primary" onclick="addToOrderForm('Tandoori Roll Box (Full Stop + Tandoori + Malai Roll)', 1850, './images/IMG_7591.JPG.jpeg')">
+              + Add Deal to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="ts-footer">
+    <div class="ts-footer-top" style="max-width:1200px; margin:0 auto;">
+      <div class="ts-footer-brand">
+        <div class="ts-brand-title" style="font-size:20px;">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
+        <p>Preserving Pakistan's rich culinary traditions with authentic clay tandoors, lump charcoal barbecues, hand-rolled naans, and rich gravies.</p>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Navigation <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu & Categories</a></li>
+          <li><a href="deals.html">Deals & Combos</a></li>
+          <li><a href="about.html">Brand Story</a></li>
+          <li><a href="locations.html">Branches & Timings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Outlets <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="locations.html">Johar Town (PIA Rd)</a></li>
+          <li><a href="locations.html">Lake City Lahore</a></li>
+          <li><a href="locations.html">GT Rd Baghbanpura</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Direct Contact <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li style="color:var(--ts-muted);">📞 Johar Town: 0327-4945947</li>
+          <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--ts-muted);">📞 Baghbanpura: 0326-6811177</li>
+          <li><a href="https://wa.me/923001234567" target="_blank" style="color:#25D366; font-weight:700;">💬 WhatsApp Ordering</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ts-footer-bottom" style="max-width:1200px; margin:0 auto;">
+      <div>© 2026 Tandoori Stop. All Rights Reserved. Lahore, Pakistan.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="https://instagram.com/tandooristoppk" target="_blank" style="color:var(--ts-muted); text-decoration:none;">Instagram</a>
+        <a href="https://wa.me/923001234567" target="_blank" style="color:var(--ts-muted); text-decoration:none;">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>window.BRAND_SLUG = "tandooristoppk";</script>
+  <script src="entrance_ts.js?v=20260913" defer></script>
+  <script src="live_catalog.js?v=20260913" defer></script>
+  <script src="cart_drawer.js?v=20260913" defer></script>
+</body>
+</html>

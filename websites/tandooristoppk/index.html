@@ -3,1219 +3,541 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TANDOORI STOP — Last Stop 📍 | Lahore's Finest Tandoori | PIA Road & Lake City</title>
-  <meta name="description" content="Tandoori Stop — Lahore's premium tandoori restaurant. Fresh naan, tandoori chicken, BBQ platters. 3 branches: Johar Town, Lake City & Pindi. 12.5K+ followers."/>
+  <title>TANDOORI STOP — Artisanal Pakistani Tandoori & BBQ | Lahore</title>
+  <meta name="description" content="Tandoori Stop — Lahore's premier artisanal tandoori restaurant. Slow-roasted sajji, sizzling charcoal BBQ, hand-stretched clay oven naans and rich karahis across 3 live Lahore branches."/>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="cart_drawer.css?v=20260804"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --crimson: #AD1F23;
-      --vivid-orange: #EC4F24;
-      --fire1: #AD1F23;
-      --fire2: #EC4F24;
-      --fire3: #FF7D40;
-      --dark: #0E0709;
-      --dark2: #170C0F;
-      --charcoal: #211216;
-      --white: #FFFFFF;
-      --muted: rgba(255, 255, 255, 0.7);
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 14px 5%;
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(10,5,0,0.93); backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,69,0,0.2);
-    }
-    .logo-wrap { display: flex; flex-direction: column; }
-    .logo-main { font-size: 18px; font-weight: 900; letter-spacing: 2px; }
-    .logo-main span {
-      background: linear-gradient(90deg, var(--fire1), var(--fire2), var(--fire3));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .logo-sub { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 3px; text-transform: uppercase; }
-    .nav-links { display: flex; gap: 26px; list-style: none; }
-    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.3s; }
-    .nav-links a:hover { color: var(--fire2); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--fire1), var(--fire2));
-      color: white; padding: 10px 22px; border-radius: 6px;
-      font-size: 13px; font-weight: 800; text-decoration: none;
-      box-shadow: 0 6px 20px rgba(255,69,0,0.35);
-      transition: all 0.3s; letter-spacing: 0.3px;
-    }
-    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,69,0,0.5); }
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      background: radial-gradient(ellipse at 60% 50%, rgba(236,79,36,0.22) 0%, transparent 60%),
-                  linear-gradient(160deg, var(--dark) 0%, var(--dark2) 50%, #1F0A00 100%);
-      display: flex; align-items: center;
-      padding: 120px 5% 80px;
-      position: relative; overflow: hidden;
-    }
-
-    /* Fire particles */
-    .fire-orb {
-      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px);
-      animation: fire-drift 6s ease-in-out infinite;
-    }
-    .fo-1 { width: 400px; height: 400px; background: rgba(255,69,0,0.15); top: 0; right: 0; }
-    .fo-2 { width: 250px; height: 250px; background: rgba(255,140,0,0.12); top: 30%; right: 20%; animation-delay: 2s; }
-    .fo-3 { width: 150px; height: 150px; background: rgba(255,195,0,0.08); bottom: 20%; left: 10%; animation-delay: 4s; }
-    @keyframes fire-drift { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.05)} }
-
-    /* Flame emoji hero */
-    .hero-flame {
-      position: absolute; right: 6%; top: 50%; transform: translateY(-50%);
-      font-size: clamp(120px, 18vw, 200px);
-      filter: drop-shadow(0 0 60px rgba(255,69,0,0.5));
-      animation: flame-flicker 3s ease-in-out infinite;
-      z-index: 2;
-    }
-    @keyframes flame-flicker {
-      0%,100%{transform:translateY(-50%) scale(1) rotate(-3deg)}
-      33%{transform:translateY(-52%) scale(1.03) rotate(2deg)}
-      66%{transform:translateY(-48%) scale(0.98) rotate(-1deg)}
-    }
-
-    .hero-content { max-width: 580px; z-index: 3; position: relative; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.35);
-      color: var(--fire2); font-size: 11px; font-weight: 800;
-      padding: 6px 16px; border-radius: 4px; margin-bottom: 22px;
-      text-transform: uppercase; letter-spacing: 2px;
-    }
-    .hero-title {
-      font-size: clamp(38px, 6vw, 72px); font-weight: 900;
-      line-height: 1.0; letter-spacing: -1px; margin-bottom: 18px;
-    }
-    .fire-text {
-      background: linear-gradient(135deg, var(--fire1) 0%, var(--fire2) 40%, var(--fire3) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      display: inline;
-    }
-    .hero-sub { font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 36px; font-weight: 300; }
-    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
-    .btn-fire {
-      background: linear-gradient(135deg, var(--fire1), var(--fire2));
-      color: white; padding: 15px 34px; border-radius: 6px;
-      font-size: 14px; font-weight: 800; text-decoration: none;
-      box-shadow: 0 10px 30px rgba(255,69,0,0.4); transition: all 0.3s;
-    }
-    .btn-fire:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(255,69,0,0.6); }
-    .btn-ghost {
-      border: 1.5px solid rgba(255,255,255,0.2); color: white;
-      padding: 13px 28px; border-radius: 6px;
-      font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s;
-    }
-    .btn-ghost:hover { border-color: var(--fire2); color: var(--fire2); }
-
-    /* Branches strip */
-    .branches-row { display: flex; gap: 16px; flex-wrap: wrap; }
-    .branch-tag {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,69,0,0.2);
-      border-radius: 8px; padding: 10px 16px;
-      font-size: 12px; color: var(--muted);
-    }
-    .branch-tag strong { color: var(--white); font-size: 13px; display: block; }
-
-    /* ── MARQUEE ── */
-    .marquee-wrap {
-      background: linear-gradient(90deg, #1F0A00, #2A1000, #1F0A00);
-      padding: 12px 0; overflow: hidden;
-      border-top: 1px solid rgba(255,69,0,0.2);
-      border-bottom: 1px solid rgba(255,69,0,0.2);
-    }
-    .marquee-track { display: flex; animation: marquee 20s linear infinite; white-space: nowrap; }
-    .marquee-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 28px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.65); }
-    .m-dot { color: var(--fire2); }
-    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-
-    /* ── MENU SECTION ── */
-    .section { padding: 80px 5%; }
-    .section-dk { background: var(--dark); }
-    .section-dk2 { background: var(--dark2); }
-
-    .eyebrow { color: var(--fire2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px; }
-    .sec-title { font-size: clamp(26px, 4vw, 44px); font-weight: 900; line-height: 1.1; margin-bottom: 12px; }
-    .sec-desc { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 520px; margin-bottom: 48px; font-weight: 300; }
-
-    /* Menu category tabs */
-    .menu-tabs { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; }
-    .menu-tab {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.6); padding: 8px 20px; border-radius: 30px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      font-family: 'Poppins', sans-serif; transition: all 0.3s;
-    }
-    .menu-tab.active, .menu-tab:hover { background: rgba(255,69,0,0.2); border-color: rgba(255,69,0,0.4); color: var(--fire2); }
-
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-    .menu-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,69,0,0.1);
-      border-radius: 14px; overflow: hidden; transition: all 0.35s;
-    }
-    .menu-card:hover { transform: translateY(-6px); border-color: rgba(255,69,0,0.35); box-shadow: 0 20px 50px rgba(255,69,0,0.12); }
-    .card-img { height: 170px; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden; position: relative; }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .menu-card:hover .card-img img { transform: scale(1.08); }
-    .ci-1 { background: linear-gradient(135deg, #1F0A00, #3D1500); }
-    .ci-2 { background: linear-gradient(135deg, #120800, #2A0F00); }
-    .ci-3 { background: linear-gradient(135deg, #0A0500, #1F0800); }
-    .ci-4 { background: linear-gradient(135deg, #1A0C00, #321500); }
-    .card-body { padding: 18px; }
-    .card-name { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-    .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
-    .card-foot { display: flex; justify-content: space-between; align-items: center; }
-    .card-price { font-size: 18px; font-weight: 800; color: var(--fire2); }
-    .order-btn {
-      background: rgba(255,69,0,0.15); border: 1px solid rgba(255,69,0,0.3);
-      color: var(--fire1); padding: 7px 16px; border-radius: 20px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      font-family: 'Poppins', sans-serif; transition: all 0.3s;
-    }
-    .order-btn:hover { background: var(--fire1); color: white; }
-
-    /* ── NAAN COUNTER ── */
-    .naan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    .naan-card {
-      background: linear-gradient(145deg, rgba(255,69,0,0.08), rgba(255,140,0,0.04));
-      border: 1px solid rgba(255,69,0,0.15); border-radius: 12px;
-      padding: 20px; text-align: center; transition: all 0.3s;
-    }
-    .naan-card:hover { border-color: rgba(255,69,0,0.35); transform: translateY(-4px); }
-    .naan-emoji { font-size: 40px; margin-bottom: 10px; }
-    .naan-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .naan-price { font-size: 14px; color: var(--fire2); font-weight: 600; }
-
-    /* ── BRANCHES ── */
-    .branches-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .branch-card {
-      background: rgba(255,69,0,0.06); border: 1px solid rgba(236,79,36,0.22);
-      border-radius: 16px; padding: 28px; transition: all 0.3s;
-    }
-    .branch-card:hover { border-color: rgba(255,69,0,0.4); background: rgba(255,69,0,0.1); }
-    .branch-num {
-      font-size: 36px; font-weight: 900; color: rgba(255,69,0,0.3);
-      margin-bottom: 8px;
-    }
-    .branch-name { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-    .branch-info { font-size: 13px; color: var(--muted); line-height: 1.7; }
-    .call-btn {
-      display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: white; padding: 9px 18px; border-radius: 8px;
-      font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s;
-    }
-    .call-btn:hover { transform: translateY(-2px); }
-
-    /* ── ORDER FORM ── */
-    .order-wrap { max-width: 580px; margin: 0 auto; }
-    .order-box {
-      background: rgba(255,69,0,0.06); border: 1px solid rgba(255,69,0,0.2);
-      border-radius: 20px; padding: 48px;
-    }
-    .form-title { font-size: 26px; font-weight: 900; margin-bottom: 6px; }
-    .form-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
-    .f-label { font-size: 11px; font-weight: 700; color: var(--fire2); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
-    .f-input, .f-textarea, .f-select {
-      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,69,0,0.2);
-      color: white; padding: 12px 16px; border-radius: 8px;
-      font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; transition: all 0.3s;
-    }
-    .f-input:focus, .f-textarea:focus { border-color: var(--fire1); background: rgba(255,69,0,0.08); }
-    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-    .f-full { margin-bottom: 14px; }
-    .f-textarea { resize: vertical; min-height: 80px; }
-    .f-select option { background: #1A0800; }
-    .cod-row {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(255,195,0,0.08); border: 1px solid rgba(255,195,0,0.2);
-      border-radius: 8px; padding: 12px 16px; margin: 14px 0;
-      font-size: 13px; color: var(--muted);
-    }
-    .cod-row strong { color: var(--fire3); }
-    .submit {
-      width: 100%; padding: 17px;
-      background: linear-gradient(135deg, var(--fire1), var(--fire2));
-      color: white; border: none; border-radius: 8px;
-      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 800;
-      cursor: pointer; box-shadow: 0 10px 30px rgba(255,69,0,0.4); transition: all 0.3s;
-    }
-    .submit:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(255,69,0,0.6); }
-
-    /* ── FOOTER ── */
-    footer {
-      background: #060300; border-top: 1px solid rgba(255,69,0,0.12);
-      padding: 36px 5%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
-    }
-    .f-logo { font-size: 16px; font-weight: 900; letter-spacing: 1.5px; }
-    .f-logo span { background: linear-gradient(90deg,var(--fire1),var(--fire3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .f-links { display: flex; gap: 20px; }
-    .f-links a { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 13px; transition: color 0.3s; }
-    .f-links a:hover { color: var(--fire2); }
-    .f-copy { font-size: 12px; color: rgba(255,255,255,0.2); }
-
-    @media(max-width:768px){
-      nav { padding: 14px 16px; }
-      .nav-links { display: none; }
-      
-      .hero { padding: 100px 16px 60px; min-height: auto; }
-      .hero-title { font-size: 28px; line-height: 1.15; }
-      .hero-flame { opacity: 0.2; font-size: 100px; }
-      
-      .section { padding: 50px 16px; }
-      .menu-grid { grid-template-columns: 1fr; }
-      .naan-grid { grid-template-columns: 1fr; }
-      
-      .f-row { grid-template-columns: 1fr; }
-      .order-box { padding: 28px 20px; }
-      footer { flex-direction: column; text-align: center; }
-      
-      .hamburger { display: flex; }
-      .whatsapp-float { bottom: 16px; right: 16px; padding: 10px 16px; font-size: 13px; }
-      .back-top { bottom: 80px; right: 16px; }
-    }
-
-    /* Gallery Styles */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 40px;
-    }
-    .gallery-item {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      height: 220px;
-      border: 1px solid rgba(255, 77, 0, 0.15);
-      transition: all 0.3s ease;
-    }
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: all 0.4s ease;
-    }
-    .gallery-item:hover img {
-      transform: scale(1.1);
-    }
-    .gallery-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 70%);
-      display: flex;
-      align-items: flex-end;
-      padding: 16px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .gallery-item:hover .gallery-overlay {
-      opacity: 1;
-    }
-    .gallery-overlay span {
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    /* Scroll Progress Bar */
-    #scroll-progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      width: 0%;
-      background: linear-gradient(90deg, var(--fire1, #FF4500), var(--fire2, #FF8C00));
-      z-index: 9999;
-      transition: width 0.1s ease-out;
-    }
-
-    /* Page Loader */
-    #page-loader {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: var(--dark, #0A0500);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
-    #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loader-ring {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: var(--fire2, #FF8C00);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Hamburger Button */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 4px;
-      background: none;
-      border: none;
-      z-index: 101;
-    }
-    .hamburger span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: white;
-      transition: all 0.3s;
-      border-radius: 2px;
-    }
-    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-    .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-
-    /* Mobile Nav Drawer */
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(10, 5, 0, 0.98);
-      backdrop-filter: blur(20px);
-      z-index: 99;
-      padding: 100px 30px 40px;
-      flex-direction: column;
-      gap: 20px;
-      border-bottom: 1px solid rgba(255, 140, 0, 0.2);
-      align-items: center;
-      justify-content: center;
-    }
-    .mobile-nav.open { display: flex; }
-    .mobile-nav a {
-      color: white;
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: 600;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      width: 100%;
-      text-align: center;
-      transition: all 0.3s;
-    }
-    .mobile-nav a:hover {
-      color: var(--fire2, #FF8C00);
-    }
-
-    /* WhatsApp Float Button */
-    .whatsapp-float {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 200;
-      background: #25D366;
-      color: white;
-      border-radius: 50px;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
-      box-shadow: 0 8px 24px rgba(37,211,102,0.4);
-      transition: all 0.3s;
-      font-family: 'Poppins', sans-serif;
-    }
-    .whatsapp-float:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(37,211,102,0.6);
-    }
-    .wa-icon { font-size: 20px; }
-
-    /* Active Nav Link Highlight (Scroll-Spy) */
-    .nav-links a.active {
-      color: var(--fire2, #FF8C00) !important;
-      font-weight: 700;
-    }
-    .nav-links a.active::after {
-      content: '';
-      display: block;
-      height: 2px;
-      background: var(--fire2, #FF8C00);
-      border-radius: 2px;
-      margin-top: 2px;
-    }
-
-    /* Back to Top Button */
-    .back-top {
-      position: fixed;
-      bottom: 90px;
-      right: 24px;
-      z-index: 199;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      color: white;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s;
-      text-decoration: none;
-    }
-    .back-top.show { opacity: 1; pointer-events: all; }
-    .back-top:hover {
-      background: var(--fire2, #FF8C00);
-      transform: translateY(-3px);
-    }
-
-    /* Footer Social Icons styles */
-    .footer-socials {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin: 20px 0 10px;
-    }
-    .social-icon {
-      color: var(--muted, rgba(255,255,255,0.6));
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .social-icon:hover {
-      color: var(--white);
-      background: var(--fire2, #FF8C00);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-  
-    /* Dynamic Variant Selector Styling */
-    .variant-selector-wrap {
-      margin: 10px 0 14px;
-    }
-    .variant-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--vivid-orange, #EC4F24);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
-      display: block;
-    }
-    .variant-select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #FFFFFF;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: 'Poppins', sans-serif;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .variant-select:focus, .variant-select:hover {
-      border-color: var(--vivid-orange, #EC4F24);
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .variant-select option {
-      background: #181114;
-      color: #FFFFFF;
-    }
-
-  
-    /* Modern Gallery & Lightbox Preview Styling */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-top: 36px;
-    }
-    .gallery-card {
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-      height: 240px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: #120A0D;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-    .gallery-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      border-color: var(--vivid-orange, #EC4F24);
-      box-shadow: 0 16px 40px rgba(236, 79, 36, 0.25);
-    }
-    .gallery-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    .gallery-card:hover img {
-      transform: scale(1.1);
-    }
-    .gallery-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      color: #FFFFFF;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 2;
-    }
-    .gallery-overlay-meta {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 20px;
-      opacity: 0.9;
-      transition: opacity 0.3s ease;
-    }
-    .gallery-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #FFFFFF;
-      letter-spacing: 0.5px;
-    }
-    .gallery-sub {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-top: 2px;
-    }
-
-    /* Lightbox Modal */
-    #lightbox-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(16px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    #lightbox-modal.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .lightbox-content {
-      position: relative;
-      max-width: 720px;
-      width: 100%;
-      background: #1A0E12;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-    #lightbox-modal.active .lightbox-content {
-      transform: scale(1);
-    }
-    .lightbox-img-wrap {
-      height: 380px;
-      width: 100%;
-      background: #0D0608;
-      position: relative;
-    }
-    .lightbox-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .lightbox-body {
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .lightbox-title {
-      font-size: 20px;
-      font-weight: 900;
-      color: #FFFFFF;
-    }
-    .lightbox-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.2s ease;
-    }
-    .lightbox-close:hover {
-      background: var(--vivid-orange, #EC4F24);
-      transform: scale(1.1);
-    }
-
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20260913"/>
 </head>
 <body>
   <!-- Scroll Progress Bar -->
   <div id="scroll-progress"></div>
 
-  <!-- Page Loader -->
-  <div id="page-loader">
-    <div class="loader-ring"></div>
+  <!-- Luxury Entrance Reveal Animation -->
+  <div id="ts-entrance">
+    <div class="ts-splash-seal">
+      <div class="ts-splash-ring"></div>
+      <div class="ts-splash-ring-inner"></div>
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Emblem" class="ts-splash-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+    </div>
+    <div class="ts-splash-title">Tandoori <span>Stop</span></div>
+    <div class="ts-splash-sub">Artisanal Clay Oven Heritage</div>
   </div>
 
-  <!-- NAV -->
-  <nav id="navbar">
-    <a href="#home" class="logo-wrap" style="display:flex; align-items:center; gap:12px; text-decoration:none;">
-      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Logo" style="height:44px; width:auto; object-fit:contain;" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
-      <div>
-        <div class="logo-main" style="font-size:18px; font-weight:900; letter-spacing:1px; color:#FFFFFF;">TANDOORI <span style="color:var(--vivid-orange);">STOP</span></div>
-        <div class="logo-sub" style="font-size:9px; color:rgba(255,255,255,0.6); letter-spacing:2px; text-transform:uppercase;">Lahore's Finest Tandoori</div>
+  <!-- Top Announcement Bar -->
+  <header class="ts-topbar">
+    <div class="ts-topbar-left">
+      <span class="ts-topbar-pill">Live Clay Tandoor</span>
+      <span>🔥 Serving Sizzling BBQ & Fresh Naans at 3 Operational Branches in Lahore</span>
+    </div>
+    <div class="ts-topbar-right">
+      <a href="tel:03274945947" class="ts-topbar-link">📞 Johar Town: 0327-4945947</a>
+      <a href="tel:03244441735" class="ts-topbar-link">📞 Lake City: 0324-4441735</a>
+      <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="ts-topbar-link" style="color:#25D366;">💬 WhatsApp Order</a>
+    </div>
+  </header>
+
+  <!-- Main Navigation Header -->
+  <nav class="ts-nav">
+    <a href="index.html" class="ts-brand-link">
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Logo" class="ts-brand-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+      <div class="ts-brand-text">
+        <div class="ts-brand-title">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
       </div>
     </a>
-    <ul class="nav-links">
-      <li><a href="#home">Home</a></li>
-      <li><a href="#menu">Menu</a></li>
-      <li><a href="#gallery">Gallery</a></li>
-      <li><a href="#branches">Branches</a></li>
-      <li><a href="#order">Order</a></li>
+
+    <!-- Multi-Page Navigation Routes -->
+    <ul class="ts-nav-links">
+      <li class="ts-nav-item active"><a href="index.html">Home</a></li>
+      <li class="ts-nav-item"><a href="menu.html">Menu</a></li>
+      <li class="ts-nav-item"><a href="deals.html">Deals & Combos</a></li>
+      <li class="ts-nav-item"><a href="about.html">Brand Story</a></li>
+      <li class="ts-nav-item"><a href="locations.html">Locations</a></li>
     </ul>
-    <a href="#order" class="nav-cta">Order Now</a>
-    <!-- Hamburger Button -->
-    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+
+    <div class="ts-nav-actions">
+      <a href="menu.html" class="ts-btn-primary">
+        <span>🔥 Order Online</span>
+      </a>
+      <button class="ts-hamburger" id="ts-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile Navigation Drawer -->
-  <div class="mobile-nav" id="mobile-nav">
-    <a href="#home" onclick="closeMobileNav()">Home</a>
-    <a href="#menu" onclick="closeMobileNav()">Menu</a>
-    <a href="#gallery" onclick="closeMobileNav()">Gallery</a>
-    <a href="#branches" onclick="closeMobileNav()">Branches</a>
-    <a href="#order" onclick="closeMobileNav()">Order Now</a>
+  <div class="ts-mobile-nav" id="ts-mobile-nav">
+    <a href="index.html" class="active" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" onclick="closeMobileNav()">Menu & Catalog</a>
+    <a href="deals.html" onclick="closeMobileNav()">Deals & Platters</a>
+    <a href="about.html" onclick="closeMobileNav()">Our Brand Story</a>
+    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
+    <a href="menu.html" class="ts-btn-primary" style="margin-top:16px;" onclick="closeMobileNav()">🔥 Order Online — COD</a>
   </div>
 
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="fire-orb fo-1"></div>
-    <div class="fire-orb fo-2"></div>
-    <div class="fire-orb fo-3"></div>
-    <div class="hero-flame">🔥</div>
-
-    <div class="hero-content">
-      <div class="hero-badge">🏆 12.5K Followers · 3 Branches</div>
-      <h1 class="hero-title">
-        Lahore's<br/>
-        <span class="fire-text">Authentic Tandoori</span><br/>
-        — The Ultimate Stop 📍
-      </h1>
-      <p class="hero-sub">
-        Straight from the hot clay tandoor to your plate — sizzling naans, juicy tikkas, smokey seekh kebabs, and rich karahis. Unmatched taste in every bite — this is TANDOORI STOP.
-      </p>
-      <div class="hero-btns">
-        <a href="#order" class="btn-fire">🔥 Order Now — COD</a>
-        <a href="#branches" class="btn-ghost">📍 Find a Branch</a>
-      </div>
-      <div class="branches-row">
-        <div class="branch-tag">📍 <div><strong>PIA Road, Johar Town</strong>Lahore</div></div>
-        <div class="branch-tag">📍 <div><strong>Lake City</strong>Lahore</div></div>
-        <div class="branch-tag">📍 <div><strong>GT Road, Baghbanpura</strong>Lahore</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <div class="marquee-wrap">
-    <div class="marquee-track">
-      <span class="marquee-item"><span class="m-dot">🔥</span>Fresh Naan</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Tandoori Chicken</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Seekh Kabab</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Roghni Naan</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Karahi</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>3 Branches</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>12.5K Fans</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Last Stop Lahore</span>
-      <!-- duplicate -->
-      <span class="marquee-item"><span class="m-dot">🔥</span>Fresh Naan</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Tandoori Chicken</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Seekh Kabab</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Roghni Naan</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Karahi</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>3 Branches</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>12.5K Fans</span>
-      <span class="marquee-item"><span class="m-dot">🔥</span>Last Stop Lahore</span>
-    </div>
-  </div>
-
-  <!-- MENU -->
-  <section class="section section-dk2" id="menu">
-    <div class="eyebrow">🍽️ Our Menu</div>
-    <h2 class="sec-title">Authentic <span style="color:var(--fire2)">Tandoori</span> Items</h2>
-    <p class="sec-desc">Everything is baked fresh in our live tandoor — from morning till night. Click on items to add them to your order form below.</p>
-
-    <div class="menu-tabs">
-      <button class="menu-tab active" onclick="filterMenu(this, 'all')">All Items</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'tandoori')">Tandoori & Sajji</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'tawa')">Tawa & Karahi</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'bbq')">BBQ & Rolls</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'platters')">Platters & Addons</button>
-    </div>
-
-    <div class="menu-grid" id="menu-grid-container">
-      <!-- Dynamically populated -->
-    </div>
-
-    <!-- Naan Counter -->
-    <div style="margin-top:60px">
-      <div class="eyebrow" style="margin-bottom:12px">🫓 Naan Counter</div>
-      <h3 style="font-size:26px;font-weight:800;margin-bottom:32px">Fresh from the <span style="color:var(--fire2)">Tandoor</span></h3>
-      <div class="naan-grid">
-        <div class="naan-card" onclick="addToOrderForm('Plain Naan', 40, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
-          <div class="naan-emoji">🫓</div>
-          <div class="naan-name">Plain Naan</div>
-          <div class="naan-price">Rs. 40</div>
+  <!-- HERO SECTION -->
+  <section class="ts-section" style="padding-top:70px; padding-bottom:70px; background: radial-gradient(ellipse at 70% 30%, rgba(234, 88, 12, 0.18) 0%, transparent 60%), linear-gradient(165deg, #160D09 0%, #0F0806 65%, #080402 100%);">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.15fr 0.85fr; gap:40px; align-items:center;">
+      <div>
+        <div class="ts-hero-badge">🏆 12.5K+ Followers · 3 Physical Branches in Lahore</div>
+        <h1 class="ts-sec-title" style="font-size:clamp(34px, 5.2vw, 64px); margin-bottom:20px;">
+          Lahore's Artisanal<br/>
+          <span>Clay Tandoor Heritage</span><br/>
+          — Baked Fresh Daily.
+        </h1>
+        <p class="ts-sec-desc" style="font-size:16px;">
+          From the roaring 800°F clay oven straight to your table. Crisp sesame roghni naans, slow-roasted chicken sajji, melt-in-mouth malai boti, and royal Mughlai handis. True Pakistani culinary craftsmanship.
+        </p>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px;">
+          <a href="menu.html" class="ts-btn-primary" style="padding:14px 30px; font-size:14px;">
+            <span>🔥 Explore Full Menu</span>
+          </a>
+          <a href="deals.html" class="ts-btn-secondary" style="padding:14px 26px; font-size:14px;">
+            <span>✨ View Exclusive Deals</span>
+          </a>
+          <a href="locations.html" class="ts-btn-secondary" style="padding:14px 22px; font-size:14px;">
+            <span>📍 Find a Branch</span>
+          </a>
         </div>
-        <div class="naan-card" onclick="addToOrderForm('Roghni Naan', 200, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
-          <div class="naan-emoji">🌾</div>
-          <div class="naan-name">Roghni Naan</div>
-          <div class="naan-price">Rs. 200</div>
-        </div>
-        <div class="naan-card" onclick="addToOrderForm('Butter Naan', 350, './images/IMG_7582.JPG.jpeg')" style="cursor:pointer">
-          <div class="naan-emoji">🧈</div>
-          <div class="naan-name">Butter Naan</div>
-          <div class="naan-price">Rs. 350</div>
-        </div>
-        <div class="naan-card" onclick="addToOrderForm('Cheese Naan', 500, './images/IMG_7581.JPG.jpeg')" style="cursor:pointer">
-          <div class="naan-emoji">🧀</div>
-          <div class="naan-name">Cheese Naan</div>
-          <div class="naan-price">Rs. 500</div>
-        </div>
-        <div class="naan-card" onclick="addToOrderForm('Puri Paratha', 270, './images/IMG_7580.JPG.jpeg')" style="cursor:pointer">
-          <div class="naan-emoji">🫓</div>
-          <div class="naan-name">Puri Paratha</div>
-          <div class="naan-price">Rs. 270</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-    <!-- GALLERY SECTION -->
-  <section class="section section-dk2" id="gallery">
-    <div class="eyebrow">📸 Our Gallery</div>
-    <h2 class="sec-title">Mouth-Watering <span style="color:var(--vivid-orange, #EC4F24)">Visuals</span></h2>
-    <p class="sec-desc">Freshly prepared tandoori delicacies — click any photo for preview.</p>
-    <div class="gallery-grid">
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7587.JPG.jpeg', 'Traditional Chicken Sajji', 'Slow-roasted chicken sajji seasoned with secret tandoori spices')">
-        <span class="gallery-badge">🔥 Signature</span>
-        <img src="./images/IMG_7587.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Traditional Chicken Sajji</div>
-          <div class="gallery-sub">Flame-grilled slow roasted sajji</div>
-        </div>
-      </div>
-
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7585.JPG.jpeg', 'Tandoori Chicken', 'Fresh tandoori chicken served with authentic spices')">
-        <span class="gallery-badge">⭐ Top Seller</span>
-        <img src="./images/IMG_7585.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Tandoori Chicken</div>
-          <div class="gallery-sub">Flame-grilled tandoori specialty</div>
-        </div>
-      </div>
-
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7582.JPG.jpeg', 'Fresh Roghni & Butter Naan', 'Crispy hot naans baked fresh in live tandoor')">
-        <span class="gallery-badge">🫓 Tandoor Fresh</span>
-        <img src="./images/IMG_7582.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Roghni & Butter Naan</div>
-          <div class="gallery-sub">Live tandoor freshly baked</div>
-        </div>
-      </div>
-
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7578.JPG.jpeg', 'Seekh Kabab', 'Juicy spiced seekh kababs grilled over coals')">
-        <span class="gallery-badge">🍢 BBQ Special</span>
-        <img src="./images/IMG_7578.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Seekh Kabab</div>
-          <div class="gallery-sub">Charcoal flame grilled kababs</div>
-        </div>
-      </div>
-
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7583.JPG.jpeg', 'Tikka Boti', 'Tender spicy chicken tikka botis')">
-        <span class="gallery-badge">🍢 Charcoal BBQ</span>
-        <img src="./images/IMG_7583.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Tikka Boti</div>
-          <div class="gallery-sub">Charcoal grilled chicken botis</div>
-        </div>
-      </div>
-
-      <div class="gallery-card" onclick="openLightbox('./images/IMG_7576.JPG.jpeg', 'Refreshing Mojitos', 'Chilled ice mocktails & mint margaritas')">
-        <span class="gallery-badge">🍹 Beverages</span>
-        <img src="./images/IMG_7576.JPG.jpeg" alt="" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
-        <div class="gallery-overlay-meta">
-          <div class="gallery-title">Chilled Mojitos & Margaritas</div>
-          <div class="gallery-sub">Ice blended refreshing mocktails</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- BRANCHES -->
-  <section class="section section-dk" id="branches">
-    <div class="eyebrow">📍 Find Us</div>
-    <h2 class="sec-title">Our <span style="color:var(--fire2)">3 Outlets</span></h2>
-    <p class="sec-desc">At Lahore's prime locations — Johar Town, Lake City & Baghbanpura!</p>
-    <div class="branches-grid">
-      <div class="branch-card">
-        <div class="branch-num">01</div>
-        <div class="branch-name">PIA Road, Johar Town</div>
-        <div class="branch-info">📍 PIA Road, Johar Town, Lahore<br/>📞 Available on WhatsApp<br/>⏰ Open Daily</div>
-        <a href="https://wa.me/923001234567" class="call-btn">💬 WhatsApp Order</a>
-      </div>
-      <div class="branch-card">
-        <div class="branch-num">02</div>
-        <div class="branch-name">Lake City, Lahore</div>
-        <div class="branch-info">📍 Lake City, Lahore<br/>📞 Available on WhatsApp<br/>⏰ Open Daily</div>
-        <a href="https://wa.me/923001234567" class="call-btn">💬 WhatsApp Order</a>
-      </div>
-      <div class="branch-card">
-        <div class="branch-num">03</div>
-        <div class="branch-name">GT Road, Baghbanpura</div>
-        <div class="branch-info">📍 GT Road, Baghbanpura, Lahore<br/>📞 Available on WhatsApp<br/>⏰ Open Daily</div>
-        <a href="https://wa.me/923001234567" class="call-btn">💬 WhatsApp Order</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ORDER FORM -->
-  <section class="section section-dk2" id="order">
-    <div class="order-wrap">
-      <div class="order-box">
-        <h2 class="form-title">🔥 Place Order</h2>
-        <p class="form-sub">Fill out the form — confirmation will be sent within 5 minutes.</p>
-        <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
-          <div style="font-size:48px; margin-bottom:16px;">✅</div>
-          <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Order Received!</h3>
-          <p style="color:var(--muted); font-size:14px; line-height:1.6;">
-            Thank you! Your order has been received.<br/>
-            We will confirm shortly — please keep your phone ready!
-          </p>
-          <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #AD1F23, #EC4F24); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(173,31,35,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
-        </div>
-        <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/tandooristoppk" method="POST" onsubmit="handleFormSubmit(event)">
-          <div class="f-row">
-            <div><label class="f-label">Full Name</label><input type="text" name="name" class="f-input" placeholder="Your full name" required/></div>
-            <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
+        <!-- Quick Branch Status Row -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:20px;">
+          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Johar Town</div>
+            <div style="font-size:12px; color:var(--ts-muted);">PIA Road, Hakim Chowk</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
           </div>
-          <div class="f-row">
+          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Lake City</div>
+            <div style="font-size:12px; color:var(--ts-muted);">Opp. Lake City Mall</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Baghbanpura</div>
+            <div style="font-size:12px; color:var(--ts-muted);">GT Road, Shalimar</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Card -->
+      <div style="position:relative;">
+        <div style="position:relative; border-radius:24px; overflow:hidden; border:2px solid var(--ts-border-strong); box-shadow:0 24px 60px rgba(0,0,0,0.8); background:#1A0E08;">
+          <img src="./images/IMG_7587.JPG.jpeg" alt="Tandoori Stop Traditional Sajji & Naan" style="width:100%; height:440px; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(15,8,6,0.95) 0%, rgba(15,8,6,0.2) 60%, transparent 100%);"></div>
+          <div style="position:absolute; bottom:24px; left:24px; right:24px;">
+            <div style="background:rgba(234,88,12,0.9); color:white; font-size:11px; font-weight:800; display:inline-block; padding:4px 12px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">Chef's Special</div>
+            <div style="font-family:var(--font-serif); font-size:22px; font-weight:800; color:var(--ts-ivory); margin-bottom:4px;">Traditional Chicken Sajji</div>
+            <div style="font-size:13px; color:var(--ts-muted); margin-bottom:12px;">Slow roasted in the clay tandoor with secret heritage spices</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:20px; font-weight:800; color:var(--ts-gold);">From Rs. 799</span>
+              <button onclick="addToOrderForm('Traditional Chicken Sajji (Quarter Sajji)', 799, './images/IMG_7587.JPG.jpeg')" class="ts-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USP FEATURES SECTION (Eastern Oven Benchmark) -->
+  <section class="ts-section ts-section-alt">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:50px;">
+        <div class="ts-eyebrow">Artisanal Craftsmanship</div>
+        <h2 class="ts-sec-title">Why Lahore Chooses <span>Tandoori Stop</span></h2>
+        <p class="ts-sec-desc" style="margin:0 auto;">We honor the age-old tradition of lump-charcoal fired clay ovens. No industrial shortcuts — just pure heritage flavour.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:24px;">
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+          <div style="font-size:42px; margin-bottom:14px;">🏺</div>
+          <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">800°F Clay Tandoor</h3>
+          <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Handcrafted mud tandoors fired with premium lump charcoal create an intense radiant crust that locks in juices.</p>
+        </div>
+
+        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+          <div style="font-size:42px; margin-bottom:14px;">🥩</div>
+          <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">100% Halal Prime Cuts</h3>
+          <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Fresh poultry delivered each dawn, hand-trimmed and marinated for 12 hours in our family blend of 14 roasted spices.</p>
+        </div>
+
+        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+          <div style="font-size:42px; margin-bottom:14px;">🫓</div>
+          <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">Hand-Stretched Naans</h3>
+          <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Our master bakers slap each dough ball directly against the burning clay walls, delivering blistered, airy naans.</p>
+        </div>
+
+        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+          <div style="font-size:42px; margin-bottom:14px;">🥘</div>
+          <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">Clay Pot Handis</h3>
+          <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Simmered in earthen clay handis with pure butter and rich cream to preserve the deep aromatics of royal desi cooking.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED SIGNATURE ITEMS -->
+  <section class="ts-section">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div class="ts-eyebrow">Signature Dishes</div>
+          <h2 class="ts-sec-title">Fresh from the <span>Embers</span></h2>
+          <p class="ts-sec-desc" style="margin-bottom:0;">Order our most celebrated dishes directly to your door.</p>
+        </div>
+        <a href="menu.html" class="ts-btn-secondary">View Complete Menu →</a>
+      </div>
+
+      <div class="ts-menu-grid">
+        <!-- Item 1: Traditional Chicken Sajji -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap">
+            <img src="./images/IMG_7587.JPG.jpeg" alt="Traditional Chicken Sajji" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">🔥 Signature</span>
+          </div>
+          <div class="ts-card-body">
+            <div class="ts-card-name">Traditional Chicken Sajji</div>
+            <div class="ts-card-desc">Slow-roasted traditional chicken sajji seasoned with secret tandoori spices.</div>
+            <div class="ts-card-variant-wrap">
+              <select class="ts-variant-select" onchange="onCardVariantChange(this, 'Traditional Chicken Sajji')">
+                <option value="Quarter Sajji" data-price="799" selected>Quarter Sajji — Rs. 799</option>
+                <option value="Half Sajji" data-price="1400">Half Sajji — Rs. 1,400</option>
+                <option value="Full Sajji" data-price="2500">Full Sajji — Rs. 2,500</option>
+              </select>
+            </div>
+            <div class="ts-card-foot">
+              <div class="ts-card-price">Rs. 799</div>
+              <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('Traditional Chicken Sajji (Quarter Sajji)', 799, './images/IMG_7587.JPG.jpeg')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2: Tandoori Chicken Bone (Cheese Naan Single) -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap">
+            <img src="./images/IMG_7585.JPG.jpeg" alt="Tandoori Chicken Single Cheese Naan" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">⭐ Bestseller</span>
+          </div>
+          <div class="ts-card-body">
+            <div class="ts-card-name">Tandoori Chicken (Cheese Naan Single)</div>
+            <div class="ts-card-desc">Flame-grilled tandoori chicken served with 1 hot cheese naan.</div>
+            <div class="ts-card-variant-wrap">
+              <select class="ts-variant-select" onchange="onCardVariantChange(this, 'Tandoori Chicken (Cheese Naan Single)')">
+                <option value="Bone (Cheese Naan Single)" data-price="1150" selected>Bone — Rs. 1,150</option>
+                <option value="Boneless (Cheese Naan Single)" data-price="1350">Boneless — Rs. 1,350</option>
+              </select>
+            </div>
+            <div class="ts-card-foot">
+              <div class="ts-card-price">Rs. 1,150</div>
+              <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('Tandoori Chicken Bone (Cheese Naan Single)', 1150, './images/IMG_7585.JPG.jpeg')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3: Malai Boti -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap">
+            <img src="./images/IMG_7584.JPG.jpeg" alt="Creamy Malai Boti" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">🍢 BBQ Specialty</span>
+          </div>
+          <div class="ts-card-body">
+            <div class="ts-card-name">Malai Boti</div>
+            <div class="ts-card-desc">Velvety chicken chunks marinated in cream, herbs and cardamom, grilled over coals.</div>
+            <div class="ts-card-variant-wrap">
+              <select class="ts-variant-select" onchange="onCardVariantChange(this, 'Malai Boti')">
+                <option value="Per Seekh" data-price="450" selected>Per Seekh — Rs. 450</option>
+                <option value="Per KG" data-price="2200">Per KG — Rs. 2,200</option>
+              </select>
+            </div>
+            <div class="ts-card-foot">
+              <div class="ts-card-price">Rs. 450</div>
+              <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('Malai Boti (Per Seekh)', 450, './images/IMG_7584.JPG.jpeg')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4: Full Stop Roll -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap">
+            <img src="./images/IMG_7591.JPG.jpeg" alt="Tandoori Stop Full Stop Roll" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">🌯 Giant Roll</span>
+          </div>
+          <div class="ts-card-body">
+            <div class="ts-card-name">Full Stop Roll</div>
+            <div class="ts-card-desc">Tandoori Stop signature giant paratha roll stuffed with smoky tandoori chicken, kabab and special sauces.</div>
+            <div class="ts-card-foot" style="margin-top:auto;">
+              <div class="ts-card-price">Rs. 650</div>
+              <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('Full Stop Roll', 650, './images/IMG_7591.JPG.jpeg')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLAY OVEN NAAN COUNTER SECTION -->
+  <section class="ts-section ts-section-alt">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:32px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div class="ts-eyebrow">🫓 Live Clay Tandoor</div>
+          <h2 class="ts-sec-title">Freshly Baked <span>Naan Counter</span></h2>
+          <p class="ts-sec-desc" style="margin-bottom:0;">Slapped onto glowing clay walls upon order — hot, blistered, and aromatic.</p>
+        </div>
+      </div>
+
+      <div class="ts-naan-grid">
+        <div class="ts-naan-card" onclick="addToOrderForm('Plain Naan', 40, './images/IMG_7582.JPG.jpeg')">
+          <div class="ts-naan-emoji">🫓</div>
+          <div class="ts-naan-name">Plain Naan</div>
+          <div class="ts-naan-price">Rs. 40</div>
+        </div>
+        <div class="ts-naan-card" onclick="addToOrderForm('Roghni Naan', 200, './images/IMG_7582.JPG.jpeg')">
+          <div class="ts-naan-emoji">🌾</div>
+          <div class="ts-naan-name">Roghni Naan</div>
+          <div class="ts-naan-price">Rs. 200</div>
+        </div>
+        <div class="ts-naan-card" onclick="addToOrderForm('Butter Naan', 350, './images/IMG_7582.JPG.jpeg')">
+          <div class="ts-naan-emoji">🧈</div>
+          <div class="ts-naan-name">Butter Naan</div>
+          <div class="ts-naan-price">Rs. 350</div>
+        </div>
+        <div class="ts-naan-card" onclick="addToOrderForm('Cheese Naan', 500, './images/IMG_7581.JPG.jpeg')">
+          <div class="ts-naan-emoji">🧀</div>
+          <div class="ts-naan-name">Cheese Naan</div>
+          <div class="ts-naan-price">Rs. 500</div>
+        </div>
+        <div class="ts-naan-card" onclick="addToOrderForm('Puri Paratha', 270, './images/IMG_7580.JPG.jpeg')">
+          <div class="ts-naan-emoji">🫓</div>
+          <div class="ts-naan-name">Puri Paratha</div>
+          <div class="ts-naan-price">Rs. 270</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMOTIONAL DEALS BANNER (Linking to /deals) -->
+  <section class="ts-section" style="background: linear-gradient(135deg, #2D140B 0%, #170904 100%); border-top:1px solid var(--ts-border); border-bottom:1px solid var(--ts-border);">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap:40px; align-items:center;">
+      <div>
+        <div class="ts-eyebrow">✨ Family Feast & Combos</div>
+        <h2 class="ts-sec-title">Grand <span>Tandoori Feasts</span> Built For Sharing</h2>
+        <p class="ts-sec-desc">
+          Gather your family around our signature tandoori feast platters — featuring authentic chicken sajji, sizzling karahi, skewered seekh kebabs, freshly baked naans, and chilled mojitos.
+        </p>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <a href="deals.html" class="ts-btn-primary" style="padding:12px 28px;">View Exclusive Deals</a>
+          <button onclick="addToOrderForm('Family Tandoori Platter', 7000, './images/tandoori_stop_logo.png')" class="ts-btn-secondary">Add Family Platter (Rs. 7,000)</button>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <img src="./images/IMG_7589.JPG.jpeg" alt="Tandoori Feast Platter" style="max-width:100%; border-radius:20px; border:2px solid var(--ts-border-strong); box-shadow:0 20px 50px rgba(0,0,0,0.7);" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMER TESTIMONIALS & SOCIAL PROOF -->
+  <section class="ts-section">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:44px;">
+        <div class="ts-eyebrow">Customer Love</div>
+        <h2 class="ts-sec-title">What Lahore Says About <span>Tandoori Stop</span></h2>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px;">
+          <div style="color:var(--ts-gold); font-size:16px; margin-bottom:12px;">⭐⭐⭐⭐⭐</div>
+          <p style="font-size:13.5px; color:var(--ts-ivory); font-style:italic; line-height:1.7; margin-bottom:16px;">
+            "The Cheese Naan with Tandoori Chicken is simply out of this world. The naan is stuffed with molten cheese and the chicken has that authentic smoky clay oven char. The best in Johar Town!"
+          </p>
+          <div style="font-weight:700; font-size:13px; color:var(--ts-saffron);">Hamza Malik</div>
+          <div style="font-size:11px; color:var(--ts-muted);">Dine-In Customer · Johar Town Branch</div>
+        </div>
+
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px;">
+          <div style="color:var(--ts-gold); font-size:16px; margin-bottom:12px;">⭐⭐⭐⭐⭐</div>
+          <p style="font-size:13.5px; color:var(--ts-ivory); font-style:italic; line-height:1.7; margin-bottom:16px;">
+            "We ordered the Family Tandoori Platter for a dinner gathering in Lake City. Hot, fragrant delivery within 35 minutes. Every single guest asked where the food was from. Highly recommended!"
+          </p>
+          <div style="font-weight:700; font-size:13px; color:var(--ts-saffron);">Ayesha Tariq</div>
+          <div style="font-size:11px; color:var(--ts-muted);">Home Delivery · Lake City Lahore</div>
+        </div>
+
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px;">
+          <div style="color:var(--ts-gold); font-size:16px; margin-bottom:12px;">⭐⭐⭐⭐⭐</div>
+          <p style="font-size:13.5px; color:var(--ts-ivory); font-style:italic; line-height:1.7; margin-bottom:16px;">
+            "Their Sajji has pure authentic Baloch & Desi seasoning. Crisp skin on the outside, tender juicy meat inside. Coupled with piping hot Roghni Naan, it's perfection."
+          </p>
+          <div style="font-weight:700; font-size:13px; color:var(--ts-saffron);">Usman Ghani</div>
+          <div style="font-size:11px; color:var(--ts-muted);">Food Enthusiast · Baghbanpura Branch</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK ORDER FORM (Fully Preserved Formspree + API Integration) -->
+  <section class="ts-section ts-section-alt" id="order-section">
+    <div style="max-width:640px; margin:0 auto;">
+      <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border-strong); border-radius:20px; padding:40px 32px; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+        <div style="text-align:center; margin-bottom:28px;">
+          <div class="ts-eyebrow">Quick Checkout</div>
+          <h2 style="font-family:var(--font-serif); font-size:26px; font-weight:800; color:var(--ts-ivory); margin-bottom:6px;">Place Direct Order</h2>
+          <p style="font-size:13.5px; color:var(--ts-muted);">Fill details below — we confirm immediately via WhatsApp & SMS!</p>
+        </div>
+
+        <div id="form-success" style="display:none; text-align:center; padding:30px 20px;">
+          <div style="font-size:48px; margin-bottom:14px;">✅</div>
+          <h3 style="font-family:var(--font-serif); font-size:22px; font-weight:800; margin-bottom:8px; color:var(--ts-gold);">Order Received!</h3>
+          <p style="color:var(--ts-muted); font-size:13.5px; line-height:1.6;">
+            Thank you! Your order has been dispatched to our kitchen.<br/>
+            Our team will confirm your delivery shortly.
+          </p>
+          <button type="button" onclick="resetOrderForm()" class="ts-btn-primary" style="margin-top:20px;">➕ Place Another Order</button>
+        </div>
+
+        <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/tandooristoppk" method="POST" onsubmit="handleFormSubmit(event)">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
             <div>
-              <label class="f-label">Select Branch</label>
-              <select name="branch" class="f-input f-select">
+              <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Full Name *</label>
+              <input type="text" name="name" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="Your full name" required/>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Phone Number *</label>
+              <input type="tel" name="phone" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="03XX-XXXXXXX" required/>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+            <div>
+              <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Select Branch</label>
+              <select name="branch" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;">
                 <option>PIA Road, Johar Town</option>
                 <option>Lake City</option>
                 <option>GT Road, Baghbanpura</option>
               </select>
             </div>
             <div>
-              <label class="f-label">Payment Method</label>
-              <select name="payment" class="f-input f-select" readonly>
+              <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Payment Method</label>
+              <select name="payment" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;" readonly>
                 <option>Cash on Delivery (COD)</option>
               </select>
             </div>
           </div>
-          <div class="f-full">
-            <label class="f-label">Delivery Address</label>
-            <input type="text" name="address" class="f-input" placeholder="Complete delivery address" required/>
+
+          <div style="margin-bottom:14px;">
+            <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Delivery Address *</label>
+            <input type="text" name="address" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="House/Flat #, Street, Area, Landmark" required/>
           </div>
-          <div class="f-full">
-            <label class="f-label">YOUR ORDER SUMMARY</label>
-            <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Tandoori Chicken, 2x Seekh Kabab, 4x Naan..." required></textarea>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Your Order Items</label>
+            <textarea name="order" id="order-textarea" style="width:100%; min-height:85px; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none; resize:vertical;" placeholder="e.g. 1x Traditional Chicken Sajji, 2x Roghni Naan, 1x Malai Boti..." required></textarea>
           </div>
-          <div class="cod-row">🪙 <span>Payment: <strong>Cash on Delivery (COD)</strong> — Pay upon delivery</span></div>
-          <button type="submit" class="submit">🔥 Place Order</button>
+
+          <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:12px 16px; margin-bottom:20px; font-size:12.5px; color:var(--ts-muted);">
+            🪙 Payment Method: <strong style="color:var(--ts-gold);">Cash on Delivery (COD)</strong> — Pay when the rider arrives at your doorstep.
+          </div>
+
+          <button type="submit" class="ts-btn-primary" style="width:100%; justify-content:center; padding:16px; font-size:15px;">
+            🔥 Confirm & Place Order
+          </button>
         </form>
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <footer>
-    <div class="f-logo"><span>TANDOORI STOP</span> &nbsp;— Last Stop 📍</div>
-    <div class="f-links">
-      <a href="#home">Home</a>
-      <a href="#menu">Menu</a>
-      <a href="#gallery">Gallery</a>
-      <a href="#branches">Branches</a>
-      <a href="#order">Order</a>
+  <footer class="ts-footer">
+    <div class="ts-footer-top" style="max-width:1200px; margin:0 auto;">
+      <div class="ts-footer-brand">
+        <div class="ts-brand-title" style="font-size:20px;">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
+        <p>
+          Preserving Pakistan's rich culinary traditions with authentic clay tandoors, lump charcoal barbecues, hand-rolled naans, and rich gravies.
+        </p>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Navigation <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu & Categories</a></li>
+          <li><a href="deals.html">Deals & Combos</a></li>
+          <li><a href="about.html">Brand Story</a></li>
+          <li><a href="locations.html">Branches & Timings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Outlets <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="locations.html">Johar Town (PIA Rd)</a></li>
+          <li><a href="locations.html">Lake City Lahore</a></li>
+          <li><a href="locations.html">GT Rd Baghbanpura</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Direct Contact <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li style="color:var(--ts-muted);">📞 Johar Town: 0327-4945947</li>
+          <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--ts-muted);">📞 Baghbanpura: 0326-6811177</li>
+          <li><a href="https://wa.me/923001234567" target="_blank" style="color:#25D366; font-weight:700;">💬 WhatsApp Ordering</a></li>
+        </ul>
+      </div>
     </div>
-    
-    <div class="footer-socials">
-      <a href="https://instagram.com/tandooristoppk" target="_blank" class="social-icon" aria-label="Instagram">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a>
-      <a href="https://wa.me/923001234567" target="_blank" class="social-icon" aria-label="WhatsApp">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.198 1.455 4.814 1.456 5.587 0 10.132-4.547 10.136-10.136.002-2.707-1.05-5.253-2.962-7.166C16.714 1.396 14.167.34 11.47.34 5.882.34 1.339 4.887 1.335 10.478c-.001 1.702.447 3.366 1.3 4.811L1.455 20.71l5.192-1.556zM17.06 13.9c-.277-.139-1.642-.81-1.897-.903-.255-.093-.44-.139-.626.139-.186.278-.718.903-.88 1.088-.163.186-.325.208-.602.07-.277-.14-1.17-.43-2.23-1.376-.824-.735-1.38-1.644-1.542-1.921-.162-.278-.017-.427.122-.566.124-.125.277-.324.416-.486.139-.162.186-.278.278-.463.093-.185.046-.347-.023-.486-.069-.139-.626-1.505-.858-2.061-.226-.543-.454-.47-.626-.479-.162-.008-.348-.01-.534-.01-.186 0-.487.07-.742.347-.255.278-.974.95-.974 2.315 0 1.365.992 2.685 1.131 2.87.14.186 1.95 2.977 4.724 4.17 1.157.497 2.062.775 2.76.996.697.222 1.333.12 1.835.045.56-.084 1.643-.671 1.874-1.319.232-.648.232-1.204.163-1.319-.069-.116-.255-.209-.533-.348z"/></svg>
-      </a>
+
+    <div class="ts-footer-bottom" style="max-width:1200px; margin:0 auto;">
+      <div>© 2026 Tandoori Stop. All Rights Reserved. Lahore, Pakistan.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="https://instagram.com/tandooristoppk" target="_blank" style="color:var(--ts-muted); text-decoration:none;">Instagram</a>
+        <a href="https://wa.me/923001234567" target="_blank" style="color:var(--ts-muted); text-decoration:none;">WhatsApp</a>
+      </div>
     </div>
-    
-    <div class="f-copy">© 2025 Tandoori Stop. Lahore, Pakistan.</div>
   </footer>
 
+  <!-- WhatsApp Floating Action -->
+  <a href="https://wa.me/923001234567?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20Tandoori%20Stop" class="ts-float-wa" target="_blank" rel="noopener">
+    <span>💬</span> WhatsApp Order
+  </a>
+
+  <!-- Lightbox Modal -->
+  <div id="ts-lightbox" onclick="closeTsLightbox()">
+    <div class="ts-lightbox-box" onclick="event.stopPropagation()">
+      <button class="ts-lightbox-close" onclick="closeTsLightbox()">&times;</button>
+      <div class="ts-lightbox-img-wrap">
+        <img id="ts-lightbox-img" src="" alt="Preview" />
+      </div>
+      <div class="ts-lightbox-body">
+        <div>
+          <div id="ts-lightbox-title" style="font-family:var(--font-serif); font-size:18px; font-weight:800; color:var(--ts-ivory);">Preview</div>
+          <div id="ts-lightbox-desc" style="font-size:12px; color:var(--ts-muted);">Freshly prepared in our authentic kitchen.</div>
+        </div>
+        <a href="menu.html" class="ts-btn-primary" style="font-size:12.5px; padding:8px 16px;">🔥 Order Now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preserved Central Menu Data & Order Handling Scripts -->
   <script>
-    const TS_REAL_SET = new Set(["Tandoori Chicken Bone (Cheese Naan Double)", "Seekh Kabab (Per Seekh)", "Tandoori Chicken Bone (With Rice)", "Tikka Boti (Per Seekh)", "Tandoori Chicken Boneless (With Rice)", "Blueberry Mojito", "Butter Naan", "Peach Mojito", "Plain Roti", "Roghni Naan", "Tandoori Chicken Bone (Cheese Naan Single)", "Peri Peri Quarter Sajji", "Tandoori Chicken Boneless", "Chicken Paratha Roll", "Mint Margaritas", "Full Sajji", "Tandoori Chicken Boneless (Cheese Naan Single)", "Full Stop Roll", "Strawberry Mojito", "Puri Paratha", "Malai Boti (Per Seekh)", "Tandoori Chicken Boneless (Cheese Naan Double)", "Peri Peri Full Sajji", "Apple Mojito", "Tandoori Chicken Roll", "Cheese Naan", "Peri Peri Half Sajji", "Tandoori Chicken Bone", "Quarter Sajji", "Malai Boti Roll", "Rice", "Half Sajji"]);
-const menuData = {
-      tandoori: [
-        { 
-          name: "Traditional Chicken Sajji", 
-          price: 799, 
-          desc: "Slow-roasted traditional chicken sajji seasoned with secret tandoori spices.", 
-          emoji: "🍗", 
-          image: "./images/IMG_7587.JPG.jpeg",
-          variants: [
-            { name: "Quarter Sajji", price: 799 },
-            { name: "Half Sajji", price: 1400 },
-            { name: "Full Sajji", price: 2500 }
-          ]
-        },
-        { 
-          name: "Peri Peri Chicken Sajji", 
-          price: 900, 
-          desc: "Flame-grilled spicy peri peri chicken sajji.", 
-          emoji: "🍗", 
-          image: "./images/IMG_7587.JPG.jpeg",
-          variants: [
-            { name: "Quarter Sajji", price: 900 },
-            { name: "Half Sajji", price: 1600 },
-            { name: "Full Sajji", price: 2900 }
-          ]
-        },
-        { 
-          name: "Tandoori Chicken (Cheese Naan Single)", 
-          price: 1150, 
-          desc: "Flame-grilled tandoori chicken served with 1 cheese naan", 
-          emoji: "🍗", 
-          image: "./images/IMG_7585.JPG.jpeg",
-          variants: [
-            { name: "Bone (Cheese Naan Single)", price: 1150 },
-            { name: "Boneless (Cheese Naan Single)", price: 1350 }
-          ]
-        },
-        { 
-          name: "Tandoori Chicken (Cheese Naan Double)", 
-          price: 1950, 
-          desc: "Flame-grilled tandoori chicken served with 2 cheese naans", 
-          emoji: "🍗", 
-          image: "./images/IMG_7589.JPG.jpeg",
-          variants: [
-            { name: "Bone (Cheese Naan Double)", price: 1950 },
-            { name: "Boneless (Cheese Naan Double)", price: 2299 }
-          ]
-        },
-        { 
-          name: "Tandoori Chicken (With Rice)", 
-          price: 780, 
-          desc: "Flame-grilled tandoori chicken served with aromatic rice", 
-          emoji: "🍗", 
-          image: "./images/IMG_7586.JPG.jpeg",
-          variants: [
-            { name: "Boneless (With Rice)", price: 780 },
-            { name: "Bone (With Rice)", price: 980 }
-          ]
-        },
-        { 
-          name: "Tandoori Chicken (Plain)", 
-          price: 750, 
-          desc: "Traditional flame-grilled tandoori chicken piece", 
-          emoji: "🍗", 
-          image: "./images/IMG_7590.JPG.jpeg",
-          variants: [
-            { name: "Bone (Plain)", price: 750 },
-            { name: "Boneless (Plain)", price: 899 }
-          ]
-        }
-      ],
-      tawa: [
-        { name: "Tawa Chicken", price: 750, desc: "Spicy stir-fried tawa chicken piece", emoji: "🍳" , image: "./images/tandoori_stop_logo.png" },
-        { 
-          name: "Tawa Chicken Platter", 
-          price: 800, 
-          desc: "Stir-fried tawa chicken platter served with hot roti", 
-          emoji: "🍳", 
-          image: "./images/tandoori_stop_logo.png",
-          variants: [
-            { name: "Single Serving (2 Roti)", price: 800 },
-            { name: "Double Serving (4 Roti)", price: 1400 }
-          ]
-        },
-        { 
-          name: "Chicken Karahi", 
-          price: 1300, 
-          desc: "Traditional wok chicken karahi cooked in fresh tomatoes & spices", 
-          emoji: "🥘", 
-          image: "./images/tandoori_stop_logo.png",
-          variants: [
-            { name: "Half Portion", price: 1300 },
-            { name: "Full Portion", price: 2500 }
-          ]
-        },
-        { 
-          name: "Chicken White Karahi", 
-          price: 1500, 
-          desc: "Creamy white chicken karahi cooked in cream & green chilies", 
-          emoji: "🥘", 
-          image: "./images/tandoori_stop_logo.png",
-          variants: [
-            { name: "Half Portion", price: 1500 },
-            { name: "Full Portion", price: 2700 }
-          ]
-        },
-        { 
-          name: "Chicken Kabab Masala", 
-          price: 1350, 
-          desc: "Spiced chicken kabab masala wok", 
-          emoji: "🥘", 
-          image: "./images/tandoori_stop_logo.png",
-          variants: [
-            { name: "Half Portion", price: 1350 },
-            { name: "Full Portion", price: 2600 }
-          ]
-        },
-        { name: "Nawabi Handi Boneless (2-Person)", price: 2200, desc: "Rich royal Nawabi handi boneless serving", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Shahi Kabab Masala Handi Boneless (2-Person)", price: 1999, desc: "Spiced shahi kabab masala handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Mughlai Cheese Handi Boneless (2-Person)", price: 1999, desc: "Creamy Mughlai cheese handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Reshmi Handi Boneless (2-Person)", price: 1999, desc: "Velvety reshmi handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Sha Jahani Handi Boneless (2-Person)", price: 1999, desc: "Royal spice mix Sha Jahani handi boneless", emoji: "🍲" , image: "./images/tandoori_stop_logo.png" }
-      ],
-      bbq: [
-        { 
-          name: "Malai Boti", 
-          price: 450, 
-          desc: "Creamy flame-grilled malai boti", 
-          emoji: "🍢", 
-          image: "./images/IMG_7584.JPG.jpeg",
-          variants: [
-            { name: "Per Seekh", price: 450 },
-            { name: "Per KG", price: 2200 }
-          ]
-        },
-        { 
-          name: "Tikka Boti", 
-          price: 400, 
-          desc: "Classic flame-grilled tikka boti", 
-          emoji: "🍢", 
-          image: "./images/IMG_7583.JPG.jpeg",
-          variants: [
-            { name: "Per Seekh", price: 400 },
-            { name: "Per KG", price: 1999 }
-          ]
-        },
-        { 
-          name: "Seekh Kabab", 
-          price: 250, 
-          desc: "Spiced chicken seekh kabab", 
-          emoji: "🍢", 
-          image: "./images/IMG_7578.JPG.jpeg",
-          variants: [
-            { name: "Per Seekh", price: 250 },
-            { name: "Per KG", price: 1999 }
-          ]
-        },
-        { name: "Full Stop Roll", price: 650, desc: "TandooriStopp signature giant roll", emoji: "🌯" , image: "./images/IMG_7591.JPG.jpeg" },
-        { name: "Tandoori Chicken Roll", price: 520, desc: "Tandoori chicken chunks wrapped in paratha", emoji: "🌯" , image: "./images/IMG_7591.JPG.jpeg" },
-        { name: "Malai Boti Roll", price: 550, desc: "Creamy malai boti wrapped in paratha", emoji: "🌯" , image: "./images/IMG_7592.JPG.jpeg" },
-        { name: "Chicken Paratha Roll", price: 499, desc: "Classic chicken paratha roll", emoji: "🌯" , image: "./images/IMG_7588.JPG.jpeg" }
-      ],
-      platters: [
-        { name: "Family Tandoori Platter", price: 7000, desc: "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos", emoji: "👪" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Roghni Naan", price: 200, desc: "Fluffy sesame roghni naan", emoji: "🫓" , image: "./images/IMG_7582.JPG.jpeg" },
-        { name: "Butter Naan", price: 350, desc: "Buttery flatbread naan", emoji: "🫓" , image: "./images/IMG_7582.JPG.jpeg" },
-        { name: "Cheese Naan", price: 500, desc: "Naan stuffed with melted cheese", emoji: "🫓" , image: "./images/IMG_7581.JPG.jpeg" },
-        { name: "Rice", price: 350, desc: "Extra serving of aromatic rice", emoji: "🍚" , image: "./images/IMG_7579.JPG.jpeg" },
-        { name: "Plain Roti", price: 30, desc: "Hot whole wheat roti", emoji: "🫓" , image: "./images/IMG_7582.JPG.jpeg" },
-        { name: "Salad", price: 350, desc: "Fresh seasonal salad", emoji: "🥗" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Raita", price: 70, desc: "Yogurt herb raita dip", emoji: "🏺" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Puri Paratha", price: 270, desc: "Flaky deep-fried puri paratha", emoji: "🫓" , image: "./images/IMG_7580.JPG.jpeg" },
-        { name: "Blueberry Mojito", price: 300, desc: "Blueberry refreshing mocktail", emoji: "🍹" , image: "./images/IMG_7576.JPG.jpeg" },
-        { name: "Strawberry Mojito", price: 300, desc: "Strawberry refreshing mocktail", emoji: "🍹" , image: "./images/IMG_7576.JPG.jpeg" },
-        { name: "Peach Mojito", price: 300, desc: "Peach refreshing mocktail", emoji: "🍹" , image: "./images/IMG_7576.JPG.jpeg" },
-        { name: "Apple Mojito", price: 300, desc: "Apple refreshing mocktail", emoji: "🍹" , image: "./images/IMG_7576.JPG.jpeg" },
-        { name: "Oreo Sundae", price: 400, desc: "Oreo cookies and vanilla ice cream sundae", emoji: "🍨" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Lotus Three Sundae", price: 400, desc: "Lotus Biscoff crumbs and sauce sundae", emoji: "🍨" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Nutella Sundae", price: 400, desc: "Nutella chocolate fudge sundae", emoji: "🍨" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Water (Small)", price: 80, desc: "Chilled mineral water", emoji: "🥤" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Soft Drink (300ml)", price: 120, desc: "Carbonated soft drink regular", emoji: "🥤" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Soft Drink (Tin)", price: 150, desc: "Carbonated soft drink tin can", emoji: "🥤" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Fresh Lime", price: 350, desc: "Zesty fresh lime soda", emoji: "🥤" , image: "./images/tandoori_stop_logo.png" },
-        { name: "Mint Margaritas", price: 300, desc: "Minty blended ice margarita", emoji: "🥤" , image: "./images/IMG_7577.JPG.jpeg" }
-      ]
-    };
-    window.menuData = menuData;
-
-    let cart = {};
-
+    window.BRAND_SLUG = "tandooristoppk";
+    
     function onCardVariantChange(selectEl, baseItemName) {
       const selectedOption = selectEl.options[selectEl.selectedIndex];
       const variantName = selectedOption.value;
       const price = parseInt(selectedOption.getAttribute('data-price'), 10);
       
-      const cardBody = selectEl.closest('.card-body');
+      const cardBody = selectEl.closest('.ts-card-body');
       if (cardBody) {
-        const priceEl = cardBody.querySelector('.card-price');
-        const btnEl = cardBody.querySelector('.order-btn');
-        const cardImg = cardBody.parentElement ? cardBody.parentElement.querySelector('.card-img img') : null;
+        const priceEl = cardBody.querySelector('.ts-card-price');
+        const btnEl = cardBody.querySelector('.ts-card-add-btn');
+        const cardImg = cardBody.parentElement ? cardBody.parentElement.querySelector('.ts-card-img') : null;
         let imgUrl = cardImg ? cardImg.getAttribute('src') : '';
         if ((!imgUrl || imgUrl.includes('unsplash.com')) && window.CartDrawer && typeof window.CartDrawer.findProductImage === 'function') {
           imgUrl = window.CartDrawer.findProductImage(baseItemName);
@@ -1227,188 +549,7 @@ const menuData = {
       }
     }
 
-      function renderMenu(category = 'all') {
-        const container = document.getElementById('menu-grid-container');
-        if (!container) return;
-
-        container.innerHTML = '';
-        
-        let items = [];
-        if (category === 'all') {
-          items = [...menuData.tandoori, ...menuData.tawa, ...menuData.bbq, ...menuData.platters];
-        } else {
-          items = menuData[category] || [];
-        }
-
-        // Unique items just in case
-        const seen = new Set();
-        const uniqueItems = items.filter(el => {
-          const duplicate = seen.has(el.name);
-          seen.add(el.name);
-          return !duplicate;
-        });
-
-        uniqueItems.forEach((item, idx) => {
-          const card = document.createElement('div');
-          card.className = 'menu-card';
-          
-          // Dynamic image backgrounds
-          const bgs = ['ci-1', 'ci-2', 'ci-3', 'ci-4'];
-          const bgClass = bgs[idx % bgs.length];
-          const fallbackLogo = "./images/tandoori_stop_logo.png";
-          const isLogo = !item.image || item.image.includes('tandoori_stop_logo.png');
-          const imgHtml = `<img src="${item.image || fallbackLogo}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:${isLogo ? 'contain' : 'cover'};${isLogo ? 'padding:16px;' : ''}" onerror="this.onerror=null; this.src='${fallbackLogo}'; this.style.objectFit='contain'; this.style.padding='16px';" />`;
-
-          
-          let variantHtml = '';
-          let initialPrice = item.price;
-          let initialName = item.name;
-
-          if (item.variants && item.variants.length > 0) {
-            initialPrice = item.variants[0].price;
-            initialName = `${item.name} (${item.variants[0].name})`;
-            variantHtml = `
-              <div class="variant-selector-wrap">
-                <label class="variant-label">Select Option / Size:</label>
-                <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
-                  ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
-                </select>
-              </div>`;
-          }
-
-          card.innerHTML = `
-            <div class="card-img ${item.image ? '' : bgClass}" style="position:relative;">
-              ${imgHtml}
-            </div>
-            <div class="card-body">
-              <div class="card-name">${item.name}</div>
-              <div class="card-desc">${item.desc}</div>
-              ${variantHtml}
-              <div class="card-foot">
-                <div class="card-price" id="price-card-${idx}">Rs. ${initialPrice.toLocaleString()}</div>
-                <button class="order-btn" id="btn-card-${idx}" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${initialPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">Order</button>
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      }
-
-    function filterMenu(btn, category) {
-      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderMenu(category);
-    }
-
-    function addToOrderForm(itemName, price, image) {
-      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
-        window.CartDrawer.addItem({
-          name: itemName,
-          price: price,
-          qty: 1,
-          image: image || ''
-        });
-        return;
-      }
-      if (typeof resetOrderForm === "function") {
-        const s = document.getElementById("form-success");
-        if (s && s.style.display === "block") resetOrderForm();
-      }
-      if (cart[itemName]) {
-        cart[itemName]++;
-      } else {
-        cart[itemName] = 1;
-      }
-
-      updateTextArea();
-      
-      const orderSec = document.getElementById('order');
-      if (orderSec) {
-        orderSec.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    function updateTextArea() {
-      const ta = document.getElementById('order-textarea');
-      if (!ta) return;
-
-      let list = [];
-      for (const name in cart) {
-        const qty = cart[name];
-        list.push(`${qty}x ${name}`);
-      }
-
-      ta.value = list.join(', ');
-    }
-
-    // Toggle Mobile Navigation
-    function toggleMobileNav() {
-      const nav = document.getElementById('mobile-nav');
-      const btn = document.getElementById('hamburger');
-      if (nav) nav.classList.toggle('open');
-      if (btn) btn.classList.toggle('open');
-    }
-    function closeMobileNav() {
-      const nav = document.getElementById('mobile-nav');
-      const btn = document.getElementById('hamburger');
-      if (nav) nav.classList.remove('open');
-      if (btn) btn.classList.remove('open');
-    }
-
-    // Scroll Progress & Back to Top & Scroll Spy
-    const sections = document.querySelectorAll('section[id], footer[id]');
-    const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
-    
-    window.addEventListener('scroll', () => {
-      // Scroll Progress
-      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-      const progressBar = document.getElementById('scroll-progress');
-      if (progressBar) progressBar.style.width = scrolled + "%";
-
-      // Back to Top Button
-      const btn = document.getElementById('backTop');
-      if (btn) {
-        btn.classList.toggle('show', window.scrollY > 400);
-      }
-
-      // Scroll Spy
-      let current = '';
-      sections.forEach(section => {
-        const top = section.offsetTop - 120;
-        if (window.scrollY >= top) {
-          current = section.getAttribute('id');
-        }
-      });
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-          link.classList.add('active');
-        }
-      });
-    });
-
-    // Initialize Menu & Loader Safely
-    function initMenuAndLoader() {
-      renderMenu('all');
-      const loader = document.getElementById('page-loader');
-      if (loader) {
-        loader.classList.add('hidden');
-        setTimeout(() => { try { loader.remove(); } catch(e){} }, 400);
-      }
-    }
-
-    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-      setTimeout(initMenuAndLoader, 1);
-    } else {
-      document.addEventListener('DOMContentLoaded', initMenuAndLoader);
-      window.addEventListener('load', initMenuAndLoader);
-    }
-    setTimeout(initMenuAndLoader, 500); // Fail-safe fallback to ensure loader NEVER stays stuck
-
-    // Handle WhatsApp Order Submission
-        async function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
       
@@ -1419,10 +560,10 @@ const menuData = {
       const orderStr = form.order ? form.order.value : '';
       
       const cartItems = [];
-      if (typeof cart === 'object' && Object.keys(cart).length > 0) {
-        for (const itemKey in cart) {
-          if (cart[itemKey] > 0) {
-            cartItems.push({ name: itemKey, qty: cart[itemKey] });
+      if (typeof window.cart === 'object' && Object.keys(window.cart || {}).length > 0) {
+        for (const itemKey in window.cart) {
+          if (window.cart[itemKey] > 0) {
+            cartItems.push({ name: itemKey, qty: window.cart[itemKey] });
           }
         }
       } else if (orderStr) {
@@ -1436,7 +577,7 @@ const menuData = {
         });
       }
 
-      // Submit payload directly to central Django REST API (/api/orders/)
+      // Submit directly to central Django REST API
       if (typeof window.submitWebOrder === 'function') {
         try {
           await window.submitWebOrder({
@@ -1452,7 +593,7 @@ const menuData = {
         }
       }
 
-      // Dual Action: Open WhatsApp Order Confirmation
+      // WhatsApp Order Confirmation
       const message = `Hello! I want to place an order from Tandoori Stop Website 🛵\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
@@ -1469,77 +610,23 @@ const menuData = {
       window.open(whatsappUrl, '_blank');
       
       form.style.display = 'none';
-      if (typeof cart === 'object' && cart !== null) { for (const k in cart) delete cart[k]; }
-      if (typeof preorderCart === 'object' && preorderCart !== null) { for (const k in preorderCart) delete preorderCart[k]; }
       const successDiv = document.getElementById('form-success');
-      if (successDiv) {
-        successDiv.style.display = 'block';
-      }
+      if (successDiv) successDiv.style.display = 'block';
     }
-  
+
     function resetOrderForm() {
-      const form = document.getElementById('order-form') || document.getElementById('res-form') || document.getElementById('catering-form') || document.querySelector('form');
+      const form = document.getElementById('order-form');
       const successDiv = document.getElementById('form-success');
       if (form) {
         form.reset();
         form.style.display = 'block';
       }
-      if (successDiv) {
-        successDiv.style.display = 'none';
-      }
-      if (typeof cart === 'object' && cart !== null) {
-        for (const k in cart) delete cart[k];
-      }
-      if (typeof preorderCart === 'object' && preorderCart !== null) {
-        for (const k in preorderCart) delete preorderCart[k];
-      }
-      if (typeof updateTextArea === 'function') updateTextArea();
-      if (typeof updateRequestsTextArea === 'function') updateRequestsTextArea();
+      if (successDiv) successDiv.style.display = 'none';
     }
-  
-    // Reset order form automatically if user clicks an order navigation CTA while in success state
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('a[href="#order"], a[href="#book"], a[href="#catering"], a[href="#reservation"], .nav-cta, .btn-fire, .btn-red, .btn-grad, .btn-purple').forEach(link => {
-        link.addEventListener('click', () => {
-          const s = document.getElementById("form-success");
-          if (s && s.style.display === "block") {
-            if (typeof resetOrderForm === "function") resetOrderForm();
-          }
-        });
-      });
-    });
-
   </script>
 
-  <!-- WhatsApp Float Button -->
-  <a href="https://wa.me/923001234567?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20Tandoori%20Stop" 
-     class="whatsapp-float" target="_blank" rel="noopener">
-    <span class="wa-icon">💬</span>
-    Order on WhatsApp
-  </a>
-
-  <!-- Back to Top Button -->
-  <a href="#home" class="back-top" id="backTop" aria-label="Back to top">↑</a>
-<script>window.BRAND_SLUG = "tandooristoppk";</script>
-<script src="live_catalog.js" defer></script>
-<script src="cart_drawer.js?v=20260804" defer></script>
-
-  <!-- Lightbox Modal Preview -->
-  <div id="lightbox-modal" onclick="closeLightbox(event)">
-    <div class="lightbox-content" onclick="event.stopPropagation()">
-      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-      <div class="lightbox-img-wrap">
-        <img id="lightbox-img" src="" alt="" />
-      </div>
-      <div class="lightbox-body">
-        <div>
-          <div class="lightbox-title" id="lightbox-title">Item Preview</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.6);" id="lightbox-desc">Freshly prepared in our kitchen</div>
-        </div>
-        <a href="#order" class="btn-fire" onclick="closeLightbox()" style="padding:10px 20px; font-size:13px;">🔥 Order Now</a>
-      </div>
-    </div>
-  </div>
-
+  <script src="entrance_ts.js?v=20260913" defer></script>
+  <script src="live_catalog.js?v=20260913" defer></script>
+  <script src="cart_drawer.js?v=20260913" defer></script>
 </body>
 </html>

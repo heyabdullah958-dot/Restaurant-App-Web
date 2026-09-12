@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JUSHH PK — Complete Street Gourmet Menu | Turkish Doner & Shawarma</title>
+  <meta name="description" content="Explore JushhPK's complete menu: Chicken & Beef Doner Fries, Dubai Shawaya, Turkish Wraps, Charcoal Shawarma, Pull-Tab Can Desserts, and Mojitos."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
+  <link rel="stylesheet" href="theme_jushh.css?v=20260913"/>
+  <style>
+    .jushh-cat-nav {
+      position: sticky;
+      top: 73px;
+      z-index: 950;
+      background: rgba(10, 10, 12, 0.96);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--jushh-border);
+      padding: 12px 5%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .jushh-cat-nav::-webkit-scrollbar { display: none; }
+    
+    .jushh-cat-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--jushh-border);
+      color: var(--jushh-muted);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .jushh-cat-btn:hover, .jushh-cat-btn.active {
+      background: var(--jushh-crimson);
+      color: #FFFFFF;
+      border-color: var(--jushh-crimson);
+      box-shadow: 0 4px 16px rgba(220, 38, 38, 0.5);
+    }
+
+    .jushh-search-input {
+      width: 100%;
+      max-width: 440px;
+      background: #0D0D10;
+      border: 1px solid var(--jushh-border);
+      color: var(--jushh-white);
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .jushh-search-input:focus {
+      border-color: var(--jushh-crimson);
+    }
+  </style>
+</head>
+<body>
+  <div id="scroll-progress"></div>
+
+  <!-- High-Energy Urban Entrance Reveal -->
+  <div id="jushh-entrance">
+    <div class="jushh-splash-emblem">
+      <div class="jushh-splash-beam"></div>
+      <div class="jushh-splash-card">
+        <img src="./images/jushh_logo.jpg" alt="Jushh Logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+      </div>
+    </div>
+    <div class="jushh-splash-title">Jushh <span>Menu</span></div>
+    <div class="jushh-splash-sub">Street Gourmet Catalog</div>
+  </div>
+
+  <!-- Top Announcement Bar -->
+  <header class="jushh-topbar">
+    <div class="jushh-topbar-left">
+      <span class="jushh-topbar-pill">Street Gourmet</span>
+      <span>🔥 Authentic Turkish Doner & Shawarma across 3 Lahore Outlets</span>
+    </div>
+    <div class="jushh-topbar-right">
+      <a href="tel:+923269946142" class="jushh-topbar-link">📞 Johar Town: 0326-9946142</a>
+      <a href="tel:+923244441735" class="jushh-topbar-link">📞 Lake City: 0324-4441735</a>
+      <a href="tel:+923257217221" class="jushh-topbar-link">📞 DHA: 0325-7217221</a>
+      <a href="https://wa.me/923269946142" target="_blank" rel="noopener" class="jushh-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Main Navigation Header -->
+  <nav class="jushh-nav">
+    <a href="index.html" class="jushh-brand-wrap">
+      <img src="./images/jushh_logo.jpg" alt="JushhPK Logo" class="jushh-brand-logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+      <div class="jushh-brand-text">
+        <div class="jushh-brand-name">
+          JUST <span>SHHH</span>… <span class="jushh-verified-tick">✓</span>
+        </div>
+        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
+      </div>
+    </a>
+
+    <ul class="jushh-nav-links">
+      <li class="jushh-nav-item"><a href="index.html">Home</a></li>
+      <li class="jushh-nav-item active"><a href="menu.html">Menu</a></li>
+      <li class="jushh-nav-item"><a href="deals.html">Loaded Combos</a></li>
+      <li class="jushh-nav-item"><a href="about.html">About Jushh</a></li>
+      <li class="jushh-nav-item"><a href="locations.html">Locations</a></li>
+    </ul>
+
+    <div class="jushh-nav-actions">
+      <button onclick="window.CartDrawer && window.CartDrawer.openDrawer()" class="jushh-btn-primary">
+        <span>🛍️ View Cart</span>
+      </button>
+      <button class="jushh-hamburger" id="jushh-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="jushh-mobile-nav" id="jushh-mobile-nav">
+    <a href="index.html" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" class="active" onclick="closeMobileNav()">Menu & Catalog</a>
+    <a href="deals.html" onclick="closeMobileNav()">Loaded Combos</a>
+    <a href="about.html" onclick="closeMobileNav()">About Jushh</a>
+    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
+    <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="jushh-btn-primary" style="margin-top:16px;"><span>🛍️ View Cart</span></button>
+  </div>
+
+  <!-- MENU HEADER -->
+  <header style="padding:50px 5% 30px; background:radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.18) 0%, transparent 60%), #111115; border-bottom:1px solid var(--jushh-border);">
+    <div style="max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
+      <div>
+        <div class="jushh-eyebrow">Full Catalog</div>
+        <h1 class="jushh-sec-title" style="margin-bottom:8px;">Taste That Makes You Go <span>Shhh!</span></h1>
+        <p class="jushh-sec-desc" style="margin-bottom:0;">Order directly for fast delivery across Lahore. Cash on delivery available.</p>
+      </div>
+
+      <div>
+        <input type="text" id="menu-search" class="jushh-search-input" placeholder="🔍 Search doner fries, shawarma, shawaya..." oninput="handleMenuSearch(this.value)"/>
+      </div>
+    </div>
+  </header>
+
+  <!-- STICKY CATEGORY NAV -->
+  <div class="jushh-cat-nav" id="cat-nav">
+    <button class="jushh-cat-btn active" onclick="filterCategory(this, 'all')">All Items</button>
+    <button class="jushh-cat-btn" onclick="filterCategory(this, 'appetizer')">🍟 Appetizers & Fries</button>
+    <button class="jushh-cat-btn" onclick="filterCategory(this, 'turkish')">🥙 Turkish Specials & Shawaya</button>
+    <button class="jushh-cat-btn" onclick="filterCategory(this, 'shawarma')">🌯 Shawarmas & Wraps</button>
+    <button class="jushh-cat-btn" onclick="filterCategory(this, 'desserts')">🥫 Can Desserts & Drinks</button>
+  </div>
+
+  <!-- MENU GRID SECTION -->
+  <section class="jushh-section" style="padding-top:40px;">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div class="jushh-menu-grid" id="menu-grid-container">
+        <!-- Dynamically rendered from preserved menuData -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="jushh-footer">
+    <div class="jushh-footer-top" style="max-width:1200px; margin:0 auto;">
+      <div class="jushh-footer-brand">
+        <div class="jushh-brand-name" style="font-size:22px;">JUST <span>SHHH</span>… ✓</div>
+        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
+        <p>
+          Loud crunch, bold Turkish rotisserie doner, loaded fries, and viral can desserts across Johar Town, Lake City, and DHA Phase 1.
+        </p>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Quick Links</div>
+        <ul class="jushh-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu & Categories</a></li>
+          <li><a href="deals.html">Loaded Combos</a></li>
+          <li><a href="about.html">About Jushh</a></li>
+          <li><a href="locations.html">Locations & Timings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Outlets</div>
+        <ul class="jushh-footer-links">
+          <li><a href="locations.html">Johar Town (Phase 2, R2)</a></li>
+          <li><a href="locations.html">Lake City Business Bay</a></li>
+          <li><a href="locations.html">DHA Phase 1 (Sector H)</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Hotlines</div>
+        <ul class="jushh-footer-links">
+          <li style="color:var(--jushh-muted);">📞 Johar Town: 0326-9946142</li>
+          <li style="color:var(--jushh-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--jushh-muted);">📞 DHA Phase 1: 0325-7217221</li>
+          <li><a href="https://wa.me/923269946142" target="_blank" style="color:#25D366; font-weight:800;">💬 WhatsApp Order</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="jushh-footer-bottom" style="max-width:1200px; margin:0 auto;">
+      <div>© 2026 JushhPK. All Rights Reserved. Lahore, Pakistan.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="https://instagram.com/jushhpk" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">Instagram</a>
+        <a href="https://wa.me/923269946142" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Preserved Complete Jushh Menu Dataset -->
+  <script>
+    window.BRAND_SLUG = "jushhpk";
+
+    const menuData = {
+      appetizer: [
+        {
+          name: "Chicken Doner Fries",
+          price: 600,
+          desc: "Crispy fries topped with sliced chicken doner and sauces",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg"
+        },
+        {
+          name: "Beef Doner Fries",
+          price: 750,
+          desc: "Crispy fries topped with sliced beef doner and signature sauces",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg"
+        },
+        {
+          name: "Plain Fries",
+          price: 150,
+          desc: "Golden salted french fries side",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg"
+        }
+      ],
+      turkish: [
+        {
+          name: "Chicken Grilled Sandwich",
+          price: 750,
+          desc: "Grilled chicken sandwich Turkish style",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg"
+        },
+        {
+          name: "Beef Grilled Sandwich",
+          price: 950,
+          desc: "Grilled beef sandwich Turkish style",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg"
+        },
+        {
+          name: "Half Dubai Shawaya",
+          price: 1400,
+          desc: "Traditional roasted chicken shawaya half portion",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg"
+        },
+        {
+          name: "Full Dubai Shawaya",
+          price: 2500,
+          desc: "Traditional roasted chicken shawaya full portion",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg"
+        },
+        {
+          name: "Add-on Rice",
+          price: 300,
+          desc: "Spiced Arabic rice serving for Shawaya",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg"
+        },
+        {
+          name: "Chicken Turkish Wrap",
+          price: 600,
+          desc: "Spiced chicken doner wrapped in soft flatbread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
+        },
+        {
+          name: "Beef Turkish Wrap",
+          price: 900,
+          desc: "Premium beef doner wrapped in soft flatbread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
+        },
+        {
+          name: "Chicken Turkish Doner",
+          price: 850,
+          desc: "Traditional Turkish chicken doner in pita bread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg"
+        },
+        {
+          name: "Beef Turkish Doner",
+          price: 1100,
+          desc: "Traditional Turkish beef doner in pita bread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg"
+        }
+      ],
+      shawarma: [
+        {
+          name: "Chicken Pouch Shawarma",
+          price: 450,
+          desc: "Pocket-style chicken shawarma pocket bread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg"
+        },
+        {
+          name: "Beef Pouch Shawarma",
+          price: 700,
+          desc: "Pocket-style beef shawarma pocket bread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg"
+        },
+        {
+          name: "Chicken Shawarma",
+          price: 550,
+          desc: "Classic Lebanese chicken shawarma wrap",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
+        },
+        {
+          name: "Beef Shawarma",
+          price: 750,
+          desc: "Classic Lebanese beef shawarma wrap",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
+        },
+        {
+          name: "Charcoal Shawarma Chicken",
+          price: 750,
+          desc: "Charcoal grilled chicken shawarma wrapped in flatbread",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg"
+        },
+        {
+          name: "Chicken Shawarma Platter",
+          price: 900,
+          desc: "Deconstructed chicken shawarma served on a platter",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
+        },
+        {
+          name: "Chicken Shawarma Platter (with cheese)",
+          price: 1000,
+          desc: "Deconstructed chicken shawarma topped with melted cheese",
+          image: "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
+        }
+      ],
+      desserts: [
+        {
+          name: "Lotus Can Dessert",
+          price: 600,
+          desc: "Creamy Lotus Biscoff dessert served in a signature can",
+          image: "./images/lotus_can_dessert.jpg"
+        },
+        {
+          name: "Red Velvet Can Dessert",
+          price: 600,
+          desc: "Rich red velvet cake layered in a signature can",
+          image: "./images/red_velvet_can_dessert.jpg"
+        },
+        {
+          name: "Nutella Can Dessert",
+          price: 600,
+          desc: "Decadent Nutella chocolate dessert in a signature can",
+          image: "./images/nutella_can_dessert.jpg"
+        },
+        {
+          name: "Cheese Add-on",
+          price: 90,
+          desc: "Extra melted cheese portion",
+          image: "./images/cheese_addon.jpg"
+        },
+        {
+          name: "Dip Add-on",
+          price: 90,
+          desc: "Signature Jushh garlic or spicy dip",
+          image: "./images/garlic_dip.jpg"
+        },
+        {
+          name: "Tortilla Bread",
+          price: 90,
+          desc: "Extra soft tortilla flatbread",
+          image: "./images/pita_bread.jpg"
+        },
+        {
+          name: "Pita Bread",
+          price: 60,
+          desc: "Extra Lebanese pita pocket bread",
+          image: "./images/pita_bread.jpg"
+        },
+        {
+          name: "Water",
+          price: 80,
+          desc: "Mineral water bottle",
+          image: "./images/water_bottle.jpg"
+        },
+        {
+          name: "Soft Drink",
+          price: 150,
+          desc: "Chilled regular soft drink",
+          image: "./images/soft_drink.jpg"
+        },
+        {
+          name: "Blueberry Mojito",
+          price: 290,
+          desc: "Refreshing blueberry mocktail",
+          image: "./images/blueberry_mojito.jpg"
+        },
+        {
+          name: "Strawberry Mojito",
+          price: 290,
+          desc: "Refreshing strawberry mocktail",
+          image: "./images/strawberry_mojito.jpg"
+        },
+        {
+          name: "Green Apple Mojito",
+          price: 290,
+          desc: "Refreshing green apple mocktail",
+          image: "./images/green_apple_mojito.jpg"
+        },
+        {
+          name: "Peach Mojito",
+          price: 290,
+          desc: "Refreshing peach mocktail",
+          image: "./images/peach_mojito.jpg"
+        },
+        {
+          name: "Lemon Mojito",
+          price: 290,
+          desc: "Refreshing lemon mint mocktail",
+          image: "./images/lemon_mojito.jpg"
+        }
+      ]
+    };
+    window.menuData = menuData;
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    function renderMenu() {
+      const container = document.getElementById('menu-grid-container');
+      if (!container) return;
+
+      let allItems = [];
+      if (activeCategory === 'all') {
+        allItems = [
+          ...menuData.appetizer,
+          ...menuData.turkish,
+          ...menuData.shawarma,
+          ...menuData.desserts
+        ];
+      } else {
+        allItems = menuData[activeCategory] || [];
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        allItems = allItems.filter(it => it.name.toLowerCase().includes(q) || (it.desc && it.desc.toLowerCase().includes(q)));
+      }
+
+      if (allItems.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding:60px 20px; color:var(--jushh-muted);">
+            <div style="font-size:48px; margin-bottom:12px;">🔍</div>
+            <h3 style="font-family:var(--font-display); font-size:20px; color:white; margin-bottom:6px; text-transform:uppercase;">No street items match your search</h3>
+            <p>Try searching for "doner", "shawaya", "wrap", or click a category tab above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allItems.map(item => {
+        let imgHtml = '';
+        if (item.image) {
+          imgHtml = `<img src="${item.image}" alt="${item.name}" class="jushh-card-img" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;\\'>🥙</div>';" />`;
+        } else {
+          imgHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;background:#110003;">🥙</div>`;
+        }
+
+        return `
+          <div class="jushh-card">
+            <div class="jushh-card-img-wrap">
+              ${imgHtml}
+              <span class="jushh-card-badge">🔥 Street Gourmet</span>
+            </div>
+            <div class="jushh-card-body">
+              <div class="jushh-card-name">${item.name}</div>
+              <div class="jushh-card-desc">${item.desc || 'Freshly sliced Turkish rotisserie doner & signature dips.'}</div>
+              <div class="jushh-card-foot" style="margin-top:auto;">
+                <div class="jushh-card-price">Rs. ${item.price.toLocaleString()}</div>
+                <button class="jushh-card-add-btn order-btn" onclick="addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price}, '${(item.image || '').replace(/'/g, "\\'")}')">
+                  + Add
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(btn, cat) {
+      document.querySelectorAll('.jushh-cat-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      activeCategory = cat;
+      renderMenu();
+    }
+
+    function handleMenuSearch(val) {
+      searchQuery = val;
+      renderMenu();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMenu();
+    });
+  </script>
+
+  <script src="entrance_jushh.js?v=20260913" defer></script>
+  <script src="live_catalog.js?v=20260913" defer></script>
+  <script src="cart_drawer.js?v=20260913" defer></script>
+</body>
+</html>

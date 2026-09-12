@@ -3,1321 +3,482 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Just Shhh… — You Don't Find JUSHHH, JUSHHH Finds You | Lahore</title>
-  <meta name="description" content="Just Shhh... (JushhPK) — Food that makes you go Shhh! Johar Town R2 + Lake City + DHA Phase 1. 3 Locations. Bold burgers & combos. Order COD."/>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <title>JUSHH PK — You Don't Find JUSHHH, JUSHHH Finds You | Lahore</title>
+  <meta name="description" content="Just Shhh... (JushhPK) — Food that makes you go Shhh! Authentic Turkish Doner spits, shawarmas, loaded doner fries, and signature can desserts across 3 Lahore locations. Order COD."/>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="cart_drawer.css?v=20260804"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --red: #C8102E;
-      --red2: #E8192E;
-      --orange: #FF6B35;
-      --dark: #0D0000;
-      --dark2: #160004;
-      --white: #FFFFFF;
-      --cream: #FFF5F0;
-      --muted: rgba(255,255,255,0.62);
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
-
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 14px 5%;
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(13,0,0,0.94); backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(200,16,46,0.2);
-    }
-    .nav-brand { display: flex; flex-direction: column; }
-    .nav-name { font-size: 18px; font-weight: 900; color: var(--white); letter-spacing: -0.5px; }
-    .nav-tagline { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 1.5px; text-transform: uppercase; }
-    .nav-verified { color: #1877F2; font-size: 12px; margin-left: 4px; }
-    .nav-links { display: flex; gap: 26px; list-style: none; }
-    .nav-links a { color: rgba(255,255,255,0.65); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.3s; }
-    .nav-links a:hover { color: var(--orange); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      color: white; padding: 10px 22px; border-radius: 6px;
-      font-size: 13px; font-weight: 800; text-decoration: none;
-      box-shadow: 0 6px 20px rgba(200,16,46,0.35); transition: all 0.3s;
-    }
-    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(200,16,46,0.5); }
-
-    /* HERO */
-    .hero {
-      min-height: 100vh;
-      background: var(--dark);
-      display: flex; align-items: center; justify-content: space-between; gap: 40px;
-      padding: 120px 5% 80px;
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute; top: 0; right: 0; width: 60vw; height: 100vh;
-      background: linear-gradient(145deg, rgba(200,16,46,0.18) 0%, rgba(255,107,53,0.06) 60%, transparent 80%);
-      clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
-    }
-    .hero-image-wrap {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 3;
-      max-width: 520px;
-      position: relative;
-    }
-    .hero-image {
-      width: 100%;
-      height: auto;
-      border-radius: 24px;
-      border: 2px solid rgba(200,16,46,0.25);
-      box-shadow: 0 20px 50px rgba(200,16,46,0.3);
-      transform: rotate(2deg);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .hero-image:hover {
-      transform: rotate(0deg) scale(1.03);
-      border-color: var(--orange);
-      box-shadow: 0 30px 60px rgba(255,107,53,0.45);
-    }
-    .hero-orbs { position: absolute; inset: 0; pointer-events: none; }
-    .orb { position: absolute; border-radius: 50%; filter: blur(70px); }
-    .orb1 { width: 380px; height: 380px; background: rgba(200,16,46,0.18); top: -80px; right: 5%; }
-    .orb2 { width: 200px; height: 200px; background: rgba(255,107,53,0.12); bottom: 15%; left: 10%; animation: orb-pulse 5s ease-in-out infinite; }
-    @keyframes orb-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
-
-    /* Big bold text BG */
-    .hero-bg-text {
-      position: absolute; right: -2%; top: 50%; transform: translateY(-50%);
-      font-size: clamp(80px, 15vw, 160px); font-weight: 900;
-      color: rgba(200,16,46,0.06); letter-spacing: -4px; z-index: 1;
-      line-height: 0.9; text-align: right;
-    }
-
-    .hero-content { max-width: 570px; z-index: 3; position: relative; }
-    .verified-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(24,119,242,0.12); border: 1px solid rgba(24,119,242,0.25);
-      color: #60A5FA; font-size: 11px; font-weight: 700;
-      padding: 5px 14px; border-radius: 4px; margin-bottom: 16px;
-      text-transform: uppercase; letter-spacing: 1.5px;
-    }
-    .hero-tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(200,16,46,0.12); border: 1px solid rgba(200,16,46,0.3);
-      color: #FF8080; font-size: 11px; font-weight: 700;
-      padding: 5px 14px; border-radius: 4px; margin-bottom: 20px; margin-left: 8px;
-      text-transform: uppercase; letter-spacing: 1.5px;
-    }
-    .hero-title {
-      font-size: clamp(32px, 6vw, 68px); font-weight: 900;
-      line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 16px;
-    }
-    .hero-title .shhh {
-      background: linear-gradient(135deg, var(--red), var(--orange));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .hero-tagline {
-      font-size: 15px; color: rgba(255,255,255,0.5); font-style: italic;
-      margin-bottom: 24px; font-weight: 400; border-left: 3px solid var(--red);
-      padding-left: 14px;
-    }
-    .hero-sub { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 32px; font-weight: 300; }
-    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
-    .btn-red {
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      color: white; padding: 14px 32px; border-radius: 6px;
-      font-size: 14px; font-weight: 800; text-decoration: none;
-      box-shadow: 0 10px 30px rgba(200,16,46,0.4); transition: all 0.3s;
-    }
-    .btn-red:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(200,16,46,0.6); }
-    .btn-ghost {
-      border: 1.5px solid rgba(255,255,255,0.2); color: white;
-      padding: 12px 26px; border-radius: 6px;
-      font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s;
-    }
-    .btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
-
-    /* Branches strip */
-    .branch-strip { display: flex; gap: 14px; flex-wrap: wrap; }
-    .branch-pill {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(200,16,46,0.2);
-      border-radius: 6px; padding: 10px 16px;
-      font-size: 12px; color: var(--muted);
-    }
-    .branch-pill strong { color: var(--white); display: block; font-size: 13px; }
-    .branch-phone { color: var(--orange); font-size: 11px; margin-top: 2px; }
-
-    /* MARQUEE */
-    .marquee-wrap {
-      background: linear-gradient(90deg, #1A0002, #260006, #1A0002);
-      padding: 12px 0; overflow: hidden;
-      border-top: 1px solid rgba(200,16,46,0.2);
-      border-bottom: 1px solid rgba(200,16,46,0.2);
-    }
-    .mq-track { display: flex; animation: mq 18s linear infinite; white-space: nowrap; }
-    .mq-item { display: inline-flex; align-items: center; gap: 10px; padding: 0 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
-    .mq-dot { color: var(--red2); font-weight: 900; }
-    @keyframes mq { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-
-    /* SECTIONS */
-    .section { padding: 80px 5%; }
-    .sek { background: var(--dark); }
-    .sek2 { background: var(--dark2); }
-
-    .eyebrow { color: var(--red); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 12px; }
-    .sec-h { font-size: clamp(26px, 4vw, 44px); font-weight: 900; line-height: 1.1; margin-bottom: 12px; }
-    .sec-h .highlight { color: var(--orange); }
-    .sec-p { font-size: 15px; color: var(--muted); line-height: 1.75; max-width: 520px; margin-bottom: 48px; font-weight: 300; }
-
-    /* Combos */
-    .combos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-    .combo-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(200,16,46,0.12);
-      border-radius: 14px; overflow: hidden; transition: all 0.35s; position: relative;
-    }
-    .combo-card:hover { transform: translateY(-6px); border-color: rgba(200,16,46,0.35); box-shadow: 0 20px 50px rgba(200,16,46,0.15); }
-    .combo-badge {
-      position: absolute; top: 12px; left: 12px;
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      color: white; font-size: 10px; font-weight: 900;
-      padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;
-    }
-    .combo-img { height: 170px; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden; }
-    .combo-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    .combo-card:hover .combo-img img { transform: scale(1.1); }
-    .ci1 { background: linear-gradient(135deg, #1A0002, #330008); }
-    .ci2 { background: linear-gradient(135deg, #0D0000, #1F0004); }
-    .ci3 { background: linear-gradient(135deg, #1A0800, #2A1000); }
-    .combo-body { padding: 18px; }
-    .combo-name { font-size: 16px; font-weight: 800; margin-bottom: 5px; }
-    .combo-includes { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
-    .combo-foot { display: flex; justify-content: space-between; align-items: center; }
-    .combo-price { font-size: 20px; font-weight: 900; color: var(--orange); }
-    .combo-was { font-size: 11px; color: rgba(255,255,255,0.3); text-decoration: line-through; margin-left: 6px; }
-    .order-btn {
-      background: rgba(200,16,46,0.15); border: 1px solid rgba(200,16,46,0.3);
-      color: var(--red); padding: 7px 16px; border-radius: 20px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      font-family: 'Poppins', sans-serif; transition: all 0.3s;
-    }
-    .order-btn:hover { background: var(--red); color: white; }
-
-    /* Timings */
-    .timings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .timing-card {
-      background: rgba(200,16,46,0.06); border: 1px solid rgba(200,16,46,0.15);
-      border-radius: 14px; padding: 28px;
-    }
-    .timing-card h4 { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .timing-table { width: 100%; }
-    .timing-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .timing-table td { padding: 10px 0; font-size: 13px; }
-    .timing-table td:last-child { text-align: right; font-weight: 700; color: var(--orange); }
-
-    .branch-cta {
-      background: rgba(200,16,46,0.08); border: 1px solid rgba(200,16,46,0.2);
-      border-radius: 14px; padding: 28px;
-    }
-    .branch-cta h4 { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
-    .branch-cta p { font-size: 13px; color: var(--muted); margin-bottom: 6px; line-height: 1.7; }
-    .call-link {
-      display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; margin-right: 8px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: white; padding: 9px 18px; border-radius: 6px;
-      font-size: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s;
-    }
-    .call-link:hover { transform: translateY(-2px); }
-
-    /* Order form */
-    .order-wrap { max-width: 560px; margin: 0 auto; }
-    .order-box {
-      background: rgba(200,16,46,0.06); border: 1px solid rgba(200,16,46,0.18);
-      border-radius: 20px; padding: 48px;
-    }
-    .f-label { font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
-    .f-input, .f-textarea, .f-select {
-      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,16,46,0.18);
-      color: white; padding: 12px 16px; border-radius: 8px;
-      font-family: 'Poppins', sans-serif; font-size: 14px; outline: none; transition: all 0.3s;
-    }
-    .f-input:focus, .f-textarea:focus { border-color: var(--red); background: rgba(200,16,46,0.08); }
-    .f-select option { background: #1A0002; }
-    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-    .f-full { margin-bottom: 14px; }
-    .f-textarea { resize: vertical; min-height: 80px; }
-    .cod-note { display: flex; align-items: center; gap: 10px; background: rgba(255,107,53,0.07); border: 1px solid rgba(255,107,53,0.18); border-radius: 8px; padding: 12px 16px; margin: 14px 0; font-size: 13px; color: var(--muted); }
-    .cod-note strong { color: var(--orange); }
-    .submit {
-      width: 100%; padding: 16px;
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      color: white; border: none; border-radius: 8px;
-      font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 900;
-      cursor: pointer; box-shadow: 0 10px 30px rgba(200,16,46,0.4); transition: all 0.3s;
-    }
-    .submit:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(200,16,46,0.6); }
-
-    footer {
-      background: #090000; border-top: 1px solid rgba(200,16,46,0.12);
-      padding: 36px 5%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
-    }
-    .f-brand { font-size: 18px; font-weight: 900; }
-    .f-brand span { color: var(--red); }
-    .f-links { display: flex; gap: 20px; }
-    .f-links a { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 13px; transition: color 0.3s; }
-    .f-links a:hover { color: var(--orange); }
-    .f-copy { font-size: 12px; color: rgba(255,255,255,0.2); }
-
-    @media(max-width:768px){
-      nav { padding: 14px 16px; }
-      .nav-links { display: none; }
-      
-      .hero { padding: 100px 16px 60px; min-height: auto; flex-direction: column; text-align: center; gap: 30px; }
-      .hero-image-wrap { width: 100%; max-width: 380px; margin: 0 auto; order: -1; }
-      .hero-title { font-size: 28px; line-height: 1.15; }
-      
-      .section { padding: 50px 16px; }
-      .combos-grid { grid-template-columns: 1fr; }
-      .timings-grid { grid-template-columns: 1fr; gap: 16px; }
-      
-      .f-row { grid-template-columns: 1fr; }
-      .order-box { padding: 28px 20px; }
-      footer { flex-direction: column; text-align: center; }
-      
-      .hamburger { display: flex; }
-      .whatsapp-float { bottom: 16px; right: 16px; padding: 10px 16px; font-size: 13px; }
-      .back-top { bottom: 80px; right: 16px; }
-    }
-    /* Menu tabs */
-    .menu-tabs { display: flex; gap: 8px; margin-bottom: 36px; flex-wrap: wrap; }
-    .menu-tab {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.6); padding: 8px 20px; border-radius: 30px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      font-family: 'Poppins', sans-serif; transition: all 0.3s;
-    }
-    .menu-tab.active, .menu-tab:hover { background: rgba(200,16,46,0.2); border-color: rgba(200,16,46,0.4); color: var(--orange); }
-
-    /* Scroll Progress Bar */
-    #scroll-progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      width: 0%;
-      background: linear-gradient(90deg, var(--orange, #FF6B35), var(--red, #C8102E));
-      z-index: 9999;
-      transition: width 0.1s ease-out;
-    }
-
-    /* Page Loader */
-    #page-loader {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: var(--dark, #0D0000);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
-    #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loader-ring {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(255,255,255,0.1);
-      border-top-color: var(--orange, #FF6B35);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Hamburger Button */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 4px;
-      background: none;
-      border: none;
-      z-index: 101;
-    }
-    .hamburger span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: white;
-      transition: all 0.3s;
-      border-radius: 2px;
-    }
-    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-    .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
-
-    /* Mobile Nav Drawer */
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(13, 0, 0, 0.98);
-      backdrop-filter: blur(20px);
-      z-index: 99;
-      padding: 100px 30px 40px;
-      flex-direction: column;
-      gap: 20px;
-      border-bottom: 1px solid rgba(255, 107, 53, 0.2);
-      align-items: center;
-      justify-content: center;
-    }
-    .mobile-nav.open { display: flex; }
-    .mobile-nav a {
-      color: white;
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: 600;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      width: 100%;
-      text-align: center;
-      transition: all 0.3s;
-    }
-    .mobile-nav a:hover {
-      color: var(--orange, #FF6B35);
-    }
-
-    /* WhatsApp Float Button */
-    .whatsapp-float {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 200;
-      background: #25D366;
-      color: white;
-      border-radius: 50px;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 14px;
-      box-shadow: 0 8px 24px rgba(37,211,102,0.4);
-      transition: all 0.3s;
-      font-family: 'Poppins', sans-serif;
-    }
-    .whatsapp-float:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(37,211,102,0.6);
-    }
-    .wa-icon { font-size: 20px; }
-
-    /* Active Nav Link Highlight (Scroll-Spy) */
-    .nav-links a.active {
-      color: var(--orange, #FF6B35) !important;
-      font-weight: 700;
-    }
-    .nav-links a.active::after {
-      content: '';
-      display: block;
-      height: 2px;
-      background: var(--orange, #FF6B35);
-      border-radius: 2px;
-      margin-top: 2px;
-    }
-
-    /* Back to Top Button */
-    .back-top {
-      position: fixed;
-      bottom: 90px;
-      right: 24px;
-      z-index: 199;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      color: white;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s;
-      text-decoration: none;
-    }
-    .back-top.show { opacity: 1; pointer-events: all; }
-    .back-top:hover {
-      background: var(--orange, #FF6B35);
-      transform: translateY(-3px);
-    }
-
-    /* Footer Social Icons styles */
-    .footer-socials {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin: 20px 0 10px;
-    }
-    .social-icon {
-      color: var(--muted, rgba(255,255,255,0.6));
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .social-icon:hover {
-      color: var(--white);
-      background: var(--orange, #FF6B35);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-  
-    /* Dynamic Variant Selector Styling */
-    .variant-selector-wrap {
-      margin: 8px 0 12px;
-    }
-    .variant-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: #F59E0B;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 4px;
-      display: block;
-    }
-    .variant-select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #FFFFFF;
-      padding: 7px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: 'Poppins', sans-serif;
-      outline: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .variant-select:focus, .variant-select:hover {
-      border-color: #F59E0B;
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .variant-select option {
-      background: #18181b;
-      color: #FFFFFF;
-    }
-
-  
-    /* Modern Gallery & Lightbox Preview Styling */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-top: 36px;
-    }
-    .gallery-card {
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-      height: 240px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: #120A0D;
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-    .gallery-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      border-color: var(--vivid-orange, #EC4F24);
-      box-shadow: 0 16px 40px rgba(236, 79, 36, 0.25);
-    }
-    .gallery-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    .gallery-card:hover img {
-      transform: scale(1.1);
-    }
-    .gallery-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      color: #FFFFFF;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 2;
-    }
-    .gallery-overlay-meta {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 20px;
-      opacity: 0.9;
-      transition: opacity 0.3s ease;
-    }
-    .gallery-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #FFFFFF;
-      letter-spacing: 0.5px;
-    }
-    .gallery-sub {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-top: 2px;
-    }
-
-    /* Lightbox Modal */
-    #lightbox-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(16px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    #lightbox-modal.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .lightbox-content {
-      position: relative;
-      max-width: 720px;
-      width: 100%;
-      background: #1A0E12;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-    #lightbox-modal.active .lightbox-content {
-      transform: scale(1);
-    }
-    .lightbox-img-wrap {
-      height: 380px;
-      width: 100%;
-      background: #0D0608;
-      position: relative;
-    }
-    .lightbox-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .lightbox-body {
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .lightbox-title {
-      font-size: 20px;
-      font-weight: 900;
-      color: #FFFFFF;
-    }
-    .lightbox-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-      transition: all 0.2s ease;
-    }
-    .lightbox-close:hover {
-      background: var(--vivid-orange, #EC4F24);
-      transform: scale(1.1);
-    }
-
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
+  <link rel="stylesheet" href="theme_jushh.css?v=20260913"/>
 </head>
 <body>
   <!-- Scroll Progress Bar -->
   <div id="scroll-progress"></div>
 
-  <!-- Page Loader -->
-  <div id="page-loader">
-    <div class="loader-ring"></div>
+  <!-- High-Energy Urban Entrance Reveal -->
+  <div id="jushh-entrance">
+    <div class="jushh-splash-emblem">
+      <div class="jushh-splash-beam"></div>
+      <div class="jushh-splash-card">
+        <img src="./images/jushh_logo.jpg" alt="Jushh Logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+      </div>
+    </div>
+    <div class="jushh-splash-title">Just <span>Shhh</span>…</div>
+    <div class="jushh-splash-sub">Food That Makes You Go Shhh!</div>
   </div>
 
-  <!-- NAV -->
-  <nav id="navbar">
-    <div class="nav-brand">
-      <div class="nav-name">Just Shhh… <span class="nav-verified">✓</span></div>
-      <div class="nav-tagline">Food That Makes You Go Shh...</div>
+  <!-- Top Announcement Bar -->
+  <header class="jushh-topbar">
+    <div class="jushh-topbar-left">
+      <span class="jushh-topbar-pill">Street Gourmet</span>
+      <span>🔥 Authentic Turkish Doner & Shawarma across 3 Lahore Outlets</span>
     </div>
-    <ul class="nav-links">
-      <li><a href="#home">Home</a></li>
-      <li><a href="#menu">Combos</a></li>
-      <li><a href="#timings">Timings</a></li>
-      <li><a href="#order">Order</a></li>
+    <div class="jushh-topbar-right">
+      <a href="tel:+923269946142" class="jushh-topbar-link">📞 Johar Town: 0326-9946142</a>
+      <a href="tel:+923244441735" class="jushh-topbar-link">📞 Lake City: 0324-4441735</a>
+      <a href="tel:+923257217221" class="jushh-topbar-link">📞 DHA: 0325-7217221</a>
+      <a href="https://wa.me/923269946142" target="_blank" rel="noopener" class="jushh-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Main Navigation Header -->
+  <nav class="jushh-nav">
+    <a href="index.html" class="jushh-brand-wrap">
+      <img src="./images/jushh_logo.jpg" alt="JushhPK Logo" class="jushh-brand-logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+      <div class="jushh-brand-text">
+        <div class="jushh-brand-name">
+          JUST <span>SHHH</span>… <span class="jushh-verified-tick" title="Meta Verified">✓</span>
+        </div>
+        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
+      </div>
+    </a>
+
+    <ul class="jushh-nav-links">
+      <li class="jushh-nav-item active"><a href="index.html">Home</a></li>
+      <li class="jushh-nav-item"><a href="menu.html">Menu</a></li>
+      <li class="jushh-nav-item"><a href="deals.html">Loaded Combos</a></li>
+      <li class="jushh-nav-item"><a href="about.html">About Jushh</a></li>
+      <li class="jushh-nav-item"><a href="locations.html">Locations</a></li>
     </ul>
-    <a href="#order" class="nav-cta">Order Now</a>
-    <!-- Hamburger Button -->
-    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+
+    <div class="jushh-nav-actions">
+      <a href="menu.html" class="jushh-btn-primary">
+        <span>🍔 Order Online</span>
+      </a>
+      <button class="jushh-hamburger" id="jushh-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile Navigation Drawer -->
-  <div class="mobile-nav" id="mobile-nav">
-    <a href="#home" onclick="closeMobileNav()">Home</a>
-    <a href="#menu" onclick="closeMobileNav()">Combos</a>
-    <a href="#timings" onclick="closeMobileNav()">Timings</a>
-    <a href="#order" onclick="closeMobileNav()">Order Now</a>
+  <div class="jushh-mobile-nav" id="jushh-mobile-nav">
+    <a href="index.html" class="active" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" onclick="closeMobileNav()">Menu & Catalog</a>
+    <a href="deals.html" onclick="closeMobileNav()">Loaded Combos</a>
+    <a href="about.html" onclick="closeMobileNav()">About Jushh</a>
+    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
+    <a href="menu.html" class="jushh-btn-primary" style="margin-top:16px;" onclick="closeMobileNav()"><span>🍔 Order Online — COD</span></a>
   </div>
 
-  <!-- HERO -->
-  <section class="hero" id="home">
-    <div class="hero-orbs">
-      <div class="orb orb1"></div>
-      <div class="orb orb2"></div>
-    </div>
-    <div class="hero-bg-text">Shhh<br/>!!!</div>
+  <!-- HERO SECTION -->
+  <section class="jushh-section" style="padding-top:70px; padding-bottom:70px; background:radial-gradient(circle at 65% 35%, rgba(220, 38, 38, 0.22) 0%, transparent 60%), #0A0A0C;">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.15fr 0.85fr; gap:40px; align-items:center;">
+      <div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+          <span style="background:rgba(24,119,242,0.15); border:1px solid rgba(24,119,242,0.35); color:#60A5FA; font-size:11px; font-weight:800; padding:4px 12px; border-radius:4px; text-transform:uppercase; letter-spacing:1px;">
+            ✓ Meta Verified
+          </span>
+          <span class="jushh-eyebrow" style="margin-bottom:0;">📍 3 Live Outlets in Lahore</span>
+        </div>
 
-    <div class="hero-content">
-      <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:20px">
-        <div class="verified-badge">✓ Meta Verified</div>
-        <div class="hero-tag">📍 3 Branches · Lahore</div>
-      </div>
-      <h1 class="hero-title">
-        You Don't Find<br/>
-        <span class="shhh">JUSHHH</span>,<br/>
-        JUSHHH Finds You
-      </h1>
-      <div class="hero-tagline">"Food That Makes You Go Shh..."</div>
-      <p class="hero-sub">3 Locations in Lahore — Johar Town, Lake City, and DHA Phase 1. Bold flavors, bigger combos, and a taste that leaves you speechless.</p>
-      <div class="hero-btns">
-        <a href="#order" class="btn-red">🍔 Order Now — COD</a>
-        <a href="#menu" class="btn-ghost">🔥 See Combos</a>
-      </div>
-      <div class="branch-strip">
-        <div class="branch-pill">
-          📍
-          <div>
-            <strong>Johar Town</strong>
-            <div class="branch-phone">+92 326 9946142</div>
+        <h1 class="jushh-sec-title" style="font-size:clamp(34px, 5.5vw, 66px); margin-bottom:18px;">
+          You Don't Find<br/>
+          <span>JUSHHH</span>,<br/>
+          JUSHHH Finds You.
+        </h1>
+        <div style="font-family:var(--font-display); font-size:16px; font-weight:800; color:var(--jushh-orange); text-transform:uppercase; letter-spacing:2px; margin-bottom:14px;">
+          "Food That Makes You Go Shhh..."
+        </div>
+        <p class="jushh-sec-desc" style="font-size:16px; margin-bottom:32px;">
+          3 Locations in Lahore — Johar Town R2, Lake City, and DHA Phase 1. Sizzling rotisserie doner sliced thin, loaded seasoned fries, charcoal shawarma, and decadent pull-tab can desserts.
+        </p>
+
+        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px;">
+          <a href="menu.html" class="jushh-btn-primary" style="padding:14px 28px; font-size:14px;">
+            <span>🥙 Order Now — COD</span>
+          </a>
+          <a href="deals.html" class="jushh-btn-secondary" style="padding:14px 24px; font-size:14px;">
+            <span>🔥 See Combos</span>
+          </a>
+          <a href="locations.html" class="jushh-btn-secondary" style="padding:14px 20px; font-size:14px;">
+            <span>📍 Find a Branch</span>
+          </a>
+        </div>
+
+        <!-- Quick Branch Pills -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">Johar Town (R2)</div>
+            <div style="font-size:12px; color:var(--jushh-muted);">📞 0326-9946142</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 11AM–12AM</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">Lake City</div>
+            <div style="font-size:12px; color:var(--jushh-muted);">📞 0324-4441735</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 11AM–12AM</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px;">
+            <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">DHA Phase 1</div>
+            <div style="font-size:12px; color:var(--jushh-muted);">📞 0325-7217221</div>
+            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 11AM–12AM</div>
           </div>
         </div>
-        <div class="branch-pill">
-          📍
-          <div>
-            <strong>Lake City</strong>
-            <div class="branch-phone">+92 324 4441735</div>
+      </div>
+
+      <!-- Hero Visual Card -->
+      <div style="position:relative;">
+        <div style="border-radius:20px; overflow:hidden; border:2px solid var(--jushh-border-strong); box-shadow:0 24px 60px rgba(220, 38, 38, 0.35); transform:rotate(1.5deg); transition:transform 0.4s ease;" onmouseover="this.style.transform='rotate(0deg) scale(1.02)'" onmouseout="this.style.transform='rotate(1.5deg)'">
+          <img src="./images/jushh_banner_collage.jpg" alt="Jushh Specials Collage" style="width:100%; height:440px; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+          <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(10,10,12,0.92) 0%, rgba(10,10,12,0.1) 60%, transparent 100%);"></div>
+          <div style="position:absolute; bottom:24px; left:24px; right:24px;">
+            <div class="jushh-card-badge" style="position:static; display:inline-block; margin-bottom:8px;">🔥 Signature Item</div>
+            <div style="font-family:var(--font-display); font-size:22px; font-weight:900; color:white; margin-bottom:4px;">Chicken Doner Fries</div>
+            <div style="font-size:13px; color:var(--jushh-muted); margin-bottom:12px;">Crispy fries topped with sliced chicken doner and secret garlic sauces</div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:var(--font-display); font-size:22px; font-weight:900; color:white;">Rs. 600</span>
+              <button onclick="addToOrderForm('Chicken Doner Fries', 600, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')" class="jushh-btn-primary" style="padding:8px 18px; font-size:12.5px;">
+                <span>+ Add to Cart</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="branch-pill">
-          📍
-          <div>
-            <strong>DHA Phase 1</strong>
-            <div class="branch-phone">+92 325 7217221</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hero-image-wrap">
-      <img src="./images/jushh_banner_collage.jpg" alt="Jushh Specials Collage" class="hero-image" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <div class="marquee-wrap">
-    <div class="mq-track">
-      <span class="mq-item"><span class="mq-dot">Shhh</span>Johar Town R2</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Lake City</span>
-      <span class="mq-item"><span class="mq-dot">•</span>6,261 Fans</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Meta Verified</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Bold Combos</span>
-      <span class="mq-item"><span class="mq-dot">•</span>COD Available</span>
-      <span class="mq-item"><span class="mq-dot">Shhh</span>Food Makes You Go Shhh</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Johar Town R2</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Lake City</span>
-      <span class="mq-item"><span class="mq-dot">•</span>6,261 Fans</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Meta Verified</span>
-      <span class="mq-item"><span class="mq-dot">•</span>Bold Combos</span>
-      <span class="mq-item"><span class="mq-dot">•</span>COD Available</span>
-      <span class="mq-item"><span class="mq-dot">Shhh</span>Food Makes You Go Shhh</span>
-    </div>
-  </div>
-
-  <!-- MENU -->
-  <section class="section sek2" id="menu">
-    <div class="eyebrow">🔥 Our Menu</div>
-    <h2 class="sec-h">Taste That Makes You Go <span class="highlight">Shhh!</span></h2>
-    <p class="sec-p">Select items below to compile your order in the form automatically.</p>
-
-    <div class="menu-tabs">
-      <button class="menu-tab active" onclick="filterMenu(this, 'all')">All Items</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'appetizer')">Appetizers</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'turkish')">Turkish Specials</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'shawarma')">Shawarmas</button>
-      <button class="menu-tab" onclick="filterMenu(this, 'desserts')">Desserts & Drinks</button>
-    </div>
-
-    <div class="combos-grid" id="menu-grid-container">
-      <!-- Dynamically populated -->
-    </div>
-  </section>
-
-  <!-- TIMINGS & BRANCHES -->
-  <section class="section sek" id="timings">
-    <div class="eyebrow">⏰ Hours & Branches</div>
-    <h2 class="sec-h" style="margin-bottom:40px">Opening <span class="highlight">Hours</span></h2>
-    <div class="timings-grid">
-      <div class="timing-card">
-        <h4>🕐 Opening Hours</h4>
-        <table class="timing-table">
-          <tr><td>Monday – Thursday</td><td>11 AM – 12 AM</td></tr>
-          <tr><td>Friday</td><td>12 PM – 1 AM</td></tr>
-          <tr><td>Saturday – Sunday</td><td>11 AM – 2 AM</td></tr>
-        </table>
-      </div>
-      <div class="branch-cta">
-        <h4>📞 Direct Order</h4>
-        <p><strong>Johar Town:</strong></p>
-        <a href="tel:+923269946142" class="call-link">📞 +92 326 9946142</a>
-        <p style="margin-top:12px"><strong>Lake City:</strong></p>
-        <a href="tel:+923244441735" class="call-link">📞 +92 324 4441735</a>
-        <p style="margin-top:12px"><strong>DHA Phase 1:</strong></p>
-        <a href="tel:+923257217221" class="call-link">📞 +92 325 7217221</a>
       </div>
     </div>
   </section>
 
-  <!-- ORDER FORM -->
-  <section class="section sek2" id="order">
-    <div class="order-wrap">
-      <div class="order-box">
-        <h2 style="font-size:26px;font-weight:900;margin-bottom:6px">🥙 Place Your Order</h2>
-        <p style="font-size:14px;color:var(--muted);margin-bottom:32px">Fill out the form — we will confirm via WhatsApp within 5 minutes!</p>
-        <div id="form-success" style="display:none; text-align:center; padding:40px 20px;">
-          <div style="font-size:48px; margin-bottom:16px;">✅</div>
-          <h3 style="font-size:22px; font-weight:800; margin-bottom:8px;">Order Received!</h3>
-          <p style="color:var(--muted); font-size:14px; line-height:1.6;">
-            Thank you! Your order has been received.<br/>
-            We will confirm shortly — please keep your phone ready!
+  <!-- THE JUSHH STREET STANDARD (USP Section) -->
+  <section class="jushh-section jushh-section-alt">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:48px;">
+        <div class="jushh-eyebrow">Street Food Mastery</div>
+        <h2 class="jushh-sec-title">The <span>Jushh Standard</span></h2>
+        <p class="jushh-sec-desc" style="margin:0 auto;">Loud crunch, bold flavors, quiet satisfaction. Here's why our street food hits different.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:24px;">
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
+          <div style="font-size:38px; margin-bottom:12px;">🥩</div>
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Vertical Doner Rotisseries</h3>
+          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Stacked cuts of seasoned chicken and beef slow-roasted on rotating spits for signature caramelized edges.</p>
+        </div>
+
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
+          <div style="font-size:38px; margin-bottom:12px;">🧄</div>
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">House Secret Dips</h3>
+          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Whipped garlic toum, fiery Turkish peri, and velvety chipotle sauces crafted daily from scratch.</p>
+        </div>
+
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
+          <div style="font-size:38px; margin-bottom:12px;">🥙</div>
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Lebanese Pocket Pitas</h3>
+          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Airy flatbreads and pocket pitas baked fresh, stuffed to overflowing with tender doner and crisp pickled peppers.</p>
+        </div>
+
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
+          <div style="font-size:38px; margin-bottom:12px;">🥫</div>
+          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Pull-Tab Can Desserts</h3>
+          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Our viral canned treats: Lotus Biscoff, Red Velvet, and decadent Nutella sealed in pull-tab cans for maximum freshness.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED STREET ITEMS -->
+  <section class="jushh-section">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:36px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div class="jushh-eyebrow">Viral Bites</div>
+          <h2 class="jushh-sec-title">Top <span>Street Best-Sellers</span></h2>
+          <p class="jushh-sec-desc" style="margin-bottom:0;">Taste that makes you go Shhh! Tap to add to your bag.</p>
+        </div>
+        <a href="menu.html" class="jushh-btn-secondary">View Full Menu (33 Items) →</a>
+      </div>
+
+      <div class="jushh-menu-grid">
+        <!-- Item 1: Chicken Doner Fries -->
+        <div class="jushh-card">
+          <div class="jushh-card-img-wrap">
+            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg" alt="Chicken Doner Fries" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/chicken_doner_fries.jpg';"/>
+            <span class="jushh-card-badge">🔥 Top Pick</span>
+          </div>
+          <div class="jushh-card-body">
+            <div class="jushh-card-name">Chicken Doner Fries</div>
+            <div class="jushh-card-desc">Crispy fries topped with sliced chicken doner and signature sauces.</div>
+            <div class="jushh-card-foot" style="margin-top:auto;">
+              <div class="jushh-card-price">Rs. 600</div>
+              <button class="jushh-card-add-btn" onclick="addToOrderForm('Chicken Doner Fries', 600, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 2: Beef Doner Fries -->
+        <div class="jushh-card">
+          <div class="jushh-card-img-wrap">
+            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg" alt="Beef Doner Fries" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/beef_doner_fries.jpg';"/>
+            <span class="jushh-card-badge">🥩 Premium Beef</span>
+          </div>
+          <div class="jushh-card-body">
+            <div class="jushh-card-name">Beef Doner Fries</div>
+            <div class="jushh-card-desc">Crispy fries topped with sliced beef doner and signature sauces.</div>
+            <div class="jushh-card-foot" style="margin-top:auto;">
+              <div class="jushh-card-price">Rs. 750</div>
+              <button class="jushh-card-add-btn" onclick="addToOrderForm('Beef Doner Fries', 750, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg')">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 3: Half Dubai Shawaya -->
+        <div class="jushh-card">
+          <div class="jushh-card-img-wrap">
+            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg" alt="Half Dubai Shawaya" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/half_dubai_shawaya.jpg';"/>
+            <span class="jushh-card-badge">🍗 Roasted Special</span>
+          </div>
+          <div class="jushh-card-body">
+            <div class="jushh-card-name">Half Dubai Shawaya</div>
+            <div class="jushh-card-desc">Traditional roasted chicken shawaya half portion, spiced Arabic street style.</div>
+            <div class="jushh-card-foot" style="margin-top:auto;">
+              <div class="jushh-card-price">Rs. 1,400</div>
+              <button class="jushh-card-add-btn" onclick="addToOrderForm('Half Dubai Shawaya', 1400, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg')">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item 4: Lotus Can Dessert -->
+        <div class="jushh-card">
+          <div class="jushh-card-img-wrap">
+            <img src="./images/lotus_can_dessert.jpg" alt="Lotus Can Dessert" class="jushh-card-img" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';"/>
+            <span class="jushh-card-badge" style="background:#F59E0B; color:black;">🥫 Viral Can</span>
+          </div>
+          <div class="jushh-card-body">
+            <div class="jushh-card-name">Lotus Can Dessert</div>
+            <div class="jushh-card-desc">Creamy Lotus Biscoff dessert served in a sealed signature pull-tab can.</div>
+            <div class="jushh-card-foot" style="margin-top:auto;">
+              <div class="jushh-card-price">Rs. 600</div>
+              <button class="jushh-card-add-btn" onclick="addToOrderForm('Lotus Can Dessert', 600, './images/lotus_can_dessert.jpg')">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADED COMBOS PROMO BANNER (Linking to /deals) -->
+  <section class="jushh-section jushh-section-alt" style="border-top:1px solid var(--jushh-border); border-bottom:1px solid var(--jushh-border);">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap:40px; align-items:center;">
+      <div>
+        <div class="jushh-eyebrow">🔥 High Value Bundles</div>
+        <h2 class="jushh-sec-title">Loaded <span>Street Combos</span> Built Big</h2>
+        <p class="jushh-sec-desc">
+          Get the complete street gourmet experience: Doner fries boxes, Dubai shawaya family feasts with spiced rice, and trio can desserts at bundled discounts.
+        </p>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <a href="deals.html" class="jushh-btn-primary" style="padding:12px 26px;">
+            <span>View All Street Combos</span>
+          </a>
+          <button onclick="addToOrderForm('Doner Fries Beast Box', 1799, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')" class="jushh-btn-secondary">
+            + Beast Box (Rs. 1,799)
+          </button>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <img src="./images/jushh_banner_collage.jpg" alt="Loaded Combos" style="max-width:100%; border-radius:18px; border:2px solid var(--jushh-border-strong); box-shadow:0 20px 50px rgba(220, 38, 38, 0.3);" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL BUZZ -->
+  <section class="jushh-section">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:44px;">
+        <div class="jushh-eyebrow">Community Buzz</div>
+        <h2 class="jushh-sec-title">What Street Foodies <span>Say</span></h2>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
+          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
+          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
+            "The Chicken Doner Fries with their garlic dip is insane. Massive portion, piping hot, and the meat has actual rotisserie crispness. My go-to order in Johar Town!"
           </p>
-          <button type="button" onclick="resetOrderForm()" style="margin-top:20px; padding:12px 28px; background:linear-gradient(135deg, #c8102e, #e11d48); color:#ffffff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(200,16,46,0.4); transition:all 0.2s ease;">➕ Place Another Order</button>
+          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Bilal Sheikh</div>
+          <div style="font-size:11px; color:var(--jushh-muted);">Food Vlogger · Johar Town Branch</div>
         </div>
+
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
+          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
+          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
+            "Dubai Shawaya with spiced rice is top tier. So moist, aromatic, and the pita is super soft. Plus you get the pull-tab Lotus Can Dessert which is 10/10."
+          </p>
+          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Zainab Farooq</div>
+          <div style="font-size:11px; color:var(--jushh-muted);">Delivery Customer · DHA Phase 1</div>
+        </div>
+
+        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
+          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
+          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
+            "Late night order at Lake City arrived in 30 minutes flat. Sizzling fries, great packaging. Highly recommend Jushh!"
+          </p>
+          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Mikael Hassan</div>
+          <div style="font-size:11px; color:var(--jushh-muted);">Verified Customer · Lake City</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK ORDER FORM (Fully Preserved Formspree + API Integration) -->
+  <section class="jushh-section jushh-section-alt" id="order-section">
+    <div style="max-width:640px; margin:0 auto;">
+      <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border-strong); border-radius:16px; padding:38px 28px; box-shadow:0 20px 50px rgba(0,0,0,0.8);">
+        <div style="text-align:center; margin-bottom:26px;">
+          <div class="jushh-eyebrow">Quick Street Order</div>
+          <h2 style="font-family:var(--font-display); font-size:26px; font-weight:900; color:white; margin-bottom:6px; text-transform:uppercase;">Place Your Order 🥙</h2>
+          <p style="font-size:13.5px; color:var(--jushh-muted);">Fill details below — confirmed via WhatsApp within 5 minutes!</p>
+        </div>
+
+        <div id="form-success" style="display:none; text-align:center; padding:30px 20px;">
+          <div style="font-size:48px; margin-bottom:14px;">✅</div>
+          <h3 style="font-family:var(--font-display); font-size:22px; font-weight:900; margin-bottom:8px; color:white;">Order Received!</h3>
+          <p style="color:var(--jushh-muted); font-size:13.5px; line-height:1.6;">
+            Thank you! Your order has been dispatched to our kitchen.<br/>
+            Our team will confirm your delivery shortly.
+          </p>
+          <button type="button" onclick="resetOrderForm()" class="jushh-btn-primary" style="margin-top:20px;"><span>➕ Place Another Order</span></button>
+        </div>
+
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/jushhpk" method="POST" onsubmit="handleFormSubmit(event)">
-          <div class="f-row">
-            <div><label class="f-label">Full Name</label><input type="text" name="name" class="f-input" placeholder="Your full name" required/></div>
-            <div><label class="f-label">Phone</label><input type="tel" name="phone" class="f-input" placeholder="03XX-XXXXXXX" required/></div>
-          </div>
-          <div class="f-row">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
             <div>
-              <label class="f-label">Select Branch</label>
-              <select name="branch" class="f-input f-select">
+              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Full Name *</label>
+              <input type="text" name="name" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="Your full name" required/>
+            </div>
+            <div>
+              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Phone Number *</label>
+              <input type="tel" name="phone" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="03XX-XXXXXXX" required/>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+            <div>
+              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Select Branch</label>
+              <select name="branch" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;">
                 <option>Johar Town</option>
                 <option>Lake City</option>
                 <option>DHA Phase 1</option>
               </select>
             </div>
             <div>
-              <label class="f-label">Payment Method</label>
-              <select name="payment" class="f-input f-select" readonly>
+              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Payment Method</label>
+              <select name="payment" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" readonly>
                 <option>Cash on Delivery (COD)</option>
               </select>
             </div>
           </div>
-          <div class="f-full">
-            <label class="f-label">Delivery Address</label>
-            <input type="text" name="address" class="f-input" placeholder="Complete delivery address" required/>
+
+          <div style="margin-bottom:14px;">
+            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Delivery Address *</label>
+            <input type="text" name="address" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="House/Flat #, Street, Area, Landmark" required/>
           </div>
-          <div class="f-full">
-            <label class="f-label">YOUR ORDER SUMMARY</label>
-            <textarea name="order" id="order-textarea" class="f-textarea" placeholder="e.g. 1x Chicken Doner Fries, 2x Chicken Turkish Wrap..." required></textarea>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">YOUR ORDER SUMMARY</label>
+            <textarea name="order" id="order-textarea" style="width:100%; min-height:85px; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none; resize:vertical;" placeholder="e.g. 1x Chicken Doner Fries, 2x Chicken Turkish Wrap..." required></textarea>
           </div>
-          <div class="cod-note">💵 <span>Payment: <strong>Cash on Delivery (COD)</strong></span></div>
-          <button type="submit" class="submit">Place Your Order 🥙</button>
+
+          <div style="background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.25); border-radius:6px; padding:12px 16px; margin-bottom:20px; font-size:12.5px; color:var(--jushh-muted);">
+            💵 Payment Method: <strong style="color:white;">Cash on Delivery (COD)</strong> — Pay rider upon arrival.
+          </div>
+
+          <button type="submit" class="jushh-btn-primary" style="width:100%; justify-content:center; padding:16px; font-size:15px;">
+            <span>Place Your Order 🥙</span>
+          </button>
         </form>
       </div>
     </div>
   </section>
 
-  <footer>
-    <div class="f-brand">Just <span>Shhh</span>… ✓</div>
-    <div class="f-links">
-      <a href="#home">Home</a>
-      <a href="#menu">Menu</a>
-      <a href="#timings">Timings</a>
-      <a href="#order">Order</a>
+  <!-- FOOTER -->
+  <footer class="jushh-footer">
+    <div class="jushh-footer-top" style="max-width:1200px; margin:0 auto;">
+      <div class="jushh-footer-brand">
+        <div class="jushh-brand-name" style="font-size:22px;">JUST <span>SHHH</span>… ✓</div>
+        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
+        <p>
+          Loud crunch, bold Turkish rotisserie doner, loaded fries, and viral can desserts across Johar Town, Lake City, and DHA Phase 1.
+        </p>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Quick Links</div>
+        <ul class="jushh-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu & Categories</a></li>
+          <li><a href="deals.html">Loaded Combos</a></li>
+          <li><a href="about.html">About Jushh</a></li>
+          <li><a href="locations.html">Locations & Timings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Outlets</div>
+        <ul class="jushh-footer-links">
+          <li><a href="locations.html">Johar Town (Phase 2, R2)</a></li>
+          <li><a href="locations.html">Lake City Business Bay</a></li>
+          <li><a href="locations.html">DHA Phase 1 (Sector H)</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="jushh-footer-col-title">Hotlines</div>
+        <ul class="jushh-footer-links">
+          <li style="color:var(--jushh-muted);">📞 Johar Town: 0326-9946142</li>
+          <li style="color:var(--jushh-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--jushh-muted);">📞 DHA Phase 1: 0325-7217221</li>
+          <li><a href="https://wa.me/923269946142" target="_blank" style="color:#25D366; font-weight:800;">💬 WhatsApp Order</a></li>
+        </ul>
+      </div>
     </div>
-    
-    <div class="footer-socials">
-      <a href="https://instagram.com/jushhpk" target="_blank" class="social-icon" aria-label="Instagram">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-      </a>
-      <a href="https://wa.me/923269946142" target="_blank" class="social-icon" aria-label="WhatsApp">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.198 1.455 4.814 1.456 5.587 0 10.132-4.547 10.136-10.136.002-2.707-1.05-5.253-2.962-7.166C16.714 1.396 14.167.34 11.47.34 5.882.34 1.339 4.887 1.335 10.478c-.001 1.702.447 3.366 1.3 4.811L1.455 20.71l5.192-1.556zM17.06 13.9c-.277-.139-1.642-.81-1.897-.903-.255-.093-.44-.139-.626.139-.186.278-.718.903-.88 1.088-.163.186-.325.208-.602.07-.277-.14-1.17-.43-2.23-1.376-.824-.735-1.38-1.644-1.542-1.921-.162-.278-.017-.427.122-.566.124-.125.277-.324.416-.486.139-.162.186-.278.278-.463.093-.185.046-.347-.023-.486-.069-.139-.626-1.505-.858-2.061-.226-.543-.454-.47-.626-.479-.162-.008-.348-.01-.534-.01-.186 0-.487.07-.742.347-.255.278-.974.95-.974 2.315 0 1.365.992 2.685 1.131 2.87.14.186 1.95 2.977 4.724 4.17 1.157.497 2.062.775 2.76.996.697.222 1.333.12 1.835.045.56-.084 1.643-.671 1.874-1.319.232-.648.232-1.204.163-1.319-.069-.116-.255-.209-.533-.348z"/></svg>
-      </a>
+
+    <div class="jushh-footer-bottom" style="max-width:1200px; margin:0 auto;">
+      <div>© 2026 JushhPK. All Rights Reserved. Lahore, Pakistan.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="https://instagram.com/jushhpk" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">Instagram</a>
+        <a href="https://wa.me/923269946142" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">WhatsApp</a>
+      </div>
     </div>
-    
-    <div class="f-copy">© 2025 JushhPK. Lahore, Pakistan. +92 326 9946142</div>
   </footer>
 
+  <!-- WhatsApp Floating Action -->
+  <a href="https://wa.me/923269946142?text=Assalam%20o%20Alaikum!%20I%20want%20to%20order%20from%20JushhPK" class="jushh-float-wa" target="_blank" rel="noopener">
+    <span>💬</span> WhatsApp Order
+  </a>
+
+  <!-- Preserved Central Menu Data & Order Handling Scripts -->
   <script>
-    const JUSH_REAL_SET = new Set(["Chicken Turkish Wrap", "Chicken Turkish Doner", "Charcoal Shawarma Chicken", "Blueberry Mojito", "Full Dubai Shawaya", "Chicken Doner Fries", "Beef Pouch Shawarma", "Beef Doner Fries", "Pita Bread", "Peach Mojito", "Add-on Rice", "Beef Turkish Wrap", "Beef Turkish Doner", "Dip Add-on", "Dip", "Half Dubai Shawaya", "Water", "Chicken Grilled Sandwich", "Green Apple Mojito", "Chicken Shawarma Platter (with cheese)", "Lemon Mojito", "Soft Drink", "Chicken Pouch Shawarma", "Beef Shawarma", "Beef Grilled Sandwich", "Strawberry Mojito", "Chicken Shawarma Platter", "Chicken Shawarma"]);
-const menuData = {
-  "appetizer": [
-    {
-      "name": "Chicken Doner Fries",
-      "price": 600,
-      "desc": "Crispy fries topped with sliced chicken doner and sauces",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg"
-    },
-    {
-      "name": "Beef Doner Fries",
-      "price": 750,
-      "desc": "Crispy fries topped with sliced beef doner and signature sauces",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg"
-    }
-  ],
-  "turkish": [
-    {
-      "name": "Chicken Grilled Sandwich",
-      "price": 750,
-      "desc": "Grilled chicken sandwich Turkish style",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg"
-    },
-    {
-      "name": "Beef Grilled Sandwich",
-      "price": 950,
-      "desc": "Grilled beef sandwich Turkish style",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg"
-    },
-    {
-      "name": "Half Dubai Shawaya",
-      "price": 1400,
-      "desc": "Traditional roasted chicken shawaya half portion",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg"
-    },
-    {
-      "name": "Full Dubai Shawaya",
-      "price": 2500,
-      "desc": "Traditional roasted chicken shawaya full portion",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg"
-    },
-    {
-      "name": "Add-on Rice",
-      "price": 300,
-      "desc": "Spiced Arabic rice serving for Shawaya",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg"
-    },
-    {
-      "name": "Chicken Turkish Wrap",
-      "price": 600,
-      "desc": "Spiced chicken doner wrapped in soft flatbread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
-    },
-    {
-      "name": "Beef Turkish Wrap",
-      "price": 900,
-      "desc": "Premium beef doner wrapped in soft flatbread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
-    },
-    {
-      "name": "Chicken Turkish Doner",
-      "price": 850,
-      "desc": "Traditional Turkish chicken doner in pita bread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg"
-    },
-    {
-      "name": "Beef Turkish Doner",
-      "price": 1100,
-      "desc": "Traditional Turkish beef doner in pita bread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg"
-    }
-  ],
-  "shawarma": [
-    {
-      "name": "Chicken Pouch Shawarma",
-      "price": 450,
-      "desc": "Pocket-style chicken shawarma pocket bread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg"
-    },
-    {
-      "name": "Beef Pouch Shawarma",
-      "price": 700,
-      "desc": "Pocket-style beef shawarma pocket bread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg"
-    },
-    {
-      "name": "Chicken Shawarma",
-      "price": 550,
-      "desc": "Classic Lebanese chicken shawarma wrap",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg"
-    },
-    {
-      "name": "Beef Shawarma",
-      "price": 750,
-      "desc": "Classic Lebanese beef shawarma wrap",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg"
-    },
-    {
-      "name": "Charcoal Shawarma Chicken",
-      "price": 750,
-      "desc": "Charcoal grilled chicken shawarma wrapped in flatbread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg"
-    },
-    {
-      "name": "Chicken Shawarma Platter",
-      "price": 900,
-      "desc": "Deconstructed chicken shawarma served on a platter",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
-    },
-    {
-      "name": "Chicken Shawarma Platter (with cheese)",
-      "price": 1000,
-      "desc": "Deconstructed chicken shawarma topped with melted cheese",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg"
-    }
-  ],
-  "desserts": [
-    {
-      "name": "Lotus Can Dessert",
-      "price": 600,
-      "desc": "Creamy Lotus Biscoff dessert served in a signature can",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg"
-    },
-    {
-      "name": "Red Velvet Can Dessert",
-      "price": 600,
-      "desc": "Rich red velvet cake layered in a signature can",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg"
-    },
-    {
-      "name": "Nutella Can Dessert",
-      "price": 600,
-      "desc": "Decadent Nutella chocolate dessert in a signature can",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg"
-    },
-    {
-      "name": "Cheese Add-on",
-      "price": 90,
-      "desc": "Extra melted cheese portion",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg"
-    },
-    {
-      "name": "Dip Add-on",
-      "price": 90,
-      "desc": "Signature Jushh garlic or spicy dip",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg"
-    },
-    {
-      "name": "Tortilla Bread",
-      "price": 90,
-      "desc": "Extra soft tortilla flatbread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg"
-    },
-    {
-      "name": "Pita Bread",
-      "price": 60,
-      "desc": "Extra Lebanese pita pocket bread",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg"
-    },
-    {
-      "name": "Plain Fries",
-      "price": 150,
-      "desc": "Golden salted french fries side",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg"
-    },
-    {
-      "name": "Water",
-      "price": 80,
-      "desc": "Mineral water bottle",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg"
-    },
-    {
-      "name": "Soft Drink",
-      "price": 150,
-      "desc": "Chilled regular soft drink",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg"
-    },
-    {
-      "name": "Blueberry Mojito",
-      "price": 290,
-      "desc": "Refreshing blueberry mocktail",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg"
-    },
-    {
-      "name": "Strawberry Mojito",
-      "price": 290,
-      "desc": "Refreshing strawberry mocktail",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg"
-    },
-    {
-      "name": "Green Apple Mojito",
-      "price": 290,
-      "desc": "Refreshing green apple mocktail",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg"
-    },
-    {
-      "name": "Peach Mojito",
-      "price": 290,
-      "desc": "Refreshing peach mocktail",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg"
-    },
-    {
-      "name": "Lemon Mojito",
-      "price": 290,
-      "desc": "Refreshing lemon mint mocktail",
-      "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg"
-    }
-  ]
-};
-window.menuData = menuData;
+    window.BRAND_SLUG = "jushhpk";
 
-    let cart = {};
-
-    function onCardVariantChange(selectEl, baseItemName) {
-      const selectedOption = selectEl.options[selectEl.selectedIndex];
-      const variantName = selectedOption.value;
-      const price = parseInt(selectedOption.getAttribute('data-price'), 10);
-      
-      const comboBody = selectEl.closest('.combo-body');
-      if (comboBody) {
-        const priceEl = comboBody.querySelector('.combo-price');
-        const btnEl = comboBody.querySelector('.order-btn');
-        const cardImg = comboBody.parentElement ? comboBody.parentElement.querySelector('.combo-img img') : null;
-        let imgUrl = cardImg ? cardImg.getAttribute('src') : '';
-        if ((!imgUrl || imgUrl.includes('unsplash.com')) && window.CartDrawer && typeof window.CartDrawer.findProductImage === 'function') {
-          imgUrl = window.CartDrawer.findProductImage(baseItemName);
-        }
-        const fullName = `${baseItemName} (${variantName})`;
-        
-        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
-        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
-      }
-    }
-
-    function renderMenu(category = 'all') {
-      const container = document.getElementById('menu-grid-container');
-      if (!container) return;
-
-      container.innerHTML = '';
-      
-      let items = [];
-      if (category === 'all') {
-        items = [...menuData.appetizer, ...menuData.turkish, ...menuData.shawarma, ...menuData.desserts];
-      } else {
-        items = menuData[category] || [];
-      }
-
-      // Unique items filter
-      const seen = new Set();
-      const uniqueItems = items.filter(el => {
-        const duplicate = seen.has(el.name);
-        seen.add(el.name);
-        return !duplicate;
-      });
-
-      uniqueItems.forEach((item, idx) => {
-        const card = document.createElement('div');
-        card.className = 'combo-card';
-        
-        const fallbackImg = "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg";
-        const imgSrc = item.image || fallbackImg;
-        const imgContent = `<img src="${imgSrc}" alt="${item.name}" loading="lazy" style="width:100%;height:100%;object-fit:${item.image ? 'cover' : 'contain'};${item.image ? '' : 'padding:16px;'}" onerror="this.onerror=null; this.src='${fallbackImg}'; this.style.objectFit='contain'; this.style.padding='16px';" />`;
-
-        
-        let variantHtml = '';
-        let initialPrice = item.price;
-        let initialName = item.name;
-
-        if (item.variants && item.variants.length > 0) {
-          initialPrice = item.variants[0].price;
-          initialName = `${item.name} (${item.variants[0].name})`;
-          variantHtml = `
-            <div class="variant-selector-wrap">
-              <label class="variant-label">Select Option / Variant:</label>
-              <select class="variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
-                ${item.variants.map(v => `<option value="${v.name.replace(/'/g, "\\'")}" data-price="${v.price}">${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
-              </select>
-            </div>`;
-        }
-
-        card.innerHTML = `
-          <div class="combo-img" style="height:180px;overflow:hidden;position:relative;background:#18181b;">
-            ${imgContent}
-          </div>
-          <div class="combo-body">
-            <div class="combo-name">${item.name}</div>
-            <div class="combo-includes">${item.desc}</div>
-            ${variantHtml}
-            <div class="combo-foot">
-              <span class="combo-price">Rs. ${initialPrice.toLocaleString()}</span>
-              <button class="order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${initialPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">Order</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function filterMenu(btn, category) {
-      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      renderMenu(category);
-    }
-
-    function addToOrderForm(itemName, price, image) {
-      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
-        window.CartDrawer.addItem({
-          name: itemName,
-          price: price,
-          qty: 1,
-          image: image || ''
-        });
-        return;
-      }
-      if (typeof resetOrderForm === "function") {
-        const s = document.getElementById("form-success");
-        if (s && s.style.display === "block") resetOrderForm();
-      }
-      if (cart[itemName]) {
-        cart[itemName]++;
-      } else {
-        cart[itemName] = 1;
-      }
-
-      updateTextArea();
-      
-      const orderSec = document.getElementById('order');
-      if (orderSec) {
-        orderSec.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    function updateTextArea() {
-      const ta = document.getElementById('order-textarea');
-      if (!ta) return;
-
-      let list = [];
-      for (const name in cart) {
-        list.push(`${cart[name]}x ${name}`);
-      }
-
-      ta.value = list.join(', ');
-    }
-
-    // Initialize Menu & Loader Safely
-    function initMenuAndLoader() {
-      renderMenu('all');
-      const loader = document.getElementById('page-loader');
-      if (loader) {
-        loader.classList.add('hidden');
-        setTimeout(() => { try { loader.remove(); } catch(e){} }, 400);
-      }
-    }
-
-    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-      setTimeout(initMenuAndLoader, 1);
-    } else {
-      document.addEventListener('DOMContentLoaded', initMenuAndLoader);
-      window.addEventListener('load', initMenuAndLoader);
-    }
-    setTimeout(initMenuAndLoader, 500); // Fail-safe fallback to ensure loader NEVER stays stuck
-
-    // Toggle Mobile Navigation
-    function toggleMobileNav() {
-      const nav = document.getElementById('mobile-nav');
-      const btn = document.getElementById('hamburger');
-      nav.classList.toggle('open');
-      btn.classList.toggle('open');
-    }
-    function closeMobileNav() {
-      document.getElementById('mobile-nav').classList.remove('open');
-      document.getElementById('hamburger').classList.remove('open');
-    }
-
-    // Scroll Progress & Back to Top & Scroll Spy
-    const sections = document.querySelectorAll('section[id], footer[id]');
-    const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
-    
-    window.addEventListener('scroll', () => {
-      // Scroll Progress
-      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-      const progressBar = document.getElementById('scroll-progress');
-      if (progressBar) progressBar.style.width = scrolled + "%";
-
-      // Back to Top Button
-      const btn = document.getElementById('backTop');
-      if (btn) {
-        btn.classList.toggle('show', window.scrollY > 400);
-      }
-
-      // Scroll Spy
-      let current = '';
-      sections.forEach(section => {
-        const top = section.offsetTop - 120;
-        if (window.scrollY >= top) {
-          current = section.getAttribute('id');
-        }
-      });
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-          link.classList.add('active');
-        }
-      });
-    });
-
-
-
-    // Handle WhatsApp Order Submission
-        async function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
       const form = e.target;
       
@@ -1328,10 +489,10 @@ window.menuData = menuData;
       const orderStr = form.order ? form.order.value : '';
       
       const cartItems = [];
-      if (typeof cart === 'object' && Object.keys(cart).length > 0) {
-        for (const itemKey in cart) {
-          if (cart[itemKey] > 0) {
-            cartItems.push({ name: itemKey, qty: cart[itemKey] });
+      if (typeof window.cart === 'object' && Object.keys(window.cart || {}).length > 0) {
+        for (const itemKey in window.cart) {
+          if (window.cart[itemKey] > 0) {
+            cartItems.push({ name: itemKey, qty: window.cart[itemKey] });
           }
         }
       } else if (orderStr) {
@@ -1345,7 +506,6 @@ window.menuData = menuData;
         });
       }
 
-      // Submit payload directly to central Django REST API (/api/orders/)
       if (typeof window.submitWebOrder === 'function') {
         try {
           await window.submitWebOrder({
@@ -1361,8 +521,7 @@ window.menuData = menuData;
         }
       }
 
-      // Dual Action: Open WhatsApp Order Confirmation
-      const message = `Hello! I want to place an order from Jushh Website 🛵\n\n` +
+      const message = `Hello! I want to place an order from JushhPK Website 🥙\n\n` +
                       `*Customer Details:*\n` +
                       `• *Name:* ${name}\n` +
                       `• *Phone:* ${phone}\n` +
@@ -1378,77 +537,23 @@ window.menuData = menuData;
       window.open(whatsappUrl, '_blank');
       
       form.style.display = 'none';
-      if (typeof cart === 'object' && cart !== null) { for (const k in cart) delete cart[k]; }
-      if (typeof preorderCart === 'object' && preorderCart !== null) { for (const k in preorderCart) delete preorderCart[k]; }
       const successDiv = document.getElementById('form-success');
-      if (successDiv) {
-        successDiv.style.display = 'block';
-      }
+      if (successDiv) successDiv.style.display = 'block';
     }
-  
+
     function resetOrderForm() {
-      const form = document.getElementById('order-form') || document.getElementById('res-form') || document.getElementById('catering-form') || document.querySelector('form');
+      const form = document.getElementById('order-form');
       const successDiv = document.getElementById('form-success');
       if (form) {
         form.reset();
         form.style.display = 'block';
       }
-      if (successDiv) {
-        successDiv.style.display = 'none';
-      }
-      if (typeof cart === 'object' && cart !== null) {
-        for (const k in cart) delete cart[k];
-      }
-      if (typeof preorderCart === 'object' && preorderCart !== null) {
-        for (const k in preorderCart) delete preorderCart[k];
-      }
-      if (typeof updateTextArea === 'function') updateTextArea();
-      if (typeof updateRequestsTextArea === 'function') updateRequestsTextArea();
+      if (successDiv) successDiv.style.display = 'none';
     }
-  
-    // Reset order form automatically if user clicks an order navigation CTA while in success state
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('a[href="#order"], a[href="#book"], a[href="#catering"], a[href="#reservation"], .nav-cta, .btn-fire, .btn-red, .btn-grad, .btn-purple').forEach(link => {
-        link.addEventListener('click', () => {
-          const s = document.getElementById("form-success");
-          if (s && s.style.display === "block") {
-            if (typeof resetOrderForm === "function") resetOrderForm();
-          }
-        });
-      });
-    });
-
   </script>
 
-  <!-- WhatsApp Float Button -->
-  <a href="https://wa.me/923269946142?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20Jushh" 
-     class="whatsapp-float" target="_blank" rel="noopener">
-    <span class="wa-icon">💬</span>
-    Order on WhatsApp
-  </a>
-
-  <!-- Back to Top Button -->
-  <a href="#home" class="back-top" id="backTop" aria-label="Back to top">↑</a>
-<script>window.BRAND_SLUG = "jushhpk";</script>
-<script src="live_catalog.js?v=20260802_v5"></script>
-<script src="cart_drawer.js?v=20260804" defer></script>
-
-  <!-- Lightbox Modal Preview -->
-  <div id="lightbox-modal" onclick="closeLightbox(event)">
-    <div class="lightbox-content" onclick="event.stopPropagation()">
-      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-      <div class="lightbox-img-wrap">
-        <img id="lightbox-img" src="" alt="" />
-      </div>
-      <div class="lightbox-body">
-        <div>
-          <div class="lightbox-title" id="lightbox-title">Item Preview</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.6);" id="lightbox-desc">Freshly prepared in our kitchen</div>
-        </div>
-        <a href="#order" class="btn-fire" onclick="closeLightbox()" style="padding:10px 20px; font-size:13px;">🔥 Order Now</a>
-      </div>
-    </div>
-  </div>
-
+  <script src="entrance_jushh.js?v=20260913" defer></script>
+  <script src="live_catalog.js?v=20260913" defer></script>
+  <script src="cart_drawer.js?v=20260913" defer></script>
 </body>
 </html>

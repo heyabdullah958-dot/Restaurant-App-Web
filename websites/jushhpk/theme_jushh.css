@@ -1,0 +1,762 @@
+/* ==========================================================================
+   JUSHH PK — Modern Street Gourmet & Turkish Doner Vibe
+   Theme: Bold Doner Crimson, Street Neon Orange, Jet Obsidian & Dark Slate
+   Typography: Aggressive Modern Sans-Serif, Skewed Street Badges, High Contrast
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Brand Culinary Color Tokens */
+  --jushh-bg: #0A0A0C;
+  --jushh-bg-alt: #111115;
+  --jushh-surface: #16161D;
+  --jushh-surface-hover: #20202A;
+  --jushh-surface-card: rgba(22, 22, 29, 0.9);
+  
+  --jushh-crimson: #DC2626;
+  --jushh-red-bright: #EF4444;
+  --jushh-red-deep: #991B1B;
+  --jushh-orange: #F97316;
+  --jushh-neon-yellow: #FACC15;
+  --jushh-meta-blue: #1877F2;
+  
+  --jushh-white: #FFFFFF;
+  --jushh-muted: rgba(255, 255, 255, 0.68);
+  --jushh-faint: rgba(255, 255, 255, 0.4);
+  
+  --jushh-border: rgba(220, 38, 38, 0.22);
+  --jushh-border-strong: rgba(239, 68, 68, 0.5);
+  
+  /* Fonts */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Cart Drawer Overrides for JushhPK */
+  --cd-primary: #DC2626;
+  --cd-primary-hover: #EF4444;
+  --cd-accent: #F97316;
+  --cd-bg: #0A0A0C;
+  --cd-surface: #111115;
+  --cd-card-bg: rgba(255, 255, 255, 0.03);
+  --cd-card-border: rgba(220, 38, 38, 0.25);
+  --cd-text: #FFFFFF;
+  --cd-muted: rgba(255, 255, 255, 0.65);
+  --cd-shadow: 0 10px 40px rgba(0, 0, 0, 0.95);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--jushh-bg);
+  color: var(--jushh-white);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--jushh-bg);
+  color: var(--jushh-white);
+  overflow-x: hidden;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scroll Progress Bar */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--jushh-crimson), var(--jushh-orange), var(--jushh-neon-yellow));
+  z-index: 10001;
+  transition: width 0.1s ease-out;
+}
+
+/* ── HIGH-ENERGY URBAN ENTRANCE SPLASH REVEAL ── */
+#jushh-entrance {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: radial-gradient(circle at center, #1B0609 0%, #0A0A0C 75%, #050507 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s ease;
+  pointer-events: all;
+}
+
+#jushh-entrance.dismissed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.jushh-splash-emblem {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.jushh-splash-beam {
+  position: absolute;
+  inset: -10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(249, 115, 22, 0.15));
+  filter: blur(20px);
+  animation: jushhPulse 1.8s ease-in-out infinite;
+}
+
+.jushh-splash-card {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: #160004;
+  border: 2px solid var(--jushh-crimson);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 35px rgba(220, 38, 38, 0.5);
+  transform: rotate(-3deg);
+}
+
+.jushh-splash-card img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.jushh-splash-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: var(--jushh-white);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.jushh-splash-title span {
+  color: var(--jushh-crimson);
+  text-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+}
+
+.jushh-splash-sub {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--jushh-orange);
+}
+
+@keyframes jushhPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+/* ── URBAN TOP BAR ── */
+.jushh-topbar {
+  background: linear-gradient(90deg, #180004, #2E0007, #180004);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+  padding: 6px 5%;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1001;
+}
+
+.jushh-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.jushh-topbar-pill {
+  background: var(--jushh-crimson);
+  color: white;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.jushh-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.jushh-topbar-link {
+  color: var(--jushh-white);
+  text-decoration: none;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+
+.jushh-topbar-link:hover {
+  color: var(--jushh-orange);
+}
+
+/* ── MAIN STREET NAVIGATION ── */
+.jushh-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 14px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 10, 12, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--jushh-border);
+  transition: all 0.3s ease;
+}
+
+.jushh-nav.scrolled {
+  padding: 10px 5%;
+  background: rgba(10, 10, 12, 0.98);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  border-bottom-color: rgba(220, 38, 38, 0.4);
+}
+
+.jushh-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.jushh-brand-logo {
+  height: 42px;
+  width: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.jushh-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.jushh-brand-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--jushh-white);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.jushh-brand-name span {
+  color: var(--jushh-crimson);
+}
+
+.jushh-verified-tick {
+  color: var(--jushh-meta-blue);
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+.jushh-brand-tagline {
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--jushh-orange);
+  font-weight: 700;
+}
+
+/* Nav Links */
+.jushh-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.jushh-nav-item a {
+  font-family: var(--font-display);
+  color: var(--jushh-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  position: relative;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.jushh-nav-item a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--jushh-crimson);
+  transition: width 0.25s ease;
+}
+
+.jushh-nav-item a:hover {
+  color: var(--jushh-white);
+}
+
+.jushh-nav-item a:hover::after,
+.jushh-nav-item.active a::after {
+  width: 100%;
+}
+
+.jushh-nav-item.active a {
+  color: var(--jushh-crimson);
+}
+
+.jushh-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.jushh-btn-primary {
+  background: linear-gradient(135deg, var(--jushh-crimson) 0%, #B91C1C 100%);
+  color: #FFFFFF;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 22px rgba(220, 38, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  transform: skewX(-4deg);
+}
+
+.jushh-btn-primary span {
+  transform: skewX(4deg);
+}
+
+.jushh-btn-primary:hover {
+  transform: skewX(-4deg) translateY(-2px);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.65);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.jushh-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--jushh-white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jushh-btn-secondary:hover {
+  border-color: var(--jushh-crimson);
+  color: var(--jushh-crimson);
+  background: rgba(220, 38, 38, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Mobile Hamburger */
+.jushh-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  z-index: 1002;
+}
+
+.jushh-hamburger span {
+  width: 24px;
+  height: 2px;
+  background-color: var(--jushh-white);
+  transition: all 0.3s;
+}
+
+.jushh-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.jushh-hamburger.open span:nth-child(2) { opacity: 0; }
+.jushh-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+.jushh-mobile-nav {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 12, 0.98);
+  backdrop-filter: blur(24px);
+  z-index: 999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  padding: 40px 20px;
+}
+
+.jushh-mobile-nav.open {
+  display: flex;
+}
+
+.jushh-mobile-nav a {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--jushh-white);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.jushh-mobile-nav a.active,
+.jushh-mobile-nav a:hover {
+  color: var(--jushh-crimson);
+}
+
+/* ── COMMON SECTION UTILITIES ── */
+.jushh-section {
+  padding: 90px 5%;
+  position: relative;
+}
+
+.jushh-section-alt {
+  background-color: var(--jushh-bg-alt);
+}
+
+.jushh-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--jushh-crimson);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  background: rgba(220, 38, 38, 0.12);
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  transform: skewX(-4deg);
+}
+
+.jushh-sec-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5vw, 50px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  color: var(--jushh-white);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.jushh-sec-title span {
+  color: var(--jushh-crimson);
+  text-shadow: 0 0 25px rgba(220, 38, 38, 0.4);
+}
+
+.jushh-sec-desc {
+  font-size: 15px;
+  color: var(--jushh-muted);
+  line-height: 1.75;
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+/* ── STREET GOURMET MENU CARDS ── */
+.jushh-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.jushh-card {
+  background: var(--jushh-surface-card);
+  border: 1px solid var(--jushh-border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.jushh-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--jushh-border-strong);
+  box-shadow: 0 16px 40px rgba(220, 38, 38, 0.25);
+}
+
+.jushh-card-img-wrap {
+  height: 190px;
+  position: relative;
+  overflow: hidden;
+  background: #110003;
+}
+
+.jushh-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.jushh-card:hover .jushh-card-img {
+  transform: scale(1.08);
+}
+
+.jushh-card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--jushh-crimson);
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transform: skewX(-6deg);
+}
+
+.jushh-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.jushh-card-name {
+  font-family: var(--font-display);
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--jushh-white);
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.jushh-card-desc {
+  font-size: 12.5px;
+  color: var(--jushh-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.jushh-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.jushh-card-price {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--jushh-white);
+}
+
+.jushh-card-add-btn {
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: var(--jushh-red-bright);
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.25s;
+}
+
+.jushh-card-add-btn:hover {
+  background: var(--jushh-crimson);
+  color: #FFFFFF;
+  border-color: var(--jushh-crimson);
+  transform: scale(1.04);
+}
+
+/* ── BRANCH CARDS ── */
+.jushh-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.jushh-branch-card {
+  background: var(--jushh-surface-card);
+  border: 1px solid var(--jushh-border);
+  border-radius: 14px;
+  padding: 30px 24px;
+  transition: all 0.3s ease;
+}
+
+.jushh-branch-card:hover {
+  border-color: var(--jushh-border-strong);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(220, 38, 38, 0.25);
+}
+
+.jushh-branch-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--jushh-white);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.jushh-branch-info {
+  font-size: 13.5px;
+  color: var(--jushh-muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* ── FOOTER ── */
+.jushh-footer {
+  background: #060608;
+  border-top: 1px solid var(--jushh-border);
+  padding: 60px 5% 30px;
+}
+
+.jushh-footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.jushh-footer-brand p {
+  font-size: 13px;
+  color: var(--jushh-muted);
+  line-height: 1.7;
+  margin-top: 14px;
+  max-width: 320px;
+}
+
+.jushh-footer-col-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--jushh-white);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.jushh-footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jushh-footer-links a {
+  color: var(--jushh-faint);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.jushh-footer-links a:hover {
+  color: var(--jushh-crimson);
+}
+
+.jushh-footer-bottom {
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--jushh-faint);
+}
+
+/* Float WhatsApp */
+.jushh-float-wa {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9989;
+  background: #25D366;
+  color: white;
+  padding: 11px 20px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s;
+}
+
+.jushh-float-wa:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .jushh-nav-links { display: none; }
+  .jushh-hamburger { display: flex; }
+  .jushh-footer-top { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .jushh-topbar { display: none; }
+  .jushh-footer-top { grid-template-columns: 1fr; gap: 30px; }
+  .jushh-section { padding: 60px 16px; }
+  .jushh-sec-title { font-size: 28px; }
+  .jushh-menu-grid { grid-template-columns: 1fr; }
+}

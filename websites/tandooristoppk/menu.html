@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TANDOORI STOP — Full Menu & Categories | Authentic Pakistani Tandoor</title>
+  <meta name="description" content="Explore Tandoori Stop's authentic culinary menu: Traditional Chicken Sajji, Tandoori Chicken, Roghni & Cheese Naan, Malai Boti, Handis and Wok Karahis."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20260913"/>
+  <style>
+    /* Sticky Category Nav */
+    .ts-cat-nav {
+      position: sticky;
+      top: 73px;
+      z-index: 950;
+      background: rgba(15, 8, 6, 0.96);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--ts-border);
+      padding: 12px 5%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .ts-cat-nav::-webkit-scrollbar { display: none; }
+    
+    .ts-cat-btn {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid var(--ts-border);
+      color: var(--ts-muted);
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.25s;
+    }
+    .ts-cat-btn:hover, .ts-cat-btn.active {
+      background: linear-gradient(135deg, var(--ts-terracotta), var(--ts-flame));
+      color: #FFFFFF;
+      border-color: var(--ts-flame);
+      box-shadow: 0 4px 14px rgba(194, 65, 12, 0.4);
+    }
+
+    .ts-search-input {
+      width: 100%;
+      max-width: 440px;
+      background: #140A06;
+      border: 1px solid var(--ts-border);
+      color: var(--ts-ivory);
+      padding: 12px 18px;
+      border-radius: 50px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .ts-search-input:focus {
+      border-color: var(--ts-saffron);
+    }
+  </style>
+</head>
+<body>
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Luxury Entrance Reveal Animation -->
+  <div id="ts-entrance">
+    <div class="ts-splash-seal">
+      <div class="ts-splash-ring"></div>
+      <div class="ts-splash-ring-inner"></div>
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Emblem" class="ts-splash-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+    </div>
+    <div class="ts-splash-title">Tandoori <span>Menu</span></div>
+    <div class="ts-splash-sub">Artisanal Clay Oven Heritage</div>
+  </div>
+
+  <!-- Top Announcement Bar -->
+  <header class="ts-topbar">
+    <div class="ts-topbar-left">
+      <span class="ts-topbar-pill">Live Clay Tandoor</span>
+      <span>🔥 Serving Sizzling BBQ & Fresh Naans across 3 Lahore Outlets</span>
+    </div>
+    <div class="ts-topbar-right">
+      <a href="tel:03274945947" class="ts-topbar-link">📞 Johar Town: 0327-4945947</a>
+      <a href="tel:03244441735" class="ts-topbar-link">📞 Lake City: 0324-4441735</a>
+      <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="ts-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Main Navigation Header -->
+  <nav class="ts-nav">
+    <a href="index.html" class="ts-brand-link">
+      <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop Logo" class="ts-brand-logo" onerror="this.onerror=null; this.src='./images/tandoori_logo_vertical.png';" />
+      <div class="ts-brand-text">
+        <div class="ts-brand-title">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
+      </div>
+    </a>
+
+    <ul class="ts-nav-links">
+      <li class="ts-nav-item"><a href="index.html">Home</a></li>
+      <li class="ts-nav-item active"><a href="menu.html">Menu</a></li>
+      <li class="ts-nav-item"><a href="deals.html">Deals & Combos</a></li>
+      <li class="ts-nav-item"><a href="about.html">Brand Story</a></li>
+      <li class="ts-nav-item"><a href="locations.html">Locations</a></li>
+    </ul>
+
+    <div class="ts-nav-actions">
+      <button onclick="window.CartDrawer && window.CartDrawer.openDrawer()" class="ts-btn-primary">
+        <span>🛍️ View Cart</span>
+      </button>
+      <button class="ts-hamburger" id="ts-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="ts-mobile-nav" id="ts-mobile-nav">
+    <a href="index.html" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" class="active" onclick="closeMobileNav()">Menu & Catalog</a>
+    <a href="deals.html" onclick="closeMobileNav()">Deals & Platters</a>
+    <a href="about.html" onclick="closeMobileNav()">Our Brand Story</a>
+    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
+    <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="ts-btn-primary" style="margin-top:16px;">🛍️ View Cart</button>
+  </div>
+
+  <!-- MENU HEADER -->
+  <header style="padding:50px 5% 30px; background:radial-gradient(circle at 80% 20%, rgba(234, 88, 12, 0.15) 0%, transparent 60%), #140A06; border-bottom:1px solid var(--ts-border);">
+    <div style="max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
+      <div>
+        <div class="ts-eyebrow">Complete Culinary Catalog</div>
+        <h1 class="ts-sec-title" style="margin-bottom:8px;">Authentic <span>Tandoori Menu</span></h1>
+        <p class="ts-sec-desc" style="margin-bottom:0;">Baked fresh in live clay tandoors at all 3 Lahore branches.</p>
+      </div>
+
+      <div>
+        <input type="text" id="menu-search" class="ts-search-input" placeholder="🔍 Search sajji, naan, karahi, kabab..." oninput="handleMenuSearch(this.value)"/>
+      </div>
+    </div>
+  </header>
+
+  <!-- STICKY CATEGORY NAV -->
+  <div class="ts-cat-nav" id="cat-nav">
+    <button class="ts-cat-btn active" onclick="filterCategory(this, 'all')">All Items</button>
+    <button class="ts-cat-btn" onclick="filterCategory(this, 'tandoori')">🍗 Tandoori & Sajji</button>
+    <button class="ts-cat-btn" onclick="filterCategory(this, 'tawa')">🥘 Tawa & Karahi</button>
+    <button class="ts-cat-btn" onclick="filterCategory(this, 'bbq')">🍢 BBQ & Paratha Rolls</button>
+    <button class="ts-cat-btn" onclick="filterCategory(this, 'naan')">🫓 Naan Counter</button>
+    <button class="ts-cat-btn" onclick="filterCategory(this, 'platters')">🍹 Platters & Drinks</button>
+  </div>
+
+  <!-- MENU CATALOG GRID SECTION -->
+  <section class="ts-section" style="padding-top:40px;">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div class="ts-menu-grid" id="menu-grid-container">
+        <!-- Dynamically rendered from preserved menuData -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="ts-footer">
+    <div class="ts-footer-top" style="max-width:1200px; margin:0 auto;">
+      <div class="ts-footer-brand">
+        <div class="ts-brand-title" style="font-size:20px;">TANDOORI <span>STOP</span></div>
+        <div class="ts-brand-tagline">Lahore's Authentic Tandoori</div>
+        <p>
+          Preserving Pakistan's rich culinary traditions with authentic clay tandoors, lump charcoal barbecues, hand-rolled naans, and rich gravies.
+        </p>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Navigation <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu & Categories</a></li>
+          <li><a href="deals.html">Deals & Combos</a></li>
+          <li><a href="about.html">Brand Story</a></li>
+          <li><a href="locations.html">Branches & Timings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Outlets <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li><a href="locations.html">Johar Town (PIA Rd)</a></li>
+          <li><a href="locations.html">Lake City Lahore</a></li>
+          <li><a href="locations.html">GT Rd Baghbanpura</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="ts-footer-col-title">Direct Contact <span>•</span></div>
+        <ul class="ts-footer-links">
+          <li style="color:var(--ts-muted);">📞 Johar Town: 0327-4945947</li>
+          <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--ts-muted);">📞 Baghbanpura: 0326-6811177</li>
+          <li><a href="https://wa.me/923001234567" target="_blank" style="color:#25D366; font-weight:700;">💬 WhatsApp Ordering</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ts-footer-bottom" style="max-width:1200px; margin:0 auto;">
+      <div>© 2026 Tandoori Stop. All Rights Reserved. Lahore, Pakistan.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="https://instagram.com/tandooristoppk" target="_blank" style="color:var(--ts-muted); text-decoration:none;">Instagram</a>
+        <a href="https://wa.me/923001234567" target="_blank" style="color:var(--ts-muted); text-decoration:none;">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Preserved Complete Menu Dataset -->
+  <script>
+    window.BRAND_SLUG = "tandooristoppk";
+
+    const menuData = {
+      tandoori: [
+        { 
+          name: "Traditional Chicken Sajji", 
+          price: 799, 
+          desc: "Slow-roasted traditional chicken sajji seasoned with secret tandoori spices.", 
+          emoji: "🍗", 
+          image: "./images/IMG_7587.JPG.jpeg",
+          variants: [
+            { name: "Quarter Sajji", price: 799 },
+            { name: "Half Sajji", price: 1400 },
+            { name: "Full Sajji", price: 2500 }
+          ]
+        },
+        { 
+          name: "Peri Peri Chicken Sajji", 
+          price: 900, 
+          desc: "Flame-grilled spicy peri peri chicken sajji.", 
+          emoji: "🍗", 
+          image: "./images/IMG_7587.JPG.jpeg",
+          variants: [
+            { name: "Quarter Sajji", price: 900 },
+            { name: "Half Sajji", price: 1600 },
+            { name: "Full Sajji", price: 2900 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Cheese Naan Single)", 
+          price: 1150, 
+          desc: "Flame-grilled tandoori chicken served with 1 cheese naan", 
+          emoji: "🍗", 
+          image: "./images/IMG_7585.JPG.jpeg",
+          variants: [
+            { name: "Bone (Cheese Naan Single)", price: 1150 },
+            { name: "Boneless (Cheese Naan Single)", price: 1350 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Cheese Naan Double)", 
+          price: 1950, 
+          desc: "Flame-grilled tandoori chicken served with 2 cheese naans", 
+          emoji: "🍗", 
+          image: "./images/IMG_7589.JPG.jpeg",
+          variants: [
+            { name: "Bone (Cheese Naan Double)", price: 1950 },
+            { name: "Boneless (Cheese Naan Double)", price: 2299 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (With Rice)", 
+          price: 780, 
+          desc: "Flame-grilled tandoori chicken served with aromatic rice", 
+          emoji: "🍗", 
+          image: "./images/IMG_7586.JPG.jpeg",
+          variants: [
+            { name: "Boneless (With Rice)", price: 780 },
+            { name: "Bone (With Rice)", price: 980 }
+          ]
+        },
+        { 
+          name: "Tandoori Chicken (Plain)", 
+          price: 750, 
+          desc: "Traditional flame-grilled tandoori chicken piece", 
+          emoji: "🍗", 
+          image: "./images/IMG_7590.JPG.jpeg",
+          variants: [
+            { name: "Bone (Plain)", price: 750 },
+            { name: "Boneless (Plain)", price: 899 }
+          ]
+        }
+      ],
+      tawa: [
+        { name: "Tawa Chicken", price: 750, desc: "Spicy stir-fried tawa chicken piece", emoji: "🍳", image: "./images/tandoori_stop_logo.png" },
+        { 
+          name: "Tawa Chicken Platter", 
+          price: 800, 
+          desc: "Stir-fried tawa chicken platter served with hot roti", 
+          emoji: "🍳", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Single Serving (2 Roti)", price: 800 },
+            { name: "Double Serving (4 Roti)", price: 1400 }
+          ]
+        },
+        { 
+          name: "Chicken Karahi", 
+          price: 1300, 
+          desc: "Traditional wok chicken karahi cooked in fresh tomatoes & spices", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1300 },
+            { name: "Full Portion", price: 2500 }
+          ]
+        },
+        { 
+          name: "Chicken White Karahi", 
+          price: 1500, 
+          desc: "Creamy white chicken karahi cooked in cream & green chilies", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1500 },
+            { name: "Full Portion", price: 2700 }
+          ]
+        },
+        { 
+          name: "Chicken Kabab Masala", 
+          price: 1350, 
+          desc: "Spiced chicken kabab masala wok", 
+          emoji: "🥘", 
+          image: "./images/tandoori_stop_logo.png",
+          variants: [
+            { name: "Half Portion", price: 1350 },
+            { name: "Full Portion", price: 2600 }
+          ]
+        },
+        { name: "Nawabi Handi Boneless (2-Person)", price: 2200, desc: "Rich royal Nawabi handi boneless serving", emoji: "🍲", image: "./images/tandoori_stop_logo.png" },
+        { name: "Shahi Kabab Masala Handi Boneless (2-Person)", price: 1999, desc: "Spiced shahi kabab masala handi boneless", emoji: "🍲", image: "./images/tandoori_stop_logo.png" },
+        { name: "Mughlai Cheese Handi Boneless (2-Person)", price: 1999, desc: "Creamy Mughlai cheese handi boneless", emoji: "🍲", image: "./images/tandoori_stop_logo.png" },
+        { name: "Reshmi Handi Boneless (2-Person)", price: 1999, desc: "Velvety reshmi handi boneless", emoji: "🍲", image: "./images/tandoori_stop_logo.png" },
+        { name: "Sha Jahani Handi Boneless (2-Person)", price: 1999, desc: "Royal spice mix Sha Jahani handi boneless", emoji: "🍲", image: "./images/tandoori_stop_logo.png" }
+      ],
+      bbq: [
+        { 
+          name: "Malai Boti", 
+          price: 450, 
+          desc: "Creamy flame-grilled malai boti", 
+          emoji: "🍢", 
+          image: "./images/IMG_7584.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 450 },
+            { name: "Per KG", price: 2200 }
+          ]
+        },
+        { 
+          name: "Tikka Boti", 
+          price: 400, 
+          desc: "Classic flame-grilled tikka boti", 
+          emoji: "🍢", 
+          image: "./images/IMG_7583.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 400 },
+            { name: "Per KG", price: 1999 }
+          ]
+        },
+        { 
+          name: "Seekh Kabab", 
+          price: 250, 
+          desc: "Spiced chicken seekh kabab", 
+          emoji: "🍢", 
+          image: "./images/IMG_7578.JPG.jpeg",
+          variants: [
+            { name: "Per Seekh", price: 250 },
+            { name: "Per KG", price: 1999 }
+          ]
+        },
+        { name: "Full Stop Roll", price: 650, desc: "Tandoori Stop signature giant roll", emoji: "🌯", image: "./images/IMG_7591.JPG.jpeg" },
+        { name: "Tandoori Chicken Roll", price: 520, desc: "Tandoori chicken chunks wrapped in paratha", emoji: "🌯", image: "./images/IMG_7591.JPG.jpeg" },
+        { name: "Malai Boti Roll", price: 550, desc: "Creamy malai boti wrapped in paratha", emoji: "🌯", image: "./images/IMG_7592.JPG.jpeg" },
+        { name: "Chicken Paratha Roll", price: 499, desc: "Classic chicken paratha roll", emoji: "🌯", image: "./images/IMG_7588.JPG.jpeg" }
+      ],
+      naan: [
+        { name: "Plain Naan", price: 40, desc: "Hot plain naan baked in clay tandoor", emoji: "🫓", image: "./images/IMG_7582.JPG.jpeg" },
+        { name: "Roghni Naan", price: 200, desc: "Fluffy sesame roghni naan", emoji: "🫓", image: "./images/IMG_7582.JPG.jpeg" },
+        { name: "Butter Naan", price: 350, desc: "Buttery flatbread naan", emoji: "🫓", image: "./images/IMG_7582.JPG.jpeg" },
+        { name: "Cheese Naan", price: 500, desc: "Naan stuffed with molten melted cheese", emoji: "🫓", image: "./images/IMG_7581.JPG.jpeg" },
+        { name: "Puri Paratha", price: 270, desc: "Flaky deep-fried puri paratha", emoji: "🫓", image: "./images/IMG_7580.JPG.jpeg" },
+        { name: "Plain Roti", price: 30, desc: "Hot whole wheat roti", emoji: "🫓", image: "./images/IMG_7582.JPG.jpeg" },
+        { name: "Rice", price: 350, desc: "Extra serving of aromatic rice", emoji: "🍚", image: "./images/IMG_7579.JPG.jpeg" }
+      ],
+      platters: [
+        { name: "Family Tandoori Platter", price: 7000, desc: "Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 mojitos", emoji: "👪", image: "./images/tandoori_stop_logo.png" },
+        { name: "Salad", price: 350, desc: "Fresh seasonal salad", emoji: "🥗", image: "./images/tandoori_stop_logo.png" },
+        { name: "Raita", price: 70, desc: "Yogurt herb raita dip", emoji: "🏺", image: "./images/tandoori_stop_logo.png" },
+        { name: "Blueberry Mojito", price: 300, desc: "Blueberry refreshing mocktail", emoji: "🍹", image: "./images/IMG_7576.JPG.jpeg" },
+        { name: "Strawberry Mojito", price: 300, desc: "Strawberry refreshing mocktail", emoji: "🍹", image: "./images/IMG_7576.JPG.jpeg" },
+        { name: "Peach Mojito", price: 300, desc: "Peach refreshing mocktail", emoji: "🍹", image: "./images/IMG_7576.JPG.jpeg" },
+        { name: "Apple Mojito", price: 300, desc: "Apple refreshing mocktail", emoji: "🍹", image: "./images/IMG_7576.JPG.jpeg" },
+        { name: "Mint Margaritas", price: 300, desc: "Minty blended ice margarita", emoji: "🥤", image: "./images/IMG_7577.JPG.jpeg" },
+        { name: "Oreo Sundae", price: 400, desc: "Oreo cookies and vanilla ice cream sundae", emoji: "🍨", image: "./images/tandoori_stop_logo.png" },
+        { name: "Lotus Three Sundae", price: 400, desc: "Lotus Biscoff crumbs and sauce sundae", emoji: "🍨", image: "./images/tandoori_stop_logo.png" },
+        { name: "Nutella Sundae", price: 400, desc: "Nutella chocolate fudge sundae", emoji: "🍨", image: "./images/tandoori_stop_logo.png" },
+        { name: "Water (Small)", price: 80, desc: "Chilled mineral water", emoji: "🥤", image: "./images/tandoori_stop_logo.png" },
+        { name: "Soft Drink (300ml)", price: 120, desc: "Carbonated soft drink regular", emoji: "🥤", image: "./images/tandoori_stop_logo.png" },
+        { name: "Soft Drink (Tin)", price: 150, desc: "Carbonated soft drink tin can", emoji: "🥤", image: "./images/tandoori_stop_logo.png" },
+        { name: "Fresh Lime", price: 350, desc: "Zesty fresh lime soda", emoji: "🥤", image: "./images/tandoori_stop_logo.png" }
+      ]
+    };
+    window.menuData = menuData;
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    function renderMenu() {
+      const container = document.getElementById('menu-grid-container');
+      if (!container) return;
+
+      let allItems = [];
+      if (activeCategory === 'all') {
+        allItems = [
+          ...menuData.tandoori,
+          ...menuData.tawa,
+          ...menuData.bbq,
+          ...menuData.naan,
+          ...menuData.platters
+        ];
+      } else {
+        allItems = menuData[activeCategory] || [];
+      }
+
+      // Filter by search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        allItems = allItems.filter(it => it.name.toLowerCase().includes(q) || (it.desc && it.desc.toLowerCase().includes(q)));
+      }
+
+      if (allItems.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding:60px 20px; color:var(--ts-muted);">
+            <div style="font-size:48px; margin-bottom:12px;">🔍</div>
+            <h3 style="font-size:20px; color:var(--ts-ivory); margin-bottom:6px;">No items match your search</h3>
+            <p>Try searching for "sajji", "naan", "karahi", or browse through category tabs above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allItems.map(item => {
+        const hasVariants = Array.isArray(item.variants) && item.variants.length > 0;
+        const initialVariant = hasVariants ? item.variants[0] : null;
+        const displayPrice = initialVariant ? initialVariant.price : item.price;
+        const initialName = initialVariant ? `${item.name} (${initialVariant.name})` : item.name;
+        
+        let imgHtml = '';
+        if (item.image) {
+          imgHtml = `<img src="${item.image}" alt="${item.name}" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;\\'>${item.emoji || '🍗'}</div>';" />`;
+        } else {
+          imgHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;background:#180D08;">${item.emoji || '🍗'}</div>`;
+        }
+
+        let variantHtml = '';
+        if (hasVariants) {
+          variantHtml = `
+            <div class="ts-card-variant-wrap">
+              <select class="ts-variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
+                ${item.variants.map((v, i) => `<option value="${v.name}" data-price="${v.price}" ${i === 0 ? 'selected' : ''}>${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
+              </select>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="ts-menu-card">
+            <div class="ts-card-img-wrap">
+              ${imgHtml}
+              <span class="ts-card-badge">${item.emoji || '🔥'} Authentic</span>
+            </div>
+            <div class="ts-card-body">
+              <div class="ts-card-name">${item.name}</div>
+              <div class="ts-card-desc">${item.desc || 'Freshly prepared in our authentic tandoor kitchen.'}</div>
+              ${variantHtml}
+              <div class="ts-card-foot" style="${!hasVariants ? 'margin-top:auto;' : ''}">
+                <div class="ts-card-price">Rs. ${displayPrice.toLocaleString()}</div>
+                <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${displayPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">
+                  + Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCategory(btn, cat) {
+      document.querySelectorAll('.ts-cat-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      activeCategory = cat;
+      renderMenu();
+    }
+
+    function handleMenuSearch(val) {
+      searchQuery = val;
+      renderMenu();
+    }
+
+    function onCardVariantChange(selectEl, baseItemName) {
+      const selectedOption = selectEl.options[selectEl.selectedIndex];
+      const variantName = selectedOption.value;
+      const price = parseInt(selectedOption.getAttribute('data-price'), 10);
+      
+      const cardBody = selectEl.closest('.ts-card-body');
+      if (cardBody) {
+        const priceEl = cardBody.querySelector('.ts-card-price');
+        const btnEl = cardBody.querySelector('.ts-card-add-btn');
+        const cardImg = cardBody.parentElement ? cardBody.parentElement.querySelector('.ts-card-img') : null;
+        let imgUrl = cardImg ? cardImg.getAttribute('src') : '';
+        if ((!imgUrl || imgUrl.includes('unsplash.com')) && window.CartDrawer && typeof window.CartDrawer.findProductImage === 'function') {
+          imgUrl = window.CartDrawer.findProductImage(baseItemName);
+        }
+        const fullName = `${baseItemName} (${variantName})`;
+        
+        if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
+        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMenu();
+    });
+  </script>
+
+  <script src="entrance_ts.js?v=20260913" defer></script>
+  <script src="live_catalog.js?v=20260913" defer></script>
+  <script src="cart_drawer.js?v=20260913" defer></script>
+</body>
+</html>
