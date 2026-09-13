@@ -8,8 +8,18 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap"/>
   <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
   <link rel="stylesheet" href="theme_ts.css?v=20260913"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('ts_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <style>
     /* Sticky Category Nav */
     .ts-cat-nav {
@@ -218,6 +228,44 @@
       </div>
     </div>
   </footer>
+
+  <!-- ITEM DETAIL MODAL (Eastern Oven / McDonald's Benchmark) -->
+  <div class="ts-modal-overlay" id="ts-item-modal" onclick="closeItemModal()">
+    <div class="ts-modal-box" onclick="event.stopPropagation()">
+      <button class="ts-modal-close" onclick="closeItemModal()" aria-label="Close Modal">&times;</button>
+      <div class="ts-modal-img-wrap">
+        <img id="ts-modal-img" src="" alt="Dish Preview" class="ts-modal-img" />
+        <span class="ts-card-badge" id="ts-modal-badge" style="top:16px; left:16px;">🔥 Authentic Tandoori</span>
+      </div>
+      <div class="ts-modal-body">
+        <h2 class="ts-modal-title" id="ts-modal-title">Item Title</h2>
+        <div class="ts-modal-price" id="ts-modal-price">Rs. 0</div>
+        <p class="ts-modal-desc" id="ts-modal-desc">Description</p>
+        
+        <div class="ts-modal-spec">
+          <div class="ts-modal-pill">🏺 Clay Oven Baked</div>
+          <div class="ts-modal-pill">🥩 100% Halal Prime</div>
+          <div class="ts-modal-pill">🌿 14 Roasted Spices</div>
+        </div>
+
+        <div id="ts-modal-variants-wrap" style="display:none; margin-bottom:18px;">
+          <label class="ts-modal-variants-label">Select Portion / Variation:</label>
+          <div class="ts-modal-variant-options" id="ts-modal-variant-options"></div>
+        </div>
+
+        <div class="ts-modal-footer">
+          <div class="ts-modal-qty-control">
+            <button class="ts-modal-qty-btn" onclick="changeModalQty(-1)">-</button>
+            <span class="ts-modal-qty-val" id="ts-modal-qty">1</span>
+            <button class="ts-modal-qty-btn" onclick="changeModalQty(1)">+</button>
+          </div>
+          <button class="ts-btn-primary" id="ts-modal-add-btn" style="flex:1; justify-content:center; padding:14px;" onclick="addModalItemToCart()">
+            + Add to Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Preserved Complete Menu Dataset -->
   <script>
@@ -468,7 +516,7 @@
         if (hasVariants) {
           variantHtml = `
             <div class="ts-card-variant-wrap">
-              <select class="ts-variant-select" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
+              <select class="ts-variant-select" onclick="event.stopPropagation()" onchange="onCardVariantChange(this, '${item.name.replace(/'/g, "\\'")}')">
                 ${item.variants.map((v, i) => `<option value="${v.name}" data-price="${v.price}" ${i === 0 ? 'selected' : ''}>${v.name} — Rs. ${v.price.toLocaleString()}</option>`).join('')}
               </select>
             </div>
@@ -476,7 +524,7 @@
         }
 
         return `
-          <div class="ts-menu-card">
+          <div class="ts-menu-card" onclick="openItemModal('${item.name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
             <div class="ts-card-img-wrap">
               ${imgHtml}
               <span class="ts-card-badge">${item.emoji || '🔥'} Authentic</span>
@@ -487,7 +535,7 @@
               ${variantHtml}
               <div class="ts-card-foot" style="${!hasVariants ? 'margin-top:auto;' : ''}">
                 <div class="ts-card-price">Rs. ${displayPrice.toLocaleString()}</div>
-                <button class="ts-card-add-btn order-btn" onclick="addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${displayPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">
+                <button class="ts-card-add-btn order-btn" onclick="event.stopPropagation(); addToOrderForm('${initialName.replace(/'/g, "\\'")}', ${displayPrice}, '${(item.image || '').replace(/'/g, "\\'")}')">
                   + Add to Cart
                 </button>
               </div>
@@ -526,12 +574,133 @@
         const fullName = `${baseItemName} (${variantName})`;
         
         if (priceEl) priceEl.textContent = `Rs. ${price.toLocaleString()}`;
-        if (btnEl) btnEl.setAttribute('onclick', `addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
+        if (btnEl) btnEl.setAttribute('onclick', `event.stopPropagation(); addToOrderForm('${fullName.replace(/'/g, "\\'")}', ${price}, '${(imgUrl || '').replace(/'/g, "\\'")}')`);
       }
     }
 
+    // --- ITEM DETAIL MODAL CONTROLLER ---
+    let activeModalItem = null;
+    let activeModalVariant = null;
+    let activeModalQty = 1;
+
+    function findItemByName(name) {
+      for (const cat in menuData) {
+        const found = menuData[cat].find(i => i.name.toLowerCase() === name.toLowerCase());
+        if (found) return found;
+      }
+      return null;
+    }
+
+    window.openItemModal = function(itemName) {
+      const item = findItemByName(itemName);
+      if (!item) return;
+
+      activeModalItem = item;
+      activeModalQty = 1;
+      activeModalVariant = (item.variants && item.variants.length > 0) ? item.variants[0] : null;
+
+      const modal = document.getElementById('ts-item-modal');
+      const img = document.getElementById('ts-modal-img');
+      const title = document.getElementById('ts-modal-title');
+      const price = document.getElementById('ts-modal-price');
+      const desc = document.getElementById('ts-modal-desc');
+      const badge = document.getElementById('ts-modal-badge');
+      const qtyEl = document.getElementById('ts-modal-qty');
+      const variantsWrap = document.getElementById('ts-modal-variants-wrap');
+      const variantsList = document.getElementById('ts-modal-variant-options');
+
+      if (img) {
+        img.src = item.image || './images/tandoori_stop_logo.png';
+        img.onerror = () => { img.src = './images/tandoori_stop_logo.png'; };
+      }
+      if (title) title.textContent = item.name;
+      if (desc) desc.textContent = item.desc || 'Prepared fresh daily with authentic clay tandoor heritage spices.';
+      if (badge) badge.textContent = `${item.emoji || '🔥'} Authentic Tandoori`;
+      if (qtyEl) qtyEl.textContent = activeModalQty;
+
+      if (item.variants && item.variants.length > 0 && variantsWrap && variantsList) {
+        variantsWrap.style.display = 'block';
+        variantsList.innerHTML = item.variants.map((v, idx) => `
+          <div class="ts-modal-variant-opt ${idx === 0 ? 'selected' : ''}" onclick="selectModalVariant(${idx})">
+            <span style="font-size:13.5px; font-weight:700; color:var(--ts-ivory);">${v.name}</span>
+            <span style="font-size:14px; font-weight:800; color:var(--ts-gold);">Rs. ${v.price.toLocaleString()}</span>
+          </div>
+        `).join('');
+      } else if (variantsWrap) {
+        variantsWrap.style.display = 'none';
+      }
+
+      updateModalPrice();
+      if (modal) modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeItemModal = function() {
+      const modal = document.getElementById('ts-item-modal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+      activeModalItem = null;
+    };
+
+    window.selectModalVariant = function(idx) {
+      if (!activeModalItem || !activeModalItem.variants) return;
+      activeModalVariant = activeModalItem.variants[idx];
+      const opts = document.querySelectorAll('.ts-modal-variant-opt');
+      opts.forEach((el, i) => {
+        if (i === idx) el.classList.add('selected');
+        else el.classList.remove('selected');
+      });
+      updateModalPrice();
+    };
+
+    window.changeModalQty = function(delta) {
+      activeModalQty = Math.max(1, activeModalQty + delta);
+      const qtyEl = document.getElementById('ts-modal-qty');
+      if (qtyEl) qtyEl.textContent = activeModalQty;
+      updateModalPrice();
+    };
+
+    function updateModalPrice() {
+      const unitPrice = activeModalVariant ? activeModalVariant.price : (activeModalItem ? activeModalItem.price : 0);
+      const totalPrice = unitPrice * activeModalQty;
+      const priceEl = document.getElementById('ts-modal-price');
+      const addBtn = document.getElementById('ts-modal-add-btn');
+      if (priceEl) priceEl.textContent = `Rs. ${unitPrice.toLocaleString()}`;
+      if (addBtn) addBtn.textContent = `+ Add to Order • Rs. ${totalPrice.toLocaleString()}`;
+    }
+
+    window.addModalItemToCart = function() {
+      if (!activeModalItem) return;
+      const unitPrice = activeModalVariant ? activeModalVariant.price : activeModalItem.price;
+      const itemName = activeModalVariant ? `${activeModalItem.name} (${activeModalVariant.name})` : activeModalItem.name;
+      const resolvedImg = activeModalItem.image || './images/tandoori_stop_logo.png';
+
+      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
+        window.CartDrawer.addItem({
+          name: itemName,
+          price: unitPrice,
+          qty: activeModalQty,
+          image: resolvedImg
+        });
+      } else if (typeof window.addToOrderForm === 'function') {
+        for (let i = 0; i < activeModalQty; i++) {
+          window.addToOrderForm(itemName, unitPrice, resolvedImg);
+        }
+      }
+      closeItemModal();
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       renderMenu();
+
+      // Check URL for branch preselection
+      const params = new URLSearchParams(window.location.search);
+      const branchParam = params.get('branch');
+      if (branchParam) {
+        try {
+          sessionStorage.setItem('foodsphere_selected_branch_tandooristoppk', branchParam);
+        } catch(e) {}
+      }
     });
   </script>
 

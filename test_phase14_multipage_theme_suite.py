@@ -241,5 +241,107 @@ class TestPhase14MultiPageSuite(unittest.TestCase):
             self.assertIn('id="order-form"', index_content)
             self.assertIn('handleFormSubmit(event)', index_content)
 
+    def test_09_entrance_session_skip_head_script_and_css(self):
+        """Verify pre-paint sessionStorage check script is in <head> and CSS handles .entrance-skipped without flash."""
+        pages = ["index.html", "menu.html", "deals.html", "about.html", "locations.html"]
+        for brand_dir, session_key in [(TS_DIR, "ts_entrance_shown"), (JUSHH_DIR, "jushh_entrance_shown")]:
+            for page in pages:
+                with open(os.path.join(brand_dir, page), "r", encoding="utf-8") as f:
+                    content = f.read()
+                self.assertIn("entrance-skipped", content, f"{page} in {brand_dir} missing pre-paint skip class logic")
+                self.assertIn(session_key, content, f"{page} in {brand_dir} missing session key check in head")
+
+        with open(os.path.join(TS_DIR, "theme_ts.css"), "r", encoding="utf-8") as f:
+            ts_css = f.read()
+        self.assertIn("html.entrance-skipped #ts-entrance", ts_css)
+
+        with open(os.path.join(JUSHH_DIR, "theme_jushh.css"), "r", encoding="utf-8") as f:
+            jushh_css = f.read()
+        self.assertIn("html.entrance-skipped #jushh-entrance", jushh_css)
+
+    def test_10_item_detail_modal_in_menu(self):
+        """Verify Eastern Oven-style item detail modal markup and JS controller functions exist on menu.html."""
+        modal_checks = [
+            (TS_DIR, "ts-item-modal", "ts-modal-qty"),
+            (JUSHH_DIR, "jushh-item-modal", "jushh-modal-qty")
+        ]
+        for brand_dir, modal_id, qty_id in modal_checks:
+            with open(os.path.join(brand_dir, "menu.html"), "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn(modal_id, content, f"Missing modal ID {modal_id} in {brand_dir}")
+            self.assertIn('openItemModal', content)
+            self.assertIn('closeItemModal', content)
+            self.assertIn(qty_id, content, f"Missing qty ID {qty_id} in {brand_dir}")
+            self.assertIn('addModalItemToCart', content)
+            self.assertTrue('modal-spec' in content or 'modal-pill' in content, f"Missing spec pills in {brand_dir}")
+
+    def test_11_staggered_entrance_animations(self):
+        """Verify keyframe definitions and animation helper classes for hero staggered reveals."""
+        with open(os.path.join(TS_DIR, "theme_ts.css"), "r", encoding="utf-8") as f:
+            ts_css = f.read()
+        self.assertIn("@keyframes heroSlideUp", ts_css)
+        self.assertIn("@keyframes heroFadeIn", ts_css)
+        self.assertIn("@keyframes badgeSettle", ts_css)
+        self.assertIn(".hero-stagger-badge", ts_css)
+        self.assertIn(".hero-stagger-title", ts_css)
+
+        with open(os.path.join(JUSHH_DIR, "theme_jushh.css"), "r", encoding="utf-8") as f:
+            jushh_css = f.read()
+        self.assertIn("@keyframes jushhHeroSlideUp", jushh_css)
+        self.assertIn("@keyframes jushhHeroFadeIn", jushh_css)
+        self.assertIn("@keyframes jushhBadgeSettle", jushh_css)
+        self.assertIn(".hero-stagger-badge", jushh_css)
+        self.assertIn(".hero-stagger-title", jushh_css)
+
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            with open(os.path.join(brand_dir, "index.html"), "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("hero-stagger-badge", content)
+            self.assertIn("hero-stagger-title", content)
+            self.assertIn("hero-stagger-visual", content)
+
+    def test_12_cloudflare_redirects_and_stubs(self):
+        """Verify _redirects file exists without infinite loop rules and directory stubs are non-empty."""
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            redirects_path = os.path.join(brand_dir, "_redirects")
+            self.assertTrue(os.path.exists(redirects_path))
+            with open(redirects_path, "r", encoding="utf-8") as f:
+                red_content = f.read()
+            # Must NOT contain conflicting rewrite rules that cause 308 infinite loops on Cloudflare Pages
+            self.assertNotIn("/menu /menu.html 200", red_content)
+            self.assertNotIn("/deals /deals.html 200", red_content)
+            
+            # Verify directory stubs exist and are non-empty
+            for stub in ["menu", "deals", "about", "locations"]:
+                stub_path = os.path.join(brand_dir, stub, "index.html")
+                self.assertTrue(os.path.exists(stub_path))
+                self.assertGreater(os.path.getsize(stub_path), 50)
+
+    def test_13_home_quick_branch_and_deals_preview(self):
+        """Verify interactive Quick Branch Selector and Flash Deals preview section on index.html."""
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            with open(os.path.join(brand_dir, "index.html"), "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertTrue("Quick Branch Selector" in content or "Quick Order By Branch" in content or "Select Branch To Order" in content)
+            self.assertIn("orderFromBranch", content)
+            self.assertTrue(bool(re.search(r'Featured Deals.*Combos', content) or re.search(r'Flash Deals.*Bundles', content)))
+
+    def test_14_locations_branch_order_redirection(self):
+        """Verify locations.html branch button directs user to menu.html with branch preselected."""
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            with open(os.path.join(brand_dir, "locations.html"), "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("orderFromBranch", content)
+            self.assertIn("menu.html?branch=", content)
+
+    def test_15_mobile_drawer_and_modal_a11y(self):
+        """Verify entrance scripts implement escape key and backdrop listeners for mobile menu and modal."""
+        for brand_dir, script in [(TS_DIR, "entrance_ts.js"), (JUSHH_DIR, "entrance_jushh.js")]:
+            with open(os.path.join(brand_dir, script), "r", encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("keydown", content)
+            self.assertIn("Escape", content)
+
 if __name__ == "__main__":
     unittest.main()
+

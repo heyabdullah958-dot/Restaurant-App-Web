@@ -6,24 +6,35 @@
 (function () {
   'use strict';
 
+  // 1. Entrance Reveal Handler (< 1.2s luxury reveal with immediate session skip)
   function initEntranceReveal() {
     const splash = document.getElementById('jushh-entrance');
     if (!splash) return;
 
-    const hasSeen = sessionStorage.getItem('jushh_entrance_shown');
-    const delay = hasSeen ? 120 : 900;
+    let hasSeen = false;
+    try {
+      hasSeen = sessionStorage.getItem('jushh_entrance_shown') === 'true';
+    } catch (e) {}
 
+    if (hasSeen || document.documentElement.classList.contains('entrance-skipped')) {
+      splash.classList.add('dismissed');
+      splash.style.display = 'none';
+      return;
+    }
+
+    // First time visitor in this session: Fast high-energy reveal under 1.2s
     setTimeout(() => {
       splash.classList.add('dismissed');
       setTimeout(() => {
         splash.style.display = 'none';
-      }, 450);
+      }, 350);
       try {
         sessionStorage.setItem('jushh_entrance_shown', 'true');
       } catch (e) {}
-    }, delay);
+    }, 800);
   }
 
+  // 2. Scroll Progress & Sticky Nav Shadow
   function initScrollProgress() {
     const bar = document.getElementById('scroll-progress');
     const nav = document.querySelector('.jushh-nav');
@@ -44,6 +55,7 @@
     }, { passive: true });
   }
 
+  // 3. Mobile Navigation Drawer with Outside Click & ESC Key Handling
   window.toggleMobileNav = function () {
     const drawer = document.getElementById('jushh-mobile-nav');
     const btn = document.getElementById('jushh-hamburger');
@@ -51,9 +63,7 @@
 
     const isOpen = drawer.classList.contains('open');
     if (isOpen) {
-      drawer.classList.remove('open');
-      if (btn) btn.classList.remove('open');
-      document.body.style.overflow = '';
+      closeMobileNav();
     } else {
       drawer.classList.add('open');
       if (btn) btn.classList.add('open');
@@ -69,6 +79,22 @@
     document.body.style.overflow = '';
   };
 
+  // 4. Global Keyboard and Window Listeners
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileNav();
+      if (typeof window.closeItemModal === 'function') window.closeItemModal();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const drawer = document.getElementById('jushh-mobile-nav');
+    const btn = document.getElementById('jushh-hamburger');
+    if (drawer && drawer.classList.contains('open') && !drawer.contains(e.target) && btn && !btn.contains(e.target)) {
+      closeMobileNav();
+    }
+  });
+
   if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initEntranceReveal();
     initScrollProgress();
@@ -83,8 +109,8 @@
     const splash = document.getElementById('jushh-entrance');
     if (splash && !splash.classList.contains('dismissed')) {
       splash.classList.add('dismissed');
-      setTimeout(() => { splash.style.display = 'none'; }, 400);
+      setTimeout(() => { splash.style.display = 'none'; }, 300);
     }
-  }, 2000);
+  }, 1800);
 
 })();

@@ -6,23 +6,32 @@
 (function () {
   'use strict';
 
-  // 1. Entrance Reveal Handler
+  // 1. Entrance Reveal Handler (< 1.2s luxury reveal with immediate session skip)
   function initEntranceReveal() {
     const splash = document.getElementById('ts-entrance');
     if (!splash) return;
 
-    const hasSeen = sessionStorage.getItem('ts_entrance_shown');
-    const delay = hasSeen ? 150 : 950;
+    let hasSeen = false;
+    try {
+      hasSeen = sessionStorage.getItem('ts_entrance_shown') === 'true';
+    } catch (e) {}
 
+    if (hasSeen || document.documentElement.classList.contains('entrance-skipped')) {
+      splash.classList.add('dismissed');
+      splash.style.display = 'none';
+      return;
+    }
+
+    // First time visitor in this session: Smooth high-end reveal under 1.2s
     setTimeout(() => {
       splash.classList.add('dismissed');
       setTimeout(() => {
         splash.style.display = 'none';
-      }, 500);
+      }, 350);
       try {
         sessionStorage.setItem('ts_entrance_shown', 'true');
       } catch (e) {}
-    }, delay);
+    }, 850);
   }
 
   // 2. Scroll Progress & Sticky Nav Shadow
@@ -46,7 +55,7 @@
     }, { passive: true });
   }
 
-  // 3. Mobile Navigation Drawer
+  // 3. Mobile Navigation Drawer with Backdrop & Escape Key Handlers
   window.toggleMobileNav = function () {
     const drawer = document.getElementById('ts-mobile-nav');
     const btn = document.getElementById('ts-hamburger');
@@ -54,9 +63,7 @@
 
     const isOpen = drawer.classList.contains('open');
     if (isOpen) {
-      drawer.classList.remove('open');
-      if (btn) btn.classList.remove('open');
-      document.body.style.overflow = '';
+      closeMobileNav();
     } else {
       drawer.classList.add('open');
       if (btn) btn.classList.add('open');
@@ -97,7 +104,24 @@
     }
   };
 
-  // Execute on DOM Ready
+  // 5. Global Keyboard and Window Listeners (ESC key & outside click)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeMobileNav();
+      closeTsLightbox();
+      if (typeof window.closeItemModal === 'function') window.closeItemModal();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const drawer = document.getElementById('ts-mobile-nav');
+    const btn = document.getElementById('ts-hamburger');
+    if (drawer && drawer.classList.contains('open') && !drawer.contains(e.target) && btn && !btn.contains(e.target)) {
+      closeMobileNav();
+    }
+  });
+
+  // Execute on DOM Ready or immediately
   if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initEntranceReveal();
     initScrollProgress();
@@ -113,8 +137,8 @@
     const splash = document.getElementById('ts-entrance');
     if (splash && !splash.classList.contains('dismissed')) {
       splash.classList.add('dismissed');
-      setTimeout(() => { splash.style.display = 'none'; }, 400);
+      setTimeout(() => { splash.style.display = 'none'; }, 300);
     }
-  }, 2200);
+  }, 1800);
 
 })();

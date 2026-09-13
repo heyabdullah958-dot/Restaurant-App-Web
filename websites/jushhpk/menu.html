@@ -8,8 +8,18 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"/>
   <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
   <link rel="stylesheet" href="theme_jushh.css?v=20260913"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('jushh_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <style>
     .jushh-cat-nav {
       position: sticky;
@@ -205,9 +215,9 @@
       <div>
         <div class="jushh-footer-col-title">Hotlines</div>
         <ul class="jushh-footer-links">
-          <li style="color:var(--jushh-muted);">📞 Johar Town: 0326-9946142</li>
-          <li style="color:var(--jushh-muted);">📞 Lake City: 0324-4441735</li>
-          <li style="color:var(--jushh-muted);">📞 DHA Phase 1: 0325-7217221</li>
+          <li style="color:var(--ts-muted);">📞 Johar Town: 0326-9946142</li>
+          <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--ts-muted);">📞 DHA Phase 1: 0325-7217221</li>
           <li><a href="https://wa.me/923269946142" target="_blank" style="color:#25D366; font-weight:800;">💬 WhatsApp Order</a></li>
         </ul>
       </div>
@@ -221,6 +231,39 @@
       </div>
     </div>
   </footer>
+
+  <!-- ITEM DETAIL MODAL (Modern Street Gourmet Vibe) -->
+  <div class="jushh-modal-overlay" id="jushh-item-modal" onclick="closeItemModal()">
+    <div class="jushh-modal-box" onclick="event.stopPropagation()">
+      <button class="jushh-modal-close" onclick="closeItemModal()" aria-label="Close Modal">&times;</button>
+      <div class="jushh-modal-img-wrap">
+        <img id="jushh-modal-img" src="" alt="Dish Preview" class="jushh-modal-img" />
+        <span class="jushh-card-badge" id="jushh-modal-badge" style="top:16px; left:16px;">🔥 Street Gourmet</span>
+      </div>
+      <div class="jushh-modal-body">
+        <h2 class="jushh-modal-title" id="jushh-modal-title">Item Title</h2>
+        <div class="jushh-modal-price" id="jushh-modal-price">Rs. 0</div>
+        <p class="jushh-modal-desc" id="jushh-modal-desc">Description</p>
+        
+        <div class="jushh-modal-spec">
+          <div class="jushh-modal-pill">🌯 Vertical Spits</div>
+          <div class="jushh-modal-pill">🧄 Garlic Toum</div>
+          <div class="jushh-modal-pill">🔥 Freshly Sliced</div>
+        </div>
+
+        <div class="jushh-modal-footer">
+          <div class="jushh-modal-qty-control">
+            <button class="jushh-modal-qty-btn" onclick="changeModalQty(-1)">-</button>
+            <span class="jushh-modal-qty-val" id="jushh-modal-qty">1</span>
+            <button class="jushh-modal-qty-btn" onclick="changeModalQty(1)">+</button>
+          </div>
+          <button class="jushh-btn-primary" id="jushh-modal-add-btn" style="flex:1; justify-content:center; padding:14px;" onclick="addModalItemToCart()">
+            + Add to Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Preserved Complete Jushh Menu Dataset -->
   <script>
@@ -480,7 +523,7 @@
         }
 
         return `
-          <div class="jushh-card">
+          <div class="jushh-card" onclick="openItemModal('${item.name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
             <div class="jushh-card-img-wrap">
               ${imgHtml}
               <span class="jushh-card-badge">🔥 Street Gourmet</span>
@@ -490,7 +533,7 @@
               <div class="jushh-card-desc">${item.desc || 'Freshly sliced Turkish rotisserie doner & signature dips.'}</div>
               <div class="jushh-card-foot" style="margin-top:auto;">
                 <div class="jushh-card-price">Rs. ${item.price.toLocaleString()}</div>
-                <button class="jushh-card-add-btn order-btn" onclick="addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price}, '${(item.image || '').replace(/'/g, "\\'")}')">
+                <button class="jushh-card-add-btn order-btn" onclick="event.stopPropagation(); addToOrderForm('${item.name.replace(/'/g, "\\'")}', ${item.price}, '${(item.image || '').replace(/'/g, "\\'")}')">
                   + Add
                 </button>
               </div>
@@ -512,8 +555,99 @@
       renderMenu();
     }
 
+    // --- ITEM DETAIL MODAL CONTROLLER ---
+    let activeModalItem = null;
+    let activeModalQty = 1;
+
+    function findItemByName(name) {
+      for (const cat in menuData) {
+        const found = menuData[cat].find(i => i.name.toLowerCase() === name.toLowerCase());
+        if (found) return found;
+      }
+      return null;
+    }
+
+    window.openItemModal = function(itemName) {
+      const item = findItemByName(itemName);
+      if (!item) return;
+
+      activeModalItem = item;
+      activeModalQty = 1;
+
+      const modal = document.getElementById('jushh-item-modal');
+      const img = document.getElementById('jushh-modal-img');
+      const title = document.getElementById('jushh-modal-title');
+      const price = document.getElementById('jushh-modal-price');
+      const desc = document.getElementById('jushh-modal-desc');
+      const qtyEl = document.getElementById('jushh-modal-qty');
+
+      if (img) {
+        img.src = item.image || './images/jushh_logo.jpg';
+        img.onerror = () => { img.src = './images/jushh_logo.jpg'; };
+      }
+      if (title) title.textContent = item.name;
+      if (desc) desc.textContent = item.desc || 'Authentic Turkish street flavor prepared fresh with garlic toum & signature seasonings.';
+      if (qtyEl) qtyEl.textContent = activeModalQty;
+
+      updateModalPrice();
+      if (modal) modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeItemModal = function() {
+      const modal = document.getElementById('jushh-item-modal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+      activeModalItem = null;
+    };
+
+    window.changeModalQty = function(delta) {
+      activeModalQty = Math.max(1, activeModalQty + delta);
+      const qtyEl = document.getElementById('jushh-modal-qty');
+      if (qtyEl) qtyEl.textContent = activeModalQty;
+      updateModalPrice();
+    };
+
+    function updateModalPrice() {
+      if (!activeModalItem) return;
+      const unitPrice = activeModalItem.price || 0;
+      const totalPrice = unitPrice * activeModalQty;
+      const priceEl = document.getElementById('jushh-modal-price');
+      const addBtn = document.getElementById('jushh-modal-add-btn');
+      if (priceEl) priceEl.textContent = `Rs. ${unitPrice.toLocaleString()}`;
+      if (addBtn) addBtn.textContent = `+ Add to Order • Rs. ${totalPrice.toLocaleString()}`;
+    }
+
+    window.addModalItemToCart = function() {
+      if (!activeModalItem) return;
+      const resolvedImg = activeModalItem.image || './images/jushh_logo.jpg';
+
+      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
+        window.CartDrawer.addItem({
+          name: activeModalItem.name,
+          price: activeModalItem.price,
+          qty: activeModalQty,
+          image: resolvedImg
+        });
+      } else if (typeof window.addToOrderForm === 'function') {
+        for (let i = 0; i < activeModalQty; i++) {
+          window.addToOrderForm(activeModalItem.name, activeModalItem.price, resolvedImg);
+        }
+      }
+      closeItemModal();
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       renderMenu();
+
+      // Check URL for branch preselection
+      const params = new URLSearchParams(window.location.search);
+      const branchParam = params.get('branch');
+      if (branchParam) {
+        try {
+          sessionStorage.setItem('foodsphere_selected_branch_jushhpk', branchParam);
+        } catch(e) {}
+      }
     });
   </script>
 

@@ -79,6 +79,10 @@ body {
 }
 
 /* ── LUXURY ENTRANCE SPLASH REVEAL ── */
+html.entrance-skipped #ts-entrance {
+  display: none !important;
+}
+
 #ts-entrance {
   position: fixed;
   inset: 0;
@@ -90,7 +94,7 @@ body {
   justify-content: center;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s ease;
   pointer-events: all;
 }
 
@@ -98,6 +102,68 @@ body {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+/* Staggered Content Entry Keyframes (< 1.2s reveal) */
+@keyframes heroSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes badgeSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.88);
+  }
+  70% {
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero-stagger-badge {
+  animation: badgeSettle 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.1s;
+}
+
+.hero-stagger-title {
+  animation: heroSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.22s;
+}
+
+.hero-stagger-desc {
+  animation: heroSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.34s;
+}
+
+.hero-stagger-actions {
+  animation: heroSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.46s;
+}
+
+.hero-stagger-visual {
+  animation: heroFadeIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.25s;
 }
 
 .ts-splash-seal {
@@ -923,6 +989,222 @@ body {
 
 .ts-lightbox-close:hover {
   background: var(--ts-terracotta);
+}
+
+/* ── TACTILE INTERACTION & BUTTON PRESS STATES ── */
+.ts-btn-primary:active,
+.ts-btn-secondary:active,
+.ts-card-add-btn:active,
+.ts-cat-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.08s ease !important;
+}
+
+/* ── ITEM DETAIL MODAL (Eastern Oven / McDonald's Benchmark) ── */
+.ts-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 3, 0.88);
+  backdrop-filter: blur(14px);
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
+}
+
+.ts-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ts-modal-box {
+  background: linear-gradient(165deg, #1C0F0A 0%, #120805 100%);
+  border: 1px solid var(--ts-border-strong);
+  border-radius: 24px;
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.85);
+  transform: translateY(24px) scale(0.97);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ts-modal-overlay.active .ts-modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.ts-modal-img-wrap {
+  height: 280px;
+  width: 100%;
+  position: relative;
+  background: #0F0806;
+  overflow: hidden;
+}
+
+.ts-modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(15, 8, 6, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--ts-ivory);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.ts-modal-close:hover {
+  background: var(--ts-terracotta);
+  border-color: var(--ts-flame);
+  transform: scale(1.08);
+}
+
+.ts-modal-body {
+  padding: 28px 28px 24px;
+}
+
+.ts-modal-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ts-ivory);
+  margin-bottom: 6px;
+}
+
+.ts-modal-price {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ts-gold);
+  margin-bottom: 14px;
+}
+
+.ts-modal-desc {
+  font-size: 14px;
+  color: var(--ts-muted);
+  line-height: 1.7;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-modal-spec {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.ts-modal-pill {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid var(--ts-border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  color: var(--ts-gold);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-modal-variants-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ts-saffron);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.ts-modal-variant-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.ts-modal-variant-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid var(--ts-border);
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ts-modal-variant-opt:hover,
+.ts-modal-variant-opt.selected {
+  background: rgba(234, 88, 12, 0.15);
+  border-color: var(--ts-flame);
+}
+
+.ts-modal-footer {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.ts-modal-qty-control {
+  display: flex;
+  align-items: center;
+  background: #140A06;
+  border: 1px solid var(--ts-border);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.ts-modal-qty-btn {
+  background: none;
+  border: none;
+  color: var(--ts-ivory);
+  font-size: 18px;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.ts-modal-qty-btn:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--ts-gold);
+}
+
+.ts-modal-qty-val {
+  min-width: 32px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ts-ivory);
 }
 
 /* ── RESPONSIVE MEDIA QUERIES ── */

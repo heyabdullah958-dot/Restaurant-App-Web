@@ -8,8 +8,18 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap"/>
   <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
   <link rel="stylesheet" href="theme_ts.css?v=20260913"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('ts_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body>
   <!-- Scroll Progress Bar -->
@@ -84,16 +94,16 @@
   <section class="ts-section" style="padding-top:70px; padding-bottom:70px; background: radial-gradient(ellipse at 70% 30%, rgba(234, 88, 12, 0.18) 0%, transparent 60%), linear-gradient(165deg, #160D09 0%, #0F0806 65%, #080402 100%);">
     <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.15fr 0.85fr; gap:40px; align-items:center;">
       <div>
-        <div class="ts-hero-badge">🏆 12.5K+ Followers · 3 Physical Branches in Lahore</div>
-        <h1 class="ts-sec-title" style="font-size:clamp(34px, 5.2vw, 64px); margin-bottom:20px;">
+        <div class="ts-hero-badge hero-stagger-badge">🏆 12.5K+ Followers · 3 Physical Branches in Lahore</div>
+        <h1 class="ts-sec-title hero-stagger-title" style="font-size:clamp(34px, 5.2vw, 64px); margin-bottom:20px;">
           Lahore's Artisanal<br/>
           <span>Clay Tandoor Heritage</span><br/>
           — Baked Fresh Daily.
         </h1>
-        <p class="ts-sec-desc" style="font-size:16px;">
+        <p class="ts-sec-desc hero-stagger-desc" style="font-size:16px;">
           From the roaring 800°F clay oven straight to your table. Crisp sesame roghni naans, slow-roasted chicken sajji, melt-in-mouth malai boti, and royal Mughlai handis. True Pakistani culinary craftsmanship.
         </p>
-        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px;">
+        <div class="hero-stagger-actions" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
           <a href="menu.html" class="ts-btn-primary" style="padding:14px 30px; font-size:14px;">
             <span>🔥 Explore Full Menu</span>
           </a>
@@ -105,28 +115,31 @@
           </a>
         </div>
 
-        <!-- Quick Branch Status Row -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:20px;">
-          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
-            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Johar Town</div>
-            <div style="font-size:12px; color:var(--ts-muted);">PIA Road, Hakim Chowk</div>
-            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
-          </div>
-          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
-            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Lake City</div>
-            <div style="font-size:12px; color:var(--ts-muted);">Opp. Lake City Mall</div>
-            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
-          </div>
-          <div style="background:rgba(245,158,11,0.06); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px;">
-            <div style="color:var(--ts-gold); font-size:11px; font-weight:800; text-transform:uppercase;">📍 Baghbanpura</div>
-            <div style="font-size:12px; color:var(--ts-muted);">GT Road, Shalimar</div>
-            <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:2px;">● Open Daily 12PM–2AM</div>
+        <!-- Interactive Quick Branch Selector -->
+        <div style="margin-top:20px;">
+          <div style="font-size:11px; font-weight:800; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">⚡ Quick Order By Branch:</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+            <div onclick="selectQuickBranch('Johar Town')" style="background:rgba(245,158,11,0.07); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--ts-flame)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--ts-border)'; this.style.transform='none'">
+              <div style="color:var(--ts-gold); font-size:11.5px; font-weight:800; text-transform:uppercase;">📍 Johar Town</div>
+              <div style="font-size:12px; color:var(--ts-muted);">PIA Road, Hakim Chowk</div>
+              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
+            </div>
+            <div onclick="selectQuickBranch('Lake City')" style="background:rgba(245,158,11,0.07); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--ts-flame)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--ts-border)'; this.style.transform='none'">
+              <div style="color:var(--ts-gold); font-size:11.5px; font-weight:800; text-transform:uppercase;">📍 Lake City</div>
+              <div style="font-size:12px; color:var(--ts-muted);">Opp. Lake City Mall</div>
+              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
+            </div>
+            <div onclick="selectQuickBranch('GT Road Baghbanpura')" style="background:rgba(245,158,11,0.07); border:1px solid var(--ts-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--ts-flame)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--ts-border)'; this.style.transform='none'">
+              <div style="color:var(--ts-gold); font-size:11.5px; font-weight:800; text-transform:uppercase;">📍 Baghbanpura</div>
+              <div style="font-size:12px; color:var(--ts-muted);">GT Road, Shalimar</div>
+              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Hero Visual Card -->
-      <div style="position:relative;">
+      <div class="hero-stagger-visual" style="position:relative;">
         <div style="position:relative; border-radius:24px; overflow:hidden; border:2px solid var(--ts-border-strong); box-shadow:0 24px 60px rgba(0,0,0,0.8); background:#1A0E08;">
           <img src="./images/IMG_7587.JPG.jpeg" alt="Tandoori Stop Traditional Sajji & Naan" style="width:100%; height:440px; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
           <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(15,8,6,0.95) 0%, rgba(15,8,6,0.2) 60%, transparent 100%);"></div>
@@ -176,6 +189,86 @@
           <div style="font-size:42px; margin-bottom:14px;">🥘</div>
           <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">Clay Pot Handis</h3>
           <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Simmered in earthen clay handis with pure butter and rich cream to preserve the deep aromatics of royal desi cooking.</p>
+        </div>
+      </div>
+    </div>
+  <!-- FEATURED DEALS & COMBOS (Eastern Oven Benchmark) -->
+  <section class="ts-section" style="background:linear-gradient(180deg, #170E0A 0%, #0F0806 100%); border-top:1px solid var(--ts-border); border-bottom:1px solid var(--ts-border);">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:36px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div class="ts-eyebrow">✨ Handcrafted Bundles</div>
+          <h2 class="ts-sec-title">Featured Deals & <span>Combos</span></h2>
+          <p class="ts-sec-desc" style="margin-bottom:0;">Exclusive feasts and sharing platters baked fresh from our clay tandoors.</p>
+        </div>
+        <a href="deals.html" class="ts-btn-secondary">View All Deals →</a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+        <!-- Deal 1 -->
+        <div class="ts-menu-card" style="border:2px solid var(--ts-border-strong);">
+          <div class="ts-card-img-wrap" style="height:210px;">
+            <img src="./images/IMG_7589.JPG.jpeg" alt="Family Tandoori Platter" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge" style="background:var(--ts-terracotta); color:white;">🔥 Mega Platter</span>
+          </div>
+          <div class="ts-card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="ts-card-name" style="font-size:18px;">Family Tandoori Platter</div>
+              <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:3px 8px; border-radius:6px;">Serves 6–8</span>
+            </div>
+            <div class="ts-card-desc" style="font-size:12.5px; line-height:1.6;">Half Sajji, 1 Chicken Handi, 4 Rotis, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kababs, salad, raita, 6 mocktails.</div>
+            <div class="ts-card-foot" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 8,200</div>
+                <div class="ts-card-price" style="font-size:20px;">Rs. 7,000</div>
+              </div>
+              <button class="ts-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Family Tandoori Platter', 7000, './images/IMG_7589.JPG.jpeg')">+ Add Deal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 2 -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap" style="height:210px;">
+            <img src="./images/IMG_7587.JPG.jpeg" alt="Sajji Feast Box" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">🍗 Top Seller</span>
+          </div>
+          <div class="ts-card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="ts-card-name" style="font-size:18px;">Sajji Feast Box</div>
+              <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:3px 8px; border-radius:6px;">Serves 3–4</span>
+            </div>
+            <div class="ts-card-desc" style="font-size:12.5px; line-height:1.6;">Full Traditional Chicken Sajji, 4 Roghni Naans, crisp seasonal salad, 2 Mint Margaritas.</div>
+            <div class="ts-card-foot" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 3,450</div>
+                <div class="ts-card-price" style="font-size:20px;">Rs. 2,999</div>
+              </div>
+              <button class="ts-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Sajji Feast Box', 2999, './images/IMG_7587.JPG.jpeg')">+ Add Deal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 3 -->
+        <div class="ts-menu-card">
+          <div class="ts-card-img-wrap" style="height:210px;">
+            <img src="./images/IMG_7585.JPG.jpeg" alt="Duo Tandoori Box" class="ts-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            <span class="ts-card-badge">⭐ Perfect Pair</span>
+          </div>
+          <div class="ts-card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="ts-card-name" style="font-size:18px;">Duo Tandoori Box</div>
+              <span style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:800; font-size:11px; padding:3px 8px; border-radius:6px;">Serves 2</span>
+            </div>
+            <div class="ts-card-desc" style="font-size:12.5px; line-height:1.6;">2 Tandoori Chicken Bone portions, 2 Cheese Naans, mint raita, and 2 Peach Mojitos.</div>
+            <div class="ts-card-foot" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 2,050</div>
+                <div class="ts-card-price" style="font-size:20px;">Rs. 1,699</div>
+              </div>
+              <button class="ts-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Duo Tandoori Box', 1699, './images/IMG_7585.JPG.jpeg')">+ Add Deal</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -321,22 +414,79 @@
     </div>
   </section>
 
-  <!-- PROMOTIONAL DEALS BANNER (Linking to /deals) -->
-  <section class="ts-section" style="background: linear-gradient(135deg, #2D140B 0%, #170904 100%); border-top:1px solid var(--ts-border); border-bottom:1px solid var(--ts-border);">
-    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap:40px; align-items:center;">
-      <div>
-        <div class="ts-eyebrow">✨ Family Feast & Combos</div>
-        <h2 class="ts-sec-title">Grand <span>Tandoori Feasts</span> Built For Sharing</h2>
-        <p class="ts-sec-desc">
-          Gather your family around our signature tandoori feast platters — featuring authentic chicken sajji, sizzling karahi, skewered seekh kebabs, freshly baked naans, and chilled mojitos.
-        </p>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
-          <a href="deals.html" class="ts-btn-primary" style="padding:12px 28px;">View Exclusive Deals</a>
-          <button onclick="addToOrderForm('Family Tandoori Platter', 7000, './images/tandoori_stop_logo.png')" class="ts-btn-secondary">Add Family Platter (Rs. 7,000)</button>
+  <!-- FLASH DEALS & COMBOS PREVIEW (Linking to /deals) -->
+  <section class="ts-section" style="background: radial-gradient(circle at 50% 10%, rgba(234, 88, 12, 0.12) 0%, transparent 60%), #140A06; border-top:1px solid var(--ts-border); border-bottom:1px solid var(--ts-border);">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:34px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(234,88,12,0.15); border:1px solid rgba(234,88,12,0.4); border-radius:20px; padding:4px 14px; margin-bottom:10px;">
+            <span style="color:#F59E0B; font-size:12px;">⚡</span>
+            <span style="font-size:11px; font-weight:800; color:var(--ts-gold); text-transform:uppercase; letter-spacing:1px;">Flash Deals · Limited Time Combos</span>
+          </div>
+          <h2 class="ts-sec-title" style="margin-bottom:0;">Signature <span>Feast Platters</span> & Deals</h2>
         </div>
+        <a href="deals.html" class="ts-btn-secondary" style="font-size:13px; padding:10px 20px;">
+          <span>Explore All Combos & Platters →</span>
+        </a>
       </div>
-      <div style="text-align:center;">
-        <img src="./images/IMG_7589.JPG.jpeg" alt="Tandoori Feast Platter" style="max-width:100%; border-radius:20px; border:2px solid var(--ts-border-strong); box-shadow:0 20px 50px rgba(0,0,0,0.7);" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:24px;">
+        <!-- Deal Card 1 -->
+        <div style="background:var(--ts-surface-card); border:2px solid var(--ts-border-strong); border-radius:18px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="height:190px; position:relative; overflow:hidden; background:#180D08;">
+            <img src="./images/IMG_7589.JPG.jpeg" alt="Family Tandoori Platter" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';"/>
+            <span style="position:absolute; top:12px; left:12px; background:var(--ts-terracotta); color:white; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:6px; text-transform:uppercase;">🔥 SAVE RS. 1,200</span>
+          </div>
+          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
+            <div style="font-family:var(--font-serif); font-size:19px; font-weight:800; color:var(--ts-ivory); margin-bottom:6px;">Family Tandoori Platter</div>
+            <div style="font-size:13px; color:var(--ts-muted); line-height:1.6; margin-bottom:16px;">Half Sajji, Chicken Handi, 4 Rotis, 2 Malai + 2 Tikka Boti, 4 Seekh Kababs, Raita & 6 Drinks. Serves 6–8.</div>
+            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 8,200</span>
+                <div style="font-size:20px; font-weight:800; color:var(--ts-gold);">Rs. 7,000</div>
+              </div>
+              <button onclick="addToOrderForm('Family Tandoori Platter', 7000, './images/IMG_7589.JPG.jpeg')" class="ts-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal Card 2 -->
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:18px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="height:190px; position:relative; overflow:hidden; background:#180D08;">
+            <img src="./images/IMG_7587.JPG.jpeg" alt="Sajji Feast Box" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';"/>
+            <span style="position:absolute; top:12px; left:12px; background:rgba(245,158,11,0.9); color:black; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:6px; text-transform:uppercase;">🍗 Top Value</span>
+          </div>
+          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
+            <div style="font-family:var(--font-serif); font-size:19px; font-weight:800; color:var(--ts-ivory); margin-bottom:6px;">Sajji Feast Box</div>
+            <div style="font-size:13px; color:var(--ts-muted); line-height:1.6; margin-bottom:16px;">1 Full Slow-Roasted Chicken Sajji + 4 piping hot Roghni Naans + 2 Fresh Mint Margaritas. Serves 3–4.</div>
+            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 3,850</span>
+                <div style="font-size:20px; font-weight:800; color:var(--ts-gold);">Rs. 3,350</div>
+              </div>
+              <button onclick="addToOrderForm('Sajji Feast Box (Full Sajji + 4 Roghni Naan + 2 Mojitos)', 3350, './images/IMG_7587.JPG.jpeg')" class="ts-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal Card 3 -->
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:18px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="height:190px; position:relative; overflow:hidden; background:#180D08;">
+            <img src="./images/IMG_7583.JPG.jpeg" alt="BBQ Charcoal Duo" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';"/>
+            <span style="position:absolute; top:12px; left:12px; background:rgba(234,88,12,0.9); color:white; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:6px; text-transform:uppercase;">🍢 Duo Special</span>
+          </div>
+          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
+            <div style="font-family:var(--font-serif); font-size:19px; font-weight:800; color:var(--ts-ivory); margin-bottom:6px;">BBQ Charcoal Duo</div>
+            <div style="font-size:13px; color:var(--ts-muted); line-height:1.6; margin-bottom:16px;">2 Malai Boti Seekhs + 2 Tikka Boti Seekhs + 2 Stuffed Hot Cheese Naans + 2 Chilled Soft Drinks.</div>
+            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:11px; text-decoration:line-through; color:var(--ts-faint);">Rs. 2,900</span>
+                <div style="font-size:20px; font-weight:800; color:var(--ts-gold);">Rs. 2,499</div>
+              </div>
+              <button onclick="addToOrderForm('BBQ Charcoal Duo (2 Malai + 2 Tikka + 2 Cheese Naan)', 2499, './images/IMG_7583.JPG.jpeg')" class="ts-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -527,6 +677,14 @@
   <!-- Preserved Central Menu Data & Order Handling Scripts -->
   <script>
     window.BRAND_SLUG = "tandooristoppk";
+
+    function selectQuickBranch(branchName) {
+      try {
+        sessionStorage.setItem('foodsphere_selected_branch_tandooristoppk', branchName);
+      } catch (e) {}
+      window.location.href = 'menu.html?branch=' + encodeURIComponent(branchName);
+    }
+    const orderFromBranch = selectQuickBranch;
     
     function onCardVariantChange(selectEl, baseItemName) {
       const selectedOption = selectEl.options[selectEl.selectedIndex];

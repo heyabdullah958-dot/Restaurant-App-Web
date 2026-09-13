@@ -8,8 +8,18 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"/>
   <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
   <link rel="stylesheet" href="theme_jushh.css?v=20260913"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('jushh_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="scroll-progress"></div>
@@ -231,15 +241,10 @@
     window.BRAND_SLUG = "jushhpk";
 
     function orderFromBranch(branchName) {
-      if (window.CartDrawer) {
-        window.CartDrawer.openDrawer();
-        const branchSelect = document.getElementById('cd-input-branch');
-        if (branchSelect) {
-          branchSelect.value = branchName;
-        }
-      } else {
-        window.location.href = 'menu.html';
-      }
+      try {
+        sessionStorage.setItem('foodsphere_selected_branch_jushhpk', branchName);
+      } catch (e) {}
+      window.location.href = 'menu.html?branch=' + encodeURIComponent(branchName);
     }
   </script>
 
