@@ -468,7 +468,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .cd-drawer {
     max-width: 100%;
   }
@@ -477,5 +477,14 @@
     right: 16px;
     padding: 10px 16px;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cd-float-btn {
+    bottom: 72px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }

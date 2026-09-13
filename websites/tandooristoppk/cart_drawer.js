@@ -55,9 +55,22 @@
 
   const WHATSAPP_NUMBERS = {
     'jushhpk': '923269946142',
-    'tandooristoppk': '923001234567',
-    'getafomo': '923000000000',
+    'tandooristoppk': '923274945947',
+    'getafomo': '923212784841',
     'seenbanao': '923000000000'
+  };
+
+  const BRANCH_PHONES = {
+    'tandooristoppk': {
+      'Johar Town': '923274945947',
+      'Lake City': '923244441735',
+      'GT Road Baghbanpura': '923266811177'
+    },
+    'jushhpk': {
+      'Johar Town': '923269946142',
+      'Lake City': '923244441735',
+      'DHA Phase 1': '923257217221'
+    }
   };
 
   // Load saved cart state from sessionStorage
@@ -209,6 +222,10 @@
       box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
       display: flex;
       align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 92vw;
+      box-sizing: border-box;
       gap: 12px;
       font-family: 'Poppins', sans-serif;
       font-size: 13px;
@@ -473,6 +490,7 @@
     if (backdrop && drawer) {
       backdrop.classList.add('active');
       drawer.classList.add('active');
+      document.body.style.overflow = 'hidden';
       renderDrawerContent();
     }
   }
@@ -483,6 +501,7 @@
     if (backdrop && drawer) {
       backdrop.classList.remove('active');
       drawer.classList.remove('active');
+      document.body.style.overflow = '';
     }
   }
 
@@ -681,7 +700,8 @@
       const displayId = order.display_order_id || (activeStored ? activeStored.displayOrderId : ('#FS-' + Math.floor(1000 + Math.random() * 9000)));
       const rawStatus = (order.status || (activeStored ? activeStored.status : 'received')).toLowerCase();
       const statusLabel = rawStatus.toUpperCase().replace('_', ' ');
-      const whatsappPhone = WHATSAPP_NUMBERS[brandSlug] || '923000000000';
+      const branchKey = cartState.selectedBranch || activeStored?.selectedBranch || '';
+      const whatsappPhone = (BRANCH_PHONES[brandSlug] && BRANCH_PHONES[brandSlug][branchKey]) || WHATSAPP_NUMBERS[brandSlug] || '923274945947';
 
       const whatsappMessage = `Hello! I am checking on my order 🛵\n\n` +
         `*Order ID:* ${displayId}\n` +

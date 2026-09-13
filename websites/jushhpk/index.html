@@ -181,7 +181,7 @@
         <p class="jushh-sec-desc" style="margin:0 auto;">Loud crunch, bold flavors, quiet satisfaction. Here's why our street food hits different.</p>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:24px;">
+      <div class="jushh-cards-grid">
         <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
           <div style="font-size:38px; margin-bottom:12px;">🥩</div>
           <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Vertical Doner Rotisseries</h3>
@@ -220,7 +220,7 @@
         <a href="deals.html" class="jushh-btn-secondary">View All Deals →</a>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+      <div class="jushh-deals-grid">
         <!-- Deal 1 -->
         <div class="jushh-card" style="border:2px solid var(--jushh-border-strong);">
           <div class="jushh-card-img-wrap" style="height:210px;">
@@ -400,7 +400,7 @@
         </a>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:24px;">
+      <div class="jushh-cards-grid">
         <!-- Deal Card 1 -->
         <div style="background:var(--jushh-surface-card); border:2px solid var(--jushh-border-strong); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
           <div style="height:190px; position:relative; overflow:hidden; background:#110003;">
@@ -469,7 +469,7 @@
         <h2 class="jushh-sec-title">What Street Foodies <span>Say</span></h2>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+      <div class="jushh-testimonials-grid">
         <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
           <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
           <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
@@ -503,7 +503,7 @@
   <!-- QUICK ORDER FORM (Fully Preserved Formspree + API Integration) -->
   <section class="jushh-section jushh-section-alt" id="order-section">
     <div style="max-width:640px; margin:0 auto;">
-      <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border-strong); border-radius:16px; padding:38px 28px; box-shadow:0 20px 50px rgba(0,0,0,0.8);">
+      <div class="jushh-order-box">
         <div style="text-align:center; margin-bottom:26px;">
           <div class="jushh-eyebrow">Quick Street Order</div>
           <h2 style="font-family:var(--font-display); font-size:26px; font-weight:900; color:white; margin-bottom:6px; text-transform:uppercase;">Place Your Order 🥙</h2>
@@ -693,7 +693,16 @@
                       `*Payment Method:* Cash on Delivery (COD)`;
                       
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/923269946142?text=${encodedMessage}`;
+      const branchPhones = {
+        'Johar Town': '923269946142',
+        'Block R2, Johar Town': '923269946142',
+        'Lake City': '923244441735',
+        'Business Bay, Lake City': '923244441735',
+        'DHA Phase 1': '923257217221',
+        'Sector H, DHA Phase 1': '923257217221'
+      };
+      const targetPhone = branchPhones[branch] || '923269946142';
+      const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
       
       window.open(whatsappUrl, '_blank');
       

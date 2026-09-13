@@ -376,6 +376,78 @@ class Tier1RemediationSuite(TestCase):
         if 'debug_reset_link' in res_custom.data:
             self.assertTrue(res_custom.data['debug_reset_link'].startswith('https://getfood-app.pages.dev/reset-password'))
 
+    def test_tracking_token_none_spoofing_defense(self):
+        """Defense against 'None' string spoofing and unauthorized token guessing."""
+        order = Order.objects.create(
+            restaurant=self.restaurant,
+            branch=self.branch1,
+            user=self.user_owner,
+            status='delivered',
+            subtotal=Decimal("500.00"),
+            total=Decimal("500.00"),
+            payment_method='cod'
+        )
+
+        # Attacker tries to confirm COD passing tracking_token="None"
+        res_cod = self.client.post('/api/payments/cod/confirm/', {
+            'order_id': order.id,
+            'tracking_token': 'None'
+        })
+        self.assertEqual(res_cod.status_code, 403)
+
+        # Attacker tries to view order details passing ?tracking_token=None
+        res_detail = self.client.get(f'/api/orders/{order.id}/?tracking_token=None')
+        self.assertEqual(res_detail.status_code, 403)
+
+        # Attacker tries to submit review passing tracking_token="None"
+        res_review = self.client.post(f'/api/orders/{order.id}/review/', {
+            'rating': 5,
+            'comment': 'Hacked review',
+            'tracking_token': 'None'
+        }, format='json')
+        self.assertEqual(res_review.status_code, 403)
+
+        # Attacker tries to get live tracking PII passing token="None"
+        res_track = self.client.get(f'/api/v1/orders/{order.id}/track/?token=None')
+        self.assertEqual(res_track.status_code, 200)
+        self.assertEqual(res_track.data['data']['delivery_address'], "[Protected]")
+
+    def test_django_admin_loyalty_point_negative_convention(self):
+        """Django Admin UserAdmin.save_model properly records negative points for reductions."""
+        from users.admin import UserAdmin
+        from django.contrib.admin.sites import AdminSite
+        from django.test import RequestFactory
+        from unittest.mock import MagicMock
+
+        site = AdminSite()
+        admin_obj = UserAdmin(User, site)
+        user = User.objects.create_user(
+            username="admin_test_user",
+            email="admintest@foodsphere.com",
+            password="password123",
+            loyalty_points=500
+        )
+        factory = RequestFactory()
+        request = factory.post('/admin/users/user/change/')
+        request.user = self.user_superuser
+        mock_form = MagicMock()
+        mock_form.changed_data = ['loyalty_points']
+
+        # Admin decreases points from 500 to 350
+        user.loyalty_points = 350
+        admin_obj.save_model(request, user, mock_form, change=True)
+
+        txn = LoyaltyTransaction.objects.filter(user=user).latest('created_at')
+        self.assertEqual(txn.points, -150)
+        self.assertEqual(txn.transaction_type, 'redeemed')
+
+    def test_coupon_usage_indexes_exist(self):
+        """CouponUsage model includes composite indexes for fast row-locked verification."""
+        from promotions.models import CouponUsage
+        index_names = [idx.name for idx in CouponUsage._meta.indexes]
+        self.assertIn('coupon_user_usage_idx', index_names)
+        self.assertIn('coupon_order_usage_idx', index_names)
+
 if __name__ == '__main__':
     from django.test.runner import DiscoverRunner
     runner = DiscoverRunner(verbosity=2)

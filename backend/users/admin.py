@@ -48,7 +48,7 @@ class UserAdmin(AuditLogMixin, BaseUserAdmin):
                     desc = f"Updated by Admin ({request.user.username}): {old_points} -> {new_points}"
                     LoyaltyTransaction.objects.create(
                         user=obj,
-                        points=abs(difference),
+                        points=difference,
                         transaction_type=t_type,
                         description=desc
                     )

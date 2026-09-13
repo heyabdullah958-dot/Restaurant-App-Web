@@ -316,7 +316,7 @@ class OrderTrackView(APIView):
         is_owner_or_staff = user and user.is_authenticated and (
             (order.user and order.user == user) or user.is_staff
         )
-        has_valid_token = bool(token and str(order.tracking_token).strip() == str(token).strip())
+        has_valid_token = bool(order.tracking_token and token and str(order.tracking_token).strip() == str(token).strip())
 
         if not (is_owner_or_staff or has_valid_token):
             data['guest_phone'] = None
@@ -388,7 +388,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
             is_owner_or_staff = user.is_authenticated and (
                 (obj.user and obj.user == user) or user.is_staff
             )
-            has_valid_token = bool(tracking_token and str(obj.tracking_token) == tracking_token)
+            has_valid_token = bool(obj.tracking_token and tracking_token and str(obj.tracking_token).strip() == str(tracking_token).strip())
 
             if not (is_owner_or_staff or has_valid_token):
                 raise PermissionDenied("You do not have permission to view this order.")
@@ -737,7 +737,7 @@ class OrderReviewView(APIView):
         # Enforce order ownership: user must own order or provide matching tracking_token
         tracking_token = request.data.get('tracking_token') or request.query_params.get('tracking_token')
         is_owner = bool(request.user and request.user.is_authenticated and order.user and order.user == request.user)
-        has_valid_token = bool(tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip())
+        has_valid_token = bool(order.tracking_token and tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip())
 
         if not (is_owner or has_valid_token):
             return Response(

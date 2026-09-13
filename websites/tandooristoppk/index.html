@@ -45,7 +45,7 @@
     <div class="ts-topbar-right">
       <a href="tel:03274945947" class="ts-topbar-link">📞 Johar Town: 0327-4945947</a>
       <a href="tel:03244441735" class="ts-topbar-link">📞 Lake City: 0324-4441735</a>
-      <a href="https://wa.me/923001234567" target="_blank" rel="noopener" class="ts-topbar-link" style="color:#25D366;">💬 WhatsApp Order</a>
+      <a href="https://wa.me/923274945947" target="_blank" rel="noopener" class="ts-topbar-link" style="color:#25D366;">💬 WhatsApp Order</a>
     </div>
   </header>
 
@@ -166,7 +166,7 @@
         <p class="ts-sec-desc" style="margin:0 auto;">We honor the age-old tradition of lump-charcoal fired clay ovens. No industrial shortcuts — just pure heritage flavour.</p>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:24px;">
+      <div class="ts-cards-grid">
         <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
           <div style="font-size:42px; margin-bottom:14px;">🏺</div>
           <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">800°F Clay Tandoor</h3>
@@ -205,7 +205,7 @@
         <a href="deals.html" class="ts-btn-secondary">View All Deals →</a>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+      <div class="ts-deals-grid">
         <!-- Deal 1 -->
         <div class="ts-menu-card" style="border:2px solid var(--ts-border-strong);">
           <div class="ts-card-img-wrap" style="height:210px;">
@@ -431,7 +431,7 @@
         </a>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(310px, 1fr)); gap:24px;">
+      <div class="ts-cards-grid">
         <!-- Deal Card 1 -->
         <div style="background:var(--ts-surface-card); border:2px solid var(--ts-border-strong); border-radius:18px; overflow:hidden; display:flex; flex-direction:column;">
           <div style="height:190px; position:relative; overflow:hidden; background:#180D08;">
@@ -500,7 +500,7 @@
         <h2 class="ts-sec-title">What Lahore Says About <span>Tandoori Stop</span></h2>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+      <div class="ts-testimonials-grid">
         <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px;">
           <div style="color:var(--ts-gold); font-size:16px; margin-bottom:12px;">⭐⭐⭐⭐⭐</div>
           <p style="font-size:13.5px; color:var(--ts-ivory); font-style:italic; line-height:1.7; margin-bottom:16px;">
@@ -534,7 +534,7 @@
   <!-- QUICK ORDER FORM (Fully Preserved Formspree + API Integration) -->
   <section class="ts-section ts-section-alt" id="order-section">
     <div style="max-width:640px; margin:0 auto;">
-      <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border-strong); border-radius:20px; padding:40px 32px; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+      <div class="ts-order-box">
         <div style="text-align:center; margin-bottom:28px;">
           <div class="ts-eyebrow">Quick Checkout</div>
           <h2 style="font-family:var(--font-serif); font-size:26px; font-weight:800; color:var(--ts-ivory); margin-bottom:6px;">Place Direct Order</h2>
@@ -639,7 +639,7 @@
           <li style="color:var(--ts-muted);">📞 Johar Town: 0327-4945947</li>
           <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
           <li style="color:var(--ts-muted);">📞 Baghbanpura: 0326-6811177</li>
-          <li><a href="https://wa.me/923001234567" target="_blank" style="color:#25D366; font-weight:700;">💬 WhatsApp Ordering</a></li>
+          <li><a href="https://wa.me/923274945947" target="_blank" style="color:#25D366; font-weight:700;">💬 WhatsApp Ordering</a></li>
         </ul>
       </div>
     </div>
@@ -648,13 +648,13 @@
       <div>© 2026 Tandoori Stop. All Rights Reserved. Lahore, Pakistan.</div>
       <div style="display:flex; gap:16px;">
         <a href="https://instagram.com/tandooristoppk" target="_blank" style="color:var(--ts-muted); text-decoration:none;">Instagram</a>
-        <a href="https://wa.me/923001234567" target="_blank" style="color:var(--ts-muted); text-decoration:none;">WhatsApp</a>
+        <a href="https://wa.me/923274945947" target="_blank" style="color:var(--ts-muted); text-decoration:none;">WhatsApp</a>
       </div>
     </div>
   </footer>
 
   <!-- WhatsApp Floating Action -->
-  <a href="https://wa.me/923001234567?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20Tandoori%20Stop" class="ts-float-wa" target="_blank" rel="noopener">
+  <a href="https://wa.me/923274945947?text=Assalam%20o%20Alaikum!%20I%20want%20to%20place%20an%20order%20from%20Tandoori%20Stop" class="ts-float-wa" target="_blank" rel="noopener">
     <span>💬</span> WhatsApp Order
   </a>
 
@@ -764,7 +764,15 @@
                       `*Payment Method:* Cash on Delivery (COD)`;
                       
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/923001234567?text=${encodedMessage}`;
+      const branchPhones = {
+        'PIA Road, Johar Town': '923274945947',
+        'Johar Town': '923274945947',
+        'Lake City': '923244441735',
+        'GT Road, Baghbanpura': '923266811177',
+        'GT Road Baghbanpura': '923266811177'
+      };
+      const targetPhone = branchPhones[branch] || '923274945947';
+      const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
       
       window.open(whatsappUrl, '_blank');
       

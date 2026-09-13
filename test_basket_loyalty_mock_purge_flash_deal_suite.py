@@ -75,6 +75,7 @@ def run_suite():
     )
 
     # 2. Setup Threshold Promo Coupon (Min Rs. 1000, Rs. 200 Flat Off)
+    FlashDeal.objects.filter(restaurant=restaurant).delete()
     Coupon.objects.filter(code='BASKET200').delete()
     coupon = Coupon.objects.create(
         code='BASKET200',

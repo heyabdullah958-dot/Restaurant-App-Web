@@ -325,14 +325,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Coupon is no longer available.")
 
                 from promotions.models import CouponUsage
-                # Re-verify per-user limit inside locked transaction
+                # Re-verify per-user limit inside locked transaction with row-locks
                 if user and not user.is_guest:
-                    user_usage_count = CouponUsage.objects.filter(coupon=coupon, user=user).count()
+                    user_usage_count = len(list(CouponUsage.objects.select_for_update().filter(coupon=coupon, user=user)))
                     if user_usage_count >= coupon.per_user_limit:
                         raise serializers.ValidationError("You have already used this promo code the maximum allowed times.")
                 elif validated_data.get('guest_phone'):
                     phone = str(validated_data.get('guest_phone')).strip()
-                    phone_usage_count = CouponUsage.objects.filter(coupon=coupon, order__guest_phone=phone).count()
+                    phone_usage_count = len(list(CouponUsage.objects.select_for_update().filter(coupon=coupon, order__guest_phone=phone)))
                     if phone_usage_count >= coupon.per_user_limit:
                         raise serializers.ValidationError("This phone number has already used this promo code the maximum allowed times.")
 

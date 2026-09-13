@@ -48,7 +48,13 @@ class CouponUsage(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='coupon_usages')
     used_at = models.DateTimeField(auto_now_add=True)
-    
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['coupon', 'user'], name='coupon_user_usage_idx'),
+            models.Index(fields=['coupon', 'order'], name='coupon_order_usage_idx'),
+        ]
+
     def __str__(self):
         return f"{self.coupon.code} used on order #{self.order_id}"
 

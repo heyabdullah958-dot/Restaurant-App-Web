@@ -67,6 +67,7 @@
     } else {
       drawer.classList.add('open');
       if (btn) btn.classList.add('open');
+      document.body.classList.add('mobile-nav-open');
       document.body.style.overflow = 'hidden';
     }
   };
@@ -76,6 +77,7 @@
     const btn = document.getElementById('ts-hamburger');
     if (drawer) drawer.classList.remove('open');
     if (btn) btn.classList.remove('open');
+    document.body.classList.remove('mobile-nav-open');
     document.body.style.overflow = '';
   };
 

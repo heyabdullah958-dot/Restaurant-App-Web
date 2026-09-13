@@ -202,5 +202,88 @@ class WebsiteUIAndMobileAudit(unittest.TestCase):
         for item in JUSHH_ITEMS:
             self.assertIn(item, jushh_menu, f"Missing Jushh PK item: {item}")
 
+    def test_zero_fake_whatsapp_placeholder_numbers(self):
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            for fname in os.listdir(brand_dir):
+                if fname.endswith(('.html', '.js')):
+                    path = os.path.join(brand_dir, fname)
+                    with open(path, 'r', encoding='utf-8') as fh:
+                        content = fh.read()
+                    self.assertNotIn('wa.me/923001234567', content, f"Found placeholder phone in {path}")
+
+    def test_branch_specific_whatsapp_numbers(self):
+        # TS locations
+        with open(os.path.join(TS_DIR, 'locations.html'), 'r', encoding='utf-8') as fh:
+            ts_loc = fh.read()
+        self.assertIn('wa.me/923274945947', ts_loc) # Johar Town
+        self.assertIn('wa.me/923244441735', ts_loc) # Lake City
+        self.assertIn('wa.me/923266811177', ts_loc) # Baghbanpura
+
+        # Jushh locations
+        with open(os.path.join(JUSHH_DIR, 'locations.html'), 'r', encoding='utf-8') as fh:
+            jushh_loc = fh.read()
+        self.assertIn('wa.me/923269946142', jushh_loc) # Johar Town
+        self.assertIn('wa.me/923244441735', jushh_loc) # Lake City
+        self.assertIn('wa.me/923257217221', jushh_loc) # DHA Phase 1
+
+    def test_no_rigid_inline_minmax_grids(self):
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            for fname in PAGES:
+                path = os.path.join(brand_dir, fname)
+                with open(path, 'r', encoding='utf-8') as fh:
+                    content = fh.read()
+                matches = re.findall(r'minmax\(\s*(?:320px|310px|300px|280px|260px)\s*,', content)
+                self.assertEqual(len(matches), 0, f"Found rigid inline minmax grid in {path}: {matches}")
+
+    def test_mobile_nav_zindex_and_body_open_state(self):
+        with open(os.path.join(TS_DIR, 'theme_ts.css'), 'r', encoding='utf-8') as fh:
+            ts_css = fh.read()
+        self.assertIn('z-index: 10000;', ts_css)
+        self.assertIn('body.mobile-nav-open .ts-float-wa', ts_css)
+        self.assertIn('body.mobile-nav-open #cd-active-order-banner', ts_css)
+
+        with open(os.path.join(JUSHH_DIR, 'theme_jushh.css'), 'r', encoding='utf-8') as fh:
+            jushh_css = fh.read()
+        self.assertIn('z-index: 10000;', jushh_css)
+        self.assertIn('body.mobile-nav-open .jushh-float-wa', jushh_css)
+        self.assertIn('body.mobile-nav-open #cd-active-order-banner', jushh_css)
+
+    def test_active_order_banner_mobile_responsive(self):
+        for cd_path in [
+            os.path.join(TS_DIR, 'cart_drawer.js'),
+            os.path.join(JUSHH_DIR, 'cart_drawer.js'),
+            os.path.join(BASE_DIR, 'websites', 'cart_drawer.js')
+        ]:
+            with open(cd_path, 'r', encoding='utf-8') as fh:
+                content = fh.read()
+            self.assertIn('max-width: 92vw', content, f"Missing mobile responsive max-width on active order banner in {cd_path}")
+            self.assertIn('box-sizing: border-box', content, f"Missing box-sizing on active order banner in {cd_path}")
+
+    def test_promo_coupon_banners_responsive(self):
+        for brand_dir in [TS_DIR, JUSHH_DIR]:
+            deals_path = os.path.join(brand_dir, 'deals.html')
+            with open(deals_path, 'r', encoding='utf-8') as fh:
+                content = fh.read()
+            self.assertIn('flex-wrap:wrap', content.replace(' ', ''), f"Promo banner in {deals_path} should have flex-wrap")
+            self.assertIn('max-width:100%', content.replace(' ', ''), f"Promo banner in {deals_path} should have max-width: 100%")
+
+    def test_order_box_mobile_padding_and_button_alignment(self):
+        with open(os.path.join(TS_DIR, 'theme_ts.css'), 'r', encoding='utf-8') as fh:
+            ts_css = fh.read()
+        self.assertIn('.ts-order-box', ts_css)
+        self.assertIn('right: 12px;', ts_css)
+
+        with open(os.path.join(JUSHH_DIR, 'theme_jushh.css'), 'r', encoding='utf-8') as fh:
+            jushh_css = fh.read()
+        self.assertIn('.jushh-order-box', jushh_css)
+        self.assertIn('right: 12px;', jushh_css)
+
+    def test_cart_drawer_scroll_lock(self):
+        for cd_path in [os.path.join(TS_DIR, 'cart_drawer.js'), os.path.join(JUSHH_DIR, 'cart_drawer.js')]:
+            with open(cd_path, 'r', encoding='utf-8') as fh:
+                content = fh.read()
+            self.assertIn("document.body.style.overflow = 'hidden'", content)
+            self.assertIn("document.body.style.overflow = ''", content)
+
 if __name__ == '__main__':
     unittest.main()

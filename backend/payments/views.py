@@ -61,7 +61,7 @@ def check_order_ownership(order, request):
             or request.headers.get('X-Tracking-Token')
             or request.query_params.get('tracking_token')
         )
-        if tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
+        if order.tracking_token and tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
             return True, None
         return False, "You do not have permission for this order."
 
@@ -74,10 +74,21 @@ def check_order_ownership(order, request):
         or request.headers.get('X-Tracking-Token')
         or request.query_params.get('tracking_token')
     )
-    if tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
+    if order.tracking_token and tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
         return True, None
 
     return False, "Valid tracking_token or authentication required for this order."
+
+
+def get_order_by_identifier(order_id):
+    """Fetches Order by numeric primary key or tenant display_order_id."""
+    if not order_id:
+        return None
+    from django.db.models import Q
+    query = Q(display_order_id__iexact=str(order_id).strip())
+    if str(order_id).isdigit():
+        query |= Q(pk=int(order_id))
+    return Order.objects.filter(query).first()
 
 
 class ConfirmCODPaymentView(APIView):
@@ -95,9 +106,14 @@ class ConfirmCODPaymentView(APIView):
                 'message': 'order_id is required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            order = Order.objects.get(pk=order_id)
+        order = get_order_by_identifier(order_id)
+        if not order:
+            return Response({
+                'success': False,
+                'message': 'Order not found'
+            }, status=status.HTTP_404_NOT_FOUND)
 
+        try:
             has_perm, perm_err = check_order_ownership(order, request)
             if not has_perm:
                 logger.warning(
@@ -168,9 +184,14 @@ class CreateStripePaymentIntentView(APIView):
                 'message': 'order_id is required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            order = Order.objects.get(pk=order_id)
+        order = get_order_by_identifier(order_id)
+        if not order:
+            return Response({
+                'success': False,
+                'message': 'Order not found'
+            }, status=status.HTTP_404_NOT_FOUND)
 
+        try:
             has_perm, perm_err = check_order_ownership(order, request)
             if not has_perm:
                 return Response({
@@ -267,7 +288,19 @@ class ConfirmStripePaymentView(APIView):
             intent = stripe.PaymentIntent.retrieve(payment_intent_id)
             if intent.status == 'succeeded':
                 order_id = intent.metadata.get('order_id')
-                order = Order.objects.get(pk=order_id)
+                order = get_order_by_identifier(order_id)
+                if not order:
+                    return Response({
+                        'success': False,
+                        'message': 'Order not found for this intent.'
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+                has_perm, perm_err = check_order_ownership(order, request)
+                if not has_perm:
+                    return Response({
+                        'success': False,
+                        'message': perm_err or 'You do not have permission for this order.'
+                    }, status=status.HTTP_403_FORBIDDEN)
 
                 payment = Payment.objects.get(order=order, method='stripe', transaction_id=payment_intent_id)
                 payment.status = 'completed'
@@ -635,9 +668,14 @@ class CreatePayFastPaymentView(APIView):
                 'message': 'order_id is required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            order = Order.objects.get(pk=order_id)
+        order = get_order_by_identifier(order_id)
+        if not order:
+            return Response({
+                'success': False,
+                'message': 'Order not found'
+            }, status=status.HTTP_404_NOT_FOUND)
 
+        try:
             has_perm, perm_err = check_order_ownership(order, request)
             if not has_perm:
                 return Response({

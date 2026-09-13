@@ -343,9 +343,10 @@ export default function RestaurantScreen() {
       return;
     }
     const baseVariantPrice = Number(variant.price);
-    const effectiveVariantPrice = item.active_flash_deal && item.active_flash_deal.discounted_price !== undefined
-      ? Number(item.active_flash_deal.discounted_price)
-      : baseVariantPrice;
+    const flashDiscount = (item.active_flash_deal && item.active_flash_deal.discounted_price !== undefined)
+      ? Math.max(0, Number(item.price) - Number(item.active_flash_deal.discounted_price))
+      : 0;
+    const effectiveVariantPrice = Math.max(0, baseVariantPrice - flashDiscount);
 
     const itemToAdd = {
       id: item.id,
