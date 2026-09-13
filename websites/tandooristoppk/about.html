@@ -84,12 +84,12 @@
     <a href="deals.html" onclick="closeMobileNav()">Deals & Platters</a>
     <a href="about.html" class="active" onclick="closeMobileNav()">Our Brand Story</a>
     <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
-    <a href="menu.html" class="ts-btn-primary" style="margin-top:16px;">🔥 Order Online</a>
+    <a href="menu.html" class="ts-btn-primary" style="margin-top:16px;" onclick="closeMobileNav()">🔥 Order Online</a>
   </div>
 
   <!-- ABOUT HERO -->
   <header style="padding:70px 5% 50px; background:radial-gradient(circle at 70% 30%, rgba(194, 65, 12, 0.22) 0%, transparent 65%), #140A06; border-bottom:1px solid var(--ts-border);">
-    <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1.2fr 0.8fr; gap:40px; align-items:center;">
+    <div class="ts-about-grid">
       <div>
         <div class="ts-eyebrow">Our Roots & Passion</div>
         <h1 class="ts-sec-title" style="font-size:clamp(32px, 5vw, 56px); margin-bottom:18px;">
@@ -106,7 +106,7 @@
       </div>
 
       <div style="position:relative;">
-        <img src="./images/IMG_7585.JPG.jpeg" alt="Tandoori Chicken Sizzling" style="width:100%; height:400px; object-fit:cover; border-radius:20px; border:2px solid var(--ts-border-strong); box-shadow:0 20px 50px rgba(0,0,0,0.7);" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+        <img src="./images/IMG_7585.JPG.jpeg" alt="Tandoori Chicken Sizzling" class="ts-hero-img" style="border-radius:20px; border:2px solid var(--ts-border-strong); box-shadow:0 20px 50px rgba(0,0,0,0.7);" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
       </div>
     </div>
   </header>

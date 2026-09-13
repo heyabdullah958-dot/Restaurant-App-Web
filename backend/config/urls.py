@@ -40,7 +40,6 @@ urlpatterns = [
     path('api/v1/search/popular-tags/', PopularTagsView.as_view(), name='v1_popular_tags'),
     path('api/v1/search/', PublicSearchView.as_view(), name='v1_public_search'),
     path('api/v1/promotions/flash-deals/', ActiveFlashDealsView.as_view(), name='v1_flash_deals'),
-    path('api/promotions/flash-deals/', ActiveFlashDealsView.as_view(), name='api_flash_deals'),
     path('api/search/popular-tags/', PopularTagsView.as_view(), name='api_popular_tags'),
     path('api/search/', PublicSearchView.as_view(), name='api_public_search'),
 

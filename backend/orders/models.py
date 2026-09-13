@@ -90,6 +90,15 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['restaurant', '-created_at'], name='order_rest_created_idx'),
+            models.Index(fields=['branch', '-created_at'], name='order_branch_created_idx'),
+            models.Index(fields=['user', '-created_at'], name='order_user_created_idx'),
+            models.Index(fields=['status', '-created_at'], name='order_status_created_idx'),
+        ]
+
     def generate_display_order_id(self):
         brand_map = {
             'seenbanao': 'SB',

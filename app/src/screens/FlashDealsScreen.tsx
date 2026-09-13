@@ -15,10 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
 import { COLORS, FONTS, SPACING, SHADOWS } from '../theme';
 import api from '../services/api';
-import { applyPromo, AppliedPromo } from '../store/cartSlice';
 
 const { width } = Dimensions.get('window');
 
@@ -320,7 +318,6 @@ const extractDealsList = (res: any): FlashDealItem[] => {
 
 export default function FlashDealsScreen() {
   const navigation = useNavigation<any>();
-  const dispatch = useDispatch();
 
   const [deals, setDeals] = useState<FlashDealItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -381,30 +378,20 @@ export default function FlashDealsScreen() {
 
   const handleClaim = useCallback((deal: FlashDealItem) => {
     const brand = resolveBrandInfo(deal);
-    const promoCode = `FLASH-${(deal.title || 'SALE').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8)}`;
-    
-    const promoPayload: AppliedPromo = {
-      code: promoCode,
-      discount_type: deal.deal_type === 'flat' ? 'fixed' : 'percentage',
-      discount_value: Number(deal.discount_value || deal.discount_percentage || 20),
-      max_discount: deal.max_discount ? Number(deal.max_discount) : null,
-      min_subtotal: Number(deal.min_subtotal || 0),
-      discount: 0,
-    };
+    const discountVal = Number(deal.discount_value || deal.discount_percentage || 20);
+    const discountType = deal.deal_type === 'flat' ? 'fixed' : 'percentage';
 
-    dispatch(applyPromo(promoPayload));
-
-    // Navigate to restaurant screen with alert banner
+    // Navigate cleanly to restaurant screen with flash deal highlight
     navigation.navigate('Restaurant', {
       slug: brand.slug,
       flashDealClaimed: {
         id: deal.id,
         title: deal.title,
-        discount: promoPayload.discount_value,
-        type: promoPayload.discount_type,
+        discount: discountVal,
+        type: discountType,
       }
     });
-  }, [dispatch, navigation]);
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>

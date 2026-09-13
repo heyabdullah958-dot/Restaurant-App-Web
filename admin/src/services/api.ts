@@ -238,6 +238,7 @@ export interface ApiOrder {
   total: string | number;
   subtotal: string | number;
   delivery_fee: string | number;
+  discount?: string | number;
   guest_name: string;
   guest_phone: string;
   delivery_address: string;
@@ -600,7 +601,7 @@ export const createRider = (data: any) => apiFetch<any>('/api/admin/riders/', { 
 export const updateRider = (id: number, data: any) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteRider = (id: number) => apiFetch<any>(`/api/admin/riders/${id}/`, { method: 'DELETE' });
 export const assignRiderToOrder = (orderId: number, riderId: number | null, is_hq_override?: boolean) => 
-  apiFetch<any>(`/api/orders/${orderId}/assign-rider/`, { method: 'POST', body: JSON.stringify({ rider_id: riderId, is_hq_override: is_hq_override ?? true }) });
+  apiFetch<any>(`/api/orders/${orderId}/assign-rider/`, { method: 'POST', body: JSON.stringify({ rider_id: riderId, ...(is_hq_override !== undefined ? { is_hq_override } : {}) }) });
 
 export const updateBranchStock = (branchId: number, itemId: number, is_in_stock: boolean) => 
   apiFetch<any>(`/api/admin/branches/${branchId}/stock/`, { method: 'POST', body: JSON.stringify({ item_id: itemId, is_in_stock }) });

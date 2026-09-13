@@ -34,8 +34,20 @@
       gap: 10px;
       overflow-x: auto;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
     .jushh-cat-nav::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 640px) {
+      .jushh-cat-nav {
+        top: 60px;
+        padding: 10px 16px;
+      }
+      .jushh-cat-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+      }
+    }
     
     .jushh-cat-btn {
       background: rgba(255, 255, 255, 0.04);
@@ -148,6 +160,14 @@
     <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="jushh-btn-primary" style="margin-top:16px;"><span>🛍️ View Cart</span></button>
   </div>
 
+  <!-- Selected Outlet Banner -->
+  <div id="jushh-branch-banner" style="display:none; background:rgba(220, 38, 38, 0.12); border-bottom:1px solid var(--jushh-border); padding:10px 5%; font-size:12.5px; color:var(--jushh-cream); align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <div>
+      <span style="color:var(--jushh-gold); font-weight:800;">📍 Selected Outlet:</span> <strong id="jushh-selected-branch-name" style="color:white;"></strong>
+    </div>
+    <a href="locations.html" style="color:var(--jushh-crimson); font-size:12px; font-weight:700; text-decoration:none;">Change Branch →</a>
+  </div>
+
   <!-- MENU HEADER -->
   <header style="padding:50px 5% 30px; background:radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.18) 0%, transparent 60%), #111115; border-bottom:1px solid var(--jushh-border);">
     <div style="max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
@@ -215,9 +235,9 @@
       <div>
         <div class="jushh-footer-col-title">Hotlines</div>
         <ul class="jushh-footer-links">
-          <li style="color:var(--ts-muted);">📞 Johar Town: 0326-9946142</li>
-          <li style="color:var(--ts-muted);">📞 Lake City: 0324-4441735</li>
-          <li style="color:var(--ts-muted);">📞 DHA Phase 1: 0325-7217221</li>
+          <li style="color:var(--jushh-muted);">📞 Johar Town: 0326-9946142</li>
+          <li style="color:var(--jushh-muted);">📞 Lake City: 0324-4441735</li>
+          <li style="color:var(--jushh-muted);">📞 DHA Phase 1: 0325-7217221</li>
           <li><a href="https://wa.me/923269946142" target="_blank" style="color:#25D366; font-weight:800;">💬 WhatsApp Order</a></li>
         </ul>
       </div>
@@ -640,13 +660,24 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderMenu();
 
-      // Check URL for branch preselection
+      // Check URL and sessionStorage for branch preselection
       const params = new URLSearchParams(window.location.search);
-      const branchParam = params.get('branch');
+      let branchParam = params.get('branch');
+      if (!branchParam) {
+        try {
+          branchParam = sessionStorage.getItem('foodsphere_selected_branch_jushhpk');
+        } catch(e) {}
+      }
       if (branchParam) {
         try {
           sessionStorage.setItem('foodsphere_selected_branch_jushhpk', branchParam);
         } catch(e) {}
+        const banner = document.getElementById('jushh-branch-banner');
+        const nameEl = document.getElementById('jushh-selected-branch-name');
+        if (banner && nameEl) {
+          nameEl.textContent = branchParam;
+          banner.style.display = 'flex';
+        }
       }
     });
   </script>

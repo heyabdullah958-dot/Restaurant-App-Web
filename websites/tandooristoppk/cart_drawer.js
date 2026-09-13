@@ -62,7 +62,18 @@
 
   // Load saved cart state from sessionStorage
   function initCartState() {
+    const brandSlug = (window.BRAND_SLUG || 'default').toLowerCase();
     try {
+      const savedBranch = sessionStorage.getItem('foodsphere_selected_branch_' + brandSlug);
+      if (savedBranch) {
+        cartState.selectedBranch = savedBranch;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const urlBranch = params.get('branch');
+      if (urlBranch) {
+        cartState.selectedBranch = urlBranch;
+        sessionStorage.setItem('foodsphere_selected_branch_' + brandSlug, urlBranch);
+      }
       const saved = sessionStorage.getItem('foodsphere_cart_' + (window.BRAND_SLUG || 'default'));
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -78,6 +89,14 @@
     } catch (e) {
       console.warn('[CartDrawer] State restore skipped', e);
     }
+  }
+
+  function setSelectedBranch(branch) {
+    cartState.selectedBranch = branch;
+    const brandSlug = (window.BRAND_SLUG || 'default').toLowerCase();
+    try {
+      sessionStorage.setItem('foodsphere_selected_branch_' + brandSlug, branch);
+    } catch (e) {}
   }
 
   function saveCartState() {
@@ -597,7 +616,7 @@
           <!-- Form Fields -->
           <div class="cd-form-group">
             <label class="cd-form-label">Select Branch Outlet</label>
-            <select class="cd-form-select" id="cd-input-branch">
+            <select class="cd-form-select" id="cd-input-branch" onchange="CartDrawer.setSelectedBranch(this.value)">
               ${branches.map(b => `<option value="${b.name}" ${cartState.selectedBranch === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
             </select>
           </div>
@@ -857,7 +876,8 @@
     processOrderSubmission,
     resetAndClose,
     clearActiveGuestOrder,
-    findProductImage
+    findProductImage,
+    setSelectedBranch
   };
 
 })();

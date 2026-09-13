@@ -39,6 +39,47 @@ def generate_payfast_signature(data, passphrase=None):
     return hashlib.md5(query_str.encode('utf-8')).hexdigest()
 
 
+def check_order_ownership(order, request):
+    """
+    Enforces object-level ownership on payment operations.
+    - If user is authenticated registered user: order.user must match request.user (or superuser/staff).
+    - If order belongs to a registered user, unauthenticated requests are strictly rejected.
+    - If order is a guest order (order.user is None or getattr(order.user, 'is_guest', False)):
+      requires request.user == order.user OR a valid matching tracking_token.
+    """
+    user = request.user
+    if user and user.is_authenticated and not getattr(user, 'is_guest', False):
+        if user.is_superuser or user.is_staff:
+            return True, None
+        if order.user:
+            if order.user == user:
+                return True, None
+            return False, "You do not have permission for this order."
+        # Guest order being paid by authenticated user: allow if matching tracking_token
+        tracking_token = (
+            request.data.get('tracking_token')
+            or request.headers.get('X-Tracking-Token')
+            or request.query_params.get('tracking_token')
+        )
+        if tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
+            return True, None
+        return False, "You do not have permission for this order."
+
+    # Unauthenticated / guest caller
+    if order.user and not getattr(order.user, 'is_guest', False):
+        return False, "Authentication required. You do not have permission for this order."
+
+    tracking_token = (
+        request.data.get('tracking_token')
+        or request.headers.get('X-Tracking-Token')
+        or request.query_params.get('tracking_token')
+    )
+    if tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip():
+        return True, None
+
+    return False, "Valid tracking_token or authentication required for this order."
+
+
 class ConfirmCODPaymentView(APIView):
     """
     POST /api/payments/cod/confirm/
@@ -57,17 +98,16 @@ class ConfirmCODPaymentView(APIView):
         try:
             order = Order.objects.get(pk=order_id)
 
-            # Check permission: if registered user, verify ownership. Allow guests & anonymous checkout.
-            if request.user.is_authenticated and not getattr(request.user, 'is_guest', False):
-                if order.user and order.user != request.user and not order.user.is_guest:
-                    logger.warning(
-                        f"User {request.user.id} attempted to confirm order {order_id} "
-                        f"owned by user {order.user.id}"
-                    )
-                    return Response({
-                        'success': False,
-                        'message': 'You do not have permission to confirm this order.'
-                    }, status=status.HTTP_403_FORBIDDEN)
+            has_perm, perm_err = check_order_ownership(order, request)
+            if not has_perm:
+                logger.warning(
+                    f"User {getattr(request.user, 'id', 'anonymous')} attempted to confirm order {order_id} "
+                    f"without permission: {perm_err}"
+                )
+                return Response({
+                    'success': False,
+                    'message': perm_err or 'You do not have permission to confirm this order.'
+                }, status=status.HTTP_403_FORBIDDEN)
 
 
             if order.status not in ('received', 'pending'):
@@ -131,12 +171,12 @@ class CreateStripePaymentIntentView(APIView):
         try:
             order = Order.objects.get(pk=order_id)
 
-            if request.user.is_authenticated:
-                if order.user and order.user != request.user:
-                    return Response({
-                        'success': False,
-                        'message': 'You do not have permission for this order.'
-                    }, status=status.HTTP_403_FORBIDDEN)
+            has_perm, perm_err = check_order_ownership(order, request)
+            if not has_perm:
+                return Response({
+                    'success': False,
+                    'message': perm_err or 'You do not have permission for this order.'
+                }, status=status.HTTP_403_FORBIDDEN)
 
             host = request.build_absolute_uri('/')[:-1]
 
@@ -398,20 +438,8 @@ class StripeSuccessLandingView(APIView):
 
     def get(self, request):
         order_id = request.GET.get('order_id', '')
-        
-        # Mark payment as completed if it was pending
-        try:
-            if order_id:
-                order = Order.objects.get(pk=order_id)
-                payment = Payment.objects.filter(order=order, method='stripe').first()
-                if payment and payment.status == 'pending':
-                    payment.status = 'completed'
-                    payment.save()
-                if order.status == 'pending':
-                    order.status = 'received'
-                    order.save()
-        except Exception as e:
-            logger.error(f"Error auto-completing Stripe payment on success landing: {str(e)}")
+        # Security Hardening: Payment completion and order state transitions strictly handled via webhook callback.
+        # Landing view purely displays status page without mutating database state.
 
         html_content = f"""
         <!DOCTYPE html>
@@ -610,12 +638,12 @@ class CreatePayFastPaymentView(APIView):
         try:
             order = Order.objects.get(pk=order_id)
 
-            if request.user.is_authenticated:
-                if order.user and order.user != request.user:
-                    return Response({
-                        'success': False,
-                        'message': 'You do not have permission for this order.'
-                    }, status=status.HTTP_403_FORBIDDEN)
+            has_perm, perm_err = check_order_ownership(order, request)
+            if not has_perm:
+                return Response({
+                    'success': False,
+                    'message': perm_err or 'You do not have permission for this order.'
+                }, status=status.HTTP_403_FORBIDDEN)
 
             # Create or update Payment entry
             payment, created = Payment.objects.update_or_create(
@@ -755,20 +783,8 @@ class PayFastSuccessLandingView(APIView):
 
     def get(self, request):
         order_id = request.GET.get('order_id', '')
-        
-        # Mark payment as completed if it was pending
-        try:
-            if order_id:
-                order = Order.objects.get(pk=order_id)
-                payment = Payment.objects.filter(order=order, method='payfast').first()
-                if payment and payment.status == 'pending':
-                    payment.status = 'completed'
-                    payment.save()
-                if order.status == 'pending':
-                    order.status = 'received'
-                    order.save()
-        except Exception as e:
-            logger.error(f"Error auto-completing PayFast payment on success landing: {str(e)}")
+        # Security Hardening: Payment completion and order state transitions strictly handled via webhook callback.
+        # Landing view purely displays status page without mutating database state.
 
         html_content = f"""
         <!DOCTYPE html>

@@ -92,7 +92,7 @@
 
   <!-- HERO SECTION -->
   <section class="ts-section" style="padding-top:70px; padding-bottom:70px; background: radial-gradient(ellipse at 70% 30%, rgba(234, 88, 12, 0.18) 0%, transparent 60%), linear-gradient(165deg, #160D09 0%, #0F0806 65%, #080402 100%);">
-    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.15fr 0.85fr; gap:40px; align-items:center;">
+    <div class="ts-hero-grid">
       <div>
         <div class="ts-hero-badge hero-stagger-badge">🏆 12.5K+ Followers · 3 Physical Branches in Lahore</div>
         <h1 class="ts-sec-title hero-stagger-title" style="font-size:clamp(34px, 5.2vw, 64px); margin-bottom:20px;">
@@ -141,7 +141,7 @@
       <!-- Hero Visual Card -->
       <div class="hero-stagger-visual" style="position:relative;">
         <div style="position:relative; border-radius:24px; overflow:hidden; border:2px solid var(--ts-border-strong); box-shadow:0 24px 60px rgba(0,0,0,0.8); background:#1A0E08;">
-          <img src="./images/IMG_7587.JPG.jpeg" alt="Tandoori Stop Traditional Sajji & Naan" style="width:100%; height:440px; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+          <img src="./images/IMG_7587.JPG.jpeg" alt="Tandoori Stop Traditional Sajji & Naan" class="ts-hero-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
           <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(15,8,6,0.95) 0%, rgba(15,8,6,0.2) 60%, transparent 100%);"></div>
           <div style="position:absolute; bottom:24px; left:24px; right:24px;">
             <div style="background:rgba(234,88,12,0.9); color:white; font-size:11px; font-weight:800; display:inline-block; padding:4px 12px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">Chef's Special</div>
@@ -173,25 +173,26 @@
           <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Handcrafted mud tandoors fired with premium lump charcoal create an intense radiant crust that locks in juices.</p>
         </div>
 
-        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
           <div style="font-size:42px; margin-bottom:14px;">🥩</div>
           <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">100% Halal Prime Cuts</h3>
           <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Fresh poultry delivered each dawn, hand-trimmed and marinated for 12 hours in our family blend of 14 roasted spices.</p>
         </div>
 
-        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
           <div style="font-size:42px; margin-bottom:14px;">🫓</div>
           <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">Hand-Stretched Naans</h3>
           <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Our master bakers slap each dough ball directly against the burning clay walls, delivering blistered, airy naans.</p>
         </div>
 
-        <div style="display:grid; background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
+        <div style="background:var(--ts-surface-card); border:1px solid var(--ts-border); border-radius:16px; padding:28px 24px; text-align:center;">
           <div style="font-size:42px; margin-bottom:14px;">🥘</div>
           <h3 style="font-family:var(--font-serif); font-size:18px; color:var(--ts-ivory); margin-bottom:8px;">Clay Pot Handis</h3>
           <p style="font-size:13px; color:var(--ts-muted); line-height:1.7;">Simmered in earthen clay handis with pure butter and rich cream to preserve the deep aromatics of royal desi cooking.</p>
         </div>
       </div>
     </div>
+  </section>
   <!-- FEATURED DEALS & COMBOS (Eastern Oven Benchmark) -->
   <section class="ts-section" style="background:linear-gradient(180deg, #170E0A 0%, #0F0806 100%); border-top:1px solid var(--ts-border); border-bottom:1px solid var(--ts-border);">
     <div style="max-width:1200px; margin:0 auto;">
@@ -551,7 +552,7 @@
         </div>
 
         <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/tandooristoppk" method="POST" onsubmit="handleFormSubmit(event)">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+          <div class="ts-form-row">
             <div>
               <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Full Name *</label>
               <input type="text" name="name" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="Your full name" required/>
@@ -562,7 +563,7 @@
             </div>
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+          <div class="ts-form-row">
             <div>
               <label style="font-size:11px; font-weight:700; color:var(--ts-saffron); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Select Branch</label>
               <select name="branch" style="width:100%; background:#140A06; border:1px solid var(--ts-border); color:white; padding:12px 14px; border-radius:8px; font-family:var(--font-body); font-size:13.5px; outline:none;">

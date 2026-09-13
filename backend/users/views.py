@@ -251,7 +251,25 @@ class ForgotPasswordView(APIView):
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
-        reset_link = f"https://foodsphere-admin.pages.dev/reset-password?uid={uid}&token={token}"
+        redirect_url = request.data.get('redirect_url')
+        client_type = request.data.get('client_type')
+        origin = request.headers.get('Origin') or request.headers.get('Referer')
+
+        safe_base_url = None
+        if redirect_url:
+            r_lower = str(redirect_url).lower()
+            if r_lower.startswith('foodsphere://') or 'pages.dev' in r_lower or 'vercel.app' in r_lower or 'localhost' in r_lower or '127.0.0.1' in r_lower:
+                safe_base_url = redirect_url
+        elif client_type == 'mobile':
+            safe_base_url = 'foodsphere://reset-password'
+        elif origin:
+            safe_base_url = f"{origin.rstrip('/')}/reset-password"
+
+        if safe_base_url:
+            sep = '&' if '?' in safe_base_url else '?'
+            reset_link = f"{safe_base_url}{sep}uid={uid}&token={token}"
+        else:
+            reset_link = f"https://foodsphere-admin.pages.dev/reset-password?uid={uid}&token={token}"
         
         subject = "Reset Your FoodSphere Password"
         message = f"""Hi {user.username},

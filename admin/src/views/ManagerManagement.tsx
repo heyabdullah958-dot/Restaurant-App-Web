@@ -52,21 +52,6 @@ interface CreatedManagerCredentials {
   notification_email: string;
 }
 
-const WHITELISTED_USERNAMES = [
-  'manager_tandooristoppk_johar_town',
-  'manager_tandooristoppk_lake_city',
-  'manager_tandooristoppk_gt_road_baghbanpura',
-  'manager_jushhpk_dha_phase_1',
-  'manager_jushhpk_johar_town',
-  'manager_jushhpk_lake_city',
-  'manager_getafomo_gulberg_iii'
-];
-
-const isLaunchBrand = (str: string) => {
-  const clean = (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  return clean.includes('tandoori') || clean.includes('jush') || clean.includes('fomo');
-};
-
 export const ManagerManagement: React.FC = () => {
   const { showToast, restaurants } = useAdmin();
   const [managers, setManagers] = useState<Manager[]>([]);
@@ -91,16 +76,11 @@ export const ManagerManagement: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [copiedField, setCopiedField] = useState<'username' | 'password' | null>(null);
 
-  const isWhitelistedManager = (m: Manager) => {
-    return WHITELISTED_USERNAMES.includes(m.username);
-  };
-
   const loadManagers = async () => {
     setLoading(true);
     try {
       const data = await fetchAllManagers();
-      const filtered = data.filter((m: Manager) => isWhitelistedManager(m) || WHITELISTED_USERNAMES.some(w => m.username.includes(w)));
-      setManagers(filtered);
+      setManagers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       showToast('Failed to load manager accounts from live API.', 'error');
       setManagers([]);
@@ -455,7 +435,7 @@ export const ManagerManagement: React.FC = () => {
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500 transition-all appearance-none pr-8 cursor-pointer"
                     >
                       <option value="">Select a restaurant...</option>
-                      {restaurants.filter(r => isLaunchBrand(r.slug || r.name)).map((r) => (
+                      {restaurants.map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.name} ({r.city})
                         </option>

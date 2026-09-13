@@ -90,6 +90,17 @@ def _dispatch_order_notifications(
 
 
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
+class OptionalJWTAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception:
+            return None
+
+
 class OrderListCreateView(generics.ListCreateAPIView):
     """
     POST /api/orders/ - Place a new order (IsAuthenticated).
@@ -114,7 +125,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').order_by('-created_at')
+        queryset = Order.objects.select_related('restaurant', 'branch', 'rider__branch__restaurant').prefetch_related('items__menu_item').order_by('-created_at')
         
         # If user is a branch manager (staff but not superuser), filter by their managed restaurant/branch
         if user.is_authenticated and user.is_staff and not user.is_superuser:
@@ -272,7 +283,7 @@ class OrderTrackView(APIView):
     estimated time, and restaurant/branch info for Order #<pk> without authorization restrictions.
     Redacts sensitive PII (phone & exact address) unless valid tracking_token or owner auth is present.
     """
-    authentication_classes = []
+    authentication_classes = [OptionalJWTAuthentication]
     permission_classes = [permissions.AllowAny]
     throttle_classes = []
 
@@ -285,7 +296,7 @@ class OrderTrackView(APIView):
                 query = Q(display_order_id__iexact=str(pk).strip())
                 if str(pk).isdigit():
                     query |= Q(pk=int(pk))
-                order = Order.objects.select_related('restaurant', 'branch', 'rider').prefetch_related('items__menu_item').filter(query).order_by('-id').first()
+                order = Order.objects.select_related('restaurant', 'branch', 'rider__branch__restaurant').prefetch_related('items__menu_item').filter(query).order_by('-id').first()
                 if not order:
                     return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
             elif token:
@@ -351,7 +362,7 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
             managed_restaurant = get_managed_restaurant(user)
             
             if managed_branch:
-                return queryset.filter(Q(branch=managed_branch) | Q(restaurant=managed_branch.restaurant))
+                return queryset.filter(branch=managed_branch)
             elif managed_restaurant:
                 return queryset.filter(restaurant=managed_restaurant)
             return Order.objects.none()
@@ -494,7 +505,7 @@ class MyOrdersListView(generics.ListAPIView):
 
         return (
             Order.objects.filter(user=user)
-            .select_related('restaurant', 'branch', 'rider')
+            .select_related('restaurant', 'branch', 'rider__branch__restaurant')
             .prefetch_related('items__menu_item')
             .order_by('-created_at')
         )
@@ -539,7 +550,30 @@ class OrderAssignRiderView(APIView):
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
         user = request.user
-        is_super = getattr(user, 'is_superuser', False) or bool(request.data.get('is_hq_override'))
+        is_super = bool(user and user.is_superuser)
+
+        # Enforce caller-to-order ownership: non-superusers can only manage orders for their assigned branch or restaurant
+        if not is_super:
+            from config.admin_utils import get_managed_branch, get_managed_restaurant
+            managed_branch = get_managed_branch(user)
+            managed_restaurant = get_managed_restaurant(user)
+            if managed_branch:
+                if order.branch != managed_branch:
+                    return Response(
+                        {'error': 'You can only assign riders to orders belonging to your assigned branch.'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            elif managed_restaurant:
+                if order.restaurant != managed_restaurant:
+                    return Response(
+                        {'error': 'You can only assign riders to orders belonging to your assigned restaurant.'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            else:
+                return Response(
+                    {'error': 'You do not have permission to manage orders.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         rider_id = request.data.get('rider_id')
         if rider_id is None and 'rider' in request.data:
@@ -698,6 +732,17 @@ class OrderReviewView(APIView):
             return Response(
                 {'error': 'Reviews can only be submitted for delivered orders.'},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Enforce order ownership: user must own order or provide matching tracking_token
+        tracking_token = request.data.get('tracking_token') or request.query_params.get('tracking_token')
+        is_owner = bool(request.user and request.user.is_authenticated and order.user and order.user == request.user)
+        has_valid_token = bool(tracking_token and str(order.tracking_token).strip() == str(tracking_token).strip())
+
+        if not (is_owner or has_valid_token):
+            return Response(
+                {'error': 'You do not have permission to review this order.'},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         if hasattr(order, 'review') and order.review is not None:

@@ -482,14 +482,49 @@ html.entrance-skipped #ts-entrance {
   backdrop-filter: blur(24px);
   z-index: 999;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 22px;
-  padding: 40px 20px;
+  padding: 85px 20px 40px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ts-mobile-nav.open {
   display: flex;
+}
+
+/* Responsive Grid Helper Classes */
+.ts-hero-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.ts-about-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.ts-hero-img {
+  width: 100%;
+  height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+.ts-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .ts-mobile-nav a {
@@ -1212,13 +1247,46 @@ html.entrance-skipped #ts-entrance {
   .ts-nav-links { display: none; }
   .ts-hamburger { display: flex; }
   .ts-footer-top { grid-template-columns: 1fr 1fr; }
+  .ts-hero-grid { grid-template-columns: 1fr; gap: 32px; }
+  .ts-about-grid { grid-template-columns: 1fr; gap: 32px; }
+  .ts-hero-img { height: 340px; }
 }
 
 @media (max-width: 640px) {
   .ts-topbar { display: none; }
+  .ts-nav { padding: 10px 16px; }
+  .ts-brand-logo { height: 38px; }
+  .ts-brand-title { font-size: 16px; }
+  .ts-brand-tagline { display: none; }
+  .ts-nav-actions .ts-btn-primary { padding: 7px 12px; font-size: 11.5px; gap: 4px; }
   .ts-footer-top { grid-template-columns: 1fr; gap: 30px; }
-  .ts-section { padding: 60px 16px; }
+  .ts-section { padding: 48px 16px; }
   .ts-sec-title { font-size: 26px; }
   .ts-menu-grid { grid-template-columns: 1fr; }
   .ts-naan-grid { grid-template-columns: 1fr 1fr; }
+  .ts-form-row { grid-template-columns: 1fr; gap: 12px; }
+  .ts-hero-img { height: 260px; }
+  .ts-float-wa { bottom: 18px; right: 16px; padding: 9px 16px; font-size: 12px; }
+  .ts-modal-overlay { padding: 12px; }
+  .ts-modal-img-wrap { height: 200px; }
+  .ts-modal-body { padding: 18px 18px 16px; }
+  .ts-modal-title { font-size: 20px; }
+  .ts-modal-price { font-size: 18px; margin-bottom: 10px; }
+  .ts-modal-desc { font-size: 13px; margin-bottom: 16px; padding-bottom: 14px; }
+  .ts-modal-spec { gap: 8px; margin-bottom: 14px; }
+  .ts-modal-pill { font-size: 10.5px; padding: 4px 10px; }
+  .ts-modal-footer { flex-direction: column; gap: 10px; }
+  .ts-modal-footer .ts-modal-qty-control { width: 100%; justify-content: space-between; }
+  .ts-modal-footer .ts-btn-primary { width: 100%; }
+  .ts-lightbox-box { margin: 10px; }
+  .ts-lightbox-img-wrap { height: 220px; }
+  .ts-lightbox-body { padding: 14px 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .ts-branch-actions { flex-direction: column; }
+  .ts-branch-actions a, .ts-branch-actions button { width: 100%; justify-content: center; text-align: center; }
+}
+
+@media (max-width: 400px) {
+  .ts-sec-title { font-size: 23px; }
+  .ts-naan-grid { grid-template-columns: 1fr; }
+  .ts-hero-badge { font-size: 9.5px; padding: 4px 12px; }
 }

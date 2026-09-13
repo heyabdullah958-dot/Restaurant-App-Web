@@ -125,7 +125,7 @@ class AdminCustomerLoyaltyView(APIView):
         if diff != 0:
             LoyaltyTransaction.objects.create(
                 user=user,
-                points=abs(diff),
+                points=diff,
                 transaction_type='earned' if diff > 0 else 'redeemed',
                 description=f"Admin adjustment: {reason} (by {request.user.username})"
             )

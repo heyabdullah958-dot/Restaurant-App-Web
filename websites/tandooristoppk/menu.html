@@ -35,8 +35,20 @@
       gap: 10px;
       overflow-x: auto;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
     .ts-cat-nav::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 640px) {
+      .ts-cat-nav {
+        top: 60px;
+        padding: 10px 16px;
+      }
+      .ts-cat-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+      }
+    }
     
     .ts-cat-btn {
       background: rgba(245, 158, 11, 0.08);
@@ -142,6 +154,14 @@
     <a href="about.html" onclick="closeMobileNav()">Our Brand Story</a>
     <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
     <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="ts-btn-primary" style="margin-top:16px;">🛍️ View Cart</button>
+  </div>
+
+  <!-- Selected Outlet Banner -->
+  <div id="ts-branch-banner" style="display:none; background:rgba(245, 158, 11, 0.1); border-bottom:1px solid var(--ts-border); padding:10px 5%; font-size:12.5px; color:var(--ts-cream); align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <div>
+      <span style="color:var(--ts-gold); font-weight:800;">📍 Selected Outlet:</span> <strong id="ts-selected-branch-name" style="color:white;"></strong>
+    </div>
+    <a href="locations.html" style="color:var(--ts-saffron); font-size:12px; font-weight:700; text-decoration:none;">Change Branch →</a>
   </div>
 
   <!-- MENU HEADER -->
@@ -693,13 +713,24 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderMenu();
 
-      // Check URL for branch preselection
+      // Check URL and sessionStorage for branch preselection
       const params = new URLSearchParams(window.location.search);
-      const branchParam = params.get('branch');
+      let branchParam = params.get('branch');
+      if (!branchParam) {
+        try {
+          branchParam = sessionStorage.getItem('foodsphere_selected_branch_tandooristoppk');
+        } catch(e) {}
+      }
       if (branchParam) {
         try {
           sessionStorage.setItem('foodsphere_selected_branch_tandooristoppk', branchParam);
         } catch(e) {}
+        const banner = document.getElementById('ts-branch-banner');
+        const nameEl = document.getElementById('ts-selected-branch-name');
+        if (banner && nameEl) {
+          nameEl.textContent = branchParam;
+          banner.style.display = 'flex';
+        }
       }
     });
   </script>

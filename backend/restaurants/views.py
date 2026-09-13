@@ -21,7 +21,7 @@ class RestaurantListView(generics.ListAPIView):
 
     def get_queryset(self):
         # Always return all restaurants so offline restaurants remain visible across UI with is_active=False status
-        queryset = Restaurant.objects.all()
+        queryset = Restaurant.objects.all().prefetch_related('branches')
 
         is_featured = self.request.query_params.get('featured')
         city = self.request.query_params.get('city')
@@ -374,20 +374,19 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
         is_active_param = self.request.query_params.get('is_active')
         allow_global_param = self.request.query_params.get('allow_global')
 
-        if not user.is_superuser:
+        is_super = bool(user and user.is_superuser)
+        allow_global = is_super and (allow_global_param in ['true', '1'])
+
+        if not is_super:
             from config.admin_utils import get_managed_restaurant, get_managed_branch
             managed_branch = get_managed_branch(user)
             managed_restaurant = get_managed_restaurant(user)
-            if allow_global_param in ['true', '1']:
-                pass
-            elif managed_branch and not branch_id:
-                base_qs = base_qs.filter(branch=managed_branch)
-            elif managed_restaurant and not restaurant_id:
-                base_qs = base_qs.filter(branch__restaurant=managed_restaurant)
-            elif managed_branch:
+            if managed_branch:
                 base_qs = base_qs.filter(branch=managed_branch)
             elif managed_restaurant:
                 base_qs = base_qs.filter(branch__restaurant=managed_restaurant)
+            else:
+                return BranchRider.objects.none()
 
         status_filter = status_param.upper() if status_param else None
         is_act_filter = True if (is_active_param and is_active_param.lower() in ['true', '1']) else (False if (is_active_param and is_active_param.lower() in ['false', '0']) else None)
@@ -404,8 +403,8 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 t1_qs = t1_qs.filter(status__iexact=status_filter)
             if is_act_filter is not None:
                 t1_qs = t1_qs.filter(is_active=is_act_filter)
-            # Return branch-scoped queryset directly unless global fallback is explicitly requested
-            if t1_qs.exists() or allow_global_param not in ['true', '1']:
+            # Return branch-scoped queryset directly unless global fallback is explicitly requested by superuser
+            if t1_qs.exists() or not allow_global:
                 return t1_qs
 
         if restaurant_id:
@@ -420,8 +419,8 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 t2_qs = t2_qs.filter(status__iexact=status_filter)
             if is_act_filter is not None:
                 t2_qs = t2_qs.filter(is_active=is_act_filter)
-            # Return restaurant-scoped queryset directly unless global fallback is explicitly requested
-            if t2_qs.exists() or allow_global_param not in ['true', '1']:
+            # Return restaurant-scoped queryset directly unless global fallback is explicitly requested by superuser
+            if t2_qs.exists() or not allow_global:
                 return t2_qs
 
         qs = base_qs

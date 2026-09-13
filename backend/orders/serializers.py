@@ -131,6 +131,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if branch:
                 attrs['branch'] = branch
 
+        if branch and not branch.is_active:
+            raise serializers.ValidationError(
+                f"Branch '{branch.name}' is currently closed and not accepting orders."
+            )
+
+        ord_type_val = str(attrs.get('order_type') or 'DELIVERY').upper()
+        if ord_type_val == 'DELIVERY':
+            delivery_addr = attrs.get('delivery_address')
+            if not delivery_addr or not str(delivery_addr).strip() or str(delivery_addr).strip() in ['PICKUP AT OUTLET']:
+                raise serializers.ValidationError({
+                    'delivery_address': 'A valid delivery address is required for delivery orders.'
+                })
+
         items = attrs.get('items', [])
         from restaurants.models import BranchMenuItemAvailability
         for item_data in items:
@@ -151,11 +164,17 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                         f"Please remove it from your cart and try again."
                     )
 
-        # Minimum order amount validation
+        # Minimum order amount validation & subtotal calculation with active flash deals
+        from promotions.deal_engine import resolve_active_deal_for_item
+        b_id = branch.id if branch else None
         subtotal = Decimal('0.00')
         for item in items:
             menu_item = item['menu_item']
-            item_price = menu_item.price
+            deal = resolve_active_deal_for_item(menu_item, order_mode=ord_type_val, branch_id=b_id)
+            if deal and deal.get('discount_amount', 0) > 0:
+                item_price = Decimal(str(deal['discounted_price']))
+            else:
+                item_price = menu_item.price
             selected_opts = item.get('selected_options', [])
             
             db_options = menu_item.options or []
@@ -299,8 +318,38 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             
             validated_data['user'] = user
 
+            if coupon:
+                # Concurrency Protection: Row-lock coupon record during creation
+                coupon = Coupon.objects.select_for_update().filter(pk=coupon.pk, is_active=True).first()
+                if not coupon:
+                    raise serializers.ValidationError("Coupon is no longer available.")
+
+                from promotions.models import CouponUsage
+                # Re-verify per-user limit inside locked transaction
+                if user and not user.is_guest:
+                    user_usage_count = CouponUsage.objects.filter(coupon=coupon, user=user).count()
+                    if user_usage_count >= coupon.per_user_limit:
+                        raise serializers.ValidationError("You have already used this promo code the maximum allowed times.")
+                elif validated_data.get('guest_phone'):
+                    phone = str(validated_data.get('guest_phone')).strip()
+                    phone_usage_count = CouponUsage.objects.filter(coupon=coupon, order__guest_phone=phone).count()
+                    if phone_usage_count >= coupon.per_user_limit:
+                        raise serializers.ValidationError("This phone number has already used this promo code the maximum allowed times.")
+
+            from promotions.deal_engine import resolve_active_deal_for_item
+            from promotions.models import FlashDeal, FlashDealRedemption
+
+            ord_type = str(validated_data.get('order_type', 'DELIVERY')).upper()
+            validated_data['order_type'] = ord_type
+
+            branch_obj = validated_data.get('branch')
+            b_id = branch_obj.id if branch_obj else None
+
             subtotal = Decimal('0.00')
+            gross_subtotal = Decimal('0.00')
+            total_flash_discount = Decimal('0.00')
             order_items_to_create = []
+            applied_flash_deals = []
 
             for item_data in items_data:
                 menu_item = item_data['menu_item']
@@ -316,7 +365,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                         f"Menu item '{menu_item.name}' is currently unavailable."
                     )
 
-                branch_obj = validated_data.get('branch')
                 if branch_obj:
                     from restaurants.models import BranchMenuItemAvailability
                     branch_override = BranchMenuItemAvailability.objects.filter(
@@ -328,7 +376,26 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                             f"'{menu_item.name}' is currently out of stock at {branch_obj.name}."
                         )
 
-                unit_price = menu_item.price
+                # Resolve active flash deal BEFORE computing subtotal and total
+                active_deal_info = resolve_active_deal_for_item(
+                    menu_item,
+                    order_mode=ord_type,
+                    branch_id=b_id
+                )
+                base_price = menu_item.price
+                item_flash_saving = Decimal('0.00')
+                if active_deal_info and active_deal_info.get('discount_amount', 0) > 0:
+                    item_flash_saving = Decimal(str(active_deal_info['discount_amount']))
+                    deal_id = active_deal_info.get('deal_id')
+                    if deal_id:
+                        applied_flash_deals.append({
+                            'deal_id': deal_id,
+                            'discount_amount': item_flash_saving * quantity,
+                        })
+
+                # Line-item unit price after flash deal deduction
+                unit_price = max(Decimal('0.00'), base_price - item_flash_saving)
+
                 selected_opts = item_data.get('selected_options', [])
                 db_options = menu_item.options or []
                 price_modifier_sum = Decimal('0.00')
@@ -354,6 +421,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 unit_price += price_modifier_sum
                 total_price = unit_price * quantity
                 subtotal += total_price
+                gross_subtotal += (base_price + price_modifier_sum) * quantity
+                total_flash_discount += (item_flash_saving * quantity)
 
                 order_items_to_create.append({
                     'menu_item': menu_item,
@@ -365,8 +434,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 })
 
             delivery_fee = restaurant.delivery_fee
-            ord_type = str(validated_data.get('order_type', 'DELIVERY')).upper()
-            validated_data['order_type'] = ord_type
 
             if ord_type in ['DINE_IN', 'TAKEAWAY']:
                 delivery_fee = Decimal('0.00')
@@ -393,14 +460,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     coupon_discount = coupon.discount_value
                 coupon_discount = min(coupon_discount, subtotal)
 
-                # Atomic increment of times_used
+                # Atomic increment of times_used supporting unlimited campaigns (usage_limit = 0)
+                from django.db.models import Q
                 updated = Coupon.objects.filter(
-                    pk=coupon.pk,
-                    is_active=True,
-                    times_used__lt=F('usage_limit')
+                    Q(pk=coupon.pk, is_active=True) &
+                    (Q(usage_limit=0) | Q(times_used__lt=F('usage_limit')))
                 ).update(times_used=F('times_used') + 1)
 
-                if updated == 0 and coupon.usage_limit > 0:
+                if updated == 0:
                     raise serializers.ValidationError("Coupon usage limit has been reached.")
 
             # Loyalty Points Redemption
@@ -414,15 +481,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 if actual_pts_redeemed > 0:
                     loyalty_discount = Decimal(actual_pts_redeemed)
 
-            discount = coupon_discount + loyalty_discount
-            total = subtotal + delivery_fee - discount
+            total = subtotal + delivery_fee - coupon_discount - loyalty_discount
             total = max(Decimal('0.00'), round(total, 2))
+            recorded_discount = total_flash_discount + coupon_discount + loyalty_discount
 
             # Create Order
             order = Order.objects.create(
-                subtotal=subtotal,
+                subtotal=gross_subtotal,
                 delivery_fee=delivery_fee,
-                discount=discount,
+                discount=recorded_discount,
                 total=total,
                 **validated_data
             )
@@ -438,25 +505,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
             # Record FlashDealRedemption if active flash deals apply
             try:
-                from promotions.models import FlashDeal, FlashDealRedemption
-                from promotions.deal_engine import resolve_active_deal_for_item
                 claimed_deal_ids = set()
-                for item_obj in order_items_to_create:
-                    m_item = item_obj['menu_item']
-                    b_id = validated_data.get('branch_id') or (validated_data.get('branch').id if validated_data.get('branch') else None)
-                    active_deal_info = resolve_active_deal_for_item(m_item, order_mode=ord_type, branch_id=b_id)
-                    if active_deal_info and active_deal_info.get('deal_id'):
-                        deal_id = active_deal_info['deal_id']
-                        if deal_id not in claimed_deal_ids:
-                            claimed_deal_ids.add(deal_id)
-                            deal_obj = FlashDeal.objects.filter(id=deal_id).first()
-                            if deal_obj:
-                                FlashDealRedemption.objects.create(
-                                    flash_deal=deal_obj,
-                                    order=order,
-                                    user=user if user and not user.is_guest else None,
-                                    discount_applied=Decimal(str(active_deal_info.get('discount_amount', 0)))
-                                )
+                for deal_rec in applied_flash_deals:
+                    d_id = deal_rec['deal_id']
+                    if d_id not in claimed_deal_ids:
+                        claimed_deal_ids.add(d_id)
+                        deal_obj = FlashDeal.objects.filter(id=d_id).first()
+                        if deal_obj:
+                            FlashDealRedemption.objects.create(
+                                flash_deal=deal_obj,
+                                order=order,
+                                user=user if user and not user.is_guest else None,
+                                discount_applied=Decimal(str(deal_rec['discount_amount']))
+                            )
             except Exception as e:
                 logger.warning(f"[FLASH DEAL REDEMPTION LOGGING ERROR]: {e}")
 

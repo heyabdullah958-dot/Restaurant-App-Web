@@ -148,7 +148,7 @@ function mapApiOrder(o: ApiOrder): Order {
     total: typeof o.total === 'string' ? parseFloat(o.total) : o.total,
     subtotal: typeof o.subtotal === 'string' ? parseFloat(o.subtotal) : (o.subtotal || 0),
     delivery_fee: typeof o.delivery_fee === 'string' ? parseFloat(o.delivery_fee) : (o.delivery_fee || 0),
-    discount: 0,
+    discount: Number(o.discount) || 0,
     delivery_address: o.delivery_address,
     delivery_lat: parseCoord(o.delivery_lat),
     delivery_lng: parseCoord(o.delivery_lng),

@@ -86,12 +86,19 @@ export const BranchDashboard: React.FC = () => {
   }, [restaurant?.id]);
 
 
-  // Filter orders for this restaurant (robust casting)
-  const brandOrders = orders.filter((o) => 
-    Number(o.restaurant_id) === Number(restaurant.id) ||
-    (o.restaurant_name && restaurant.name && 
-     o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
-  );
+  // Filter orders for this restaurant and branch (robust casting)
+  const brandOrders = orders.filter((o) => {
+    const isRestaurantMatch = (
+      Number(o.restaurant_id) === Number(restaurant.id) ||
+      (o.restaurant_name && restaurant.name && 
+       o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+    );
+    if (!isRestaurantMatch) return false;
+    if (currentBranch?.id && o.branch_id) {
+      return Number(o.branch_id) === Number(currentBranch.id);
+    }
+    return true;
+  });
   const pendingOrdersCount = brandOrders.filter((o) => o.status !== 'delivered' && o.status !== 'cancelled').length;
 
   // Calculate live stats based on timeframe (Delivered-Only Revenue Accounting)

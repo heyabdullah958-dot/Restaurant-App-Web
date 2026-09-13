@@ -49,10 +49,11 @@ class Restaurant(models.Model):
     def is_open(self):
         if self.is_force_closed or not self.is_active:
             return False
-        b_list = self.branches.all()
-        if not b_list.exists():
+        # Inspect prefetched branches in Python without firing new SQL queries
+        branches = self.branches.all()
+        if not branches:
             return True
-        return b_list.filter(is_active=True).exists()
+        return any(b.is_active for b in branches)
 
     def __str__(self):
         return self.name

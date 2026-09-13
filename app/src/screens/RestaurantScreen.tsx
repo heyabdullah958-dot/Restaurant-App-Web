@@ -342,14 +342,19 @@ export default function RestaurantScreen() {
       showAlert('Item Out of Stock', `${item.name} is currently sold out at ${currentBranch?.name || 'this branch'}.`);
       return;
     }
+    const baseVariantPrice = Number(variant.price);
+    const effectiveVariantPrice = item.active_flash_deal && item.active_flash_deal.discounted_price !== undefined
+      ? Number(item.active_flash_deal.discounted_price)
+      : baseVariantPrice;
+
     const itemToAdd = {
       id: item.id,
       name: `${item.name} (${variant.name})`,
-      price: Number(variant.price),
+      price: effectiveVariantPrice,
       quantity: 1,
       selectedOptions: [{
         name: variant.name,
-        price_modifier: Number(variant.price) - Number(item.price),
+        price_modifier: baseVariantPrice - Number(item.price),
         specifications: variant.specifications || {}
       }],
       branch_availability_map: item.branch_availability_map,
@@ -471,10 +476,14 @@ export default function RestaurantScreen() {
       showAlert('Restaurant Closed', `${restaurant.name} is currently closed and not accepting orders.`);
       return;
     }
+    const effectivePrice = item.active_flash_deal && item.active_flash_deal.discounted_price !== undefined
+      ? Number(item.active_flash_deal.discounted_price)
+      : Number(item.price);
+
     const itemToAdd = {
       id: item.id,
       name: item.name,
-      price: Number(item.price),
+      price: effectivePrice,
       quantity: 1,
       selectedOptions: [],
       branch_availability_map: item.branch_availability_map,

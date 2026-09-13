@@ -2,13 +2,14 @@ import React from 'react';
 import { useAdmin } from '../AdminContext';
 import { AnalyticsCharts } from '../components/AnalyticsCharts';
 import { DollarSign, Store, ClipboardCheck, Percent, Star, ArrowUpRight, Clock, Settings, Save, CheckCircle } from 'lucide-react';
-import { fetchPlatformSettings, updatePlatformSettings, fetchReviews } from '../services/api';
+import { fetchPlatformSettings, updatePlatformSettings, fetchReviews, fetchPlatformAnalytics } from '../services/api';
 
 export const SuperDashboard: React.FC = () => {
   const { restaurants, orders, setSelectedBrand, setView, selectedBrandId } = useAdmin();
   const [scope, setScope] = React.useState<'all' | 'selected'>('all');
   const [timeframe, setTimeframe] = React.useState<'all' | 'today' | 'week' | 'month'>('all');
 
+  const [platformAnalytics, setPlatformAnalytics] = React.useState<any>(null);
   const [reviews, setReviews] = React.useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = React.useState(false);
 
@@ -54,7 +55,15 @@ export const SuperDashboard: React.FC = () => {
       })
       .catch(() => setReviews([]))
       .finally(() => setLoadingReviews(false));
-  }, []);
+
+    fetchPlatformAnalytics()
+      .then((data: any) => {
+        if (data?.summary) {
+          setPlatformAnalytics(data);
+        }
+      })
+      .catch(() => {});
+  }, [orders.length]);
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,9 +147,28 @@ export const SuperDashboard: React.FC = () => {
 
   // Delivered-Only Revenue Accounting
   const deliveredOrders = filteredOrders.filter(o => o.status === 'delivered');
-  const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
-  const totalOrders = filteredOrders.length;
-  const averageOrderValue = deliveredOrders.length > 0 ? totalRevenue / deliveredOrders.length : 0;
+  let totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
+  let totalOrders = filteredOrders.length;
+  let averageOrderValue = deliveredOrders.length > 0 ? totalRevenue / deliveredOrders.length : 0;
+
+  // When scope is 'all' and server platformAnalytics is available, wire exact DB platform aggregates
+  if (scope === 'all' && platformAnalytics?.summary) {
+    const s = platformAnalytics.summary;
+    if (timeframe === 'today') {
+      totalRevenue = s.revenue_today ?? totalRevenue;
+      totalOrders = s.orders_today ?? totalOrders;
+    } else if (timeframe === 'week') {
+      totalRevenue = s.revenue_7d ?? totalRevenue;
+      totalOrders = s.orders_7d ?? totalOrders;
+    } else if (timeframe === 'month') {
+      totalRevenue = s.revenue_30d ?? totalRevenue;
+      totalOrders = s.orders_30d ?? totalOrders;
+    } else {
+      totalRevenue = s.revenue_all_time ?? totalRevenue;
+      totalOrders = s.orders_all_time ?? totalOrders;
+    }
+    averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  }
 
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
@@ -333,13 +361,19 @@ export const SuperDashboard: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-700/40 text-sm text-slate-300">
               {restaurants.map((restaurant) => {
+                const breakdown = platformAnalytics?.restaurant_breakdown?.find((b: any) => b.id === restaurant.id);
                 const tenantOrders = orders.filter(o => 
                   Number(o.restaurant_id) === Number(restaurant.id) ||
                   (o.restaurant_name && restaurant.name && 
                    o.restaurant_name.toLowerCase().replace(/[^a-z0-9]/g, '') === restaurant.name.toLowerCase().replace(/[^a-z0-9]/g, ''))
                 );
-                const tenantRevenue = tenantOrders.reduce((sum, o) => sum + o.total, 0);
-                const tenantAOV = tenantOrders.length > 0 ? tenantRevenue / tenantOrders.length : 0;
+                const tenantRevenue = breakdown?.revenue_all_time !== undefined 
+                  ? breakdown.revenue_all_time 
+                  : tenantOrders.reduce((sum, o) => sum + o.total, 0);
+                const tenantOrderCount = breakdown?.orders_all_time !== undefined 
+                  ? breakdown.orders_all_time 
+                  : tenantOrders.length;
+                const tenantAOV = tenantOrderCount > 0 ? tenantRevenue / tenantOrderCount : (breakdown?.avg_order || 0);
                 
                 return (
                   <tr key={restaurant.id} className="hover:bg-slate-700/20 transition-colors">
@@ -377,7 +411,7 @@ export const SuperDashboard: React.FC = () => {
                       Rs. {tenantRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="py-4.5 px-6 text-right font-semibold">
-                      {tenantOrders.length.toLocaleString()}
+                      {tenantOrderCount.toLocaleString()}
                     </td>
                     <td className="py-4.5 px-6 text-right font-semibold">
                       Rs. {Math.round(tenantAOV)}
