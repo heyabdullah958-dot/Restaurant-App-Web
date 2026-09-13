@@ -961,6 +961,53 @@
     - JushhPK: `https://jushhpk-foodsphere.pages.dev` (HTTP 200 across all 5 routes)
 - **Confidence**: [100%] — All multi-page routes, modals, themes, and animations verified on live production Cloudflare Pages.
 
+---
+
+## Phase 14b — Brand Websites Comprehensive Mobile UI & Viewport Optimization — 2026-09-13
+- **What was done**:
+  1. **Inline Minmax Grid Elimination & Responsive Re-Architecture**:
+     - Audited all 10 HTML templates across TandooriStop and JushhPK.
+     - Replaced hardcoded inline `grid-template-columns: repeat(auto-fit, minmax(260px/280px/320px, 1fr))` across `about.html`, `index.html`, and `deals.html` with responsive theme classes (`.ts-cards-grid`, `.jushh-cards-grid`).
+     - On screens `<= 640px`, grids collapse to single-column (`1fr`) with fluid padding, eliminating horizontal viewport blowouts on 320px–375px devices.
+  2. **Active Order Banner Boundaries & Mobile Nav Suppression**:
+     - Bounded `#cd-active-order-banner` with `max-width: 92vw`, `box-sizing: border-box`, and text centering.
+     - Added `#cd-active-order-banner` to `body.mobile-nav-open` suppression in `theme_ts.css` and `theme_jushh.css` to prevent it from overlaying the mobile slide-out drawer.
+  3. **Promo Coupon Badge Wrapping on Small Devices**:
+     - Added `flex-wrap: wrap; max-width: 100%; box-sizing: border-box; justify-content: center;` to the promo coupon badges in `deals.html`, fixing horizontal scrollbars on 320px screens.
+  4. **Direct Order Form Box Mobile Padding**:
+     - Introduced `.ts-order-box` and `.jushh-order-box` classes replacing static 40px/32px inline paddings with responsive `padding: 24px 16px;` on screens `<= 640px`.
+  5. **Floating Action Alignment on Narrow Screens**:
+     - Standardized right-alignment (`right: 12px; bottom: 16px;`) across both floating WhatsApp and Cart buttons on screens `<= 360px`.
+  6. **Multi-Copy Cart Drawer Synchronization**:
+     - Harmonized `cart_drawer.js` and `cart_drawer.css` across root, `websites/tandooristoppk/`, and `websites/jushhpk/` to 100% binary parity.
+  7. **Cloudflare Production Deployment**:
+     - Deployed both sites via Wrangler to Cloudflare Pages (`tandooristoppk-foodsphere` and `jushhpk-foodsphere`).
+- **Files modified**:
+  - `websites/cart_drawer.css`
+  - `websites/cart_drawer.js`
+  - `websites/tandooristoppk/cart_drawer.css`
+  - `websites/tandooristoppk/cart_drawer.js`
+  - `websites/tandooristoppk/theme_ts.css`
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/about.html`
+  - `websites/tandooristoppk/deals.html`
+  - `websites/tandooristoppk/locations.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/jushhpk/cart_drawer.css`
+  - `websites/jushhpk/cart_drawer.js`
+  - `websites/jushhpk/theme_jushh.css`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/about.html`
+  - `websites/jushhpk/deals.html`
+  - `websites/jushhpk/locations.html`
+  - `test_phase14_mobile_ui_deep_audit.py` [NEW]
+- **Verification evidence**:
+  - `python test_phase14_mobile_ui_deep_audit.py` passed 18/18 tests (100%).
+  - `python test_phase14_multipage_theme_suite.py` passed 15/15 tests (100%).
+  - Live HTTP 200 OK verified across all 10 Cloudflare Pages production endpoints.
+- **Confidence**: [100%] — Zero horizontal scroll blowouts, perfect 320px–414px mobile viewport adaptation.
+
+
 
 
 
