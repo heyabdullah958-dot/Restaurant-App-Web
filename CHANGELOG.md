@@ -912,6 +912,56 @@
   - Metro bundler compiled and served Android JS bundle (`index.ts`, 1066 modules) with HTTP 200 OK.
 - Confidence: [100%] — All 12 views + Login equipped with robust loading, error recovery, and empty states.
 
+---
+
+## Phase 14 — Multi-Page Architecture Overhaul, Brand-Specific Theme Separation & Premium Entrance Animation — 2026-09-13
+- **What was done**:
+  1. **Multi-Page Site Architecture Transition**:
+     - Refactored single-page hash navigation into structured, multi-page web presence across both TandooriStop and JushhPK:
+       - `/` (`index.html`): High-converting Hero, USP pillars, Featured Deals & Combos teaser grid, Signature Dishes, Testimonials, and Quick Branch Selector.
+       - `/menu` (`menu.html`): Sticky category pill bar, full menu catalog, Eastern Oven-style interactive item detail inspection modals with flavor/spec tags, quantity controls, and cart hooks.
+       - `/deals` (`deals.html`): Active value combos, family packs, and limited-time discount bundles with 1-tap cart additions.
+       - `/about` (`about.html`): Brand culinary heritage, artisanal philosophy, quality standards, and hygiene assurances.
+       - `/locations` (`locations.html`): Operational branches, contact phones, operational hours, delivery zones, and 1-tap branch pre-selection navigating to `menu.html?branch=...`.
+     - Standardized clean navigation headers with active route pill indicators, mobile hamburger drawers with backdrop blur, and sticky header behaviors.
+  2. **Total Theme Differentiation**:
+     - **TandooriStop (`theme_ts.css`)**: Artisanal Desi warmth featuring terracotta (`#C2410C`), clay (`#7C2D12`), saffron accents, cream paper backdrops (`#FFFBF5`), textured border cards, and heritage serif typography (`Playfair Display` + `Plus Jakarta Sans`).
+     - **JushhPK (`theme_jushh.css`)**: Modern Turkish street-gourmet aesthetic featuring bold doner red (`#DC2626`, `#991B1B`), sleek dark slate contrasts (`#111827`), high-contrast modern sans-serif typography (`Syne` + `Inter`), dynamic neon badges, and sharp card radii.
+  3. **High-Performance Luxury Entrance Animation**:
+     - Lightweight entrance reveal animation featuring brand monogram pulsing, scale-up, and staggered content slide-ins (`heroSlideUp`, `heroFadeIn`, `badgeSettle`).
+     - Fast ~800ms reveal with pre-paint synchronous `sessionStorage` guard (`html.entrance-skipped`), preventing flash of splash during internal multi-page browsing.
+  4. **Cloudflare Pretty URLs Canonicalization**:
+     - Resolved 308 redirect loops by allowing Cloudflare Pages native Pretty URLs to rewrite extensionless paths (`/menu`, `/deals`, `/about`, `/locations`) to HTML files cleanly without recursive `_redirects`.
+  5. **100% Data & Cart Integrity**:
+     - Preserved all 41 TandooriStop items, 33 JushhPK items, local HD images, Central DRF checkout hooks, WhatsApp order dispatches, and branch configurations.
+- **Files modified / created**:
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/tandooristoppk/deals.html`
+  - `websites/tandooristoppk/about.html`
+  - `websites/tandooristoppk/locations.html`
+  - `websites/tandooristoppk/theme_ts.css`
+  - `websites/tandooristoppk/entrance_ts.js`
+  - `websites/tandooristoppk/_redirects`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/menu.html`
+  - `websites/jushhpk/deals.html`
+  - `websites/jushhpk/about.html`
+  - `websites/jushhpk/locations.html`
+  - `websites/jushhpk/theme_jushh.css`
+  - `websites/jushhpk/entrance_jushh.js`
+  - `websites/jushhpk/_redirects`
+  - `test_phase14_multipage_theme_suite.py` [NEW]
+  - `test_phase14_http_routes_and_assets.py` [NEW]
+- **Verification evidence**:
+  - `python test_phase14_multipage_theme_suite.py` passed 15/15 tests (100%).
+  - `python test_phase14_http_routes_and_assets.py` passed 4/4 route tests (100%).
+  - Wrangler direct upload deployed to Cloudflare Pages:
+    - TandooriStop: `https://tandooristoppk-foodsphere.pages.dev` (HTTP 200 across all 5 routes)
+    - JushhPK: `https://jushhpk-foodsphere.pages.dev` (HTTP 200 across all 5 routes)
+- **Confidence**: [100%] — All multi-page routes, modals, themes, and animations verified on live production Cloudflare Pages.
+
+
 
 
 

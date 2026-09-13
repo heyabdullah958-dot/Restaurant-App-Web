@@ -445,6 +445,30 @@
   - File presence and byte counts verified on local `D:\` drive via PowerShell `Get-Item`.
 - **Confidence**: 100% — production standalone APKs compiled and ready for Android installation.
 
+---
+
+## Phase 14 — Multi-Page Architecture, Distinct Brand Themes & Luxury Entrance Animations — 2026-09-13
+- **What was done**:
+  1. **Multi-Page Web Architecture Overhaul**:
+     - Separated single-page hash navigation into distinct, full HTML routes: `/` (Home), `/menu` (Catalog & Modal details), `/deals` (Value combos & bundles), `/about` (Culinary heritage & quality), and `/locations` (Outlets & direct order routing).
+     - Standardized navigation bars with active pill route indicators, mobile drawer overlays, sticky scroll behaviors, and floating shopping cart trigger badges.
+  2. **Design System & Theme Differentiation**:
+     - **Tandoori Stop (`theme_ts.css`)**: Warm Desi aesthetic with terracotta (`#C2410C`), deep clay (`#7C2D12`), saffron accents, cream textured background (`#FFFBF5`), heritage typography (`Playfair Display` + `Plus Jakarta Sans`), and warm pill badges.
+     - **Jushh PK (`theme_jushh.css`)**: Modern Turkish street-gourmet aesthetic with bold crimson (`#DC2626`, `#991B1B`), sleek dark slate backgrounds (`#111827`), high-contrast typography (`Syne` + `Inter`), dynamic neon badges, and sharp card radius.
+  3. **Eastern Oven Benchmark Item Detail Modal**:
+     - Built comprehensive item detail modal (`openItemModal`, `closeItemModal`, `changeModalQty`, `addModalItemToCart`) displaying item photo, category tag, detailed description, variant options, interactive quantity counter, and dynamic price button.
+  4. **High-Performance Entrance Reveal with Session Memory**:
+     - Engineered lightweight splash reveal (~800ms) that displays brand monogram pulsing and staggered hero elements (`heroSlideUp`, `heroFadeIn`, `badgeSettle`).
+     - Added synchronous `<head>` script inspecting `sessionStorage` before DOM paint, applying `html.entrance-skipped` to prevent flash of splash during internal multi-page browsing.
+- **Files modified**:
+  - `websites/tandooristoppk/*`
+  - `websites/jushhpk/*`
+- **Verification evidence**:
+  - 15/15 tests passing in `test_phase14_multipage_theme_suite.py`.
+  - HTTP 200 OK verified across all 10 Cloudflare Pages production endpoints.
+- **Confidence**: 100% — complete brand differentiation with zero template bleed.
+
+
 
 
 
