@@ -174,6 +174,16 @@
     const activeOrder = getActiveGuestOrder();
     if (!activeOrder || !activeOrder.orderId) return;
 
+    // 1. Auto-clear stale guest orders after 12 hours
+    if (activeOrder.savedAt) {
+      const orderAgeMs = Date.now() - new Date(activeOrder.savedAt).getTime();
+      if (orderAgeMs > 12 * 60 * 60 * 1000) {
+        console.log('[CartDrawer] Clearing stale active order older than 12 hours');
+        clearActiveGuestOrder();
+        return;
+      }
+    }
+
     try {
       // Poll backend for live status
       const orderId = activeOrder.orderId;
@@ -208,11 +218,23 @@
 
         // Inject Floating Active Order Banner
         renderActiveOrderBanner(activeOrder);
+      } else if (res.status === 404 || res.status === 410) {
+        // Order not found on backend - clear local stale mock
+        clearActiveGuestOrder();
       }
     } catch (err) {
       console.warn('[CartDrawer] Failed to hydrate active guest order status:', err);
-      // Fallback: render banner with cached stored data
-      renderActiveOrderBanner(activeOrder);
+      // Fallback: only render if order was placed very recently (within 3 hours)
+      if (activeOrder.savedAt) {
+        const orderAgeMs = Date.now() - new Date(activeOrder.savedAt).getTime();
+        if (orderAgeMs < 3 * 60 * 60 * 1000) {
+          renderActiveOrderBanner(activeOrder);
+        } else {
+          clearActiveGuestOrder();
+        }
+      } else {
+        clearActiveGuestOrder();
+      }
     }
   }
 
@@ -223,36 +245,37 @@
     banner.id = 'cd-active-order-banner';
     banner.style.cssText = `
       position: fixed;
-      top: 75px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9980;
-      background: linear-gradient(135deg, #10B981, #059669);
+      background: linear-gradient(135deg, #0284C7, #0369A1);
       color: #ffffff;
-      padding: 10px 20px;
+      padding: 10px 18px;
       border-radius: 50px;
-      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 8px 30px rgba(2, 132, 199, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       max-width: 92vw;
       box-sizing: border-box;
-      gap: 12px;
-      font-family: 'Poppins', sans-serif;
+      gap: 10px;
+      font-family: 'Poppins', 'Plus Jakarta Sans', sans-serif;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      animation: cdBannerSlideDown 0.4s ease forwards;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      transition: transform 0.3s ease, opacity 0.3s ease;
     `;
 
     const statusText = (activeOrder.status || 'PREPARING').toUpperCase().replace('_', ' ');
 
     banner.innerHTML = `
-      <span>🛵</span>
+      <span style="font-size:16px;">🛵</span>
       <span>Active Order <strong>${activeOrder.displayOrderId}</strong>: <span style="text-decoration:underline;">${statusText}</span></span>
-      <span style="background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:12px; font-size:11px;">Track →</span>
+      <span style="background:rgba(255,255,255,0.25); padding:3px 10px; border-radius:12px; font-size:11.5px; font-weight:700;">Track →</span>
+      <button type="button" aria-label="Dismiss order banner" style="background:none; border:none; color:#ffffff; font-size:18px; font-weight:bold; cursor:pointer; padding:0 0 0 6px; line-height:1; opacity:0.85;" onclick="event.stopPropagation(); window.CartDrawer && window.CartDrawer.clearActiveGuestOrder ? window.CartDrawer.clearActiveGuestOrder() : this.parentElement.remove();">&times;</button>
     `;
 
     banner.onclick = () => {

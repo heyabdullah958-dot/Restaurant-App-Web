@@ -598,6 +598,35 @@
     let activeCategory = 'all';
     let searchQuery = '';
 
+    function getCategoryBadge(item) {
+      if (item.badge) return item.badge;
+      let cat = '';
+      for (const c in menuData) {
+        if (menuData[c].some(it => it.id === item.id || it.name === item.name)) {
+          cat = c;
+          break;
+        }
+      }
+      switch(cat) {
+        case 'platters':
+          return '🦞 PLATTER';
+        case 'starters':
+          return (item.name.toLowerCase().includes('dumpling') || item.name.toLowerCase().includes('dim sum')) ? '🥟 STARTER' : '🍤 STARTER';
+        case 'seafood':
+          return (item.name.toLowerCase().includes('lobster') || item.name.toLowerCase().includes('crab')) ? '🦞 FRESH CATCH' : '🐟 FRESH CATCH';
+        case 'chicken':
+          return '🔥 CHEF\'S WOK';
+        case 'salads':
+          return '🥗 FRESH SALAD';
+        case 'beverages':
+          return '🍹 CHILLED';
+        case 'addons':
+          return '🍟 SIDE';
+        default:
+          return `${item.emoji || '🌊'} CATCH`;
+      }
+    }
+
     function renderMenu() {
       const container = document.getElementById('menu-grid-container');
       if (!container) return;
@@ -656,7 +685,7 @@
           <div class="blue-dish-card" onclick="openItemModal('${item.name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
             <div class="blue-dish-img-wrap">
               ${imgHtml}
-              <span class="blue-dish-badge">${item.emoji || '🌊'} Catch</span>
+              <span class="blue-dish-badge">${getCategoryBadge(item)}</span>
             </div>
             <div class="blue-dish-body">
               <div class="blue-dish-title">${item.name}</div>
@@ -752,7 +781,7 @@
       }
       if (title) title.textContent = item.name;
       if (desc) desc.textContent = item.desc || 'Freshly prepared ocean catch prepared with signature seasonings.';
-      if (badge) badge.textContent = `${item.emoji || '🌊'} Ocean Catch`;
+      if (badge) badge.textContent = getCategoryBadge(item);
       if (qtyEl) qtyEl.textContent = activeModalQty;
 
       if (item.variants && item.variants.length > 0 && variantsWrap && variantsList) {
