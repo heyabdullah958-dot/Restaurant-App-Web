@@ -214,6 +214,7 @@ FoodSphere/
 | Phase 14 Multi-Page Architecture, Brand Theme Separation & Premium Entrance Animation | ✅ Completed (Multi-page routes, Eastern Oven-style modals, theme separation, session-skipped entrance animation, Cloudflare Pages live) | Done |
 | Phase 15 Tier-1 Enterprise Production Remediation & Security Hardening | ✅ Completed (24-point remediation: sealed payment landing URLs, tracking token spoofing guard, caller-to-order ownership, atomic flash deal checkout deduction, 100-query N+1 elimination, composite DB indexes, Heroku v93 deploy, 14/14 live tests pass) | Done |
 | Dine At Blue Launch, 5-Page Luxury Architecture & KFC Fulfillment Mode (Phases 1-5) | ✅ Completed (Ingested 41 dishes/45 assets, 5-page sapphire theme, KFC delivery/pickup toggle across websites/app/manager, SQLite migration 0015, Cloudflare Pages deploy) | Done |
+| Dine At Blue Visual Audit & Asset Alignment (Phase 6) | ✅ Completed (Re-cropped all 41 dishes with tight food-only bounding boxes, transparent logo SVG/PNG, context-aware category badges, relocated active order banner to bottom with dismiss & 12h auto-purge, Cloudflare Pages live) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
