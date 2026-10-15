@@ -489,7 +489,7 @@ export interface AdminOrder {
   rider_id: number | null;
   guest_name: string;
   guest_phone: string;
-  order_type: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN';
+  order_type: 'DELIVERY' | 'TAKEAWAY' | 'DINE_IN' | 'PICKUP';
   table_number: string | null;
   status: 'received' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
   payment_method: 'cod' | 'stripe' | 'payfast';

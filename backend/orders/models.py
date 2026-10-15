@@ -16,6 +16,7 @@ class Order(models.Model):
         ('DELIVERY', 'Delivery'),
         ('TAKEAWAY', 'Takeaway'),
         ('DINE_IN', 'Dine-In'),
+        ('PICKUP', 'Pickup'),
     )
     
     PAYMENT_METHODS = (

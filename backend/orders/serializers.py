@@ -435,7 +435,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
             delivery_fee = restaurant.delivery_fee
 
-            if ord_type in ['DINE_IN', 'TAKEAWAY']:
+            if ord_type in ['DINE_IN', 'TAKEAWAY', 'PICKUP']:
                 delivery_fee = Decimal('0.00')
 
             curr_addr = validated_data.get('delivery_address')
@@ -444,10 +444,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 br_obj = validated_data.get('branch')
                 br_title = br_obj.name if br_obj else restaurant.name
                 validated_data['delivery_address'] = f"Dine-In (Table #{tbl}) - {br_title}"
-            elif ord_type == 'TAKEAWAY' and (not curr_addr or curr_addr in ['Address Provided via Phone', 'PICKUP AT OUTLET']):
+            elif ord_type in ['TAKEAWAY', 'PICKUP'] and (not curr_addr or curr_addr in ['Address Provided via Phone', 'PICKUP AT OUTLET']):
                 br_obj = validated_data.get('branch')
                 br_title = br_obj.name if br_obj else restaurant.name
-                validated_data['delivery_address'] = f"Takeaway Pickup - {br_title}"
+                validated_data['delivery_address'] = f"Counter Pickup - {br_title}"
 
             # Coupon discount calculation
             coupon_discount = Decimal('0.00')

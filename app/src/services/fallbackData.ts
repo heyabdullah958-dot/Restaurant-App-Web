@@ -132,48 +132,528 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     ]
   },
   {
-    id: 2,
-    name: "dineatblue",
-    slug: "dineatblue",
-    cuisine_type: "Seafood Specialty",
-    logo: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=200&auto=format&fit=crop&q=80",
-    cover_image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=80",
-    description: "Premium seafood creations, freshly caught and expertly cooked by our master chefs.",
-    address: "Block 4, Clifton Beach Road, Karachi",
-    city: "Karachi",
-    phone: "+92 21 3456789",
-    is_active: false,
-    is_featured: true,
-    opens_at: "12:00:00",
-    closes_at: "23:30:00",
-    delivery_time_min: 40,
-    delivery_time_max: 55,
-    min_order_amount: 1000,
-    delivery_fee: 150,
-    rating: 4.9,
-    total_reviews: 188,
-    categories: [
-      {
-        id: 2,
-        name: "Appetizers",
-        icon: "restaurant",
-        order: 1,
-        is_active: true,
-        items: [
-          {
-            id: 34,
-            name: "Dynamite Shrimp",
-            description: "Crispy batter-fried shrimp tossed in our signature creamy, spicy dynamite sauce.",
-            price: 950,
-            image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&auto=format&fit=crop&q=80",
-            is_available: true,
-            is_featured: true,
-            preparation_time: 15
-          }
-        ]
-      }
+    "id": 2,
+    "name": "Dine At Blue",
+    "slug": "dineatblue",
+    "cuisine_type": "Seafood & Ocean Fine-Casual",
+    "logo": "./images/logo.png",
+    "cover_image": "./images/hero_seafood.png",
+    "description": "Lahore's premier ocean-inspired seafood destination. Fresh steamed lobsters, mud crabs, king prawns, and signature seafood platters.",
+    "address": "94-B/2, MM Alam Road, Gulberg III, Lahore",
+    "city": "Lahore",
+    "phone": "0321-8484111",
+    "is_active": true,
+    "is_featured": true,
+    "opens_at": "00:00:00",
+    "closes_at": "23:59:59",
+    "delivery_time_min": 35,
+    "delivery_time_max": 50,
+    "min_order_amount": 1000,
+    "delivery_fee": 150,
+    "rating": 4.9,
+    "total_reviews": 185,
+    "branches": [
+        {
+            "id": 73,
+            "name": "Gulberg III Main Outlet",
+            "address": "94-B/2, MM Alam Road, Gulberg III, Lahore",
+            "phone": "0321-8484111",
+            "is_active": true
+        }
+    ],
+    "categories": [
+        {
+            "id": 201,
+            "name": "SIGNATURE PLATTERS",
+            "icon": "restaurant",
+            "order": 1,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2001,
+                    "name": "Blue Seafood Platter (Steamed)",
+                    "description": "An indulgent medley of crabs, lobsters, prawns, shrimps, tiger prawns, fish, squid, dumplings, vegetables, boiled eggs, butter mushroom rice, and sauces - delicately steamed to highlight the natural elegance of the sea.",
+                    "price": 4999.0,
+                    "image": "./images/blue_seafood_platter.png",
+                    "is_available": true,
+                    "is_featured": true,
+                    "preparation_time": 25,
+                    "options": [
+                        {
+                            "name": "2 Person Platter",
+                            "price_modifier": 0,
+                            "price": 4999
+                        },
+                        {
+                            "name": "Without Lobster",
+                            "price_modifier": 3501,
+                            "price": 8500
+                        },
+                        {
+                            "name": "With Lobster",
+                            "price_modifier": 8001,
+                            "price": 13000
+                        }
+                    ]
+                },
+                {
+                    "id": 2002,
+                    "name": "2 Person Seafood & Chicken Platter",
+                    "description": "A decadent combination platter featuring succulent seafood and grilled chicken favorites with savory accompaniments.",
+                    "price": 3500.0,
+                    "image": "./images/chicken_platter_2person.png",
+                    "is_available": true,
+                    "is_featured": true,
+                    "preparation_time": 25
+                }
+            ]
+        },
+        {
+            "id": 202,
+            "name": "STARTERS",
+            "icon": "restaurant",
+            "order": 2,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2003,
+                    "name": "Kunafa Prawns (3 pcs)",
+                    "description": "Crispy kataifi-wrapped jumbo prawns garnished with crushed pistachio and sweet spicy dip.",
+                    "price": 1100.0,
+                    "image": "./images/kunafa_prawns.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2004,
+                    "name": "Dynamite Prawns",
+                    "description": "Crisp fried prawns tossed in signature creamy spicy dynamite glaze on a bed of fresh slaw.",
+                    "price": 1260.0,
+                    "image": "./images/dynamite_prawns.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2005,
+                    "name": "Seared Dumplings (6 pcs)",
+                    "description": "Golden pan-seared gyoza dumplings with savory filling and sesame chili soy dip.",
+                    "price": 600.0,
+                    "image": "./images/seared_dumplings.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2006,
+                    "name": "Chicken Dumplings (6 pcs)",
+                    "description": "Steamed chicken dumplings served with aromatic chili soy dipping sauce.",
+                    "price": 500.0,
+                    "image": "./images/chicken_dumplings.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2007,
+                    "name": "Dynamite Chicken",
+                    "description": "Crispy chicken bites coated in tangy, fiery dynamite dressing.",
+                    "price": 850.0,
+                    "image": "./images/dynamite_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2008,
+                    "name": "Honey Wings (6 pcs)",
+                    "description": "Glazed sesame chicken wings tossed in sticky honey sauce with crisp garden salad.",
+                    "price": 700.0,
+                    "image": "./images/honey_wings.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2009,
+                    "name": "Fish & Chips",
+                    "description": "Golden crispy battered fish fillets served with steak fries and homemade tartar sauce.",
+                    "price": 850.0,
+                    "image": "./images/fish_and_chips.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2010,
+                    "name": "19B Soup",
+                    "description": "Traditional thick, savory oriental seafood and chicken soup with fresh herbs.",
+                    "price": 390.0,
+                    "image": "./images/soup_19b.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2011,
+                    "name": "Chicken Corn Soup",
+                    "description": "Classic comforting chicken corn soup with shredded chicken and sweet corn.",
+                    "price": 350.0,
+                    "image": "./images/chicken_corn_soup.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        },
+        {
+            "id": 203,
+            "name": "SALADS",
+            "icon": "restaurant",
+            "order": 3,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2012,
+                    "name": "BBQ Prawn Salad",
+                    "description": "Fresh garden greens tossed with flame-grilled prawns, cherry tomatoes, and citrus vinaigrette.",
+                    "price": 900.0,
+                    "image": "./images/bbq_prawn_salad.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        },
+        {
+            "id": 204,
+            "name": "MAINS - SEAFOOD",
+            "icon": "restaurant",
+            "order": 4,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2013,
+                    "name": "Romesco Fish",
+                    "description": "Pan-grilled fresh fish fillet smothered in rich Spanish romesco almond-pepper sauce.",
+                    "price": 2000.0,
+                    "image": "./images/romesco_fish.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2014,
+                    "name": "Umami Fish",
+                    "description": "Seared fish fillet basted in savory umami glaze topped with fresh herbs.",
+                    "price": 1800.0,
+                    "image": "./images/umami_fish.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2015,
+                    "name": "Pamphlet Fish",
+                    "description": "Whole grilled pomfret marinated in aromatic coastal herbs and garlic butter.",
+                    "price": 1900.0,
+                    "image": "./images/pamphlet_fish.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2016,
+                    "name": "Fish Chilli Dry",
+                    "description": "Crisp wok-tossed fish chunks with green chilies, onions, and spicy Asian seasonings.",
+                    "price": 1500.0,
+                    "image": "./images/fish_chilli_dry.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2017,
+                    "name": "Vietnamese Fish",
+                    "description": "Tender fish fillet wok-cooked with Vietnamese sweet-tangy garlic glaze.",
+                    "price": 1500.0,
+                    "image": "./images/vietnamese_fish.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2018,
+                    "name": "Thermidor Lobster",
+                    "description": "Rich baked lobster meat in creamy cheese and white wine reduction topped with melted crust.",
+                    "price": 5000.0,
+                    "image": "./images/thermidor_lobster.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2019,
+                    "name": "Grilled Lobster",
+                    "description": "Whole succulent lobster flame-grilled with garlic butter and lemon wedges.",
+                    "price": 5000.0,
+                    "image": "./images/grilled_lobster.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2020,
+                    "name": "BBQ Prawns",
+                    "description": "Skewered king prawns chargrilled over live charcoal with smokey glaze.",
+                    "price": 2500.0,
+                    "image": "./images/bbq_prawns.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2021,
+                    "name": "Prawn Pasta",
+                    "description": "Al dente fettuccine tossed with saut\u00e9ed prawns in creamy garlic marinara sauce.",
+                    "price": 1900.0,
+                    "image": "./images/prawn_pasta.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2022,
+                    "name": "Steamed Crab",
+                    "description": "Fresh mud crab delicately steamed to perfection with ginger scallion dipping oil.",
+                    "price": 2000.0,
+                    "image": "./images/steamed_crab.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2023,
+                    "name": "Mud Crab",
+                    "description": "Whole mud crab cooked in savory spicy coastal chili sauce.",
+                    "price": 2000.0,
+                    "image": "./images/mud_crab.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2024,
+                    "name": "Grilled Fish",
+                    "description": "Catch of the day fish fillet seasoned with coastal spices and char-grilled.",
+                    "price": 2500.0,
+                    "image": "./images/grilled_fish.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        },
+        {
+            "id": 205,
+            "name": "MAINS - CHICKEN",
+            "icon": "restaurant",
+            "order": 5,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2025,
+                    "name": "Chilli Mint Chicken",
+                    "description": "Stir-fried chicken tossed with fresh garden mint, green chilies, and tangy soy sauce.",
+                    "price": 900.0,
+                    "image": "./images/chilli_mint_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2026,
+                    "name": "Cashew Nut Chicken",
+                    "description": "Wok-fried chicken breast cubes with roasted cashew nuts and bell peppers.",
+                    "price": 1000.0,
+                    "image": "./images/cashew_nut_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2027,
+                    "name": "Korean Fried Chicken",
+                    "description": "Double-fried crispy chicken glazed in sweet and spicy gochujang sauce.",
+                    "price": 1100.0,
+                    "image": "./images/korean_fried_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2028,
+                    "name": "Chicken Chilli Dry",
+                    "description": "Classic stir-fried boneless chicken with crisp onions, bell peppers, and red chilies.",
+                    "price": 1100.0,
+                    "image": "./images/chicken_chilli_dry.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2029,
+                    "name": "Sweet & Sour Chicken",
+                    "description": "Crispy chicken tossed with bell peppers and pineapple in vibrant sweet and sour glaze.",
+                    "price": 1050.0,
+                    "image": "./images/sweet_and_sour_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2030,
+                    "name": "House Special Chicken",
+                    "description": "Chef's signature chicken saut\u00e9ed with secret ocean spices and aromatic sauce.",
+                    "price": 1250.0,
+                    "image": "./images/house_special_chicken.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        },
+        {
+            "id": 206,
+            "name": "BEVERAGES & MOJITOS",
+            "icon": "restaurant",
+            "order": 6,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2031,
+                    "name": "Strawberry Mojito",
+                    "description": "Chilled sparkling strawberry mocktail with fresh mint and lime.",
+                    "price": 350.0,
+                    "image": "./images/strawberry_mojito.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2032,
+                    "name": "Blueberry Mojito",
+                    "description": "Refreshing ocean blueberry cooler with crushed ice and mint.",
+                    "price": 350.0,
+                    "image": "./images/blueberry_mojito.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2033,
+                    "name": "Peach Mojito",
+                    "description": "Succulent peach nectar blended with sparkling soda and garden mint.",
+                    "price": 350.0,
+                    "image": "./images/peach_mojito.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2034,
+                    "name": "Green Apple Mojito",
+                    "description": "Crisp green apple mocktail with zesty lime splash.",
+                    "price": 350.0,
+                    "image": "./images/green_apple_mojito.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2035,
+                    "name": "Fresh Lemonade",
+                    "description": "Freshly squeezed lemon cooler with mint leaves.",
+                    "price": 350.0,
+                    "image": "./images/lemonade.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2036,
+                    "name": "Pepsi / 7Up (Tin)",
+                    "description": "Chilled 250ml soda can.",
+                    "price": 150.0,
+                    "image": "./images/pepsi_7up.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2037,
+                    "name": "Mineral Water (Small)",
+                    "description": "Chilled pure mineral water.",
+                    "price": 100.0,
+                    "image": "./images/water.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        },
+        {
+            "id": 207,
+            "name": "ADD-ONS",
+            "icon": "restaurant",
+            "order": 7,
+            "is_active": true,
+            "items": [
+                {
+                    "id": 2038,
+                    "name": "Butter Mushroom Rice",
+                    "description": "Fragrant buttered rice saut\u00e9ed with button mushrooms.",
+                    "price": 300.0,
+                    "image": "./images/butter_rice.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2039,
+                    "name": "Roasted Potatoes",
+                    "description": "Oven-roasted baby potatoes with rosemary and garlic butter.",
+                    "price": 300.0,
+                    "image": "./images/roasted_potatoes.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2040,
+                    "name": "Steak Fries",
+                    "description": "Thick-cut golden salted french fries.",
+                    "price": 300.0,
+                    "image": "./images/french_fries.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                },
+                {
+                    "id": 2041,
+                    "name": "Special Dynamite Dip",
+                    "description": "Creamy spicy seafood dip.",
+                    "price": 200.0,
+                    "image": "./images/dynamite_dip.png",
+                    "is_available": true,
+                    "is_featured": false,
+                    "preparation_time": 15
+                }
+            ]
+        }
     ]
-  },
+},
   {
     id: 3,
     name: "jushhpk",

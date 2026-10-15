@@ -108,27 +108,92 @@ class Command(BaseCommand):
             },
             {
                 "name": "DineAtBlue",
-                "cuisine_type": "Seafood Specialty",
-                "description": "Premium fresh seafood grill, lobster, crab, and special fish platters.",
-                "address": "DHA Phase 6, Karachi",
-                "city": "Karachi",
-                "phone": "+923007654321",
-                "opens_at": datetime.time(16, 0),
-                "closes_at": datetime.time(23, 30),
-                "delivery_time_min": 30,
-                "delivery_time_max": 40,
+                "cuisine_type": "Seafood & Ocean Fine-Casual",
+                "description": "Lahore's premier ocean-inspired seafood destination. Fresh steamed lobsters, mud crabs, king prawns, and signature seafood platters.",
+                "logo": "menu_items/dineatblue_logo.png",
+                "cover_image": "menu_items/dineatblue_cover.png",
+                "address": "94-B/2, MM Alam Road, Gulberg III, Lahore",
+                "city": "Lahore",
+                "phone": "+923218484111",
+                "opens_at": datetime.time(12, 0),
+                "closes_at": datetime.time(23, 59),
+                "delivery_time_min": 35,
+                "delivery_time_max": 50,
                 "min_order_amount": 1000.00,
-                "delivery_fee": 80.00,
-                "rating": 4.8,
-                "total_reviews": 120,
-                "is_featured": False,
+                "delivery_fee": 150.00,
+                "rating": 4.9,
+                "total_reviews": 185,
+                "is_featured": True,
                 "menu": {
-                    "SPECIALS": [
-                        {"name": "Mix Seafood Grill", "price": 2450.00, "desc": "Grilled fish, prawns, calamari served with garlic butter"},
-                        {"name": "Fish & Chips", "price": 950.00, "desc": "Crispy battered fish fillet served with tartar sauce"}
+                    "SIGNATURE PLATTERS": [
+                        {
+                            "name": "Blue Seafood Platter (Steamed)",
+                            "price": 4999.00,
+                            "desc": "An indulgent medley of crabs, lobsters, prawns, shrimps, tiger prawns, fish, squid, dumplings, vegetables, boiled eggs, butter mushroom rice, and sauces - delicately steamed to highlight the natural elegance of the sea.",
+                            "image": "menu_items/blue_seafood_platter.png",
+                            "options": [
+                                {"name": "2 Person Platter", "price_modifier": 0, "price": 4999},
+                                {"name": "Without Lobster", "price_modifier": 3501, "price": 8500},
+                                {"name": "With Lobster", "price_modifier": 8001, "price": 13000}
+                            ]
+                        },
+                        {
+                            "name": "2 Person Seafood & Chicken Platter",
+                            "price": 3500.00,
+                            "desc": "A decadent combination platter featuring succulent seafood and grilled chicken favorites with savory accompaniments.",
+                            "image": "menu_items/chicken_platter_2person.png"
+                        }
                     ],
-                    "DRINKS": [
-                        {"name": "Blue Lagoon Mocktail", "price": 350.00, "desc": "Refreshing blue curacao drink"}
+                    "STARTERS": [
+                        {"name": "Kunafa Prawns (3 pcs)", "price": 1100.00, "desc": "Crispy kataifi-wrapped jumbo prawns garnished with crushed pistachio and sweet spicy dip.", "image": "menu_items/kunafa_prawns.png"},
+                        {"name": "Dynamite Prawns", "price": 1260.00, "desc": "Crisp fried prawns tossed in signature creamy spicy dynamite glaze on a bed of fresh slaw.", "image": "menu_items/dynamite_prawns.png"},
+                        {"name": "Seared Dumplings (6 pcs)", "price": 600.00, "desc": "Golden pan-seared gyoza dumplings with savory filling and sesame chili soy dip.", "image": "menu_items/seared_dumplings.png"},
+                        {"name": "Chicken Dumplings (6 pcs)", "price": 500.00, "desc": "Steamed chicken dumplings served with aromatic chili soy dipping sauce.", "image": "menu_items/chicken_dumplings.png"},
+                        {"name": "Dynamite Chicken", "price": 850.00, "desc": "Crispy chicken bites coated in tangy, fiery dynamite dressing.", "image": "menu_items/dynamite_chicken.png"},
+                        {"name": "Honey Wings (6 pcs)", "price": 700.00, "desc": "Glazed sesame chicken wings tossed in sticky honey sauce with crisp garden salad.", "image": "menu_items/honey_wings.png"},
+                        {"name": "Fish & Chips", "price": 850.00, "desc": "Golden crispy battered fish fillets served with steak fries and homemade tartar sauce.", "image": "menu_items/fish_and_chips.png"},
+                        {"name": "19B Soup", "price": 390.00, "desc": "Traditional thick, savory oriental seafood and chicken soup with fresh herbs.", "image": "menu_items/soup_19b.png"},
+                        {"name": "Chicken Corn Soup", "price": 350.00, "desc": "Classic comforting chicken corn soup with shredded chicken and sweet corn.", "image": "menu_items/chicken_corn_soup.png"}
+                    ],
+                    "SALADS": [
+                        {"name": "BBQ Prawn Salad", "price": 900.00, "desc": "Fresh garden greens tossed with flame-grilled prawns, cherry tomatoes, and citrus vinaigrette.", "image": "menu_items/bbq_prawn_salad.png"}
+                    ],
+                    "MAINS - SEAFOOD": [
+                        {"name": "Romesco Fish", "price": 2000.00, "desc": "Pan-grilled fresh fish fillet smothered in rich Spanish romesco almond-pepper sauce.", "image": "menu_items/romesco_fish.png"},
+                        {"name": "Umami Fish", "price": 1800.00, "desc": "Seared fish fillet basted in savory umami glaze topped with fresh herbs.", "image": "menu_items/umami_fish.png"},
+                        {"name": "Pamphlet Fish", "price": 1900.00, "desc": "Whole grilled pomfret marinated in aromatic coastal herbs and garlic butter.", "image": "menu_items/pamphlet_fish.png"},
+                        {"name": "Fish Chilli Dry", "price": 1500.00, "desc": "Crisp wok-tossed fish chunks with green chilies, onions, and spicy Asian seasonings.", "image": "menu_items/fish_chilli_dry.png"},
+                        {"name": "Vietnamese Fish", "price": 1500.00, "desc": "Tender fish fillet wok-cooked with Vietnamese sweet-tangy garlic glaze.", "image": "menu_items/vietnamese_fish.png"},
+                        {"name": "Thermidor Lobster", "price": 5000.00, "desc": "Rich baked lobster meat in creamy cheese and white wine reduction topped with melted crust.", "image": "menu_items/thermidor_lobster.png"},
+                        {"name": "Grilled Lobster", "price": 5000.00, "desc": "Whole succulent lobster flame-grilled with garlic butter and lemon wedges.", "image": "menu_items/grilled_lobster.png"},
+                        {"name": "BBQ Prawns", "price": 2500.00, "desc": "Skewered king prawns chargrilled over live charcoal with smokey glaze.", "image": "menu_items/bbq_prawns.png"},
+                        {"name": "Prawn Pasta", "price": 1900.00, "desc": "Al dente fettuccine tossed with sautéed prawns in creamy garlic marinara sauce.", "image": "menu_items/prawn_pasta.png"},
+                        {"name": "Steamed Crab", "price": 2000.00, "desc": "Fresh mud crab delicately steamed to perfection with ginger scallion dipping oil.", "image": "menu_items/steamed_crab.png"},
+                        {"name": "Mud Crab", "price": 2000.00, "desc": "Whole mud crab cooked in savory spicy coastal chili sauce.", "image": "menu_items/mud_crab.png"},
+                        {"name": "Grilled Fish", "price": 2500.00, "desc": "Catch of the day fish fillet seasoned with coastal spices and char-grilled.", "image": "menu_items/grilled_fish.png"}
+                    ],
+                    "MAINS - CHICKEN": [
+                        {"name": "Chilli Mint Chicken", "price": 900.00, "desc": "Stir-fried chicken tossed with fresh garden mint, green chilies, and tangy soy sauce.", "image": "menu_items/chilli_mint_chicken.png"},
+                        {"name": "Cashew Nut Chicken", "price": 1000.00, "desc": "Wok-fried chicken breast cubes with roasted cashew nuts and bell peppers.", "image": "menu_items/cashew_nut_chicken.png"},
+                        {"name": "Korean Fried Chicken", "price": 1100.00, "desc": "Double-fried crispy chicken glazed in sweet and spicy gochujang sauce.", "image": "menu_items/korean_fried_chicken.png"},
+                        {"name": "Chicken Chilli Dry", "price": 1100.00, "desc": "Classic stir-fried boneless chicken with crisp onions, bell peppers, and red chilies.", "image": "menu_items/chicken_chilli_dry.png"},
+                        {"name": "Sweet & Sour Chicken", "price": 1050.00, "desc": "Crispy chicken tossed with bell peppers and pineapple in vibrant sweet and sour glaze.", "image": "menu_items/sweet_and_sour_chicken.png"},
+                        {"name": "House Special Chicken", "price": 1250.00, "desc": "Chef's signature chicken sautéed with secret ocean spices and aromatic sauce.", "image": "menu_items/house_special_chicken.png"}
+                    ],
+                    "BEVERAGES & MOJITOS": [
+                        {"name": "Strawberry Mojito", "price": 350.00, "desc": "Chilled sparkling strawberry mocktail with fresh mint and lime.", "image": "menu_items/strawberry_mojito.png"},
+                        {"name": "Blueberry Mojito", "price": 350.00, "desc": "Refreshing ocean blueberry cooler with crushed ice and mint.", "image": "menu_items/blueberry_mojito.png"},
+                        {"name": "Peach Mojito", "price": 350.00, "desc": "Succulent peach nectar blended with sparkling soda and garden mint.", "image": "menu_items/peach_mojito.png"},
+                        {"name": "Green Apple Mojito", "price": 350.00, "desc": "Crisp green apple mocktail with zesty lime splash.", "image": "menu_items/green_apple_mojito.png"},
+                        {"name": "Fresh Lemonade", "price": 350.00, "desc": "Freshly squeezed lemon cooler with mint leaves.", "image": "menu_items/lemonade.png"},
+                        {"name": "Pepsi / 7Up (Tin)", "price": 150.00, "desc": "Chilled 250ml soda can.", "image": "menu_items/pepsi_7up.png"},
+                        {"name": "Mineral Water (Small)", "price": 100.00, "desc": "Chilled pure mineral water.", "image": "menu_items/water.png"}
+                    ],
+                    "ADD-ONS": [
+                        {"name": "Butter Mushroom Rice", "price": 300.00, "desc": "Fragrant buttered rice sautéed with button mushrooms.", "image": "menu_items/butter_rice.png"},
+                        {"name": "Roasted Potatoes", "price": 300.00, "desc": "Oven-roasted baby potatoes with rosemary and garlic butter.", "image": "menu_items/roasted_potatoes.png"},
+                        {"name": "Steak Fries", "price": 300.00, "desc": "Thick-cut golden salted french fries.", "image": "menu_items/french_fries.png"},
+                        {"name": "Special Dynamite Dip", "price": 200.00, "desc": "Creamy spicy seafood dip.", "image": "menu_items/dynamite_dip.png"}
                     ]
                 }
             },

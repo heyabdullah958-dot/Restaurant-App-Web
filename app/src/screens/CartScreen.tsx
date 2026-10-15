@@ -29,6 +29,7 @@ import {
   updateQuantity,
   removeItemFromCart,
   clearCart,
+  setFulfillmentMode,
   applyPromo,
   removePromo,
   clearPromoNotice,
@@ -229,7 +230,8 @@ export default function CartScreen() {
   };
 
   const promoDiscount = appliedPromo ? appliedPromo.discount : 0;
-  const deliveryFee = activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0;
+  const isPickup = cart.fulfillmentMode === 'TAKEAWAY' || (cart.fulfillmentMode as string) === 'PICKUP' || cart.fulfillmentMode === 'DINE_IN';
+  const deliveryFee = isPickup ? 0 : (activeRestaurant ? Number(activeRestaurant.delivery_fee) : 0);
   const availablePoints = (user && !user.is_guest) ? (user.loyalty_points || 0) : 0;
   const remainingSubtotal = Math.max(0, cart.totalAmount - promoDiscount);
   const actualLoyaltyDiscount = cart.useLoyaltyPoints ? Math.min(availablePoints, remainingSubtotal) : 0;
@@ -337,6 +339,58 @@ export default function CartScreen() {
             </View>
           </View>
         )}
+
+        {/* KFC-Style Fulfillment Mode Segmented Toggle */}
+        <View style={styles.kfcCartToggleWrap}>
+          <TouchableOpacity
+            style={[
+              styles.kfcCartToggleBtn,
+              cart.fulfillmentMode === 'DELIVERY' && styles.kfcCartToggleBtnActive,
+            ]}
+            onPress={() => dispatch(setFulfillmentMode('DELIVERY'))}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="bicycle"
+              size={15}
+              color={cart.fulfillmentMode === 'DELIVERY' ? '#FFFFFF' : COLORS.gray}
+            />
+            <Text
+              style={[
+                styles.kfcCartToggleText,
+                cart.fulfillmentMode === 'DELIVERY' && styles.kfcCartToggleTextActive,
+              ]}
+            >
+              Delivery ({activeRestaurant ? `Rs. ${Number(activeRestaurant.delivery_fee)}` : 'Rs. 150'})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.kfcCartToggleBtn,
+              (cart.fulfillmentMode === 'TAKEAWAY' || (cart.fulfillmentMode as string) === 'PICKUP') && styles.kfcCartToggleBtnActive,
+            ]}
+            onPress={() => dispatch(setFulfillmentMode('TAKEAWAY'))}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="bag-handle"
+              size={15}
+              color={(cart.fulfillmentMode === 'TAKEAWAY' || (cart.fulfillmentMode as string) === 'PICKUP') ? '#FFFFFF' : COLORS.gray}
+            />
+            <Text
+              style={[
+                styles.kfcCartToggleText,
+                (cart.fulfillmentMode === 'TAKEAWAY' || (cart.fulfillmentMode as string) === 'PICKUP') && styles.kfcCartToggleTextActive,
+              ]}
+            >
+              Pickup
+            </Text>
+            <View style={styles.kfcCartFreeBadge}>
+              <Text style={styles.kfcCartFreeBadgeText}>FREE</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
         {/* Cart Items List */}
         <View style={styles.sectionCard}>
@@ -484,9 +538,11 @@ export default function CartScreen() {
             <Text style={styles.billValue}>Rs. {cart.totalAmount}</Text>
           </View>
           <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Delivery Fee</Text>
+            <Text style={styles.billLabel}>
+              {isPickup ? 'Pickup / Service Fee' : 'Delivery Fee'}
+            </Text>
             <Text style={styles.billValue}>
-              {activeRestaurant && Number(activeRestaurant.delivery_fee) === 0
+              {isPickup || (activeRestaurant && Number(activeRestaurant.delivery_fee) === 0)
                 ? '🎉 Free!'
                 : `Rs. ${deliveryFee}`}
             </Text>
@@ -1035,5 +1091,51 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     lineHeight: 16,
+  },
+  kfcCartToggleWrap: {
+    flexDirection: 'row',
+    backgroundColor: '#EEF2F6',
+    borderRadius: 20,
+    padding: 3,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  kfcCartToggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    borderRadius: 16,
+    gap: 6,
+  },
+  kfcCartToggleBtnActive: {
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  kfcCartToggleText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: COLORS.gray,
+  },
+  kfcCartToggleTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  kfcCartFreeBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 8,
+  },
+  kfcCartFreeBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
   },
 });

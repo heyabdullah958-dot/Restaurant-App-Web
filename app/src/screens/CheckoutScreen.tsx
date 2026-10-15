@@ -22,7 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
-import { clearCart, applyPromo, removePromo, clearPromoNotice, setUseLoyaltyPoints } from '../store/cartSlice';
+import { clearCart, applyPromo, removePromo, clearPromoNotice, setUseLoyaltyPoints, setFulfillmentMode } from '../store/cartSlice';
 import { guestLogin, updateUserProfile, fetchUserProfile } from '../store/userSlice';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -438,7 +438,7 @@ export default function CheckoutScreen() {
   }, [branches, isLoadingBranches]);
 
   const deliveryFee = useMemo(() => {
-    if (fulfillmentMode === 'DINE_IN' || fulfillmentMode === 'TAKEAWAY') {
+    if (fulfillmentMode === 'DINE_IN' || fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') {
       return 0;
     }
     if (restaurant && restaurant.delivery_fee) {
@@ -601,8 +601,8 @@ export default function CheckoutScreen() {
     if (fulfillmentMode === 'DINE_IN') {
       const tbl = tableNumberInput.trim() || 'N/A';
       finalAddress = finalAddress || `Dine-In (Table #${tbl}) - ${selectedBranch?.name || 'In-House'}`;
-    } else if (fulfillmentMode === 'TAKEAWAY') {
-      finalAddress = finalAddress || `Takeaway Pickup - ${selectedBranch?.name || 'Counter'}`;
+    } else if (fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') {
+      finalAddress = finalAddress || `Counter Pickup - ${selectedBranch?.name || 'Selected Outlet'}`;
     }
 
     const orderData: any = {
@@ -610,7 +610,7 @@ export default function CheckoutScreen() {
       branch: selectedBranchId || undefined,
       items: orderItems,
       payment_method: paymentMethod,
-      order_type: fulfillmentMode,
+      order_type: (fulfillmentMode as string) === 'PICKUP' ? 'PICKUP' : fulfillmentMode,
       table_number: fulfillmentMode === 'DINE_IN' ? (tableNumberInput.trim() || 'N/A') : undefined,
       delivery_address: finalAddress,
       delivery_lat: fulfillmentMode === 'DELIVERY' && customerCoords?.latitude != null ? Number(customerCoords.latitude.toFixed(6)) : undefined,
@@ -832,8 +832,65 @@ export default function CheckoutScreen() {
           )}
 
           {/* Delivery Details */}
+          {/* Delivery Details */}
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Delivery Details</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <Text style={styles.sectionTitle}>
+                {fulfillmentMode === 'DELIVERY' ? 'Delivery Details' : 'Pickup & Contact Details'}
+              </Text>
+            </View>
+
+            {/* KFC-Style Fulfillment Mode Toggle in Checkout */}
+            <View style={styles.kfcCheckoutToggleWrap}>
+              <TouchableOpacity
+                style={[
+                  styles.kfcCheckoutToggleBtn,
+                  fulfillmentMode === 'DELIVERY' && styles.kfcCheckoutToggleBtnActive,
+                ]}
+                onPress={() => dispatch(setFulfillmentMode('DELIVERY'))}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="bicycle"
+                  size={15}
+                  color={fulfillmentMode === 'DELIVERY' ? '#FFFFFF' : COLORS.gray}
+                />
+                <Text
+                  style={[
+                    styles.kfcCheckoutToggleText,
+                    fulfillmentMode === 'DELIVERY' && styles.kfcCheckoutToggleTextActive,
+                  ]}
+                >
+                  Delivery
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.kfcCheckoutToggleBtn,
+                  (fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') && styles.kfcCheckoutToggleBtnActive,
+                ]}
+                onPress={() => dispatch(setFulfillmentMode('TAKEAWAY'))}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="bag-handle"
+                  size={15}
+                  color={(fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') ? '#FFFFFF' : COLORS.gray}
+                />
+                <Text
+                  style={[
+                    styles.kfcCheckoutToggleText,
+                    (fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') && styles.kfcCheckoutToggleTextActive,
+                  ]}
+                >
+                  Pickup
+                </Text>
+                <View style={styles.kfcCheckoutFreeBadge}>
+                  <Text style={styles.kfcCheckoutFreeBadgeText}>FREE</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
             
             <Text style={styles.fieldLabel}>Full Name (Required)</Text>
             <TextInput
@@ -854,39 +911,53 @@ export default function CheckoutScreen() {
               onChangeText={setGuestPhone}
             />
 
-            <Text style={styles.fieldLabel}>Delivery Address</Text>
-            <View style={styles.addressRow}>
-              <Ionicons name="location-outline" size={20} color={COLORS.primary} style={{ marginTop: 10 }} />
-              <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[styles.input, styles.textArea, { marginLeft: SPACING.sm }]}
-                  placeholder="Street No., Area, City — e.g. House 5, Block B, Gulberg, Lahore"
-                  placeholderTextColor={COLORS.gray}
-                  multiline
-                  numberOfLines={3}
-                  value={address}
-                  onChangeText={setAddress}
-                />
-                <Text style={styles.addressHintText}>
-                  💡 Exact address likho — rider ko dhundne mein asaani hogi
-                </Text>
-                
-                <TouchableOpacity activeOpacity={0.8}
-                  style={[styles.detectLocationBtn, isDetectingLocation && { opacity: 0.7 }]}
-                  onPress={handleDetectLocation}
-                  disabled={isDetectingLocation}
-                >
-                  {isDetectingLocation ? (
-                    <ActivityIndicator size="small" color={COLORS.primary} style={{ marginRight: 6 }} />
-                  ) : (
-                    <Ionicons name="locate-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
-                  )}
-                  <Text style={styles.detectLocationBtnText}>
-                    {isDetectingLocation ? 'Detecting Location...' : 'Auto-Detect Address'}
+            {fulfillmentMode === 'DELIVERY' ? (
+              <>
+                <Text style={styles.fieldLabel}>Delivery Address</Text>
+                <View style={styles.addressRow}>
+                  <Ionicons name="location-outline" size={20} color={COLORS.primary} style={{ marginTop: 10 }} />
+                  <View style={{ flex: 1 }}>
+                    <TextInput
+                      style={[styles.input, styles.textArea, { marginLeft: SPACING.sm }]}
+                      placeholder="Street No., Area, City — e.g. House 5, Block B, Gulberg, Lahore"
+                      placeholderTextColor={COLORS.gray}
+                      multiline
+                      numberOfLines={3}
+                      value={address}
+                      onChangeText={setAddress}
+                    />
+                    <Text style={styles.addressHintText}>
+                      💡 Exact address likho — rider ko dhundne mein asaani hogi
+                    </Text>
+                    
+                    <TouchableOpacity activeOpacity={0.8}
+                      style={[styles.detectLocationBtn, isDetectingLocation && { opacity: 0.7 }]}
+                      onPress={handleDetectLocation}
+                      disabled={isDetectingLocation}
+                    >
+                      {isDetectingLocation ? (
+                        <ActivityIndicator size="small" color={COLORS.primary} style={{ marginRight: 6 }} />
+                      ) : (
+                        <Ionicons name="locate-outline" size={16} color={COLORS.primary} style={{ marginRight: 6 }} />
+                      )}
+                      <Text style={styles.detectLocationBtnText}>
+                        {isDetectingLocation ? 'Detecting Location...' : 'Auto-Detect Address'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <View style={styles.pickupInfoCard}>
+                <Ionicons name="storefront-outline" size={24} color="#10B981" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.pickupInfoTitle}>🛍️ Self-Pickup Selected (Rs. 0 Delivery Fee)</Text>
+                  <Text style={styles.pickupInfoSub}>
+                    No street address needed! Please select your pickup outlet below. Your order will be prepared fresh and packed for collection in 20–25 minutes.
                   </Text>
-                </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            )}
 
 
 
@@ -1659,5 +1730,73 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  kfcCheckoutToggleWrap: {
+    flexDirection: 'row',
+    backgroundColor: '#EEF2F6',
+    borderRadius: 20,
+    padding: 3,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  kfcCheckoutToggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    borderRadius: 16,
+    gap: 6,
+  },
+  kfcCheckoutToggleBtnActive: {
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  kfcCheckoutToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.gray,
+  },
+  kfcCheckoutToggleTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  kfcCheckoutFreeBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 8,
+  },
+  kfcCheckoutFreeBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  pickupInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 14,
+    padding: 14,
+    marginVertical: 10,
+    gap: 12,
+  },
+  pickupInfoTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#166534',
+    marginBottom: 4,
+  },
+  pickupInfoSub: {
+    fontSize: 12,
+    color: '#15803D',
+    lineHeight: 18,
   },
 });

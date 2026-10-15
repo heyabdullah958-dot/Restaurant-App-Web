@@ -43,7 +43,7 @@
       { name: 'Johar Town', id: 1 }
     ],
     'dineatblue': [
-      { name: 'DHA Phase 5', id: 2 }
+      { name: 'Gulberg III Main Outlet', id: 73 }
     ],
     'sandmelts': [
       { name: 'Gulberg', id: 5 }
@@ -55,14 +55,50 @@
 
   const WHATSAPP_NUMBERS = {
     'jushhpk': '923269946142',
-    'tandooristoppk': '923001234567',
-    'getafomo': '923000000000',
-    'seenbanao': '923000000000'
+    'tandooristoppk': '923274945947',
+    'getafomo': '923212784841',
+    'seenbanao': '923000000000',
+    'dineatblue': '923218484111'
+  };
+
+  const BRANCH_PHONES = {
+    'dineatblue': {
+      'Gulberg III Main Outlet': '03218484111',
+      'default': '03218484111'
+    },
+    'tandooristoppk': {
+      'Johar Town': '923274945947',
+      'Lake City': '923244441735',
+      'GT Road Baghbanpura': '923266811177'
+    },
+    'jushhpk': {
+      'Johar Town': '923269946142',
+      'Lake City': '923244441735',
+      'DHA Phase 1': '923257217221'
+    }
   };
 
   // Load saved cart state from sessionStorage
   function initCartState() {
+    const brandSlug = (window.BRAND_SLUG || 'default').toLowerCase();
     try {
+            const savedFulfillment = localStorage.getItem('foodsphere_fulfillment_mode');
+      if (savedFulfillment === 'PICKUP' || savedFulfillment === 'TAKEAWAY') {
+        cartState.fulfillmentType = 'PICKUP';
+      } else {
+        cartState.fulfillmentType = 'DELIVERY';
+      }
+
+      const savedBranch = sessionStorage.getItem('foodsphere_selected_branch_' + brandSlug);
+      if (savedBranch) {
+        cartState.selectedBranch = savedBranch;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const urlBranch = params.get('branch');
+      if (urlBranch) {
+        cartState.selectedBranch = urlBranch;
+        sessionStorage.setItem('foodsphere_selected_branch_' + brandSlug, urlBranch);
+      }
       const saved = sessionStorage.getItem('foodsphere_cart_' + (window.BRAND_SLUG || 'default'));
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -78,6 +114,14 @@
     } catch (e) {
       console.warn('[CartDrawer] State restore skipped', e);
     }
+  }
+
+  function setSelectedBranch(branch) {
+    cartState.selectedBranch = branch;
+    const brandSlug = (window.BRAND_SLUG || 'default').toLowerCase();
+    try {
+      sessionStorage.setItem('foodsphere_selected_branch_' + brandSlug, branch);
+    } catch (e) {}
   }
 
   function saveCartState() {
@@ -190,6 +234,10 @@
       box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
       display: flex;
       align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 92vw;
+      box-sizing: border-box;
       gap: 12px;
       font-family: 'Poppins', sans-serif;
       font-size: 13px;
@@ -226,7 +274,7 @@
   }
 
   function getDeliveryCharge() {
-    return cartState.fulfillmentType === 'DELIVERY' && cartState.items.length > 0 ? DELIVERY_FEE : 0;
+    return (cartState.fulfillmentType === 'DELIVERY') && cartState.items.length > 0 ? DELIVERY_FEE : 0;
   }
 
   function getGrandTotal() {
@@ -454,6 +502,7 @@
     if (backdrop && drawer) {
       backdrop.classList.add('active');
       drawer.classList.add('active');
+      document.body.style.overflow = 'hidden';
       renderDrawerContent();
     }
   }
@@ -464,6 +513,7 @@
     if (backdrop && drawer) {
       backdrop.classList.remove('active');
       drawer.classList.remove('active');
+      document.body.style.overflow = '';
     }
   }
 
@@ -487,10 +537,61 @@
     renderDrawerContent();
   }
 
-  function setFulfillmentType(type) {
-    cartState.fulfillmentType = type;
+    function setFulfillmentType(type) {
+    const normalized = (type === 'PICKUP' || type === 'TAKEAWAY') ? 'PICKUP' : 'DELIVERY';
+    cartState.fulfillmentType = normalized;
+    try {
+      localStorage.setItem('foodsphere_fulfillment_mode', normalized);
+    } catch (e) {}
+    try {
+      window.dispatchEvent(new CustomEvent('foodsphere:fulfillment_changed', { detail: { mode: normalized } }));
+    } catch (e) {}
+    updatePageFulfillmentToggles(normalized);
     renderDrawerContent();
   }
+
+  function getFulfillmentType() {
+    return cartState.fulfillmentType || 'DELIVERY';
+  }
+
+  function updatePageFulfillmentToggles(mode) {
+    const isPickup = (mode === 'PICKUP' || mode === 'TAKEAWAY');
+    const activeVal = isPickup ? 'PICKUP' : 'DELIVERY';
+
+    // 1. Update any in-page segmented toggle buttons
+    document.querySelectorAll('.kfc-toggle-btn, .fulfillment-toggle-btn, [data-fulfillment-mode]').forEach(btn => {
+      const btnMode = btn.getAttribute('data-fulfillment-mode') || (btn.textContent.includes('Pickup') ? 'PICKUP' : 'DELIVERY');
+      if (btnMode === activeVal) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // 2. Update address containers in direct checkout forms on page
+    document.querySelectorAll('.direct-checkout-address-wrap, [data-address-wrap]').forEach(el => {
+      if (isPickup) {
+        el.style.display = 'none';
+        const inp = el.querySelector('input, textarea');
+        if (inp) inp.removeAttribute('required');
+      } else {
+        el.style.display = '';
+        const inp = el.querySelector('input, textarea');
+        if (inp) inp.setAttribute('required', 'required');
+      }
+    });
+
+    // 3. Update delivery fee labels in direct checkout forms
+    document.querySelectorAll('[data-delivery-fee-display]').forEach(el => {
+      el.textContent = isPickup ? 'Rs. 0 (Free Pickup)' : 'Rs. 150';
+    });
+
+    // 4. Update ETA badges
+    document.querySelectorAll('[data-eta-badge]').forEach(el => {
+      el.textContent = isPickup ? '⏱️ Pickup Ready in 20–25 mins' : '🛵 Delivery in 35–45 mins';
+    });
+  }
+
 
   // Main UI Renderer
   function renderDrawerContent() {
@@ -584,20 +685,34 @@
 
       body.innerHTML = `
         <div class="cd-step active">
-          <!-- Fulfillment Segmented Toggle -->
-          <div class="cd-fulfillment-toggle">
+                    <!-- KFC-Style Segmented Toggle -->
+          <div class="cd-fulfillment-toggle kfc-segmented-toggle">
             <div class="cd-toggle-option ${isDelivery ? 'active' : ''}" onclick="CartDrawer.setFulfillmentType('DELIVERY')">
-              🛵 Delivery
+              <span style="font-size:16px;">🛵</span>
+              <span>Delivery</span>
+              <span style="font-size:11px; opacity:0.8;">(Rs. 150)</span>
             </div>
-            <div class="cd-toggle-option ${!isDelivery ? 'active' : ''}" onclick="CartDrawer.setFulfillmentType('TAKEAWAY')">
-              🛍️ Pickup / Takeaway
+            <div class="cd-toggle-option ${!isDelivery ? 'active' : ''}" onclick="CartDrawer.setFulfillmentType('PICKUP')">
+              <span style="font-size:16px;">🛍️</span>
+              <span>Pickup</span>
+              <span style="font-size:10px; background:#10B981; color:#fff; padding:2px 6px; border-radius:10px; font-weight:800;">FREE</span>
             </div>
           </div>
+
+          ${!isDelivery ? `
+            <div class="cd-pickup-notice" style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.35); border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:12.5px; color:#10B981; display:flex; align-items:center; gap:10px;">
+              <span style="font-size:22px;">⏱️</span>
+              <div>
+                <strong style="color:#FFFFFF; font-size:13px;">Ready for Pickup in 20–25 mins</strong>
+                <div style="font-size:11.5px; color:rgba(255,255,255,0.7); margin-top:2px;">Collect your fresh meal at the outlet counter. Zero delivery fee!</div>
+              </div>
+            </div>
+          ` : ''}
 
           <!-- Form Fields -->
           <div class="cd-form-group">
             <label class="cd-form-label">Select Branch Outlet</label>
-            <select class="cd-form-select" id="cd-input-branch">
+            <select class="cd-form-select" id="cd-input-branch" onchange="CartDrawer.setSelectedBranch(this.value)">
               ${branches.map(b => `<option value="${b.name}" ${cartState.selectedBranch === b.name ? 'selected' : ''}>${b.name}</option>`).join('')}
             </select>
           </div>
@@ -662,7 +777,8 @@
       const displayId = order.display_order_id || (activeStored ? activeStored.displayOrderId : ('#FS-' + Math.floor(1000 + Math.random() * 9000)));
       const rawStatus = (order.status || (activeStored ? activeStored.status : 'received')).toLowerCase();
       const statusLabel = rawStatus.toUpperCase().replace('_', ' ');
-      const whatsappPhone = WHATSAPP_NUMBERS[brandSlug] || '923000000000';
+      const branchKey = cartState.selectedBranch || activeStored?.selectedBranch || '';
+      const whatsappPhone = (BRANCH_PHONES[brandSlug] && BRANCH_PHONES[brandSlug][branchKey]) || WHATSAPP_NUMBERS[brandSlug] || '923274945947';
 
       const whatsappMessage = `Hello! I am checking on my order 🛵\n\n` +
         `*Order ID:* ${displayId}\n` +
@@ -854,10 +970,15 @@
     closeDrawer,
     setStep,
     setFulfillmentType,
+    getFulfillmentType,
     processOrderSubmission,
     resetAndClose,
     clearActiveGuestOrder,
-    findProductImage
+    findProductImage,
+    setSelectedBranch
   };
 
+  window.setFulfillmentMode = setFulfillmentType;
+
 })();
+

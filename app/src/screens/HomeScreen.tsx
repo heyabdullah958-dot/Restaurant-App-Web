@@ -978,6 +978,81 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </View>
       </View>
 
+      {/* KFC-Style Global Fulfillment Mode Segmented Toggle */}
+      <View style={styles.kfcToggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.kfcToggleBtn,
+            fulfillmentMode === 'DELIVERY' && styles.kfcToggleBtnActive
+          ]}
+          onPress={() => handleSwitchFulfillmentMode('DELIVERY')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="bicycle"
+            size={16}
+            color={fulfillmentMode === 'DELIVERY' ? '#FFFFFF' : COLORS.gray}
+          />
+          <Text
+            style={[
+              styles.kfcToggleText,
+              fulfillmentMode === 'DELIVERY' && styles.kfcToggleTextActive
+            ]}
+          >
+            Delivery
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.kfcToggleBtn,
+            (fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') && styles.kfcToggleBtnActive
+          ]}
+          onPress={() => handleSwitchFulfillmentMode('TAKEAWAY')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="bag-handle"
+            size={16}
+            color={(fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') ? '#FFFFFF' : COLORS.gray}
+          />
+          <Text
+            style={[
+              styles.kfcToggleText,
+              (fulfillmentMode === 'TAKEAWAY' || (fulfillmentMode as string) === 'PICKUP') && styles.kfcToggleTextActive
+            ]}
+          >
+            Pickup
+          </Text>
+          <View style={styles.kfcFreeBadge}>
+            <Text style={styles.kfcFreeBadgeText}>FREE</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.kfcToggleBtn,
+            fulfillmentMode === 'DINE_IN' && styles.kfcToggleBtnActive
+          ]}
+          onPress={() => handleSwitchFulfillmentMode('DINE_IN')}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="restaurant"
+            size={16}
+            color={fulfillmentMode === 'DINE_IN' ? '#FFFFFF' : COLORS.gray}
+          />
+          <Text
+            style={[
+              styles.kfcToggleText,
+              fulfillmentMode === 'DINE_IN' && styles.kfcToggleTextActive
+            ]}
+          >
+            Dine-In
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={{ flex: 1, backgroundColor: '#f8fafc' }}>
         <FlatList
           key={`home_restaurant_list_${fulfillmentMode}_${selectedCategory}`}
@@ -1520,5 +1595,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     ...SHADOWS.medium,
+  },
+  kfcToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#EEF2F6',
+    borderRadius: 24,
+    padding: 3,
+    marginHorizontal: SPACING.md,
+    marginTop: 8,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  kfcToggleBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  kfcToggleBtnActive: {
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  kfcToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.gray,
+  },
+  kfcToggleTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  kfcFreeBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 8,
+  },
+  kfcFreeBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
   },
 });

@@ -46,7 +46,12 @@
       'gulberg': 36,
       'default': 36
     },
-    'dineatblue': { 'default': 2 },
+        'dineatblue': {
+      'gulberg': 73,
+      'gulberg iii': 73,
+      'mm alam': 73,
+      'default': 73
+    },
     'sandmelts': { 'default': 5 },
     'birdmanfoodspk': { 'default': 6 }
   };
@@ -173,7 +178,49 @@
     'pita bread': './images/pita_bread.jpg',
     'lotus can dessert': './images/lotus_can_dessert.jpg',
     'red velvet can dessert': './images/red_velvet_can_dessert.jpg',
-    'nutella can dessert': './images/nutella_can_dessert.jpg'
+    'nutella can dessert': './images/nutella_can_dessert.jpg',
+    // DineAtBlue
+    'blue seafood platter': './images/blue_seafood_platter.png',
+    'seafood platter': './images/blue_seafood_platter.png',
+    'kunafa prawns': './images/kunafa_prawns.png',
+    'dynamite prawns': './images/dynamite_prawns.png',
+    'seared dumplings': './images/seared_dumplings.png',
+    'chicken dumplings': './images/chicken_dumplings.png',
+    'dynamite chicken': './images/dynamite_chicken.png',
+    'honey wings': './images/honey_wings.png',
+    'fish & chips': './images/fish_and_chips.png',
+    '19b soup': './images/soup_19b.png',
+    'chicken corn soup': './images/chicken_corn_soup.png',
+    'bbq prawn salad': './images/bbq_prawn_salad.png',
+    'romesco fish': './images/romesco_fish.png',
+    'umami fish': './images/umami_fish.png',
+    'pamphlet fish': './images/pamphlet_fish.png',
+    'fish chilli dry': './images/fish_chilli_dry.png',
+    'vietnamese fish': './images/vietnamese_fish.png',
+    'thermidor lobster': './images/thermidor_lobster.png',
+    'grilled lobster': './images/grilled_lobster.png',
+    'bbq prawns': './images/bbq_prawns.png',
+    'prawn pasta': './images/prawn_pasta.png',
+    'steamed crab': './images/steamed_crab.png',
+    'mud crab': './images/mud_crab.png',
+    'grilled fish': './images/grilled_fish.png',
+    'chilli mint chicken': './images/chilli_mint_chicken.png',
+    'cashew nut chicken': './images/cashew_nut_chicken.png',
+    'korean fried chicken': './images/korean_fried_chicken.png',
+    'sweet & sour chicken': './images/sweet_and_sour_chicken.png',
+    'house special chicken': './images/house_special_chicken.png',
+    'chicken platter': './images/chicken_platter_2person.png',
+    'strawberry mojito': './images/strawberry_mojito.png',
+    'blueberry mojito': './images/blueberry_mojito.png',
+    'peach mojito': './images/peach_mojito.png',
+    'green apple mojito': './images/green_apple_mojito.png',
+    'lemonade': './images/lemonade.png',
+    'pepsi': './images/pepsi_7up.png',
+    'butter mushroom rice': './images/butter_rice.png',
+    'roasted potatoes': './images/roasted_potatoes.png',
+    'steak fries': './images/french_fries.png',
+    'dynamite dip': './images/dynamite_dip.png',
+
   };
 
   function resolveItemImage(item) {

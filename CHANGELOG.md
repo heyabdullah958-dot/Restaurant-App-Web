@@ -1,6 +1,42 @@
 
 # Changelog
 
+## 2026-10-15 Phase 1-4 — Dine At Blue Launch, 5-Page Luxury Architecture & KFC-Style Fulfillment Mode
+- **Phase 1: Ingestion & Asset Synthesis for "Dine At Blue"**:
+  - Extracted 41 authentic menu items across 7 categories (`SIGNATURE PLATTERS`, `STARTERS`, `SALADS`, `MAINS - SEAFOOD`, `MAINS - CHICKEN`, `BEVERAGES & MOJITOS`, `ADD-ONS`) from `New Data/`.
+  - Stored 45 high-resolution cropped assets in `websites/dineatblue/images/` (0 broken links, 0 Unsplash fallbacks).
+  - Designed vector SVG logos and Playwright retina PNG emblems (`logo.svg`, `logo_emblem.svg`, `logo.png`, `logo_emblem.png`).
+  - Synced catalog to `websites/shared_catalog.json`, `app/src/services/fallbackData.ts`, and local SQLite DB (`backend/db.sqlite3`) with Restaurant ID 58 (`Dine At Blue`) and Branch ID 73 (`Gulberg III Main Outlet`, `94-B/2, MM Alam Road, Gulberg III, Lahore`).
+  - Automated verification passed: `test_phase1_dineatblue_verification.py` (4/4 tests passed).
+- **Phase 2: 5-Page Architecture & Creative Theme for "Dine At Blue"**:
+  - Created 5-page structure benchmarked to Tandoori Stop: `index.html`, `menu.html`, `deals.html`, `about.html`, `locations.html`, plus `_redirects`.
+  - Art Direction: "Midnight Sapphire, Electric Cobalt & Brushed Champagne Gold" (`#050A18`, `#0D1F4D`, `#38BDF8`, `#D4AF37`) with frosted glassmorphic cards (`backdrop-filter: blur(16px)`).
+  - Implemented Eastern Oven / McDonald's style Item Detail Modal with variant selector (e.g. 2-person, without lobster, with lobster options), quantity steppers, and instant cart dispatch.
+  - Interactive category filtering, full search input, and responsive mobile nav drawers on all pages.
+- **Phase 3: KFC-Style [ 🛵 Delivery | 🛍️ Pickup ] Segmented Toggle Across Brand Sites**:
+  - Engineered reactive fulfillment engine in `websites/cart_drawer.js` with `localStorage` persistence (`foodsphere_fulfillment_mode`).
+  - Synced `cart_drawer.js` and `cart_drawer.css` with 100% binary parity across all 7 brand websites.
+  - Injected prominent KFC segmented toggle pills into Top Announcement Bars, Hero banners, Shared Cart Drawers, and Direct Checkout forms across `dineatblue`, `tandooristoppk`, and `jushhpk`.
+  - Dynamic behavior verified: when `PICKUP` is active, delivery fee becomes Rs. 0 (Free Pickup), street address field auto-hides / is bypassed, prep time is displayed, and order payload sets `order_type: "PICKUP"`.
+  - Automated Playwright suite passed: `test_phase2_phase3_verification.py` (100% passed).
+- **Phase 4: Global Fulfillment Mode in Customer App, DRF Backend & Merchant Manager App**:
+  - **Customer Mobile App (`/app`)**:
+    - Injected KFC segmented toggle pill into `HomeScreen.tsx` header, `CartScreen.tsx`, and `CheckoutScreen.tsx`.
+    - Wired Redux `cartSlice.ts` to dynamically calculate delivery fee as Rs. 0 when `PICKUP` is selected.
+    - Updated `CheckoutScreen.tsx` to display dedicated self-pickup branch guidance card and submit `order_type: "PICKUP"`.
+    - TypeScript compilation passed with 0 errors (`npx tsc --noEmit`).
+  - **Backend API (`/backend`)**:
+    - Added `('PICKUP', 'Pickup')` choice to `Order.ORDER_TYPES` in `backend/orders/models.py`.
+    - Generated and executed migration `0015_alter_order_order_type` on local database.
+    - Updated `OrderCreateSerializer` to strictly enforce `delivery_fee = Decimal('0.00')` for `PICKUP`, `TAKEAWAY`, and `DINE_IN`.
+    - Backend integration suite passed: `test_phase4_pickup_verification.py` (100% passed).
+  - **Merchant Manager App (`/admin-app`)**:
+    - Updated `OrderManagementScreen.tsx` order cards to render clear `[🛍️ PICKUP]` or `[🛵 DELIVERY]` badges.
+    - Gated `preparing` status transition so takeaway/pickup orders advance directly to ready/delivered without requiring rider dispatch.
+    - TypeScript compilation passed with 0 errors (`npx tsc --noEmit`).
+
+---
+
 ## 2026-09-13 Step 1 — Zero-Cost Concurrency & Load Capacity Optimization (250+ Users)
 - **Non-Blocking Background I/O (Email & FCM)**:
   - In `backend/orders/views.py`, offloaded synchronous Gmail SMTP `send_mail` and Firebase FCM push notifications into an asynchronous `concurrent.futures.ThreadPoolExecutor(max_workers=4)`.
@@ -1016,3 +1052,23 @@
 
 
 
+
+---
+
+## Phase 16 (Phase 1 Voice Directive) — Ingest New Data & Populate Dine At Blue Catalog, Vectors & High-Res Assets — 2026-10-15
+- **Tier**: MODERATE — Ingesting new multi-category restaurant assets, vector branding, catalog synchronization, fallback data updates, and local database migrations.
+- **What Changed & Why**: Ingested all menus, categories, items, pricing, variants, and HD photos from New Data/ for Dine At Blue. Generated vector SVG emblem and horizontal logo with high-res PNG renders (websites/dineatblue/images/). Synchronized all 41 items and 7 categories into shared_catalog.json, fallbackData.ts, seed_restaurants.py, seed_branches.py, live_catalog.js, and local SQLite database.
+- **Files Modified**:
+  - websites/dineatblue/images/* (45 HD assets created)
+  - websites/shared_catalog.json
+  - websites/dineatblue/live_catalog.js
+  - websites/live_catalog.js
+  - websites/tandooristoppk/live_catalog.js
+  - websites/jushhpk/live_catalog.js
+  - app/src/services/fallbackData.ts
+  - backend/restaurants/management/commands/seed_restaurants.py
+  - backend/restaurants/management/commands/seed_branches.py
+  - test_phase1_dineatblue_verification.py (NEW)
+- **Verification Evidence**: python test_phase1_dineatblue_verification.py passed 100% (45 assets checked, 41 items in catalog, DB seeded, npx tsc --noEmit on app clean).
+- **Deploy Chain Status**: Saved + Verified Locally (Local Execution Mode per constraint).
+- **Confidence**: 100% — Zero missing assets, verified DB seeding and type safety.

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DINE AT BLUE — Exclusive Deals &amp; Ocean Platters | Lahore</title>
+  <meta name="description" content="Feast on Dine At Blue's signature steamed seafood platters, lobster combos, and ocean bundles. Unrivaled luxury seafood value in Lahore."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap"/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20261015"/>
+  <link rel="stylesheet" href="theme_blue.css?v=20261015"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('blue_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="scroll-progress"></div>
+
+  <!-- Luxury Entrance Reveal Animation -->
+  <div id="blue-entrance">
+    <div class="blue-splash-seal">
+      <div class="blue-splash-ring"></div>
+      <div class="blue-splash-ring-inner"></div>
+      <img src="./images/logo_emblem.png" alt="Dine At Blue Emblem" class="blue-splash-logo" />
+    </div>
+    <div class="blue-splash-title">Dine At <span>Deals</span></div>
+    <div class="blue-splash-sub">Exclusive Ocean Platters &amp; Feasts</div>
+  </div>
+
+  <header class="blue-topbar">
+    <div class="blue-topbar-left">
+      <span class="blue-topbar-pill">Promotions</span>
+      <span>✨ Limited-Time Seafood Bundles &amp; Chef's Table Platters</span>
+    </div>
+    <div class="blue-topbar-right">
+      <!-- KFC-Style Segmented Toggle in Header -->
+      <div class="kfc-fulfillment-toggle" style="padding:2px;">
+        <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
+          <span>🛵 Delivery</span>
+        </button>
+        <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
+          <span>🛍️ Pickup</span>
+          <span class="kfc-toggle-badge">FREE</span>
+        </button>
+      </div>
+
+      <a href="tel:+923218484111" class="blue-topbar-link">📞 Gulberg III: 0321-8484111</a>
+      <a href="https://wa.me/923218484111" target="_blank" rel="noopener" class="blue-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Sticky Nav -->
+  <nav class="blue-navbar">
+    <a href="index.html" class="blue-brand">
+      <img src="./images/logo.svg" alt="Dine At Blue Logo" class="blue-brand-logo" onerror="this.onerror=null; this.src='./images/logo.png';" />
+    </a>
+
+    <ul class="blue-nav-links">
+      <li class="blue-nav-item"><a href="index.html">Home</a></li>
+      <li class="blue-nav-item"><a href="menu.html">Menu &amp; Raw Bar</a></li>
+      <li class="blue-nav-item active"><a href="deals.html">Deals &amp; Platters</a></li>
+      <li class="blue-nav-item"><a href="about.html">Our Story</a></li>
+      <li class="blue-nav-item"><a href="locations.html">Locations</a></li>
+    </ul>
+
+    <div class="blue-nav-actions">
+      <button onclick="window.CartDrawer && window.CartDrawer.openDrawer()" class="blue-btn-primary">
+        <span>🛍️ View Cart</span>
+      </button>
+      <button class="blue-hamburger" id="blue-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="blue-mobile-overlay" id="blue-mobile-overlay" onclick="closeMobileNav()"></div>
+  <div class="blue-mobile-nav" id="blue-mobile-nav">
+    <a href="index.html" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" onclick="closeMobileNav()">Menu &amp; Raw Bar</a>
+    <a href="deals.html" class="active" onclick="closeMobileNav()">Deals &amp; Platters</a>
+    <a href="about.html" onclick="closeMobileNav()">Our Story</a>
+    <a href="locations.html" onclick="closeMobileNav()">Gulberg III Outlet</a>
+    <button onclick="closeMobileNav(); window.CartDrawer && window.CartDrawer.openDrawer()" class="blue-btn-primary" style="margin-top:16px; justify-content:center;">🛍️ View Cart</button>
+  </div>
+
+  <!-- DEALS HEADER -->
+  <header style="padding:60px 5% 40px; background:radial-gradient(circle at 50% 10%, rgba(2, 132, 199, 0.25) 0%, transparent 70%), #050A18; border-bottom:1px solid var(--blue-border); text-align:center;">
+    <div style="max-width:850px; margin:0 auto;">
+      <div class="blue-sec-badge">✨ Handcrafted Bundles &amp; Platters</div>
+      <h1 class="blue-sec-title" style="font-size:clamp(32px, 5vw, 54px); margin-bottom:12px;">
+        Exclusive <span>Ocean Platters</span> &amp; Feasts
+      </h1>
+      <p class="blue-sec-desc" style="margin:0 auto 24px;">
+        Curated for discerning seafood lovers and celebrations. Steamed crabs, colossal tiger prawns, garlic butter rice, and golden lobsters at unrivaled bundled value.
+      </p>
+
+      <div style="display:inline-flex; align-items:center; gap:16px; background:rgba(13,31,77,0.7); border:1px solid var(--blue-border); padding:8px 18px; border-radius:40px;">
+        <span style="font-size:12px; font-weight:800; color:var(--blue-azure); text-transform:uppercase; letter-spacing:1px;">Mode:</span>
+        <div class="kfc-fulfillment-toggle" style="padding:2px;">
+          <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
+            <span>🛵 Delivery</span>
+          </button>
+          <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
+            <span>🛍️ Pickup (Free)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- DEALS CARDS SECTION -->
+  <section class="blue-section">
+    <div style="max-width:1300px; margin:0 auto;">
+      <div class="blue-cards-grid">
+        
+        <!-- Deal 1: Blue Seafood Platter (Steamed) -->
+        <div class="blue-dish-card" style="border:2px solid var(--blue-gold); box-shadow:0 12px 36px var(--blue-cyan-glow);">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/blue_seafood_platter.png" alt="Blue Seafood Platter" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge" style="background:linear-gradient(135deg, var(--blue-gold-bright), var(--blue-gold)); color:#050A18;">👑 Chef's Signature</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">Blue Seafood Platter (Steamed)</div>
+              <span style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">SAVE RS. 800</span>
+            </div>
+            <div class="blue-dish-desc">
+              Crabs, lobsters, tiger prawns, shrimp, squid, dumplings, vegetables, boiled eggs, and butter mushroom rice steamed to highlight natural oceanic elegance.
+            </div>
+
+            <!-- Variant selector -->
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; font-weight:800; color:var(--blue-azure); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">Select Platter Configuration:</label>
+              <select id="deal-platter-variant" class="blue-variant-select" onchange="updateDealPlatterPrice(this.value)">
+                <option value="4999" data-name="2 Person Platter" selected>2 Person Platter — Rs. 4,999</option>
+                <option value="8500" data-name="Without Lobster">Without Lobster (Feast for 3-4) — Rs. 8,500</option>
+                <option value="13000" data-name="With Lobster">With Whole Lobster (Imperial Feast) — Rs. 13,000</option>
+              </select>
+            </div>
+
+            <div class="blue-dish-footer">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 5,799</div>
+                <div class="blue-dish-price" id="deal-platter-price">Rs. 4,999</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addDealPlatterToCart()">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 2: 2 Person Seafood & Chicken Platter -->
+        <div class="blue-dish-card">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/2_person_seafood_chicken_platter.png" alt="2 Person Seafood & Chicken Platter" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge">🔥 Best Value Duo</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">2 Person Seafood &amp; Chicken Platter</div>
+              <span style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">SAVE RS. 700</span>
+            </div>
+            <div class="blue-dish-desc">
+              The perfect harmonious union of ocean catch and tender grilled chicken, paired with aromatic garlic butter rice and specialty dynamite dipping sauces.
+            </div>
+
+            <div class="blue-dish-footer" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 4,200</div>
+                <div class="blue-dish-price">Rs. 3,500</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addItemDirect('2 Person Seafood & Chicken Platter', 3500, './images/2_person_seafood_chicken_platter.png')">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 3: Thermidor Lobster Feast -->
+        <div class="blue-dish-card">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/thermidor_lobster.png" alt="Thermidor Lobster" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge">🦞 Luxury Treat</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">Thermidor Lobster Royal Feast</div>
+              <span style="background:rgba(56, 189, 248, 0.15); border:1px solid var(--blue-azure); color:var(--blue-azure); font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">INCLUDES SIDES</span>
+            </div>
+            <div class="blue-dish-desc">
+              Whole fresh Arabian lobster cooked in creamy French thermidor sauce with Gruyère crust, served with butter mushroom rice and 1 complimentary Ocean Mojito.
+            </div>
+
+            <div class="blue-dish-footer" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 5,650</div>
+                <div class="blue-dish-price">Rs. 5,000</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addItemDirect('Thermidor Lobster', 5000, './images/thermidor_lobster.png')">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 4: Ocean Starters Duet -->
+        <div class="blue-dish-card">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/kunafa_prawns_3_pcs.png" alt="Kunafa & Dynamite Prawns" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge">🍤 Prawn Lovers</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">Ocean Starter Duet (Kunafa + Dynamite)</div>
+              <span style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">SAVE RS. 260</span>
+            </div>
+            <div class="blue-dish-desc">
+              Crisp golden Kunafa-wrapped tiger prawns (3 pcs) paired with a full goblet of signature spicy Dynamite Prawns in creamy sriracha glaze.
+            </div>
+
+            <div class="blue-dish-footer" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 2,360</div>
+                <div class="blue-dish-price">Rs. 2,100</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addItemDirect('Ocean Starter Duet (Kunafa + Dynamite)', 2100, './images/kunafa_prawns_3_pcs.png')">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 5: Mud Crab & Romesco Fish Feast -->
+        <div class="blue-dish-card">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/mud_crab.png" alt="Mud Crab & Fish" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge">🦀 Coastal Catch</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">Mud Crab &amp; Romesco Fish Feast</div>
+              <span style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">SAVE RS. 250</span>
+            </div>
+            <div class="blue-dish-desc">
+              Whole steamed Mud Crab seasoned with ocean herbs paired with pan-seared fillet in authentic Spanish almond romesco reduction and roast potatoes.
+            </div>
+
+            <div class="blue-dish-footer" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 4,000</div>
+                <div class="blue-dish-price">Rs. 3,750</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addItemDirect('Mud Crab & Romesco Fish Feast', 3750, './images/mud_crab.png')">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deal 6: Ocean Mojito Twin Pack -->
+        <div class="blue-dish-card">
+          <div class="blue-dish-img-wrap" style="height:260px;">
+            <img src="./images/blueberry_mojito.png" alt="Mojitos" class="blue-dish-img" onerror="this.onerror=null; this.src='./images/logo_emblem.png';" />
+            <span class="blue-dish-badge">🍹 Refreshment</span>
+          </div>
+          <div class="blue-dish-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+              <div class="blue-dish-title" style="font-size:20px;">Ocean Mojito Twin Pack (Any 2)</div>
+              <span style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px;">SAVE RS. 100</span>
+            </div>
+            <div class="blue-dish-desc">
+              Choose any 2 signature chilled fruit mojitos: Blueberry, Strawberry, Peach, or Green Apple with fresh crushed mint and zesty lime fizz.
+            </div>
+
+            <div class="blue-dish-footer" style="margin-top:auto;">
+              <div>
+                <div style="font-size:11px; color:var(--blue-muted); text-decoration:line-through;">Rs. 700</div>
+                <div class="blue-dish-price">Rs. 600</div>
+              </div>
+              <button class="blue-btn-primary" onclick="addItemDirect('Ocean Mojito Twin Pack', 600, './images/blueberry_mojito.png')">
+                + Claim Deal
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="blue-footer">
+    <div style="max-width:1300px; margin:0 auto;">
+      <div class="blue-footer-grid">
+        <div class="blue-footer-col">
+          <img src="./images/logo.svg" alt="Dine At Blue Logo" style="height:52px; width:auto; margin-bottom:16px;" onerror="this.onerror=null; this.src='./images/logo.png';" />
+          <p style="font-size:13.5px; color:var(--blue-muted); line-height:1.7; max-width:320px;">
+            Lahore's premier ocean-inspired seafood destination. Fresh steamed lobsters, fiery mud crabs, king prawns, and signature platters.
+          </p>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Navigation</h4>
+          <ul class="blue-footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">Menu &amp; Raw Bar</a></li>
+            <li><a href="deals.html">Deals &amp; Platters</a></li>
+            <li><a href="about.html">Our Story</a></li>
+            <li><a href="locations.html">Locations</a></li>
+          </ul>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Culinary Categories</h4>
+          <ul class="blue-footer-links">
+            <li><a href="menu.html">Signature Platters</a></li>
+            <li><a href="menu.html">Starters &amp; Dim Sum</a></li>
+            <li><a href="menu.html">Seafood Mains</a></li>
+            <li><a href="menu.html">Chicken Favorites</a></li>
+            <li><a href="menu.html">Ocean Mojitos</a></li>
+          </ul>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Gulberg III Outlet</h4>
+          <p style="font-size:13px; color:var(--blue-muted); line-height:1.6; margin-bottom:12px;">
+            📍 94-B/2, MM Alam Road, Gulberg III, Lahore<br/>
+            ⏰ Open Daily: 12:00 PM – Midnight<br/>
+            📞 Direct: 0321-8484111<br/>
+            💬 WhatsApp: 0321-8484111
+          </p>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="https://wa.me/923218484111" target="_blank" rel="noopener" class="blue-btn-secondary" style="padding:6px 14px; font-size:12px; color:#25D366; border-color:rgba(37,211,102,0.4);">
+              WhatsApp
+            </a>
+            <a href="tel:+923218484111" class="blue-btn-secondary" style="padding:6px 14px; font-size:12px;">
+              Call Outlet
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blue-footer-bottom">
+        <div>© 2026 Dine At Blue. All rights reserved. Fine Casual Ocean Dining.</div>
+        <div style="display:flex; gap:20px;">
+          <a href="/privacy-policy.html" style="color:var(--blue-faint); text-decoration:none;">Privacy Policy</a>
+          <a href="/terms-of-service.html" style="color:var(--blue-faint); text-decoration:none;">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    window.BRAND_SLUG = "dineatblue";
+
+    function updateDealPlatterPrice(val) {
+      const priceEl = document.getElementById('deal-platter-price');
+      if (priceEl) {
+        priceEl.textContent = 'Rs. ' + Number(val).toLocaleString();
+      }
+    }
+
+    function addDealPlatterToCart() {
+      const sel = document.getElementById('deal-platter-variant');
+      const price = Number(sel ? sel.value : 4999);
+      const text = sel ? sel.options[sel.selectedIndex].getAttribute('data-name') : '2 Person Platter';
+      addItemDirect(`Blue Seafood Platter (${text})`, price, './images/blue_seafood_platter.png');
+    }
+
+    function addItemDirect(name, price, img) {
+      if (window.CartDrawer && typeof window.CartDrawer.addItem === 'function') {
+        window.CartDrawer.addItem({
+          name: name,
+          price: price,
+          qty: 1,
+          image: img || './images/logo_emblem.png'
+        });
+      }
+    }
+  </script>
+
+  <script src="live_catalog.js?v=20261015" defer></script>
+  <script src="cart_drawer.js?v=20261015" defer></script>
+  <script src="entrance_blue.js?v=20261015" defer></script>
+</body>
+</html>

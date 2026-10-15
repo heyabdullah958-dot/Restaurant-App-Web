@@ -114,6 +114,16 @@ class Command(BaseCommand):
                     'phone': "03212784841",
                     'area_keywords': GULBERG_KEYWORDS
                 }
+            ],
+            'dineatblue': [
+                {
+                    'name': "Gulberg III Main Outlet",
+                    'address': "94-B/2, MM Alam Road, Gulberg III, Lahore",
+                    'phone': "0321-8484111",
+                    'latitude': 31.5135,
+                    'longitude': 74.3512,
+                    'area_keywords': GULBERG_KEYWORDS + DHA_KEYWORDS + JOHAR_TOWN_KEYWORDS
+                }
             ]
         }
 

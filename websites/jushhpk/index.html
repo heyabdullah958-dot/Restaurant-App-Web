@@ -44,6 +44,16 @@
       <span>🔥 Authentic Turkish Doner & Shawarma across 3 Lahore Outlets</span>
     </div>
     <div class="jushh-topbar-right">
+      <!-- KFC-Style Segmented Toggle in Header -->
+      <div class="kfc-fulfillment-toggle" style="padding:2px;">
+        <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
+          <span>🛵 Delivery</span>
+        </button>
+        <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
+          <span>🛍️ Pickup</span>
+          <span class="kfc-toggle-badge">FREE</span>
+        </button>
+      </div>
       <a href="tel:+923269946142" class="jushh-topbar-link">📞 Johar Town: 0326-9946142</a>
       <a href="tel:+923244441735" class="jushh-topbar-link">📞 Lake City: 0324-4441735</a>
       <a href="tel:+923257217221" class="jushh-topbar-link">📞 DHA: 0325-7217221</a>
@@ -126,6 +136,21 @@
           <a href="locations.html" class="jushh-btn-secondary" style="padding:14px 20px; font-size:14px;">
             <span>📍 Find a Branch</span>
           </a>
+        </div>
+
+                <!-- KFC-Style Segmented Toggle in Hero -->
+        <div style="margin-bottom:20px;">
+          <div style="font-size:11px; font-weight:800; color:var(--jushh-crimson); font-family:var(--font-display); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Choose Fulfillment Mode:</div>
+          <div class="kfc-fulfillment-toggle">
+            <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
+              <span>🛵 Express Delivery</span>
+              <span class="kfc-toggle-badge">Rs. 150</span>
+            </button>
+            <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
+              <span>🛍️ Counter Pickup</span>
+              <span class="kfc-toggle-badge" style="background:#10B981; color:#fff;">FREE</span>
+            </button>
+          </div>
         </div>
 
         <!-- Interactive Quick Branch Selector -->
@@ -520,7 +545,19 @@
           <button type="button" onclick="resetOrderForm()" class="jushh-btn-primary" style="margin-top:20px;"><span>➕ Place Another Order</span></button>
         </div>
 
-        <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/jushhpk" method="POST" onsubmit="handleFormSubmit(event)">
+                <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/jushhpk" method="POST" onsubmit="handleFormSubmit(event)">
+          <!-- In-Form Segmented Toggle -->
+          <div style="margin-bottom:18px;">
+            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Fulfillment Mode:</label>
+            <div class="kfc-fulfillment-toggle" style="background:#0D0D10;">
+              <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
+                <span>🛵 Delivery (Rs. 150)</span>
+              </button>
+              <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
+                <span>🛍️ Counter Pickup (FREE)</span>
+              </button>
+            </div>
+          </div>
           <div class="jushh-form-row">
             <div>
               <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Full Name *</label>
@@ -549,7 +586,7 @@
             </div>
           </div>
 
-          <div style="margin-bottom:14px;">
+          <div style="margin-bottom:14px;" class="direct-checkout-address-wrap">
             <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Delivery Address *</label>
             <input type="text" name="address" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="House/Flat #, Street, Area, Landmark" required/>
           </div>

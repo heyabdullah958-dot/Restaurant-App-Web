@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DINE AT BLUE — Flagship Outlet &amp; Delivery Hub | Gulberg III, Lahore</title>
+  <meta name="description" content="Visit Dine At Blue's flagship ocean dining outlet at 94-B/2, MM Alam Road, Gulberg III, Lahore. Direct contact, WhatsApp ordering, operating hours, and express delivery zones."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap"/>
+  <link rel="stylesheet" href="cart_drawer.css?v=20261015"/>
+  <link rel="stylesheet" href="theme_blue.css?v=20261015"/>
+  <script>
+    (function(){
+      try {
+        if (sessionStorage.getItem('blue_entrance_shown') === 'true') {
+          document.documentElement.classList.add('entrance-skipped');
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="scroll-progress"></div>
+
+  <!-- Luxury Entrance Reveal Animation -->
+  <div id="blue-entrance">
+    <div class="blue-splash-seal">
+      <div class="blue-splash-ring"></div>
+      <div class="blue-splash-ring-inner"></div>
+      <img src="./images/logo_emblem.png" alt="Dine At Blue Emblem" class="blue-splash-logo" />
+    </div>
+    <div class="blue-splash-title">Our <span>Location</span></div>
+    <div class="blue-splash-sub">Gulberg III Flagship · MM Alam Road</div>
+  </div>
+
+  <header class="blue-topbar">
+    <div class="blue-topbar-left">
+      <span class="blue-topbar-pill">Flagship Outlet</span>
+      <span>📍 MM Alam Road, Gulberg III, Lahore (Open Daily 12 PM – Midnight)</span>
+    </div>
+    <div class="blue-topbar-right">
+      <a href="tel:+923218484111" class="blue-topbar-link">📞 Gulberg III: 0321-8484111</a>
+      <a href="https://wa.me/923218484111" target="_blank" rel="noopener" class="blue-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Sticky Nav -->
+  <nav class="blue-navbar">
+    <a href="index.html" class="blue-brand">
+      <img src="./images/logo.svg" alt="Dine At Blue Logo" class="blue-brand-logo" onerror="this.onerror=null; this.src='./images/logo.png';" />
+    </a>
+
+    <ul class="blue-nav-links">
+      <li class="blue-nav-item"><a href="index.html">Home</a></li>
+      <li class="blue-nav-item"><a href="menu.html">Menu &amp; Raw Bar</a></li>
+      <li class="blue-nav-item"><a href="deals.html">Deals &amp; Platters</a></li>
+      <li class="blue-nav-item"><a href="about.html">Our Story</a></li>
+      <li class="blue-nav-item active"><a href="locations.html">Locations</a></li>
+    </ul>
+
+    <div class="blue-nav-actions">
+      <a href="menu.html" class="blue-btn-primary">
+        <span>🌊 Order Online</span>
+      </a>
+      <button class="blue-hamburger" id="blue-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="blue-mobile-overlay" id="blue-mobile-overlay" onclick="closeMobileNav()"></div>
+  <div class="blue-mobile-nav" id="blue-mobile-nav">
+    <a href="index.html" onclick="closeMobileNav()">Home</a>
+    <a href="menu.html" onclick="closeMobileNav()">Menu &amp; Raw Bar</a>
+    <a href="deals.html" onclick="closeMobileNav()">Deals &amp; Platters</a>
+    <a href="about.html" onclick="closeMobileNav()">Our Story</a>
+    <a href="locations.html" class="active" onclick="closeMobileNav()">Gulberg III Outlet</a>
+    <a href="menu.html" class="blue-btn-primary" style="margin-top:16px; justify-content:center;" onclick="closeMobileNav()">🌊 Order Online</a>
+  </div>
+
+  <!-- LOCATIONS HEADER -->
+  <header style="padding:60px 5% 40px; background:radial-gradient(circle at 50% 20%, rgba(2, 132, 199, 0.22) 0%, transparent 70%), #050A18; border-bottom:1px solid var(--blue-border); text-align:center;">
+    <div style="max-width:800px; margin:0 auto;">
+      <div class="blue-sec-badge">📍 Physical Dine-In &amp; Express Delivery Hub</div>
+      <h1 class="blue-sec-title" style="font-size:clamp(32px, 5vw, 52px); margin-bottom:12px;">
+        Our <span>Flagship Outlet</span> in Lahore
+      </h1>
+      <p class="blue-sec-desc" style="margin:0 auto;">
+        Visit our coastal-inspired dining lounge in Gulberg III for an intimate culinary journey, or order for doorstep delivery across Lahore.
+      </p>
+    </div>
+  </header>
+
+  <!-- OUTLET CARD SECTION -->
+  <section class="blue-section">
+    <div style="max-width:1100px; margin:0 auto;">
+      <div style="background:var(--blue-surface-card); border:2px solid var(--blue-gold); border-radius:20px; padding:40px; box-shadow:0 24px 60px rgba(0,0,0,0.8), 0 0 35px var(--blue-cyan-glow);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px; margin-bottom:24px;">
+          <div>
+            <div style="font-size:12px; font-weight:800; color:var(--blue-azure); text-transform:uppercase; letter-spacing:2px; margin-bottom:6px;">Outlet 01 · Lahore Central Hub</div>
+            <h2 style="font-family:var(--font-serif); font-size:32px; font-weight:900; color:#FFFFFF;">Gulberg III Flagship Outlet</h2>
+          </div>
+          <div style="background:rgba(16, 185, 129, 0.15); border:1px solid #10B981; color:#10B981; font-size:12px; font-weight:800; padding:6px 14px; border-radius:20px;">
+            🟢 OPEN NOW · 12:00 PM – Midnight
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-bottom:32px; font-size:14px; line-height:1.8;">
+          <div>
+            <div style="color:var(--blue-gold); font-weight:800; margin-bottom:4px;">📍 Physical Address:</div>
+            <div style="color:var(--blue-ivory);">94-B/2, MM Alam Road, Gulberg III, Lahore, Pakistan.</div>
+          </div>
+          <div>
+            <div style="color:var(--blue-gold); font-weight:800; margin-bottom:4px;">📞 Direct Line:</div>
+            <div><a href="tel:+923218484111" style="color:var(--blue-azure); text-decoration:none; font-weight:700;">0321-8484111</a></div>
+          </div>
+          <div>
+            <div style="color:var(--blue-gold); font-weight:800; margin-bottom:4px;">⏰ Operating Hours:</div>
+            <div style="color:var(--blue-ivory);">Monday to Sunday: 12:00 PM – 12:00 AM (Midnight)</div>
+          </div>
+          <div>
+            <div style="color:var(--blue-gold); font-weight:800; margin-bottom:4px;">🛵 Express Delivery Zones:</div>
+            <div style="color:var(--blue-muted);">Gulberg (All Phases), DHA Phases 1–6, Cantt, Model Town, Garden Town, Shadman, Jail Road, Canal Road.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <a href="tel:+923218484111" class="blue-btn-primary" style="padding:12px 26px;">
+            📞 Call Outlet Directly
+          </a>
+          <a href="https://wa.me/923218484111?text=Hello%20Dine%20At%20Blue!%20I%20would%20like%20to%20reserve%20a%20table%20or%20place%20an%20order." target="_blank" rel="noopener" class="blue-btn-secondary" style="padding:12px 26px; color:#25D366; border-color:rgba(37,211,102,0.4);">
+            💬 WhatsApp Concierge
+          </a>
+          <a href="menu.html" class="blue-btn-secondary" style="padding:12px 26px;">
+            🌊 View Menu &amp; Order
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEAFOOD FAQS -->
+  <section class="blue-section" style="background:#070F24;">
+    <div style="max-width:900px; margin:0 auto;">
+      <div style="text-align:center; margin-bottom:40px;">
+        <div class="blue-sec-badge">Guest Information</div>
+        <h2 class="blue-sec-title">Dining &amp; <span>Delivery FAQs</span></h2>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="blue-card">
+          <div style="font-family:var(--font-serif); font-size:16px; font-weight:800; color:var(--blue-gold); margin-bottom:6px;">How fresh is the seafood served?</div>
+          <div style="font-size:13.5px; color:var(--blue-muted); line-height:1.7;">Our whole lobsters, mud crabs, pomfret, and tiger prawns are sourced directly from sustainable fisheries and flown in fresh. We never serve re-frozen or chemically treated catch.</div>
+        </div>
+
+        <div class="blue-card">
+          <div style="font-family:var(--font-serif); font-size:16px; font-weight:800; color:var(--blue-gold); margin-bottom:6px;">How does delivery work for hot steamed seafood?</div>
+          <div style="font-size:13.5px; color:var(--blue-muted); line-height:1.7;">Our platters are packed in heavy-duty food-grade thermal foil seal boxes that trap heat and aromatic steam for up to 45 minutes, ensuring your lobster and crab arrive piping hot at your dining table.</div>
+        </div>
+
+        <div class="blue-card">
+          <div style="font-family:var(--font-serif); font-size:16px; font-weight:800; color:var(--blue-gold); margin-bottom:6px;">Is Counter Pickup free of charge?</div>
+          <div style="font-size:13.5px; color:var(--blue-muted); line-height:1.7;">Yes! Select "🛍️ Pickup" at checkout and your order will be prepared with zero delivery fees. Your food will be waiting fresh and hot at our MM Alam Road counter in 20–25 minutes.</div>
+        </div>
+
+        <div class="blue-card">
+          <div style="font-family:var(--font-serif); font-size:16px; font-weight:800; color:var(--blue-gold); margin-bottom:6px;">Do you accept Cash on Delivery (COD)?</div>
+          <div style="font-size:13.5px; color:var(--blue-muted); line-height:1.7;">Yes! We accept Cash on Delivery across all serviceable areas in Lahore. You pay upon receiving your fresh seafood package.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="blue-footer">
+    <div style="max-width:1300px; margin:0 auto;">
+      <div class="blue-footer-grid">
+        <div class="blue-footer-col">
+          <img src="./images/logo.svg" alt="Dine At Blue Logo" style="height:52px; width:auto; margin-bottom:16px;" onerror="this.onerror=null; this.src='./images/logo.png';" />
+          <p style="font-size:13.5px; color:var(--blue-muted); line-height:1.7; max-width:320px;">
+            Lahore's premier ocean-inspired seafood destination. Fresh steamed lobsters, fiery mud crabs, king prawns, and signature platters.
+          </p>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Navigation</h4>
+          <ul class="blue-footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">Menu &amp; Raw Bar</a></li>
+            <li><a href="deals.html">Deals &amp; Platters</a></li>
+            <li><a href="about.html">Our Story</a></li>
+            <li><a href="locations.html">Locations</a></li>
+          </ul>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Culinary Categories</h4>
+          <ul class="blue-footer-links">
+            <li><a href="menu.html">Signature Platters</a></li>
+            <li><a href="menu.html">Starters &amp; Dim Sum</a></li>
+            <li><a href="menu.html">Seafood Mains</a></li>
+            <li><a href="menu.html">Chicken Favorites</a></li>
+            <li><a href="menu.html">Ocean Mojitos</a></li>
+          </ul>
+        </div>
+
+        <div class="blue-footer-col">
+          <h4>Gulberg III Outlet</h4>
+          <p style="font-size:13px; color:var(--blue-muted); line-height:1.6; margin-bottom:12px;">
+            📍 94-B/2, MM Alam Road, Gulberg III, Lahore<br/>
+            ⏰ Open Daily: 12:00 PM – Midnight<br/>
+            📞 Direct: 0321-8484111<br/>
+            💬 WhatsApp: 0321-8484111
+          </p>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <a href="https://wa.me/923218484111" target="_blank" rel="noopener" class="blue-btn-secondary" style="padding:6px 14px; font-size:12px; color:#25D366; border-color:rgba(37,211,102,0.4);">
+              WhatsApp
+            </a>
+            <a href="tel:+923218484111" class="blue-btn-secondary" style="padding:6px 14px; font-size:12px;">
+              Call Outlet
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blue-footer-bottom">
+        <div>© 2026 Dine At Blue. All rights reserved. Fine Casual Ocean Dining.</div>
+        <div style="display:flex; gap:20px;">
+          <a href="/privacy-policy.html" style="color:var(--blue-faint); text-decoration:none;">Privacy Policy</a>
+          <a href="/terms-of-service.html" style="color:var(--blue-faint); text-decoration:none;">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="live_catalog.js?v=20261015" defer></script>
+  <script src="cart_drawer.js?v=20261015" defer></script>
+  <script src="entrance_blue.js?v=20261015" defer></script>
+</body>
+</html>

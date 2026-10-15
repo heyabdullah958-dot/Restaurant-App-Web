@@ -77,7 +77,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
   };
 
   const handleAdvanceStatus = async (order: AdminOrder) => {
-    const isDelivery = !order.order_type || order.order_type === 'DELIVERY';
+    const isDelivery = order.order_type === 'DELIVERY' || !order.order_type;
 
     if (order.status === 'preparing' && isDelivery) {
       // Intercept preparing -> out_for_delivery for delivery orders with Rider Dispatch Modal
@@ -89,7 +89,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
     if (order.status === 'received') {
       nextStatus = 'preparing';
     } else if (order.status === 'preparing' && !isDelivery) {
-      // For TAKEAWAY / DINE_IN, preparing moves straight to delivered (completed/served)
+      // For TAKEAWAY / PICKUP / DINE_IN, preparing moves straight to delivered (completed/served)
       nextStatus = 'delivered';
     } else if (order.status === 'out_for_delivery') {
       nextStatus = 'delivered';
@@ -243,7 +243,7 @@ export const OrderManagementScreen = ({ navigation }: any) => {
               <Text style={styles.typeText}>
                 {item.order_type === 'DINE_IN'
                   ? `🍽️ DINE-IN ${item.table_number ? `(T-${item.table_number})` : ''}`
-                  : item.order_type === 'TAKEAWAY'
+                  : (item.order_type === 'TAKEAWAY' || item.order_type === 'PICKUP')
                   ? '🛍️ PICKUP'
                   : '🛵 DELIVERY'}
               </Text>

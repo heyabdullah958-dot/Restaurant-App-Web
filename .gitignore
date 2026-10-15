@@ -36,3 +36,9 @@ chrome_temp_profile/
 *.apk
 app/android/app/build/
 admin-app/android/app/build/
+
+# Backups & Raw Intake
+*.bak
+scratch/
+New Data/
+heroku_database_backup_*.json
