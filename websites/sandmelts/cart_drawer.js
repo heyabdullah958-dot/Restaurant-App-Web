@@ -482,6 +482,7 @@
       <span class="cd-float-badge" id="cd-float-badge">0</span>
       <span class="cd-float-total" id="cd-float-total">Rs. 0</span>
     `;
+    floatBtn.style.display = 'none';
     floatBtn.onclick = () => openDrawer();
     document.body.appendChild(floatBtn);
 
@@ -551,7 +552,11 @@
     
     const floatBtn = document.getElementById('cd-float-btn');
     if (floatBtn) {
-      floatBtn.style.display = 'flex';
+      if (count > 0) {
+        floatBtn.style.display = 'flex';
+      } else {
+        floatBtn.style.display = 'none';
+      }
     }
   }
 
