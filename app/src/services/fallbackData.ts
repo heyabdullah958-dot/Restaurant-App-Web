@@ -136,8 +136,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     "name": "Dine At Blue",
     "slug": "dineatblue",
     "cuisine_type": "Seafood & Ocean Fine-Casual",
-    "logo": "./images/logo.png",
-    "cover_image": "./images/hero_seafood.png",
+    "logo": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150463/dineatblue/brand/logo.png",
+    "cover_image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150458/dineatblue/brand/hero_seafood.png",
     "description": "Lahore's premier ocean-inspired seafood destination. Fresh steamed lobsters, mud crabs, king prawns, and signature seafood platters.",
     "address": "94-B/2, MM Alam Road, Gulberg III, Lahore",
     "city": "Lahore",
@@ -174,7 +174,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Blue Seafood Platter (Steamed)",
                     "description": "An indulgent medley of crabs, lobsters, prawns, shrimps, tiger prawns, fish, squid, dumplings, vegetables, boiled eggs, butter mushroom rice, and sauces - delicately steamed to highlight the natural elegance of the sea.",
                     "price": 4999.0,
-                    "image": "./images/blue_seafood_platter.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150436/dineatblue/menu_items/blue_seafood_platter.png",
                     "is_available": true,
                     "is_featured": true,
                     "preparation_time": 25,
@@ -201,7 +201,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "2 Person Seafood & Chicken Platter",
                     "description": "A decadent combination platter featuring succulent seafood and grilled chicken favorites with savory accompaniments.",
                     "price": 3500.0,
-                    "image": "./images/chicken_platter_2person.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150443/dineatblue/menu_items/chicken_platter_2person.png",
                     "is_available": true,
                     "is_featured": true,
                     "preparation_time": 25
@@ -220,7 +220,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Kunafa Prawns (3 pcs)",
                     "description": "Crispy kataifi-wrapped jumbo prawns garnished with crushed pistachio and sweet spicy dip.",
                     "price": 1100.0,
-                    "image": "./images/kunafa_prawns.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150461/dineatblue/menu_items/kunafa_prawns.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -230,7 +230,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Dynamite Prawns",
                     "description": "Crisp fried prawns tossed in signature creamy spicy dynamite glaze on a bed of fresh slaw.",
                     "price": 1260.0,
-                    "image": "./images/dynamite_prawns.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150448/dineatblue/menu_items/dynamite_prawns.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -240,7 +240,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Seared Dumplings (6 pcs)",
                     "description": "Golden pan-seared gyoza dumplings with savory filling and sesame chili soy dip.",
                     "price": 600.0,
-                    "image": "./images/seared_dumplings.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150480/dineatblue/menu_items/seared_dumplings.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -250,7 +250,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Chicken Dumplings (6 pcs)",
                     "description": "Steamed chicken dumplings served with aromatic chili soy dipping sauce.",
                     "price": 500.0,
-                    "image": "./images/chicken_dumplings.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150442/dineatblue/menu_items/chicken_dumplings.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -260,7 +260,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Dynamite Chicken",
                     "description": "Crispy chicken bites coated in tangy, fiery dynamite dressing.",
                     "price": 850.0,
-                    "image": "./images/dynamite_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150446/dineatblue/menu_items/dynamite_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -270,7 +270,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Honey Wings (6 pcs)",
                     "description": "Glazed sesame chicken wings tossed in sticky honey sauce with crisp garden salad.",
                     "price": 700.0,
-                    "image": "./images/honey_wings.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150459/dineatblue/menu_items/honey_wings.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -280,7 +280,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Fish & Chips",
                     "description": "Golden crispy battered fish fillets served with steak fries and homemade tartar sauce.",
                     "price": 850.0,
-                    "image": "./images/fish_and_chips.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150449/dineatblue/menu_items/fish_and_chips.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -290,7 +290,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "19B Soup",
                     "description": "Traditional thick, savory oriental seafood and chicken soup with fresh herbs.",
                     "price": 390.0,
-                    "image": "./images/soup_19b.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150481/dineatblue/menu_items/soup_19b.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -300,7 +300,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Chicken Corn Soup",
                     "description": "Classic comforting chicken corn soup with shredded chicken and sweet corn.",
                     "price": 350.0,
-                    "image": "./images/chicken_corn_soup.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150440/dineatblue/menu_items/chicken_corn_soup.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -319,7 +319,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "BBQ Prawn Salad",
                     "description": "Fresh garden greens tossed with flame-grilled prawns, cherry tomatoes, and citrus vinaigrette.",
                     "price": 900.0,
-                    "image": "./images/bbq_prawn_salad.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150434/dineatblue/menu_items/bbq_prawn_salad.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -338,7 +338,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Romesco Fish",
                     "description": "Pan-grilled fresh fish fillet smothered in rich Spanish romesco almond-pepper sauce.",
                     "price": 2000.0,
-                    "image": "./images/romesco_fish.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150479/dineatblue/menu_items/romesco_fish.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -348,7 +348,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Umami Fish",
                     "description": "Seared fish fillet basted in savory umami glaze topped with fresh herbs.",
                     "price": 1800.0,
-                    "image": "./images/umami_fish.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150488/dineatblue/menu_items/umami_fish.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -358,7 +358,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Pamphlet Fish",
                     "description": "Whole grilled pomfret marinated in aromatic coastal herbs and garlic butter.",
                     "price": 1900.0,
-                    "image": "./images/pamphlet_fish.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150472/dineatblue/menu_items/pamphlet_fish.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -368,7 +368,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Fish Chilli Dry",
                     "description": "Crisp wok-tossed fish chunks with green chilies, onions, and spicy Asian seasonings.",
                     "price": 1500.0,
-                    "image": "./images/fish_chilli_dry.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150450/dineatblue/menu_items/fish_chilli_dry.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -378,7 +378,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Vietnamese Fish",
                     "description": "Tender fish fillet wok-cooked with Vietnamese sweet-tangy garlic glaze.",
                     "price": 1500.0,
-                    "image": "./images/vietnamese_fish.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150489/dineatblue/menu_items/vietnamese_fish.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -388,7 +388,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Thermidor Lobster",
                     "description": "Rich baked lobster meat in creamy cheese and white wine reduction topped with melted crust.",
                     "price": 5000.0,
-                    "image": "./images/thermidor_lobster.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150487/dineatblue/menu_items/thermidor_lobster.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -398,7 +398,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Grilled Lobster",
                     "description": "Whole succulent lobster flame-grilled with garlic butter and lemon wedges.",
                     "price": 5000.0,
-                    "image": "./images/grilled_lobster.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150455/dineatblue/menu_items/grilled_lobster.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -408,7 +408,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "BBQ Prawns",
                     "description": "Skewered king prawns chargrilled over live charcoal with smokey glaze.",
                     "price": 2500.0,
-                    "image": "./images/bbq_prawns.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150435/dineatblue/menu_items/bbq_prawns.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -418,7 +418,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Prawn Pasta",
                     "description": "Al dente fettuccine tossed with saut\u00e9ed prawns in creamy garlic marinara sauce.",
                     "price": 1900.0,
-                    "image": "./images/prawn_pasta.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150475/dineatblue/menu_items/prawn_pasta.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -428,7 +428,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Steamed Crab",
                     "description": "Fresh mud crab delicately steamed to perfection with ginger scallion dipping oil.",
                     "price": 2000.0,
-                    "image": "./images/steamed_crab.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150484/dineatblue/menu_items/steamed_crab.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -438,7 +438,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Mud Crab",
                     "description": "Whole mud crab cooked in savory spicy coastal chili sauce.",
                     "price": 2000.0,
-                    "image": "./images/mud_crab.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150471/dineatblue/menu_items/mud_crab.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -448,7 +448,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Grilled Fish",
                     "description": "Catch of the day fish fillet seasoned with coastal spices and char-grilled.",
                     "price": 2500.0,
-                    "image": "./images/grilled_fish.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150454/dineatblue/menu_items/grilled_fish.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -467,7 +467,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Chilli Mint Chicken",
                     "description": "Stir-fried chicken tossed with fresh garden mint, green chilies, and tangy soy sauce.",
                     "price": 900.0,
-                    "image": "./images/chilli_mint_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150443/dineatblue/menu_items/chilli_mint_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -477,7 +477,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Cashew Nut Chicken",
                     "description": "Wok-fried chicken breast cubes with roasted cashew nuts and bell peppers.",
                     "price": 1000.0,
-                    "image": "./images/cashew_nut_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150439/dineatblue/menu_items/cashew_nut_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -487,7 +487,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Korean Fried Chicken",
                     "description": "Double-fried crispy chicken glazed in sweet and spicy gochujang sauce.",
                     "price": 1100.0,
-                    "image": "./images/korean_fried_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150460/dineatblue/menu_items/korean_fried_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -497,7 +497,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Chicken Chilli Dry",
                     "description": "Classic stir-fried boneless chicken with crisp onions, bell peppers, and red chilies.",
                     "price": 1100.0,
-                    "image": "./images/chicken_chilli_dry.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150439/dineatblue/menu_items/chicken_chilli_dry.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -507,7 +507,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Sweet & Sour Chicken",
                     "description": "Crispy chicken tossed with bell peppers and pineapple in vibrant sweet and sour glaze.",
                     "price": 1050.0,
-                    "image": "./images/sweet_and_sour_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150486/dineatblue/menu_items/sweet_and_sour_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -517,7 +517,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "House Special Chicken",
                     "description": "Chef's signature chicken saut\u00e9ed with secret ocean spices and aromatic sauce.",
                     "price": 1250.0,
-                    "image": "./images/house_special_chicken.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150459/dineatblue/menu_items/house_special_chicken.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -536,7 +536,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Strawberry Mojito",
                     "description": "Chilled sparkling strawberry mocktail with fresh mint and lime.",
                     "price": 350.0,
-                    "image": "./images/strawberry_mojito.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150485/dineatblue/menu_items/strawberry_mojito.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -546,7 +546,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Blueberry Mojito",
                     "description": "Refreshing ocean blueberry cooler with crushed ice and mint.",
                     "price": 350.0,
-                    "image": "./images/blueberry_mojito.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150437/dineatblue/menu_items/blueberry_mojito.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -556,7 +556,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Peach Mojito",
                     "description": "Succulent peach nectar blended with sparkling soda and garden mint.",
                     "price": 350.0,
-                    "image": "./images/peach_mojito.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150473/dineatblue/menu_items/peach_mojito.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -566,7 +566,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Green Apple Mojito",
                     "description": "Crisp green apple mocktail with zesty lime splash.",
                     "price": 350.0,
-                    "image": "./images/green_apple_mojito.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150453/dineatblue/menu_items/green_apple_mojito.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -576,7 +576,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Fresh Lemonade",
                     "description": "Freshly squeezed lemon cooler with mint leaves.",
                     "price": 350.0,
-                    "image": "./images/lemonade.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150462/dineatblue/menu_items/lemonade.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -586,7 +586,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Pepsi / 7Up (Tin)",
                     "description": "Chilled 250ml soda can.",
                     "price": 150.0,
-                    "image": "./images/pepsi_7up.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150474/dineatblue/menu_items/pepsi_7up.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -596,7 +596,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Mineral Water (Small)",
                     "description": "Chilled pure mineral water.",
                     "price": 100.0,
-                    "image": "./images/water.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150490/dineatblue/menu_items/water.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -615,7 +615,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Butter Mushroom Rice",
                     "description": "Fragrant buttered rice saut\u00e9ed with button mushrooms.",
                     "price": 300.0,
-                    "image": "./images/butter_rice.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150438/dineatblue/menu_items/butter_rice.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -625,7 +625,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Roasted Potatoes",
                     "description": "Oven-roasted baby potatoes with rosemary and garlic butter.",
                     "price": 300.0,
-                    "image": "./images/roasted_potatoes.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150476/dineatblue/menu_items/roasted_potatoes.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -635,7 +635,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Steak Fries",
                     "description": "Thick-cut golden salted french fries.",
                     "price": 300.0,
-                    "image": "./images/french_fries.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150452/dineatblue/menu_items/french_fries.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -645,7 +645,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Special Dynamite Dip",
                     "description": "Creamy spicy seafood dip.",
                     "price": 200.0,
-                    "image": "./images/dynamite_dip.png",
+                    "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1792150447/dineatblue/menu_items/dynamite_dip.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
