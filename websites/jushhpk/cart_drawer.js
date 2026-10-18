@@ -550,6 +550,17 @@
     if (badge) badge.textContent = count;
     if (total) total.textContent = `Rs. ${subtotal.toLocaleString()}`;
     
+    // Synchronize sticky header cart bucket button
+    const headerCount = document.getElementById('header-cart-count');
+    const headerTotal = document.getElementById('header-cart-total');
+    if (headerCount) headerCount.textContent = count;
+    if (headerTotal) headerTotal.textContent = `Rs. ${subtotal.toLocaleString()}`;
+
+    // Synchronize in-page product card steppers
+    if (typeof window.syncCardSteppers === 'function') {
+      window.syncCardSteppers();
+    }
+
     const floatBtn = document.getElementById('cd-float-btn');
     if (floatBtn) {
       if (count > 0) {
@@ -565,11 +576,12 @@
     renderDrawerContent();
   }
 
-    function setFulfillmentType(type) {
+  function setFulfillmentType(type) {
     const normalized = (type === 'PICKUP' || type === 'TAKEAWAY') ? 'PICKUP' : 'DELIVERY';
     cartState.fulfillmentType = normalized;
     try {
       localStorage.setItem('foodsphere_fulfillment_mode', normalized);
+      localStorage.setItem('jushh_order_mode', normalized);
     } catch (e) {}
     try {
       window.dispatchEvent(new CustomEvent('foodsphere:fulfillment_changed', { detail: { mode: normalized } }));
@@ -586,7 +598,7 @@
     const isPickup = (mode === 'PICKUP' || mode === 'TAKEAWAY');
     const activeVal = isPickup ? 'PICKUP' : 'DELIVERY';
 
-    // 1. Update any in-page segmented toggle buttons
+    // 1. Update in-page segmented toggle buttons
     document.querySelectorAll('.kfc-toggle-btn, .fulfillment-toggle-btn, [data-fulfillment-mode]').forEach(btn => {
       const btnMode = btn.getAttribute('data-fulfillment-mode') || (btn.textContent.includes('Pickup') ? 'PICKUP' : 'DELIVERY');
       if (btnMode === activeVal) {
@@ -596,7 +608,27 @@
       }
     });
 
-    // 2. Update address containers in direct checkout forms on page
+    // 2. Update Sticky Header KFC Mode Switcher
+    const headerDelBtn = document.getElementById('header-mode-delivery');
+    const headerPickBtn = document.getElementById('header-mode-pickup');
+    if (headerDelBtn && headerPickBtn) {
+      if (isPickup) {
+        headerDelBtn.className = "text-[#111827] font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer";
+        headerPickBtn.className = "bg-[#EA580C] text-white font-extrabold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer";
+      } else {
+        headerDelBtn.className = "bg-[#EA580C] text-white font-extrabold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer";
+        headerPickBtn.className = "text-[#111827] font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer";
+      }
+    }
+
+    // 3. Update Header Location Pill text
+    const headerLocText = document.getElementById('header-location-text');
+    if (headerLocText) {
+      const locBranch = localStorage.getItem('jushh_selected_branch') || 'Main Branch';
+      headerLocText.textContent = isPickup ? `🛍️ Lahore (${locBranch} Pickup) • Change` : `📍 Lahore (${locBranch}) • Change`;
+    }
+
+    // 4. Update address containers in direct checkout forms on page
     document.querySelectorAll('.direct-checkout-address-wrap, [data-address-wrap]').forEach(el => {
       if (isPickup) {
         el.style.display = 'none';
@@ -609,12 +641,12 @@
       }
     });
 
-    // 3. Update delivery fee labels in direct checkout forms
+    // 5. Update delivery fee labels in direct checkout forms
     document.querySelectorAll('[data-delivery-fee-display]').forEach(el => {
       el.textContent = isPickup ? 'Rs. 0 (Free Pickup)' : 'Rs. 150';
     });
 
-    // 4. Update ETA badges
+    // 6. Update ETA badges
     document.querySelectorAll('[data-eta-badge]').forEach(el => {
       el.textContent = isPickup ? '⏱️ Pickup Ready in 20–25 mins' : '🛵 Delivery in 35–45 mins';
     });
@@ -728,11 +760,11 @@
           </div>
 
           ${!isDelivery ? `
-            <div class="cd-pickup-notice" style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.35); border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:12.5px; color:#10B981; display:flex; align-items:center; gap:10px;">
+            <div class="cd-pickup-notice" style="background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:12.5px; color:#8B1D1D; display:flex; align-items:center; gap:10px;">
               <span style="font-size:22px;">⏱️</span>
               <div>
-                <strong style="color:#FFFFFF; font-size:13px;">Ready for Pickup in 20–25 mins</strong>
-                <div style="font-size:11.5px; color:rgba(255,255,255,0.7); margin-top:2px;">Collect your fresh meal at the outlet counter. Zero delivery fee!</div>
+                <strong style="color:#111827; font-size:13px;">Ready for Pickup in 20–25 mins</strong>
+                <div style="font-size:11.5px; color:#4B5563; margin-top:2px;">Collect your fresh meal at the outlet counter. Zero delivery fee!</div>
               </div>
             </div>
           ` : ''}
@@ -820,27 +852,27 @@
         <div class="cd-step active">
           <div class="cd-success-box">
             <div class="cd-success-icon">🛵</div>
-            <h3 style="font-size:20px; font-weight:900; margin-bottom:4px;">Active Order Tracking</h3>
-            <p style="font-size:13px; color:var(--cd-muted);">Your order is active and saved in this browser.</p>
+            <h3 style="font-size:20px; font-weight:900; margin-bottom:4px; color:#111827;">Active Order Tracking</h3>
+            <p style="font-size:13px; color:#4B5563;">Your order is active and saved in this browser.</p>
             
-            <div class="cd-success-order-id">${displayId}</div>
+            <div class="cd-success-order-id" style="color:#8B1D1D; font-weight:800; font-size:18px; margin:12px 0;">${displayId}</div>
 
-            <div class="cd-summary-box" style="text-align:left; margin-bottom:24px;">
+            <div class="cd-summary-box" style="text-align:left; margin-bottom:24px; background:#F8F9FA; border:1px solid #E5E7EB; border-radius:12px; padding:14px;">
               <div class="cd-summary-row">
                 <span>Branch:</span>
-                <span style="color:#ffffff; font-weight:700;">${cartState.selectedBranch || activeStored?.selectedBranch || 'Main Branch'}</span>
+                <span style="color:#111827; font-weight:700;">${cartState.selectedBranch || activeStored?.selectedBranch || 'Main Branch'}</span>
               </div>
               <div class="cd-summary-row">
                 <span>Payment:</span>
-                <span style="color:#ffffff; font-weight:700;">Cash on Delivery (COD)</span>
+                <span style="color:#111827; font-weight:700;">Cash on Delivery (COD)</span>
               </div>
               <div class="cd-summary-row">
                 <span>Current Status:</span>
-                <span style="color:#10B981; font-weight:900;">${statusLabel}</span>
+                <span style="color:#EA580C; font-weight:900;">${statusLabel}</span>
               </div>
             </div>
 
-            <a href="${waUrl}" target="_blank" rel="noopener" class="cd-btn-primary" style="text-decoration:none; margin-bottom:12px;">
+            <a href="${waUrl}" target="_blank" rel="noopener" class="cd-btn-primary" style="text-decoration:none; margin-bottom:12px; display:block; text-align:center;">
               <span>💬 Confirm Status on WhatsApp</span>
             </a>
           </div>
@@ -1003,7 +1035,12 @@
     resetAndClose,
     clearActiveGuestOrder,
     findProductImage,
-    setSelectedBranch
+    setSelectedBranch,
+    getItems: () => cartState.items,
+    getItemQty: (name) => {
+      const it = cartState.items.find(i => i.name === name);
+      return it ? it.qty : 0;
+    }
   };
 
   window.setFulfillmentMode = setFulfillmentType;

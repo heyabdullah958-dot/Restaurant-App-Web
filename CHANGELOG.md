@@ -1,6 +1,88 @@
 
 # Changelog
 
+## 2026-10-18 Phase 8 — Jushh PK Plain Fries Asset Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild with 1024x1024 Logo Upscale
+- **Global Cloudinary CDN Upload (`depa8gfnk`)**:
+  - Located all genuine food photographs across `New Data/`, `websites/dineatblue/images/`, `websites/tandooristoppk/images/`, and `websites/jushhpk/images/`.
+  - Ingested 48 genuine brand assets and enhanced logos to Cloudinary under `foodsphere/dineatblue/`, `foodsphere/tandooristop/`, and `foodsphere/jushhpk/` using delivery format `f_auto,q_auto,w_800`, saving the complete manifest to `websites/cloudinary_urls.json`.
+- **Part A: Jushh PK Plain Fries Audit & Polish (`/websites/jushhpk`)**:
+  - Identified that `Plain Fries` incorrectly displayed `chicken_doner_fries.jpg` with sliced chicken. Replaced with an official Jushh logo placeholder card (`bg-[#FFF7ED]` with `object-contain p-6 border border-[#EA580C]/10`).
+  - Verified upright Chicken Turkish Doner hero promo banner and copy alignment. Re-ran verification test suite (`test_jushhpk_kfc_verification.py`) with 100% pass (9/9 passed).
+- **Part B: Tandoori Stop Handi & Card Layout Differentiation (`/websites/tandooristoppk`)**:
+  - Replaced wrong BBQ platter photos on all 4 Handi dishes (`Nawabi Handi`, `Shahi Kabab Masala Handi`, `Mughlai Cheese Handi`, `Reshmi Handi`) with the official Tandoori Stop logo placeholder card (`./images/tandoori_stop_logo.png` centered on `#1C1917` with `object-contain p-6`).
+  - Transformed category navigation ribbon from rounded pills to **Bottom-Underline Commercial Tabs** (`font-['Barlow_Condensed'] text-[17px] font-bold uppercase tracking-wider py-3.5 px-3 border-b-4 border-transparent text-[#4B5563]` -> Active: `border-b-4 border-[#C81E1E] text-[#C81E1E] bg-transparent rounded-none font-extrabold`).
+  - Docked price badge on the bottom-right of the image container on all 46 product cards (`absolute bottom-2.5 right-2.5 bg-[#1C1917]/95 text-white font-extrabold text-sm px-3 py-1 rounded-md border border-[#F59E0B]/60 shadow-sm font-heading tracking-wide`).
+  - Upgraded card action button to 100% full-width crimson CTA (`btn-add-cart w-full bg-[#C81E1E] hover:bg-[#1C1917] text-white font-heading font-extrabold uppercase text-sm py-2.5 px-4 rounded-xl shadow-xs transition`), switching to a full-width charcoal stepper (`inline-qty-stepper w-full bg-[#1C1917] text-white font-bold py-2 px-3 rounded-xl flex items-center justify-between text-sm shadow-xs border border-[#F59E0B]/40`) when `qty > 0`.
+  - Re-ran verification test suite (`test_tandooristoppk_kfc_verification.py`) with 100% pass (10/10 passed).
+- **Part C: Dine At Blue KFC-Style Commercial Rebuild + Logo Upscale (`/websites/dineatblue`)**:
+  - Upscaled official circular `BLUE (SEA-FOOD • CONTINENTAL • PAN-ASIAN)` emblem from `New Data/logo.jpeg` to crisp 1024x1024 RGBA PNG and WebP with transparent outer corners using 4x Lanczos + unsharp masking (`websites/dineatblue/images/logo.png`, `logo.webp`). Deleted obsolete fake gold-crown logos.
+  - Purged 100% of old dark AI templates, dark blue backgrounds (`#050A18`), fake gold (`#D4AF37`), serif fonts (`Cinzel`, `Playfair Display`), and splash animations.
+  - Implemented locked cool coastal ice-white commercial palette in `theme_blue.css`: `--bg-canvas: #F4F7F9`, `--bg-surface: #FFFFFF`, `--bg-subtle: #EDF2F7`, Deep Ocean Teal `--blue-primary: #16384C` (hover `#0D2331`), Warm Coastal Sand `--blue-sand: #EFE6D5`, Soft Sand `--blue-sand-light: #F9F6F0`, `--text-primary: #0F172A`, `--text-secondary: #475569`, `--border-color: #E2E8F0`. Strictly ZERO fake gold or hardcoded banners.
+  - Applied Google Fonts `'Montserrat'` (600, 700, 800) for punchy headings, prices, tabs, and buttons, and `'DM Sans'` (400, 500, 700) for body and dish descriptions.
+  - Built KFC commercial storefront (`index.html`):
+    - Top Ocean Teal announcement strip with catch details and Gulberg III hotline.
+    - 76px sticky header with circular logo, Delivery (Rs. 200) / Pickup (Rs. 0) switcher, branch location trigger pill, live search filter, and cart bucket button. 0 login buttons.
+    - Mandatory auto-opening entry modal (`#blue-order-modal`) on first visit with delivery address input & Gulberg III pickup outlet selection.
+    - Compact promotional deal banner with gradient from `#16384C` to `#1E4D68` and upright Blue Seafood Platter photo.
+    - Sticky category navigation ribbon across 7 categories with smooth scroll and active IntersectionObserver highlighting.
+    - 4-column responsive grid featuring all 41 dishes across 7 categories. Applied high-resolution studio photography to the 10 studio dishes (Blue Seafood Platter, Kunafa Prawns, Dynamite Prawns, Seared Dumplings, Chicken Dumplings, Honey Wings, Fish & Chips, 19B Soup, Chicken Corn Soup, BBQ Prawn Salad) and the Enhanced Official Circular Logo Placeholder Card (`bg-[#16384C] relative h-48 rounded-xl flex flex-col items-center justify-center p-6`) to all other dishes, strictly purging text-contaminated brochure crops.
+    - Commercial QSR footer detailing Gulberg III branch address (`65, Block D1, Gulberg III, Lahore | 0321-8484111`), operational hours (12 PM – Midnight), and direct WhatsApp order button.
+  - Rewrote `cart_drawer.css` & `cart_drawer.js` with light QSR coastal theme, Gulberg III outlet support, card stepper synchronization, and 12-hour active order auto-purge.
+  - Replaced sub-routes (`menu.html`, `deals.html`, `about.html`, `locations.html`) with clean instant redirects to `index.html`.
+- **Verification & Deployment**:
+  - Created and ran Playwright verification test suite `test_dineatblue_kfc_verification.py` with 100% pass (10/10 assertions passed).
+  - Deployed all 3 websites live to Cloudflare Pages via Wrangler direct upload (`jushhpk-foodsphere`, `tandooristoppk-foodsphere`, `dineatblue-foodsphere`).
+  - Verified live HTTP 200 on all 3 production URLs:
+    - `https://jushhpk-foodsphere.pages.dev` (83 KB)
+    - `https://tandooristoppk-foodsphere.pages.dev` (124 KB)
+    - `https://dineatblue-foodsphere.pages.dev` (108 KB)
+
+---
+
+## 2026-10-18 Phase 7 — (Part A) Jushh PK Hero Polish & (Part B) Complete KFC-Style Commercial Rebuild of Tandoori Stop (/websites/tandooristoppk)
+- **Part A: Jushh PK Micro-Polish (`/websites/jushhpk`)**:
+  - Replaced rotated flat-lay collage hero promo banner in `websites/jushhpk/index.html` with an upright, appetizing high-resolution photograph of the Chicken Turkish Doner (`./images/chicken_turkish_doner.jpg`).
+  - Aligned hero headline to `"Loaded Turkish Doners, Shawarmas & Platters — Made To Make You Go Uff!"` and search placeholder to `"Search Turkish doners, shawarmas, wraps, rice platters..."`.
+  - Re-verified suite with Playwright (`test_jushhpk_kfc_verification.py` 9/9 passed).
+- **Part B: Tandoori Stop Complete KFC-Style Commercial Rebuild (`/websites/tandooristoppk`)**:
+  - **Purged 100% of Legacy Dark AI Templates**: Removed all dark backgrounds (`#0F0806`, `#170E0A`), low-contrast serif typography (`Cinzel`, `Playfair Display`), obsolete entrance animations, and hardcoded banners.
+  - **Locked Color System**: Implemented `--bg-canvas: #FAF8F5`, `--bg-surface: #FFFFFF`, `--bg-subtle: #F3F2EE`, `--ts-crimson: #C81E1E` (hover `#991B1B`), `--ts-charcoal: #1C1917` (hover `#000000`), `--ts-gold: #F59E0B`, `--ts-gold-soft: #FEF3C7`, `--text-primary: #111827`, `--text-secondary: #4B5563`, `--border-color: #E5E7EB`. Strictly ZERO orange (`#EA580C`) to maintain distinct visual identity from Jushh PK.
+  - **Commercial Typography**: Applied Google Fonts `'Barlow Condensed'` (700, 800) for all headings, category buttons, card titles, and prices, paired with `'Inter'` (400, 500, 600, 700) for body and UI elements.
+  - **Storefront Architecture (`index.html`)**:
+    - Top Charcoal Utility Bar (`#1C1917`) with hotlines for all 3 operational branches (Johar Town: `0327-4945947`, Lake City: `0324-4441735`, GT Road: `0326-6811177`) and WhatsApp link.
+    - 76px Sticky Commercial White Header with horizontal brand logo, 1-click KFC Delivery (`Rs. 150`) vs Pickup (`Rs. 0`) switcher, branch location trigger button (`#header-branch-btn`), live search filter, and cart bucket button with counter/total. Zero login buttons.
+    - Auto-opening modal (`#ts-order-modal`) on first visit with delivery/pickup toggle, branch selector across all 3 physical branches, address input, and "Start My Order" CTA.
+    - Compact promotional deal banner with smoky charcoal background and upright dish photograph.
+    - Sticky horizontal category navigation ribbon with 11 category pills, smooth scroll, and IntersectionObserver active tracking.
+    - 4-column responsive grid with 46 menu items, pure white cards (`#FFFFFF`), local `IMG_75xx` photos, and interactive inline quantity steppers (`- qty +`).
+    - QSR Commercial Footer detailing all 3 operational branches and contact hotlines.
+  - **Cart Drawer & Subroute Hardening**:
+    - Rebuilt `cart_drawer.css` & `cart_drawer.js` with light QSR theme, active order hydration, 12-hour stale purge, and card stepper synchronization.
+    - Replaced sub-routes (`menu.html`, `deals.html`, `about.html`, `locations.html`, and subfolder `index.html`s) with clean instant redirects to `index.html`.
+- **Verification & Deployment**:
+  - Playwright test `test_tandooristoppk_kfc_verification.py` passed with 100% success (10/10 assertions passed).
+  - Deployed both `jushhpk` and `tandooristoppk` to Cloudflare Pages via Wrangler direct upload.
+  - Verified live production HTTP 200 and DOM integrity on `https://jushhpk-foodsphere.pages.dev` and `https://tandooristoppk-foodsphere.pages.dev`.
+
+---
+
+## 2026-10-18 Phase 6 — Authoritative KFC-Style Commercial QSR Rebuild of Jushh PK (/websites/jushhpk)
+- **Purged Legacy Dark AI Templates**: Completely eliminated dark backgrounds (`#0A0A0C`, `bg-slate-900`, `bg-black`), dark blur overlays, and non-brand fonts.
+- **Official Jushh!! Brand Palette & Typography**: Locked `:root` CSS custom properties to official dual-tone logo colors (`--bg-canvas: #F8F9FA`, `--bg-surface: #FFFFFF`, `--jushh-orange: #EA580C`, `--jushh-maroon: #8B1D1D`, `--text-primary: #111827`, `--border-color: #E5E7EB`) and Google Font `'Plus Jakarta Sans'` globally.
+- **KFC-Style Single Storefront Architecture (`index.html`)**:
+  - Top brand utility announcement bar in `#8B1D1D` maroon.
+  - Sticky commercial header with Jushh!! logo, 1-click Delivery (`Rs. 150`) / Pickup (`Rs. 0`) toggle, branch location trigger pill, live search filter, and cart bucket button (count & total badges). Zero login buttons.
+  - Mandatory KFC entry order mode & location popup modal (`#jushh-order-modal`) with branch selector, delivery address input, and 1-tap confirmation.
+  - Compact promotional deal banner with gradient from `#8B1D1D` to `#EA580C`.
+  - Sticky horizontal category navigation ribbon with smooth scroll and active IntersectionObserver pill highlighting.
+  - 6 full category sections with 35 food items, local image bindings, and interactive inline quantity steppers (`- qty +`).
+- **Light-Themed Cart Drawer & Multi-Page Parity**: Updated `cart_drawer.css` and `cart_drawer.js` with Pure White background, maroon accents, and automatic card stepper synchronization. Added clean redirects on `menu.html`, `deals.html`, `about.html`, and `locations.html` to primary storefront sections.
+- **Verification & Deployment**:
+  - Automated Playwright verification (`test_jushhpk_kfc_verification.py`) passed 100% (9/9 assertions passed: body bg `#F8F9FA`, cards `#FFFFFF`, 0 login buttons, modal auto-open & toggle, 39/39 images `naturalWidth > 0`, live search, card stepper).
+  - Deployed to Cloudflare Pages via Wrangler direct upload (`https://jushhpk-foodsphere.pages.dev`) and verified live HTTP 200 with 100% pass rate.
+
+---
+
 ## 2026-10-15 Phase 1-4 — Dine At Blue Launch, 5-Page Luxury Architecture & KFC-Style Fulfillment Mode
 - **Phase 1: Ingestion & Asset Synthesis for "Dine At Blue"**:
   - Extracted 41 authentic menu items across 7 categories (`SIGNATURE PLATTERS`, `STARTERS`, `SALADS`, `MAINS - SEAFOOD`, `MAINS - CHICKEN`, `BEVERAGES & MOJITOS`, `ADD-ONS`) from `New Data/`.

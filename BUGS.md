@@ -2,6 +2,77 @@
 
 ## Resolved Bugs Log
 
+### Bug #39: Jushh PK Plain Fries Asset Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild with 1024x1024 Logo Upscale (Resolved 2026-10-18)
+- **Severity**: High / Commercial QSR Brand Silhouette & Asset Integrity
+- **Status**: FIXED
+- **Reported In**: Phase 8 — Jushh PK Audit, Tandoori Stop Handi & Card Layout Fix, Dine At Blue Complete KFC Rebuild
+- **Symptoms**:
+  - In Jushh PK (`websites/jushhpk`), `Plain Fries` incorrectly displayed `chicken_doner_fries.jpg` with sliced chicken instead of an official logo placeholder.
+  - In Tandoori Stop (`websites/tandooristoppk`), all 4 Handi dishes (`Nawabi Handi`, `Shahi Kabab Masala Handi`, `Mughlai Cheese Handi`, `Reshmi Handi`) displayed BBQ skewer/platter photos, category bar used rounded pills identical to Jushh PK, and cards lacked bottom-right docked price badges and full-width action steppers.
+  - In Dine At Blue (`websites/dineatblue`), previous builds retained dark mode templates (`#050A18`, `#D4AF37`), fake gold-crown logos, serif fonts (`Cinzel`, `Playfair Display`), obsolete splash animations, and low-res brochure crops with baked-in printed text and prices.
+- **Root Cause**:
+  - Catalog image mapping assigned wrong BBQ platter photos to Handi items; brochure crops with printed text were used for dishes without dedicated studio photos; legacy dark theme CSS files and unstandardized cart drawers.
+- **Fix Applied**:
+  - Uploaded 48 clean studio assets across all 3 brands to Cloudinary CDN (`depa8gfnk`) and cataloged in `websites/cloudinary_urls.json`.
+  - Upscaled official circular Dine At Blue emblem to 1024x1024 RGBA with transparent outer corners using 4x Lanczos + unsharp masking (`websites/dineatblue/images/logo.png`, `logo.webp`).
+  - In Jushh PK, updated `Plain Fries` to use official Jushh logo placeholder card (`bg-[#FFF7ED]` with `object-contain p-6`).
+  - In Tandoori Stop, updated category ribbon to bottom-underline commercial tabs (`border-b-4 border-[#C81E1E] text-[#C81E1E] bg-transparent rounded-none`), docked price badge to bottom-right of image container on charcoal `#1C1917` with saffron gold border `#F59E0B`, upgraded action button to 100% full-width crimson CTA, upgraded active stepper to full-width charcoal stepper, and assigned official Tandoori Stop logo placeholder card on all 4 Handi dishes.
+  - In Dine At Blue, executed complete KFC commercial storefront rebuild: locked cool coastal ice-white palette (`--bg-canvas: #F4F7F9`, `--bg-surface: #FFFFFF`, Deep Ocean Teal `--blue-primary: #16384C`, Coastal Sand `--blue-sand: #EFE6D5`, strictly ZERO fake gold), Google Fonts `'Montserrat'` + `'DM Sans'`, auto-opening entry modal (`#blue-order-modal`), 41 dishes (studio photos for 10 studio dishes, enhanced circular logo placeholder cards for all others), light `cart_drawer.css` & `cart_drawer.js`, and clean instant redirects for sub-routes.
+  - Verified 100% pass across all 3 Playwright verification test suites (9/9 on Jushh PK, 10/10 on Tandoori Stop, 10/10 on Dine At Blue) and deployed all 3 live to Cloudflare Pages via Wrangler direct upload.
+- **Files Modified**:
+  - `websites/jushhpk/index.html`
+  - `websites/tandooristoppk/theme_ts.css`
+  - `websites/tandooristoppk/index.html`
+  - `websites/dineatblue/theme_blue.css`
+  - `websites/dineatblue/cart_drawer.css`
+  - `websites/dineatblue/cart_drawer.js`
+  - `websites/dineatblue/index.html`
+  - `websites/dineatblue/menu.html`
+  - `websites/dineatblue/deals.html`
+  - `websites/dineatblue/about.html`
+  - `websites/dineatblue/locations.html`
+  - `test_dineatblue_kfc_verification.py`
+  - `enhance_blue_logo.py`
+  - `upload_to_cloudinary.py`
+  - `websites/cloudinary_urls.json`
+
+
+### Bug #38: Sideways Hero Promo Collage on Jushh PK & Complete KFC-Style Overhaul of Tandoori Stop (Resolved 2026-10-18)
+- **Severity**: High / Commercial QSR Brand Silhouette & UX Conversion
+- **Status**: FIXED
+- **Reported In**: Phase 7 — Jushh PK Hero Polish & Complete KFC-Style Commercial Rebuild of Tandoori Stop
+- **Symptoms**:
+  - In Jushh PK (`websites/jushhpk`), hero promo image used a flat-lay collage where pouches appeared sideways/upside-down, and headline copy mentioned generic burgers rather than the actual Turkish Shawarma, Doner, and Platter catalog.
+  - In Tandoori Stop (`websites/tandooristoppk`), previous builds retained a dark clay/black AI template (`#0F0806`), with low-contrast serif typography (`Cinzel`, `Playfair Display`), obsolete splash screen animations, fragmented multi-page navigation, and hardcoded legacy banners.
+- **Root Cause**:
+  - Collage image asset orientation in hero banner container; outdated text copy unaligned with DRF menu models.
+  - Legacy dark theme CSS files (`theme_ts.css`) and unstandardized cart drawer styles with dark cards (`#0D0000`).
+- **Fix Applied**:
+  - Updated Jushh PK right-side hero banner to use an upright, high-resolution photo (`./images/chicken_turkish_doner.jpg`), aligned headline to Turkish Doners, Shawarmas & Platters, and updated search placeholder.
+  - Purged 100% of dark clay styling in Tandoori Stop. Implemented locked light QSR color system: `--bg-canvas: #FAF8F5`, `--bg-surface: #FFFFFF`, `--ts-crimson: #C81E1E`, `--ts-charcoal: #1C1917`, `--ts-gold: #F59E0B`, strictly ZERO orange.
+  - Applied Google Fonts `'Barlow Condensed'` (700, 800) for punchy headings/cards and `'Inter'` for body/UI text.
+  - Rebuilt `index.html` with full commercial KFC storefront: top charcoal utility bar with operational branch hotlines, 76px sticky commercial header with 1-click Delivery (Rs. 150) / Pickup (Rs. 0) switcher, branch location trigger, search filter, and cart bucket (0 login buttons).
+  - Implemented auto-opening modal (`#ts-order-modal`) with real physical branches (Johar Town, Lake City, GT Road Baghbanpura).
+  - Ingested 46 food cards across 11 categories with local `IMG_75xx` photos and inline quantity steppers (`- qty +`).
+  - Rewrote `cart_drawer.css` & `cart_drawer.js` with light ivory QSR tokens, card stepper synchronization, active order persistence, and 12-hour purge.
+  - Replaced sub-routes with clean instant redirects to `index.html`.
+  - Verified 10/10 assertions on Tandoori Stop and 9/9 on Jushh PK with Playwright; deployed both to Cloudflare Pages.
+- **Files Modified**:
+  - `websites/jushhpk/index.html`
+  - `websites/tandooristoppk/theme_ts.css`
+  - `websites/tandooristoppk/cart_drawer.css`
+  - `websites/tandooristoppk/cart_drawer.js`
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/tandooristoppk/deals.html`
+  - `websites/tandooristoppk/about.html`
+  - `websites/tandooristoppk/locations.html`
+  - `websites/tandooristoppk/menu/index.html`
+  - `websites/tandooristoppk/deals/index.html`
+  - `websites/tandooristoppk/about/index.html`
+  - `websites/tandooristoppk/locations/index.html`
+  - `test_tandooristoppk_kfc_verification.py`
+
 ### Bug #22: Web Admin & Mobile Admin Viewport Layout Stacking, Modal Overflow & Validation Hardening (Resolved 2026-09-10)
 - **Severity**: High / Enterprise UX & Navigation Polish
 - **Status**: FIXED
@@ -896,3 +967,28 @@
   - `npx tsc --noEmit` in `app` (0 errors).
   - `npx tsc --noEmit` in `admin-app` (0 errors).
   - `npx tsc --noEmit` in `admin` (0 errors).
+
+---
+
+### Bug #37 — Dark AI Landing Page & Fragmented Multi-Page Navigation on Jushh PK Website
+- **Discovered**: 2026-10-18
+- **Status**: Fixed
+- **Severity**: High (Brand Identity, Contrast, Conversion & Commercial QSR Storefront Integrity)
+- **Component**: `/websites/jushhpk` (`index.html`, `theme_jushh.css`, `cart_drawer.css`, `cart_drawer.js`, `menu.html`, `deals.html`, `about.html`, `locations.html`)
+- **Symptom**:
+  1. Jushh PK website previously loaded dark/black backgrounds (`bg-slate-900`, `bg-black`, `#0A0A0C`), serif/grotesk styling, and dark overlays instead of the official Jushh!! brand palette.
+  2. Multi-page routes fragmented user cart state and created disjointed navigation.
+  3. Header displayed unnecessary Login/Sign In buttons and lacked KFC-style instant fulfillment toggling.
+- **Root Cause**:
+  1. Legacy dark AI template styling retained in `theme_jushh.css` (`--jushh-bg: #0A0A0C`) and `cart_drawer.css`.
+  2. Outdated separate HTML files with un-unified cart sessions.
+- **Fix Applied**:
+  1. Purged all dark-mode tokens and classes; locked `:root` to official Jushh!! dual-tone logo palette (`--bg-canvas: #F8F9FA`, `--bg-surface: #FFFFFF`, `--jushh-orange: #EA580C`, `--jushh-maroon: #8B1D1D`, `--text-primary: #111827`).
+  2. Rebuilt `index.html` as complete, self-contained KFC-style storefront featuring top brand announcement bar, sticky header with 1-click Delivery/Pickup switcher, auto-opening `#jushh-order-modal`, deals banner, horizontal category navigation, and 35 categorized dish cards with inline steppers.
+  3. Fully synchronized `cart_drawer.js` with header bucket button, header mode switcher, and card steppers, converting cart drawer to Pure White light theme with zero mock banners.
+  4. Wired clean redirects from `menu.html`, `deals.html`, `about.html`, and `locations.html` to unified storefront sections.
+  5. Deployed to Cloudflare Pages via Wrangler direct upload (`jushhpk-foodsphere`).
+- **Verification Evidence**:
+  - `python test_jushhpk_kfc_verification.py` passed 100% (9/9 assertions passed: body bg `#F8F9FA`, cards `#FFFFFF`, 0 login buttons, modal auto-open & toggle, 39/39 images `naturalWidth > 0`, live search, card stepper).
+  - `python scratch/test_live_cf.py` passed 100% on live production Cloudflare Pages (`https://jushhpk-foodsphere.pages.dev`).
+

@@ -17,6 +17,38 @@
     ```
 - **Media Assets**: Cloudinary storage (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
 
+## Phase 8 — Jushh PK Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild — 2026-10-18
+- **What was done**:
+  - Global Cloudinary CDN Upload: Uploaded 48 clean food assets across all 3 brands (`foodsphere/dineatblue/`, `foodsphere/tandooristop/`, `foodsphere/jushhpk/`) to Cloudinary (`depa8gfnk`), cataloged in `websites/cloudinary_urls.json`.
+  - Dine At Blue Logo Upscale: 4x Lanczos upscale + unsharp masking to 1024x1024 RGBA circular PNG/WebP with transparent outer corners (`websites/dineatblue/images/logo.png`, `logo.webp`). Deleted fake gold-crown logos.
+  - Part A: Audited Jushh PK, verified hero banner image & copy, applied official logo placeholder card (`bg-[#FFF7ED]` with `object-contain p-6`) to `Plain Fries`.
+  - Part B: Refined Tandoori Stop commercial differentiation: converted category pills to bottom-underline commercial tabs (`border-b-4 border-[#C81E1E] text-[#C81E1E]`), docked price badge to bottom-right of image container on charcoal `#1C1917` with saffron gold `#F59E0B`, upgraded action CTA to 100% full-width crimson button, upgraded stepper to full-width charcoal stepper, and assigned official Tandoori Stop logo placeholder card on all 4 Handi dishes (`Nawabi Handi`, `Shahi Kabab Masala Handi`, `Mughlai Cheese Handi`, `Reshmi Handi`).
+  - Part C: Fully rebuilt Dine At Blue into a commercial KFC-style storefront (`#F4F7F9` body, `#FFFFFF` cards, Deep Ocean Teal `#16384C`, Coastal Sand `#EFE6D5`, strictly 0 fake gold). Montserrat & DM Sans fonts. 76px sticky header, Delivery (Rs. 200) / Pickup (Rs. 0) switcher, auto-opening modal `#blue-order-modal`, 41 dishes (studio photos for 10 studio dishes, enhanced circular logo placeholder cards for all others), light `cart_drawer.css` & `cart_drawer.js`, and sub-route redirects.
+  - Verified 100% pass across all 3 Playwright verification test suites:
+    - `test_jushhpk_kfc_verification.py`: 9/9 passed (100%)
+    - `test_tandooristoppk_kfc_verification.py`: 10/10 passed (100%)
+    - `test_dineatblue_kfc_verification.py`: 10/10 passed (100%)
+  - Deployed all 3 sites live to Cloudflare Pages via Wrangler direct upload:
+    - `npx wrangler pages deploy websites/jushhpk --project-name=jushhpk-foodsphere`
+    - `npx wrangler pages deploy websites/tandooristoppk --project-name=tandooristoppk-foodsphere`
+    - `npx wrangler pages deploy websites/dineatblue --project-name=dineatblue-foodsphere`
+- **Files modified**: `websites/jushhpk/index.html`, `websites/tandooristoppk/theme_ts.css`, `websites/tandooristoppk/index.html`, `websites/dineatblue/theme_blue.css`, `websites/dineatblue/cart_drawer.css`, `websites/dineatblue/cart_drawer.js`, `websites/dineatblue/index.html`, `websites/dineatblue/*.html`, `test_dineatblue_kfc_verification.py`, `websites/cloudinary_urls.json`.
+- **Self-corrections used**: 1/3 (Resolved Windows CP1252 emoji encoding in verification test stdout and cart_drawer location text).
+- **Confidence score**: 100% (29/29 assertions passed across all 3 suites; live HTTP 200 on all 3 Cloudflare Pages URLs).
+
+---
+
+## Phase 7 — (Part A) Jushh PK Polish & (Part B) Tandoori Stop Commercial Rebuild — 2026-10-18
+- **What was done**:
+  - Part A: Micro-polished Jushh PK hero banner (`chicken_turkish_doner.jpg` upright asset) and aligned copy to Turkish catalog.
+  - Part B: Fully rebuilt Tandoori Stop into a commercial KFC-style storefront (`#FAF8F5` body, `#FFFFFF` cards, `#C81E1E` crimson, `#1C1917` charcoal, 0 orange). Barlow Condensed & Inter fonts. Top utility bar, 76px sticky header, 1-click Delivery (Rs. 150) / Pickup (Rs. 0) switcher, branch modal for 3 physical branches, 46 product cards, and QSR cart drawer.
+  - Deployed both sites to Cloudflare Pages via Wrangler direct upload:
+    - `npx wrangler pages deploy websites/jushhpk --project-name=jushhpk-foodsphere`
+    - `npx wrangler pages deploy websites/tandooristoppk --project-name=tandooristoppk-foodsphere`
+- **Files modified**: `websites/jushhpk/index.html`, `websites/tandooristoppk/theme_ts.css`, `websites/tandooristoppk/cart_drawer.css`, `websites/tandooristoppk/cart_drawer.js`, `websites/tandooristoppk/index.html`, `websites/tandooristoppk/*.html`.
+- **Self-corrections used**: 0/3.
+- **Confidence score**: 100% (Verified 10/10 assertions on Tandoori Stop and 9/9 on Jushh PK with Playwright; live HTTP 200 on Cloudflare Pages).
+
 ---
 
 ## Phase 1 — Local Menu Asset Mapping & Multi-Tenant Catalog Sync — 2026-08-02
@@ -246,6 +278,35 @@
   - `PROJECT.md`
 - **Self-corrections used**: 1/3.
 - **Confidence score**: 100%.
+
+---
+
+## Phase 6 — KFC-Style QSR Storefront Rebuild & Cloudflare Pages Deploy for Jushh PK — 2026-10-18
+- **What was done**:
+  1. Purged all legacy dark-mode styling and AI templates across `/websites/jushhpk`.
+  2. Implemented locked dual-tone logo color system (`#F8F9FA`, `#FFFFFF`, `#EA580C`, `#8B1D1D`, `#111827`) and Google Font `'Plus Jakarta Sans'`.
+  3. Rebuilt `index.html` as complete single-storefront QSR experience with top banner, sticky commercial header (0 login buttons), 1-click Delivery/Pickup switcher, auto-opening `#jushh-order-modal`, deals banner, horizontal category navigation ribbon, and 35 categorized menu cards with inline quantity steppers.
+  4. Updated `cart_drawer.css` and `cart_drawer.js` with Pure White theme, live cart bucket badge synchronization, and card stepper syncing.
+  5. Configured clean redirects on `menu.html`, `deals.html`, `about.html`, and `locations.html` to unified storefront sections.
+  6. Automated Playwright verification (`test_jushhpk_kfc_verification.py`) passed 100% (9/9 assertions passed: body bg `#F8F9FA`, cards `#FFFFFF`, 0 login buttons, modal auto-open & toggle, 39/39 images `naturalWidth > 0`, live search, card stepper).
+  7. Deployed to Cloudflare Pages via Wrangler Direct Upload: `npx wrangler pages deploy websites/jushhpk --project-name=jushhpk-foodsphere`. Live HTTP 200 verified on `https://jushhpk-foodsphere.pages.dev`.
+- **Files modified**:
+  - `websites/jushhpk/theme_jushh.css`
+  - `websites/jushhpk/cart_drawer.css`
+  - `websites/jushhpk/cart_drawer.js`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/menu.html`
+  - `websites/jushhpk/deals.html`
+  - `websites/jushhpk/about.html`
+  - `websites/jushhpk/locations.html`
+  - `websites/jushhpk/menu/index.html`
+  - `websites/jushhpk/deals/index.html`
+  - `websites/jushhpk/about/index.html`
+  - `websites/jushhpk/locations/index.html`
+  - `test_jushhpk_kfc_verification.py` [NEW]
+- **Self-corrections used**: 0/3.
+- **Confidence score**: 100%.
+
 
 
 

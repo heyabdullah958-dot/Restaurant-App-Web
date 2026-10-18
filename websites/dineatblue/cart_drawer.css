@@ -1,51 +1,60 @@
-/* FoodSphere QSR Cart Drawer & Multi-Step Checkout Styles */
+/* ==========================================================================
+   FoodSphere QSR Cart Drawer & Multi-Step Checkout Styles — Dine At Blue (Light Coastal QSR)
+   Cool Coastal Ice-White, Deep Ocean Teal (#16384C), Coastal Sand (#EFE6D5)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Montserrat:ital,wght@0,600;0,700;0,800;1,600;1,700;1,800&display=swap');
 
 :root {
-  --cd-primary: #C8102E;
-  --cd-primary-hover: #E8192E;
-  --cd-accent: #FF6B35;
-  --cd-bg: #0D0000;
-  --cd-surface: #160004;
-  --cd-card-bg: rgba(255, 255, 255, 0.04);
-  --cd-card-border: rgba(200, 16, 46, 0.2);
-  --cd-text: #FFFFFF;
-  --cd-muted: rgba(255, 255, 255, 0.65);
-  --cd-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  --cd-primary: #16384C;
+  --cd-primary-hover: #0D2331;
+  --cd-accent: #16384C;
+  --cd-accent-hover: #0D2331;
+  --cd-sand: #EFE6D5;
+  --cd-sand-light: #F9F6F0;
+  --cd-bg: #FFFFFF;
+  --cd-surface: #FFFFFF;
+  --cd-card-bg: #F4F7F9;
+  --cd-card-border: #E2E8F0;
+  --cd-text: #0F172A;
+  --cd-muted: #475569;
+  --cd-shadow: 0 10px 40px rgba(22, 56, 76, 0.15);
 }
 
 /* Floating Cart Button */
 .cd-float-btn {
   position: fixed;
-  bottom: 80px;
+  bottom: 24px;
   right: 24px;
   z-index: 9990;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, var(--cd-primary), var(--cd-primary-hover));
+  background: var(--cd-primary);
   color: #ffffff;
   padding: 12px 20px;
   border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 30px rgba(200, 16, 46, 0.5);
+  border: 1px solid rgba(239, 230, 213, 0.3);
+  box-shadow: 0 8px 30px rgba(22, 56, 76, 0.35);
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
-  font-weight: 700;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 800;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
 }
 
 .cd-float-btn:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 14px 40px rgba(200, 16, 46, 0.7);
+  background: var(--cd-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(22, 56, 76, 0.45);
 }
 
 .cd-float-badge {
-  background: #ffffff;
+  background: var(--cd-sand);
   color: var(--cd-primary);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -64,12 +73,12 @@
 .cd-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 9998;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.35s ease, visibility 0.35s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .cd-backdrop.active {
@@ -84,16 +93,16 @@
   right: 0;
   bottom: 0;
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
   background: var(--cd-surface);
   border-left: 1px solid var(--cd-card-border);
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.8);
+  box-shadow: -10px 0 40px rgba(15, 23, 42, 0.15);
   transform: translateX(100%);
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-  font-family: 'Poppins', sans-serif;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'DM Sans', sans-serif;
   color: var(--cd-text);
 }
 
@@ -103,109 +112,105 @@
 
 /* Header */
 .cd-header {
-  padding: 18px 24px;
-  background: rgba(13, 0, 0, 0.95);
-  border-bottom: 1px solid var(--cd-card-border);
+  padding: 16px 20px;
+  background: var(--cd-primary);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .cd-header-title {
-  font-size: 18px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
   font-weight: 800;
   display: flex;
   align-items: center;
   gap: 10px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
+  color: #ffffff;
 }
 
 .cd-close-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--cd-text);
-  width: 34px;
-  height: 34px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .cd-close-btn:hover {
-  background: rgba(200, 16, 46, 0.4);
+  background: rgba(255, 255, 255, 0.3);
   transform: rotate(90deg);
+}
+
+/* Stepper Indicator */
+.cd-stepper {
+  display: flex;
+  border-bottom: 1px solid var(--cd-card-border);
+  background: #F4F7F9;
+}
+
+.cd-step {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cd-muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.cd-step.active {
+  color: var(--cd-primary);
+  border-bottom-color: var(--cd-primary);
+  font-weight: 800;
+  background: #FFFFFF;
 }
 
 /* Body / Content Area */
 .cd-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: 18px 20px;
 }
 
 /* Cart Items List */
-.cd-empty-state {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.cd-empty-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-  opacity: 0.8;
-}
-
-.cd-empty-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.cd-empty-sub {
-  font-size: 13px;
-  color: var(--cd-muted);
-  margin-bottom: 24px;
-}
-
 .cd-item-card {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  gap: 12px;
   background: var(--cd-card-bg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--cd-card-border);
   border-radius: 12px;
   padding: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  align-items: center;
   transition: border-color 0.2s ease;
 }
 
 .cd-item-card:hover {
-  border-color: var(--cd-card-border);
+  border-color: #CBD5E1;
 }
 
 .cd-item-img {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 8px;
   object-fit: cover;
-  background: #18181b;
-}
-
-.cd-item-img-placeholder {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
   flex-shrink: 0;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
 }
 
 .cd-item-info {
@@ -214,357 +219,218 @@
 }
 
 .cd-item-name {
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   font-weight: 700;
+  color: var(--cd-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .cd-item-price {
-  font-size: 13px;
-  color: var(--cd-accent);
-  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--cd-primary);
 }
 
-/* Quantity Control Buttons */
-.cd-qty-controls {
+.cd-item-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
-  padding: 4px 8px;
+  padding: 3px 6px;
 }
 
 .cd-qty-btn {
-  background: transparent;
+  background: none;
   border: none;
   color: var(--cd-text);
-  font-size: 14px;
   font-weight: 800;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  cursor: pointer;
+  font-size: 15px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
 }
 
 .cd-qty-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #E2E8F0;
 }
 
 .cd-qty-val {
+  font-family: 'Montserrat', sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   min-width: 16px;
   text-align: center;
 }
 
-.cd-remove-btn {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
-  transition: color 0.2s ease;
-}
-
-.cd-remove-btn:hover {
-  color: var(--cd-primary);
-}
-
-/* Checkout Step Views */
-.cd-step {
-  display: none;
-}
-
-.cd-step.active {
-  display: block;
-  animation: cdFadeIn 0.3s ease forwards;
-}
-
-@keyframes cdFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Fulfillment Type Segmented Toggle */
-.cd-fulfillment-toggle {
-  display: flex;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 4px;
-  margin-bottom: 20px;
-}
-
-.cd-toggle-option {
-  flex: 1;
+/* Empty State */
+.cd-empty {
   text-align: center;
-  padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
+  padding: 40px 20px;
   color: var(--cd-muted);
-  transition: all 0.2s ease;
 }
 
-.cd-toggle-option.active {
-  background: linear-gradient(135deg, var(--cd-primary), var(--cd-primary-hover));
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(200, 16, 46, 0.4);
+.cd-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
 }
 
-/* Form Controls */
-.cd-form-group {
-  margin-bottom: 16px;
-}
-
-.cd-form-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--cd-muted);
+.cd-empty-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--cd-text);
   margin-bottom: 6px;
 }
 
-.cd-form-input, .cd-form-select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 12px 14px;
-  color: #ffffff;
+.cd-empty-desc {
   font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.cd-form-input:focus, .cd-form-select:focus {
-  border-color: var(--cd-primary);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.cd-form-select option {
-  background: var(--cd-bg);
-  color: #ffffff;
-}
-
-/* Order Summary Box */
-.cd-summary-box {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 20px;
+  line-height: 1.5;
   margin-bottom: 20px;
+}
+
+/* Summary Box */
+.cd-summary {
+  background: var(--cd-card-bg);
+  border: 1px solid var(--cd-card-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  font-size: 13px;
 }
 
 .cd-summary-row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  margin-bottom: 6px;
   color: var(--cd-muted);
-  margin-bottom: 8px;
 }
 
 .cd-summary-row.total {
+  border-top: 1px solid var(--cd-card-border);
+  padding-top: 8px;
+  margin-top: 8px;
+  font-family: 'Montserrat', sans-serif;
   font-size: 16px;
   font-weight: 800;
-  color: #ffffff;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 10px;
-  margin-top: 10px;
-  margin-bottom: 0;
+  color: var(--cd-primary);
 }
 
-/* Footer CTAs */
+/* Footer & Buttons */
 .cd-footer {
-  padding: 18px 24px;
-  background: rgba(13, 0, 0, 0.95);
+  padding: 16px 20px;
   border-top: 1px solid var(--cd-card-border);
+  background: #FFFFFF;
 }
 
 .cd-btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, var(--cd-primary), var(--cd-primary-hover));
+  background: var(--cd-primary);
   color: #ffffff;
-  border: none;
-  padding: 14px 20px;
-  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
   font-weight: 800;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 4px 12px rgba(22, 56, 76, 0.25);
+  transition: all 0.2s ease;
 }
 
 .cd-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(200, 16, 46, 0.6);
+  background: var(--cd-primary-hover);
+  transform: translateY(-1px);
 }
 
 .cd-btn-secondary {
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 10px 16px;
-  border-radius: 8px;
+  background: #F4F7F9;
+  color: var(--cd-text);
+  font-family: 'Montserrat', sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #CBD5E1;
   cursor: pointer;
-  margin-top: 10px;
-  transition: background 0.2s ease;
+  margin-top: 8px;
+  transition: background 0.15s ease;
 }
 
 .cd-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #E2E8F0;
 }
 
-/* Success Confirmation Card */
-.cd-success-box {
-  text-align: center;
-  padding: 40px 10px;
+/* Form Controls */
+.cd-form-group {
+  margin-bottom: 14px;
 }
 
-.cd-success-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-  animation: cdPulse 1s ease infinite alternate;
-}
-
-@keyframes cdPulse {
-  from { transform: scale(1); }
-  to { transform: scale(1.1); }
-}
-
-.cd-success-order-id {
-  display: inline-block;
-  background: rgba(200, 16, 46, 0.15);
-  border: 1px solid var(--cd-primary);
-  color: var(--cd-accent);
-  font-size: 16px;
-  font-weight: 900;
-  padding: 6px 16px;
-  border-radius: 6px;
-  margin: 12px 0 20px;
-  letter-spacing: 1px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .cd-drawer {
-    max-width: 100%;
-  }
-  .cd-float-btn {
-    bottom: 76px;
-    right: 16px;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 360px) {
-  .cd-float-btn {
-    bottom: 72px;
-    right: 12px;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-}
-
-/* ==========================================================================
-   KFC-STYLE FULFILLMENT SEGMENTED TOGGLE (DELIVERY VS PICKUP)
-   ========================================================================== */
-.kfc-fulfillment-toggle {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(10, 10, 16, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 50px;
-  padding: 4px;
-  position: relative;
-  user-select: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.kfc-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 18px;
-  border-radius: 40px;
-  font-family: inherit;
-  font-size: 13px;
+.cd-label {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.kfc-toggle-btn:hover {
-  color: #FFFFFF;
-}
-
-.kfc-toggle-btn.active {
-  background: linear-gradient(135deg, var(--cd-primary, #EA580C), var(--cd-accent, #F59E0B));
-  color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.45);
-}
-
-.kfc-toggle-btn[data-fulfillment-mode="PICKUP"].active {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);
-}
-
-.kfc-toggle-badge {
-  font-size: 10px;
-  font-weight: 800;
+  color: var(--cd-text);
+  margin-bottom: 5px;
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 2px 6px;
+  letter-spacing: 0.02em;
+}
+
+.cd-input, .cd-select, .cd-textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
   border-radius: 10px;
-  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: var(--cd-text);
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
-.kfc-toggle-btn.active .kfc-toggle-badge {
-  background: rgba(255, 255, 255, 0.3);
-  color: #FFFFFF;
+.cd-input:focus, .cd-select:focus, .cd-textarea:focus {
+  border-color: var(--cd-primary);
+  box-shadow: 0 0 0 3px rgba(22, 56, 76, 0.1);
 }
 
-@media (max-width: 640px) {
-  .kfc-fulfillment-toggle {
-    width: 100%;
-    display: flex;
-    justify-content: stretch;
-  }
-  .kfc-toggle-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
+/* Active Order Banner at Bottom */
+.active-order-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #16384C;
+  color: #ffffff;
+  padding: 12px 16px;
+  z-index: 9980;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+.active-order-banner a {
+  color: #EFE6D5;
+  text-decoration: underline;
+  font-weight: 700;
 }

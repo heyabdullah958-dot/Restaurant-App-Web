@@ -3,764 +3,1194 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JUSHH PK — You Don't Find JUSHHH, JUSHHH Finds You | Lahore</title>
-  <meta name="description" content="Just Shhh... (JushhPK) — Food that makes you go Shhh! Authentic Turkish Doner spits, shawarmas, loaded doner fries, and signature can desserts across 3 Lahore locations. Order COD."/>
+  <title>JUSHH!! — Food That Makes You Go Uff.. | KFC-Style Street Gourmet | Lahore</title>
+  <meta name="description" content="Jushh!! Lahore — Authentic Turkish Doner spits, loaded doner fries, flame-roasted shawarmas, signature pull-tab can desserts and refreshing mojitos. Order delivery or self-pickup."/>
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"/>
-  <link rel="stylesheet" href="cart_drawer.css?v=20260913"/>
-  <link rel="stylesheet" href="theme_jushh.css?v=20260913"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"/>
+  
+  <!-- Tailwind CSS Play CDN for instantaneous QSR responsive utilities -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    (function(){
-      try {
-        if (sessionStorage.getItem('jushh_entrance_shown') === 'true') {
-          document.documentElement.classList.add('entrance-skipped');
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            jushhOrange: '#EA580C',
+            jushhOrangeHover: '#C2410C',
+            jushhOrangeTint: '#FFF7ED',
+            jushhMaroon: '#8B1D1D',
+            jushhMaroonHover: '#6E1515',
+            jushhCanvas: '#F8F9FA',
+            jushhCharcoal: '#111827',
+            jushhGrey: '#4B5563'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
         }
-      } catch(e) {}
-    })();
+      }
+    }
   </script>
+
+  <link rel="stylesheet" href="cart_drawer.css?v=20261018"/>
+  <link rel="stylesheet" href="theme_jushh.css?v=20261018"/>
 </head>
-<body>
-  <!-- Scroll Progress Bar -->
-  <div id="scroll-progress"></div>
+<body class="bg-[#F8F9FA] text-[#111827] font-sans antialiased min-h-screen flex flex-col">
 
-  <!-- High-Energy Urban Entrance Reveal -->
-  <div id="jushh-entrance">
-    <div class="jushh-splash-emblem">
-      <div class="jushh-splash-beam"></div>
-      <div class="jushh-splash-card">
-        <img src="./images/jushh_logo.jpg" alt="Jushh Logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
-      </div>
-    </div>
-    <div class="jushh-splash-title">Just <span>Shhh</span>…</div>
-    <div class="jushh-splash-sub">Food That Makes You Go Shhh!</div>
-  </div>
+  <!-- A. TOP BRAND UTILITY STRIP -->
+  <aside class="bg-[#8B1D1D] text-white text-xs font-bold py-2 px-4 text-center tracking-wide" aria-label="Announcement">
+    🔥 Jushh!! — Food That Makes You Go Uff.. | Freshly Prepared • Fast Delivery & Self-Pickup in Lahore
+  </aside>
 
-  <!-- Top Announcement Bar -->
-  <header class="jushh-topbar">
-    <div class="jushh-topbar-left">
-      <span class="jushh-topbar-pill">Street Gourmet</span>
-      <span>🔥 Authentic Turkish Doner & Shawarma across 3 Lahore Outlets</span>
-    </div>
-    <div class="jushh-topbar-right">
-      <!-- KFC-Style Segmented Toggle in Header -->
-      <div class="kfc-fulfillment-toggle" style="padding:2px;">
-        <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
-          <span>🛵 Delivery</span>
-        </button>
-        <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
-          <span>🛍️ Pickup</span>
-          <span class="kfc-toggle-badge">FREE</span>
+  <!-- B. STICKY COMMERCIAL HEADER -->
+  <header class="sticky top-0 z-40 bg-white border-b border-[#E5E7EB] shadow-sm h-[76px]">
+    <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-3">
+      
+      <!-- LEFT GROUP: Logo + Mode Switcher + Location Pill -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center flex-shrink-0" aria-label="Jushh Home">
+          <img src="./images/jushh_logo.jpg" alt="Jushh!! Logo" class="h-12 w-auto object-contain rounded-lg shadow-2xs" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+        </a>
+
+        <!-- KFC-Style Order Mode Switcher -->
+        <div class="bg-[#F3F4F6] p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#EA580C] text-white font-extrabold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer">
+            🛵 Delivery
+          </button>
+          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#111827] font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer">
+            🛍️ Pickup
+          </button>
+        </div>
+
+        <!-- Branch / Location Trigger Pill -->
+        <div id="header-location-pill" onclick="openOrderModal()" class="hidden md:flex items-center gap-1.5 bg-[#FFF7ED] border border-[#FED7AA] px-3 py-1.5 rounded-xl text-xs font-bold text-[#8B1D1D] hover:border-[#EA580C] cursor-pointer transition select-none">
+          <span id="header-location-text">📍 Lahore (Johar Town) • Change</span>
+        </div>
+      </div>
+
+      <!-- CENTER GROUP: Live Search Input -->
+      <div class="hidden lg:block flex-1 max-w-sm mx-4">
+        <div class="relative">
+          <input type="text" id="menu-search-input" oninput="handleLiveSearch(this.value)" placeholder="Search Turkish doners, shawarmas, wraps, rice platters..." class="w-full bg-[#F3F4F6] border border-[#E5E7EB] focus:border-[#EA580C] focus:bg-white rounded-full pl-10 pr-4 py-2 text-sm font-medium text-[#111827] placeholder-[#6B7280] outline-none transition" />
+          <svg class="w-4 h-4 text-[#6B7280] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- RIGHT GROUP: ONLY Jushh Cart Bucket Button (NO Login Button) -->
+      <div class="flex items-center">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#8B1D1D] hover:bg-[#6E1515] text-white font-extrabold px-4 py-2.5 rounded-xl flex items-center gap-2.5 shadow-sm transition cursor-pointer" aria-label="Open Cart Bucket">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#EA580C] text-white text-xs font-extrabold px-2 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+          <span id="header-cart-total" class="text-sm font-extrabold">Rs. 0</span>
         </button>
       </div>
-      <a href="tel:+923269946142" class="jushh-topbar-link">📞 Johar Town: 0326-9946142</a>
-      <a href="tel:+923244441735" class="jushh-topbar-link">📞 Lake City: 0324-4441735</a>
-      <a href="tel:+923257217221" class="jushh-topbar-link">📞 DHA: 0325-7217221</a>
-      <a href="https://wa.me/923269946142" target="_blank" rel="noopener" class="jushh-topbar-link" style="color:#25D366;">💬 WhatsApp</a>
+
     </div>
   </header>
 
-  <!-- Main Navigation Header -->
-  <nav class="jushh-nav">
-    <a href="index.html" class="jushh-brand-wrap">
-      <img src="./images/jushh_logo.jpg" alt="JushhPK Logo" class="jushh-brand-logo" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
-      <div class="jushh-brand-text">
-        <div class="jushh-brand-name">
-          JUST <span>SHHH</span>… <span class="jushh-verified-tick" title="Meta Verified">✓</span>
+  <!-- C. MANDATORY KFC-STYLE ENTRY ORDER MODE & LOCATION POPUP MODAL -->
+  <div id="jushh-order-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 transition-opacity duration-200" style="display: none;">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-[#E5E7EB] transform transition-all">
+      <!-- Modal Top Header Bar -->
+      <div class="bg-[#8B1D1D] text-white p-4 text-center relative flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="./images/jushh_logo.jpg" alt="Jushh!!" class="h-9 w-9 rounded-md object-contain bg-white p-0.5" />
+          <h3 class="font-extrabold text-base text-white tracking-wide">Select Your Order Type</h3>
         </div>
-        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
+        <button type="button" onclick="closeOrderModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 cursor-pointer transition" aria-label="Close dialog">&times;</button>
       </div>
-    </a>
 
-    <ul class="jushh-nav-links">
-      <li class="jushh-nav-item active"><a href="index.html">Home</a></li>
-      <li class="jushh-nav-item"><a href="menu.html">Menu</a></li>
-      <li class="jushh-nav-item"><a href="deals.html">Loaded Combos</a></li>
-      <li class="jushh-nav-item"><a href="about.html">About Jushh</a></li>
-      <li class="jushh-nav-item"><a href="locations.html">Locations</a></li>
-    </ul>
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- 2-Column Mode Selector -->
+        <div class="grid grid-cols-2 gap-2 bg-[#F3F4F6] p-1.5 rounded-xl border border-[#E5E7EB]">
+          <button type="button" id="modal-mode-delivery" onclick="setModalMode('DELIVERY')" class="bg-[#EA580C] text-white font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer">
+            🛵 DELIVERY
+          </button>
+          <button type="button" id="modal-mode-pickup" onclick="setModalMode('PICKUP')" class="text-[#111827] font-bold py-3 rounded-lg text-sm hover:text-[#EA580C] transition cursor-pointer">
+            🛍️ PICKUP
+          </button>
+        </div>
 
-    <div class="jushh-nav-actions">
-      <a href="menu.html" class="jushh-btn-primary">
-        <span>🍔 Order Online</span>
-      </a>
-      <button class="jushh-hamburger" id="jushh-hamburger" onclick="toggleMobileNav()" aria-label="Toggle Menu">
-        <span></span>
-        <span></span>
-        <span></span>
+        <!-- Dynamic Content Panel -->
+        <div id="modal-delivery-panel" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-[#4B5563] mb-1">Select Delivery Branch / Sector</label>
+            <select id="modal-branch-select" class="w-full bg-[#F8F9FA] border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm font-bold text-[#111827] outline-none focus:border-[#EA580C]">
+              <option value="Johar Town">Jushh PK — Johar Town (Phase 2, Block R2)</option>
+              <option value="Lake City">Jushh PK — Lake City (Business Bay M1)</option>
+              <option value="DHA Phase 1">Jushh PK — DHA Phase 1 (Sector H)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-[#4B5563] mb-1">Street Address in Lahore</label>
+            <input type="text" id="modal-address-input" placeholder="Enter your block, street & house no. in Lahore" class="w-full bg-[#F8F9FA] border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm font-medium text-[#111827] outline-none focus:border-[#EA580C]" />
+          </div>
+          <div class="bg-[#FFF7ED] border border-[#FED7AA] text-[#8B1D1D] text-xs font-bold p-3 rounded-xl flex items-center gap-2">
+            <span class="text-base">🛵</span>
+            <span>Standard Delivery Fee: <strong>Rs. 150</strong> • Estimated Delivery: <strong>30–40 mins</strong></span>
+          </div>
+        </div>
+
+        <div id="modal-pickup-panel" class="space-y-3" style="display: none;">
+          <div>
+            <label class="block text-xs font-bold text-[#4B5563] mb-1">Select Pickup Outlet</label>
+            <select id="modal-pickup-branch-select" onchange="updatePickupBranchCard(this.value)" class="w-full bg-[#F8F9FA] border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm font-bold text-[#111827] outline-none focus:border-[#EA580C]">
+              <option value="Johar Town">Jushh PK — Johar Town (Block R2, Phase 2)</option>
+              <option value="Lake City">Jushh PK — Lake City (Business Bay M1)</option>
+              <option value="DHA Phase 1">Jushh PK — DHA Phase 1 (Sector H)</option>
+            </select>
+          </div>
+          <div class="bg-[#F8F9FA] border-2 border-[#8B1D1D] p-3.5 rounded-xl">
+            <div class="text-[11px] font-extrabold text-[#8B1D1D] uppercase tracking-wide">Pickup Location</div>
+            <div class="font-extrabold text-sm text-[#111827] mt-0.5" id="modal-pickup-branch-name">📍 Jushh PK — Johar Town (Open Now)</div>
+            <div class="text-xs text-[#4B5563] mt-1" id="modal-pickup-branch-desc">Block R2, Phase 2 Johar Town, Lahore • 0326-9946142</div>
+          </div>
+          <div class="bg-[#FEF2F2] border border-[#FECACA] text-[#8B1D1D] text-xs font-bold p-3 rounded-xl flex items-center gap-2">
+            <span class="text-base">🛍️</span>
+            <span>Self-Pickup: <strong>Rs. 0 Delivery Fee</strong> • Ready in <strong>15–20 mins</strong></span>
+          </div>
+        </div>
+
+        <!-- Primary Confirm Button -->
+        <button type="button" onclick="confirmOrderModal()" class="w-full bg-[#EA580C] hover:bg-[#C2410C] text-white font-extrabold py-3.5 rounded-xl text-base shadow-md transition cursor-pointer">
+          Start My Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- D. COMPACT PROMOTIONAL DEAL BANNER -->
+  <section class="max-w-7xl mx-auto px-4 pt-5 pb-2 w-full" id="deals">
+    <div class="min-h-[180px] md:min-h-[220px] rounded-2xl overflow-hidden bg-gradient-to-r from-[#8B1D1D] to-[#EA580C] text-white p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+      <div class="max-w-xl">
+        <span class="bg-white text-[#8B1D1D] text-xs font-extrabold px-3 py-1 rounded-full inline-block mb-2 shadow-2xs">🔥 JUSHH EXCLUSIVE COMBOS</span>
+        <h2 class="text-2xl md:text-3xl font-extrabold leading-tight mb-2">Loaded Turkish Doners, Shawarmas & Platters — Made To Make You Go Uff!</h2>
+        <p class="text-white/90 text-sm font-medium mb-4">Crafted with signature Turkish seasonings, flame-roasted meats & our iconic sauces.</p>
+        <a href="#cat-12" class="inline-block bg-white text-[#8B1D1D] hover:bg-[#FFF7ED] font-extrabold px-5 py-2.5 rounded-xl text-sm shadow-sm transition">
+          Explore Full Menu ↓
+        </a>
+      </div>
+      <div class="flex-shrink-0">
+        <img src="./images/chicken_turkish_doner.jpg" alt="Jushh Specials" class="h-36 md:h-44 w-auto object-cover rounded-xl shadow-lg border-2 border-white/30" onerror="this.onerror=null; this.src='./images/beef_turkish_doner.jpg';" />
+      </div>
+    </div>
+  </section>
+
+  <!-- E. STICKY HORIZONTAL CATEGORY NAVIGATION RIBBON -->
+  <nav class="sticky top-[76px] z-30 bg-white border-b border-[#E5E7EB] py-3 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 flex items-center gap-2.5 overflow-x-auto no-scrollbar" id="category-pills">
+      <button type="button" class="category-pill active bg-[#EA580C] text-white border border-[#EA580C] font-extrabold px-4 py-2 rounded-full text-sm whitespace-nowrap shadow-sm cursor-pointer" onclick="scrollToCategorySection('all')">
+        All Menu
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-11')">
+        Appetizer
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-12')">
+        Turkish Specials
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-13')">
+        Shawarma
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-14')">
+        Desserts
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-15')">
+        Add Ons
+      </button>
+      <button type="button" class="category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-16')">
+        Beverages
       </button>
     </div>
   </nav>
 
-  <!-- Mobile Navigation Drawer -->
-  <div class="jushh-mobile-nav" id="jushh-mobile-nav">
-    <a href="index.html" class="active" onclick="closeMobileNav()">Home</a>
-    <a href="menu.html" onclick="closeMobileNav()">Menu & Catalog</a>
-    <a href="deals.html" onclick="closeMobileNav()">Loaded Combos</a>
-    <a href="about.html" onclick="closeMobileNav()">About Jushh</a>
-    <a href="locations.html" onclick="closeMobileNav()">3 Branch Outlets</a>
-    <a href="menu.html" class="jushh-btn-primary" style="margin-top:16px;" onclick="closeMobileNav()"><span>🍔 Order Online — COD</span></a>
-  </div>
+  <!-- F. FULL CATEGORIZED MENU GRID -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10 flex-1 w-full" id="menu">
 
-  <!-- HERO SECTION -->
-  <section class="jushh-section" style="padding-top:70px; padding-bottom:70px; background:radial-gradient(circle at 65% 35%, rgba(220, 38, 38, 0.22) 0%, transparent 60%), #0A0A0C;">
-    <div class="jushh-hero-grid">
-      <div>
-        <div class="hero-stagger-badge" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
-          <span style="background:rgba(24,119,242,0.15); border:1px solid rgba(24,119,242,0.35); color:#60A5FA; font-size:11px; font-weight:800; padding:4px 12px; border-radius:4px; text-transform:uppercase; letter-spacing:1px;">
-            ✓ Meta Verified
-          </span>
-          <span class="jushh-eyebrow" style="margin-bottom:0;">📍 3 Live Outlets in Lahore</span>
-        </div>
+    <!-- CATEGORY 1: APPETIZER -->
+    <section class="category-section" id="cat-11" data-cat-id="11">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">APPETIZER</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">2 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 37 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="37" data-item-name="Chicken Doner Fries">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/chicken_doner_fries.jpg" alt="Chicken Doner Fries" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Doner Fries</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crispy fries topped with sliced chicken doner, secret seasoning and signature sauces.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Chicken Doner Fries" data-item-id="37" data-item-price="600" data-item-image="./images/chicken_doner_fries.jpg">
+              <button type="button" onclick="handleAddToCart(37, 'Chicken Doner Fries', 600, './images/chicken_doner_fries.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
 
-        <h1 class="jushh-sec-title hero-stagger-title" style="font-size:clamp(34px, 5.5vw, 66px); margin-bottom:18px;">
-          You Don't Find<br/>
-          <span>JUSHHH</span>,<br/>
-          JUSHHH Finds You.
-        </h1>
-        <div class="hero-stagger-desc" style="font-family:var(--font-display); font-size:16px; font-weight:800; color:var(--jushh-orange); text-transform:uppercase; letter-spacing:2px; margin-bottom:14px;">
-          "Food That Makes You Go Shhh..."
+        <!-- Item 38 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="38" data-item-name="Beef Doner Fries">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">💥 DEAL</span>
+              <img src="./images/beef_doner_fries.jpg" alt="Beef Doner Fries" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Doner Fries</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crispy golden fries loaded with sliced beef doner and signature Turkish sauces.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Beef Doner Fries" data-item-id="38" data-item-price="750" data-item-image="./images/beef_doner_fries.jpg">
+              <button type="button" onclick="handleAddToCart(38, 'Beef Doner Fries', 750, './images/beef_doner_fries.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CATEGORY 2: TURKISH SPECIALS -->
+    <section class="category-section" id="cat-12" data-cat-id="12">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">TURKISH SPECIALS</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">11 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 39 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="39" data-item-name="Chicken Grilled Sandwich">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_grilled_sandwich.jpg" alt="Chicken Grilled Sandwich" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Grilled Sandwich</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Toasted Turkish grilled sandwich packed with spiced chicken and melted layers.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Chicken Grilled Sandwich" data-item-id="39" data-item-price="750" data-item-image="./images/chicken_grilled_sandwich.jpg">
+              <button type="button" onclick="handleAddToCart(39, 'Chicken Grilled Sandwich', 750, './images/chicken_grilled_sandwich.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 40 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="40" data-item-name="Beef Grilled Sandwich">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/beef_grilled_sandwich.jpg" alt="Beef Grilled Sandwich" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Grilled Sandwich</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Slow-roasted beef grilled sandwich crafted authentic Turkish street-style.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 950</span>
+            <div class="card-action-container" data-item-name="Beef Grilled Sandwich" data-item-id="40" data-item-price="950" data-item-image="./images/beef_grilled_sandwich.jpg">
+              <button type="button" onclick="handleAddToCart(40, 'Beef Grilled Sandwich', 950, './images/beef_grilled_sandwich.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 41 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="41" data-item-name="Half Dubai Shawaya">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/half_dubai_shawaya.jpg" alt="Half Dubai Shawaya" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Half Dubai Shawaya</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Flame-roasted half chicken shawaya seasoned with Middle Eastern spices & herbs.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,400</span>
+            <div class="card-action-container" data-item-name="Half Dubai Shawaya" data-item-id="41" data-item-price="1400" data-item-image="./images/half_dubai_shawaya.jpg">
+              <button type="button" onclick="handleAddToCart(41, 'Half Dubai Shawaya', 1400, './images/half_dubai_shawaya.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 42 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="42" data-item-name="Full Dubai Shawaya">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">💥 DEAL</span>
+              <img src="./images/full_dubai_shawaya.jpg" alt="Full Dubai Shawaya" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Full Dubai Shawaya</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Whole rotisserie chicken shawaya served fresh with fragrant garlic sauces.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 2,500</span>
+            <div class="card-action-container" data-item-name="Full Dubai Shawaya" data-item-id="42" data-item-price="2500" data-item-image="./images/full_dubai_shawaya.jpg">
+              <button type="button" onclick="handleAddToCart(42, 'Full Dubai Shawaya', 2500, './images/full_dubai_shawaya.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 43 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="43" data-item-name="Add-on Rice">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/addon_rice.jpg" alt="Add-on Rice" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Add-on Rice</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Aromatic spiced basmati rice prepared Turkish style to pair with shawaya.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Add-on Rice" data-item-id="43" data-item-price="300" data-item-image="./images/addon_rice.jpg">
+              <button type="button" onclick="handleAddToCart(43, 'Add-on Rice', 300, './images/addon_rice.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 44 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="44" data-item-name="Chicken Turkish Wrap">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_turkish_wrap.jpg" alt="Chicken Turkish Wrap" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Turkish Wrap</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tender sliced chicken doner wrapped tightly in freshly rolled flatbread.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Chicken Turkish Wrap" data-item-id="44" data-item-price="600" data-item-image="./images/chicken_turkish_wrap.jpg">
+              <button type="button" onclick="handleAddToCart(44, 'Chicken Turkish Wrap', 600, './images/chicken_turkish_wrap.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 45 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="45" data-item-name="Beef Turkish Wrap">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/beef_turkish_wrap.jpg" alt="Beef Turkish Wrap" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Turkish Wrap</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Flame-grilled spiced beef doner strips rolled in artisan flatbread.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 900</span>
+            <div class="card-action-container" data-item-name="Beef Turkish Wrap" data-item-id="45" data-item-price="900" data-item-image="./images/beef_turkish_wrap.jpg">
+              <button type="button" onclick="handleAddToCart(45, 'Beef Turkish Wrap', 900, './images/beef_turkish_wrap.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 46 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="46" data-item-name="Chicken Turkish Doner">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/chicken_turkish_doner.jpg" alt="Chicken Turkish Doner" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Turkish Doner</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Authentic Turkish chicken doner stuffed into toasted bread with pickles & garlic cream.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 850</span>
+            <div class="card-action-container" data-item-name="Chicken Turkish Doner" data-item-id="46" data-item-price="850" data-item-image="./images/chicken_turkish_doner.jpg">
+              <button type="button" onclick="handleAddToCart(46, 'Chicken Turkish Doner', 850, './images/chicken_turkish_doner.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 47 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="47" data-item-name="Beef Turkish Doner">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/beef_turkish_doner.jpg" alt="Beef Turkish Doner" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Turkish Doner</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Authentic Turkish beef doner loaded with juicy cuts, herbs and crisp salad.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,100</span>
+            <div class="card-action-container" data-item-name="Beef Turkish Doner" data-item-id="47" data-item-price="1100" data-item-image="./images/beef_turkish_doner.jpg">
+              <button type="button" onclick="handleAddToCart(47, 'Beef Turkish Doner', 1100, './images/beef_turkish_doner.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 201 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="201" data-item-name="Dubai Shawaya">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/half_dubai_shawaya.jpg" alt="Dubai Shawaya" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Dubai Shawaya</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Signature spiced rotisserie roasted chicken served hot off the spit.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,400</span>
+            <div class="card-action-container" data-item-name="Dubai Shawaya" data-item-id="201" data-item-price="1400" data-item-image="./images/half_dubai_shawaya.jpg">
+              <button type="button" onclick="handleAddToCart(201, 'Dubai Shawaya', 1400, './images/half_dubai_shawaya.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 202 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="202" data-item-name="Turkish Doner">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_turkish_doner.jpg" alt="Turkish Doner" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Turkish Doner</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Classic spit-roasted doner served in fresh Turkish bread with house dressings.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 850</span>
+            <div class="card-action-container" data-item-name="Turkish Doner" data-item-id="202" data-item-price="850" data-item-image="./images/chicken_turkish_doner.jpg">
+              <button type="button" onclick="handleAddToCart(202, 'Turkish Doner', 850, './images/chicken_turkish_doner.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CATEGORY 3: SHAWARMA -->
+    <section class="category-section" id="cat-13" data-cat-id="13">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">SHAWARMA</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">7 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 48 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="48" data-item-name="Chicken Pouch Shawarma">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_pouch_shawarma.jpg" alt="Chicken Pouch Shawarma" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Pouch Shawarma</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Pocket-style pita pouch filled with charred chicken shawarma & pickles.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 450</span>
+            <div class="card-action-container" data-item-name="Chicken Pouch Shawarma" data-item-id="48" data-item-price="450" data-item-image="./images/chicken_pouch_shawarma.jpg">
+              <button type="button" onclick="handleAddToCart(48, 'Chicken Pouch Shawarma', 450, './images/chicken_pouch_shawarma.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 49 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="49" data-item-name="Beef Pouch Shawarma">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/beef_pouch_shawarma.jpg" alt="Beef Pouch Shawarma" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Pouch Shawarma</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Pocket-style pita pouch packed with savory spiced beef cuts.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 700</span>
+            <div class="card-action-container" data-item-name="Beef Pouch Shawarma" data-item-id="49" data-item-price="700" data-item-image="./images/beef_pouch_shawarma.jpg">
+              <button type="button" onclick="handleAddToCart(49, 'Beef Pouch Shawarma', 700, './images/beef_pouch_shawarma.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 50 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="50" data-item-name="Chicken Shawarma">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_turkish_wrap.jpg" alt="Chicken Shawarma" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Shawarma</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Classic Middle Eastern chicken shawarma rolled in toasted bread.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 550</span>
+            <div class="card-action-container" data-item-name="Chicken Shawarma" data-item-id="50" data-item-price="550" data-item-image="./images/chicken_turkish_wrap.jpg">
+              <button type="button" onclick="handleAddToCart(50, 'Chicken Shawarma', 550, './images/chicken_turkish_wrap.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 51 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="51" data-item-name="Beef Shawarma">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/beef_turkish_wrap.jpg" alt="Beef Shawarma" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Shawarma</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tender spiced beef shawarma roll with tahini and crisp onions.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Beef Shawarma" data-item-id="51" data-item-price="750" data-item-image="./images/beef_turkish_wrap.jpg">
+              <button type="button" onclick="handleAddToCart(51, 'Beef Shawarma', 750, './images/beef_turkish_wrap.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 52 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="52" data-item-name="Charcoal Shawarma Chicken">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/charcoal_shawarma_chicken.jpg" alt="Charcoal Shawarma Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Charcoal Shawarma Chicken</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Smoky charcoal-infused chicken shawarma for an intense flame-grilled kick.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Charcoal Shawarma Chicken" data-item-id="52" data-item-price="750" data-item-image="./images/charcoal_shawarma_chicken.jpg">
+              <button type="button" onclick="handleAddToCart(52, 'Charcoal Shawarma Chicken', 750, './images/charcoal_shawarma_chicken.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 53 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="53" data-item-name="Chicken Shawarma Platter">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">💥 DEAL</span>
+              <img src="./images/chicken_shawarma_platter.jpg" alt="Chicken Shawarma Platter" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Shawarma Platter</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Deconstructed chicken shawarma platter served with fries, garlic dip & bread.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 900</span>
+            <div class="card-action-container" data-item-name="Chicken Shawarma Platter" data-item-id="53" data-item-price="900" data-item-image="./images/chicken_shawarma_platter.jpg">
+              <button type="button" onclick="handleAddToCart(53, 'Chicken Shawarma Platter', 900, './images/chicken_shawarma_platter.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 54 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="54" data-item-name="Chicken Shawarma Platter (with cheese)">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/chicken_shawarma_platter.jpg" alt="Chicken Shawarma Platter (with cheese)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Shawarma Platter (with cheese)</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Loaded chicken shawarma platter drenched in rich melted cheese.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,000</span>
+            <div class="card-action-container" data-item-name="Chicken Shawarma Platter (with cheese)" data-item-id="54" data-item-price="1000" data-item-image="./images/chicken_shawarma_platter.jpg">
+              <button type="button" onclick="handleAddToCart(54, 'Chicken Shawarma Platter (with cheese)', 1000, './images/chicken_shawarma_platter.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CATEGORY 4: DESSERTS -->
+    <section class="category-section" id="cat-14" data-cat-id="14">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">DESSERTS</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">3 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 55 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="55" data-item-name="Lotus Can Dessert">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/lotus_can_dessert.jpg" alt="Lotus Can Dessert" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Lotus Can Dessert</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Signature pull-tab can filled with velvety Lotus Biscoff cream & crumb.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Lotus Can Dessert" data-item-id="55" data-item-price="600" data-item-image="./images/lotus_can_dessert.jpg">
+              <button type="button" onclick="handleAddToCart(55, 'Lotus Can Dessert', 600, './images/lotus_can_dessert.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 56 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="56" data-item-name="Red Velvet Can Dessert">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/red_velvet_can_dessert.jpg" alt="Red Velvet Can Dessert" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Red Velvet Can Dessert</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Artisan pull-tab can layered with rich red velvet sponge and cream cheese.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Red Velvet Can Dessert" data-item-id="56" data-item-price="600" data-item-image="./images/red_velvet_can_dessert.jpg">
+              <button type="button" onclick="handleAddToCart(56, 'Red Velvet Can Dessert', 600, './images/red_velvet_can_dessert.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 57 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="57" data-item-name="Nutella Can Dessert">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/nutella_can_dessert.jpg" alt="Nutella Can Dessert" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Nutella Can Dessert</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Indulgent pull-tab can brimming with pure Nutella hazelnut cream.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Nutella Can Dessert" data-item-id="57" data-item-price="600" data-item-image="./images/nutella_can_dessert.jpg">
+              <button type="button" onclick="handleAddToCart(57, 'Nutella Can Dessert', 600, './images/nutella_can_dessert.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CATEGORY 5: ADD ONS -->
+    <section class="category-section" id="cat-15" data-cat-id="15">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">ADD ONS</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">5 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 58 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="58" data-item-name="Cheese">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/cheese_addon.jpg" alt="Cheese" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Cheese</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Extra slice of rich melted cheddar or mozzarella blend.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 90</span>
+            <div class="card-action-container" data-item-name="Cheese" data-item-id="58" data-item-price="90" data-item-image="./images/cheese_addon.jpg">
+              <button type="button" onclick="handleAddToCart(58, 'Cheese', 90, './images/cheese_addon.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 59 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="59" data-item-name="Dip">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/garlic_dip.jpg" alt="Dip" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Dip</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Extra cup of signature Turkish garlic crema or chili sauce.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 90</span>
+            <div class="card-action-container" data-item-name="Dip" data-item-id="59" data-item-price="90" data-item-image="./images/garlic_dip.jpg">
+              <button type="button" onclick="handleAddToCart(59, 'Dip', 90, './images/garlic_dip.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 60 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="60" data-item-name="Tortilla Bread">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/pita_bread.jpg" alt="Tortilla Bread" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Tortilla Bread</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Freshly warmed soft tortilla flatbread.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 90</span>
+            <div class="card-action-container" data-item-name="Tortilla Bread" data-item-id="60" data-item-price="90" data-item-image="./images/pita_bread.jpg">
+              <button type="button" onclick="handleAddToCart(60, 'Tortilla Bread', 90, './images/pita_bread.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 61 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="61" data-item-name="Pita Bread">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/pita_bread.jpg" alt="Pita Bread" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Pita Bread</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Warm stone-baked Middle Eastern pita pocket.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 60</span>
+            <div class="card-action-container" data-item-name="Pita Bread" data-item-id="61" data-item-price="60" data-item-image="./images/pita_bread.jpg">
+              <button type="button" onclick="handleAddToCart(61, 'Pita Bread', 60, './images/pita_bread.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 62 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="62" data-item-name="Plain Fries">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative flex items-center justify-center p-6 border border-[#EA580C]/10">
+              <img src="./images/jushh_logo.jpg" alt="Plain Fries" class="w-full h-full object-contain" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Plain Fries</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Golden salted crispy potato french fries.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 150</span>
+            <div class="card-action-container" data-item-name="Plain Fries" data-item-id="62" data-item-price="150" data-item-image="./images/jushh_logo.jpg">
+              <button type="button" onclick="handleAddToCart(62, 'Plain Fries', 150, './images/jushh_logo.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- CATEGORY 6: BEVERAGES -->
+    <section class="category-section" id="cat-16" data-cat-id="16">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#8B1D1D] rounded-full"></span>
+        <h2 class="text-2xl font-extrabold text-[#111827]">BEVERAGES</h2>
+        <span class="bg-[#FFF7ED] text-[#EA580C] text-xs font-extrabold px-2.5 py-1 rounded-full">7 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Item 63 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="63" data-item-name="Water">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/water_bottle.jpg" alt="Water" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Water</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">500ml chilled mineral water bottle.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 80</span>
+            <div class="card-action-container" data-item-name="Water" data-item-id="63" data-item-price="80" data-item-image="./images/water_bottle.jpg">
+              <button type="button" onclick="handleAddToCart(63, 'Water', 80, './images/water_bottle.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 64 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="64" data-item-name="Soft Drink">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/soft_drink.jpg" alt="Soft Drink" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Soft Drink</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Chilled 345ml carbonated soft drink can.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 150</span>
+            <div class="card-action-container" data-item-name="Soft Drink" data-item-id="64" data-item-price="150" data-item-image="./images/soft_drink.jpg">
+              <button type="button" onclick="handleAddToCart(64, 'Soft Drink', 150, './images/soft_drink.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 65 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="65" data-item-name="Blueberry Mojito">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
+              <img src="./images/blueberry_mojito.jpg" alt="Blueberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Blueberry Mojito</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Sparkling blueberry cooler with fresh crushed mint and lime.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 290</span>
+            <div class="card-action-container" data-item-name="Blueberry Mojito" data-item-id="65" data-item-price="290" data-item-image="./images/blueberry_mojito.jpg">
+              <button type="button" onclick="handleAddToCart(65, 'Blueberry Mojito', 290, './images/blueberry_mojito.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 66 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="66" data-item-name="Strawberry Mojito">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/strawberry_mojito.jpg" alt="Strawberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Strawberry Mojito</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Refreshing strawberry fizz with fresh mint leaves and soda.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 290</span>
+            <div class="card-action-container" data-item-name="Strawberry Mojito" data-item-id="66" data-item-price="290" data-item-image="./images/strawberry_mojito.jpg">
+              <button type="button" onclick="handleAddToCart(66, 'Strawberry Mojito', 290, './images/strawberry_mojito.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 67 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="67" data-item-name="Green Apple Mojito">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/green_apple_mojito.jpg" alt="Green Apple Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Green Apple Mojito</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crisp tart green apple mocktail with zesty lime punch.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 290</span>
+            <div class="card-action-container" data-item-name="Green Apple Mojito" data-item-id="67" data-item-price="290" data-item-image="./images/green_apple_mojito.jpg">
+              <button type="button" onclick="handleAddToCart(67, 'Green Apple Mojito', 290, './images/green_apple_mojito.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 68 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="68" data-item-name="Peach Mojito">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/peach_mojito.jpg" alt="Peach Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Peach Mojito</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Sweet sun-ripened peach mojito infused with sparkling citrus.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 290</span>
+            <div class="card-action-container" data-item-name="Peach Mojito" data-item-id="68" data-item-price="290" data-item-image="./images/peach_mojito.jpg">
+              <button type="button" onclick="handleAddToCart(68, 'Peach Mojito', 290, './images/peach_mojito.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Item 69 -->
+        <article class="product-card p-3.5 flex flex-col justify-between" data-item-id="69" data-item-name="Lemon Mojito">
+          <div>
+            <div class="w-full h-44 bg-[#FFF7ED] rounded-xl overflow-hidden mb-3 relative">
+              <img src="./images/lemon_mojito.jpg" alt="Lemon Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            </div>
+            <h3 class="text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Lemon Mojito</h3>
+            <p class="text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Classic iced lemon mint margarita fizz with fresh lime zest.</p>
+          </div>
+          <div class="pt-3 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
+            <span class="text-[18px] font-extrabold text-[#8B1D1D]">Rs. 290</span>
+            <div class="card-action-container" data-item-name="Lemon Mojito" data-item-id="69" data-item-price="290" data-item-image="./images/lemon_mojito.jpg">
+              <button type="button" onclick="handleAddToCart(69, 'Lemon Mojito', 290, './images/lemon_mojito.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- COMMERCIAL QSR FOOTER -->
+  <footer class="bg-white border-t border-[#E5E7EB] mt-12 py-10">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Col 1: Brand Info -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <img src="./images/jushh_logo.jpg" alt="Jushh" class="h-10 w-auto rounded-md object-contain" />
+          <span class="font-extrabold text-lg text-[#111827]">Jushh!!</span>
         </div>
-        <p class="jushh-sec-desc hero-stagger-desc" style="font-size:16px; margin-bottom:28px;">
-          3 Locations in Lahore — Johar Town R2, Lake City, and DHA Phase 1. Sizzling rotisserie doner sliced thin, loaded seasoned fries, charcoal shawarma, and decadent pull-tab can desserts.
+        <p class="text-xs text-[#4B5563] leading-relaxed">
+          Food That Makes You Go Uff.. Fresh authentic Turkish doners, shawarmas, crispy doner fries & pull-tab desserts across 3 Lahore branches.
         </p>
-
-        <div class="hero-stagger-actions" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:28px;">
-          <a href="menu.html" class="jushh-btn-primary" style="padding:14px 28px; font-size:14px;">
-            <span>🥙 Order Now — COD</span>
-          </a>
-          <a href="deals.html" class="jushh-btn-secondary" style="padding:14px 24px; font-size:14px;">
-            <span>🔥 See Combos</span>
-          </a>
-          <a href="locations.html" class="jushh-btn-secondary" style="padding:14px 20px; font-size:14px;">
-            <span>📍 Find a Branch</span>
-          </a>
-        </div>
-
-                <!-- KFC-Style Segmented Toggle in Hero -->
-        <div style="margin-bottom:20px;">
-          <div style="font-size:11px; font-weight:800; color:var(--jushh-crimson); font-family:var(--font-display); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Choose Fulfillment Mode:</div>
-          <div class="kfc-fulfillment-toggle">
-            <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
-              <span>🛵 Express Delivery</span>
-              <span class="kfc-toggle-badge">Rs. 150</span>
-            </button>
-            <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
-              <span>🛍️ Counter Pickup</span>
-              <span class="kfc-toggle-badge" style="background:#10B981; color:#fff;">FREE</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Interactive Quick Branch Selector -->
-        <div style="margin-top:20px;">
-          <div style="font-size:11px; font-weight:800; color:var(--jushh-crimson); font-family:var(--font-display); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">⚡ Select Branch To Order:</div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
-            <div onclick="selectQuickBranch('Johar Town')" style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--jushh-red-bright)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--jushh-border)'; this.style.transform='none'">
-              <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">Johar Town (R2)</div>
-              <div style="font-size:12px; color:var(--jushh-muted);">📞 0326-9946142</div>
-              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
-            </div>
-            <div onclick="selectQuickBranch('Lake City')" style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--jushh-red-bright)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--jushh-border)'; this.style.transform='none'">
-              <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">Lake City</div>
-              <div style="font-size:12px; color:var(--jushh-muted);">📞 0324-4441735</div>
-              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
-            </div>
-            <div onclick="selectQuickBranch('DHA Phase 1')" style="background:rgba(255,255,255,0.03); border:1px solid var(--jushh-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:all 0.25s;" onmouseover="this.style.borderColor='var(--jushh-red-bright)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--jushh-border)'; this.style.transform='none'">
-              <div style="color:var(--jushh-crimson); font-family:var(--font-display); font-size:12px; font-weight:800; text-transform:uppercase;">DHA Phase 1</div>
-              <div style="font-size:12px; color:var(--jushh-muted);">📞 0325-7217221</div>
-              <div style="font-size:11px; color:#10B981; font-weight:700; margin-top:3px;">● Open · Order Now →</div>
-            </div>
-          </div>
+        <div class="text-xs font-bold text-[#8B1D1D]">
+          🛵 Fast Delivery • 🛍️ Self-Pickup
         </div>
       </div>
 
-      <!-- Hero Visual Card -->
-      <div class="hero-stagger-visual" style="position:relative;">
-        <div style="border-radius:20px; overflow:hidden; border:2px solid var(--jushh-border-strong); box-shadow:0 24px 60px rgba(220, 38, 38, 0.35); transform:rotate(1.5deg); transition:transform 0.4s ease;" onmouseover="this.style.transform='rotate(0deg) scale(1.02)'" onmouseout="this.style.transform='rotate(1.5deg)'">
-          <img src="./images/jushh_banner_collage.jpg" alt="Jushh Specials Collage" class="jushh-hero-img" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
-          <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(10,10,12,0.92) 0%, rgba(10,10,12,0.1) 60%, transparent 100%);"></div>
-          <div style="position:absolute; bottom:24px; left:24px; right:24px;">
-            <div class="jushh-card-badge" style="position:static; display:inline-block; margin-bottom:8px;">🔥 Signature Item</div>
-            <div style="font-family:var(--font-display); font-size:22px; font-weight:900; color:white; margin-bottom:4px;">Chicken Doner Fries</div>
-            <div style="font-size:13px; color:var(--jushh-muted); margin-bottom:12px;">Crispy fries topped with sliced chicken doner and secret garlic sauces</div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-family:var(--font-display); font-size:22px; font-weight:900; color:white;">Rs. 600</span>
-              <button onclick="addToOrderForm('Chicken Doner Fries', 600, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')" class="jushh-btn-primary" style="padding:8px 18px; font-size:12.5px;">
-                <span>+ Add to Cart</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- THE JUSHH STREET STANDARD (USP Section) -->
-  <section class="jushh-section jushh-section-alt">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div style="text-align:center; margin-bottom:48px;">
-        <div class="jushh-eyebrow">Street Food Mastery</div>
-        <h2 class="jushh-sec-title">The <span>Jushh Standard</span></h2>
-        <p class="jushh-sec-desc" style="margin:0 auto;">Loud crunch, bold flavors, quiet satisfaction. Here's why our street food hits different.</p>
+      <!-- Col 2: Johar Town Branch -->
+      <div class="space-y-2">
+        <h4 class="font-extrabold text-sm text-[#111827] uppercase tracking-wide">Johar Town Outlet</h4>
+        <p class="text-xs text-[#4B5563]">Block R2, Phase 2 Johar Town, Lahore</p>
+        <p class="text-xs font-bold text-[#EA580C]">📞 0326-9946142</p>
+        <p class="text-xs text-[#6B7280]">Open Daily: 1:00 PM – 2:00 AM</p>
       </div>
 
-      <div class="jushh-cards-grid">
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
-          <div style="font-size:38px; margin-bottom:12px;">🥩</div>
-          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Vertical Doner Rotisseries</h3>
-          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Stacked cuts of seasoned chicken and beef slow-roasted on rotating spits for signature caramelized edges.</p>
-        </div>
-
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
-          <div style="font-size:38px; margin-bottom:12px;">🧄</div>
-          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">House Secret Dips</h3>
-          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Whipped garlic toum, fiery Turkish peri, and velvety chipotle sauces crafted daily from scratch.</p>
-        </div>
-
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
-          <div style="font-size:38px; margin-bottom:12px;">🥙</div>
-          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Lebanese Pocket Pitas</h3>
-          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Airy flatbreads and pocket pitas baked fresh, stuffed to overflowing with tender doner and crisp pickled peppers.</p>
-        </div>
-
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:28px 22px;">
-          <div style="font-size:38px; margin-bottom:12px;">🥫</div>
-          <h3 style="font-family:var(--font-display); font-size:18px; font-weight:800; color:white; margin-bottom:8px; text-transform:uppercase;">Pull-Tab Can Desserts</h3>
-          <p style="font-size:13px; color:var(--jushh-muted); line-height:1.7;">Our viral canned treats: Lotus Biscoff, Red Velvet, and decadent Nutella sealed in pull-tab cans for maximum freshness.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- FLASH DEALS & BUNDLES (Benchmark Street Combos) -->
-  <section class="jushh-section" style="background:linear-gradient(180deg, #111115 0%, #0A0A0C 100%); border-top:1px solid var(--jushh-border); border-bottom:1px solid var(--jushh-border);">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:36px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <div class="jushh-eyebrow">🔥 Loaded Bundles</div>
-          <h2 class="jushh-sec-title">Flash Deals & <span>Bundles</span></h2>
-          <p class="jushh-sec-desc" style="margin-bottom:0;">Loaded street feasts, doner boxes, and viral combos packed for sharing.</p>
-        </div>
-        <a href="deals.html" class="jushh-btn-secondary">View All Deals →</a>
+      <!-- Col 3: Lake City & DHA Branches -->
+      <div class="space-y-2">
+        <h4 class="font-extrabold text-sm text-[#111827] uppercase tracking-wide">Lake City & DHA Outlets</h4>
+        <p class="text-xs text-[#4B5563]"><strong>Lake City:</strong> Business Bay M1 • 📞 0324-4441735</p>
+        <p class="text-xs text-[#4B5563]"><strong>DHA:</strong> Sector H, DHA Phase 1 • 📞 0325-7217221</p>
+        <p class="text-xs text-[#6B7280]">Express Kitchen & Drive-thru Ready</p>
       </div>
 
-      <div class="jushh-deals-grid">
-        <!-- Deal 1 -->
-        <div class="jushh-card" style="border:2px solid var(--jushh-border-strong);">
-          <div class="jushh-card-img-wrap" style="height:210px;">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg" alt="Doner Fries Beast Box" class="jushh-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/chicken_doner_fries.jpg';" />
-            <span class="jushh-card-badge" style="background:var(--jushh-crimson);">🔥 Beast Value</span>
-          </div>
-          <div class="jushh-card-body">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-              <div class="jushh-card-name" style="font-size:18px;">Doner Fries Beast Box</div>
-              <span style="background:rgba(220,38,38,0.2); color:var(--jushh-red-bright); font-family:var(--font-display); font-weight:900; font-size:11px; padding:3px 8px; border-radius:4px;">SERVES 2–3</span>
-            </div>
-            <div class="jushh-card-desc" style="font-size:12.5px; line-height:1.6;">1 Large Chicken Doner Fries + 1 Beef Doner Fries + 2 Garlic Dips + 2 Blueberry Mojitos.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div>
-                <div style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 2,110</div>
-                <div class="jushh-card-price" style="font-size:20px;">Rs. 1,799</div>
-              </div>
-              <button class="jushh-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Doner Fries Beast Box', 1799, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')">
-                <span>+ Add Deal</span>
-              </button>
-            </div>
-          </div>
+      <!-- Col 4: Quick Help & Legal -->
+      <div class="space-y-2">
+        <h4 class="font-extrabold text-sm text-[#111827] uppercase tracking-wide">Customer Support</h4>
+        <p class="text-xs text-[#4B5563]">Payment: Cash on Delivery (COD) / Pay on Pickup</p>
+        <div class="flex items-center gap-3 pt-2">
+          <a href="https://foodsphere-admin.pages.dev/privacy-policy.html" target="_blank" class="text-xs text-[#4B5563] hover:text-[#EA580C] underline">Privacy Policy</a>
+          <span class="text-[#E5E7EB]">•</span>
+          <a href="https://foodsphere-admin.pages.dev/terms-of-service.html" target="_blank" class="text-xs text-[#4B5563] hover:text-[#EA580C] underline">Terms of Service</a>
         </div>
-
-        <!-- Deal 2 -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap" style="height:210px;">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg" alt="Dubai Shawaya Royal Feast" class="jushh-card-img" loading="lazy" onerror="this.onerror=null; this.src='./images/full_dubai_shawaya.jpg';" />
-            <span class="jushh-card-badge">🍗 Royal Feast</span>
-          </div>
-          <div class="jushh-card-body">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-              <div class="jushh-card-name" style="font-size:18px;">Dubai Shawaya Royal Feast</div>
-              <span style="background:rgba(220,38,38,0.2); color:var(--jushh-red-bright); font-family:var(--font-display); font-weight:900; font-size:11px; padding:3px 8px; border-radius:4px;">SERVES 4–5</span>
-            </div>
-            <div class="jushh-card-desc" style="font-size:12.5px; line-height:1.6;">1 Full Dubai Shawaya Chicken + 2 Spiced Rice + 4 Lebanese Pitas + 2 Dips + 4 Soft Drinks.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div>
-                <div style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 3,690</div>
-                <div class="jushh-card-price" style="font-size:20px;">Rs. 3,199</div>
-              </div>
-              <button class="jushh-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Dubai Shawaya Royal Feast', 3199, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg')">
-                <span>+ Add Deal</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Deal 3 -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap" style="height:210px;">
-            <img src="./images/lotus_can_dessert.jpg" alt="Street Doner Duo" class="jushh-card-img" loading="lazy" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg';" />
-            <span class="jushh-card-badge">⭐ Street Duo</span>
-          </div>
-          <div class="jushh-card-body">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
-              <div class="jushh-card-name" style="font-size:18px;">Street Doner Duo</div>
-              <span style="background:rgba(220,38,38,0.2); color:var(--jushh-red-bright); font-family:var(--font-display); font-weight:900; font-size:11px; padding:3px 8px; border-radius:4px;">SERVES 2</span>
-            </div>
-            <div class="jushh-card-desc" style="font-size:12.5px; line-height:1.6;">2 Chicken Turkish Doners + 1 Plain Fries + 2 Signature Dips + 2 Soft Drinks.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div>
-                <div style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 1,550</div>
-                <div class="jushh-card-price" style="font-size:20px;">Rs. 1,299</div>
-              </div>
-              <button class="jushh-btn-primary" style="font-size:12px; padding:8px 16px;" onclick="addToOrderForm('Street Doner Duo', 1299, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg')">
-                <span>+ Add Deal</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURED STREET ITEMS -->
-  <section class="jushh-section">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:36px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <div class="jushh-eyebrow">Viral Bites</div>
-          <h2 class="jushh-sec-title">Top <span>Street Best-Sellers</span></h2>
-          <p class="jushh-sec-desc" style="margin-bottom:0;">Taste that makes you go Shhh! Tap to add to your bag.</p>
-        </div>
-        <a href="menu.html" class="jushh-btn-secondary">View Full Menu (33 Items) →</a>
-      </div>
-
-      <div class="jushh-menu-grid">
-        <!-- Item 1: Chicken Doner Fries -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg" alt="Chicken Doner Fries" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/chicken_doner_fries.jpg';"/>
-            <span class="jushh-card-badge">🔥 Top Pick</span>
-          </div>
-          <div class="jushh-card-body">
-            <div class="jushh-card-name">Chicken Doner Fries</div>
-            <div class="jushh-card-desc">Crispy fries topped with sliced chicken doner and signature sauces.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div class="jushh-card-price">Rs. 600</div>
-              <button class="jushh-card-add-btn" onclick="addToOrderForm('Chicken Doner Fries', 600, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')">
-                + Add
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Item 2: Beef Doner Fries -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg" alt="Beef Doner Fries" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/beef_doner_fries.jpg';"/>
-            <span class="jushh-card-badge">🥩 Premium Beef</span>
-          </div>
-          <div class="jushh-card-body">
-            <div class="jushh-card-name">Beef Doner Fries</div>
-            <div class="jushh-card-desc">Crispy fries topped with sliced beef doner and signature sauces.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div class="jushh-card-price">Rs. 750</div>
-              <button class="jushh-card-add-btn" onclick="addToOrderForm('Beef Doner Fries', 750, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg')">
-                + Add
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Item 3: Half Dubai Shawaya -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg" alt="Half Dubai Shawaya" class="jushh-card-img" onerror="this.onerror=null; this.src='./images/half_dubai_shawaya.jpg';"/>
-            <span class="jushh-card-badge">🍗 Roasted Special</span>
-          </div>
-          <div class="jushh-card-body">
-            <div class="jushh-card-name">Half Dubai Shawaya</div>
-            <div class="jushh-card-desc">Traditional roasted chicken shawaya half portion, spiced Arabic street style.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div class="jushh-card-price">Rs. 1,400</div>
-              <button class="jushh-card-add-btn" onclick="addToOrderForm('Half Dubai Shawaya', 1400, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg')">
-                + Add
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Item 4: Lotus Can Dessert -->
-        <div class="jushh-card">
-          <div class="jushh-card-img-wrap">
-            <img src="./images/lotus_can_dessert.jpg" alt="Lotus Can Dessert" class="jushh-card-img" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';"/>
-            <span class="jushh-card-badge" style="background:#F59E0B; color:black;">🥫 Viral Can</span>
-          </div>
-          <div class="jushh-card-body">
-            <div class="jushh-card-name">Lotus Can Dessert</div>
-            <div class="jushh-card-desc">Creamy Lotus Biscoff dessert served in a sealed signature pull-tab can.</div>
-            <div class="jushh-card-foot" style="margin-top:auto;">
-              <div class="jushh-card-price">Rs. 600</div>
-              <button class="jushh-card-add-btn" onclick="addToOrderForm('Lotus Can Dessert', 600, './images/lotus_can_dessert.jpg')">
-                + Add
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FLASH DEALS & COMBOS PREVIEW (Linking to /deals) -->
-  <section class="jushh-section jushh-section-alt" style="border-top:1px solid var(--jushh-border); border-bottom:1px solid var(--jushh-border);">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:34px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(220,38,38,0.15); border:1px solid rgba(220,38,38,0.4); border-radius:4px; padding:4px 12px; margin-bottom:10px;">
-            <span style="color:#EF4444; font-size:12px;">⚡</span>
-            <span style="font-size:11px; font-weight:800; color:var(--jushh-red-bright); text-transform:uppercase; letter-spacing:1px; font-family:var(--font-display);">Flash Street Combos · Limited Time</span>
-          </div>
-          <h2 class="jushh-sec-title" style="margin-bottom:0;">Loaded <span>Street Combos</span> Built Big</h2>
-        </div>
-        <a href="deals.html" class="jushh-btn-secondary" style="font-size:13px; padding:10px 20px;">
-          <span>Explore All Street Combos →</span>
-        </a>
-      </div>
-
-      <div class="jushh-cards-grid">
-        <!-- Deal Card 1 -->
-        <div style="background:var(--jushh-surface-card); border:2px solid var(--jushh-border-strong); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-          <div style="height:190px; position:relative; overflow:hidden; background:#110003;">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg" alt="Doner Fries Beast Box" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';"/>
-            <span style="position:absolute; top:12px; left:12px; background:var(--jushh-crimson); color:white; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:4px; text-transform:uppercase; font-family:var(--font-display);">🔥 SAVE RS. 350</span>
-          </div>
-          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
-            <div style="font-family:var(--font-display); font-size:19px; font-weight:900; color:white; margin-bottom:6px;">Doner Fries Beast Box</div>
-            <div style="font-size:13px; color:var(--jushh-muted); line-height:1.6; margin-bottom:16px;">1 Large Chicken Doner Fries + 1 Chicken Turkish Wrap + 1 Signature Garlic Dip + 1 Chilled Soft Drink.</div>
-            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <span style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 2,150</span>
-                <div style="font-size:20px; font-weight:900; color:var(--jushh-orange);">Rs. 1,799</div>
-              </div>
-              <button onclick="addToOrderForm('Doner Fries Beast Box', 1799, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg')" class="jushh-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Deal Card 2 -->
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-          <div style="height:190px; position:relative; overflow:hidden; background:#110003;">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg" alt="Dubai Shawaya Royal Feast" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';"/>
-            <span style="position:absolute; top:12px; left:12px; background:var(--jushh-orange); color:black; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:4px; text-transform:uppercase; font-family:var(--font-display);">🍗 Mega Feast</span>
-          </div>
-          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
-            <div style="font-family:var(--font-display); font-size:19px; font-weight:900; color:white; margin-bottom:6px;">Dubai Shawaya Royal Feast</div>
-            <div style="font-size:13px; color:var(--jushh-muted); line-height:1.6; margin-bottom:16px;">1 Full Dubai Shawaya + 2 Spiced Rice + 4 Soft Pita Breads + 2 Garlic Toum Dips + 2 Chilled Soft Drinks.</div>
-            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <span style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 3,500</span>
-                <div style="font-size:20px; font-weight:900; color:var(--jushh-orange);">Rs. 2,999</div>
-              </div>
-              <button onclick="addToOrderForm('Dubai Shawaya Royal Feast', 2999, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg')" class="jushh-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Deal Card 3 -->
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
-          <div style="height:190px; position:relative; overflow:hidden; background:#110003;">
-            <img src="https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg" alt="Street Shawarma Duo" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';"/>
-            <span style="position:absolute; top:12px; left:12px; background:rgba(220,38,38,0.9); color:white; font-size:10.5px; font-weight:800; padding:4px 10px; border-radius:4px; text-transform:uppercase; font-family:var(--font-display);">🌯 Street Duo</span>
-          </div>
-          <div style="padding:20px; display:flex; flex-direction:column; flex:1;">
-            <div style="font-family:var(--font-display); font-size:19px; font-weight:900; color:white; margin-bottom:6px;">Street Shawarma Duo</div>
-            <div style="font-size:13px; color:var(--jushh-muted); line-height:1.6; margin-bottom:16px;">2 Chicken Turkish Wraps + 1 Salted Fries + 1 Garlic Dip + 2 Soft Drinks. Perfect street duo deal.</div>
-            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <span style="font-size:11px; text-decoration:line-through; color:var(--jushh-faint);">Rs. 1,850</span>
-                <div style="font-size:20px; font-weight:900; color:var(--jushh-orange);">Rs. 1,550</div>
-              </div>
-              <button onclick="addToOrderForm('Street Shawarma Duo', 1550, 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg')" class="jushh-btn-primary" style="padding:8px 18px; font-size:12.5px;">+ Add Deal</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SOCIAL BUZZ -->
-  <section class="jushh-section">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div style="text-align:center; margin-bottom:44px;">
-        <div class="jushh-eyebrow">Community Buzz</div>
-        <h2 class="jushh-sec-title">What Street Foodies <span>Say</span></h2>
-      </div>
-
-      <div class="jushh-testimonials-grid">
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
-          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
-          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
-            "The Chicken Doner Fries with their garlic dip is insane. Massive portion, piping hot, and the meat has actual rotisserie crispness. My go-to order in Johar Town!"
-          </p>
-          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Bilal Sheikh</div>
-          <div style="font-size:11px; color:var(--jushh-muted);">Food Vlogger · Johar Town Branch</div>
-        </div>
-
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
-          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
-          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
-            "Dubai Shawaya with spiced rice is top tier. So moist, aromatic, and the pita is super soft. Plus you get the pull-tab Lotus Can Dessert which is 10/10."
-          </p>
-          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Zainab Farooq</div>
-          <div style="font-size:11px; color:var(--jushh-muted);">Delivery Customer · DHA Phase 1</div>
-        </div>
-
-        <div style="background:var(--jushh-surface-card); border:1px solid var(--jushh-border); border-radius:14px; padding:26px;">
-          <div style="color:var(--jushh-orange); font-size:15px; margin-bottom:10px;">★★★★★</div>
-          <p style="font-size:13.5px; color:var(--jushh-white); font-style:italic; line-height:1.7; margin-bottom:14px;">
-            "Late night order at Lake City arrived in 30 minutes flat. Sizzling fries, great packaging. Highly recommend Jushh!"
-          </p>
-          <div style="font-weight:800; font-size:13px; color:var(--jushh-crimson); font-family:var(--font-display);">Mikael Hassan</div>
-          <div style="font-size:11px; color:var(--jushh-muted);">Verified Customer · Lake City</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- QUICK ORDER FORM (Fully Preserved Formspree + API Integration) -->
-  <section class="jushh-section jushh-section-alt" id="order-section">
-    <div style="max-width:640px; margin:0 auto;">
-      <div class="jushh-order-box">
-        <div style="text-align:center; margin-bottom:26px;">
-          <div class="jushh-eyebrow">Quick Street Order</div>
-          <h2 style="font-family:var(--font-display); font-size:26px; font-weight:900; color:white; margin-bottom:6px; text-transform:uppercase;">Place Your Order 🥙</h2>
-          <p style="font-size:13.5px; color:var(--jushh-muted);">Fill details below — confirmed via WhatsApp within 5 minutes!</p>
-        </div>
-
-        <div id="form-success" style="display:none; text-align:center; padding:30px 20px;">
-          <div style="font-size:48px; margin-bottom:14px;">✅</div>
-          <h3 style="font-family:var(--font-display); font-size:22px; font-weight:900; margin-bottom:8px; color:white;">Order Received!</h3>
-          <p style="color:var(--jushh-muted); font-size:13.5px; line-height:1.6;">
-            Thank you! Your order has been dispatched to our kitchen.<br/>
-            Our team will confirm your delivery shortly.
-          </p>
-          <button type="button" onclick="resetOrderForm()" class="jushh-btn-primary" style="margin-top:20px;"><span>➕ Place Another Order</span></button>
-        </div>
-
-                <form id="order-form" action="https://formspree.io/p/3012813034625170617/f/jushhpk" method="POST" onsubmit="handleFormSubmit(event)">
-          <!-- In-Form Segmented Toggle -->
-          <div style="margin-bottom:18px;">
-            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Fulfillment Mode:</label>
-            <div class="kfc-fulfillment-toggle" style="background:#0D0D10;">
-              <button type="button" class="kfc-toggle-btn active" data-fulfillment-mode="DELIVERY" onclick="setFulfillmentMode('DELIVERY')">
-                <span>🛵 Delivery (Rs. 150)</span>
-              </button>
-              <button type="button" class="kfc-toggle-btn" data-fulfillment-mode="PICKUP" onclick="setFulfillmentMode('PICKUP')">
-                <span>🛍️ Counter Pickup (FREE)</span>
-              </button>
-            </div>
-          </div>
-          <div class="jushh-form-row">
-            <div>
-              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Full Name *</label>
-              <input type="text" name="name" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="Your full name" required/>
-            </div>
-            <div>
-              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Phone Number *</label>
-              <input type="tel" name="phone" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="03XX-XXXXXXX" required/>
-            </div>
-          </div>
-
-          <div class="jushh-form-row">
-            <div>
-              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Select Branch</label>
-              <select name="branch" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;">
-                <option>Johar Town</option>
-                <option>Lake City</option>
-                <option>DHA Phase 1</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Payment Method</label>
-              <select name="payment" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" readonly>
-                <option>Cash on Delivery (COD)</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="margin-bottom:14px;" class="direct-checkout-address-wrap">
-            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Delivery Address *</label>
-            <input type="text" name="address" style="width:100%; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none;" placeholder="House/Flat #, Street, Area, Landmark" required/>
-          </div>
-
-          <div style="margin-bottom:16px;">
-            <label style="font-size:11px; font-weight:800; color:var(--jushh-crimson); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">YOUR ORDER SUMMARY</label>
-            <textarea name="order" id="order-textarea" style="width:100%; min-height:85px; background:#0D0D10; border:1px solid var(--jushh-border); color:white; padding:12px 14px; border-radius:6px; font-family:var(--font-body); font-size:13.5px; outline:none; resize:vertical;" placeholder="e.g. 1x Chicken Doner Fries, 2x Chicken Turkish Wrap..." required></textarea>
-          </div>
-
-          <div style="background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.25); border-radius:6px; padding:12px 16px; margin-bottom:20px; font-size:12.5px; color:var(--jushh-muted);">
-            💵 Payment Method: <strong style="color:white;">Cash on Delivery (COD)</strong> — Pay rider upon arrival.
-          </div>
-
-          <button type="submit" class="jushh-btn-primary" style="width:100%; justify-content:center; padding:16px; font-size:15px;">
-            <span>Place Your Order 🥙</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="jushh-footer">
-    <div class="jushh-footer-top" style="max-width:1200px; margin:0 auto;">
-      <div class="jushh-footer-brand">
-        <div class="jushh-brand-name" style="font-size:22px;">JUST <span>SHHH</span>… ✓</div>
-        <div class="jushh-brand-tagline">Street Gourmet Lahore</div>
-        <p>
-          Loud crunch, bold Turkish rotisserie doner, loaded fries, and viral can desserts across Johar Town, Lake City, and DHA Phase 1.
-        </p>
-      </div>
-
-      <div>
-        <div class="jushh-footer-col-title">Quick Links</div>
-        <ul class="jushh-footer-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="menu.html">Menu & Categories</a></li>
-          <li><a href="deals.html">Loaded Combos</a></li>
-          <li><a href="about.html">About Jushh</a></li>
-          <li><a href="locations.html">Locations & Timings</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <div class="jushh-footer-col-title">Outlets</div>
-        <ul class="jushh-footer-links">
-          <li><a href="locations.html">Johar Town (Phase 2, R2)</a></li>
-          <li><a href="locations.html">Lake City Business Bay</a></li>
-          <li><a href="locations.html">DHA Phase 1 (Sector H)</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <div class="jushh-footer-col-title">Hotlines</div>
-        <ul class="jushh-footer-links">
-          <li style="color:var(--jushh-muted);">📞 Johar Town: 0326-9946142</li>
-          <li style="color:var(--jushh-muted);">📞 Lake City: 0324-4441735</li>
-          <li style="color:var(--jushh-muted);">📞 DHA Phase 1: 0325-7217221</li>
-          <li><a href="https://wa.me/923269946142" target="_blank" style="color:#25D366; font-weight:800;">💬 WhatsApp Order</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="jushh-footer-bottom" style="max-width:1200px; margin:0 auto;">
-      <div>© 2026 JushhPK. All Rights Reserved. Lahore, Pakistan.</div>
-      <div style="display:flex; gap:16px;">
-        <a href="https://instagram.com/jushhpk" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">Instagram</a>
-        <a href="https://wa.me/923269946142" target="_blank" style="color:var(--jushh-muted); text-decoration:none;">WhatsApp</a>
+        <p class="text-[11px] text-[#6B7280] pt-2">© 2026 Jushh PK. Part of FoodSphere Aggregator Platform.</p>
       </div>
     </div>
   </footer>
 
-  <!-- WhatsApp Floating Action -->
-  <a href="https://wa.me/923269946142?text=Assalam%20o%20Alaikum!%20I%20want%20to%20order%20from%20JushhPK" class="jushh-float-wa" target="_blank" rel="noopener">
-    <span>💬</span> WhatsApp Order
-  </a>
-
-  <!-- Preserved Central Menu Data & Order Handling Scripts -->
+  <!-- JAVASCRIPT LOGIC & CART INTEGRATION -->
   <script>
-    window.BRAND_SLUG = "jushhpk";
+    window.BRAND_SLUG = 'jushhpk';
+    window.RESTAURANT_ID = 3;
 
-    function selectQuickBranch(branchName) {
-      try {
-        sessionStorage.setItem('foodsphere_selected_branch_jushhpk', branchName);
-      } catch (e) {}
-      window.location.href = 'menu.html?branch=' + encodeURIComponent(branchName);
+    let activeModalMode = 'DELIVERY';
+
+    // 1. ORDER MODE & LOCATION MODAL LOGIC
+    function openOrderModal() {
+      const modal = document.getElementById('jushh-order-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+      }
     }
-    const orderFromBranch = selectQuickBranch;
 
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const form = e.target;
-      
-      const name = form.name ? form.name.value : 'Customer';
-      const phone = form.phone ? form.phone.value : '';
-      const branch = form.branch ? form.branch.value : '';
-      const address = form.address ? form.address.value : '';
-      const orderStr = form.order ? form.order.value : '';
-      
-      const cartItems = [];
-      if (typeof window.cart === 'object' && Object.keys(window.cart || {}).length > 0) {
-        for (const itemKey in window.cart) {
-          if (window.cart[itemKey] > 0) {
-            cartItems.push({ name: itemKey, qty: window.cart[itemKey] });
+    function closeOrderModal() {
+      const modal = document.getElementById('jushh-order-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('modal-open');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function setModalMode(mode) {
+      activeModalMode = mode;
+      const delBtn = document.getElementById('modal-mode-delivery');
+      const pickBtn = document.getElementById('modal-mode-pickup');
+      const delPanel = document.getElementById('modal-delivery-panel');
+      const pickPanel = document.getElementById('modal-pickup-panel');
+
+      if (mode === 'DELIVERY') {
+        delBtn.className = "bg-[#EA580C] text-white font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer";
+        pickBtn.className = "text-[#111827] font-bold py-3 rounded-lg text-sm hover:text-[#EA580C] transition cursor-pointer";
+        delPanel.style.display = 'block';
+        pickPanel.style.display = 'none';
+      } else {
+        delBtn.className = "text-[#111827] font-bold py-3 rounded-lg text-sm hover:text-[#EA580C] transition cursor-pointer";
+        pickBtn.className = "bg-[#EA580C] text-white font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer";
+        delPanel.style.display = 'none';
+        pickPanel.style.display = 'block';
+      }
+    }
+
+    function updatePickupBranchCard(branch) {
+      const nameEl = document.getElementById('modal-pickup-branch-name');
+      const descEl = document.getElementById('modal-pickup-branch-desc');
+      if (branch === 'Lake City') {
+        nameEl.textContent = '📍 Jushh PK — Lake City (Open Now)';
+        descEl.textContent = 'Business Bay M1, Lake City, Lahore • 0324-4441735';
+      } else if (branch === 'DHA Phase 1') {
+        nameEl.textContent = '📍 Jushh PK — DHA Phase 1 (Open Now)';
+        descEl.textContent = 'Sector H, DHA Phase 1, Lahore • 0325-7217221';
+      } else {
+        nameEl.textContent = '📍 Jushh PK — Johar Town (Open Now)';
+        descEl.textContent = 'Block R2, Phase 2 Johar Town, Lahore • 0326-9946142';
+      }
+    }
+
+    function confirmOrderModal() {
+      try {
+        localStorage.setItem('jushh_mode_confirmed', 'true');
+        localStorage.setItem('jushh_order_mode', activeModalMode);
+        
+        let branchName = 'Johar Town';
+        if (activeModalMode === 'DELIVERY') {
+          const sel = document.getElementById('modal-branch-select');
+          if (sel) branchName = sel.value;
+          const addr = document.getElementById('modal-address-input');
+          if (addr && addr.value.trim()) {
+            localStorage.setItem('jushh_saved_address', addr.value.trim());
+          }
+        } else {
+          const sel = document.getElementById('modal-pickup-branch-select');
+          if (sel) branchName = sel.value;
+        }
+        localStorage.setItem('jushh_selected_branch', branchName);
+      } catch (e) {}
+
+      // Synchronize with cart_drawer.js
+      if (window.CartDrawer && typeof window.CartDrawer.setFulfillmentType === 'function') {
+        window.CartDrawer.setFulfillmentType(activeModalMode);
+      }
+      if (window.CartDrawer && typeof window.CartDrawer.setSelectedBranch === 'function') {
+        const branch = localStorage.getItem('jushh_selected_branch') || 'Johar Town';
+        window.CartDrawer.setSelectedBranch(branch);
+      }
+
+      closeOrderModal();
+    }
+
+    // 2. STICKY HEADER MODE TOGGLE
+    function setOrderMode(mode) {
+      if (window.CartDrawer && typeof window.CartDrawer.setFulfillmentType === 'function') {
+        window.CartDrawer.setFulfillmentType(mode);
+      } else {
+        const isPickup = (mode === 'PICKUP');
+        const headerDelBtn = document.getElementById('header-mode-delivery');
+        const headerPickBtn = document.getElementById('header-mode-pickup');
+        if (headerDelBtn && headerPickBtn) {
+          if (isPickup) {
+            headerDelBtn.className = "text-[#111827] font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer";
+            headerPickBtn.className = "bg-[#EA580C] text-white font-extrabold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer";
+          } else {
+            headerDelBtn.className = "bg-[#EA580C] text-white font-extrabold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer";
+            headerPickBtn.className = "text-[#111827] font-bold px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer";
           }
         }
-      } else if (orderStr) {
-        orderStr.split(',').forEach(p => {
-          const match = p.trim().match(/^(\d+)x?\s+(.+)$/);
-          if (match) {
-            cartItems.push({ name: match[2].trim(), qty: parseInt(match[1], 10) });
-          } else if (p.trim()) {
-            cartItems.push({ name: p.trim(), qty: 1 });
-          }
+      }
+    }
+
+    // 3. CART ACTIONS & CARD STEPPER SYNCHRONIZATION
+    function handleAddToCart(id, name, price, image) {
+      if (window.CartDrawer) {
+        window.CartDrawer.addItem({
+          id: id,
+          name: name,
+          price: price,
+          qty: 1,
+          image: image
         });
       }
+    }
 
-      if (typeof window.submitWebOrder === 'function') {
-        try {
-          await window.submitWebOrder({
-            brandSlug: 'jushhpk',
-            branchName: branch,
-            guestName: name,
-            guestPhone: phone,
-            deliveryAddress: address,
-            cartItems: cartItems
-          });
-        } catch (err) {
-          console.warn('[FoodSphere Order] API submit error:', err);
+    function handleCardQtyChange(name, delta) {
+      if (!window.CartDrawer || !window.CartDrawer.getItems) return;
+      const items = window.CartDrawer.getItems();
+      const idx = items.findIndex(i => i.name === name);
+      if (idx > -1) {
+        window.CartDrawer.updateQty(idx, delta);
+      }
+    }
+
+    window.syncCardSteppers = function() {
+      if (!window.CartDrawer) return;
+      const items = (typeof window.CartDrawer.getItems === 'function') ? window.CartDrawer.getItems() : [];
+      const itemMap = {};
+      items.forEach(it => { itemMap[it.name] = it.qty; });
+
+      document.querySelectorAll('.card-action-container').forEach(wrap => {
+        const name = wrap.getAttribute('data-item-name');
+        const id = wrap.getAttribute('data-item-id');
+        const price = wrap.getAttribute('data-item-price');
+        const image = wrap.getAttribute('data-item-image');
+        const qty = itemMap[name] || 0;
+
+        if (qty > 0) {
+          wrap.innerHTML = `
+            <div class="inline-qty-stepper">
+              <button type="button" onclick="handleCardQtyChange('${name.replace(/'/g, "\\'")}', -1)" aria-label="Decrease">&minus;</button>
+              <span class="font-extrabold min-w-[16px] text-center">${qty}</span>
+              <button type="button" onclick="handleCardQtyChange('${name.replace(/'/g, "\\'")}', 1)" aria-label="Increase">&plus;</button>
+            </div>
+          `;
+        } else {
+          wrap.innerHTML = `
+            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\\'")}', ${price}, '${image}')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+          `;
+        }
+      });
+    };
+
+    // 4. LIVE SEARCH FILTER
+    function handleLiveSearch(query) {
+      const q = (query || '').toLowerCase().trim();
+      const cards = document.querySelectorAll('.product-card');
+      const sections = document.querySelectorAll('.category-section');
+
+      cards.forEach(card => {
+        const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+        const desc = (card.querySelector('p')?.textContent || '').toLowerCase();
+        if (!q || title.includes(q) || desc.includes(q)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      sections.forEach(sec => {
+        const visibleCards = sec.querySelectorAll('.product-card[style*="display: flex"], .product-card:not([style*="display: none"])');
+        if (q && visibleCards.length === 0) {
+          sec.style.display = 'none';
+        } else {
+          sec.style.display = 'block';
+        }
+      });
+    }
+
+    // 5. CATEGORY SMOOTH SCROLL & ACTIVE OBSERVER
+    function scrollToCategorySection(sectionId) {
+      if (sectionId === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const target = document.getElementById(sectionId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
-
-      const message = `Hello! I want to place an order from JushhPK Website 🥙\n\n` +
-                      `*Customer Details:*\n` +
-                      `• *Name:* ${name}\n` +
-                      `• *Phone:* ${phone}\n` +
-                      `• *Address:* ${address}\n` +
-                      (branch ? `• *Branch:* ${branch}\n\n` : '\n') +
-                      `*Order Details:*\n` +
-                      `${orderStr}\n\n` +
-                      `*Payment Method:* Cash on Delivery (COD)`;
-                      
-      const encodedMessage = encodeURIComponent(message);
-      const branchPhones = {
-        'Johar Town': '923269946142',
-        'Block R2, Johar Town': '923269946142',
-        'Lake City': '923244441735',
-        'Business Bay, Lake City': '923244441735',
-        'DHA Phase 1': '923257217221',
-        'Sector H, DHA Phase 1': '923257217221'
-      };
-      const targetPhone = branchPhones[branch] || '923269946142';
-      const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
-      
-      window.open(whatsappUrl, '_blank');
-      
-      form.style.display = 'none';
-      const successDiv = document.getElementById('form-success');
-      if (successDiv) successDiv.style.display = 'block';
     }
 
-    function resetOrderForm() {
-      const form = document.getElementById('order-form');
-      const successDiv = document.getElementById('form-success');
-      if (form) {
-        form.reset();
-        form.style.display = 'block';
+    function initCategoryObserver() {
+      const sections = document.querySelectorAll('.category-section');
+      const pills = document.querySelectorAll('.category-pill');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            pills.forEach(pill => {
+              const targetCall = pill.getAttribute('onclick') || '';
+              if (targetCall.includes(id)) {
+                pills.forEach(p => {
+                  p.classList.remove('active');
+                  p.className = "category-pill bg-[#F3F4F6] text-[#111827] hover:border-[#EA580C] border border-[#E5E7EB] font-bold px-4 py-2 rounded-full text-sm whitespace-nowrap transition cursor-pointer";
+                });
+                pill.classList.add('active');
+                pill.className = "category-pill active bg-[#EA580C] text-white border border-[#EA580C] font-extrabold px-4 py-2 rounded-full text-sm whitespace-nowrap shadow-sm cursor-pointer";
+              }
+            });
+          }
+        });
+      }, { rootMargin: '-140px 0px -60% 0px' });
+
+      sections.forEach(sec => observer.observe(sec));
+    }
+
+    // 6. INITIALIZATION ON PAGE LOAD
+    document.addEventListener('DOMContentLoaded', () => {
+      initCategoryObserver();
+
+      // Check KFC-Style entry popup trigger
+      try {
+        const confirmed = localStorage.getItem('jushh_mode_confirmed');
+        if (confirmed !== 'true') {
+          openOrderModal();
+        } else {
+          const savedMode = localStorage.getItem('jushh_order_mode') || 'DELIVERY';
+          setOrderMode(savedMode);
+        }
+      } catch (e) {
+        openOrderModal();
       }
-      if (successDiv) successDiv.style.display = 'none';
-    }
+
+      // Initial card steppers sync
+      setTimeout(() => {
+        if (typeof window.syncCardSteppers === 'function') {
+          window.syncCardSteppers();
+        }
+      }, 50);
+    });
   </script>
 
-  <script src="entrance_jushh.js?v=20260913" defer></script>
-  <script src="live_catalog.js?v=20260913" defer></script>
-  <script src="cart_drawer.js?v=20260913" defer></script>
+  <!-- External Cart & Catalog Engine -->
+  <script src="cart_drawer.js?v=20261018"></script>
+  <script src="live_catalog.js?v=20261018"></script>
+
 </body>
 </html>

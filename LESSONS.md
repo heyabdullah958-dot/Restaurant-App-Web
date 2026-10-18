@@ -2,6 +2,32 @@
 
 > Generalized engineering takeaways, multi-tenant patterns, and invariants learned from debugging across backend, admin, mobile, and web applications.
 
+## Lesson 22 — Strict Missing-Photo Rules, High-Res Circular Logo Upscaling & Commercial QSR Distinct Layout Silhouettes — 2026-10-18
+- **Pattern**: Multi-brand storefront visual isolation, asset integrity for missing dish photography, high-resolution logo upscaling, and distinct card layouts.
+- **Wrong assumption made**:
+  1. Assuming that cropping low-resolution rectangles with printed text, prices, or borders from a physical restaurant menu brochure is better than having no food photo. In reality, text-contaminated crops with printed prices (`850`, `3500`) look broken, unprofessional, and confuse customers when the actual digital prices differ.
+  2. Assuming that assigning a different dish's photo (e.g. putting BBQ skewers on a Handi dish, or doner fries with sliced chicken on plain fries) is acceptable filler. Customers immediately notice when delivered food does not match the photo on the card.
+  3. Assuming that having identical rounded category pills and left-price/right-button layouts across different brand websites creates consistency. In a multi-tenant platform with 7 brands, each brand must have its own unmistakable visual silhouette: Tandoori Stop uses bottom-underline commercial tabs (`border-b-4`), bottom-right docked price badges on charcoal/gold (`#1C1917`/`#F59E0B`), and 100% full-width action buttons; Dine At Blue uses a cool coastal ice-white theme (`#F4F7F9` body, `#FFFFFF` cards, Deep Ocean Teal `#16384C`, Warm Coastal Sand `#EFE6D5`), Montserrat + DM Sans fonts, and full-width ocean steppers.
+- **What actually mattered**:
+  1. **Strict Missing-Photo Rule**: When a menu item lacks a dedicated, clean, text-free food photograph, NEVER crop printed brochure rectangles with text and NEVER borrow photos from another dish. Instead, render a clean, branded **Official Logo Placeholder Card** with the high-resolution logo centered (`w-full h-44 flex items-center justify-center p-6 object-contain`) on a brand-tinted background.
+  2. **Supersampled Logo Upscaling**: When only a low-res JPEG or brochure photo of an emblem is available (`New Data/logo.jpeg`), use 4x Lanczos interpolation with unsharp masking (`radius=2, percent=150, threshold=3`), clean center fill, and an antialiased supersampled circular mask to generate pristine 1024x1024 RGBA PNG and WebP assets with transparent outer corners.
+  3. **Wrangler Deployment & Playwright Verification**: Automated test suites running in headless Chromium with full DOM assertions (background color, card color, 0 login buttons, modal auto-open & fulfillment toggling, broken image detection `naturalWidth > 0`, live search filtering, and cart quantity stepper sync) guarantee zero regressions across all storefronts before Cloudflare Pages direct upload.
+- **Applies to**: `websites/dineatblue/`, `websites/tandooristoppk/`, `websites/jushhpk/`, all 7 brand websites.
+
+---
+
+## Lesson 21 — Multi-Brand QSR Design Separation, Local Asset Orientation & Clean Light Storefronts — 2026-10-18
+- **Pattern**: Multi-brand storefront visual isolation, local photo asset orientation, and commercial QSR storefront conversion.
+- **Wrong assumption made**:
+  1. Assuming that AI landing page templates with dark gradients (`#0F0806`, `#160004`, serif fonts, blur overlays) look "luxurious" or convert well for fast-casual food delivery. In reality, modern commercial QSR platforms (KFC, McDonald's) rely on crisp, high-contrast light surfaces (`#FFFFFF` cards, warm light canvas `#FAF8F5` or `#F8F9FA`), punchy condensed typography, and instant 1-tap fulfillment toggles.
+  2. Assuming that two different brands can share orange or warm tones without confusing customers. Tandoori Stop must have strictly ZERO orange (`#EA580C`) to preserve its unmistakable Clay Tandoor Crimson (`#C81E1E`), Smoky Charcoal (`#1C1917`), and Saffron Gold (`#F59E0B`) identity distinct from Jushh PK.
+  3. Assuming that flat-lay marketing collages will render appetizingly at any angle without inspecting image orientation. When packaging in a hero banner appears sideways or upside down, conversion drops. Using single upright food photography with tight food-only bounding boxes is essential.
+- **What actually mattered**:
+  1. Storefront DOM hierarchy must follow proven commercial QSR ergonomics: Top utility strip with real operational branch hotlines ➔ Sticky 76px white header with logo, 1-click Delivery (Rs. 150) vs Pickup (Rs. 0) switcher, branch location trigger, search bar, and cart bucket with 0 login buttons ➔ Auto-opening modal on first visit ➔ Sticky horizontal category ribbon with active IntersectionObserver pill highlighting ➔ 4-column menu grid with pure white cards, local high-res photos, and inline quantity steppers (`- qty +`) ➔ Light QSR sliding cart drawer with active order persistence.
+  2. Every `img` element must have a local fallback and load with `naturalWidth > 0`.
+  3. Cloudflare Pages direct upload via Wrangler CLI (`npx wrangler pages deploy`) requires passing `--commit-dirty=true` or running from a clean git worktree, and custom user agents must be supplied when testing deployed domains over HTTP to avoid Cloudflare automated bot-blocking (HTTP 403).
+- **Applies to**: `websites/tandooristoppk/`, `websites/jushhpk/`, `websites/dineatblue/`, all 7 brand websites.
+
 ---
 
 ## Lesson 20 — Strict Stacking Hierarchies, Mobile Viewport Resiliency & Serializer Invariant Bounds — 2026-09-10
@@ -362,6 +388,19 @@
   3. Splash screen navigation timers must use single-fire refs (`hasNavigated = useRef(false)`) independent of volatile authentication states, preventing double-timer resets (~3.8s delays) or erratic redirects to onboarding.
   4. Root `<ErrorBoundary>` components must wrap the entire component tree *outside* `<Provider store={store}>` so that store initialization errors or state rehydration faults are caught gracefully with a recovery screen instead of terminating the Android activity.
 - **Applies to**: `app/index.ts`, `admin-app/index.ts`, `app/App.tsx`, `admin-app/App.tsx`, `app/src/screens/SplashScreen.tsx`, `app/src/components/ErrorBoundary.tsx`, `admin-app/src/components/ErrorBoundary.tsx`, `app/android/gradle.properties`, `admin-app/android/gradle.properties`, `app/android/app/src/main/AndroidManifest.xml`, `admin-app/android/app/src/main/AndroidManifest.xml`.
+
+---
+
+## Lesson 25 — Commercial QSR Storefront Architecture, Dual-Tone Brand Invariants & Zero-Login Sticky Headers — 2026-10-18
+- **Pattern**: Rebuilding brand websites into high-conversion KFC-style single-page storefronts, strict brand palette adherence, zero-login commercial headers, and 1-click fulfillment synchronization.
+- **Wrong assumption made**: Relying on multi-page sub-routes (`/menu.html`, `/deals.html`, `/about.html`, `/locations.html`) with dark-mode aesthetic templates, leading to fragmented cart state, high cognitive friction, and brand inconsistency with the physical brand logos.
+- **What actually mattered**:
+  1. **Single-Storefront QSR Pattern**: In high-velocity food delivery (KFC, McDonald's), the entire ordering journey belongs on `index.html`. Separate routes must cleanly redirect with anchor offsets to the primary storefront sections (`#menu`, `#deals`).
+  2. **Authoritative Logo-Extracted Palette**: Dark templates must be ruthlessly purged in favor of the client's genuine logo colors (for Jushh!!: `--bg-canvas: #F8F9FA`, `--bg-surface: #FFFFFF`, `--jushh-orange: #EA580C`, `--jushh-maroon: #8B1D1D`, `--text-primary: #111827`, and `'Plus Jakarta Sans'`).
+  3. **Zero Login In Header**: Commercial storefront headers must focus 100% on ordering conversion. Login/sign-in buttons add friction and distract from the cart bucket button.
+  4. **Active Stepper & Cart Sync Invariant**: Product card action controls must dynamically toggle between `+ Add to Cart` and inline quantity steppers (`- qty +`) based on live CartDrawer state, and the sticky header bucket button must stay synchronously updated.
+- **Applies to**: `/websites/jushhpk`, `/websites/cart_drawer.js`, `/websites/cart_drawer.css`, brand storefronts on Cloudflare Pages.
+
 
 
 
