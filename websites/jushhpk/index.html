@@ -40,26 +40,26 @@
 
 
   <!-- B. STICKY COMMERCIAL HEADER (NO TOP ANNOUNCEMENT BAR) -->
-  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E5E7EB] px-3 sm:px-6">
-    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-2">
+  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E5E7EB] px-2.5 sm:px-6">
+    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-1.5 sm:gap-4">
       
       <!-- LEFT GROUP: Hamburger + Brand Logo -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-10 h-10 rounded-xl bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] transition cursor-pointer shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] transition cursor-pointer shrink-0">
           <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
         <a href="index.html" class="shrink-0 flex items-center" aria-label="Jushh!! Home">
-          <img src="./images/jushh_logo.jpg" alt="Jushh!! Logo" class="h-9 sm:h-11 w-auto object-contain rounded-lg shadow-2xs" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';" />
+          <img src="./images/jushh_logo_clean.png" alt="Jushh!! Logo" class="h-8 sm:h-11 max-w-[115px] sm:max-w-[160px] w-auto object-contain" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
         </a>
       </div>
 
       <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
-      <div class="flex items-center gap-2">
-        <div class="bg-[#F3F4F6] p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
-          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#EA580C] text-white font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <div class="bg-[#F3F4F6] p-0.5 sm:p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#EA580C] text-white font-extrabold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap">
             🛵 Delivery
           </button>
-          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#111827] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer whitespace-nowrap">
+          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#111827] font-bold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#EA580C] transition cursor-pointer whitespace-nowrap">
             🛍️ Pickup
           </button>
         </div>
@@ -70,10 +70,10 @@
       </div>
 
       <!-- RIGHT GROUP: Compact Cart Button (NO 'Rs. 0' TEXT) -->
-      <div class="flex items-center gap-2">
-        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#8B1D1D] hover:bg-[#6E1515] text-white font-extrabold h-10 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          <span id="header-cart-count" class="bg-[#EA580C] text-white text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+      <div class="flex items-center shrink-0">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#8B1D1D] hover:bg-[#6E1515] text-white font-extrabold h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#EA580C] text-white text-[11px] sm:text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
         </button>
       </div>
 

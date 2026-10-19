@@ -83,40 +83,44 @@ def render_product_card(item, compact=False):
 
 header_html = '''
   <!-- B. STICKY COMMERCIAL HEADER (NO TOP ANNOUNCEMENT BAR) -->
-  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E2E8F0] px-3 sm:px-6">
-    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-2">
+  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E2E8F0] px-2.5 sm:px-6">
+    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-1.5 sm:gap-4">
       
-      <!-- LEFT GROUP: Hamburger + Circular Brand Logo -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-10 h-10 rounded-xl bg-[#F4F7F9] hover:bg-[#E2E8F0] flex items-center justify-center text-[#0F172A] transition cursor-pointer shrink-0">
+      <!-- LEFT GROUP: Hamburger + Circular Brand Logo + Wordmark -->
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#F4F7F9] hover:bg-[#E2E8F0] flex items-center justify-center text-[#0F172A] transition cursor-pointer shrink-0">
           <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <a href="index.html" class="shrink-0 flex items-center" aria-label="Dine At Blue Home">
-          <img src="./images/logo.png" alt="Dine At Blue Logo" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-contain drop-shadow-xs" />
+        <a href="index.html" class="shrink-0 flex items-center gap-2 sm:gap-2.5 group" aria-label="Dine At Blue Home">
+          <img src="./images/logo.png" alt="Dine At Blue Emblem" class="h-9 w-9 sm:h-11 sm:w-11 rounded-full object-contain drop-shadow-xs transition group-hover:scale-105 shrink-0" />
+          <div class="flex flex-col">
+            <span class="font-['Montserrat'] font-extrabold text-sm sm:text-base text-[#16384C] tracking-tight leading-tight hidden min-[440px]:inline">Dine At Blue</span>
+            <span class="text-[10px] font-semibold text-[#64748B] tracking-wider uppercase leading-none hidden sm:inline">Ocean Catch & Pan-Asian</span>
+          </div>
         </a>
       </div>
 
       <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
-      <div class="flex items-center gap-2">
-        <div class="bg-[#EDF2F7] p-1 rounded-xl flex items-center border border-[#E2E8F0]" role="group" aria-label="Fulfillment Mode Toggle">
-          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#16384C] text-white font-['Montserrat'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <div class="bg-[#EDF2F7] p-0.5 sm:p-1 rounded-xl flex items-center border border-[#E2E8F0]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#16384C] text-white font-['Montserrat'] font-extrabold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap">
             🛵 Delivery
           </button>
-          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#0F172A] font-['Montserrat'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#16384C] transition cursor-pointer whitespace-nowrap">
+          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#0F172A] font-['Montserrat'] font-bold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#16384C] transition cursor-pointer whitespace-nowrap">
             🛍️ Pickup
           </button>
         </div>
 
         <div id="header-location-pill" onclick="openOrderModal()" class="hidden md:flex items-center gap-1.5 bg-[#F9F6F0] border border-[#EFE6D5] px-3 py-1.5 rounded-xl text-xs font-bold text-[#16384C] hover:border-[#16384C] cursor-pointer transition select-none">
-          <span id="header-location-text">📍 Gulberg III (65, Block D1) • Change</span>
+          <span id="header-location-text">📍 Gulberg III • Change</span>
         </div>
       </div>
 
       <!-- RIGHT GROUP: Compact Cart Button (NO 'Rs. 0' TEXT) -->
-      <div class="flex items-center gap-2">
-        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold h-10 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          <span id="header-cart-count" class="bg-[#EFE6D5] text-[#16384C] text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+      <div class="flex items-center shrink-0">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#EFE6D5] text-[#16384C] text-[11px] sm:text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">0</span>
         </button>
       </div>
 

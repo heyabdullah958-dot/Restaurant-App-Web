@@ -2,6 +2,39 @@
 
 ## Resolved Bugs Log
 
+### Bug #41: Header Logo Truncation, Color Swatch Misattribution & Mobile Header Flex Crowding (Resolved 2026-10-19)
+- **Severity**: High / Visual Brand Identity & Viewport Ergonomics
+- **Status**: FIXED
+- **Reported In**: Phase 8.1 Header Polish — Logo Resolution on Mobile & PC View
+- **Symptoms**:
+  - In Tandoori Stop (`websites/tandooristoppk`), header logo was pointing to an internal brand guidelines swatch sheet (`tandoori_logo_horizontal_clean.png`) showing an orange strip, white block, and black square, which squeezed into an unreadable vertical sliver on mobile and looked broken on PC.
+  - In Dine At Blue (`websites/dineatblue`), the 40px circular emblem was pushed right against the fulfillment toggle on mobile without breathing room, and appeared lost/unbranded on PC view without brand typography.
+  - In Jushh PK (`websites/jushhpk`), `jushh_logo.jpg` had large 300px white margins, scaling the logo text down to ~14px.
+- **Root Cause**:
+  - Tandoori Stop asset file was incorrectly cropped from a color palette sheet instead of the vector logo suite in `Guideline.pdf`.
+  - Header containers used uniform padding and gaps that did not give adequate breathing room on narrow (360px-390px) viewports.
+  - Dine At Blue header omitted brand wordmark typography on tablet/desktop viewports.
+- **Fix Applied**:
+  - Extracted the official vector Secondary Horizontal Logo (1260x267) and Primary Vertical Logo (1040x648) directly from `Tandoori stop/Guideline.pdf` at 8x scale with crisp transparent RGBA channels.
+  - Replaced `tandoori_logo_horizontal_clean.png` and `tandoori_stop_logo_horizontal.png` with this pristine high-def transparent vector logo.
+  - Updated Dine At Blue header to feature the circular emblem + responsive brand typography (`Dine At Blue` / `Ocean Catch & Pan-Asian`), hiding the text on viewports <440px to ensure zero header crowding.
+  - Cropped Jushh PK logo tightly to content (855x424) with transparent alpha (`jushh_logo_clean.png`).
+  - Added responsive padding and gap tokens (`px-2.5 sm:px-6`, `gap-1.5 sm:gap-4`, `p-0.5 sm:p-1` on toggles) so mobile headers never crowd, clip, or overflow.
+  - Verified 100% pass on Playwright mobile suite and deployed live to Cloudflare Pages.
+- **Files Modified**:
+  - `websites/tandooristoppk/images/tandoori_logo_horizontal_clean.png`
+  - `websites/tandooristoppk/images/tandoori_stop_logo_horizontal.png`
+  - `websites/tandooristoppk/images/tandoori_stop_logo.png`
+  - `websites/tandooristoppk/images/tandoori_logo_vertical.png`
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/dineatblue/index.html`
+  - `websites/dineatblue/menu.html`
+  - `websites/jushhpk/images/jushh_logo_clean.png`
+  - `websites/jushhpk/images/jushh_logo.jpg`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/menu.html`
+
 ### Bug #40: Mobile Header Viewport Congestion, Monolithic Single-Page Catalog Clutter & Hero Silhouette Homogeneity (Resolved 2026-10-19)
 - **Severity**: High / Mobile UX Ergonomics & Conversion
 - **Status**: FIXED

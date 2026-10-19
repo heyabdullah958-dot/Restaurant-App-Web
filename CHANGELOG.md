@@ -2,6 +2,11 @@
 # Changelog
 
 ## 2026-10-19 Phase 8.1 — Mobile-First KFC 2-Page Storefront (index.html vs menu.html), Header De-Congestion, Hamburger Drawer (☰), and 3 Distinct Brand Hero Layouts
+- **Header Logo & Typography Polish (Mobile & PC View)**:
+  - **Tandoori Stop**: Extracted official vector Secondary Horizontal Logo (1260x267) and Primary Vertical Logo (1040x648) directly from `Guideline.pdf` with transparent RGBA channels, completely replacing the erroneous color palette swatch screenshot (`tandoori_logo_horizontal_clean.png`).
+  - **Dine At Blue**: Added dual presentation: circular emblem (36px mobile, 44px PC) + responsive brand typography (`Dine At Blue` / `Ocean Catch & Pan-Asian`), gracefully collapsing wordmark on <440px viewports to eliminate header crowding while providing prominent desktop branding.
+  - **Jushh PK**: Cropped `jushh_logo.jpg` tightly to content (855x424) with transparent alpha (`jushh_logo_clean.png`), doubling the effective rendered size of the logo in the header without blur.
+  - **Ergonomic Spacing & Viewport Tolerances**: Re-balanced header horizontal gaps (`gap-1.5 sm:gap-4`) and padding (`px-2.5 sm:px-6`, toggle padding `p-0.5 sm:p-1`), guaranteeing zero horizontal overflow and ample breathing room on 360px-390px mobile viewports.
 - **Global Header & Navigation De-Congestion**:
   - Completely purged top announcement/utility strip above `<header>` across all pages for Dine At Blue, Tandoori Stop, and Jushh PK. `<header>` is strictly the first child of `<body>` (`sticky top-0 z-40`).
   - Added 3-lines hamburger menu button (`#hamburger-btn` / `☰`) on the far left of `<header>` across ALL viewports (mobile and desktop).
