@@ -7,6 +7,35 @@
 - **Mobile App Screens**: Home, Restaurant, Cart, Checkout, OrderConfirmation, Tracking, Rewards, Profile.
 - **State Management**: React AdminContext + JWT payload decoding (`restaurantId`, `branchId`), Redux Toolkit in Mobile App.
 
+## Phase 8.1 — Mobile-First KFC 2-Page Storefront, Header De-Congestion, Hamburger Drawer & 3 Distinct Brand Heroes — 2026-10-19
+- **What was done**:
+  - **Global Header De-Congestion**:
+    - Purged top utility/announcement strip above `<header>` across all pages for Dine At Blue, Tandoori Stop, and Jushh PK. `<header>` is strictly the first child of `<body>` (`sticky top-0 z-40`).
+    - Added 3-lines hamburger menu button (`#hamburger-btn` / `☰`) on the far left of `<header>` across all viewports.
+    - Added slide-out navigation drawer (`#mobile-nav-drawer`) with Backdrop blur, Close `✕`, Home, All Menu, Change Order Mode, Branch Locations, and About Us.
+    - Streamlined fulfillment toggle to compact `[ 🛵 Delivery ]` / `[ 🛍️ Pickup ]` buttons with 0 price text.
+    - Streamlined header cart button to SVG bag icon + dynamic `#header-cart-count` badge with 0 "Rs" / price text.
+  - **Strict 2-Page Storefront Architecture (`index.html` vs `menu.html`)**:
+    - `index.html`: Visual showcase only. Sticky Header ➔ Order Mode Modal ➔ Distinct Hero Layout ➔ Explore Menu visual category grid with "View All" link ➔ Best Sellers showcase (<= 6 featured items with inline steppers) ➔ About Us & Footer. Monolithic full catalog lists completely eliminated.
+    - `menu.html`: Dedicated full catalog page featuring sticky horizontal category ribbon/tabs with active IntersectionObserver highlighting, live search input, and full vertical stacks of all menu items (41 on Dine At Blue, 46 on Tandoori Stop, 35 on Jushh PK) with 100% working quantity steppers and cart drawer integration.
+  - **3 Distinct Brand Hero Silhouettes**:
+    - Dine At Blue: Full-Bleed 3-Slide Auto Carousel `h-[195px] sm:h-[290px]` with slide dots, clean white text over dark teal overlay; completely purged `"SIGNATURE OCEAN BANQUET"` badge and long paragraph; 3-col/2-row Bento Grid for Explore Menu.
+    - Tandoori Stop: 2-Card Visual Promo Showcase with main Tandoori Chicken & Cheese Naan card + secondary Whole Roasted Chicken Sajji card; 6 Explore Menu cards; genuine Handi gravy dish images.
+    - Jushh PK: Compact Horizontal Split Card with 7-col maroon/orange gradient on left featuring short headline `"Turkish Doners, Wraps & Shawaya"` + 5-col edge-to-edge upright food photograph on right; 6 Explore Menu cards.
+- **Files modified**:
+  - `websites/dineatblue/index.html`
+  - `websites/dineatblue/menu.html`
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/menu.html`
+  - `websites/test_mobile_kfc_verification.py`
+  - `websites/verify_static.py`
+- **Self-corrections used**: 1/3 (Resolved Python f-string curly-brace syntax conflict by isolating JavaScript templates from Python template formatting).
+- **Confidence score**: 100% (Playwright mobile verification passed 100% on 375x812 viewport; live HTTP 200 on Cloudflare Pages for all 3 brands).
+
+---
+
 ## Phase 8 — Jushh PK Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild — 2026-10-18
 - **What was done**:
   - **Part A (Jushh PK Audit & Polish)**: Audited all menu card images. Replaced wrong doner fries photo on `Plain Fries` with the official logo placeholder card (`bg-[#FFF7ED]` with centered logo `object-contain p-6`). Verified upright Chicken Turkish Doner hero banner and copy alignment.

@@ -1,6 +1,31 @@
 
 # Changelog
 
+## 2026-10-19 Phase 8.1 — Mobile-First KFC 2-Page Storefront (index.html vs menu.html), Header De-Congestion, Hamburger Drawer (☰), and 3 Distinct Brand Hero Layouts
+- **Global Header & Navigation De-Congestion**:
+  - Completely purged top announcement/utility strip above `<header>` across all pages for Dine At Blue, Tandoori Stop, and Jushh PK. `<header>` is strictly the first child of `<body>` (`sticky top-0 z-40`).
+  - Added 3-lines hamburger menu button (`#hamburger-btn` / `☰`) on the far left of `<header>` across ALL viewports (mobile and desktop).
+  - Wired mobile slide-out navigation drawer (`#mobile-nav-drawer`) with Backdrop blur, Close `✕`, Home (`index.html`), All Menu (`menu.html`), Order Mode / Branch Switcher (opens brand order modal), Branch Locations (`locations.html`), and About Us (`index.html#about-section`).
+  - Streamlined header fulfillment switcher to compact icons `[ 🛵 Delivery ]` / `[ 🛍️ Pickup ]`, strictly removing price text (`Rs. 150`, `Rs. 0`) from buttons.
+  - Streamlined header cart bucket button to SVG shopping bag icon with dynamic `#header-cart-count` badge; strictly removed price label (`Rs. 0` / total price) from header cart button to prevent overflow on mobile.
+- **Strict 2-Page Storefront Architecture (`index.html` vs `menu.html`)**:
+  - `index.html`: Clean, high-converting visual showcase only. Contains: Sticky Header ➔ Order Mode & Branch Selection Modal ➔ Distinct Hero Layout ➔ Explore Menu visual category grid with "View All" link ➔ Best Sellers showcase with max 6 featured dishes, working inline steppers, and "Explore Full Menu →" CTA ➔ About Section & Commercial Footer. Monolithic full menu lists completely eliminated from `index.html`.
+  - `menu.html`: Dedicated full catalog page featuring sticky horizontal category ribbon/tabs with active IntersectionObserver highlighting, live search input, and full vertical stacks of all menu items (41 on Dine At Blue, 46 on Tandoori Stop, 35 on Jushh PK) with 100% synchronized quantity steppers and cart drawer integration.
+- **3 Distinct Brand Hero Silhouettes**:
+  - **Dine At Blue**: Design Type 1 (Full-Bleed 3-Slide Auto Carousel `h-[195px] sm:h-[290px]` with slide dots, clean white text over dark teal overlay; completely purged `"SIGNATURE OCEAN BANQUET"` badge and long paragraph; 3-col/2-row Bento Grid for Explore Menu).
+  - **Tandoori Stop**: Design Type 2 (2-Card Visual Promo Showcase with main Tandoori Chicken & Cheese Naan card + secondary Whole Roasted Chicken Sajji card; 6 Explore Menu cards; genuine Handi gravy dish images).
+  - **Jushh PK**: Design Type 3 (Compact Horizontal Split Card with 7-col maroon/orange gradient on left featuring short headline `"Turkish Doners, Wraps & Shawaya"` + 5-col edge-to-edge upright food photograph on right; 6 Explore Menu cards).
+- **Automated Playwright Mobile Verification**:
+  - Authored and ran `websites/test_mobile_kfc_verification.py` across mobile viewport `375x812` simulating real user flows across all 3 storefronts:
+    - Dine At Blue: PASSED (100%) — header first, 0 announcement bars, drawer toggling, cart count strictly `'0'` (0 "Rs" text), Explore Menu + Best Sellers <= 6 cards, View All navigates to `menu.html` (41 cards, 0 broken images).
+    - Tandoori Stop: PASSED (100%) — header first, 0 announcement bars, drawer toggling, cart count strictly `'0'` (0 "Rs" text), Explore Menu + Best Sellers <= 6 cards, View All navigates to `menu.html` (46 cards, 0 broken images).
+    - Jushh PK: PASSED (100%) — header first, 0 announcement bars, drawer toggling, cart count strictly `'0'` (0 "Rs" text), Explore Menu + Best Sellers <= 6 cards, View All navigates to `menu.html` (35 cards, 0 broken images).
+- **Cloudflare Pages Production Deployment**:
+  - Deployed all 3 websites live via Wrangler CLI direct upload:
+    - `https://jushhpk-foodsphere.pages.dev/` & `/menu.html` (HTTP 200)
+    - `https://tandooristoppk-foodsphere.pages.dev/` & `/menu.html` (HTTP 200)
+    - `https://dineatblue-foodsphere.pages.dev/` & `/menu.html` (HTTP 200)
+
 ## 2026-10-18 Phase 8 — Jushh PK Plain Fries Asset Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild with 1024x1024 Logo Upscale
 - **Global Cloudinary CDN Upload (`depa8gfnk`)**:
   - Located all genuine food photographs across `New Data/`, `websites/dineatblue/images/`, `websites/tandooristoppk/images/`, and `websites/jushhpk/images/`.

@@ -2,6 +2,20 @@
 
 > Generalized engineering takeaways, multi-tenant patterns, and invariants learned from debugging across backend, admin, mobile, and web applications.
 
+## Lesson 23 — Mobile-First Header De-Congestion, Strict 2-Page Storefront Separation & Client-Side Template Syntax Isolation — 2026-10-19
+- **Pattern**: Mobile viewport ergonomics, KFC 2-page storefront conversion, header congestion relief, and Python code generation template escaping.
+- **Wrong assumption made**:
+  1. Assuming that displaying the entire restaurant menu on the homepage (`index.html`) alongside marketing banners and about sections is acceptable for fast-casual ordering. On mobile, monolithic full-catalog homepages overwhelm users with hundreds of vertical pixels before they understand the brand's key offerings or bestsellers.
+  2. Assuming that having the fulfillment toggle (`Delivery` / `Pickup`) and header cart bucket display full price strings (`Rs. 150`, `Rs. 0`, `Rs. 2,450`) works on mobile viewports. On a 375px wide screen, long text labels cause horizontal scrolling, overlapping buttons, or wrap the header into two awkward rows.
+  3. Assuming that client-side JavaScript templates with curly braces (`{}`) can be directly written into Python f-strings (`f'''...'''`) in automated page generator scripts. Python's parser treats all single `{}` inside f-strings as Python expression evaluations, resulting in immediate compilation `SyntaxError` crashes.
+- **What actually mattered**:
+  1. **Strict 2-Page Flow**: High-converting QSR storefronts separate discovery from catalog browsing. `index.html` must remain a punchy, visual showcase: Header ➔ Order Mode Modal ➔ Distinct Hero Showcase ➔ Explore Menu category grid with "View All" ➔ Best Sellers (max 6 items) with inline steppers ➔ About Us & Footer. Full vertical catalogs (all 35-46 items) belong strictly on `menu.html` with a sticky category ribbon and live search.
+  2. **De-Congested Header Architecture**: On mobile viewports (375x812), the `<header>` must be the first child of `<body>` (0 announcement strips above it). The 3-lines hamburger menu (`#hamburger-btn` / `☰`) lives on the far left. Fulfillment buttons must contain only compact labels/icons (`[ 🛵 Delivery ]` / `[ 🛍️ Pickup ]`) with 0 fee strings. The header cart bucket button must contain only the SVG shopping bag icon and `#header-cart-count` badge (0 "Rs" price text).
+  3. **Template String Isolation in Code Generators**: When writing Python scripts to programmatically generate HTML/JS storefronts, never embed raw JavaScript blocks containing object literals or `${}` inside Python f-strings without escaping (`{{}}`). The cleanest pattern is defining pure JavaScript code blocks in standard non-f-string variables and interpolating them into the HTML document as a single clean token (`{script_block}`).
+- **Applies to**: `websites/dineatblue/`, `websites/tandooristoppk/`, `websites/jushhpk/`, all 7 brand websites.
+
+---
+
 ## Lesson 22 — Strict Missing-Photo Rules, High-Res Circular Logo Upscaling & Commercial QSR Distinct Layout Silhouettes — 2026-10-18
 - **Pattern**: Multi-brand storefront visual isolation, asset integrity for missing dish photography, high-resolution logo upscaling, and distinct card layouts.
 - **Wrong assumption made**:

@@ -2,6 +2,41 @@
 
 ## Resolved Bugs Log
 
+### Bug #40: Mobile Header Viewport Congestion, Monolithic Single-Page Catalog Clutter & Hero Silhouette Homogeneity (Resolved 2026-10-19)
+- **Severity**: High / Mobile UX Ergonomics & Conversion
+- **Status**: FIXED
+- **Reported In**: Phase 8.1 — Mobile-First KFC 2-Page Storefront, Header De-Congestion, Hamburger Drawer & 3 Distinct Brand Heroes
+- **Symptoms**:
+  - On mobile screens (375x812), the top announcement strip and crowded headers caused visual clutter and layout wrapping.
+  - Fulfillment switchers and cart bucket buttons contained long price strings (`Rs. 150`, `Rs. 0`, `Rs. 2,450`), causing header text overflow and horizontal stretching on narrow mobile viewports.
+  - Complete catalogs with 35-46 menu items were rendered directly onto `index.html`, burying brand showcase content and requiring endless scrolling.
+  - Dine At Blue retained legacy `"SIGNATURE OCEAN BANQUET"` badges and long paragraphs, while hero showcases lacked distinct brand personality.
+- **Root Cause**:
+  - Absence of strict 2-page storefront architecture (`index.html` showcase vs `menu.html` catalog).
+  - Header elements bundled delivery fees and total price text inside interactive buttons instead of relying on compact icons and counts.
+- **Fix Applied**:
+  - Purged 100% of top announcement bars above `<header>` across all pages for Dine At Blue, Tandoori Stop, and Jushh PK. `<header>` is strictly the first child of `<body>` (`sticky top-0 z-40`).
+  - Added universal 3-lines hamburger menu button (`#hamburger-btn` / `☰`) on the far left of `<header>` across all viewports.
+  - Wired mobile slide-out drawer (`#mobile-nav-drawer`) with Backdrop blur, Close `✕`, Home, All Menu, Order Mode / Branch Switcher, Branch Locations, and About Us links.
+  - Stripped price text from fulfillment toggle buttons (`[ 🛵 Delivery ]` / `[ 🛍️ Pickup ]`) and header cart bucket button (retaining SVG bag icon and dynamic item counter badge only).
+  - Refactored storefronts into a strict 2-page architecture:
+    - `index.html`: Showcase only (Header ➔ Order Mode Modal ➔ Distinct Hero ➔ Explore Menu category grid ➔ Best Sellers <= 6 dishes with steppers ➔ About Us ➔ Footer).
+    - `menu.html`: Dedicated full catalog page with sticky category ribbon, live search, and full menu stacks with synchronized steppers.
+  - Crafted 3 distinct brand hero layouts:
+    - Dine At Blue: Full-bleed 3-slide auto carousel `h-[195px] sm:h-[290px]` with dots, clean white text, and 3x2 bento category grid.
+    - Tandoori Stop: 2-card visual promo showcase with Tandoori Chicken & Cheese Naan card + Whole Roasted Sajji card, and authentic Handi photos.
+    - Jushh PK: Compact horizontal split card with 7-col maroon/orange gradient + 5-col edge-to-edge upright food photo.
+  - Verified 100% pass in mobile Playwright test suite (`websites/test_mobile_kfc_verification.py`), and deployed to Cloudflare Pages via Wrangler CLI direct upload.
+- **Files Modified**:
+  - `websites/dineatblue/index.html`
+  - `websites/dineatblue/menu.html`
+  - `websites/tandooristoppk/index.html`
+  - `websites/tandooristoppk/menu.html`
+  - `websites/jushhpk/index.html`
+  - `websites/jushhpk/menu.html`
+  - `websites/test_mobile_kfc_verification.py`
+  - `websites/verify_static.py`
+
 ### Bug #39: Jushh PK Plain Fries Asset Audit, Tandoori Stop Handi & Card Layout Differentiation, and Dine At Blue KFC Rebuild with 1024x1024 Logo Upscale (Resolved 2026-10-18)
 - **Severity**: High / Commercial QSR Brand Silhouette & Asset Integrity
 - **Status**: FIXED

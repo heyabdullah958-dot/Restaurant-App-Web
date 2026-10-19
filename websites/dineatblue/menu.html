@@ -2,17 +2,1225 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta http-equiv="refresh" content="0;url=index.html#menu"/>
-  <title>Dine At Blue — Commercial Storefront</title>
-  <link rel="stylesheet" href="theme_blue.css?v=20261018"/>
-  <style>
-    body { font-family: 'Montserrat', sans-serif; background: #F4F7F9; color: #0F172A; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dine At Blue — Full Menu &amp; Catalog | Lahore</title>
+  <meta name="description" content="Explore Dine At Blue Lahore's full coastal menu: Seafood Platters, Kunafa Prawns, Grilled Lobsters, Fish, Korean Chicken &amp; Mocktails."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Montserrat:ital,wght@0,600;0,700;0,800;1,600;1,700;1,800&display=swap"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    window.location.replace("index.html#menu");
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blueTeal: '#16384C',
+            blueNavy: '#0D2331',
+            blueSand: '#EFE6D5',
+            blueCanvas: '#F4F7F9'
+          },
+          fontFamily: {
+            sans: ['"DM Sans"', 'sans-serif'],
+            heading: ['"Montserrat"', 'sans-serif']
+          }
+        }
+      }
+    }
   </script>
+
+  <link rel="stylesheet" href="cart_drawer.css?v=20261019"/>
+  <link rel="stylesheet" href="theme_blue.css?v=20261019"/>
 </head>
-<body>
-  <p>Redirecting to Dine At Blue Storefront...</p>
+<body class="bg-[#F4F7F9] text-[#0F172A] font-['DM_Sans'] antialiased min-h-screen flex flex-col">
+
+
+  <!-- B. STICKY COMMERCIAL HEADER (NO TOP ANNOUNCEMENT BAR) -->
+  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E2E8F0] px-3 sm:px-6">
+    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-2">
+      
+      <!-- LEFT GROUP: Hamburger + Circular Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-10 h-10 rounded-xl bg-[#F4F7F9] hover:bg-[#E2E8F0] flex items-center justify-center text-[#0F172A] transition cursor-pointer shrink-0">
+          <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="index.html" class="shrink-0 flex items-center" aria-label="Dine At Blue Home">
+          <img src="./images/logo.png" alt="Dine At Blue Logo" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-contain drop-shadow-xs" />
+        </a>
+      </div>
+
+      <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
+      <div class="flex items-center gap-2">
+        <div class="bg-[#EDF2F7] p-1 rounded-xl flex items-center border border-[#E2E8F0]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-mode-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#16384C] text-white font-['Montserrat'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap">
+            🛵 Delivery
+          </button>
+          <button type="button" id="header-mode-pickup" onclick="setOrderMode('PICKUP')" class="text-[#0F172A] font-['Montserrat'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#16384C] transition cursor-pointer whitespace-nowrap">
+            🛍️ Pickup
+          </button>
+        </div>
+
+        <div id="header-location-pill" onclick="openOrderModal()" class="hidden md:flex items-center gap-1.5 bg-[#F9F6F0] border border-[#EFE6D5] px-3 py-1.5 rounded-xl text-xs font-bold text-[#16384C] hover:border-[#16384C] cursor-pointer transition select-none">
+          <span id="header-location-text">📍 Gulberg III (65, Block D1) • Change</span>
+        </div>
+      </div>
+
+      <!-- RIGHT GROUP: Compact Cart Button (NO 'Rs. 0' TEXT) -->
+      <div class="flex items-center gap-2">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold h-10 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#EFE6D5] text-[#16384C] text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SLIDE-OUT HAMBURGER NAVIGATION DRAWER -->
+  <div id="mobile-nav-backdrop" onclick="closeMobileNavDrawer()" class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true"></div>
+  <aside id="mobile-nav-drawer" class="fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl border-r border-[#E2E8F0] flex flex-col justify-between p-5 transform -translate-x-full transition-transform duration-300 ease-in-out" aria-label="Main Navigation">
+    <div>
+      <!-- Drawer Top -->
+      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
+        <div class="flex items-center gap-2.5">
+          <img src="./images/logo.png" alt="Dine At Blue" class="h-10 w-10 rounded-full object-contain" />
+          <span class="font-['Montserrat'] font-extrabold text-[#0F172A] text-base">Dine At Blue</span>
+        </div>
+        <button type="button" id="close-drawer-btn" onclick="closeMobileNavDrawer()" class="w-9 h-9 rounded-lg bg-[#F4F7F9] hover:bg-[#E2E8F0] flex items-center justify-center text-[#0F172A] text-xl font-bold cursor-pointer transition" aria-label="Close menu">&times;</button>
+      </div>
+      <!-- Drawer Navigation Links -->
+      <nav class="mt-4 space-y-1 font-['Montserrat'] text-sm font-bold">
+        <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#0F172A] hover:bg-[#F4F7F9] transition">
+          <span class="text-lg">🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="menu.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#0F172A] hover:bg-[#F4F7F9] transition">
+          <span class="text-lg">📖</span>
+          <span>All Menu (Full Catalog)</span>
+        </a>
+        <button type="button" onclick="closeMobileNavDrawer(); openOrderModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#0F172A] hover:bg-[#F4F7F9] transition text-left cursor-pointer font-['Montserrat'] text-sm font-bold">
+          <span class="text-lg">🛵</span>
+          <span>Change Order Mode / Branch</span>
+        </button>
+        <a href="locations.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#0F172A] hover:bg-[#F4F7F9] transition">
+          <span class="text-lg">📍</span>
+          <span>Branch Locations</span>
+        </a>
+        <a href="index.html#about-section" onclick="closeMobileNavDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#0F172A] hover:bg-[#F4F7F9] transition">
+          <span class="text-lg">ℹ️</span>
+          <span>About Us</span>
+        </a>
+      </nav>
+    </div>
+    <!-- Drawer Bottom: Active Branch, Phone, WhatsApp -->
+    <div class="pt-4 border-t border-[#E2E8F0] text-xs text-[#64748B] space-y-2">
+      <div>
+        <span class="font-bold text-[#0F172A] block">Active Outlet:</span>
+        <span id="drawer-active-branch" class="text-xs font-semibold text-[#16384C]">Gulberg III (65, Block D1)</span>
+      </div>
+      <div>
+        <span class="font-bold text-[#0F172A] block">Helpline:</span>
+        <a href="tel:03218484111" class="text-xs font-semibold text-[#0F172A] hover:underline">0321-8484111</a>
+      </div>
+      <a href="https://wa.me/923218484111" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-2 rounded-xl text-xs hover:bg-[#20ba59] transition">
+        <span>💬 WhatsApp Support</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- C. MANDATORY KFC-STYLE ENTRY ORDER MODE & LOCATION POPUP MODAL -->
+  <div id="blue-order-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 transition-opacity duration-200" style="display: none;">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-[#E2E8F0] transform transition-all">
+      <!-- Modal Top Header Bar -->
+      <div class="bg-[#16384C] text-white p-4 text-center relative flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="./images/logo.png" alt="Dine At Blue" class="h-9 w-9 rounded-full object-contain bg-white p-0.5" />
+          <h3 class="font-['Montserrat'] font-extrabold text-base text-[#EFE6D5] tracking-wide">Select Your Dining Mode</h3>
+        </div>
+        <button type="button" onclick="closeOrderModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1 cursor-pointer transition" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- 2-Column Mode Selector -->
+        <div class="grid grid-cols-2 gap-2 bg-[#EDF2F7] p-1.5 rounded-xl border border-[#E2E8F0]">
+          <button type="button" id="modal-mode-delivery" onclick="setModalMode('DELIVERY')" class="bg-[#16384C] text-white font-['Montserrat'] font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer">
+            🛵 DELIVERY
+          </button>
+          <button type="button" id="modal-mode-pickup" onclick="setModalMode('PICKUP')" class="text-[#0F172A] font-['Montserrat'] font-bold py-3 rounded-lg hover:text-[#16384C] text-sm transition cursor-pointer">
+            🛍️ SELF-PICKUP
+          </button>
+        </div>
+
+        <!-- Dynamic Delivery Panel -->
+        <div id="modal-delivery-panel" class="space-y-3">
+          <label class="block text-xs font-['Montserrat'] font-bold text-[#0F172A] uppercase tracking-wide">Enter Delivery Address</label>
+          <div class="relative">
+            <input type="text" id="modal-delivery-address" placeholder="e.g. House 14, Street 5, Gulberg III / DHA Phase 5..." class="w-full bg-[#F4F7F9] border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#0F172A] outline-none focus:border-[#16384C] focus:bg-white" />
+          </div>
+          <div class="bg-[#F9F6F0] border border-[#EFE6D5] text-[#16384C] text-xs font-medium p-3 rounded-xl flex items-center gap-2">
+            <span class="text-base">🌊</span>
+            <span>Express Seafood Delivery: <strong>Rs. 200</strong> • Direct from steam &amp; flame kitchen</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Pickup Panel -->
+        <div id="modal-pickup-panel" class="space-y-3" style="display: none;">
+          <div>
+            <label class="block text-xs font-['Montserrat'] font-bold text-[#0F172A] uppercase tracking-wide mb-1">Select Pickup Outlet</label>
+            <select id="modal-pickup-branch-select" onchange="updatePickupBranchCard(this.value)" class="w-full bg-[#F4F7F9] border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-sm font-bold text-[#0F172A] outline-none focus:border-[#16384C]">
+              <option value="Gulberg III">Dine At Blue — Gulberg III (65, Block D1)</option>
+            </select>
+          </div>
+          <div class="bg-[#F9F6F0] border-2 border-[#16384C] p-3.5 rounded-xl">
+            <div class="text-[11px] font-['Montserrat'] font-extrabold text-[#16384C] uppercase tracking-wide">Pickup Location</div>
+            <div class="font-['Montserrat'] font-extrabold text-sm text-[#0F172A] mt-0.5" id="modal-pickup-branch-name">📍 Dine At Blue — Gulberg III (Open Now)</div>
+            <div class="text-xs text-[#475569] mt-1" id="modal-pickup-branch-desc">65, Block D1, Gulberg III, Lahore • 0321-8484111</div>
+          </div>
+          <div class="bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold p-3 rounded-xl flex items-center gap-2">
+            <span class="text-base">🛍️</span>
+            <span>Self-Pickup: <strong>Rs. 0 Delivery Fee</strong> • Ready in <strong>20–25 mins</strong></span>
+          </div>
+        </div>
+
+        <!-- Primary Confirm Button -->
+        <button type="button" onclick="confirmOrderModal()" class="w-full bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold py-3.5 rounded-xl text-base shadow-md transition cursor-pointer">
+          Start My Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- STICKY CATEGORY RIBBON & LIVE SEARCH BAR -->
+  <nav class="sticky top-16 sm:top-[72px] z-30 bg-white border-b border-[#E2E8F0] py-2.5 px-3 sm:px-6 shadow-xs">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <!-- Search Input -->
+      <div class="relative w-full sm:max-w-xs">
+        <input type="text" id="menu-search-input" oninput="handleLiveSearch(this.value)" placeholder="Search seafood, prawns, chicken..." class="w-full bg-[#F4F7F9] border border-[#E2E8F0] focus:border-[#16384C] focus:bg-white rounded-xl pl-9 pr-3 py-1.5 text-xs sm:text-sm font-medium text-[#0F172A] placeholder-[#64748B] outline-none transition" />
+        <svg class="w-4 h-4 text-[#64748B] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <!-- Horizontal Scrollable Category Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5" id="category-pills">
+        
+      <button type="button" class="category-pill active bg-[#16384C] text-white border border-[#16384C] font-['Montserrat'] font-extrabold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap shadow-sm cursor-pointer" onclick="scrollToCategorySection('all')">
+        All Menu
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('signature-platters')">
+        Platters
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('starters')">
+        Starters & Prawns
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('salads')">
+        Salads
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('mains-seafood')">
+        Mains Seafood
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('mains-chicken')">
+        Mains Chicken
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('add-ons')">
+        Sides & Add-Ons
+      </button>
+      <button type="button" class="category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('beverages')">
+        Beverages
+      </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- FULL CATEGORIZED CATALOG BODY -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10 flex-1 w-full" id="menu">
+    
+    <section class="category-section scroll-mt-36" id="signature-platters" data-cat-id="cat-platters">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Signature Platters</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">2 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="100" data-item-name="Blue Seafood Platter (Steamed)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/blue_seafood_platter.png" alt="Blue Seafood Platter (Steamed)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Blue Seafood Platter (Steamed)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Steamed whole crabs, king prawns, mussels, calamari & tender fish fillets simmered in signature blue seafood broth.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 4,999</span>
+            <div class="card-action-container" data-item-name="Blue Seafood Platter (Steamed)" data-item-id="100" data-item-price="4999" data-item-image="./images/blue_seafood_platter.png">
+              <button type="button" onclick="handleAddToCart(100, 'Blue Seafood Platter (Steamed)', 4999, './images/blue_seafood_platter.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="101" data-item-name="2 Person Seafood & Chicken Platter">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="2 Person Seafood & Chicken Platter" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">2 Person Seafood & Chicken Platter</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Generous combination of grilled jumbo prawns, crispy battered fish fillet, and flame-seared chicken with seasoned fries.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 3,500</span>
+            <div class="card-action-container" data-item-name="2 Person Seafood & Chicken Platter" data-item-id="101" data-item-price="3500" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(101, '2 Person Seafood & Chicken Platter', 3500, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="starters" data-cat-id="cat-starters">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Starters & Prawns</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">9 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="102" data-item-name="Kunafa Prawns (3 pcs)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/kunafa_prawns.png" alt="Kunafa Prawns (3 pcs)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Kunafa Prawns (3 pcs)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Jumbo ocean prawns wrapped in crispy shredded kataifi pastry, fried golden and drizzled with crushed pistachios & sweet dip.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,100</span>
+            <div class="card-action-container" data-item-name="Kunafa Prawns (3 pcs)" data-item-id="102" data-item-price="1100" data-item-image="./images/kunafa_prawns.png">
+              <button type="button" onclick="handleAddToCart(102, 'Kunafa Prawns (3 pcs)', 1100, './images/kunafa_prawns.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="103" data-item-name="Dynamite Prawns">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/dynamite_prawns.png" alt="Dynamite Prawns" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Dynamite Prawns</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Crispy golden fried prawns tossed in our fiery, creamy house dynamite sauce served on a bed of fresh garden slaw.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,260</span>
+            <div class="card-action-container" data-item-name="Dynamite Prawns" data-item-id="103" data-item-price="1260" data-item-image="./images/dynamite_prawns.png">
+              <button type="button" onclick="handleAddToCart(103, 'Dynamite Prawns', 1260, './images/dynamite_prawns.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="104" data-item-name="Seared Dumplings (6 pcs)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/seared_dumplings.png" alt="Seared Dumplings (6 pcs)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Seared Dumplings (6 pcs)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Handcrafted dumplings pan-seared to a golden crisp bottom with savory ginger-scallion filling & chili soy dip.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 600</span>
+            <div class="card-action-container" data-item-name="Seared Dumplings (6 pcs)" data-item-id="104" data-item-price="600" data-item-image="./images/seared_dumplings.png">
+              <button type="button" onclick="handleAddToCart(104, 'Seared Dumplings (6 pcs)', 600, './images/seared_dumplings.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="105" data-item-name="Chicken Dumplings (6 pcs)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/chicken_dumplings.png" alt="Chicken Dumplings (6 pcs)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Chicken Dumplings (6 pcs)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Delicate steamed artisanal dumplings packed with seasoned minced chicken, herbs and served with sweet soy sauce.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 500</span>
+            <div class="card-action-container" data-item-name="Chicken Dumplings (6 pcs)" data-item-id="105" data-item-price="500" data-item-image="./images/chicken_dumplings.png">
+              <button type="button" onclick="handleAddToCart(105, 'Chicken Dumplings (6 pcs)', 500, './images/chicken_dumplings.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="106" data-item-name="Dynamite Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Dynamite Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Dynamite Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Tender crispy chicken bites coated in rich, zesty dynamite sauce and sprinkled with toasted sesame seeds.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 850</span>
+            <div class="card-action-container" data-item-name="Dynamite Chicken" data-item-id="106" data-item-price="850" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(106, 'Dynamite Chicken', 850, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="107" data-item-name="Honey Wings (6 pcs)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/honey_wings.png" alt="Honey Wings (6 pcs)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Honey Wings (6 pcs)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Crisp chicken wings glazed in sweet amber honey-garlic glaze and sprinkled with toasted white sesame.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 700</span>
+            <div class="card-action-container" data-item-name="Honey Wings (6 pcs)" data-item-id="107" data-item-price="700" data-item-image="./images/honey_wings.png">
+              <button type="button" onclick="handleAddToCart(107, 'Honey Wings (6 pcs)', 700, './images/honey_wings.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="108" data-item-name="Fish & Chips">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/fish_and_chips.png" alt="Fish & Chips" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Fish & Chips</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Traditional crispy battered ocean fish fillet served golden with crunchy steak fries, tartar sauce & lemon wedge.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 850</span>
+            <div class="card-action-container" data-item-name="Fish & Chips" data-item-id="108" data-item-price="850" data-item-image="./images/fish_and_chips.png">
+              <button type="button" onclick="handleAddToCart(108, 'Fish & Chips', 850, './images/fish_and_chips.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="109" data-item-name="19B Soup">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/soup_19b.png" alt="19B Soup" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">19B Soup</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Classic thick oriental hot soup simmered with shredded chicken, prawns, black mushrooms, bamboo shoots & chili vinegar.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 390</span>
+            <div class="card-action-container" data-item-name="19B Soup" data-item-id="109" data-item-price="390" data-item-image="./images/soup_19b.png">
+              <button type="button" onclick="handleAddToCart(109, '19B Soup', 390, './images/soup_19b.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="110" data-item-name="Chicken Corn Soup">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/chicken_corn_soup.png" alt="Chicken Corn Soup" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Chicken Corn Soup</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Silky comfort broth loaded with crushed sweet corn kernels, tender shredded chicken & egg drops.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Chicken Corn Soup" data-item-id="110" data-item-price="350" data-item-image="./images/chicken_corn_soup.png">
+              <button type="button" onclick="handleAddToCart(110, 'Chicken Corn Soup', 350, './images/chicken_corn_soup.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="salads" data-cat-id="cat-salads">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Salads</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">1 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="111" data-item-name="BBQ Prawn Salad">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/bbq_prawn_salad.png" alt="BBQ Prawn Salad" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">BBQ Prawn Salad</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Flame-grilled glazed prawns tossed with crisp iceberg lettuce, sweet cherry tomatoes, cucumber & citrus vinaigrette.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 900</span>
+            <div class="card-action-container" data-item-name="BBQ Prawn Salad" data-item-id="111" data-item-price="900" data-item-image="./images/bbq_prawn_salad.png">
+              <button type="button" onclick="handleAddToCart(111, 'BBQ Prawn Salad', 900, './images/bbq_prawn_salad.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="mains-seafood" data-cat-id="cat-seafood">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Mains - Seafood</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">12 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="112" data-item-name="Romesco Fish">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Romesco Fish" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Romesco Fish</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Pan-seared prime ocean fish fillet served over rich Spanish romesco sauce of roasted peppers, garlic and almonds.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 2,000</span>
+            <div class="card-action-container" data-item-name="Romesco Fish" data-item-id="112" data-item-price="2000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(112, 'Romesco Fish', 2000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="113" data-item-name="Umami Fish">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Umami Fish" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Umami Fish</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Tender white fish fillet glazed in deep savory umami reduction with shiitake mushrooms and scallions.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,800</span>
+            <div class="card-action-container" data-item-name="Umami Fish" data-item-id="113" data-item-price="1800" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(113, 'Umami Fish', 1800, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="114" data-item-name="Pamphlet Fish">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Pamphlet Fish" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Pamphlet Fish</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Whole fresh pomfret pan-fried in coastal spices, served sizzling with fresh lemon wedges and mint dip.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,900</span>
+            <div class="card-action-container" data-item-name="Pamphlet Fish" data-item-id="114" data-item-price="1900" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(114, 'Pamphlet Fish', 1900, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="115" data-item-name="Fish Chilli Dry">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Fish Chilli Dry" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Fish Chilli Dry</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Sliced fish fillets wok-tossed with spicy green bird-eye chilies, onions, garlic and dark soy glaze.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,500</span>
+            <div class="card-action-container" data-item-name="Fish Chilli Dry" data-item-id="115" data-item-price="1500" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(115, 'Fish Chilli Dry', 1500, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="116" data-item-name="Vietnamese Fish">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Vietnamese Fish" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Vietnamese Fish</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Crispy fish fillet simmered in fragrant Vietnamese ginger-lime-lemongrass glaze with fresh coriander.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,500</span>
+            <div class="card-action-container" data-item-name="Vietnamese Fish" data-item-id="116" data-item-price="1500" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(116, 'Vietnamese Fish', 1500, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="117" data-item-name="Thermidor Lobster">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Thermidor Lobster" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Thermidor Lobster</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Whole fresh lobster tail baked in rich egg-yolk cognac cream sauce, mustard & gratin melted cheese crust.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 5,000</span>
+            <div class="card-action-container" data-item-name="Thermidor Lobster" data-item-id="117" data-item-price="5000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(117, 'Thermidor Lobster', 5000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="118" data-item-name="Grilled Lobster">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Grilled Lobster" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Grilled Lobster</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Live fresh ocean lobster split and flame-grilled with herb-garlic butter and served with seasonal sides.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 5,000</span>
+            <div class="card-action-container" data-item-name="Grilled Lobster" data-item-id="118" data-item-price="5000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(118, 'Grilled Lobster', 5000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="119" data-item-name="BBQ Prawns">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="BBQ Prawns" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">BBQ Prawns</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Skewered ocean prawns flame-roasted over charcoal embers with smoky garlic butter & citrus marinade.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 2,500</span>
+            <div class="card-action-container" data-item-name="BBQ Prawns" data-item-id="119" data-item-price="2500" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(119, 'BBQ Prawns', 2500, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="120" data-item-name="Prawn Pasta">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Prawn Pasta" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Prawn Pasta</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Al dente fettuccine pasta tossed with juicy sautéed prawns in a velvety garlic parmesan cream sauce.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,900</span>
+            <div class="card-action-container" data-item-name="Prawn Pasta" data-item-id="120" data-item-price="1900" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(120, 'Prawn Pasta', 1900, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="121" data-item-name="Steamed Crab">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Steamed Crab" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Steamed Crab</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Whole live mud crab gently steam-cooked to preserve sweet natural meat, served with hot drawn butter.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 2,000</span>
+            <div class="card-action-container" data-item-name="Steamed Crab" data-item-id="121" data-item-price="2000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(121, 'Steamed Crab', 2000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="122" data-item-name="Mud Crab">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Mud Crab" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Mud Crab</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Whole succulent mud crab wok-fried in rich Singaporean chili-garlic egg gravy.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 2,000</span>
+            <div class="card-action-container" data-item-name="Mud Crab" data-item-id="122" data-item-price="2000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(122, 'Mud Crab', 2000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="123" data-item-name="Grilled Fish">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Grilled Fish" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Grilled Fish</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Fresh boneless catch of the day marinated in lemon, herbs & olive oil, flame-seared on the grill.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 2,500</span>
+            <div class="card-action-container" data-item-name="Grilled Fish" data-item-id="123" data-item-price="2500" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(123, 'Grilled Fish', 2500, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="mains-chicken" data-cat-id="cat-chicken">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Mains - Chicken</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">6 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="124" data-item-name="Chilli Mint Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Chilli Mint Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Chilli Mint Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Sliced chicken wok-fried in spicy green bird-eye chilies, fresh mint puree & aromatic garlic.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 900</span>
+            <div class="card-action-container" data-item-name="Chilli Mint Chicken" data-item-id="124" data-item-price="900" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(124, 'Chilli Mint Chicken', 900, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="125" data-item-name="Cashew Nut Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Cashew Nut Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Cashew Nut Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Tender diced chicken breast stir-fried with roasted crunchy cashew nuts, bell peppers and sweet chili paste.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,000</span>
+            <div class="card-action-container" data-item-name="Cashew Nut Chicken" data-item-id="125" data-item-price="1000" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(125, 'Cashew Nut Chicken', 1000, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="126" data-item-name="Korean Fried Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Korean Fried Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Korean Fried Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Ultra-crispy double-fried chicken chunks coated in sweet and spicy gochujang glaze with sesame.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,100</span>
+            <div class="card-action-container" data-item-name="Korean Fried Chicken" data-item-id="126" data-item-price="1100" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(126, 'Korean Fried Chicken', 1100, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="127" data-item-name="Chicken Chilli Dry">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Chicken Chilli Dry" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Chicken Chilli Dry</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Classic Indo-Chinese style shredded chicken stir-fried dry with green chilies, onions and dark soy sauce.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,100</span>
+            <div class="card-action-container" data-item-name="Chicken Chilli Dry" data-item-id="127" data-item-price="1100" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(127, 'Chicken Chilli Dry', 1100, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="128" data-item-name="Sweet & Sour Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Sweet & Sour Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Sweet & Sour Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Crispy chicken cubes tossed with pineapple chunks, bell peppers and onions in tangy sweet & sour sauce.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,050</span>
+            <div class="card-action-container" data-item-name="Sweet & Sour Chicken" data-item-id="128" data-item-price="1050" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(128, 'Sweet & Sour Chicken', 1050, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="129" data-item-name="House Special Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="House Special Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">House Special Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Signature chef creation of flame-seared chicken supreme served in a velvety peppercorn cream glaze.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 1,250</span>
+            <div class="card-action-container" data-item-name="House Special Chicken" data-item-id="129" data-item-price="1250" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(129, 'House Special Chicken', 1250, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="add-ons" data-cat-id="cat-addons">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Sides & Add-Ons</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">4 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="137" data-item-name="Butter Mushroom Rice">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Butter Mushroom Rice" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Butter Mushroom Rice</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Fragrant jasmine rice sautéed in rich French butter with sliced button mushrooms and fresh herbs.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Butter Mushroom Rice" data-item-id="137" data-item-price="300" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(137, 'Butter Mushroom Rice', 300, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="138" data-item-name="Roasted Potatoes">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Roasted Potatoes" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Roasted Potatoes</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Baby potatoes oven-roasted until crispy skin with rosemary, thyme, garlic and extra virgin olive oil.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Roasted Potatoes" data-item-id="138" data-item-price="300" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(138, 'Roasted Potatoes', 300, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="139" data-item-name="Steak Fries">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Steak Fries" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Steak Fries</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Thick-cut golden steak potato wedges fried crispy on the outside and fluffy on the inside.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Steak Fries" data-item-id="139" data-item-price="300" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(139, 'Steak Fries', 300, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="140" data-item-name="Special Dynamite Dip">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Special Dynamite Dip" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Special Dynamite Dip</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Signature creamy, spicy and tangy seafood dip crafted with Japanese mayo and sriracha.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 200</span>
+            <div class="card-action-container" data-item-name="Special Dynamite Dip" data-item-id="140" data-item-price="200" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(140, 'Special Dynamite Dip', 200, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="beverages" data-cat-id="cat-drinks">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#16384C] rounded-full"></span>
+        <h2 class="font-['Montserrat'] text-xl sm:text-2xl font-extrabold text-[#0F172A] uppercase">Beverages & Mojitos</h2>
+        <span class="bg-[#F9F6F0] text-[#16384C] font-['Montserrat'] text-xs font-bold px-2.5 py-1 rounded-full border border-[#EFE6D5]">7 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="130" data-item-name="Strawberry Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Strawberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Strawberry Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Muddled fresh strawberries, wild mint leaves, lime wedges and sparkling soda over crushed ice.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Strawberry Mojito" data-item-id="130" data-item-price="350" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(130, 'Strawberry Mojito', 350, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="131" data-item-name="Blueberry Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Blueberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Blueberry Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Plump blueberries muddled with fresh mint, lime juice, simple syrup and bubbly club soda.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Blueberry Mojito" data-item-id="131" data-item-price="350" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(131, 'Blueberry Mojito', 350, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="132" data-item-name="Peach Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Peach Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Peach Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Sweet juicy peach nectar muddled with cooling mint leaves, lemon juice and fizzy sparkling soda.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Peach Mojito" data-item-id="132" data-item-price="350" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(132, 'Peach Mojito', 350, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="133" data-item-name="Green Apple Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Green Apple Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Green Apple Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Crisp tart green apple puree shaken with garden mint, lime slices and chilled tonic water.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Green Apple Mojito" data-item-id="133" data-item-price="350" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(133, 'Green Apple Mojito', 350, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="134" data-item-name="Fresh Lemonade">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Fresh Lemonade" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Fresh Lemonade</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Freshly squeezed Lahore lemons blended with chilled water, cane sugar, black salt and mint.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Fresh Lemonade" data-item-id="134" data-item-price="350" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(134, 'Fresh Lemonade', 350, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="135" data-item-name="Pepsi / 7Up (Tin)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Pepsi / 7Up (Tin)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Pepsi / 7Up (Tin)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Chilled 250ml can of Pepsi, 7Up or diet soft drink served icy fresh.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 150</span>
+            <div class="card-action-container" data-item-name="Pepsi / 7Up (Tin)" data-item-id="135" data-item-price="150" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(135, 'Pepsi / 7Up (Tin)', 150, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E2E8F0] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="136" data-item-name="Mineral Water (Small)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#F4F7F9] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/logo.png" alt="Mineral Water (Small)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/logo.png';" />
+            </div>
+            <h3 class="font-['Montserrat'] text-[15px] sm:text-[17px] font-extrabold text-[#0F172A] leading-snug mb-1">Mineral Water (Small)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#475569] line-clamp-2 mb-3">Premium purified mineral water bottle (500ml), chilled.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#EDF2F7] flex items-center justify-between gap-2">
+            <span class="font-['Montserrat'] text-base sm:text-lg font-extrabold text-[#16384C]">Rs. 100</span>
+            <div class="card-action-container" data-item-name="Mineral Water (Small)" data-item-id="136" data-item-price="100" data-item-image="./images/logo.png">
+              <button type="button" onclick="handleAddToCart(136, 'Mineral Water (Small)', 100, './images/logo.png')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- G. COMPACT RESTAURANT DETAILS & ABOUT SNIPPET -->
+  <footer class="bg-white border-t border-[#E2E8F0] mt-12 py-10" id="about-section">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <img src="./images/logo.png" alt="Dine At Blue" class="h-10 w-10 rounded-full object-contain" />
+          <h4 class="font-['Montserrat'] font-extrabold text-lg text-[#0F172A]">Dine At Blue Lahore</h4>
+        </div>
+        <p class="text-xs text-[#475569] leading-relaxed mb-4">
+          Ocean catch, continental grills &amp; authentic pan-asian wok specialties. Prepared fresh in Gulberg III with strict temperature control and premium oceanic ingredients.
+        </p>
+        <div class="flex items-center gap-3">
+          <a href="https://wa.me/923218484111" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow-xs hover:bg-[#20ba59] transition">
+            <span>💬 WhatsApp</span>
+          </a>
+          <a href="tel:03218484111" class="bg-[#F4F7F9] text-[#0F172A] font-bold text-xs px-3.5 py-2 rounded-lg hover:bg-[#E2E8F0] transition">
+            📞 0321-8484111
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-['Montserrat'] font-extrabold text-sm uppercase tracking-wider text-[#0F172A] mb-3">Flagship Location</h4>
+        <ul class="text-xs text-[#475569] space-y-2">
+          <li><strong>Gulberg III Outlet:</strong> 65, Block D1, Gulberg III, Lahore</li>
+          <li><strong>Kitchen Contact:</strong> 0321-8484111</li>
+          <li><strong>Landmark:</strong> Near Ghalib Market &amp; Main Boulevard</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-['Montserrat'] font-extrabold text-sm uppercase tracking-wider text-[#0F172A] mb-3">Hours &amp; Delivery Logistics</h4>
+        <p class="text-xs text-[#475569] leading-relaxed mb-2">
+          🕒 <strong>Open Daily:</strong> 01:00 PM – 01:00 AM<br/>
+          🌊 <strong>Ocean Express Delivery:</strong> 35–50 mins • Temperature-controlled thermal cases<br/>
+          🛍️ <strong>Self-Pickup:</strong> 20–25 mins • Free
+        </p>
+        <p class="text-[11px] text-[#94A3B8] mt-4">
+          &copy; 2026 Dine At Blue. Part of FoodSphere Aggregator Platform. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT HELPERS -->
+  <script>
+    window.BRAND_SLUG = 'dineatblue';
+
+    // Drawer Controls
+    function openMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.remove('-translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    // Modal Controls
+    function openOrderModal() {
+      const modal = document.getElementById('blue-order-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById('blue-order-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setModalMode(mode) {
+      const delBtn = document.getElementById('modal-mode-delivery');
+      const pickBtn = document.getElementById('modal-mode-pickup');
+      const delPanel = document.getElementById('modal-delivery-panel');
+      const pickPanel = document.getElementById('modal-pickup-panel');
+      if (mode === 'PICKUP') {
+        pickBtn.className = "bg-[#16384C] text-white font-['Montserrat'] font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer";
+        delBtn.className = "text-[#0F172A] font-['Montserrat'] font-bold py-3 rounded-lg hover:text-[#16384C] text-sm transition cursor-pointer";
+        delPanel.style.display = 'none';
+        pickPanel.style.display = 'block';
+      } else {
+        delBtn.className = "bg-[#16384C] text-white font-['Montserrat'] font-extrabold py-3 rounded-lg shadow-sm text-sm transition cursor-pointer";
+        pickBtn.className = "text-[#0F172A] font-['Montserrat'] font-bold py-3 rounded-lg hover:text-[#16384C] text-sm transition cursor-pointer";
+        delPanel.style.display = 'block';
+        pickPanel.style.display = 'none';
+      }
+    }
+
+    function updatePickupBranchCard(val) {
+      // Single Gulberg III branch
+    }
+
+    function confirmOrderModal() {
+      const isPickup = (document.getElementById('modal-pickup-panel').style.display === 'block');
+      const mode = isPickup ? 'PICKUP' : 'DELIVERY';
+      const branch = 'Gulberg III Main Outlet';
+
+      setOrderMode(mode);
+      if (window.CartDrawer && window.CartDrawer.setSelectedBranch) {
+        window.CartDrawer.setSelectedBranch(branch);
+      }
+
+      const locText = document.getElementById('header-location-text');
+      if (locText) {
+        locText.textContent = `📍 Gulberg III • Change`;
+      }
+      const drawerBranch = document.getElementById('drawer-active-branch');
+      if (drawerBranch) {
+        drawerBranch.textContent = "Gulberg III (65, Block D1)";
+      }
+
+      localStorage.setItem('blue_selected_branch', branch);
+      localStorage.setItem('blue_mode_confirmed', 'true');
+      closeOrderModal();
+    }
+
+    function setOrderMode(mode) {
+      const isPickup = (mode === 'PICKUP');
+      if (window.CartDrawer && window.CartDrawer.setFulfillmentType) {
+        window.CartDrawer.setFulfillmentType(isPickup ? 'PICKUP' : 'DELIVERY');
+      }
+
+      const headerDel = document.getElementById('header-mode-delivery');
+      const headerPick = document.getElementById('header-mode-pickup');
+      if (headerDel && headerPick) {
+        if (isPickup) {
+          headerPick.className = "bg-[#16384C] text-white font-['Montserrat'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap";
+          headerDel.className = "text-[#0F172A] font-['Montserrat'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#16384C] transition cursor-pointer whitespace-nowrap";
+        } else {
+          headerDel.className = "bg-[#16384C] text-white font-['Montserrat'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm transition cursor-pointer whitespace-nowrap";
+          headerPick.className = "text-[#0F172A] font-['Montserrat'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm hover:text-[#16384C] transition cursor-pointer whitespace-nowrap";
+        }
+      }
+    }
+
+    function handleAddToCart(id, name, price, img) {
+      if (window.CartDrawer && window.CartDrawer.addItem) {
+        window.CartDrawer.addItem(id, name, price, img);
+      }
+    }
+
+    function handleCardQty(name, delta) {
+      if (window.CartDrawer && window.CartDrawer.updateQty) {
+        window.CartDrawer.updateQty(name, delta);
+      }
+    }
+
+    window.syncCardSteppers = function() {
+      const items = (window.CartDrawer && window.CartDrawer.getItems) ? window.CartDrawer.getItems() : [];
+      document.querySelectorAll('.card-action-container').forEach(container => {
+        const name = container.getAttribute('data-item-name');
+        const id = container.getAttribute('data-item-id');
+        const price = container.getAttribute('data-item-price');
+        const img = container.getAttribute('data-item-image');
+        const cartItem = items.find(i => i.name === name);
+        const qty = cartItem ? cartItem.qty : 0;
+
+        if (qty > 0) {
+          container.innerHTML = `
+            <div class="stepper-wrap flex items-center bg-[#16384C] rounded-xl overflow-hidden shadow-xs text-white">
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#0D2331] transition cursor-pointer">-</button>
+              <span class="w-8 text-center text-xs font-extrabold text-[#EFE6D5]">${qty}</span>
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#0D2331] transition cursor-pointer">+</button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\'")}', ${price}, '${img}')" class="btn-add-cart bg-[#16384C] hover:bg-[#0D2331] text-white font-['Montserrat'] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+          `;
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const confirmed = localStorage.getItem('blue_mode_confirmed');
+        if (confirmed !== 'true') {
+          openOrderModal();
+        }
+      } catch (e) {
+        openOrderModal();
+      }
+      setTimeout(() => {
+        if (typeof window.syncCardSteppers === 'function') window.syncCardSteppers();
+      }, 50);
+    });
+  </script>
+
+  <!-- External Cart & Catalog Engine -->
+  <script src="cart_drawer.js?v=20261019"></script>
+  <script src="live_catalog.js?v=20261019"></script>
+
+
+  <script>
+    function scrollToCategorySection(catId) {
+      if (catId === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        updateActivePill('all');
+        return;
+      }
+      const el = document.getElementById(catId) || 
+                 document.querySelector(`[data-cat-id="${catId}"]`) ||
+                 document.querySelector(`section#${catId}`) ||
+                 document.querySelector(`[data-cat-id="cat-${catId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        updateActivePill(catId);
+      }
+    }
+
+    function updateActivePill(catId) {
+      document.querySelectorAll('.category-pill').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${catId}'`)) {
+          btn.className = "category-pill active bg-[#16384C] text-white border border-[#16384C] font-['Montserrat'] font-extrabold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap shadow-sm cursor-pointer";
+        } else {
+          btn.className = "category-pill bg-[#F4F7F9] text-[#0F172A] hover:border-[#16384C] border border-[#E2E8F0] font-['Montserrat'] font-bold px-4 py-2 rounded-full text-xs sm:text-sm whitespace-nowrap transition cursor-pointer";
+        }
+      });
+    }
+
+    function handleLiveSearch(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('#menu .product-card').forEach(card => {
+        const name = (card.getAttribute('data-item-name') || '').toLowerCase();
+        const desc = (card.querySelector('p') ? card.querySelector('p').textContent : '').toLowerCase();
+        if (!q || name.includes(q) || desc.includes(q)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Scroll to URL hash on load
+    window.addEventListener('load', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        setTimeout(() => {
+          scrollToCategorySection(hash);
+        }, 100);
+      }
+    });
+  </script>
+
 </body>
 </html>

@@ -2,17 +2,1372 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta http-equiv="refresh" content="0;url=index.html#cat-tandoori"/>
-  <title>Tandoori Stop — Menu Storefront</title>
-  <link rel="stylesheet" href="theme_ts.css?v=20261018"/>
-  <style>
-    body { font-family: 'Inter', sans-serif; background: #FAF8F5; color: #111827; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tandoori Stop — Full Menu &amp; Catalog | Lahore</title>
+  <meta name="description" content="Explore Tandoori Stop Lahore's full tandoor catalog: Tandoori Chicken, Sajji, Paratha Rolls, Charcoal BBQ, Handis, Karahis, and Fresh Naans."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    window.location.replace("index.html#cat-tandoori");
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tsCrimson: '#C81E1E',
+            tsCharcoal: '#1C1917',
+            tsGold: '#F59E0B',
+            tsCanvas: '#FAF8F5'
+          },
+          fontFamily: {
+            sans: ['"Inter"', 'sans-serif'],
+            heading: ['"Barlow Condensed"', 'sans-serif']
+          }
+        }
+      }
+    }
   </script>
+
+  <link rel="stylesheet" href="cart_drawer.css?v=20261019"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20261019"/>
 </head>
-<body>
-  <p>Redirecting to Tandoori Stop Storefront...</p>
+<body class="bg-[#FAF8F5] text-[#111827] font-['Inter'] antialiased min-h-screen flex flex-col">
+
+
+  <!-- B. STICKY COMMERCIAL HEADER (NO TOP ANNOUNCEMENT BAR) -->
+  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E5E7EB] px-3 sm:px-6">
+    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-2">
+      
+      <!-- LEFT GROUP: Hamburger + Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-10 h-10 rounded-xl bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] transition cursor-pointer shrink-0">
+          <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="index.html" class="shrink-0 flex items-center" aria-label="Tandoori Stop Home">
+          <img src="./images/tandoori_logo_horizontal_clean.png" alt="Tandoori Stop Logo" class="h-9 sm:h-11 w-auto object-contain" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+        </a>
+      </div>
+
+      <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
+      <div class="flex items-center gap-2">
+        <div class="bg-[#F3F4F6] p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-btn-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap">
+            🛵 Delivery
+          </button>
+          <button type="button" id="header-btn-pickup" onclick="setOrderMode('PICKUP')" class="text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap">
+            🛍️ Pickup
+          </button>
+        </div>
+
+        <button type="button" id="header-branch-btn" onclick="openOrderModal()" class="hidden md:flex items-center gap-1.5 bg-[#FAF8F5] border border-[#E5E7EB] hover:border-[#C81E1E] px-3 py-1.5 rounded-xl text-xs font-bold text-[#1C1917] transition cursor-pointer select-none">
+          <span id="header-branch-text">📍 Johar Town • Change</span>
+        </button>
+      </div>
+
+      <!-- RIGHT GROUP: Compact Cart Button (NO 'Rs. 0' TEXT) -->
+      <div class="flex items-center gap-2">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#1C1917] hover:bg-[#C81E1E] text-white font-extrabold h-10 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#C81E1E] text-white text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SLIDE-OUT HAMBURGER NAVIGATION DRAWER -->
+  <div id="mobile-nav-backdrop" onclick="closeMobileNavDrawer()" class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true"></div>
+  <aside id="mobile-nav-drawer" class="fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl border-r border-[#E5E7EB] flex flex-col justify-between p-5 transform -translate-x-full transition-transform duration-300 ease-in-out" aria-label="Main Navigation">
+    <div>
+      <!-- Drawer Top -->
+      <div class="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
+        <div class="flex items-center gap-2.5">
+          <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-9 w-auto object-contain rounded-md" />
+          <span class="font-['Barlow_Condensed'] font-extrabold text-[#1C1917] text-lg uppercase tracking-wider">Tandoori Stop</span>
+        </div>
+        <button type="button" id="close-drawer-btn" onclick="closeMobileNavDrawer()" class="w-9 h-9 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] text-xl font-bold cursor-pointer transition" aria-label="Close menu">&times;</button>
+      </div>
+      <!-- Drawer Navigation Links -->
+      <nav class="mt-4 space-y-1 font-['Barlow_Condensed'] text-base uppercase tracking-wider">
+        <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="menu.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">📖</span>
+          <span>All Menu (Full Catalog)</span>
+        </a>
+        <button type="button" onclick="closeMobileNavDrawer(); openOrderModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition text-left cursor-pointer font-['Barlow_Condensed'] text-base uppercase tracking-wider">
+          <span class="text-lg">🛵</span>
+          <span>Change Order Mode / Branch</span>
+        </button>
+        <a href="locations.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">📍</span>
+          <span>Branch Locations</span>
+        </a>
+        <a href="index.html#about-section" onclick="closeMobileNavDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">ℹ️</span>
+          <span>About Us</span>
+        </a>
+      </nav>
+    </div>
+    <!-- Drawer Bottom: Active Branch, Phone, WhatsApp -->
+    <div class="pt-4 border-t border-[#E5E7EB] text-xs text-[#4B5563] space-y-2">
+      <div>
+        <span class="font-bold text-[#111827] block">Active Outlet:</span>
+        <span id="drawer-active-branch" class="text-xs font-semibold text-[#C81E1E]">Johar Town (PIA Road)</span>
+      </div>
+      <div>
+        <span class="font-bold text-[#111827] block">Helpline:</span>
+        <a href="tel:03274945947" class="text-xs font-semibold text-[#111827] hover:underline">0327-4945947</a>
+      </div>
+      <a href="https://wa.me/923274945947" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-2 rounded-xl text-xs hover:bg-[#20ba59] transition">
+        <span>💬 WhatsApp Support</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- C. MANDATORY ENTRY ORDER MODE & LOCATION POPUP MODAL -->
+  <div id="ts-order-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200" style="display: none;">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#E5E7EB] relative transform transition-all">
+      <button type="button" onclick="closeOrderModal()" class="absolute top-5 right-5 text-[#9CA3AF] hover:text-[#111827] text-2xl font-bold leading-none p-1 cursor-pointer transition">&times;</button>
+      
+      <div class="flex items-center gap-3 mb-5">
+        <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-10 w-auto object-contain" />
+        <div>
+          <h3 class="font-['Barlow_Condensed'] text-2xl font-extrabold uppercase tracking-wide text-[#111827] leading-tight">Order Method</h3>
+          <p class="text-xs text-[#6B7280]">Select fulfillment type &amp; your nearest operational branch</p>
+        </div>
+      </div>
+
+      <!-- Segmented Toggle -->
+      <div class="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-1.5 rounded-2xl border border-[#E5E7EB] mb-5">
+        <button type="button" id="modal-btn-delivery" onclick="setOrderMode('DELIVERY')" class="py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer">
+          🛵 Delivery
+        </button>
+        <button type="button" id="modal-btn-pickup" onclick="setOrderMode('PICKUP')" class="py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer">
+          🛍️ Pickup
+        </button>
+      </div>
+
+      <!-- Branch Selection -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1.5">Select Branch</label>
+          <select id="modal-branch-select" onchange="onModalBranchChange(this.value)" class="w-full bg-[#FAF8F5] border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm font-semibold text-[#111827] outline-none focus:border-[#C81E1E]">
+            <option value="Johar Town">Johar Town (PIA Road, Hakim Chowk | 0327-4945947)</option>
+            <option value="Lake City">Lake City (Opposite Mall, Raiwind Rd | 0324-4441735)</option>
+            <option value="GT Road Baghbanpura">GT Road Baghbanpura (GT Road | 0326-6811177)</option>
+          </select>
+        </div>
+
+        <!-- Delivery Address Input -->
+        <div id="modal-address-section">
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1.5">Delivery Address</label>
+          <input type="text" id="modal-address-input" placeholder="House/Flat #, Street #, Sector / Colony" class="w-full bg-[#FAF8F5] border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm text-[#111827] outline-none focus:border-[#C81E1E]" />
+          <p class="text-[11px] text-[#6B7280] mt-1.5">Flat delivery fee: <strong>Rs. 150</strong>. Delivered piping hot in 30-45 mins.</p>
+        </div>
+
+        <!-- Pickup Info Box -->
+        <div id="modal-pickup-section" style="display:none;" class="bg-[#FAF8F5] border border-[#E5E7EB] rounded-xl p-3.5 text-xs text-[#4B5563] space-y-1">
+          <p class="font-bold text-[#111827]" id="pickup-outlet-title">📍 Johar Town Branch</p>
+          <p id="pickup-outlet-address">PIA Road, Hakim Chowk, Johar Town, Lahore</p>
+          <p class="text-[#C81E1E] font-semibold" id="pickup-outlet-contact">📞 0327-4945947 • Ready in 15–20 mins • Free</p>
+        </div>
+
+        <button type="button" onclick="confirmOrderModeModal()" class="w-full bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] text-xl font-extrabold uppercase tracking-wider py-3.5 rounded-xl shadow-md transition cursor-pointer mt-2">
+          Start Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- STICKY CATEGORY RIBBON & LIVE SEARCH BAR -->
+  <nav class="sticky top-16 sm:top-[72px] z-30 bg-white border-b border-[#E5E7EB] py-2.5 px-3 sm:px-6 shadow-xs">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <!-- Search Input -->
+      <div class="relative w-full sm:max-w-xs">
+        <input type="text" id="menu-search-input" oninput="handleLiveSearch(this.value)" placeholder="Search tandoori dishes, sajji, rolls..." class="w-full bg-[#FAF8F5] border border-[#E5E7EB] focus:border-[#C81E1E] focus:bg-white rounded-xl pl-9 pr-3 py-1.5 text-xs sm:text-sm font-medium text-[#111827] placeholder-[#6B7280] outline-none transition" />
+        <svg class="w-4 h-4 text-[#6B7280] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <!-- Horizontal Scrollable Category Tabs -->
+      <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5" id="category-tabs">
+        
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-[#C81E1E] text-[#C81E1E] bg-transparent whitespace-nowrap cursor-pointer" onclick="scrollToCategorySection('all')">
+        All Menu
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-tandoori')">
+        Tandoori Chicken
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-sajji')">
+        Chicken Sajji
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-rolls')">
+        Paratha Rolls
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-bbq')">
+        Charcoal BBQ
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-handi')">
+        Handi Specialties
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-karahi')">
+        Karahi
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-naan')">
+        Tandoori Breads
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-sides')">
+        Sides, Rice
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-platters')">
+        Family Tandoori Platters
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-drinks')">
+        Mocktails
+      </button>
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('cat-desserts')">
+        Desserts
+      </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- FULL CATEGORIZED CATALOG BODY -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10 flex-1 w-full" id="menu">
+    
+    <section class="category-section scroll-mt-36" id="cat-tandoori" data-cat-id="cat-tandoori">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Tandoori Chicken & Combos</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">8 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="70" data-item-name="Tandoori Chicken Bone (Cheese Naan Single)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7585.JPG.jpeg" alt="Tandoori Chicken Bone (Cheese Naan Single)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Bone (Cheese Naan Single)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tender prime boneless tandoori chicken steak served with 1 freshly baked cheese naan.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,150</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Bone (Cheese Naan Single)" data-item-id="70" data-item-price="1150" data-item-image="./images/IMG_7585.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(70, 'Tandoori Chicken Bone (Cheese Naan Single)', 1150, './images/IMG_7585.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="71" data-item-name="Tandoori Chicken Boneless (Cheese Naan Single)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7585.JPG.jpeg" alt="Tandoori Chicken Boneless (Cheese Naan Single)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Boneless (Cheese Naan Single)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Generous half tandoori chicken portion served with 2 freshly rolled cheese naans.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,350</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Boneless (Cheese Naan Single)" data-item-id="71" data-item-price="1350" data-item-image="./images/IMG_7585.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(71, 'Tandoori Chicken Boneless (Cheese Naan Single)', 1350, './images/IMG_7585.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="72" data-item-name="Tandoori Chicken Bone (Cheese Naan Double)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7589.JPG.jpeg" alt="Tandoori Chicken Bone (Cheese Naan Double)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Bone (Cheese Naan Double)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Double boneless grilled tandoori portions paired with 2 hot, buttery cheese naans.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,950</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Bone (Cheese Naan Double)" data-item-id="72" data-item-price="1950" data-item-image="./images/IMG_7589.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(72, 'Tandoori Chicken Bone (Cheese Naan Double)', 1950, './images/IMG_7589.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="73" data-item-name="Tandoori Chicken Boneless (Cheese Naan Double)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7589.JPG.jpeg" alt="Tandoori Chicken Boneless (Cheese Naan Double)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Boneless (Cheese Naan Double)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Flame-grilled tandoori chicken quarter placed over spiced long-grain aromatic rice.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 2,299</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Boneless (Cheese Naan Double)" data-item-id="73" data-item-price="2299" data-item-image="./images/IMG_7589.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(73, 'Tandoori Chicken Boneless (Cheese Naan Double)', 2299, './images/IMG_7589.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="74" data-item-name="Tandoori Chicken Bone (With Rice)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7586.JPG.jpeg" alt="Tandoori Chicken Bone (With Rice)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Bone (With Rice)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Char-grilled juicy boneless chicken fillets on seasoned aromatic saffron rice.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 980</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Bone (With Rice)" data-item-id="74" data-item-price="980" data-item-image="./images/IMG_7586.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(74, 'Tandoori Chicken Bone (With Rice)', 980, './images/IMG_7586.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="75" data-item-name="Tandoori Chicken Boneless (With Rice)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7586.JPG.jpeg" alt="Tandoori Chicken Boneless (With Rice)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Boneless (With Rice)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Authentic clay-baked quarter chicken marinated in 14 secret tandoori herbs.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 780</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Boneless (With Rice)" data-item-id="75" data-item-price="780" data-item-image="./images/IMG_7586.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(75, 'Tandoori Chicken Boneless (With Rice)', 780, './images/IMG_7586.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="76" data-item-name="Tandoori Chicken Bone (Plain)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7590.JPG.jpeg" alt="Tandoori Chicken Bone (Plain)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Bone (Plain)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tender boneless chicken fillets slow roasted inside our high-heat clay oven.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Bone (Plain)" data-item-id="76" data-item-price="750" data-item-image="./images/IMG_7590.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(76, 'Tandoori Chicken Bone (Plain)', 750, './images/IMG_7590.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="77" data-item-name="Tandoori Chicken Boneless (Plain)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7590.JPG.jpeg" alt="Tandoori Chicken Boneless (Plain)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Boneless (Plain)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crisp outer skin, tender juicy meat roasted slowly on authentic iron skewers.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 899</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Boneless (Plain)" data-item-id="77" data-item-price="899" data-item-image="./images/IMG_7590.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(77, 'Tandoori Chicken Boneless (Plain)', 899, './images/IMG_7590.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-sajji" data-cat-id="cat-sajji">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Authentic Chicken Sajji</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">6 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="78" data-item-name="Traditional Chicken Sajji (Quarter)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Traditional Chicken Sajji (Quarter)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Traditional Chicken Sajji (Quarter)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Half whole chicken cooked over burning charcoal with aromatic sajji masala.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 799</span>
+            <div class="card-action-container" data-item-name="Traditional Chicken Sajji (Quarter)" data-item-id="78" data-item-price="799" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(78, 'Traditional Chicken Sajji (Quarter)', 799, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="79" data-item-name="Traditional Chicken Sajji (Half)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Traditional Chicken Sajji (Half)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Traditional Chicken Sajji (Half)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Full whole chicken slow-grilled to perfection, served with lemon and green chili dip.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,400</span>
+            <div class="card-action-container" data-item-name="Traditional Chicken Sajji (Half)" data-item-id="79" data-item-price="1400" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(79, 'Traditional Chicken Sajji (Half)', 1400, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="80" data-item-name="Traditional Chicken Sajji (Full)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Traditional Chicken Sajji (Full)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Traditional Chicken Sajji (Full)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Quarter spit-roasted chicken coated in tangy African bird's eye chili glaze.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 2,500</span>
+            <div class="card-action-container" data-item-name="Traditional Chicken Sajji (Full)" data-item-id="80" data-item-price="2500" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(80, 'Traditional Chicken Sajji (Full)', 2500, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="81" data-item-name="Peri Peri Chicken Sajji (Quarter)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Peri Peri Chicken Sajji (Quarter)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Peri Peri Chicken Sajji (Quarter)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Half chicken basted in fiery peri peri sauce, flame-grilled on coal embers.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 900</span>
+            <div class="card-action-container" data-item-name="Peri Peri Chicken Sajji (Quarter)" data-item-id="81" data-item-price="900" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(81, 'Peri Peri Chicken Sajji (Quarter)', 900, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="82" data-item-name="Peri Peri Chicken Sajji (Half)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Peri Peri Chicken Sajji (Half)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Peri Peri Chicken Sajji (Half)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Full chicken roasted on charcoal and basted generously with spicy peri glaze.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,600</span>
+            <div class="card-action-container" data-item-name="Peri Peri Chicken Sajji (Half)" data-item-id="82" data-item-price="1600" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(82, 'Peri Peri Chicken Sajji (Half)', 1600, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="83" data-item-name="Peri Peri Chicken Sajji (Full)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Peri Peri Chicken Sajji (Full)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Peri Peri Chicken Sajji (Full)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tandoori Stop's signature giant roll stuffed with tikka chunks, seekh kabab, and special chutney.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 2,900</span>
+            <div class="card-action-container" data-item-name="Peri Peri Chicken Sajji (Full)" data-item-id="83" data-item-price="2900" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(83, 'Peri Peri Chicken Sajji (Full)', 2900, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-rolls" data-cat-id="cat-rolls">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Signature Paratha Rolls</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">4 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="85" data-item-name="Full Stop Roll">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7591.JPG.jpeg" alt="Full Stop Roll" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Full Stop Roll</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Juicy spiced tandoori chicken cubes wrapped inside a freshly griddled puri paratha.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 650</span>
+            <div class="card-action-container" data-item-name="Full Stop Roll" data-item-id="85" data-item-price="650" data-item-image="./images/IMG_7591.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(85, 'Full Stop Roll', 650, './images/IMG_7591.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="86" data-item-name="Tandoori Chicken Roll">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7591.JPG.jpeg" alt="Tandoori Chicken Roll" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tandoori Chicken Roll</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Velvety malai chicken boti wrapped in buttery paratha with mint yogurt sauce.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 520</span>
+            <div class="card-action-container" data-item-name="Tandoori Chicken Roll" data-item-id="86" data-item-price="520" data-item-image="./images/IMG_7591.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(86, 'Tandoori Chicken Roll', 520, './images/IMG_7591.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="87" data-item-name="Malai Boti Roll">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7592.JPG.jpeg" alt="Malai Boti Roll" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Malai Boti Roll</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Classic Lahori street-style chicken tikka roll with onions and spiced tamarind dip.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 550</span>
+            <div class="card-action-container" data-item-name="Malai Boti Roll" data-item-id="87" data-item-price="550" data-item-image="./images/IMG_7592.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(87, 'Malai Boti Roll', 550, './images/IMG_7592.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="88" data-item-name="Chicken Paratha Roll">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7588.JPG.jpeg" alt="Chicken Paratha Roll" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Chicken Paratha Roll</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Minced chicken spiced with green chilies, coriander & grilled over charcoal.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 499</span>
+            <div class="card-action-container" data-item-name="Chicken Paratha Roll" data-item-id="88" data-item-price="499" data-item-image="./images/IMG_7588.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(88, 'Chicken Paratha Roll', 499, './images/IMG_7588.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-bbq" data-cat-id="cat-bbq">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Charcoal BBQ & Grills</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">3 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="89" data-item-name="Seekh Kabab (Per Seekh)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7578.JPG.jpeg" alt="Seekh Kabab (Per Seekh)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Seekh Kabab (Per Seekh)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Spicy charred chicken cubes marinated in red chili paste and ground spices.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 250</span>
+            <div class="card-action-container" data-item-name="Seekh Kabab (Per Seekh)" data-item-id="89" data-item-price="250" data-item-image="./images/IMG_7578.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(89, 'Seekh Kabab (Per Seekh)', 250, './images/IMG_7578.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="90" data-item-name="Tikka Boti (Per Seekh)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7583.JPG.jpeg" alt="Tikka Boti (Per Seekh)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tikka Boti (Per Seekh)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Melt-in-mouth boneless chicken cubes marinated with fresh dairy cream & cardamom.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 400</span>
+            <div class="card-action-container" data-item-name="Tikka Boti (Per Seekh)" data-item-id="90" data-item-price="400" data-item-image="./images/IMG_7583.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(90, 'Tikka Boti (Per Seekh)', 400, './images/IMG_7583.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="91" data-item-name="Malai Boti (Per Seekh)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7584.JPG.jpeg" alt="Malai Boti (Per Seekh)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Malai Boti (Per Seekh)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Rich royal Nawabi boneless chicken gravy cooked in almonds, cream, and tandoori ghee.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 450</span>
+            <div class="card-action-container" data-item-name="Malai Boti (Per Seekh)" data-item-id="91" data-item-price="450" data-item-image="./images/IMG_7584.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(91, 'Malai Boti (Per Seekh)', 450, './images/IMG_7584.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-handi" data-cat-id="cat-handi">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Clay Handi Specialties</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">4 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="421" data-item-name="Nawabi Handi Boneless (2-Person)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Nawabi Handi Boneless (2-Person)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Nawabi Handi Boneless (2-Person)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Skewered chicken seekh kababs simmered in a velvety, spiced shahi gravy.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 2,200</span>
+            <div class="card-action-container" data-item-name="Nawabi Handi Boneless (2-Person)" data-item-id="421" data-item-price="2200" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(421, 'Nawabi Handi Boneless (2-Person)', 2200, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="422" data-item-name="Shahi Kabab Masala Handi Boneless (2-Person)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Shahi Kabab Masala Handi Boneless (2-Person)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Shahi Kabab Masala Handi Boneless (2-Person)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Thick aromatic cream gravy laced with molten cheese and tender boneless cubes.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,999</span>
+            <div class="card-action-container" data-item-name="Shahi Kabab Masala Handi Boneless (2-Person)" data-item-id="422" data-item-price="1999" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(422, 'Shahi Kabab Masala Handi Boneless (2-Person)', 1999, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="423" data-item-name="Mughlai Cheese Handi Boneless (2-Person)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Mughlai Cheese Handi Boneless (2-Person)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Mughlai Cheese Handi Boneless (2-Person)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Velvety soft boneless chicken cooked in silky cashew gravy and mild spices.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,999</span>
+            <div class="card-action-container" data-item-name="Mughlai Cheese Handi Boneless (2-Person)" data-item-id="423" data-item-price="1999" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(423, 'Mughlai Cheese Handi Boneless (2-Person)', 1999, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="424" data-item-name="Reshmi Handi Boneless (2-Person)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Reshmi Handi Boneless (2-Person)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Reshmi Handi Boneless (2-Person)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Spicy stir-fried tawa chicken piece cooked in thick onion-tomato gravy with chopped green chilies.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,999</span>
+            <div class="card-action-container" data-item-name="Reshmi Handi Boneless (2-Person)" data-item-id="424" data-item-price="1999" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(424, 'Reshmi Handi Boneless (2-Person)', 1999, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-karahi" data-cat-id="cat-karahi">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Wok Karahi & Desi Tawa</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">4 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="84" data-item-name="Tawa Chicken">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7585.JPG.jpeg" alt="Tawa Chicken" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Tawa Chicken</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Traditional wok chicken karahi cooked in fresh tomatoes, ginger juliennes & crushed black pepper.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 750</span>
+            <div class="card-action-container" data-item-name="Tawa Chicken" data-item-id="84" data-item-price="750" data-item-image="./images/IMG_7585.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(84, 'Tawa Chicken', 750, './images/IMG_7585.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="395" data-item-name="Chicken Karahi (Half Portion)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7585.JPG.jpeg" alt="Chicken Karahi (Half Portion)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Chicken Karahi (Half Portion)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Creamy white chicken karahi cooked in heavy dairy cream, green chilies, and white cumin.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,300</span>
+            <div class="card-action-container" data-item-name="Chicken Karahi (Half Portion)" data-item-id="395" data-item-price="1300" data-item-image="./images/IMG_7585.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(395, 'Chicken Karahi (Half Portion)', 1300, './images/IMG_7585.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="406" data-item-name="Chicken White Karahi (Half Portion)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7584.JPG.jpeg" alt="Chicken White Karahi (Half Portion)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Chicken White Karahi (Half Portion)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Grilled seekh kababs tossed with ginger, green pepper, and spicy masala on iron karahi.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,500</span>
+            <div class="card-action-container" data-item-name="Chicken White Karahi (Half Portion)" data-item-id="406" data-item-price="1500" data-item-image="./images/IMG_7584.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(406, 'Chicken White Karahi (Half Portion)', 1500, './images/IMG_7584.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="417" data-item-name="Chicken Kabab Masala (Half Portion)">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7578.JPG.jpeg" alt="Chicken Kabab Masala (Half Portion)" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Chicken Kabab Masala (Half Portion)</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Tandoor-baked flatbread stuffed to the brim with molten mozzarella & cheddar cheese.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 1,350</span>
+            <div class="card-action-container" data-item-name="Chicken Kabab Masala (Half Portion)" data-item-id="417" data-item-price="1350" data-item-image="./images/IMG_7578.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(417, 'Chicken Kabab Masala (Half Portion)', 1350, './images/IMG_7578.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-naan" data-cat-id="cat-naan">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Tandoori Breads & Naan</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">6 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="92" data-item-name="Cheese Naan">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7581.JPG.jpeg" alt="Cheese Naan" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Cheese Naan</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Fluffy pillowy naan brushed with desi ghee and sprinkled with toasted sesame seeds.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 500</span>
+            <div class="card-action-container" data-item-name="Cheese Naan" data-item-id="92" data-item-price="500" data-item-image="./images/IMG_7581.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(92, 'Cheese Naan', 500, './images/IMG_7581.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="93" data-item-name="Roghni Naan">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7582.JPG.jpeg" alt="Roghni Naan" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Roghni Naan</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Hot clay tandoor naan lavished with melting dairy butter for rich indulgence.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 200</span>
+            <div class="card-action-container" data-item-name="Roghni Naan" data-item-id="93" data-item-price="200" data-item-image="./images/IMG_7582.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(93, 'Roghni Naan', 200, './images/IMG_7582.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="94" data-item-name="Butter Naan">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7582.JPG.jpeg" alt="Butter Naan" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Butter Naan</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Flaky, multi-layered deep-fried puri paratha with delicate crispiness.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Butter Naan" data-item-id="94" data-item-price="350" data-item-image="./images/IMG_7582.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(94, 'Butter Naan', 350, './images/IMG_7582.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="96" data-item-name="Puri Paratha">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7580.JPG.jpeg" alt="Puri Paratha" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Puri Paratha</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Freshly baked traditional plain naan directly from the burning clay tandoor.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 270</span>
+            <div class="card-action-container" data-item-name="Puri Paratha" data-item-id="96" data-item-price="270" data-item-image="./images/IMG_7580.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(96, 'Puri Paratha', 270, './images/IMG_7580.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="467" data-item-name="Plain Naan">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7582.JPG.jpeg" alt="Plain Naan" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Plain Naan</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Traditional whole-wheat healthy tandoori roti baked over clay embers.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 40</span>
+            <div class="card-action-container" data-item-name="Plain Naan" data-item-id="467" data-item-price="40" data-item-image="./images/IMG_7582.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(467, 'Plain Naan', 40, './images/IMG_7582.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="95" data-item-name="Plain Roti">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7582.JPG.jpeg" alt="Plain Roti" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Plain Roti</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Steamed long-grain basmati rice seasoned with mild whole tandoori spices.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 30</span>
+            <div class="card-action-container" data-item-name="Plain Roti" data-item-id="95" data-item-price="30" data-item-image="./images/IMG_7582.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(95, 'Plain Roti', 30, './images/IMG_7582.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-sides" data-cat-id="cat-sides">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Sides, Rice & Dips</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">3 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="97" data-item-name="Rice">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7579.JPG.jpeg" alt="Rice" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Rice</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crisp sliced cucumbers, tomatoes, onions, green chili and lemon wedges.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Rice" data-item-id="97" data-item-price="350" data-item-image="./images/IMG_7579.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(97, 'Rice', 350, './images/IMG_7579.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="477" data-item-name="Salad">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Salad" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Salad</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Chilled yogurt dip infused with crushed mint leaves, roasted cumin and rock salt.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 350</span>
+            <div class="card-action-container" data-item-name="Salad" data-item-id="477" data-item-price="350" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(477, 'Salad', 350, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="478" data-item-name="Raita">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Raita" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Raita</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Half Sajji, 1 Handi, 4 Roti, 2 Malai Boti, 2 Tikka Boti, 4 Seekh Kabab, salad, raita, 6 refreshing mojitos.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 70</span>
+            <div class="card-action-container" data-item-name="Raita" data-item-id="478" data-item-price="70" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(478, 'Raita', 70, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-platters" data-cat-id="cat-platters">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Family Tandoori Platters</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">1 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="476" data-item-name="Family Tandoori Platter">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7587.JPG.jpeg" alt="Family Tandoori Platter" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Family Tandoori Platter</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Zesty blueberry syrup shaken with fresh mint, crushed ice, and sparkling soda.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 7,000</span>
+            <div class="card-action-container" data-item-name="Family Tandoori Platter" data-item-id="476" data-item-price="7000" data-item-image="./images/IMG_7587.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(476, 'Family Tandoori Platter', 7000, './images/IMG_7587.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-drinks" data-cat-id="cat-drinks">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Mocktails & Mojitos</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">4 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="479" data-item-name="Blueberry Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7576.JPG.jpeg" alt="Blueberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Blueberry Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Sweet strawberry puree with garden mint, lime slices, and crushed ice fizz.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Blueberry Mojito" data-item-id="479" data-item-price="300" data-item-image="./images/IMG_7576.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(479, 'Blueberry Mojito', 300, './images/IMG_7576.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="480" data-item-name="Strawberry Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7576.JPG.jpeg" alt="Strawberry Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Strawberry Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Juicy ripe peach nectar muddled with fresh mint and chilled club soda.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Strawberry Mojito" data-item-id="480" data-item-price="300" data-item-image="./images/IMG_7576.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(480, 'Strawberry Mojito', 300, './images/IMG_7576.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="481" data-item-name="Peach Mojito">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7576.JPG.jpeg" alt="Peach Mojito" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Peach Mojito</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Blended fresh mint slush with tangy lime juice and black salt.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Peach Mojito" data-item-id="481" data-item-price="300" data-item-image="./images/IMG_7576.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(481, 'Peach Mojito', 300, './images/IMG_7576.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="98" data-item-name="Mint Margaritas">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/IMG_7577.JPG.jpeg" alt="Mint Margaritas" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Mint Margaritas</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crushed Oreo cookies layered over rich creamy vanilla ice cream with chocolate drizzle.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 300</span>
+            <div class="card-action-container" data-item-name="Mint Margaritas" data-item-id="98" data-item-price="300" data-item-image="./images/IMG_7577.JPG.jpeg">
+              <button type="button" onclick="handleAddToCart(98, 'Mint Margaritas', 300, './images/IMG_7577.JPG.jpeg')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="category-section scroll-mt-36" id="cat-desserts" data-cat-id="cat-desserts">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">Desserts & Sundaes</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">3 Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="484" data-item-name="Oreo Sundae">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Oreo Sundae" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Oreo Sundae</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Warm Lotus Biscoff spread and crunchy caramelized biscuit crumbs over vanilla ice cream.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 400</span>
+            <div class="card-action-container" data-item-name="Oreo Sundae" data-item-id="484" data-item-price="400" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(484, 'Oreo Sundae', 400, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="485" data-item-name="Lotus Three Sundae">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Lotus Three Sundae" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Lotus Three Sundae</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Gooey Italian Nutella hazelnut fudge spread topped on cold velvety dairy cream.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 400</span>
+            <div class="card-action-container" data-item-name="Lotus Three Sundae" data-item-id="485" data-item-price="400" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(485, 'Lotus Three Sundae', 400, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="486" data-item-name="Nutella Sundae">
+          <div>
+            <div class="w-full h-36 sm:h-44 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              
+              <img src="./images/tandoori_stop_logo.png" alt="Nutella Sundae" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">Nutella Sundae</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">Gooey Italian Nutella hazelnut fudge spread topped on cold velvety dairy cream.</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. 400</span>
+            <div class="card-action-container" data-item-name="Nutella Sundae" data-item-id="486" data-item-price="400" data-item-image="./images/tandoori_stop_logo.png">
+              <button type="button" onclick="handleAddToCart(486, 'Nutella Sundae', 400, './images/tandoori_stop_logo.png')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- G. COMPACT RESTAURANT DETAILS & ABOUT SNIPPET -->
+  <footer class="bg-white border-t border-[#E5E7EB] mt-12 py-10" id="about-section">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-10 w-auto object-contain" />
+          <h4 class="font-['Barlow_Condensed'] font-extrabold text-xl uppercase tracking-wider text-[#111827]">Tandoori Stop Lahore</h4>
+        </div>
+        <p class="text-xs text-[#4B5563] leading-relaxed mb-4">
+          Authentic live clay tandoor chicken, golden cheese naans, charcoal grilled seekh kababs, and traditional handi gravies prepared fresh on order.
+        </p>
+        <div class="flex items-center gap-3">
+          <a href="https://wa.me/923274945947" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow-xs hover:bg-[#20ba59] transition">
+            <span>💬 WhatsApp</span>
+          </a>
+          <a href="tel:03274945947" class="bg-[#F3F4F6] text-[#111827] font-bold text-xs px-3.5 py-2 rounded-lg hover:bg-[#E5E7EB] transition">
+            📞 0327-4945947
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-['Barlow_Condensed'] font-extrabold text-base uppercase tracking-wider text-[#111827] mb-3">3 Live Operational Outlets</h4>
+        <ul class="text-xs text-[#4B5563] space-y-2">
+          <li><strong>Johar Town:</strong> PIA Road, Hakim Chowk, Johar Town, Lahore</li>
+          <li><strong>Lake City:</strong> Opposite Lake City Mall, Raiwind Road, Lahore</li>
+          <li><strong>GT Road Baghbanpura:</strong> GT Road, Baghbanpura, Lahore</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-['Barlow_Condensed'] font-extrabold text-base uppercase tracking-wider text-[#111827] mb-3">Opening Hours & Fulfillment</h4>
+        <p class="text-xs text-[#4B5563] leading-relaxed mb-2">
+          🕒 <strong>Open Daily:</strong> 01:00 PM – 02:00 AM<br/>
+          🛵 <strong>Delivery Time:</strong> 30–45 mins • Standard Fee Rs. 150<br/>
+          🛍️ <strong>Self-Pickup:</strong> 15–20 mins • Free
+        </p>
+        <p class="text-[11px] text-[#9CA3AF] mt-4">
+          &copy; 2026 Tandoori Stop. Part of FoodSphere Aggregator Platform. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT HELPERS -->
+  <script>
+    window.BRAND_SLUG = 'tandooristoppk';
+
+    // Drawer Controls
+    function openMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.remove('-translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    // Modal Controls
+    function openOrderModal() {
+      const modal = document.getElementById('ts-order-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById('ts-order-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setOrderMode(mode) {
+      const isPickup = (mode === 'PICKUP');
+      if (window.CartDrawer && window.CartDrawer.setFulfillmentType) {
+        window.CartDrawer.setFulfillmentType(isPickup ? 'PICKUP' : 'DELIVERY');
+      }
+
+      // Header button toggle
+      const btnDel = document.getElementById('header-btn-delivery');
+      const btnPick = document.getElementById('header-btn-pickup');
+      if (btnDel && btnPick) {
+        if (isPickup) {
+          btnPick.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnDel.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+        } else {
+          btnDel.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnPick.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+        }
+      }
+
+      // Modal button toggle
+      const modalDel = document.getElementById('modal-btn-delivery');
+      const modalPick = document.getElementById('modal-btn-pickup');
+      const addrSec = document.getElementById('modal-address-section');
+      const pickSec = document.getElementById('modal-pickup-section');
+      if (modalDel && modalPick) {
+        if (isPickup) {
+          modalPick.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer";
+          modalDel.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer";
+          if (addrSec) addrSec.style.display = 'none';
+          if (pickSec) pickSec.style.display = 'block';
+        } else {
+          modalDel.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer";
+          modalPick.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer";
+          if (addrSec) addrSec.style.display = 'block';
+          if (pickSec) pickSec.style.display = 'none';
+        }
+      }
+    }
+
+    function onModalBranchChange(val) {
+      const pTitle = document.getElementById('pickup-outlet-title');
+      const pAddr = document.getElementById('pickup-outlet-address');
+      const pCont = document.getElementById('pickup-outlet-contact');
+      if (!pTitle) return;
+      if (val === 'Lake City') {
+        pTitle.textContent = "📍 Lake City Branch";
+        pAddr.textContent = "Opposite Lake City Mall, Raiwind Road, Lahore";
+        pCont.textContent = "📞 0324-4441735 • Ready in 15–20 mins • Free";
+      } else if (val === 'GT Road Baghbanpura') {
+        pTitle.textContent = "📍 GT Road Baghbanpura Branch";
+        pAddr.textContent = "GT Road, Baghbanpura, Lahore";
+        pCont.textContent = "📞 0326-6811177 • Ready in 15–20 mins • Free";
+      } else {
+        pTitle.textContent = "📍 Johar Town Branch";
+        pAddr.textContent = "PIA Road, Hakim Chowk, Johar Town, Lahore";
+        pCont.textContent = "📞 0327-4945947 • Ready in 15–20 mins • Free";
+      }
+    }
+
+    function confirmOrderModeModal() {
+      const sel = document.getElementById('modal-branch-select');
+      const branch = sel ? sel.value : 'Johar Town';
+      const addrInput = document.getElementById('modal-address-input');
+      const addr = addrInput ? addrInput.value.trim() : '';
+
+      const isPickup = (document.getElementById('modal-pickup-section').style.display === 'block');
+      const mode = isPickup ? 'PICKUP' : 'DELIVERY';
+
+      setOrderMode(mode);
+      if (window.CartDrawer && window.CartDrawer.setSelectedBranch) {
+        window.CartDrawer.setSelectedBranch(branch);
+      }
+
+      const branchText = document.getElementById('header-branch-text');
+      if (branchText) {
+        branchText.textContent = `📍 ${branch} • Change`;
+      }
+      const drawerBranch = document.getElementById('drawer-active-branch');
+      if (drawerBranch) {
+        drawerBranch.textContent = branch;
+      }
+
+      localStorage.setItem('ts_selected_branch', branch);
+      localStorage.setItem('ts_mode_confirmed', 'true');
+      closeOrderModal();
+    }
+
+    function handleAddToCart(id, name, price, img) {
+      if (window.CartDrawer && window.CartDrawer.addItem) {
+        window.CartDrawer.addItem(id, name, price, img);
+      }
+    }
+
+    function handleCardQty(name, delta) {
+      if (window.CartDrawer && window.CartDrawer.updateQty) {
+        window.CartDrawer.updateQty(name, delta);
+      }
+    }
+
+    window.syncCardSteppers = function() {
+      const items = (window.CartDrawer && window.CartDrawer.getItems) ? window.CartDrawer.getItems() : [];
+      document.querySelectorAll('.card-action-container').forEach(container => {
+        const name = container.getAttribute('data-item-name');
+        const id = container.getAttribute('data-item-id');
+        const price = container.getAttribute('data-item-price');
+        const img = container.getAttribute('data-item-image');
+        const cartItem = items.find(i => i.name === name);
+        const qty = cartItem ? cartItem.qty : 0;
+
+        if (qty > 0) {
+          container.innerHTML = `
+            <div class="stepper-wrap flex items-center bg-[#C81E1E] rounded-xl overflow-hidden shadow-xs text-white">
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#991B1B] transition cursor-pointer">-</button>
+              <span class="w-8 text-center text-xs font-extrabold">${qty}</span>
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#991B1B] transition cursor-pointer">+</button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\'")}', ${price}, '${img}')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+          `;
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const confirmed = localStorage.getItem('ts_mode_confirmed');
+        if (confirmed !== 'true') {
+          openOrderModal();
+        } else {
+          const savedBranch = localStorage.getItem('ts_selected_branch') || 'Johar Town';
+          const bText = document.getElementById('header-branch-text');
+          if (bText) bText.textContent = `📍 ${savedBranch} • Change`;
+        }
+      } catch (e) {
+        openOrderModal();
+      }
+      setTimeout(() => {
+        if (typeof window.syncCardSteppers === 'function') window.syncCardSteppers();
+      }, 50);
+    });
+  </script>
+
+  <!-- External Cart & Catalog Engine -->
+  <script src="cart_drawer.js?v=20261019"></script>
+  <script src="live_catalog.js?v=20261019"></script>
+
+
+  <script>
+    function scrollToCategorySection(catId) {
+      if (catId === 'all') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        updateActiveTab('all');
+        return;
+      }
+      const el = document.getElementById(catId) || document.querySelector(`[data-cat-id="${catId}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        updateActiveTab(catId);
+      }
+    }
+
+    function updateActiveTab(catId) {
+      document.querySelectorAll('.category-tab').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${catId}'`)) {
+          btn.className = "category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-[#C81E1E] text-[#C81E1E] bg-transparent whitespace-nowrap cursor-pointer";
+        } else {
+          btn.className = "category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer";
+        }
+      });
+    }
+
+    function handleLiveSearch(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('#menu .product-card').forEach(card => {
+        const name = (card.getAttribute('data-item-name') || '').toLowerCase();
+        const desc = (card.querySelector('p') ? card.querySelector('p').textContent : '').toLowerCase();
+        if (!q || name.includes(q) || desc.includes(q)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Scroll to URL hash on load
+    window.addEventListener('load', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        setTimeout(() => {
+          scrollToCategorySection(hash);
+        }, 100);
+      }
+    });
+  </script>
+
 </body>
 </html>

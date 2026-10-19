@@ -1,0 +1,764 @@
+import json
+import re
+
+with open('websites/tandooristoppk_data.json', 'r', encoding='utf-8') as f:
+    categories = json.load(f)
+
+# Also extract item descriptions from the original index.html
+with open('websites/tandooristoppk/index.html', 'r', encoding='utf-8') as f:
+    orig_html = f.read()
+
+for cat in categories:
+    for item in cat['items']:
+        name = item['name']
+        m = re.search(rf'data-item-name="{re.escape(name)}".*?<p[^>]*class="[^"]*text-\[13px\][^"]*"[^>]*>(.*?)</p>', orig_html, re.DOTALL)
+        if not m:
+            m = re.search(rf'{re.escape(name)}</h3>\s*<p[^>]*>(.*?)</p>', orig_html, re.DOTALL)
+        desc = re.sub(r'<[^>]+>', '', m.group(1)).strip() if m else ''
+        item['description'] = desc
+
+        # Check badge
+        b_match = re.search(rf'data-item-name="{re.escape(name)}".*?<span[^>]*class="[^"]*absolute top-2\.5 left-2\.5[^"]*"[^>]*>(.*?)</span>', orig_html, re.DOTALL)
+        item['badge'] = re.sub(r'<[^>]+>', '', b_match.group(1)).strip() if b_match else ''
+
+explore_categories = [
+    {
+        'id': 'cat-tandoori',
+        'name': 'Tandoori Chicken',
+        'image': './images/IMG_7585.JPG.jpeg'
+    },
+    {
+        'id': 'cat-sajji',
+        'name': 'Chicken Sajji',
+        'image': './images/IMG_7587.JPG.jpeg'
+    },
+    {
+        'id': 'cat-rolls',
+        'name': 'Paratha Rolls',
+        'image': './images/IMG_7588.JPG.jpeg'
+    },
+    {
+        'id': 'cat-bbq',
+        'name': 'Charcoal BBQ',
+        'image': './images/IMG_7583.JPG.jpeg'
+    },
+    {
+        'id': 'cat-handi',
+        'name': 'Handi Specials',
+        'image': './images/tandoori_stop_logo.png'
+    },
+    {
+        'id': 'cat-karahi',
+        'name': 'Karahi & Tawa',
+        'image': './images/IMG_7585.JPG.jpeg'
+    }
+]
+
+# 6 Bestsellers
+bestseller_names = [
+    'Tandoori Chicken Bone (Cheese Naan Single)',
+    'Traditional Chicken Sajji (Quarter)',
+    'Malai Boti Roll',
+    'Tikka Boti (Per Seekh)',
+    'Cheese Naan',
+    'Mint Margaritas'
+]
+
+all_items = []
+for c in categories:
+    all_items.extend(c['items'])
+
+bestsellers = []
+for bname in bestseller_names:
+    found = next((i for i in all_items if i['name'] == bname), None)
+    if found:
+        bestsellers.append(found)
+
+print(f"Loaded {len(all_items)} TS items across {len(categories)} categories")
+print(f"Bestsellers ({len(bestsellers)}): {[b['name'] for b in bestsellers]}")
+
+def render_product_card(item, compact=False):
+    badge_html = f'<span class="bg-[#C81E1E] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs uppercase tracking-wider">{item["badge"]}</span>' if item.get('badge') else ''
+    h_img = "h-36 sm:h-44" if not compact else "h-32 sm:h-40"
+    price_formatted = f"{item['price']:,}"
+    return f'''
+        <div class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="{item['id']}" data-item-name="{item['name']}">
+          <div>
+            <div class="w-full {h_img} bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5 relative">
+              {badge_html}
+              <img src="{item['image']}" alt="{item['name']}" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+            </div>
+            <h3 class="font-['Barlow_Condensed'] text-lg sm:text-[20px] font-bold text-[#111827] leading-snug uppercase mb-1">{item['name']}</h3>
+            <p class="text-xs sm:text-[13px] font-medium text-[#4B5563] line-clamp-2 mb-3">{item['description']}</p>
+          </div>
+          <div class="pt-2.5 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
+            <span class="font-['Barlow_Condensed'] text-lg sm:text-2xl font-bold text-[#C81E1E]">Rs. {price_formatted}</span>
+            <div class="card-action-container" data-item-name="{item['name']}" data-item-id="{item['id']}" data-item-price="{item['price']}" data-item-image="{item['image']}">
+              <button type="button" onclick="handleAddToCart({item['id']}, '{item['name']}', {item['price']}, '{item['image']}')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>'''
+
+# SHARED HEADER HTML FOR TANDOORI STOP
+header_html = '''
+  <!-- B. STICKY COMMERCIAL HEADER (NO TOP ANNOUNCEMENT BAR) -->
+  <header class="sticky top-0 z-40 h-16 sm:h-[72px] bg-white border-b border-[#E5E7EB] px-3 sm:px-6">
+    <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-2">
+      
+      <!-- LEFT GROUP: Hamburger + Brand Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="hamburger-btn" aria-label="Open Menu" onclick="openMobileNavDrawer()" class="w-10 h-10 rounded-xl bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] transition cursor-pointer shrink-0">
+          <svg class="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="index.html" class="shrink-0 flex items-center" aria-label="Tandoori Stop Home">
+          <img src="./images/tandoori_logo_horizontal_clean.png" alt="Tandoori Stop Logo" class="h-9 sm:h-11 w-auto object-contain" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+        </a>
+      </div>
+
+      <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
+      <div class="flex items-center gap-2">
+        <div class="bg-[#F3F4F6] p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
+          <button type="button" id="header-btn-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap">
+            🛵 Delivery
+          </button>
+          <button type="button" id="header-btn-pickup" onclick="setOrderMode('PICKUP')" class="text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap">
+            🛍️ Pickup
+          </button>
+        </div>
+
+        <button type="button" id="header-branch-btn" onclick="openOrderModal()" class="hidden md:flex items-center gap-1.5 bg-[#FAF8F5] border border-[#E5E7EB] hover:border-[#C81E1E] px-3 py-1.5 rounded-xl text-xs font-bold text-[#1C1917] transition cursor-pointer select-none">
+          <span id="header-branch-text">📍 Johar Town • Change</span>
+        </button>
+      </div>
+
+      <!-- RIGHT GROUP: Compact Cart Button (NO 'Rs. 0' TEXT) -->
+      <div class="flex items-center gap-2">
+        <button type="button" id="header-cart-bucket" onclick="if(window.CartDrawer) window.CartDrawer.openDrawer();" class="bg-[#1C1917] hover:bg-[#C81E1E] text-white font-extrabold h-10 px-3 sm:px-3.5 rounded-xl flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0" aria-label="Open Cart Bucket">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="header-cart-count" class="bg-[#C81E1E] text-white text-xs font-extrabold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- SLIDE-OUT HAMBURGER NAVIGATION DRAWER -->
+  <div id="mobile-nav-backdrop" onclick="closeMobileNavDrawer()" class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true"></div>
+  <aside id="mobile-nav-drawer" class="fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl border-r border-[#E5E7EB] flex flex-col justify-between p-5 transform -translate-x-full transition-transform duration-300 ease-in-out" aria-label="Main Navigation">
+    <div>
+      <!-- Drawer Top -->
+      <div class="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
+        <div class="flex items-center gap-2.5">
+          <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-9 w-auto object-contain rounded-md" />
+          <span class="font-['Barlow_Condensed'] font-extrabold text-[#1C1917] text-lg uppercase tracking-wider">Tandoori Stop</span>
+        </div>
+        <button type="button" id="close-drawer-btn" onclick="closeMobileNavDrawer()" class="w-9 h-9 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] text-xl font-bold cursor-pointer transition" aria-label="Close menu">&times;</button>
+      </div>
+      <!-- Drawer Navigation Links -->
+      <nav class="mt-4 space-y-1 font-['Barlow_Condensed'] text-base uppercase tracking-wider">
+        <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="menu.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">📖</span>
+          <span>All Menu (Full Catalog)</span>
+        </a>
+        <button type="button" onclick="closeMobileNavDrawer(); openOrderModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition text-left cursor-pointer font-['Barlow_Condensed'] text-base uppercase tracking-wider">
+          <span class="text-lg">🛵</span>
+          <span>Change Order Mode / Branch</span>
+        </button>
+        <a href="locations.html" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">📍</span>
+          <span>Branch Locations</span>
+        </a>
+        <a href="index.html#about-section" onclick="closeMobileNavDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[#111827] hover:bg-[#F3F4F6] transition">
+          <span class="text-lg">ℹ️</span>
+          <span>About Us</span>
+        </a>
+      </nav>
+    </div>
+    <!-- Drawer Bottom: Active Branch, Phone, WhatsApp -->
+    <div class="pt-4 border-t border-[#E5E7EB] text-xs text-[#4B5563] space-y-2">
+      <div>
+        <span class="font-bold text-[#111827] block">Active Outlet:</span>
+        <span id="drawer-active-branch" class="text-xs font-semibold text-[#C81E1E]">Johar Town (PIA Road)</span>
+      </div>
+      <div>
+        <span class="font-bold text-[#111827] block">Helpline:</span>
+        <a href="tel:03274945947" class="text-xs font-semibold text-[#111827] hover:underline">0327-4945947</a>
+      </div>
+      <a href="https://wa.me/923274945947" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-2 rounded-xl text-xs hover:bg-[#20ba59] transition">
+        <span>💬 WhatsApp Support</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- C. MANDATORY ENTRY ORDER MODE & LOCATION POPUP MODAL -->
+  <div id="ts-order-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity duration-200" style="display: none;">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#E5E7EB] relative transform transition-all">
+      <button type="button" onclick="closeOrderModal()" class="absolute top-5 right-5 text-[#9CA3AF] hover:text-[#111827] text-2xl font-bold leading-none p-1 cursor-pointer transition">&times;</button>
+      
+      <div class="flex items-center gap-3 mb-5">
+        <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-10 w-auto object-contain" />
+        <div>
+          <h3 class="font-['Barlow_Condensed'] text-2xl font-extrabold uppercase tracking-wide text-[#111827] leading-tight">Order Method</h3>
+          <p class="text-xs text-[#6B7280]">Select fulfillment type &amp; your nearest operational branch</p>
+        </div>
+      </div>
+
+      <!-- Segmented Toggle -->
+      <div class="grid grid-cols-2 gap-2 bg-[#FAF8F5] p-1.5 rounded-2xl border border-[#E5E7EB] mb-5">
+        <button type="button" id="modal-btn-delivery" onclick="setOrderMode('DELIVERY')" class="py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer">
+          🛵 Delivery
+        </button>
+        <button type="button" id="modal-btn-pickup" onclick="setOrderMode('PICKUP')" class="py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer">
+          🛍️ Pickup
+        </button>
+      </div>
+
+      <!-- Branch Selection -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1.5">Select Branch</label>
+          <select id="modal-branch-select" onchange="onModalBranchChange(this.value)" class="w-full bg-[#FAF8F5] border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm font-semibold text-[#111827] outline-none focus:border-[#C81E1E]">
+            <option value="Johar Town">Johar Town (PIA Road, Hakim Chowk | 0327-4945947)</option>
+            <option value="Lake City">Lake City (Opposite Mall, Raiwind Rd | 0324-4441735)</option>
+            <option value="GT Road Baghbanpura">GT Road Baghbanpura (GT Road | 0326-6811177)</option>
+          </select>
+        </div>
+
+        <!-- Delivery Address Input -->
+        <div id="modal-address-section">
+          <label class="block text-xs font-bold uppercase tracking-wider text-[#4B5563] mb-1.5">Delivery Address</label>
+          <input type="text" id="modal-address-input" placeholder="House/Flat #, Street #, Sector / Colony" class="w-full bg-[#FAF8F5] border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm text-[#111827] outline-none focus:border-[#C81E1E]" />
+          <p class="text-[11px] text-[#6B7280] mt-1.5">Flat delivery fee: <strong>Rs. 150</strong>. Delivered piping hot in 30-45 mins.</p>
+        </div>
+
+        <!-- Pickup Info Box -->
+        <div id="modal-pickup-section" style="display:none;" class="bg-[#FAF8F5] border border-[#E5E7EB] rounded-xl p-3.5 text-xs text-[#4B5563] space-y-1">
+          <p class="font-bold text-[#111827]" id="pickup-outlet-title">📍 Johar Town Branch</p>
+          <p id="pickup-outlet-address">PIA Road, Hakim Chowk, Johar Town, Lahore</p>
+          <p class="text-[#C81E1E] font-semibold" id="pickup-outlet-contact">📞 0327-4945947 • Ready in 15–20 mins • Free</p>
+        </div>
+
+        <button type="button" onclick="confirmOrderModeModal()" class="w-full bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] text-xl font-extrabold uppercase tracking-wider py-3.5 rounded-xl shadow-md transition cursor-pointer mt-2">
+          Start Order
+        </button>
+      </div>
+    </div>
+  </div>
+'''
+
+shared_footer_html = '''
+  <!-- G. COMPACT RESTAURANT DETAILS & ABOUT SNIPPET -->
+  <footer class="bg-white border-t border-[#E5E7EB] mt-12 py-10" id="about-section">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <img src="./images/tandoori_stop_logo.png" alt="Tandoori Stop" class="h-10 w-auto object-contain" />
+          <h4 class="font-['Barlow_Condensed'] font-extrabold text-xl uppercase tracking-wider text-[#111827]">Tandoori Stop Lahore</h4>
+        </div>
+        <p class="text-xs text-[#4B5563] leading-relaxed mb-4">
+          Authentic live clay tandoor chicken, golden cheese naans, charcoal grilled seekh kababs, and traditional handi gravies prepared fresh on order.
+        </p>
+        <div class="flex items-center gap-3">
+          <a href="https://wa.me/923274945947" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow-xs hover:bg-[#20ba59] transition">
+            <span>💬 WhatsApp</span>
+          </a>
+          <a href="tel:03274945947" class="bg-[#F3F4F6] text-[#111827] font-bold text-xs px-3.5 py-2 rounded-lg hover:bg-[#E5E7EB] transition">
+            📞 0327-4945947
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-['Barlow_Condensed'] font-extrabold text-base uppercase tracking-wider text-[#111827] mb-3">3 Live Operational Outlets</h4>
+        <ul class="text-xs text-[#4B5563] space-y-2">
+          <li><strong>Johar Town:</strong> PIA Road, Hakim Chowk, Johar Town, Lahore</li>
+          <li><strong>Lake City:</strong> Opposite Lake City Mall, Raiwind Road, Lahore</li>
+          <li><strong>GT Road Baghbanpura:</strong> GT Road, Baghbanpura, Lahore</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-['Barlow_Condensed'] font-extrabold text-base uppercase tracking-wider text-[#111827] mb-3">Opening Hours & Fulfillment</h4>
+        <p class="text-xs text-[#4B5563] leading-relaxed mb-2">
+          🕒 <strong>Open Daily:</strong> 01:00 PM – 02:00 AM<br/>
+          🛵 <strong>Delivery Time:</strong> 30–45 mins • Standard Fee Rs. 150<br/>
+          🛍️ <strong>Self-Pickup:</strong> 15–20 mins • Free
+        </p>
+        <p class="text-[11px] text-[#9CA3AF] mt-4">
+          &copy; 2026 Tandoori Stop. Part of FoodSphere Aggregator Platform. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT HELPERS -->
+  <script>
+    window.BRAND_SLUG = 'tandooristoppk';
+
+    // Drawer Controls
+    function openMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.remove('-translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeMobileNavDrawer() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      if (drawer && backdrop) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    // Modal Controls
+    function openOrderModal() {
+      const modal = document.getElementById('ts-order-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById('ts-order-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setOrderMode(mode) {
+      const isPickup = (mode === 'PICKUP');
+      if (window.CartDrawer && window.CartDrawer.setFulfillmentType) {
+        window.CartDrawer.setFulfillmentType(isPickup ? 'PICKUP' : 'DELIVERY');
+      }
+
+      // Header button toggle
+      const btnDel = document.getElementById('header-btn-delivery');
+      const btnPick = document.getElementById('header-btn-pickup');
+      if (btnDel && btnPick) {
+        if (isPickup) {
+          btnPick.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnDel.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+        } else {
+          btnDel.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnPick.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+        }
+      }
+
+      // Modal button toggle
+      const modalDel = document.getElementById('modal-btn-delivery');
+      const modalPick = document.getElementById('modal-btn-pickup');
+      const addrSec = document.getElementById('modal-address-section');
+      const pickSec = document.getElementById('modal-pickup-section');
+      if (modalDel && modalPick) {
+        if (isPickup) {
+          modalPick.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer";
+          modalDel.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer";
+          if (addrSec) addrSec.style.display = 'none';
+          if (pickSec) pickSec.style.display = 'block';
+        } else {
+          modalDel.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-extrabold uppercase tracking-wider bg-[#C81E1E] text-white shadow-sm transition cursor-pointer";
+          modalPick.className = "py-3 px-4 rounded-xl font-['Barlow_Condensed'] text-lg font-bold uppercase tracking-wider text-[#4B5563] hover:text-[#111827] transition cursor-pointer";
+          if (addrSec) addrSec.style.display = 'block';
+          if (pickSec) pickSec.style.display = 'none';
+        }
+      }
+    }
+
+    function onModalBranchChange(val) {
+      const pTitle = document.getElementById('pickup-outlet-title');
+      const pAddr = document.getElementById('pickup-outlet-address');
+      const pCont = document.getElementById('pickup-outlet-contact');
+      if (!pTitle) return;
+      if (val === 'Lake City') {
+        pTitle.textContent = "📍 Lake City Branch";
+        pAddr.textContent = "Opposite Lake City Mall, Raiwind Road, Lahore";
+        pCont.textContent = "📞 0324-4441735 • Ready in 15–20 mins • Free";
+      } else if (val === 'GT Road Baghbanpura') {
+        pTitle.textContent = "📍 GT Road Baghbanpura Branch";
+        pAddr.textContent = "GT Road, Baghbanpura, Lahore";
+        pCont.textContent = "📞 0326-6811177 • Ready in 15–20 mins • Free";
+      } else {
+        pTitle.textContent = "📍 Johar Town Branch";
+        pAddr.textContent = "PIA Road, Hakim Chowk, Johar Town, Lahore";
+        pCont.textContent = "📞 0327-4945947 • Ready in 15–20 mins • Free";
+      }
+    }
+
+    function confirmOrderModeModal() {
+      const sel = document.getElementById('modal-branch-select');
+      const branch = sel ? sel.value : 'Johar Town';
+      const addrInput = document.getElementById('modal-address-input');
+      const addr = addrInput ? addrInput.value.trim() : '';
+
+      const isPickup = (document.getElementById('modal-pickup-section').style.display === 'block');
+      const mode = isPickup ? 'PICKUP' : 'DELIVERY';
+
+      setOrderMode(mode);
+      if (window.CartDrawer && window.CartDrawer.setSelectedBranch) {
+        window.CartDrawer.setSelectedBranch(branch);
+      }
+
+      const branchText = document.getElementById('header-branch-text');
+      if (branchText) {
+        branchText.textContent = `📍 ${branch} • Change`;
+      }
+      const drawerBranch = document.getElementById('drawer-active-branch');
+      if (drawerBranch) {
+        drawerBranch.textContent = branch;
+      }
+
+      localStorage.setItem('ts_selected_branch', branch);
+      localStorage.setItem('ts_mode_confirmed', 'true');
+      closeOrderModal();
+    }
+
+    function handleAddToCart(id, name, price, img) {
+      if (window.CartDrawer && window.CartDrawer.addItem) {
+        window.CartDrawer.addItem(id, name, price, img);
+      }
+    }
+
+    function handleCardQty(name, delta) {
+      if (window.CartDrawer && window.CartDrawer.updateQty) {
+        window.CartDrawer.updateQty(name, delta);
+      }
+    }
+
+    window.syncCardSteppers = function() {
+      const items = (window.CartDrawer && window.CartDrawer.getItems) ? window.CartDrawer.getItems() : [];
+      document.querySelectorAll('.card-action-container').forEach(container => {
+        const name = container.getAttribute('data-item-name');
+        const id = container.getAttribute('data-item-id');
+        const price = container.getAttribute('data-item-price');
+        const img = container.getAttribute('data-item-image');
+        const cartItem = items.find(i => i.name === name);
+        const qty = cartItem ? cartItem.qty : 0;
+
+        if (qty > 0) {
+          container.innerHTML = `
+            <div class="stepper-wrap flex items-center bg-[#C81E1E] rounded-xl overflow-hidden shadow-xs text-white">
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\\'")}', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#991B1B] transition cursor-pointer">-</button>
+              <span class="w-8 text-center text-xs font-extrabold">${qty}</span>
+              <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\\'")}', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#991B1B] transition cursor-pointer">+</button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\\'")}', ${price}, '${img}')" class="btn-add-cart bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold uppercase text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+          `;
+        }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const confirmed = localStorage.getItem('ts_mode_confirmed');
+        if (confirmed !== 'true') {
+          openOrderModal();
+        } else {
+          const savedBranch = localStorage.getItem('ts_selected_branch') || 'Johar Town';
+          const bText = document.getElementById('header-branch-text');
+          if (bText) bText.textContent = `📍 ${savedBranch} • Change`;
+        }
+      } catch (e) {
+        openOrderModal();
+      }
+      setTimeout(() => {
+        if (typeof window.syncCardSteppers === 'function') window.syncCardSteppers();
+      }, 50);
+    });
+  </script>
+
+  <!-- External Cart & Catalog Engine -->
+  <script src="cart_drawer.js?v=20261019"></script>
+  <script src="live_catalog.js?v=20261019"></script>
+'''
+
+# 1. BUILD index.html (Showcase Only)
+explore_cards_html = ""
+for ec in explore_categories:
+    explore_cards_html += f'''
+      <a href="menu.html#{ec['id']}" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#C81E1E] transition cursor-pointer flex flex-col justify-between group">
+        <div class="w-full h-24 sm:h-28 bg-[#FAF8F5] rounded-xl overflow-hidden mb-2.5">
+          <img src="{ec['image']}" alt="{ec['name']}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+        </div>
+        <span class="font-['Barlow_Condensed'] text-base sm:text-lg font-bold uppercase tracking-wider text-[#111827] text-center group-hover:text-[#C81E1E] transition">{ec['name']}</span>
+      </a>'''
+
+bestsellers_cards_html = ""
+for b in bestsellers:
+    bestsellers_cards_html += render_product_card(b, compact=True)
+
+index_html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tandoori Stop — Smoky Tandoori Chicken, Cheese Naan &amp; Authentic Sajji | Lahore</title>
+  <meta name="description" content="Tandoori Stop Lahore — Smoky live tandoori chicken, molten cheese naans, whole chicken sajji, charcoal grilled tikka and fresh karahis across Johar Town, Lake City &amp; GT Road Baghbanpura."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {{
+      theme: {{
+        extend: {{
+          colors: {{
+            tsCrimson: '#C81E1E',
+            tsCharcoal: '#1C1917',
+            tsGold: '#F59E0B',
+            tsCanvas: '#FAF8F5'
+          }},
+          fontFamily: {{
+            sans: ['"Inter"', 'sans-serif'],
+            heading: ['"Barlow Condensed"', 'sans-serif']
+          }}
+        }}
+      }}
+    }}
+  </script>
+
+  <link rel="stylesheet" href="cart_drawer.css?v=20261019"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20261019"/>
+</head>
+<body class="bg-[#FAF8F5] text-[#111827] font-['Inter'] antialiased min-h-screen flex flex-col">
+
+{header_html}
+
+  <main class="flex-1 w-full space-y-6 sm:space-y-8 pb-10">
+
+    <!-- HERO SECTION: DESIGN TYPE 2 (2-Card Visual Promo Showcase) -->
+    <section class="max-w-7xl mx-auto px-4 pt-3 pb-2 w-full grid grid-cols-1 md:grid-cols-3 gap-3">
+      <!-- Main Card (md:col-span-2) -->
+      <div class="md:col-span-2 relative h-[185px] sm:h-[240px] rounded-2xl overflow-hidden shadow-sm border border-[#E5E7EB] bg-[#1C1917]">
+        <img src="./images/IMG_7585.JPG.jpeg" alt="Smoky Tandoori Chicken &amp; Cheese Naans" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/IMG_7589.JPG.jpeg';" />
+        <div class="absolute inset-0 bg-gradient-to-r from-[#1C1917]/95 via-[#1C1917]/65 to-transparent flex flex-col justify-center p-5 sm:p-7">
+          <span class="bg-[#F59E0B] text-[#1C1917] text-[10px] sm:text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full inline-block w-fit">LIVE CLAY TANDOOR</span>
+          <h1 class="text-white font-['Barlow_Condensed'] text-2xl sm:text-4xl font-extrabold uppercase leading-none mt-1">
+            SMOKY TANDOORI CHICKEN &amp; CHEESE NAANS
+          </h1>
+          <a href="menu.html" class="bg-[#C81E1E] hover:bg-[#991B1B] text-white font-['Barlow_Condensed'] font-extrabold text-xs sm:text-sm uppercase tracking-wider px-4 py-2 rounded-lg mt-3 inline-block w-fit shadow-xs transition">
+            EXPLORE FULL MENU &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Secondary Highlight Card (hidden md:flex md:col-span-1) -->
+      <div class="hidden md:flex md:col-span-1 relative h-[240px] rounded-2xl overflow-hidden shadow-sm border border-[#E5E7EB] bg-[#1C1917] group">
+        <img src="./images/IMG_7587.JPG.jpeg" alt="Whole Roasted Chicken Sajji" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#1C1917]/90 via-transparent to-transparent flex flex-col justify-end p-4">
+          <span class="text-white font-['Barlow_Condensed'] text-xl font-extrabold uppercase tracking-wide">
+            WHOLE ROASTED CHICKEN SAJJI
+          </span>
+          <a href="menu.html#cat-sajji" class="text-xs font-bold text-[#F59E0B] hover:underline uppercase tracking-wider mt-0.5">
+            View Sajji Specials &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE MENU: KFC-Style Visual Category Cards -->
+    <section class="max-w-7xl mx-auto px-4 w-full">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-['Barlow_Condensed'] text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#111827]">EXPLORE MENU</h2>
+          <div class="w-12 h-1 mt-1 rounded-full bg-[#C81E1E]"></div>
+        </div>
+        <a href="menu.html" class="text-xs sm:text-sm font-extrabold uppercase underline tracking-wider text-[#C81E1E] hover:text-[#991B1B] transition">
+          VIEW ALL
+        </a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        {explore_cards_html}
+      </div>
+    </section>
+
+    <!-- BEST SELLERS: 6 Featured Items Only -->
+    <section class="max-w-7xl mx-auto px-4 w-full">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="font-['Barlow_Condensed'] text-xl sm:text-2xl font-extrabold uppercase tracking-tight text-[#111827]">BEST SELLERS</h2>
+          <div class="w-12 h-1 mt-1 rounded-full bg-[#C81E1E]"></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+        {bestsellers_cards_html}
+      </div>
+      <div class="mt-6 text-center">
+        <a href="menu.html" class="inline-block bg-[#C81E1E] hover:bg-[#1C1917] text-white font-['Barlow_Condensed'] font-extrabold text-base uppercase tracking-wider px-6 py-3 rounded-xl shadow-sm transition">
+          Explore Full Menu &rarr;
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+{shared_footer_html}
+
+</body>
+</html>
+'''
+
+with open('websites/tandooristoppk/index.html', 'w', encoding='utf-8') as f:
+    f.write(index_html)
+print("Successfully generated websites/tandooristoppk/index.html")
+
+# 2. BUILD menu.html (Full Categorized Catalog)
+menu_categories_html = ""
+for c in categories:
+    cat_items_html = ""
+    for item in c['items']:
+        cat_items_html += render_product_card(item)
+    menu_categories_html += f'''
+    <section class="category-section scroll-mt-36" id="{c['id']}" data-cat-id="{c['id']}">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-2 h-7 bg-[#C81E1E] rounded-full"></span>
+        <h2 class="font-['Barlow_Condensed'] text-2xl sm:text-3xl font-extrabold text-[#111827] uppercase tracking-wide">{c['title']}</h2>
+        <span class="bg-[#FAF8F5] text-[#C81E1E] font-['Barlow_Condensed'] text-sm font-bold px-2.5 py-0.5 rounded-full border border-[#E5E7EB]">{len(c['items'])} Items</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {cat_items_html}
+      </div>
+    </section>'''
+
+category_tabs_html = '''
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-[#C81E1E] text-[#C81E1E] bg-transparent whitespace-nowrap cursor-pointer" onclick="scrollToCategorySection('all')">
+        All Menu
+      </button>'''
+for c in categories:
+    # Shorten name for tab
+    tab_name = c['title'].split('&')[0].strip().replace('Authentic', '').replace('Signature', '').replace('Clay', '').replace('Wok', '').strip()
+    category_tabs_html += f'''
+      <button type="button" class="category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer" onclick="scrollToCategorySection('{c['id']}')">
+        {tab_name}
+      </button>'''
+
+menu_html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tandoori Stop — Full Menu &amp; Catalog | Lahore</title>
+  <meta name="description" content="Explore Tandoori Stop Lahore's full tandoor catalog: Tandoori Chicken, Sajji, Paratha Rolls, Charcoal BBQ, Handis, Karahis, and Fresh Naans."/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {{
+      theme: {{
+        extend: {{
+          colors: {{
+            tsCrimson: '#C81E1E',
+            tsCharcoal: '#1C1917',
+            tsGold: '#F59E0B',
+            tsCanvas: '#FAF8F5'
+          }},
+          fontFamily: {{
+            sans: ['"Inter"', 'sans-serif'],
+            heading: ['"Barlow Condensed"', 'sans-serif']
+          }}
+        }}
+      }}
+    }}
+  </script>
+
+  <link rel="stylesheet" href="cart_drawer.css?v=20261019"/>
+  <link rel="stylesheet" href="theme_ts.css?v=20261019"/>
+</head>
+<body class="bg-[#FAF8F5] text-[#111827] font-['Inter'] antialiased min-h-screen flex flex-col">
+
+{header_html}
+
+  <!-- STICKY CATEGORY RIBBON & LIVE SEARCH BAR -->
+  <nav class="sticky top-16 sm:top-[72px] z-30 bg-white border-b border-[#E5E7EB] py-2.5 px-3 sm:px-6 shadow-xs">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <!-- Search Input -->
+      <div class="relative w-full sm:max-w-xs">
+        <input type="text" id="menu-search-input" oninput="handleLiveSearch(this.value)" placeholder="Search tandoori dishes, sajji, rolls..." class="w-full bg-[#FAF8F5] border border-[#E5E7EB] focus:border-[#C81E1E] focus:bg-white rounded-xl pl-9 pr-3 py-1.5 text-xs sm:text-sm font-medium text-[#111827] placeholder-[#6B7280] outline-none transition" />
+        <svg class="w-4 h-4 text-[#6B7280] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+
+      <!-- Horizontal Scrollable Category Tabs -->
+      <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5" id="category-tabs">
+        {category_tabs_html}
+      </div>
+    </div>
+  </nav>
+
+  <!-- FULL CATEGORIZED CATALOG BODY -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-10 flex-1 w-full" id="menu">
+    {menu_categories_html}
+  </main>
+
+{shared_footer_html}
+
+  <script>
+    function scrollToCategorySection(catId) {{
+      if (catId === 'all') {{
+        window.scrollTo({{ top: 0, behavior: 'smooth' }});
+        updateActiveTab('all');
+        return;
+      }}
+      const el = document.getElementById(catId) || document.querySelector(`[data-cat-id="${{catId}}"]`);
+      if (el) {{
+        el.scrollIntoView({{ behavior: 'smooth' }});
+        updateActiveTab(catId);
+      }}
+    }}
+
+    function updateActiveTab(catId) {{
+      document.querySelectorAll('.category-tab').forEach(btn => {{
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${{catId}}'`)) {{
+          btn.className = "category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-[#C81E1E] text-[#C81E1E] bg-transparent whitespace-nowrap cursor-pointer";
+        }} else {{
+          btn.className = "category-tab font-['Barlow_Condensed'] text-sm sm:text-base font-bold uppercase tracking-wider py-2 px-3 border-b-2 border-transparent text-[#4B5563] hover:text-[#C81E1E] bg-transparent whitespace-nowrap transition cursor-pointer";
+        }}
+      }});
+    }}
+
+    function handleLiveSearch(query) {{
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('#menu .product-card').forEach(card => {{
+        const name = (card.getAttribute('data-item-name') || '').toLowerCase();
+        const desc = (card.querySelector('p') ? card.querySelector('p').textContent : '').toLowerCase();
+        if (!q || name.includes(q) || desc.includes(q)) {{
+          card.style.display = 'flex';
+        }} else {{
+          card.style.display = 'none';
+        }}
+      }});
+    }}
+
+    // Scroll to URL hash on load
+    window.addEventListener('load', () => {{
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {{
+        setTimeout(() => {{
+          scrollToCategorySection(hash);
+        }}, 100);
+      }}
+    }});
+  </script>
+
+</body>
+</html>
+'''
+
+with open('websites/tandooristoppk/menu.html', 'w', encoding='utf-8') as f:
+    f.write(menu_html)
+print("Successfully generated websites/tandooristoppk/menu.html")

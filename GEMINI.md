@@ -217,6 +217,7 @@ FoodSphere/
 | Dine At Blue Visual Audit & Asset Alignment (Phase 6) | ✅ Completed (Re-cropped all 41 dishes with tight food-only bounding boxes, transparent logo SVG/PNG, context-aware category badges, relocated active order banner to bottom with dismiss & 12h auto-purge, Cloudflare Pages live) | Done |
 | Phase 7 Jushh PK Hero Polish & Tandoori Stop KFC Rebuild | ✅ Completed (Upright Turkish Doner hero banner, purged dark AI templates, #FAF8F5 body/#C81E1E crimson/0 orange, 76px sticky header, 3 physical branches modal, 46 food cards, Playwright 19/19 passed, Cloudflare Pages live) | Done |
 | Phase 8 Jushh PK Audit, Tandoori Stop Handi/Card Differentiation & Dine At Blue Complete KFC Rebuild | ✅ Completed (48 assets to Cloudinary depa8gfnk, 1024x1024 circular logo upscale, Plain Fries logo placeholder, Tandoori Stop bottom-underline tabs & docked price badges & full-width steppers, Dine At Blue 41-dish cool coastal ice-white KFC rebuild, Playwright 29/29 passed, Cloudflare Pages live) | Done |
+| Phase 8.1 Mobile-First KFC 2-Page Storefront, Header De-Congestion, Hamburger Drawer & 3 Distinct Brand Heroes | ✅ Completed (Header de-congested, hamburger drawer on all viewports, index.html <= 6 cards, menu.html full catalog, 3 distinct heroes, Playwright mobile 100% pass, Cloudflare Pages live) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
