@@ -53,11 +53,11 @@
       <!-- CENTER GROUP: Compact Delivery/Pickup Switcher + Location Pill -->
       <div class="flex items-center gap-1 sm:gap-2">
         <div class="bg-[#F3F4F6] p-0.5 sm:p-1 rounded-xl flex items-center border border-[#E5E7EB]" role="group" aria-label="Fulfillment Mode Toggle">
-          <button type="button" id="header-btn-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap">
-            🛵 Delivery
+          <button type="button" id="header-btn-delivery" onclick="setOrderMode('DELIVERY')" class="bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap">
+            🛵 <span class="hidden min-[390px]:inline">Delivery</span>
           </button>
-          <button type="button" id="header-btn-pickup" onclick="setOrderMode('PICKUP')" class="text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap">
-            🛍️ Pickup
+          <button type="button" id="header-btn-pickup" onclick="setOrderMode('PICKUP')" class="text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap">
+            🛍️ <span class="hidden min-[390px]:inline">Pickup</span>
           </button>
         </div>
 
@@ -1182,11 +1182,11 @@
       const btnPick = document.getElementById('header-btn-pickup');
       if (btnDel && btnPick) {
         if (isPickup) {
-          btnPick.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
-          btnDel.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+          btnPick.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnDel.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
         } else {
-          btnDel.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
-          btnPick.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
+          btnDel.className = "bg-[#C81E1E] text-white font-['Barlow_Condensed'] font-extrabold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider shadow-sm transition cursor-pointer whitespace-nowrap";
+          btnPick.className = "text-[#4B5563] hover:text-[#111827] font-['Barlow_Condensed'] font-bold px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm uppercase tracking-wider transition cursor-pointer whitespace-nowrap";
         }
       }
 
@@ -1260,7 +1260,11 @@
 
     function handleAddToCart(id, name, price, img) {
       if (window.CartDrawer && window.CartDrawer.addItem) {
-        window.CartDrawer.addItem(id, name, price, img);
+        if (typeof id === 'object' && id !== null) {
+          window.CartDrawer.addItem(id);
+        } else {
+          window.CartDrawer.addItem({ id: id, name: name, price: price, image: img, qty: 1 });
+        }
       }
     }
 

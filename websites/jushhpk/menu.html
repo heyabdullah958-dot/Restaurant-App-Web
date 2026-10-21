@@ -1027,7 +1027,11 @@
 
     function handleAddToCart(id, name, price, img) {
       if (window.CartDrawer && window.CartDrawer.addItem) {
-        window.CartDrawer.addItem(id, name, price, img);
+        if (typeof id === 'object' && id !== null) {
+          window.CartDrawer.addItem(id);
+        } else {
+          window.CartDrawer.addItem({ id: id, name: name, price: price, image: img, qty: 1 });
+        }
       }
     }
 

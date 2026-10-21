@@ -206,24 +206,39 @@
 
 
   <main class="flex-1 w-full space-y-6 sm:space-y-8 pb-10">
-
-    <!-- HERO SECTION: DESIGN TYPE 3 (Compact Horizontal Split Card) -->
-    <section class="max-w-7xl mx-auto px-4 pt-3 pb-2 w-full">
-      <div class="bg-white border-2 border-[#FED7AA] rounded-2xl overflow-hidden shadow-sm grid grid-cols-12 items-center min-h-[155px] sm:min-h-[210px]">
-        <div class="col-span-7 p-4 sm:p-7 bg-gradient-to-r from-[#8B1D1D] to-[#EA580C] text-white h-full flex flex-col justify-center">
-          <h1 class="text-lg sm:text-3xl font-extrabold leading-tight text-white">Turkish Doners, Wraps &amp; Shawaya</h1>
-          <a href="menu.html" class="inline-block bg-white text-[#8B1D1D] hover:bg-[#FFF7ED] font-extrabold text-xs sm:text-sm px-3.5 py-2 rounded-xl mt-3 w-fit shadow-xs transition">
-            Order Full Menu &rarr;
-          </a>
+    <!-- 2.1 HERO: Clean White & Maroon Full-Photo Feast Card -->
+    <section class="max-w-7xl mx-auto px-3.5 pt-3 pb-2 w-full">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <!-- Main Feast Card (md:col-span-8) -->
+        <div class="md:col-span-8 bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-md flex flex-col">
+          <div class="w-full h-48 sm:h-60 relative bg-[#8B1D1D]">
+            <img src="./images/full_dubai_shawaya.jpg" alt="Dubai Shawaya Platters &amp; Loaded Doner Fries" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/chicken_doner_fries.jpg';" />
+            <span class="absolute top-3 left-3 bg-[#8B1D1D] text-white text-[11px] font-extrabold uppercase px-3 py-1 rounded-full shadow">🔥 #1 SIGNATURE PLATTER</span>
+            <span class="absolute top-3 right-3 bg-white text-[#8B1D1D] text-xs font-extrabold px-3 py-1 rounded-full shadow">From Rs. 600</span>
+          </div>
+          <div class="p-3.5 sm:p-4 bg-white flex items-center justify-between gap-3 mt-auto">
+            <div class="min-w-0">
+              <h1 class="text-base sm:text-xl font-extrabold text-[#111827] leading-tight">Dubai Shawaya Platters &amp; Loaded Doner Fries</h1>
+              <p class="text-xs text-[#4B5563] mt-0.5 truncate">Freshly grilled Turkish meats, wraps &amp; signature sauces</p>
+            </div>
+            <a href="menu.html" class="bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl shrink-0 shadow-xs transition">Explore Menu →</a>
+          </div>
         </div>
-        <div class="col-span-5 h-full min-h-[155px] sm:min-h-[210px] relative bg-[#FFF7ED]">
-          <img src="./images/chicken_turkish_doner.jpg" alt="Turkish Doners, Wraps & Shawaya" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/half_dubai_shawaya.jpg';"/>
+
+        <!-- Side Promo Card (md:col-span-4) -->
+        <div class="md:col-span-4 bg-[#FFF7ED] rounded-2xl border border-[#FED7AA] overflow-hidden shadow-xs flex flex-row md:flex-col items-center justify-between p-3 sm:p-4 gap-3">
+          <div class="flex-1 min-w-0">
+            <span class="text-[10px] font-extrabold uppercase text-[#EA580C] tracking-wider block">TURKISH WRAPS &amp; BOXES</span>
+            <h2 class="text-sm sm:text-lg font-extrabold text-[#8B1D1D] leading-snug mt-0.5">Loaded Cheese Shawarma Platter</h2>
+            <a href="menu.html#cat-13" class="inline-block mt-2 bg-[#8B1D1D] hover:bg-[#6E1515] text-white font-bold text-xs px-3 py-1.5 rounded-lg transition">Order Shawarma →</a>
+          </div>
+          <img src="./images/chicken_shawarma_platter.jpg" alt="Loaded Cheese Shawarma Platter" class="w-24 h-24 md:w-full md:h-32 object-cover rounded-xl shrink-0" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
         </div>
       </div>
     </section>
 
-    <!-- EXPLORE MENU: KFC-Style Category Boxes -->
-    <section class="max-w-7xl mx-auto px-4 w-full">
+    <!-- 2.2 EXPLORE MENU: 2-Column Horizontal Split Pill Cards -->
+    <section class="max-w-7xl mx-auto px-3.5 py-3 w-full">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-[#111827]">EXPLORE MENU</h2>
@@ -233,153 +248,146 @@
           VIEW ALL
         </a>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-        
-      <a href="menu.html#cat-11" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/chicken_doner_fries.jpg" alt="Appetizer" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Appetizer</span>
-      </a>
-      <a href="menu.html#cat-12" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/chicken_turkish_doner.jpg" alt="Turkish Specials" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Turkish Specials</span>
-      </a>
-      <a href="menu.html#cat-13" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/chicken_shawarma_platter.jpg" alt="Shawarma" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Shawarma</span>
-      </a>
-      <a href="menu.html#cat-14" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/nutella_can_dessert.jpg" alt="Desserts" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Desserts</span>
-      </a>
-      <a href="menu.html#cat-15" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/garlic_dip.jpg" alt="Add Ons" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Add Ons</span>
-      </a>
-      <a href="menu.html#cat-16" class="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs hover:shadow-md hover:border-[#EA580C] transition cursor-pointer flex flex-col justify-between group">
-        <div class="w-full h-24 sm:h-28 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5">
-          <img src="./images/blueberry_mojito.jpg" alt="Beverages" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
-        </div>
-        <span class="text-xs sm:text-sm font-extrabold text-[#111827] text-center group-hover:text-[#EA580C] transition">Beverages</span>
-      </a>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+        <a href="menu.html#cat-11" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Appetizer</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/chicken_doner_fries.jpg" alt="Appetizer" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
+        <a href="menu.html#cat-12" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Turkish Specials</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/chicken_turkish_wrap.jpg" alt="Turkish Specials" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
+        <a href="menu.html#cat-13" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Shawarma</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/chicken_shawarma_platter.jpg" alt="Shawarma" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
+        <a href="menu.html#cat-14" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Desserts</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/nutella_can_dessert.jpg" alt="Desserts" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
+        <a href="menu.html#cat-15" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Add Ons</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/garlic_dip.jpg" alt="Add Ons" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
+        <a href="menu.html#cat-16" class="bg-white hover:bg-[#FFF7ED] border border-[#E5E7EB] hover:border-[#EA580C] border-l-4 border-l-[#8B1D1D] rounded-xl p-2.5 flex items-center justify-between gap-2 shadow-2xs transition group">
+          <div class="min-w-0">
+            <span class="text-xs sm:text-sm font-extrabold text-[#111827] leading-tight block group-hover:text-[#EA580C] transition truncate">Beverages</span>
+            <span class="text-[10px] font-bold text-[#EA580C] block mt-0.5">View Items →</span>
+          </div>
+          <img src="./images/blueberry_mojito.jpg" alt="Beverages" class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shrink-0 bg-[#FFF7ED]" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+        </a>
       </div>
     </section>
 
-    <!-- BEST SELLERS: 6 Featured Items Only -->
-    <section class="max-w-7xl mx-auto px-4 w-full">
+    <!-- 2.3 BEST SELLERS: Compact 2-Column Mobile Cards With Floating Price Badge -->
+    <section class="max-w-7xl mx-auto px-3.5 w-full">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-[#111827]">BEST SELLERS</h2>
           <div class="w-12 h-1 mt-1 rounded-full bg-[#8B1D1D]"></div>
         </div>
       </div>
-      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="37" data-item-name="Chicken Doner Fries">
+        <!-- Item 1: Chicken Doner Fries -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="37" data-item-name="Chicken Doner Fries">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
-              <img src="./images/chicken_doner_fries.jpg" alt="Chicken Doner Fries" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/chicken_doner_fries.jpg" alt="Chicken Doner Fries" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 600</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Doner Fries</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Crispy fries topped with sliced chicken doner, secret seasoning and signature sauces.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Chicken Doner Fries</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
-            <div class="card-action-container" data-item-name="Chicken Doner Fries" data-item-id="37" data-item-price="600" data-item-image="./images/chicken_doner_fries.jpg">
-              <button type="button" onclick="handleAddToCart(37, 'Chicken Doner Fries', 600, './images/chicken_doner_fries.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Chicken Doner Fries" data-item-id="37" data-item-price="600" data-item-image="./images/chicken_doner_fries.jpg">
+            <button type="button" onclick="handleAddToCart(37, 'Chicken Doner Fries', 600, './images/chicken_doner_fries.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="46" data-item-name="Chicken Turkish Doner">
+
+        <!-- Item 2: Full Dubai Shawaya -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="42" data-item-name="Full Dubai Shawaya">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
-              <img src="./images/chicken_turkish_doner.jpg" alt="Chicken Turkish Doner" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/full_dubai_shawaya.jpg" alt="Full Dubai Shawaya" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 2,500</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Turkish Doner</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Authentic Turkish chicken doner stuffed into toasted bread with pickles & garlic cream.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Full Dubai Shawaya</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 850</span>
-            <div class="card-action-container" data-item-name="Chicken Turkish Doner" data-item-id="46" data-item-price="850" data-item-image="./images/chicken_turkish_doner.jpg">
-              <button type="button" onclick="handleAddToCart(46, 'Chicken Turkish Doner', 850, './images/chicken_turkish_doner.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Full Dubai Shawaya" data-item-id="42" data-item-price="2500" data-item-image="./images/full_dubai_shawaya.jpg">
+            <button type="button" onclick="handleAddToCart(42, 'Full Dubai Shawaya', 2500, './images/full_dubai_shawaya.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="47" data-item-name="Beef Turkish Doner">
+
+        <!-- Item 3: Chicken Grilled Sandwich -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="39" data-item-name="Chicken Grilled Sandwich">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              
-              <img src="./images/beef_turkish_doner.jpg" alt="Beef Turkish Doner" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/chicken_grilled_sandwich.jpg" alt="Chicken Grilled Sandwich" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 750</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Beef Turkish Doner</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Authentic Turkish beef doner loaded with juicy cuts, herbs and crisp salad.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Chicken Grilled Sandwich</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,100</span>
-            <div class="card-action-container" data-item-name="Beef Turkish Doner" data-item-id="47" data-item-price="1100" data-item-image="./images/beef_turkish_doner.jpg">
-              <button type="button" onclick="handleAddToCart(47, 'Beef Turkish Doner', 1100, './images/beef_turkish_doner.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Chicken Grilled Sandwich" data-item-id="39" data-item-price="750" data-item-image="./images/chicken_grilled_sandwich.jpg">
+            <button type="button" onclick="handleAddToCart(39, 'Chicken Grilled Sandwich', 750, './images/chicken_grilled_sandwich.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="41" data-item-name="Half Dubai Shawaya">
+
+        <!-- Item 4: Chicken Shawarma Platter -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="53" data-item-name="Chicken Shawarma Platter">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">🔥 BESTSELLER</span>
-              <img src="./images/half_dubai_shawaya.jpg" alt="Half Dubai Shawaya" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/chicken_shawarma_platter.jpg" alt="Chicken Shawarma Platter" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 900</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Half Dubai Shawaya</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Flame-roasted half chicken shawaya seasoned with Middle Eastern spices & herbs.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Chicken Shawarma Platter</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 1,400</span>
-            <div class="card-action-container" data-item-name="Half Dubai Shawaya" data-item-id="41" data-item-price="1400" data-item-image="./images/half_dubai_shawaya.jpg">
-              <button type="button" onclick="handleAddToCart(41, 'Half Dubai Shawaya', 1400, './images/half_dubai_shawaya.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Chicken Shawarma Platter" data-item-id="53" data-item-price="900" data-item-image="./images/chicken_shawarma_platter.jpg">
+            <button type="button" onclick="handleAddToCart(53, 'Chicken Shawarma Platter', 900, './images/chicken_shawarma_platter.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="53" data-item-name="Chicken Shawarma Platter">
+
+        <!-- Item 5: Chicken Turkish Wrap -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="44" data-item-name="Chicken Turkish Wrap">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              <span class="bg-[#8B1D1D] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md absolute top-2.5 left-2.5 z-10 shadow-2xs">💥 DEAL</span>
-              <img src="./images/chicken_shawarma_platter.jpg" alt="Chicken Shawarma Platter" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/chicken_turkish_wrap.jpg" alt="Chicken Turkish Wrap" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 600</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Chicken Shawarma Platter</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Deconstructed chicken shawarma platter served with fries, garlic dip & bread.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Chicken Turkish Wrap</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 900</span>
-            <div class="card-action-container" data-item-name="Chicken Shawarma Platter" data-item-id="53" data-item-price="900" data-item-image="./images/chicken_shawarma_platter.jpg">
-              <button type="button" onclick="handleAddToCart(53, 'Chicken Shawarma Platter', 900, './images/chicken_shawarma_platter.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Chicken Turkish Wrap" data-item-id="44" data-item-price="600" data-item-image="./images/chicken_turkish_wrap.jpg">
+            <button type="button" onclick="handleAddToCart(44, 'Chicken Turkish Wrap', 600, './images/chicken_turkish_wrap.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
-        <article class="product-card bg-white border border-[#E5E7EB] rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition" data-item-id="57" data-item-name="Nutella Can Dessert">
+
+        <!-- Item 6: Beef Grilled Sandwich -->
+        <article class="product-card bg-white rounded-2xl border border-[#E5E7EB] p-2.5 sm:p-3.5 shadow-2xs flex flex-col justify-between" data-item-id="40" data-item-name="Beef Grilled Sandwich">
           <div>
-            <div class="w-full h-32 sm:h-40 bg-[#FFF7ED] rounded-xl overflow-hidden mb-2.5 relative">
-              
-              <img src="./images/nutella_can_dessert.jpg" alt="Nutella Can Dessert" class="w-full h-full object-cover object-center" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+            <div class="w-full h-28 sm:h-40 rounded-xl overflow-hidden relative mb-2 bg-[#8B1D1D]">
+              <img src="./images/beef_grilled_sandwich.jpg" alt="Beef Grilled Sandwich" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='./images/jushh_logo.jpg';" />
+              <span class="absolute top-2 right-2 bg-[#8B1D1D]/95 text-white font-extrabold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shadow">Rs. 950</span>
             </div>
-            <h3 class="text-[15px] sm:text-[17px] font-extrabold text-[#111827] leading-snug mb-1">Nutella Can Dessert</h3>
-            <p class="text-xs sm:text-[13.5px] font-medium text-[#4B5563] line-clamp-2 mb-3">Indulgent pull-tab can brimming with pure Nutella hazelnut cream.</p>
+            <h3 class="text-xs sm:text-base font-extrabold text-[#111827] line-clamp-1 mb-1">Beef Grilled Sandwich</h3>
           </div>
-          <div class="pt-2.5 border-t border-[#F3F4F6] flex items-center justify-between gap-2">
-            <span class="text-base sm:text-[18px] font-extrabold text-[#8B1D1D]">Rs. 600</span>
-            <div class="card-action-container" data-item-name="Nutella Can Dessert" data-item-id="57" data-item-price="600" data-item-image="./images/nutella_can_dessert.jpg">
-              <button type="button" onclick="handleAddToCart(57, 'Nutella Can Dessert', 600, './images/nutella_can_dessert.jpg')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
-            </div>
+          <div class="card-action-container w-full mt-2" data-item-name="Beef Grilled Sandwich" data-item-id="40" data-item-price="950" data-item-image="./images/beef_grilled_sandwich.jpg">
+            <button type="button" onclick="handleAddToCart(40, 'Beef Grilled Sandwich', 950, './images/beef_grilled_sandwich.jpg')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           </div>
         </article>
+
       </div>
       <div class="mt-6 text-center">
         <a href="menu.html" class="inline-block bg-[#8B1D1D] hover:bg-[#6E1515] text-white font-extrabold text-sm px-6 py-3 rounded-xl shadow-sm transition">
@@ -387,7 +395,6 @@
         </a>
       </div>
     </section>
-
   </main>
 
 
@@ -550,7 +557,11 @@
 
     function handleAddToCart(id, name, price, img) {
       if (window.CartDrawer && window.CartDrawer.addItem) {
-        window.CartDrawer.addItem(id, name, price, img);
+        if (typeof id === 'object' && id !== null) {
+          window.CartDrawer.addItem(id);
+        } else {
+          window.CartDrawer.addItem({ id: id, name: name, price: price, image: img, qty: 1 });
+        }
       }
     }
 
@@ -572,15 +583,15 @@
 
         if (qty > 0) {
           container.innerHTML = `
-            <div class="stepper-wrap flex items-center bg-[#8B1D1D] rounded-xl overflow-hidden shadow-xs text-white">
+            <div class="stepper-wrap w-full flex items-center justify-between bg-[#8B1D1D] rounded-xl overflow-hidden shadow-xs text-white">
               <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', -1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#6E1515] transition cursor-pointer">-</button>
-              <span class="w-8 text-center text-xs font-extrabold">${qty}</span>
+              <span class="flex-1 text-center text-xs font-extrabold">${qty}</span>
               <button type="button" onclick="handleCardQty('${name.replace(/'/g, "\'")}', 1)" class="w-8 h-8 flex items-center justify-center font-bold text-sm hover:bg-[#6E1515] transition cursor-pointer">+</button>
             </div>
           `;
         } else {
           container.innerHTML = `
-            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\'")}', ${price}, '${img}')" class="btn-add-cart bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer">+ Add to Cart</button>
+            <button type="button" onclick="handleAddToCart(${id}, '${name.replace(/'/g, "\'")}', ${price}, '${img}')" class="btn-add-cart w-full bg-[#EA580C] hover:bg-[#8B1D1D] text-white font-extrabold text-[11px] sm:text-xs py-2 rounded-xl transition cursor-pointer">+ Add to Cart</button>
           `;
         }
       });

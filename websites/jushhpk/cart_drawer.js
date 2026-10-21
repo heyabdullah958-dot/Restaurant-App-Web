@@ -403,7 +403,10 @@
   }
 
   // Add Item to Cart
-  function addItem(item) {
+  function addItem(item, name, price, img) {
+    if (typeof item !== 'object' || item === null) {
+      item = { id: item, name: name, price: price, image: img, qty: 1 };
+    }
     const qtyToAdd = item.qty || 1;
     const nameKey = (item.name || 'Item').trim();
     let itemImg = item.image_url || item.image || item.thumbnail;
