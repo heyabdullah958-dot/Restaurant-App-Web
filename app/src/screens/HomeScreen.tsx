@@ -30,6 +30,7 @@ import * as Location from 'expo-location';
 import LocationPromptModal from '../components/LocationPromptModal';
 import NotificationModal from '../components/NotificationModal';
 import ErrorState from '../components/ErrorState';
+import { DineInVideoFeed } from '../components/DineInVideoFeed';
 import api from '../services/api';
 import {
   loadInAppNotifications,
@@ -846,6 +847,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         showsHorizontalScrollIndicator={false}
         style={styles.categoriesList}
         contentContainerStyle={{ paddingRight: SPACING.md }}
+      />
+
+      <DineInVideoFeed
+        fulfillmentMode={fulfillmentMode}
+        onSelectRestaurant={(slug) => navigation.navigate('Restaurant', { slug })}
       />
 
       <View style={styles.sectionHeader}>

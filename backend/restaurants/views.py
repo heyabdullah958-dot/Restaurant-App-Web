@@ -1,12 +1,15 @@
 from django.db.models import Q
+import logging
 from rest_framework import generics, permissions, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Restaurant, RestaurantReview
+from .models import Restaurant, RestaurantReview, RestaurantMediaPost
 from .serializers import (
     RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer,
-    AdminMenuCategorySerializer, RestaurantReviewSerializer
+    AdminMenuCategorySerializer, RestaurantReviewSerializer, RestaurantMediaPostSerializer
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RestaurantListView(generics.ListAPIView):
@@ -768,6 +771,172 @@ class PublicSearchView(APIView):
             })
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=500)
+
+
+class RestaurantMediaPostViewSet(viewsets.ModelViewSet):
+    """
+    CRUD ViewSet for Dine-In Video & Photo Posts with 10-Video FIFO Quota.
+    - Public / Customer: GET /api/dine-in-posts/ (Active posts only, ordered by -created_at)
+    - Admin / Manager: Full CRUD with tenant-scoped permissions and Cloudinary purge on delete.
+    """
+    queryset = RestaurantMediaPost.objects.select_related(
+        'restaurant', 'branch', 'linked_menu_item', 'linked_menu_item__category'
+    ).all()
+    serializer_class = RestaurantMediaPostSerializer
+    pagination_class = None
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def _resolve_user_manager_scope(self, user):
+        if not user or user.is_anonymous or user.is_superuser:
+            return None, None
+        if hasattr(user, 'manager_profile'):
+            return user.manager_profile.restaurant, user.manager_profile.branch
+        from config.admin_utils import get_managed_restaurant, get_managed_branch
+        return get_managed_restaurant(user), get_managed_branch(user)
+
+    def get_queryset(self):
+        queryset = RestaurantMediaPost.objects.select_related(
+            'restaurant', 'branch', 'linked_menu_item', 'linked_menu_item__category'
+        ).all()
+
+        user = self.request.user
+        managed_restaurant, _ = self._resolve_user_manager_scope(user)
+        is_staff_or_super = user.is_authenticated and (user.is_superuser or user.is_staff or managed_restaurant is not None)
+
+        include_inactive = self.request.query_params.get('include_inactive', '').lower() == 'true'
+
+        if not (is_staff_or_super and include_inactive):
+            queryset = queryset.filter(is_active=True, restaurant__is_active=True)
+        elif not user.is_superuser and managed_restaurant:
+            queryset = queryset.filter(restaurant=managed_restaurant)
+
+        restaurant_id = self.request.query_params.get('restaurant_id')
+        if restaurant_id:
+            queryset = queryset.filter(restaurant_id=restaurant_id)
+
+        branch_id = self.request.query_params.get('branch_id')
+        if branch_id:
+            queryset = queryset.filter(branch_id=branch_id)
+
+        media_type = self.request.query_params.get('media_type')
+        if media_type:
+            queryset = queryset.filter(media_type=media_type.upper())
+
+        return queryset.order_by('-created_at')
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        managed_restaurant, managed_branch = self._resolve_user_manager_scope(user)
+        if not (user.is_superuser or user.is_staff or managed_restaurant is not None):
+            return Response(
+                {"detail": "Only admins and branch managers can create media posts."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        data = request.data.copy()
+
+        # Enforce tenant scoping for branch managers
+        if not user.is_superuser and managed_restaurant:
+            data['restaurant'] = managed_restaurant.id
+            if managed_branch:
+                data['branch'] = managed_branch.id
+        elif 'restaurant' not in data:
+            return Response({"restaurant": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Handle media upload or direct URL
+        media_file = request.FILES.get('media_file')
+        direct_url = data.get('media_url', '')
+        media_type = data.get('media_type', 'VIDEO')
+
+        if not media_file and not direct_url:
+            return Response(
+                {"error": "Either media_file or media_url must be provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from .media_service import handle_media_upload_or_url, purge_overflow_media_posts
+        try:
+            media_info = handle_media_upload_or_url(
+                media_file=media_file,
+                direct_url=direct_url,
+                media_type=media_type,
+                request=request
+            )
+        except ValueError as ve:
+            return Response({"error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Media upload processing failed: {e}")
+            return Response({"error": f"Upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        data['media_url'] = media_info['media_url']
+        data['thumbnail_url'] = media_info.get('thumbnail_url', '') or data.get('thumbnail_url', '')
+        data['cloudinary_public_id'] = media_info.get('cloudinary_public_id', '')
+        data['media_type'] = media_info.get('media_type', media_type)
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        post = serializer.save(created_by=user)
+
+        # Enforce 10-post FIFO auto-cleanup
+        purge_overflow_media_posts(post.restaurant)
+
+        headers = self.get_success_headers(serializer.data)
+        res_serializer = self.get_serializer(post)
+        res_data = dict(res_serializer.data)
+        res_data['quota_message'] = f"{res_data.get('active_count_for_restaurant', 1)} / 10 slots used"
+        return Response(res_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        user = request.user
+
+        # Enforce tenant ownership
+        managed_restaurant, _ = self._resolve_user_manager_scope(user)
+        if not (user.is_superuser or user.is_staff or managed_restaurant is not None):
+            return Response(
+                {"detail": "You do not have permission to modify posts."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not user.is_superuser and managed_restaurant and instance.restaurant != managed_restaurant:
+            return Response(
+                {"detail": "You do not have permission to modify posts for another restaurant."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        data = request.data.copy()
+        if 'restaurant' in data and not user.is_superuser:
+            data['restaurant'] = instance.restaurant.id
+
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+
+        managed_restaurant, _ = self._resolve_user_manager_scope(user)
+        if not (user.is_superuser or user.is_staff or managed_restaurant is not None):
+            return Response(
+                {"detail": "You do not have permission to delete posts."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if not user.is_superuser and managed_restaurant and instance.restaurant != managed_restaurant:
+            return Response(
+                {"detail": "You do not have permission to delete posts for another restaurant."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        from .media_service import delete_media_post
+        delete_media_post(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 

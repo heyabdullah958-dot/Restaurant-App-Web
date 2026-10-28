@@ -23,6 +23,7 @@ import { PromoManagementScreen } from '../screens/placeholders/PromoManagementSc
 import { FlashDealManagementScreen } from '../screens/placeholders/FlashDealManagementScreen';
 import { BranchDashboardScreen } from '../screens/placeholders/BranchDashboardScreen';
 import { OrderManagementScreen } from '../screens/placeholders/OrderManagementScreen';
+import { DineInPostManagementScreen } from '../screens/placeholders/DineInPostManagementScreen';
 
 const AuthStack = createNativeStackNavigator();
 const SuperMoreStack = createNativeStackNavigator();
@@ -78,6 +79,7 @@ const SuperAdminMoreMain = ({ navigation }: any) => {
     { title: 'Notifications', route: 'NotificationCenter', description: 'FCM push broadcasts & targeted alerts', icon: '🔔', accentBg: 'rgba(59, 130, 246, 0.15)', accentColor: '#3B82F6' },
     { title: 'Promo Codes', route: 'PromoManagement', description: 'Discount vouchers & usage limits', icon: '🎟️', accentBg: 'rgba(236, 72, 153, 0.15)', accentColor: '#EC4899' },
     { title: 'Flash Deals', route: 'FlashDealManagement', description: 'Time-limited promotional discounts', icon: '⚡', accentBg: 'rgba(239, 68, 68, 0.15)', accentColor: '#EF4444' },
+    { title: 'Dine-In Reels', route: 'DineInPostManagement', description: 'Video highlights & sizzle reels for Dine-In feed', icon: '🎬', accentBg: 'rgba(239, 68, 68, 0.15)', accentColor: '#EF4444' },
   ];
 
   const handleLogout = () => {
@@ -178,6 +180,11 @@ const SuperAdminMoreStackNavigator = () => (
       name="FlashDealManagement"
       component={FlashDealManagementScreen}
       options={{ title: 'Flash Deals' }}
+    />
+    <SuperMoreStack.Screen
+      name="DineInPostManagement"
+      component={DineInPostManagementScreen}
+      options={{ title: 'Dine-In Reels' }}
     />
   </SuperMoreStack.Navigator>
 );
@@ -390,6 +397,22 @@ const BranchManagerTabNavigator = () => (
           <TabBarIcon
             name="bicycle-outline"
             focusedName="bicycle"
+            focused={focused}
+            color={color}
+            activeBg={COLORS.branchManager.tint}
+          />
+        ),
+      }}
+    />
+    <BranchTab.Screen
+      name="DineInReels"
+      component={DineInPostManagementScreen}
+      options={{
+        title: 'Reels',
+        tabBarIcon: ({ focused, color }) => (
+          <TabBarIcon
+            name="videocam-outline"
+            focusedName="videocam"
             focused={focused}
             color={color}
             activeBg={COLORS.branchManager.tint}

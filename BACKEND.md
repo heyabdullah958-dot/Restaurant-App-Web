@@ -123,6 +123,35 @@
   - Ran all 5 test suites ➔ **90/90 tests passed (100% pass rate)**.
 - **Confidence**: 100% — verified against both local test database and production Heroku cloud API.
 
+---
+
+### [2026-10-27] — Phase 10: Dine-In Video Posts & Highlights System with 10-Video FIFO Auto-Cleanup
+- **What changed**:
+  1. **Data Model**: Implemented `RestaurantMediaPost` in `backend/restaurants/models.py` with fields: `restaurant`, `branch`, `title`, `caption`, `media_type` (`VIDEO` / `IMAGE`), `media_url`, `cloudinary_public_id`, `thumbnail_url`, `linked_menu_item`, `is_active`, `created_by`, `created_at`. Indexed on `['restaurant', 'is_active', '-created_at']` with deterministic ordering `['-created_at', '-id']`.
+  2. **Migration**: Generated and applied migration `backend/restaurants/migrations/0016_restaurantmediapost.py`.
+  3. **Media Service & 10-Video FIFO Rule**: Created `backend/restaurants/media_service.py` with `purge_overflow_media_posts`, `delete_media_post`, and `handle_media_upload_or_url`. Automatically enforces a strict 10-video cap per restaurant: when an 11th post is published, the oldest post is automatically purged from both Cloudinary CDN and SQLite/PostgreSQL database in FIFO order.
+  4. **Serializers & Views**: Built `RestaurantMediaPostSerializer` with nested `linked_item_details`, `active_count_for_restaurant`, `max_quota: 10`, and `is_active: default=True`. Built `RestaurantMediaPostViewSet` with `AllowAny` for public customer feed (active only) and strict tenant-scoped `IsAuthenticated` permissions for branch managers and superadmin.
+  5. **URL Routes**: Registered at `/api/dine-in-posts/` and `/api/admin/dine-in-posts/`.
+  6. **Seed Data**: Created and executed `backend/restaurants/seed_media_posts.py` to seed high-res video reels for Phase 1 brands (Dine At Blue, Tandoori Stop, Jushh PK).
+- **Files created / modified**:
+  - `backend/restaurants/models.py`
+  - `backend/restaurants/migrations/0016_restaurantmediapost.py`
+  - `backend/restaurants/media_service.py`
+  - `backend/restaurants/serializers.py`
+  - `backend/restaurants/views.py`
+  - `backend/restaurants/urls.py`
+  - `backend/config/urls.py`
+  - `backend/restaurants/seed_media_posts.py`
+  - `backend/restaurants/tests/test_dine_in_posts.py`
+- **Verification Evidence**:
+  - `python backend/manage.py test restaurants.tests.test_dine_in_posts` ➔ **5/5 tests passing (100%)**:
+    1. Public unauthenticated feed retrieves active posts with nested `linked_item_details`.
+    2. Regular customer cannot create, update, or delete posts (HTTP 403 Forbidden).
+    3. Branch manager post creation with automatic restaurant scoping and quota count.
+    4. Cross-tenant isolation (Manager A cannot modify or delete Manager B's post).
+    5. 10-video FIFO auto-cleanup (creating 12 posts purges the 2 oldest, leaving exactly 10 in DB).
+
+
 
 
 

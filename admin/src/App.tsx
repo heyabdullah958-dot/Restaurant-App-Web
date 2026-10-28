@@ -15,6 +15,7 @@ import { ManagerManagement } from './views/ManagerManagement';
 import { PromoManagement } from './views/PromoManagement';
 import { FlashDealManagement } from './views/FlashDealManagement';
 import { RiderManagement } from './views/RiderManagement';
+import { DineInPostManagement } from './views/DineInPostManagement';
 import { Menu, Sun, Moon, Bell, ArrowLeft } from 'lucide-react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -99,6 +100,8 @@ const MainLayout: React.FC = () => {
         return isSuper ? <PromoManagement /> : <BranchDashboard />;
       case 'flash_deal_management':
         return isSuper ? <FlashDealManagement /> : <BranchDashboard />;
+      case 'dine_in_posts':
+        return <DineInPostManagement />;
       default:
         return isSuper ? <SuperDashboard /> : <BranchDashboard />;
     }

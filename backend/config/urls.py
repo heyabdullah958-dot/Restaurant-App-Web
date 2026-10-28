@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from config.views import health_check, db_debug, root_view, trigger_seed, init_db
 from config.admin_views import platform_analytics
-from restaurants.views import PopularTagsView, PublicSearchView
+from restaurants.views import PopularTagsView, PublicSearchView, RestaurantMediaPostViewSet
 from promotions.views import ActiveFlashDealsView
 
 
@@ -40,6 +40,8 @@ urlpatterns = [
     path('api/v1/search/popular-tags/', PopularTagsView.as_view(), name='v1_popular_tags'),
     path('api/v1/search/', PublicSearchView.as_view(), name='v1_public_search'),
     path('api/v1/promotions/flash-deals/', ActiveFlashDealsView.as_view(), name='v1_flash_deals'),
+    path('api/v1/dine-in-posts/', RestaurantMediaPostViewSet.as_view({'get': 'list', 'post': 'create'}), name='v1_dine_in_posts'),
+    path('api/v1/dine-in-posts/<int:pk>/', RestaurantMediaPostViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='v1_dine_in_post_detail'),
     path('api/search/popular-tags/', PopularTagsView.as_view(), name='api_popular_tags'),
     path('api/search/', PublicSearchView.as_view(), name='api_public_search'),
 

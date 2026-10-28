@@ -609,3 +609,62 @@ export const updateBranchStock = (branchId: number, itemId: number, is_in_stock:
 export const fetchPlatformSettings = () => apiFetch<any>('/api/restaurants/platform-settings/');
 export const updatePlatformSettings = (data: any) => apiFetch<any>('/api/restaurants/platform-settings/', { method: 'PATCH', body: JSON.stringify(data) });
 
+// ─── Dine-In Video Posts & Highlights ───────────────────────────────────────
+
+export interface DineInMediaPost {
+  id: number;
+  restaurant: number;
+  restaurant_name: string;
+  restaurant_logo?: string | null;
+  branch?: number | null;
+  branch_name?: string;
+  title: string;
+  caption: string;
+  media_type: 'VIDEO' | 'IMAGE';
+  media_url: string;
+  cloudinary_public_id?: string;
+  thumbnail_url?: string;
+  linked_menu_item?: number | null;
+  linked_item_details?: {
+    id: number;
+    name: string;
+    price: number;
+    image: string | null;
+    is_available: boolean;
+    category_name: string;
+  } | null;
+  is_active: boolean;
+  created_by?: number | null;
+  created_at: string;
+  active_count_for_restaurant: number;
+  max_quota: number;
+}
+
+export const fetchDineInPosts = async (params?: { restaurant_id?: number | string; branch_id?: number | string; include_inactive?: boolean }) => {
+  let url = '/api/dine-in-posts/';
+  if (params) {
+    const query = new URLSearchParams();
+    if (params.restaurant_id) query.append('restaurant_id', String(params.restaurant_id));
+    if (params.branch_id) query.append('branch_id', String(params.branch_id));
+    if (params.include_inactive !== undefined) query.append('include_inactive', String(params.include_inactive));
+    const qs = query.toString();
+    if (qs) url += `?${qs}`;
+  }
+  const data = await apiFetch<any>(url);
+  return Array.isArray(data) ? data : (data?.results || []);
+};
+
+export const createDineInPost = (data: FormData | Record<string, any>) => {
+  const body = data instanceof FormData ? data : JSON.stringify(data);
+  return apiFetch<DineInMediaPost>('/api/dine-in-posts/', { method: 'POST', body });
+};
+
+export const updateDineInPost = (id: number, data: FormData | Record<string, any>) => {
+  const body = data instanceof FormData ? data : JSON.stringify(data);
+  return apiFetch<DineInMediaPost>(`/api/dine-in-posts/${id}/`, { method: 'PATCH', body });
+};
+
+export const deleteDineInPost = (id: number) => 
+  apiFetch<any>(`/api/dine-in-posts/${id}/`, { method: 'DELETE' });
+
+

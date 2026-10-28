@@ -31,4 +31,3 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" updated successfully.'))
         else:
             self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
-            self.stdout.write(self.style.WARNING(f'Failed to set abdullah1 password: {e}'))

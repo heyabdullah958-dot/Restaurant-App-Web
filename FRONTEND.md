@@ -587,6 +587,39 @@
 - **Deploy Chain Status**: Confirmed Live on Cloudflare Pages (`https://jushhpk-foodsphere.pages.dev`).
 - **Confidence**: 100% — Zero dark mode remnants, exact KFC storefront hierarchy, and verified live production serving.
 
+---
+
+### [2026-10-27] — Phase 10: Dine-In Video Posts & Highlights Integration Across Web Admin, Manager App & Customer App
+- **What changed**:
+  1. **Web Admin HQ (`/admin`)**:
+     - Added `fetchDineInPosts`, `createDineInPost`, `updateDineInPost`, and `deleteDineInPost` to `admin/src/services/api.ts`.
+     - Built `admin/src/views/DineInPostManagement.tsx` containing:
+       - Dynamic active reels quota indicator (`X / 10 slots used`) with colored progress bar (green/amber/red) and FIFO policy notification.
+       - Interactive Upload Modal supporting file dropzone (up to 30 MB) or direct video URL, highlight title, tasting notes caption, menu item tagging for 1-tap cart additions, active toggle, and live video preview player.
+       - Responsive cards grid with HTML5 video player, thumbnail poster, live/hidden toggle button, linked menu item badge with price, and delete confirmation modal.
+     - Wired into `admin/src/App.tsx` and `admin/src/components/Sidebar.tsx` with `Film` icon in both Super-Admin and Branch Manager navigation.
+  2. **Merchant Manager Mobile App (`/admin-app`)**:
+     - Added endpoints and typed interface to `admin-app/src/services/api.ts`.
+     - Built `admin-app/src/screens/placeholders/DineInPostManagementScreen.tsx` supporting:
+       - Role-differentiated themes (Super-Admin dark vs Branch Manager light).
+       - Quota tracking bar (`X / 10 Active Reels`).
+       - Camera roll video/photo picker via `expo-image-picker` with URL fallback.
+       - Dish tagging selector to connect reels with live menu catalog.
+       - Live/hidden status switch and tap-to-delete confirmation.
+     - Integrated into `admin-app/src/navigation/AppNavigator.tsx` in Super-Admin "More" stack and as a 5th tab ("Reels") in Branch Manager bottom navigation.
+  3. **Customer Mobile App (`/app`)**:
+     - Built `app/src/components/DineInVideoFeed.tsx` featuring:
+       - Horizontal reels carousel with card anatomy: restaurant circular logo avatar, brand name, branch pill, "REEL" badge.
+       - Inline HTML5 `<video>` playback via `react-native-webview` with floating Mute/Unmute toggle and Close button.
+       - 1-Tap `+ Add to Cart` dish bar at the bottom of the card with thumbnail, dish name, price (`Rs. X`), and instant Redux `addItemToCart` dispatch.
+       - Out of stock handling: disabled grey button for unavailable dishes.
+     - Embedded cleanly into `app/src/screens/HomeScreen.tsx` right below category chips.
+- **Verification Evidence**:
+  - `npm run build` in `/admin`: Succeeded with **0 errors** (produced `dist/index.html` and bundled assets).
+  - `npx tsc --noEmit` in `/admin-app`: Succeeded with **0 errors**.
+  - `npx tsc --noEmit` in `/app`: Succeeded with **0 errors**.
+
+
 
 
 

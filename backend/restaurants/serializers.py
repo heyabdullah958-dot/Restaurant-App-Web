@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant, MenuCategory, MenuItem, Branch, BranchRider, RestaurantReview
+from .models import Restaurant, MenuCategory, MenuItem, Branch, BranchRider, RestaurantReview, RestaurantMediaPost
 
 
 def build_absolute_image_url(image_field, context):
@@ -439,4 +439,71 @@ class RestaurantReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"restaurant": "This field is required."})
 
         return super().validate(attrs)
+
+
+class RestaurantMediaPostSerializer(serializers.ModelSerializer):
+    restaurant_name = serializers.CharField(source='restaurant.name', read_only=True)
+    restaurant_logo = serializers.SerializerMethodField()
+    branch_name = serializers.CharField(source='branch.name', read_only=True, default='')
+    linked_item_details = serializers.SerializerMethodField()
+    is_active = serializers.BooleanField(required=False, default=True)
+    active_count_for_restaurant = serializers.SerializerMethodField()
+    max_quota = serializers.IntegerField(default=10, read_only=True)
+
+    class Meta:
+        model = RestaurantMediaPost
+        fields = (
+            'id',
+            'restaurant',
+            'restaurant_name',
+            'restaurant_logo',
+            'branch',
+            'branch_name',
+            'title',
+            'caption',
+            'media_type',
+            'media_url',
+            'cloudinary_public_id',
+            'thumbnail_url',
+            'linked_menu_item',
+            'linked_item_details',
+            'is_active',
+            'created_by',
+            'created_at',
+            'active_count_for_restaurant',
+            'max_quota',
+        )
+        read_only_fields = (
+            'id',
+            'cloudinary_public_id',
+            'created_by',
+            'created_at',
+            'active_count_for_restaurant',
+            'max_quota'
+        )
+
+    def get_restaurant_logo(self, obj):
+        if obj.restaurant and obj.restaurant.logo:
+            return build_absolute_image_url(obj.restaurant.logo, self.context)
+        return None
+
+    def get_linked_item_details(self, obj):
+        item = obj.linked_menu_item
+        if not item:
+            return None
+        img_url = build_absolute_image_url(item.image, self.context)
+        return {
+            'id': item.id,
+            'name': item.name,
+            'price': float(item.price),
+            'image': img_url,
+            'is_available': item.is_available,
+            'category_name': item.category.name if item.category else '',
+        }
+
+    def get_active_count_for_restaurant(self, obj):
+        if not obj.restaurant_id:
+            return 0
+        return RestaurantMediaPost.objects.filter(restaurant_id=obj.restaurant_id, is_active=True).count()
+
 

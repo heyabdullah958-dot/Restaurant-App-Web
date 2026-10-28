@@ -310,3 +310,62 @@ class PlatformSettings(models.Model):
         return obj
 
 
+class RestaurantMediaPost(models.Model):
+    """
+    Dine-In Highlights and Short Food Video / Photo Posts.
+    Each restaurant has a maximum FIFO quota of 10 posts.
+    """
+    MEDIA_TYPE_CHOICES = [
+        ('VIDEO', 'Video'),
+        ('IMAGE', 'Image'),
+    ]
+
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='media_posts'
+    )
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='media_posts'
+    )
+    title = models.CharField(max_length=120)
+    caption = models.TextField(max_length=350, blank=True, default='')
+    media_type = models.CharField(
+        max_length=10,
+        choices=MEDIA_TYPE_CHOICES,
+        default='VIDEO'
+    )
+    media_url = models.URLField(max_length=500)
+    cloudinary_public_id = models.CharField(max_length=255, blank=True, default='')
+    thumbnail_url = models.URLField(max_length=500, blank=True, default='')
+    linked_menu_item = models.ForeignKey(
+        MenuItem,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='video_posts'
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['restaurant', 'is_active', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.restaurant.name} - {self.title} ({self.media_type})"
+
+
+

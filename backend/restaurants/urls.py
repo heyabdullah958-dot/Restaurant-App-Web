@@ -4,7 +4,7 @@ from .views import (
     RestaurantListView, RestaurantDetailView, RestaurantMenuView, BranchListView,
     AdminRestaurantViewSet, AdminMenuCategoryViewSet, AdminMenuItemViewSet, AdminBranchViewSet,
     AdminBranchRiderViewSet, BranchItemAvailabilityView, RestaurantReviewViewSet, PlatformSettingsView, MyBranchView,
-    PopularTagsView, PublicSearchView
+    PopularTagsView, PublicSearchView, RestaurantMediaPostViewSet
 )
 
 router = DefaultRouter()
@@ -14,6 +14,8 @@ router.register('admin/riders', AdminBranchRiderViewSet, basename='admin_riders'
 router.register('admin/menu-categories', AdminMenuCategoryViewSet, basename='admin_categories')
 router.register('admin/menu-items', AdminMenuItemViewSet, basename='admin_items')
 router.register('admin/reviews', RestaurantReviewViewSet, basename='admin_reviews')
+router.register('admin/dine-in-posts', RestaurantMediaPostViewSet, basename='admin_dine_in_posts')
+router.register('dine-in-posts', RestaurantMediaPostViewSet, basename='dine_in_posts')
 router.register('reviews', RestaurantReviewViewSet, basename='restaurant_reviews')
 
 

@@ -13,7 +13,8 @@ import {
   Lock,
   Tag,
   Zap,
-  Bike
+  Bike,
+  Film
 } from 'lucide-react';
 import { changeOwnPassword, updateUserProfile } from '../services/api';
 
@@ -298,6 +299,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   Promo Codes
                 </button>
                 <button
+                  onClick={() => { setView('dine_in_posts'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'dine_in_posts' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Film size={18} />
+                  Dine-In Reels
+                </button>
+                <button
                   onClick={() => { setView('flash_deal_management'); setIsOpen(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
                     activeView === 'flash_deal_management' ? activeLinkClass : inactiveLinkClass
@@ -345,6 +355,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <ChefHat size={18} />
                   Menu Engineering
+                </button>
+                <button
+                  onClick={() => { setView('dine_in_posts'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'dine_in_posts' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Film size={18} />
+                  Dine-In Reels
                 </button>
               </>
             )}

@@ -1053,6 +1053,63 @@ export const fetchReviews = async (params?: {
   return Array.isArray(response.data) ? response.data : (response.data?.results || []);
 };
 
+// ─── Dine-In Video Posts & Highlights ───────────────────────────────────────
+
+export interface DineInMediaPost {
+  id: number;
+  restaurant: number;
+  restaurant_name: string;
+  restaurant_logo?: string | null;
+  branch?: number | null;
+  branch_name?: string;
+  title: string;
+  caption: string;
+  media_type: 'VIDEO' | 'IMAGE';
+  media_url: string;
+  cloudinary_public_id?: string;
+  thumbnail_url?: string;
+  linked_menu_item?: number | null;
+  linked_item_details?: {
+    id: number;
+    name: string;
+    price: number;
+    image: string | null;
+    is_available: boolean;
+    category_name: string;
+  } | null;
+  is_active: boolean;
+  created_by?: number | null;
+  created_at: string;
+  active_count_for_restaurant: number;
+  max_quota: number;
+}
+
+export const fetchDineInPosts = async (params?: {
+  restaurant_id?: number | string;
+  branch_id?: number | string;
+  include_inactive?: boolean;
+}): Promise<DineInMediaPost[]> => {
+  const response = await api.get('/dine-in-posts/', { params });
+  return Array.isArray(response.data) ? response.data : (response.data?.results || []);
+};
+
+export const createDineInPost = async (data: FormData | Record<string, any>): Promise<DineInMediaPost> => {
+  const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+  const response = await api.post('/dine-in-posts/', data, { headers });
+  return response.data;
+};
+
+export const updateDineInPost = async (id: number, data: FormData | Record<string, any>): Promise<DineInMediaPost> => {
+  const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+  const response = await api.patch(`/dine-in-posts/${id}/`, data, { headers });
+  return response.data;
+};
+
+export const deleteDineInPost = async (id: number): Promise<void> => {
+  await api.delete(`/dine-in-posts/${id}/`);
+};
+
+
 
 
 

@@ -1,6 +1,31 @@
 
 # Changelog
 
+## 2026-10-27 Phase 10 — Dine-In Video Posts & Highlights System with 10-Video FIFO Auto-Cleanup
+- **Backend Architecture (`/backend`)**:
+  - Implemented `RestaurantMediaPost` model in `backend/restaurants/models.py` with multi-tenant foreign keys (`restaurant`, `branch`), media metadata (`media_type`, `media_url`, `cloudinary_public_id`, `thumbnail_url`), menu item linking (`linked_menu_item`), and audit timestamps.
+  - Generated and applied local database migration `0016_restaurantmediapost.py`.
+  - Built `media_service.py` enforcing the 10-video FIFO auto-cleanup rule: any posts created beyond the newest 10 for a given brand automatically trigger Cloudinary CDN deletion and database purging in FIFO order.
+  - Built `RestaurantMediaPostSerializer` with nested `linked_item_details`, `active_count_for_restaurant`, `max_quota: 10`, and `is_active: default=True`.
+  - Built `RestaurantMediaPostViewSet` with public read endpoints (active posts only) and authenticated tenant-scoped mutation permissions.
+  - Created automated test suite `backend/restaurants/tests/test_dine_in_posts.py` with 100% pass rate (5/5 tests passing).
+  - Seeded demo high-definition video reels for Dine At Blue, Tandoori Stop, and Jushh PK via `seed_media_posts.py`.
+- **Web Admin HQ (`/admin`)**:
+  - Added typed API client methods in `admin/src/services/api.ts` (`fetchDineInPosts`, `createDineInPost`, `updateDineInPost`, `deleteDineInPost`).
+  - Created `admin/src/views/DineInPostManagement.tsx` with dynamic quota progress bar (`X / 10 slots used`), FIFO auto-cleanup alerts, interactive upload/preview modal (supports file dropzone or URL, title, caption, menu item tagging, active toggle), and responsive card grid with inline video player, status toggling, and delete modal.
+  - Integrated into `App.tsx` and `Sidebar.tsx` for both Super-Admin and Branch Managers.
+  - Verified `npm run build` with 0 TypeScript/compilation errors.
+- **Merchant Manager Mobile App (`/admin-app`)**:
+  - Added typed API client methods in `admin-app/src/services/api.ts`.
+  - Created `admin-app/src/screens/placeholders/DineInPostManagementScreen.tsx` with role-differentiated theme support, quota tracking bar, camera roll picker via `expo-image-picker`, menu item tagging, live status switch, and delete confirmations.
+  - Wired into `AppNavigator.tsx` in Super-Admin "More" stack and as a 5th tab ("Reels") in Branch Manager bottom navigation.
+  - Verified `npx tsc --noEmit` with 0 errors.
+- **Customer Mobile App (`/app`)**:
+  - Created `app/src/components/DineInVideoFeed.tsx` with inline HTML5/WebView video playback, floating Mute/Unmute toggle, card branding (logo, name, branch badge), title/caption, and 1-tap `+ Add to Cart` dish bar linked directly to `cartSlice.addItemToCart`.
+  - Integrated into `app/src/screens/HomeScreen.tsx` right above restaurant listings.
+  - Verified `npx tsc --noEmit` with 0 errors.
+
+
 ## 2026-10-19 Phase 8.1 — Mobile-First KFC 2-Page Storefront (index.html vs menu.html), Header De-Congestion, Hamburger Drawer (☰), and 3 Distinct Brand Hero Layouts
 - **Header Logo & Typography Polish (Mobile & PC View)**:
   - **Tandoori Stop**: Extracted official vector Secondary Horizontal Logo (1260x267) and Primary Vertical Logo (1040x648) directly from `Guideline.pdf` with transparent RGBA channels, completely replacing the erroneous color palette swatch screenshot (`tandoori_logo_horizontal_clean.png`).
