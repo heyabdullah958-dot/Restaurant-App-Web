@@ -71,6 +71,14 @@ export default function OrdersScreen() {
   const [isGuestLoading, setIsGuestLoading] = useState<boolean>(false);
   const [lookupInput, setLookupInput] = useState<string>('');
   const [isLookingUp, setIsLookingUp] = useState<boolean>(false);
+  const [hasTimedOut, setHasTimedOut] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasTimedOut(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchGuestOrdersFromStorage = React.useCallback(async () => {
     setIsGuestLoading(true);
@@ -388,7 +396,7 @@ export default function OrdersScreen() {
   const isGuestSession = !isAuthenticated || !user || user.is_guest;
 
   // STRICT GUEST GUARD: For Authenticated Users ONLY, show history fetching spinner. Guests are NEVER blocked.
-  if (!isGuestSession && (userLoading || (loading && myOrders.length === 0))) {
+  if (!isGuestSession && !hasTimedOut && (userLoading || (loading && myOrders.length === 0))) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>

@@ -69,6 +69,30 @@ export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
   'rice': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1330_IMG_7579.JPG_nsb0dw',
   'apple mojito': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1338_IMG_7576.JPG_b0buvx',
   'mint margaritas': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1346_IMG_7577.JPG_faehdg',
+
+  // Dine At Blue Original Photos
+  'blue seafood platter': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png',
+  'blue seafood platter (steamed)': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png',
+  '2 person platter': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png',
+  'without lobster': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png',
+  'mix seafood grill': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png',
+  'fish & chips': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png',
+  'fish and chips': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png',
+  'kunafa prawns (3 pcs)': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315659/foodsphere/dineatblue/kunafa_prawns.png',
+  'kunafa prawns': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315659/foodsphere/dineatblue/kunafa_prawns.png',
+  'dynamite prawns': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/dynamite_prawns.png',
+  'seared dumplings (6 pcs)': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/seared_dumplings.png',
+  'seared dumplings': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/seared_dumplings.png',
+  'chicken dumplings (6 pcs)': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315661/foodsphere/dineatblue/chicken_dumplings.png',
+  'chicken dumplings': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315661/foodsphere/dineatblue/chicken_dumplings.png',
+  'dynamite chicken': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/dynamite_prawns.png',
+  'honey wings (6 pcs)': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315662/foodsphere/dineatblue/honey_wings.png',
+  'honey wings': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315662/foodsphere/dineatblue/honey_wings.png',
+  'blue lagoon mocktail': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315682/foodsphere/tandooristop/mojitos.jpg',
+  '19b soup': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315665/foodsphere/dineatblue/soup_19b.png',
+  'chicken corn soup': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315664/foodsphere/dineatblue/chicken_corn_soup.png',
+  'bbq prawn salad': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315666/foodsphere/dineatblue/bbq_prawn_salad.png',
+  'spicy soup': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315667/foodsphere/dineatblue/spicy_soup.png',
 };
 
 /**
@@ -110,21 +134,22 @@ export const resolveItemImage = (item?: any): string | null => {
 
 export const BRAND_LOGOS: Record<string, string> = {
   '1': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/seenbanao_logo.png',
-  '2': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/dineatblue_logo.png',
-  '3': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
-  '4': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
+  '2': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png',
+  '3': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315684/foodsphere/jushhpk/logo.jpg',
+  '4': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315670/foodsphere/tandooristop/logo.png',
   '5': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/sandmelts_logo.png',
   '6': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/birdman_logo.png',
-  '7': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/getafomo_logo.jpg',
+  '7': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315699/foodsphere/getafomo/logo.png',
   'seenbanao': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/seenbanao_logo.png',
-  'dineatblue': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/dineatblue_logo.png',
-  'jushhpk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
-  'jushh': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg',
-  'tandooristoppk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
-  'tandooristop': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/tandoori_stop_logo.png',
+  'dineatblue': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png',
+  'blue': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png',
+  'jushhpk': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315684/foodsphere/jushhpk/logo.jpg',
+  'jushh': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315684/foodsphere/jushhpk/logo.jpg',
+  'tandooristoppk': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315670/foodsphere/tandooristop/logo.png',
+  'tandooristop': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315670/foodsphere/tandooristop/logo.png',
   'sandmelts': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/sandmelts_logo.png',
   'birdmanfoodspk': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/birdman_logo.png',
-  'getafomo': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/getafomo_logo.jpg'
+  'getafomo': 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315699/foodsphere/getafomo/logo.png'
 };
 
 export const getBrandLogo = (restaurantIdOrSlug?: string | number): string => {

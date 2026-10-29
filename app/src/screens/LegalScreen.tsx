@@ -164,7 +164,7 @@ export default function LegalScreen() {
             © 2026 GetFood (FoodSphere Multi-Tenant Platform). All rights reserved.
           </Text>
           <Text style={styles.footerBrands}>
-            Operating 7 Brands: Tandoori Stop · Jushh PK · GetAFomo · Seen Banao · Dine At Blue · SandMelts · Birdman Foods
+            Active Brands: Tandoori Stop · Jushh PK · Get A Fomo · Blue
           </Text>
           <Text style={styles.footerLocation}>
             Lahore, Punjab, Pakistan

@@ -71,6 +71,159 @@ const BRAND_SLUG_MAP: Record<string, string> = {
   'blue': 'dineatblue',
 };
 
+export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
+  {
+    id: 6,
+    restaurant: 3,
+    restaurant_name: "Jushh PK",
+    restaurant_slug: "jushhpk",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315684/foodsphere/jushhpk/logo.jpg",
+    branch: null,
+    branch_name: "Johar Town",
+    title: "Full Dubai Shawaya with Fragrant Rice",
+    caption: "Slow rotisserie grilled whole chicken basted with authentic Gulf spices over spiced Mandi rice.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80",
+    linked_menu_item: 41,
+    linked_item_details: {
+      id: 41,
+      name: "Half Dubai Shawaya",
+      price: 1400.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315688/foodsphere/jushhpk/half_dubai_shawaya.jpg",
+      is_available: true,
+      category_name: "TURKISH SPECIALS",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:48.020440+05:00",
+  },
+  {
+    id: 5,
+    restaurant: 3,
+    restaurant_name: "Jushh PK",
+    restaurant_slug: "jushhpk",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315684/foodsphere/jushhpk/logo.jpg",
+    branch: null,
+    branch_name: "DHA Phase 1",
+    title: "Loaded Chicken Doner Feast Box",
+    caption: "Thinly shaved spiced chicken doner piled high over golden fries and garlic mayo.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=800&q=80",
+    linked_menu_item: 37,
+    linked_item_details: {
+      id: 37,
+      name: "Chicken Doner Fries",
+      price: 600.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315689/foodsphere/jushhpk/chicken_doner_fries.jpg",
+      is_available: true,
+      category_name: "APPETIZER",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:48.014589+05:00",
+  },
+  {
+    id: 4,
+    restaurant: 4,
+    restaurant_name: "Tandoori Stop",
+    restaurant_slug: "tandooristoppk",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315670/foodsphere/tandooristop/logo.png",
+    branch: null,
+    branch_name: "Johar Town",
+    title: "Smoky Charcoal BBQ Platter",
+    caption: "Charcoal-kissed Malai Tikka & Seekh Kebabs served sizzling on iron platters.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",
+    linked_menu_item: 70,
+    linked_item_details: {
+      id: 70,
+      name: "Tandoori Chicken Bone (Single)",
+      price: 1150.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315671/foodsphere/tandooristop/tandoori_chicken_single.jpg",
+      is_available: true,
+      category_name: "TANDOORI CHICKEN",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:48.006725+05:00",
+  },
+  {
+    id: 3,
+    restaurant: 4,
+    restaurant_name: "Tandoori Stop",
+    restaurant_slug: "tandooristoppk",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315670/foodsphere/tandooristop/logo.png",
+    branch: null,
+    branch_name: "Lake City",
+    title: "Clay Oven Melting Cheese Naan Pull",
+    caption: "Direct from our Johar Town live clay ovens! Stuffed with 100% mozzarella and grilled tikka boti.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&q=80",
+    linked_menu_item: 70,
+    linked_item_details: {
+      id: 70,
+      name: "Clay Oven Cheese Naan",
+      price: 450.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315679/foodsphere/tandooristop/cheese_naan.jpg",
+      is_available: true,
+      category_name: "ROTI & NAAN",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:48.002909+05:00",
+  },
+  {
+    id: 2,
+    restaurant: 2,
+    restaurant_name: "Blue",
+    restaurant_slug: "dineatblue",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png",
+    branch: null,
+    branch_name: "Gulberg III",
+    title: "Golden Kunafa Prawns Sizzle",
+    caption: "Crispy shredded pastry wrapped around succulent king prawns with house spicy emulsion.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
+    linked_menu_item: null,
+    linked_item_details: {
+      id: 201,
+      name: "Kunafa Prawns (3 pcs)",
+      price: 1850.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315659/foodsphere/dineatblue/kunafa_prawns.png",
+      is_available: true,
+      category_name: "APPETIZERS",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:47.992844+05:00",
+  },
+  {
+    id: 1,
+    restaurant: 2,
+    restaurant_name: "Blue",
+    restaurant_slug: "dineatblue",
+    restaurant_logo: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png",
+    branch: null,
+    branch_name: "Gulberg III",
+    title: "Luxury Coastal Steam Seafood Platter",
+    caption: "Fresh Atlantic catch, jumbo prawns & calamari steamed to perfection. Live table-side presentation.",
+    media_type: "VIDEO",
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    thumbnail_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
+    linked_menu_item: null,
+    linked_item_details: {
+      id: 200,
+      name: "Blue Seafood Platter (Steamed)",
+      price: 4950.0,
+      image: "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
+      is_available: true,
+      category_name: "MAIN PLATTERS",
+    },
+    is_active: true,
+    created_at: "2026-10-29T01:00:47.985964+05:00",
+  },
+];
+
 const resolveBrandSlug = (post: DineInFeedPost): string => {
   if (post.restaurant_slug) return post.restaurant_slug;
   const normalized = (post.restaurant_name || '').toLowerCase().trim();
@@ -85,8 +238,8 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
   onSelectRestaurant,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [posts, setPosts] = useState<DineInFeedPost[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [posts, setPosts] = useState<DineInFeedPost[]>(FALLBACK_DINE_IN_POSTS);
+  const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeReelIndex, setActiveReelIndex] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -96,15 +249,14 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
 
   const fetchPosts = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await api.get('/dine-in-posts/');
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
       const activeList = data.filter((p: any) => p.is_active);
-      setPosts(activeList);
+      if (activeList.length > 0) {
+        setPosts(activeList);
+      }
     } catch (err) {
-      if (__DEV__) console.warn('[DineInVideoFeed] Could not load video posts:', err);
-    } finally {
-      setLoading(false);
+      if (__DEV__) console.warn('[DineInVideoFeed] Could not load video posts, using verified seeded reels:', err);
     }
   }, []);
 
@@ -152,13 +304,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
     }
   };
 
-  if (loading && posts.length === 0) {
-    return null;
-  }
-
-  if (posts.length === 0) {
-    return null;
-  }
+  const displayedPosts = posts.length > 0 ? posts : FALLBACK_DINE_IN_POSTS;
 
   return (
     <View style={styles.container}>
@@ -185,7 +331,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
         contentContainerStyle={styles.scrollContent}
         decelerationRate="fast"
       >
-        {posts.map((post, idx) => {
+        {displayedPosts.map((post, idx) => {
           const hasLinkedItem = Boolean(post.linked_item_details);
 
           return (
@@ -268,7 +414,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
         <View style={styles.modalBackdrop}>
           <FlatList
             ref={verticalFlatListRef}
-            data={posts}
+            data={displayedPosts}
             keyExtractor={(item) => String(item.id)}
             pagingEnabled={true}
             showsVerticalScrollIndicator={false}
@@ -280,7 +426,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
             })}
             onMomentumScrollEnd={(e) => {
               const newIdx = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
-              if (newIdx >= 0 && newIdx < posts.length) {
+              if (newIdx >= 0 && newIdx < displayedPosts.length) {
                 setActiveReelIndex(newIdx);
               }
             }}

@@ -54,8 +54,8 @@ export const loadInAppNotifications = async (): Promise<InAppNotification[]> => 
       cachedNotifications = [
         {
           id: 'welcome_notif_1',
-          title: '🎉 Welcome to FoodSphere!',
-          body: 'Explore 7 authentic restaurant brands in a single application.',
+          title: '🎉 Welcome to GetFood!',
+          body: 'Explore 4 authentic restaurant brands in a single application.',
           type: 'SYSTEM',
           createdAt: new Date().toISOString(),
           read: false,

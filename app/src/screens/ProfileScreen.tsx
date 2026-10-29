@@ -336,7 +336,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
             {/* App Branding Footer */}
             <View style={styles.appFooter}>
               <Text style={styles.appFooterText}>GetFood v1.0.4 • Unified Dining Platform</Text>
-              <Text style={styles.appFooterSubtext}>One App · Seven Unique Dining Experiences</Text>
+              <Text style={styles.appFooterSubtext}>One App · Four Unique Dining Experiences</Text>
             </View>
           </>
         ) : (

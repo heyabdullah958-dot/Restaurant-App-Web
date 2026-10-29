@@ -293,7 +293,7 @@ export default function CartScreen() {
           </View>
           <Text style={styles.emptyTitle}>Your Basket is Empty</Text>
           <Text style={styles.emptySubtitle}>
-            Explore 3 unique restaurant brands and add your favorite items to get started!
+            Explore 4 unique restaurant brands and add your favorite items to get started!
           </Text>
           <TouchableOpacity activeOpacity={0.75}
             style={styles.browseButton}

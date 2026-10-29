@@ -179,8 +179,68 @@ const resolveBrandInfo = (deal: any) => {
   if (deal.title?.toLowerCase().includes('burger') || deal.title?.toLowerCase().includes('jush')) return BRAND_DATA['jushhpk'];
   if (deal.title?.toLowerCase().includes('tandoori') || deal.title?.toLowerCase().includes('boti') || deal.title?.toLowerCase().includes('naan')) return BRAND_DATA['tandooristoppk'];
   if (deal.title?.toLowerCase().includes('coffee') || deal.title?.toLowerCase().includes('fomo') || deal.title?.toLowerCase().includes('dessert')) return BRAND_DATA['getafomo'];
+  if (deal.title?.toLowerCase().includes('blue') || deal.title?.toLowerCase().includes('seafood') || deal.title?.toLowerCase().includes('prawn') || deal.title?.toLowerCase().includes('fish')) return BRAND_DATA['dineatblue'];
   return { name: 'GetFood Exclusive', slug: '', emoji: '⚡', colors: ['#e11d48', '#be123c'] as const };
 };
+
+export const FALLBACK_FLASH_DEALS = [
+  {
+    id: 1,
+    title: '30% OFF All Smash Burgers',
+    description: 'Enjoy a flat 30% discount on all gourmet smash beef and crispy chicken burgers!',
+    deal_type: 'percentage',
+    discount_value: '30.00',
+    discount_display_text: '30% OFF',
+    restaurant: 3,
+    restaurant_name: 'Jushh PK',
+    restaurant_slug: 'jushhpk',
+    order_mode: 'ALL',
+    is_active: true,
+    is_currently_active: true,
+  },
+  {
+    id: 2,
+    title: 'Flat Rs. 250 OFF Naan & Boti',
+    description: 'Hot & fresh clay-oven special naans, seekh kababs, and tikka platters with flat discount!',
+    deal_type: 'flat',
+    discount_value: '250.00',
+    discount_display_text: 'Flat Rs. 250 OFF',
+    restaurant: 4,
+    restaurant_name: 'Tandoori Stop',
+    restaurant_slug: 'tandooristoppk',
+    order_mode: 'ALL',
+    is_active: true,
+    is_currently_active: true,
+  },
+  {
+    id: 3,
+    title: '20% OFF Coffee & Artisanal Desserts',
+    description: 'Specialty roasted coffees, iced lattes, and fresh French pastries.',
+    deal_type: 'percentage',
+    discount_value: '20.00',
+    discount_display_text: '20% OFF',
+    restaurant: 7,
+    restaurant_name: 'Get A Fomo',
+    restaurant_slug: 'getafomo',
+    order_mode: 'ALL',
+    is_active: true,
+    is_currently_active: true,
+  },
+  {
+    id: 4,
+    title: '25% OFF Ocean Platter & Seafood',
+    description: 'Fresh Atlantic catch, luxury prawns & fish platters with special discount!',
+    deal_type: 'percentage',
+    discount_value: '25.00',
+    discount_display_text: '25% OFF',
+    restaurant: 2,
+    restaurant_name: 'Blue',
+    restaurant_slug: 'dineatblue',
+    order_mode: 'ALL',
+    is_active: true,
+    is_currently_active: true,
+  },
+];
 
 interface DynamicHeroBannerProps {
   deals: any[];
@@ -198,9 +258,9 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
 
   // Filter active deals according to mode and active date
   const activeBanners = React.useMemo(() => {
-    if (!deals || deals.length === 0) return [];
+    const candidateDeals = (!deals || deals.length === 0) ? FALLBACK_FLASH_DEALS : deals;
     const now = Date.now();
-    const validDeals = deals.filter((d: any) => {
+    const validDeals = candidateDeals.filter((d: any) => {
       if (d.is_active === false) return false;
       if (d.is_currently_active !== undefined) {
         if (!d.is_currently_active) return false;
@@ -214,11 +274,13 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
       return true;
     });
 
+    const pool = validDeals.length > 0 ? validDeals : FALLBACK_FLASH_DEALS;
+
     if (fulfillmentMode === 'DINE_IN') {
-      const dineInDeals = validDeals.filter((d: any) => d.order_mode === 'DINE_IN' || d.is_dine_in_only);
-      return dineInDeals.length > 0 ? dineInDeals : validDeals.filter((d: any) => d.order_mode !== 'DELIVERY');
+      const dineInDeals = pool.filter((d: any) => d.order_mode === 'DINE_IN' || d.is_dine_in_only);
+      return dineInDeals.length > 0 ? dineInDeals : pool.filter((d: any) => d.order_mode !== 'DELIVERY');
     }
-    return validDeals.filter((d: any) => d.order_mode !== 'DINE_IN' && !d.is_dine_in_only);
+    return pool.filter((d: any) => d.order_mode !== 'DINE_IN' && !d.is_dine_in_only);
   }, [deals, fulfillmentMode]);
 
   // Keep index safely bounded
@@ -523,7 +585,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
   const [showNotifModal, setShowNotifModal] = React.useState(false);
   const [notifications, setNotifications] = React.useState<InAppNotification[]>([]);
-  const [flashDeals, setFlashDeals] = React.useState<any[]>([]);
+  const [flashDeals, setFlashDeals] = React.useState<any[]>(FALLBACK_FLASH_DEALS);
   const [activeGuestOrder, setActiveGuestOrder] = React.useState<any>(null);
   const [isTabSwitching, setIsTabSwitching] = React.useState(false);
 
@@ -546,7 +608,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         if (d.timing_type === 'RECURRING_DAILY') return true;
         return parseDateSafe(d.start_time) <= now && parseDateSafe(d.end_time) >= now;
       });
-      setFlashDeals(valid);
+      if (valid.length > 0) {
+        setFlashDeals(valid);
+      }
     } catch (e) {
       if (__DEV__) console.log('Flash deals fetch error', e);
     }
@@ -914,7 +978,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </Text>
       </View>
     </View>
-  ), [fulfillmentMode, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
+  ), [fulfillmentMode, flashDeals, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
 
 
   const ListEmpty = React.useMemo(() => {

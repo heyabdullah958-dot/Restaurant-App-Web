@@ -359,6 +359,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         * { box-sizing: border-box; }
         html, body {
           margin: 0; padding: 0; width: 100%; height: 100%;
+          min-width: 100%; min-height: 100%;
           overflow: hidden; background: #EBF0F5;
           user-select: none; -webkit-user-select: none;
         }
@@ -366,6 +367,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
           width: 100%; height: 100%;
+          min-width: 100%; min-height: 100%;
           z-index: 1; background: #EBF0F5;
         }
 
@@ -656,13 +658,16 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: mapHtml, baseUrl: 'https://unpkg.com' }}
+        source={{ html: mapHtml }}
         mixedContentMode="always"
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        androidLayerType="hardware"
+        androidLayerType="software"
         scalesPageToFit={false}
+        scrollEnabled={false}
+        bounces={false}
         style={styles.map}
+        containerStyle={{ flex: 1, width: '100%', height: '100%' }}
         onMessage={handleMessage}
         onLoad={() => {
           // After WebView finishes loading, trigger map invalidation

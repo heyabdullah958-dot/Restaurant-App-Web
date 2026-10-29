@@ -28,9 +28,9 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: '1',
-    title: 'One App, 3 Brands',
+    title: 'One App, 4 Brands',
     subtitle: 'Endless Dining Options',
-    description: 'Explore 3 unique restaurant brands in one place. Tandoori classics, burgers, and premium cafes.',
+    description: 'Explore 4 unique restaurant brands in one place. Tandoori classics, smash burgers, premium cafe & fresh ocean seafood.',
     icon: 'restaurant-outline',
     color: COLORS.primary,
     iconBg: 'rgba(255, 87, 34, 0.1)',

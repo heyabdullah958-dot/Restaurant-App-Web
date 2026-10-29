@@ -58,6 +58,29 @@ const isRestaurantOpen = (restaurant: any): boolean => {
   }
 };
 
+function formatOperatingHours(opensAt?: string, closesAt?: string): string {
+  if (!opensAt || !closesAt) return 'Open 24 Hours';
+  const o = opensAt.trim();
+  const c = closesAt.trim();
+  if (o.startsWith('00:00') && (c.startsWith('23:59') || c.startsWith('23:58'))) {
+    return 'Open 24 Hours';
+  }
+  const to12h = (timeStr: string) => {
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return timeStr;
+    let hours = parseInt(parts[0], 10);
+    const mins = parts[1];
+    if (isNaN(hours)) return timeStr;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    return `${hours}:${mins} ${ampm}`;
+  };
+  const openFormatted = o.includes('AM') || o.includes('PM') ? o : to12h(o);
+  const closeFormatted = c.includes('AM') || c.includes('PM') ? c : to12h(c);
+  return `${openFormatted} - ${closeFormatted}`;
+}
+
 
 // Memoized Menu Item Card component for zero frame drop menu scrolling
 const MenuItemCard = React.memo(({ 
@@ -169,14 +192,21 @@ const MenuItemCard = React.memo(({
         const { uri, isLogoFallback } = resolveItemImageWithLogoFallback(item, resKey);
         const itemImgSource = getImageUrl(uri);
         return (
-          <View style={[styles.menuItemImageContainer, isLogoFallback && { backgroundColor: '#1E1216', justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={[
+            styles.menuItemImageContainer,
+            { borderRadius: 14, overflow: 'hidden', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0' },
+            isLogoFallback && { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center' }
+          ]}>
             {itemImgSource ? (
               <Image 
                 source={itemImgSource} 
-                style={[styles.itemImage, isLogoFallback && { width: '75%', height: '75%', resizeMode: 'contain' }]} 
+                style={[styles.itemImage, isLogoFallback && { width: '70%', height: '70%', resizeMode: 'contain' }]} 
+                resizeMode={isLogoFallback ? 'contain' : 'cover'}
               />
             ) : (
-              <View style={styles.itemImageBlank} />
+              <View style={[styles.itemImagePlaceholder, { backgroundColor: '#F1F5F9' }]}>
+                <Ionicons name="fast-food-outline" size={28} color="#94A3B8" />
+              </View>
             )}
 
             <View style={styles.quantitySelectorContainer}>
@@ -756,7 +786,7 @@ export default function RestaurantScreen() {
           <View style={[styles.infoRow, { marginTop: 6 }]}>
             <Ionicons name="alarm-outline" size={14} color={COLORS.gray} />
             <Text style={styles.moreInfoText}>
-              Working hours: {restaurant.opens_at && restaurant.closes_at ? `${restaurant.opens_at.slice(0, 5)} - ${restaurant.closes_at.slice(0, 5)}` : 'Closed / N/A'}
+              Working hours: {formatOperatingHours(restaurant.opens_at, restaurant.closes_at)}
             </Text>
           </View>
         </View>
