@@ -241,7 +241,6 @@ class Command(BaseCommand):
             # Ensure Flash Deal for Blue
             try:
                 from promotions.models import FlashDeal
-                import datetime
                 if not FlashDeal.objects.filter(restaurant=blue).exists():
                     FlashDeal.objects.create(
                         restaurant=blue,
