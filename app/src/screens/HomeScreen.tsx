@@ -41,6 +41,7 @@ import {
 
 
 const { width } = Dimensions.get('window');
+const SCREEN_WIDTH = width;
 
 const categories = [
   { id: 'All', name: 'All', icon: '🍽️' },
@@ -48,6 +49,7 @@ const categories = [
   { id: 'Tandoori', name: 'Tandoori', icon: '🍗' },
   { id: 'Burgers', name: 'Burgers', icon: '🍔' },
   { id: 'Café', name: 'Café', icon: '☕' },
+  { id: 'Seafood', name: 'Seafood', icon: '🐟' },
 ];
 
 // Reliable slug map — category chip → restaurant slug
@@ -56,6 +58,7 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
   'Tandoori': 'tandooristoppk',
   'Burgers':  'jushhpk',
   'Café':     'getafomo',
+  'Seafood':  'dineatblue',
 };
 
 
@@ -96,13 +99,23 @@ const PROTOTYPE_STYLES: Record<string, { colors: readonly [string, string, ...st
 };
 
 const BRAND_DATA: Record<string, { name: string; slug: string; emoji: string; colors: readonly [string, string, ...string[]] }> = {
-  'jushhpk': { name: 'Jush PK', slug: 'jushhpk', emoji: '🍔', colors: ['#1A0A00', '#D2691E'] },
-  'tandooristoppk': { name: 'Tandoori Stop', slug: 'tandooristoppk', emoji: '🍗🔥', colors: ['#FF9900', '#E65100'] },
-  'getafomo': { name: 'Get A Fomo', slug: 'getafomo', emoji: '☕🍰', colors: ['#8b5cf6', '#6d28d9'] },
+  'jushhpk': { name: 'Jushh PK', slug: 'jushhpk', emoji: '🍔', colors: ['#E65100', '#BF360C'] },
+  'tandooristoppk': { name: 'Tandoori Stop', slug: 'tandooristoppk', emoji: '🍗🔥', colors: ['#C81E1E', '#7F1D1D'] },
+  'getafomo': { name: 'Get A Fomo', slug: 'getafomo', emoji: '☕🍰', colors: ['#6B3F25', '#2C1810'] },
+  'dineatblue': { name: 'Blue', slug: 'dineatblue', emoji: '🐟', colors: ['#16384C', '#0B1F2D'] },
   'seenbanao': { name: 'Seen Banao', slug: 'seenbanao', emoji: '🔥', colors: ['#3E1F00', '#FF5722'] },
-  'dineatblue': { name: 'Dine At Blue', slug: 'dineatblue', emoji: '🐟', colors: ['#001529', '#0055A4'] },
   'sandmelts': { name: 'Sand Melts', slug: 'sandmelts', emoji: '🥪', colors: ['#FF6B00', '#FF3CAC'] },
   'birdmanfoodspk': { name: 'Birdman Foods', slug: 'birdmanfoodspk', emoji: '🍗', colors: ['#7A0000', '#FF1744'] },
+};
+
+const formatBrandDisplayName = (brand: any): string => {
+  if (!brand) return 'Restaurant';
+  const slug = (brand.slug || brand.name || '').toLowerCase().replace(/\s+/g, '');
+  if (slug.includes('tandoori')) return 'Tandoori Stop';
+  if (slug.includes('jush')) return 'Jushh PK';
+  if (slug.includes('fomo')) return 'Get A Fomo';
+  if (slug.includes('blue')) return 'Blue';
+  return brand.name || 'Restaurant';
 };
 
 const ID_TO_SLUG: Record<number | string, string> = {
@@ -176,8 +189,12 @@ interface DynamicHeroBannerProps {
 }
 
 // Unified Dynamic Hero Banner Container — binds strictly to live backend promotional flash deals
+// Supports smooth finger swiping, pause auto-rotate while dragging, and synced pagination dots
 const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBanner }: DynamicHeroBannerProps) => {
   const [bannerIndex, setBannerIndex] = React.useState(0);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const flatListRef = React.useRef<FlatList>(null);
+  const bannerWidth = SCREEN_WIDTH - SPACING.md * 2;
 
   // Filter active deals according to mode and active date
   const activeBanners = React.useMemo(() => {
@@ -215,122 +232,159 @@ const DynamicHeroBannerSection = React.memo(({ deals, fulfillmentMode, onPressBa
     }
   }, [activeBanners.length, bannerIndex]);
 
-  // Auto rotate every 4 seconds if more than 1 deal
+  // Auto rotate every 4.5 seconds if more than 1 deal and user is not dragging
   React.useEffect(() => {
-    if (activeBanners.length <= 1) return;
+    if (activeBanners.length <= 1 || isDragging) return;
     const timer = setInterval(() => {
-      setBannerIndex(prev => (prev + 1) % activeBanners.length);
-    }, 4000);
+      setBannerIndex((prev) => {
+        const next = (prev + 1) % activeBanners.length;
+        flatListRef.current?.scrollToOffset({
+          offset: next * bannerWidth,
+          animated: true,
+        });
+        return next;
+      });
+    }, 4500);
     return () => clearInterval(timer);
-  }, [activeBanners.length]);
+  }, [activeBanners.length, isDragging, bannerWidth]);
 
-  // Clean collapse when no active promotions exist (zero height / no orphan mock slides)
   if (activeBanners.length === 0) {
     return null;
   }
 
-  const currentDeal = activeBanners[bannerIndex] || activeBanners[0];
-  const brand = resolveBrandInfo(currentDeal);
-  const isDineIn = currentDeal.order_mode === 'DINE_IN' || currentDeal.is_dine_in_only || fulfillmentMode === 'DINE_IN';
-  const isRecurring = currentDeal.timing_type === 'RECURRING_DAILY';
-
-  const discountText = currentDeal.discount_display_text || (currentDeal.discount_value
-    ? (currentDeal.deal_type === 'flat' ? `Flat Rs. ${Number(currentDeal.discount_value).toFixed(0)} OFF` : `${Number(currentDeal.discount_value).toFixed(0)}% OFF`)
-    : 'Special Discount');
-
-  const tagText = isDineIn
-    ? '🍽️ DINE-IN EXCLUSIVE'
-    : isRecurring
-    ? `🌙 MIDNIGHT DEAL • ${brand.name.toUpperCase()}`
-    : `⚡ FLASH SALE • ${brand.name.toUpperCase()}`;
-
-  const redemptionsClaimed = currentDeal.current_redemptions ?? currentDeal.orders_used ?? 0;
-  const maxCap = currentDeal.max_orders ?? 0;
-
   return (
-    <TouchableOpacity
-      activeOpacity={0.92}
-      style={[
-        styles.promoBanner,
-        { backgroundColor: isDineIn ? '#6d28d9' : '#be123c' },
-        SHADOWS.medium
-      ]}
-      onPress={() => onPressBanner(currentDeal)}
-    >
-      <LinearGradient
-        colors={isDineIn ? ['#7c3aed', '#4c1d95'] : (brand.colors || ['#e11d48', '#be123c'])}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[StyleSheet.absoluteFill, { borderRadius: 20, opacity: 0.95 }]}
+    <View style={{ marginBottom: SPACING.md }}>
+      <FlatList
+        ref={flatListRef}
+        data={activeBanners}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        nestedScrollEnabled={true}
+        decelerationRate="fast"
+        onScrollBeginDrag={() => setIsDragging(true)}
+        onScrollEndDrag={() => setIsDragging(false)}
+        onMomentumScrollEnd={(e) => {
+          setIsDragging(false);
+          const newIdx = Math.round(e.nativeEvent.contentOffset.x / bannerWidth);
+          if (newIdx >= 0 && newIdx < activeBanners.length) {
+            setBannerIndex(newIdx);
+          }
+        }}
+        keyExtractor={(item, index) => `${item.id || item.title}-${index}`}
+        renderItem={({ item: currentDeal }) => {
+          const brand = resolveBrandInfo(currentDeal);
+          const isDineIn = currentDeal.order_mode === 'DINE_IN' || currentDeal.is_dine_in_only || fulfillmentMode === 'DINE_IN';
+          const isRecurring = currentDeal.timing_type === 'RECURRING_DAILY';
+
+          const discountText = currentDeal.discount_display_text || (currentDeal.discount_value
+            ? (currentDeal.deal_type === 'flat' ? `Flat Rs. ${Number(currentDeal.discount_value).toFixed(0)} OFF` : `${Number(currentDeal.discount_value).toFixed(0)}% OFF`)
+            : 'Special Discount');
+
+          const tagText = isDineIn
+            ? '🍽️ DINE-IN EXCLUSIVE'
+            : isRecurring
+            ? `🌙 MIDNIGHT DEAL • ${brand.name.toUpperCase()}`
+            : `⚡ FLASH SALE • ${brand.name.toUpperCase()}`;
+
+          const redemptionsClaimed = currentDeal.current_redemptions ?? currentDeal.orders_used ?? 0;
+          const maxCap = currentDeal.max_orders ?? 0;
+
+          return (
+            <TouchableOpacity
+              activeOpacity={0.92}
+              style={[
+                styles.promoBanner,
+                { width: bannerWidth, marginHorizontal: 0, marginBottom: 0, backgroundColor: isDineIn ? '#6d28d9' : '#be123c' },
+                SHADOWS.medium
+              ]}
+              onPress={() => onPressBanner(currentDeal)}
+            >
+              <LinearGradient
+                colors={isDineIn ? ['#7c3aed', '#4c1d95'] : (brand.colors || ['#e11d48', '#be123c'])}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[StyleSheet.absoluteFill, { borderRadius: 20, opacity: 0.95 }]}
+              />
+
+              <View style={styles.bannerContent}>
+                <View style={{ flex: 1, paddingRight: SPACING.xs, zIndex: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+                    <View style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: 'rgba(255, 255, 255, 0.35)'
+                    }}>
+                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#fef08a', letterSpacing: 0.5 }}>
+                        {tagText}
+                      </Text>
+                    </View>
+                    {maxCap > 0 && (
+                      <View style={{
+                        backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                        paddingHorizontal: 6,
+                        paddingVertical: 3,
+                        borderRadius: 6,
+                      }}>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#FFF' }}>
+                          🔥 {redemptionsClaimed}/{maxCap} claimed
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <Text style={styles.bannerTitle} numberOfLines={2}>
+                    {currentDeal.title}
+                  </Text>
+
+                  <Text style={styles.bannerSubtitle} numberOfLines={2}>
+                    {currentDeal.description || `${discountText} on all orders!`}
+                  </Text>
+
+                  <View style={styles.bannerCTARow}>
+                    <Text style={styles.bannerCTAText}>
+                      {isDineIn ? 'Explore Dine-In Deal' : 'Claim Deal & Order'}
+                    </Text>
+                    <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
+                  </View>
+                </View>
+
+                <View style={[styles.bannerIconWrap, { zIndex: 1 }]}>
+                  <Text style={{ fontSize: 44, opacity: 0.9 }}>{brand.emoji || '⚡'}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        }}
       />
 
-      <View style={styles.bannerContent}>
-        <View style={{ flex: 1, paddingRight: SPACING.xs, zIndex: 2 }}>
-          {/* Dynamic Category/Brand Tag */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-            <View style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.22)',
-              paddingHorizontal: 8,
-              paddingVertical: 3,
-              borderRadius: 6,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.35)'
-            }}>
-              <Text style={{ fontSize: 10, fontWeight: '800', color: '#fef08a', letterSpacing: 0.5 }}>
-                {tagText}
-              </Text>
-            </View>
-            {maxCap > 0 && (
-              <View style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                paddingHorizontal: 6,
-                paddingVertical: 3,
-                borderRadius: 6,
-              }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: '#FFF' }}>
-                  🔥 {redemptionsClaimed}/{maxCap} claimed
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.bannerTitle} numberOfLines={2}>
-            {currentDeal.title}
-          </Text>
-
-          <Text style={styles.bannerSubtitle} numberOfLines={2}>
-            {currentDeal.description || `${discountText} on all orders!`}
-          </Text>
-
-          <View style={styles.bannerCTARow}>
-            <Text style={styles.bannerCTAText}>
-              {isDineIn ? 'Explore Dine-In Deal' : 'Claim Deal & Order'}
-            </Text>
-            <Ionicons name="arrow-forward" size={14} color={COLORS.white} />
-          </View>
-        </View>
-
-        <View style={[styles.bannerIconWrap, { zIndex: 1 }]}>
-          <Text style={{ fontSize: 44, opacity: 0.9 }}>{brand.emoji || '⚡'}</Text>
-        </View>
-      </View>
-
-      {/* Dot Indicators */}
+      {/* Subtle Pagination Dots */}
       {activeBanners.length > 1 && (
-        <View style={styles.bannerDots}>
+        <View style={[styles.bannerDots, { marginTop: 8 }]}>
           {activeBanners.map((_, i) => (
-            <View
+            <TouchableOpacity
               key={i}
+              activeOpacity={0.7}
+              onPress={() => {
+                setBannerIndex(i);
+                flatListRef.current?.scrollToOffset({
+                  offset: i * bannerWidth,
+                  animated: true,
+                });
+              }}
               style={[
                 styles.bannerDot,
                 i === bannerIndex && styles.bannerDotActive,
-                { backgroundColor: i === bannerIndex ? COLORS.white : 'rgba(255,255,255,0.45)' }
+                { backgroundColor: i === bannerIndex ? COLORS.primary : 'rgba(0,0,0,0.22)' }
               ]}
             />
           ))}
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 });
 
@@ -418,7 +472,7 @@ const RestaurantCard = React.memo(({ brand, fulfillmentMode, onPress }: { brand:
 
       <View style={styles.brandDetails}>
         <View style={styles.brandTitleRow}>
-          <Text style={styles.brandName}>{brand.name}</Text>
+          <Text style={styles.brandName}>{formatBrandDisplayName(brand)}</Text>
           <View style={styles.deliveryBadge}>
             <Ionicons name="time-outline" size={12} color={COLORS.gray} />
             <Text style={styles.deliveryText}>
@@ -600,7 +654,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, []);
 
   const filteredRestaurants = React.useMemo(() => {
-    const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo'];
+    const activeBrands = ['tandooristoppk', 'jushhpk', 'getafomo', 'dineatblue'];
     const src = restaurants && restaurants.length > 0 ? restaurants : FALLBACK_RESTAURANTS;
     let available = src.filter((r: any) => activeBrands.includes(r.slug || r.name?.toLowerCase().replace(/\s+/g, '')));
 

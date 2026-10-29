@@ -153,6 +153,23 @@ const REAL_BRANCH_LOCATIONS: BranchLocation[] = [
     closesAt: '02:00 AM',
     isOpen: true,
   },
+
+  // Blue Branches
+  {
+    id: 'blue-gulberg-3',
+    brandSlug: 'dineatblue',
+    brandName: 'Blue',
+    branchName: 'Gulberg III Main Outlet',
+    address: '94-B/2, MM Alam Road, Gulberg III, Lahore',
+    phone: '0321-8484111',
+    lat: 31.5135,
+    lng: 74.3512,
+    emoji: '🐟',
+    accentColor: '#0055A4',
+    opensAt: '12:00 PM',
+    closesAt: '01:00 AM',
+    isOpen: true,
+  },
 ];
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -167,6 +184,29 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+function formatOperatingHours(opensAt?: string, closesAt?: string): string {
+  if (!opensAt || !closesAt) return 'Open 24 Hours';
+  const o = opensAt.trim();
+  const c = closesAt.trim();
+  if (o.startsWith('00:00') && (c.startsWith('23:59') || c.startsWith('23:58'))) {
+    return 'Open 24 Hours';
+  }
+  const to12h = (timeStr: string) => {
+    const parts = timeStr.split(':');
+    if (parts.length < 2) return timeStr;
+    let hours = parseInt(parts[0], 10);
+    const mins = parts[1];
+    if (isNaN(hours)) return timeStr;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    return `${hours}:${mins} ${ampm}`;
+  };
+  const openFormatted = o.includes('AM') || o.includes('PM') ? o : to12h(o);
+  const closeFormatted = c.includes('AM') || c.includes('PM') ? c : to12h(c);
+  return `${openFormatted} - ${closeFormatted}`;
 }
 
 export default function MapScreen({ navigation }: { navigation: any }) {
@@ -240,17 +280,25 @@ export default function MapScreen({ navigation }: { navigation: any }) {
     return REAL_BRANCH_LOCATIONS;
   }, [restaurants]);
 
-  // Compute branches with distance
+  // Compute branches with distance (hide false 0 m when location is unset)
+  const hasRealUserLocation = Boolean(userLocation?.coords?.latitude && userLocation?.coords?.longitude);
   const processedBranches = useMemo(() => {
     return liveBranches.map((branch) => {
+      if (!hasRealUserLocation) {
+        return {
+          ...branch,
+          distanceKm: null,
+          formattedDistance: null,
+        };
+      }
       const dist = haversineKm(userLat, userLng, branch.lat, branch.lng);
       return {
         ...branch,
         distanceKm: dist,
-        formattedDistance: dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`,
+        formattedDistance: dist < 0.05 ? null : (dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`),
       };
     });
-  }, [liveBranches, userLat, userLng]);
+  }, [liveBranches, userLat, userLng, hasRealUserLocation]);
 
   // Filtered branches
   const filteredBranches = useMemo(() => {
@@ -608,11 +656,11 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: mapHtml }}
+        source={{ html: mapHtml, baseUrl: 'https://unpkg.com' }}
         mixedContentMode="always"
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        androidLayerType="software"
+        androidLayerType="hardware"
         scalesPageToFit={false}
         style={styles.map}
         onMessage={handleMessage}
@@ -672,7 +720,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
               </View>
               <View>
                 <Text style={styles.brandHeroTitle}>All Brands</Text>
-                <Text style={styles.brandHeroSub}>7 Active Outlets</Text>
+                <Text style={styles.brandHeroSub}>8 Active Outlets</Text>
               </View>
             </TouchableOpacity>
 
@@ -690,7 +738,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
                 <Text style={{ fontSize: 16 }}>🍔</Text>
               </View>
               <View>
-                <Text style={styles.brandHeroTitle}>Jush PK</Text>
+                <Text style={styles.brandHeroTitle}>Jushh PK</Text>
                 <Text style={styles.brandHeroSub}>3 Outlets · Burgers & Doner</Text>
               </View>
             </TouchableOpacity>
@@ -732,6 +780,25 @@ export default function MapScreen({ navigation }: { navigation: any }) {
                 <Text style={styles.brandHeroSub}>3 Outlets · BBQ & Naan</Text>
               </View>
             </TouchableOpacity>
+
+            {/* Card 4: Blue */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => setSelectedBrandFilter('dineatblue')}
+              style={[
+                styles.brandHeroCard,
+                selectedBrandFilter === 'dineatblue' && styles.brandHeroCardActive,
+                { borderColor: '#0055A4' },
+              ]}
+            >
+              <View style={[styles.brandHeroIconCircle, { backgroundColor: '#E0F2FE' }]}>
+                <Text style={{ fontSize: 16 }}>🐟</Text>
+              </View>
+              <View>
+                <Text style={styles.brandHeroTitle}>Blue</Text>
+                <Text style={styles.brandHeroSub}>Gulberg III · Seafood & Mains</Text>
+              </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -771,10 +838,12 @@ export default function MapScreen({ navigation }: { navigation: any }) {
                     <Text style={styles.brandEmoji}>{branch.emoji}</Text>
                     <Text style={styles.brandNameText}>{branch.brandName}</Text>
                   </View>
-                  <View style={styles.distanceBadge}>
-                    <Ionicons name="location-outline" size={12} color={COLORS.primary} />
-                    <Text style={styles.distanceText}>{branch.formattedDistance}</Text>
-                  </View>
+                  {branch.formattedDistance ? (
+                    <View style={styles.distanceBadge}>
+                      <Ionicons name="location-outline" size={12} color={COLORS.primary} />
+                      <Text style={styles.distanceText}>{branch.formattedDistance}</Text>
+                    </View>
+                  ) : null}
                 </View>
 
                 {/* Branch Name & Address */}
@@ -785,7 +854,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
                 <View style={styles.metaRow}>
                   <View style={styles.statusBadge}>
                     <View style={styles.greenDot} />
-                    <Text style={styles.statusText}>Open Now ({branch.opensAt} - {branch.closesAt})</Text>
+                    <Text style={styles.statusText}>Open Now · {formatOperatingHours(branch.opensAt, branch.closesAt)}</Text>
                   </View>
                   <TouchableOpacity
                     onPress={() => makePhoneCall(branch.phone)}

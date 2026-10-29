@@ -139,23 +139,20 @@ export default function OrdersScreen() {
     return ordersArray.filter((o: any) => o !== null && o !== undefined);
   }, [myOrders, guestOrders, isAuthenticated, user, orderFilter]);
 
-  // Fetch orders on tab focus and poll every 4 seconds while screen is active
+  // Fetch orders on tab focus: poll only for authenticated users; guests check storage once without blocking
   useFocusEffect(
     React.useCallback(() => {
-      if (isAuthenticated && user && !user.is_guest) {
+      const isUserGuest = !isAuthenticated || !user || user.is_guest;
+      if (!isUserGuest) {
         dispatch(fetchMyOrders());
 
         const interval = setInterval(() => {
           dispatch(fetchMyOrders());
-        }, 4000);
+        }, 5000);
 
         return () => clearInterval(interval);
       } else {
         fetchGuestOrdersFromStorage();
-        const interval = setInterval(() => {
-          fetchGuestOrdersFromStorage();
-        }, 4000);
-        return () => clearInterval(interval);
       }
     }, [dispatch, isAuthenticated, user?.id, user?.is_guest, fetchGuestOrdersFromStorage])
   );
@@ -388,8 +385,10 @@ export default function OrdersScreen() {
     );
   };
 
-  // If user session is currently restoring or fetching orders, render a clean loading spinner to avoid UI flickering
-  if (userLoading || isGuestLoading || (loading && myOrders.length === 0 && isAuthenticated && user && !user.is_guest)) {
+  const isGuestSession = !isAuthenticated || !user || user.is_guest;
+
+  // STRICT GUEST GUARD: For Authenticated Users ONLY, show history fetching spinner. Guests are NEVER blocked.
+  if (!isGuestSession && (userLoading || (loading && myOrders.length === 0))) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
         <View style={styles.emptyContent}>
@@ -399,9 +398,6 @@ export default function OrdersScreen() {
       </SafeAreaView>
     );
   }
-
-  // Render Guest Order Lookup UI strictly when the user is NOT authenticated or is a Guest User
-  const isGuestSession = !isAuthenticated || !user || user.is_guest;
   if (isGuestSession && guestOrders.length === 0) {
     return (
       <SafeAreaView style={[styles.emptyContainer, { backgroundColor: COLORS.light }]}>
@@ -416,7 +412,7 @@ export default function OrdersScreen() {
           </View>
           <Text style={[styles.emptyTitle, { fontSize: 22, textAlign: 'center' }]}>Track Your Orders</Text>
           <Text style={[styles.emptySubtitle, { textAlign: 'center', marginBottom: SPACING.lg }]}>
-            Sign in to access your full order history, or enter your Order ID to track an existing delivery!
+            Sign in to track active orders and view your past food history
           </Text>
 
           {/* Quick Guest Order Lookup Box */}
@@ -484,7 +480,7 @@ export default function OrdersScreen() {
             }}
           >
             <Ionicons name="log-in-outline" size={18} color={COLORS.white} />
-            <Text style={styles.loginButtonText}>Sign In / Register</Text>
+            <Text style={styles.loginButtonText}>Sign In / Sign Up →</Text>
           </TouchableOpacity>
 
           <TouchableOpacity activeOpacity={0.75}
