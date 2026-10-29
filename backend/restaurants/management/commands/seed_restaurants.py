@@ -482,10 +482,29 @@ class Command(BaseCommand):
             name = brand_data["name"]
             slug = slugify(name)
             
-            is_active_brand = slug in ['tandooristoppk', 'jushhpk', 'getafomo']
+            is_active_brand = slug in ['tandooristoppk', 'jushhpk', 'getafomo', 'dineatblue']
+            # Default brand logos and covers
+            brand_cover = None
+            brand_logo = None
+            if slug == 'dineatblue':
+                brand_data["name"] = "Blue"
+                brand_cover = "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png"
+                brand_logo = "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png"
+            elif slug == 'getafomo':
+                brand_data["name"] = "Get A Fomo"
+                brand_cover = "https://res.cloudinary.com/depa8gfnk/image/upload/v1793266684/foodsphere/getafomo/cover.png"
+                brand_logo = "https://res.cloudinary.com/depa8gfnk/image/upload/v1793266715/foodsphere/getafomo/logo.png"
+            elif slug == 'jushhpk':
+                brand_data["name"] = "Jushh PK"
+            elif slug == 'tandooristoppk':
+                brand_data["name"] = "Tandoori Stop"
+
             restaurant = Restaurant(
                 slug=slug,
                 is_active=is_active_brand,
+                cover_image=brand_cover,
+                banner_image=brand_cover,
+                logo=brand_logo,
                 **brand_data
             )
             restaurants_to_create.append(restaurant)

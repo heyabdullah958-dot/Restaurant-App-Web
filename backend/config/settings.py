@@ -329,6 +329,12 @@ CORS_ALLOWED_ORIGINS = [
     'https://foodsphere-admin.pages.dev',
     'https://admin-orpin-psi.vercel.app',
     'https://foodsphere-admin.netlify.app',
+    'https://blue.getfoodpk.com',
+    'https://jushh.getfoodpk.com',
+    'https://tandooristop.getfoodpk.com',
+    'https://admin.getfoodpk.com',
+    'https://getfoodpk.com',
+    'https://www.getfoodpk.com',
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
@@ -343,6 +349,16 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.netlify\.app$",
     r"^https://.*\.expo\.dev$",
     r"^exp://.*$",
+    r"^https://.*\.getfoodpk\.com$",
+    r"^https://getfoodpk\.com$",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.getfoodpk.com',
+    'https://getfoodpk.com',
+    'https://www.getfoodpk.com',
+    'https://*.pages.dev',
+    'https://*.vercel.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
