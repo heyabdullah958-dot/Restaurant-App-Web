@@ -431,3 +431,14 @@ ode_modules/.cache/wrangler/pages.json and <dir>/.wrangler/cache/pages.json).
   2. Even when authenticated to a new account, Wrangler's Pages command reads pages.json and makes requests to /accounts/<OLD_ACCOUNT_ID>/pages/projects, resulting in Authentication error [code: 10000] (403 Forbidden).
   3. When switching Cloudflare accounts, all local pages.json and wrangler-account.json cache files must be purged, and CLOUDFLARE_ACCOUNT_ID explicitly bound.
 - **Applies to**: dmin/node_modules/.cache/wrangler, websites/.wrangler/cache, Cloudflare Pages deployments.
+
+---
+
+## Lesson 27 - Dual Cloudinary Storage Paradigms & Public ID Mirroring - 2026-10-29
+- **Pattern**: Migrating Cloudinary media assets and models in Django projects using `django-cloudinary-storage` alongside static frontend catalogs.
+- **Wrong assumption made**: Assuming that setting `CLOUDINARY_CLOUD_NAME` in environment variables updates all media references across the system automatically.
+- **What actually mattered**:
+  1. **Dual Storage Resolution**: Relative `ImageField` paths (`menu_items/...`, `restaurants/...`) call `MediaCloudinaryStorage.url()`, which dynamically formats the URL with the active cloud name. However, fields saved as full URLs (`https://res.cloudinary.com/...`) bypass storage serialization and remain hardcoded in PostgreSQL.
+  2. **Namespace Mirroring**: `django-cloudinary-storage` expects assets either at the root or under the `media/` folder prefix depending on upload method. Syncing relative paths to both root `<public_id>` and `media/<public_id>` ensures zero 404s regardless of storage resolution.
+  3. **Version Tag Strip**: Hardcoded version segments (`/v1792315655/`) from the old account must be stripped when migrating URLs to the new account so Cloudinary immediately serves the latest asset revision.
+- **Applies to**: `backend/config/settings.py`, `backend/restaurants/serializers.py`, `backend/restaurants/management/commands/`, `websites/*/live_catalog.js`, `app/src/services/mediaAssetService.ts`.

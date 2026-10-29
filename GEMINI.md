@@ -220,6 +220,7 @@ FoodSphere/
 | Phase 8.1 Mobile-First KFC 2-Page Storefront, Header De-Congestion, Hamburger Drawer & 3 Distinct Brand Heroes | ✅ Completed (Header de-congested, hamburger drawer on all viewports, index.html <= 6 cards, menu.html full catalog, 3 distinct heroes, Playwright mobile 100% pass, Cloudflare Pages live) | Done |
 | Phase 9 Mobile-First Visual Differentiation for Tandoori Stop & Jushh PK | ✅ Completed (Tandoori Snap-Scroll Platter Hero + Circular Dish Avatars + 1-Col Horizontal List Best Sellers; Jushh Full-Photo Feast Card + 2-Col Split Pills with left maroon border + 2-Col Best Sellers 0 plain bun + High-res dessert photography; Playwright mobile 100% pass, Cloudflare Pages live HTTP 200) | Done |
 | Phase 10 Dine-In Video Posts & Highlights System with 10-Video FIFO Auto-Cleanup | ✅ Completed (Model `RestaurantMediaPost`, 10-video FIFO quota, public feed with nested `linked_item_details`, Web Admin quota bar & upload modal, Manager App camera roll reel upload & dish tag, Customer App inline HTML5 WebView reels & 1-tap cart add, 5/5 backend test pass, 100% clean builds across all surfaces) | Done |
+| Phase 12 Cloudinary Media & PostgreSQL URL Migration (`depa8gfnk` -> `qodsfm34`) | ✅ Completed (169 primary assets + 61 relative paths mirrored on qodsfm34, 23 files updated, live Heroku PostgreSQL updated, 45 Blue items seeded with qodsfm34 images) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 

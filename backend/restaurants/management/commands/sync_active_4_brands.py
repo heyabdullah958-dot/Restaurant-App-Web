@@ -17,9 +17,9 @@ class Command(BaseCommand):
             blue.is_force_closed = False
             blue.opens_at = datetime.time(0, 0)
             blue.closes_at = datetime.time(23, 59, 59)
-            blue.cover_image = 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png'
-            blue.banner_image = 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png'
-            blue.logo = 'https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png'
+            blue.cover_image = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png'
+            blue.banner_image = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png'
+            blue.logo = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png'
             blue.save()
             self.stdout.write(self.style.SUCCESS(f"Updated Blue (ID: {blue.id}) to active with Cloudinary cover and logo."))
 
@@ -51,9 +51,9 @@ class Command(BaseCommand):
             fomo.is_force_closed = False
             fomo.opens_at = datetime.time(0, 0)
             fomo.closes_at = datetime.time(23, 59, 59)
-            fomo.cover_image = 'https://res.cloudinary.com/depa8gfnk/image/upload/v1793266684/foodsphere/getafomo/cover.png'
-            fomo.banner_image = 'https://res.cloudinary.com/depa8gfnk/image/upload/v1793266684/foodsphere/getafomo/cover.png'
-            fomo.logo = 'https://res.cloudinary.com/depa8gfnk/image/upload/v1793266715/foodsphere/getafomo/logo.png'
+            fomo.cover_image = 'https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/cover.png'
+            fomo.banner_image = 'https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/cover.png'
+            fomo.logo = 'https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/logo.png'
             fomo.save()
             self.stdout.write(self.style.SUCCESS(f"Updated Get A Fomo (ID: {fomo.id}) to active with Cloudinary cover and logo."))
 
@@ -156,48 +156,48 @@ class Command(BaseCommand):
             }
 
             blue_images = {
-                "Blue Seafood Platter (Steamed)": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "2 Person Platter": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Without Lobster": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "With Lobster": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "2 Person Seafood & Chicken Platter": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Kunafa Prawns (3 pcs)": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315659/foodsphere/dineatblue/kunafa_prawns.png",
-                "Dynamite Prawns": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/dynamite_prawns.png",
-                "Seared Dumplings (6 pcs)": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/seared_dumplings.png",
-                "Chicken Dumplings (6 pcs)": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315661/foodsphere/dineatblue/chicken_dumplings.png",
-                "Dynamite Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315660/foodsphere/dineatblue/dynamite_prawns.png",
-                "Honey Wings (6 pcs)": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315662/foodsphere/dineatblue/honey_wings.png",
-                "Fish & Chips": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "19B Soup": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315665/foodsphere/dineatblue/soup_19b.png",
-                "Chicken Corn Soup": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315664/foodsphere/dineatblue/chicken_corn_soup.png",
-                "BBQ Prawn Salad": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315666/foodsphere/dineatblue/bbq_prawn_salad.png",
-                "Romesco Fish": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Umami Fish": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Pamphlet Fish": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Fish Chilli Dry": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Vietnamese Fish": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Thermidor Lobster": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "Grilled Lobster": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "BBQ Prawns": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315666/foodsphere/dineatblue/bbq_prawn_salad.png",
-                "Prawn Pasta": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315659/foodsphere/dineatblue/kunafa_prawns.png",
-                "Steamed Crab": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "Mud Crab": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png",
-                "Grilled Fish": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315663/foodsphere/dineatblue/fish_and_chips.png",
-                "Chilli Mint Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Cashew Nut Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Korean Fried Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315662/foodsphere/dineatblue/honey_wings.png",
-                "Chicken Chilli Dry": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Sweet & Sour Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "House Special Chicken": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315658/foodsphere/dineatblue/chicken_platter_2person.png",
-                "Strawberry Mojito": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg",
-                "Blueberry Mojito": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg",
-                "Peach Mojito": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg",
-                "Green Apple Mojito": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg",
-                "Fresh Lemonade": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg",
-                "Pepsi / 7Up (Tin)": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg",
-                "Mineral Water (Small)": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
-                "Butter Mushroom Rice": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315682/foodsphere/tandooristop/rice.jpg",
-                "Steak Fries": "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315689/foodsphere/jushhpk/chicken_doner_fries.jpg",
+                "Blue Seafood Platter (Steamed)": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "2 Person Platter": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Without Lobster": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "With Lobster": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "2 Person Seafood & Chicken Platter": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Kunafa Prawns (3 pcs)": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png",
+                "Dynamite Prawns": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png",
+                "Seared Dumplings (6 pcs)": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/seared_dumplings.png",
+                "Chicken Dumplings (6 pcs)": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_dumplings.png",
+                "Dynamite Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png",
+                "Honey Wings (6 pcs)": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png",
+                "Fish & Chips": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "19B Soup": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/soup_19b.png",
+                "Chicken Corn Soup": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_corn_soup.png",
+                "BBQ Prawn Salad": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/bbq_prawn_salad.png",
+                "Romesco Fish": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Umami Fish": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Pamphlet Fish": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Fish Chilli Dry": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Vietnamese Fish": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Thermidor Lobster": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "Grilled Lobster": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "BBQ Prawns": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/bbq_prawn_salad.png",
+                "Prawn Pasta": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png",
+                "Steamed Crab": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "Mud Crab": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
+                "Grilled Fish": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
+                "Chilli Mint Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Cashew Nut Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Korean Fried Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png",
+                "Chicken Chilli Dry": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Sweet & Sour Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "House Special Chicken": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png",
+                "Strawberry Mojito": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/strawberry_mojito.jpg",
+                "Blueberry Mojito": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/blueberry_mojito.jpg",
+                "Peach Mojito": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/peach_mojito.jpg",
+                "Green Apple Mojito": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/green_apple_mojito.jpg",
+                "Fresh Lemonade": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/lemon_mojito.jpg",
+                "Pepsi / 7Up (Tin)": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/soft_drink.jpg",
+                "Mineral Water (Small)": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/water_bottle.jpg",
+                "Butter Mushroom Rice": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/rice.jpg",
+                "Steak Fries": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/jushhpk/chicken_doner_fries.jpg",
             }
 
             cat_order = 1
@@ -212,7 +212,7 @@ class Command(BaseCommand):
                 cat_order += 1
 
                 for item_data in items:
-                    img_url = blue_images.get(item_data["name"], "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png")
+                    img_url = blue_images.get(item_data["name"], "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png")
                     it, _ = MenuItem.objects.get_or_create(
                         category=cat,
                         name=item_data["name"],
@@ -233,7 +233,7 @@ class Command(BaseCommand):
 
             # Attach images to all Blue items
             for it in MenuItem.objects.filter(category__restaurant=blue):
-                img_url = blue_images.get(it.name, "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png")
+                img_url = blue_images.get(it.name, "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png")
                 it.image = img_url
                 it.save()
             self.stdout.write(self.style.SUCCESS(f"Attached Cloudinary images to {MenuItem.objects.filter(category__restaurant=blue).count()} Blue menu items."))

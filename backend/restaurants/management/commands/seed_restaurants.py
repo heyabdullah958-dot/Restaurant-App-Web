@@ -488,12 +488,12 @@ class Command(BaseCommand):
             brand_logo = None
             if slug == 'dineatblue':
                 brand_data["name"] = "Blue"
-                brand_cover = "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315657/foodsphere/dineatblue/blue_seafood_platter.png"
-                brand_logo = "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png"
+                brand_cover = "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png"
+                brand_logo = "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png"
             elif slug == 'getafomo':
                 brand_data["name"] = "Get A Fomo"
-                brand_cover = "https://res.cloudinary.com/depa8gfnk/image/upload/v1793266684/foodsphere/getafomo/cover.png"
-                brand_logo = "https://res.cloudinary.com/depa8gfnk/image/upload/v1793266715/foodsphere/getafomo/logo.png"
+                brand_cover = "https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/cover.png"
+                brand_logo = "https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/logo.png"
             elif slug == 'jushhpk':
                 brand_data["name"] = "Jushh PK"
             elif slug == 'tandooristoppk':

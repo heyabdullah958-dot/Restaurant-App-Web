@@ -14,7 +14,7 @@
   - **Merchant Manager Mobile App (`/admin-app`)**: React Native, Expo SDK 57, Redux Toolkit, Full 12-View Role-Scoped Suite
   - **7 Brand Websites**: React / HTML5, Tailwind CSS
 - **Backend Stack**: Python 3.11, Django REST Framework, SimpleJWT Auth, PostgreSQL
-- **Database & Storage**: PostgreSQL (Production Heroku), Cloudinary (Media Storage `depa8gfnk`)
+- **Database & Storage**: PostgreSQL (Production Heroku), Cloudinary (Media Storage `qodsfm34`)
 
 ---
 

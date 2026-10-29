@@ -157,12 +157,12 @@
     'apple mojito': './images/IMG_7576.JPG.jpeg',
 
     // JushhPK
-    'chicken doner fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg',
-    'beef doner fries': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg',
-    'chicken grilled sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg',
-    'beef grilled sandwich': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg',
-    'half dubai shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg',
-    'full dubai shawaya': 'https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg',
+    'chicken doner fries': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_doner_fries.jpg',
+    'beef doner fries': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_doner_fries.jpg',
+    'chicken grilled sandwich': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_grilled_sandwich.jpg',
+    'beef grilled sandwich': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_grilled_sandwich.jpg',
+    'half dubai shawaya': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/half_dubai_shawaya.jpg',
+    'full dubai shawaya': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg',
     'beef burger': './images/beef_smashed_burger.jpg',
     'chicken burger': './images/chicken_crispy_burger.jpg',
     'pouch shawarma': './images/chicken_pouch_shawarma.jpg',

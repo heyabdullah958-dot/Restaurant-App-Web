@@ -5,9 +5,9 @@ import json
 
 # Configure Cloudinary
 cloudinary.config(
-    cloud_name="depa8gfnk",
-    api_key="662593181225615",
-    api_secret="zLCgiUu3bUrkwrMUOxlc2AOz0Vg"
+    cloud_name="qodsfm34",
+    api_key="257245694152878",
+    api_secret="mplgXz5lD_EZokm_yEiAg3d3Xs0"
 )
 
 results = {

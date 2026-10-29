@@ -316,7 +316,7 @@
             "name": "Water",
             "description": "Chilled mineral water",
             "price": 80.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/water_bottle.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -890,7 +890,7 @@
             "name": "Chicken Doner Fries",
             "description": "Crispy fries topped with sliced chicken doner and sauces",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_doner_fries.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_doner_fries.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -900,7 +900,7 @@
             "name": "Beef Doner Fries",
             "description": "Crispy fries topped with sliced beef doner and signature sauces",
             "price": 750.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_doner_fries.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_doner_fries.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -917,7 +917,7 @@
             "name": "Chicken Grilled Sandwich",
             "description": "Grilled chicken sandwich Turkish style",
             "price": 750.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_grilled_sandwich.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_grilled_sandwich.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -927,7 +927,7 @@
             "name": "Beef Grilled Sandwich",
             "description": "Grilled beef sandwich Turkish style",
             "price": 950.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_grilled_sandwich.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_grilled_sandwich.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -937,7 +937,7 @@
             "name": "Half Dubai Shawaya",
             "description": "Traditional roasted chicken shawaya half portion",
             "price": 1400.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/half_dubai_shawaya.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/half_dubai_shawaya.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -947,7 +947,7 @@
             "name": "Full Dubai Shawaya",
             "description": "Traditional roasted chicken shawaya full portion",
             "price": 2500.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/full_dubai_shawaya.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -957,7 +957,7 @@
             "name": "Add-on Rice",
             "description": "Spiced Arabic rice serving for Shawaya",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/addon_rice.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/addon_rice.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -967,7 +967,7 @@
             "name": "Chicken Turkish Wrap",
             "description": "Spiced chicken doner wrapped in soft flatbread",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_turkish_wrap.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -977,7 +977,7 @@
             "name": "Beef Turkish Wrap",
             "description": "Premium beef doner wrapped in soft flatbread",
             "price": 900.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_turkish_wrap.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -987,7 +987,7 @@
             "name": "Chicken Turkish Doner",
             "description": "Traditional Turkish chicken doner in pita bread",
             "price": 850.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_doner.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_turkish_doner.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -997,7 +997,7 @@
             "name": "Beef Turkish Doner",
             "description": "Traditional Turkish beef doner in pita bread",
             "price": 1100.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_doner.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_turkish_doner.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1034,7 +1034,7 @@
             "name": "Chicken Pouch Shawarma",
             "description": "Pocket-style chicken shawarma pocket bread",
             "price": 450.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_pouch_shawarma.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_pouch_shawarma.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1044,7 +1044,7 @@
             "name": "Beef Pouch Shawarma",
             "description": "Pocket-style beef shawarma pocket bread",
             "price": 700.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_pouch_shawarma.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_pouch_shawarma.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1054,7 +1054,7 @@
             "name": "Chicken Shawarma",
             "description": "Classic Lebanese chicken shawarma wrap",
             "price": 550.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_turkish_wrap.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_turkish_wrap.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1064,7 +1064,7 @@
             "name": "Beef Shawarma",
             "description": "Classic Lebanese beef shawarma wrap",
             "price": 750.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/beef_turkish_wrap.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_turkish_wrap.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1074,7 +1074,7 @@
             "name": "Charcoal Shawarma Chicken",
             "description": "Charcoal grilled chicken shawarma wrapped in flatbread",
             "price": 750.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/charcoal_shawarma_chicken.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/charcoal_shawarma_chicken.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1084,7 +1084,7 @@
             "name": "Chicken Shawarma Platter",
             "description": "Deconstructed chicken shawarma served on a platter",
             "price": 900.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_shawarma_platter.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1094,7 +1094,7 @@
             "name": "Chicken Shawarma Platter (with cheese)",
             "description": "Deconstructed chicken shawarma topped with melted cheese",
             "price": 1000.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/chicken_shawarma_platter.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_shawarma_platter.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1111,7 +1111,7 @@
             "name": "Lotus Can Dessert",
             "description": "Creamy Lotus Biscoff dessert served in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1121,7 +1121,7 @@
             "name": "Red Velvet Can Dessert",
             "description": "Rich red velvet cake layered in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1131,7 +1131,7 @@
             "name": "Nutella Can Dessert",
             "description": "Decadent Nutella chocolate dessert in a signature can",
             "price": 600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1148,7 +1148,7 @@
             "name": "Cheese",
             "description": "Extra melted cheese portion",
             "price": 90.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1158,7 +1158,7 @@
             "name": "Dip",
             "description": "Signature Jushh garlic or spicy dip",
             "price": 90.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/garlic_dip.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/garlic_dip.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1168,7 +1168,7 @@
             "name": "Tortilla Bread",
             "description": "Extra soft tortilla flatbread",
             "price": 90.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/pita_bread.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1178,7 +1178,7 @@
             "name": "Pita Bread",
             "description": "Extra Lebanese pita pocket bread",
             "price": 60.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/pita_bread.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/pita_bread.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1188,7 +1188,7 @@
             "name": "Plain Fries",
             "description": "Golden salted french fries side",
             "price": 150.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1205,7 +1205,7 @@
             "name": "Water",
             "description": "Mineral water bottle",
             "price": 80.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/water_bottle.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1215,7 +1215,7 @@
             "name": "Soft Drink",
             "description": "Chilled regular soft drink",
             "price": 150.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/soft_drink.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/soft_drink.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1225,7 +1225,7 @@
             "name": "Blueberry Mojito",
             "description": "Refreshing blueberry mocktail",
             "price": 290.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/blueberry_mojito.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/blueberry_mojito.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1235,7 +1235,7 @@
             "name": "Strawberry Mojito",
             "description": "Refreshing strawberry mocktail",
             "price": 290.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/strawberry_mojito.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/strawberry_mojito.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1245,7 +1245,7 @@
             "name": "Green Apple Mojito",
             "description": "Refreshing green apple mocktail",
             "price": 290.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/green_apple_mojito.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/green_apple_mojito.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1255,7 +1255,7 @@
             "name": "Peach Mojito",
             "description": "Refreshing peach mocktail",
             "price": 290.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/peach_mojito.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/peach_mojito.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1265,7 +1265,7 @@
             "name": "Lemon Mojito",
             "description": "Refreshing lemon mint mocktail",
             "price": 290.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/lemon_mojito.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/lemon_mojito.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1289,7 +1289,7 @@
             "name": "Tandoori Chicken Bone (Cheese Naan Single)",
             "description": "Tandoori chicken (with bone) served with 1 cheese naan",
             "price": 1150.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1288_IMG_7585.JPG_xhiffo",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1288_IMG_7585.JPG_xhiffo",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1299,7 +1299,7 @@
             "name": "Tandoori Chicken Boneless (Cheese Naan Single)",
             "description": "Boneless tandoori chicken served with 1 cheese naan",
             "price": 1350.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1289_IMG_7585.JPG_cxjp6v",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1289_IMG_7585.JPG_cxjp6v",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1309,7 +1309,7 @@
             "name": "Tandoori Chicken Bone (Cheese Naan Double)",
             "description": "Tandoori chicken (with bone) served with 2 cheese naans",
             "price": 1950.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1290_IMG_7589.JPG_ylld2e",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1290_IMG_7589.JPG_ylld2e",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1319,7 +1319,7 @@
             "name": "Tandoori Chicken Boneless (Cheese Naan Double)",
             "description": "Boneless tandoori chicken served with 2 cheese naans",
             "price": 2299.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1291_IMG_7589.JPG_of3jsh",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1291_IMG_7589.JPG_of3jsh",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1329,7 +1329,7 @@
             "name": "Tandoori Chicken Bone (With Rice)",
             "description": "Tandoori chicken (with bone) served with aromatic rice",
             "price": 980.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1292_IMG_7586.JPG_vjhc9h",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1292_IMG_7586.JPG_vjhc9h",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1339,7 +1339,7 @@
             "name": "Tandoori Chicken Boneless (With Rice)",
             "description": "Boneless tandoori chicken served with aromatic rice",
             "price": 780.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1293_IMG_7586.JPG_jazoj8",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1293_IMG_7586.JPG_jazoj8",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1349,7 +1349,7 @@
             "name": "Tandoori Chicken Bone (Plain)",
             "description": "Traditional flame-grilled tandoori chicken (with bone)",
             "price": 750.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1294_IMG_7590.JPG_ree9bg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1294_IMG_7590.JPG_ree9bg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1359,7 +1359,7 @@
             "name": "Tandoori Chicken Boneless (Plain)",
             "description": "Traditional flame-grilled boneless tandoori chicken",
             "price": 899.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1295_IMG_7590.JPG_edtoye",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1295_IMG_7590.JPG_edtoye",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1396,7 +1396,7 @@
             "name": "Quarter Sajji",
             "description": "Slow-roasted quarter chicken sajji",
             "price": 799.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1296_IMG_7587.JPG_cbsi5z",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1296_IMG_7587.JPG_cbsi5z",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1406,7 +1406,7 @@
             "name": "Half Sajji",
             "description": "Slow-roasted half chicken sajji",
             "price": 1400.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1297_IMG_7587.JPG_s9a0wa",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1297_IMG_7587.JPG_s9a0wa",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1416,7 +1416,7 @@
             "name": "Full Sajji",
             "description": "Slow-roasted full chicken sajji",
             "price": 2500.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1298_IMG_7587.JPG_ozqr4i",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1298_IMG_7587.JPG_ozqr4i",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1426,7 +1426,7 @@
             "name": "Peri Peri Quarter Sajji",
             "description": "Spiced peri peri quarter chicken sajji",
             "price": 900.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1299_IMG_7587.JPG_ia9lxc",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1299_IMG_7587.JPG_ia9lxc",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1436,7 +1436,7 @@
             "name": "Peri Peri Half Sajji",
             "description": "Spiced peri peri half chicken sajji",
             "price": 1600.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1300_IMG_7587.JPG_iyvbn9",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1300_IMG_7587.JPG_iyvbn9",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1446,7 +1446,7 @@
             "name": "Peri Peri Full Sajji",
             "description": "Spiced peri peri full chicken sajji",
             "price": 2900.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1301_IMG_7587.JPG_irp4qj",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1301_IMG_7587.JPG_irp4qj",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1463,7 +1463,7 @@
             "name": "Chicken Paratha Roll",
             "description": "Classic chicken paratha roll",
             "price": 499.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1305_IMG_7588.JPG_h1xhsz",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1305_IMG_7588.JPG_h1xhsz",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1473,7 +1473,7 @@
             "name": "Full Stop Roll",
             "description": "TandooriStopp signature giant roll",
             "price": 650.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1302_IMG_7591.JPG_veizgo",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1302_IMG_7591.JPG_veizgo",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1483,7 +1483,7 @@
             "name": "Tandoori Chicken Roll",
             "description": "Tandoori chicken chunks wrapped in paratha",
             "price": 520.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1303_IMG_7591.JPG_kooigy",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1303_IMG_7591.JPG_kooigy",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1493,7 +1493,7 @@
             "name": "Malai Boti Roll",
             "description": "Creamy malai boti wrapped in paratha",
             "price": 550.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1304_IMG_7592.JPG_fupdwk",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1304_IMG_7592.JPG_fupdwk",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1547,7 +1547,7 @@
             "name": "Seekh Kabab (Per Seekh)",
             "description": "Single seekh of spiced chicken seekh kabab",
             "price": 250.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1313_IMG_7578.JPG_cilvdf",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1313_IMG_7578.JPG_cilvdf",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1557,7 +1557,7 @@
             "name": "Tikka Boti (Per Seekh)",
             "description": "Single seekh of classic tikka boti",
             "price": 400.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1311_IMG_7583.JPG_khkxj9",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1311_IMG_7583.JPG_khkxj9",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1567,7 +1567,7 @@
             "name": "Malai Boti (Per Seekh)",
             "description": "Single seekh of creamy grilled malai boti",
             "price": 450.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1309_IMG_7584.JPG_sxoyyb",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1309_IMG_7584.JPG_sxoyyb",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1775,7 +1775,7 @@
             "name": "Roghni Naan",
             "description": "Fluffy sesame roghni naan",
             "price": 200.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1327_IMG_7582.JPG_xohvv8",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1327_IMG_7582.JPG_xohvv8",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1785,7 +1785,7 @@
             "name": "Butter Naan",
             "description": "Buttery flatbread naan",
             "price": 350.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1328_IMG_7582.JPG_ds5jeq",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1328_IMG_7582.JPG_ds5jeq",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1795,7 +1795,7 @@
             "name": "Plain Roti",
             "description": "Hot whole wheat roti",
             "price": 30.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1331_IMG_7582.JPG_f1ie9j",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1331_IMG_7582.JPG_f1ie9j",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1805,7 +1805,7 @@
             "name": "Cheese Naan",
             "description": "Naan stuffed with melted cheese",
             "price": 500.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1329_IMG_7581.JPG_p8inf5",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1329_IMG_7581.JPG_p8inf5",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1815,7 +1815,7 @@
             "name": "Puri Paratha",
             "description": "Flaky deep-fried puri paratha",
             "price": 270.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1334_IMG_7580.JPG_cr8hod",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1334_IMG_7580.JPG_cr8hod",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1825,7 +1825,7 @@
             "name": "Rice",
             "description": "Extra serving of aromatic rice",
             "price": 350.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1330_IMG_7579.JPG_nsb0dw",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1330_IMG_7579.JPG_nsb0dw",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1842,7 +1842,7 @@
             "name": "Blueberry Mojito",
             "description": "Blueberry refreshing mocktail",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1335_IMG_7576.JPG_ncny4r",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1335_IMG_7576.JPG_ncny4r",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1852,7 +1852,7 @@
             "name": "Strawberry Mojito",
             "description": "Strawberry refreshing mocktail",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1336_IMG_7576.JPG_ihc3zw",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1336_IMG_7576.JPG_ihc3zw",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1862,7 +1862,7 @@
             "name": "Peach Mojito",
             "description": "Peach refreshing mocktail",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1337_IMG_7576.JPG_ssjsaq",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1337_IMG_7576.JPG_ssjsaq",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1872,7 +1872,7 @@
             "name": "Apple Mojito",
             "description": "Apple refreshing mocktail",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1338_IMG_7576.JPG_b0buvx",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1338_IMG_7576.JPG_b0buvx",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -1966,7 +1966,7 @@
             "name": "Mint Margaritas",
             "description": "Minty blended ice margarita",
             "price": 300.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/ts_1346_IMG_7577.JPG_faehdg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1346_IMG_7577.JPG_faehdg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null
@@ -2148,7 +2148,7 @@
             "name": "Water",
             "description": "Chilled mineral water",
             "price": 100.0,
-            "image": "https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/water_bottle.jpg",
+            "image": "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/water_bottle.jpg",
             "is_available": true,
             "spicy_level": 0,
             "calories": null

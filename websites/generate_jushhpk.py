@@ -148,7 +148,7 @@ header_html = '''
       <!-- Drawer Top -->
       <div class="flex items-center justify-between pb-4 border-b border-[#E5E7EB]">
         <div class="flex items-center gap-2.5">
-          <img src="./images/jushh_logo.jpg" alt="Jushh!!" class="h-9 w-auto object-contain rounded-md" onerror="this.onerror=null; this.src='https://res.cloudinary.com/depa8gfnk/image/upload/v1/menu_items/jushh_logo.jpg';"/>
+          <img src="./images/jushh_logo.jpg" alt="Jushh!!" class="h-9 w-auto object-contain rounded-md" onerror="this.onerror=null; this.src='https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_logo.jpg';"/>
           <span class="font-extrabold text-[#111827] text-base">JUSHH!!</span>
         </div>
         <button type="button" id="close-drawer-btn" onclick="closeMobileNavDrawer()" class="w-9 h-9 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] flex items-center justify-center text-[#111827] text-xl font-bold cursor-pointer transition" aria-label="Close menu">&times;</button>
