@@ -419,3 +419,15 @@
 
 
 
+
+---
+
+## Lesson 26 — Cloudflare Multi-Account Switching & Wrangler Cache Isolation — 2026-10-29
+- **Pattern**: Switching Cloudflare accounts using Wrangler CLI or authenticating via API tokens (CLOUDFLARE_API_TOKEN).
+- **Wrong assumption made**: Assuming that running wrangler logout or setting a new API token clears all cached target account identifiers.
+- **What actually mattered**: 
+  1. **Pages Cache Trapping**: Wrangler caches pages.json containing "account_id" in local cache folders (
+ode_modules/.cache/wrangler/pages.json and <dir>/.wrangler/cache/pages.json).
+  2. Even when authenticated to a new account, Wrangler's Pages command reads pages.json and makes requests to /accounts/<OLD_ACCOUNT_ID>/pages/projects, resulting in Authentication error [code: 10000] (403 Forbidden).
+  3. When switching Cloudflare accounts, all local pages.json and wrangler-account.json cache files must be purged, and CLOUDFLARE_ACCOUNT_ID explicitly bound.
+- **Applies to**: dmin/node_modules/.cache/wrangler, websites/.wrangler/cache, Cloudflare Pages deployments.

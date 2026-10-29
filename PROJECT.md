@@ -22,18 +22,19 @@
 
 | Platform / Website | Live URL | Status |
 |---|---|---|
-| 👑 **Admin Panel (HQ Dashboard)** | [https://foodsphere-admin.vercel.app](https://foodsphere-admin.vercel.app) | ✅ Live on Vercel |
+| 👑 **Admin Command Center** | [https://admin.getfoodpk.com](https://admin.getfoodpk.com) | ✅ Live on Cloudflare (`getfoodpk.com`) |
+| 🌐 **Root Domain (301 Redirect)** | [https://getfoodpk.com](https://getfoodpk.com) ➔ [https://admin.getfoodpk.com](https://admin.getfoodpk.com) | ✅ Active Cloudflare 301 Redirect |
+| 🐟 **Dine At Blue Storefront** | [https://blue.getfoodpk.com](https://blue.getfoodpk.com) | ✅ Live on Cloudflare (`getfoodpk.com`) |
+| 🍔 **Jushh!! PK Storefront** | [https://jushh.getfoodpk.com](https://jushh.getfoodpk.com) | ✅ Live on Cloudflare (`getfoodpk.com`) |
+| 🫓 **Tandoori Stop Storefront** | [https://tandooristop.getfoodpk.com](https://tandooristop.getfoodpk.com) | ✅ Live on Cloudflare (`getfoodpk.com`) |
 | 🚀 **Backend API (Heroku 24/7)** | [https://getfoodpk-fd9b20442fcf.herokuapp.com](https://getfoodpk-fd9b20442fcf.herokuapp.com) | ✅ Live on Heroku (Release v85) |
 | 📱 **GetFood Customer App Web Preview** | [https://getfood-app.pages.dev](https://getfood-app.pages.dev) | ✅ Live on Cloudflare |
-| 🫓 **Tandoori Stop Website** | [https://tandooristoppk-foodsphere.pages.dev](https://tandooristoppk-foodsphere.pages.dev) | ✅ Live (HD Photos & Logo) |
-| 🍔 **Jushh Website** | [https://jushhpk-foodsphere.pages.dev](https://jushhpk-foodsphere.pages.dev) | ✅ Live |
-| ☕️ **GetAFomo Website** | [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev) | ✅ Live (Instagram Feed) |
+| ☕️ **GetAFomo Website** | [https://getafomo-foodsphere.pages.dev](https://getafomo-foodsphere.pages.dev) | ✅ Live (Phase 1) |
 | 🍢 **SeenBanao Website** | [https://seenbanao-foodsphere.pages.dev](https://seenbanao-foodsphere.pages.dev) | ✅ Live (Phase 2 Preview) |
-| 🐟 **Dine At Blue Website** | [https://dineatblue-foodsphere.pages.dev](https://dineatblue-foodsphere.pages.dev) | ✅ Live (Phase 2 Preview) |
 | 🥪 **Sand Melts Website** | [https://sandmelts-foodsphere.pages.dev](https://sandmelts-foodsphere.pages.dev) | ✅ Live (Phase 2 Preview) |
 | 🍗 **Birdman Foods Website** | [https://birdmanfoodspk-foodsphere.pages.dev](https://birdmanfoodspk-foodsphere.pages.dev) | ✅ Live (Phase 2 Preview) |
-| 📜 **Privacy Policy** | [https://foodsphere-admin.pages.dev/privacy-policy.html](https://foodsphere-admin.pages.dev/privacy-policy.html) | ✅ Store Ready |
-| 📜 **Terms of Service** | [https://foodsphere-admin.pages.dev/terms-of-service.html](https://foodsphere-admin.pages.dev/terms-of-service.html) | ✅ Store Ready |
+| 📜 **Privacy Policy** | [https://admin.getfoodpk.com/privacy-policy.html](https://admin.getfoodpk.com/privacy-policy.html) | ✅ Store Ready |
+| 📜 **Terms of Service** | [https://admin.getfoodpk.com/terms-of-service.html](https://admin.getfoodpk.com/terms-of-service.html) | ✅ Store Ready |
 
 ---
 
