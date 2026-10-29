@@ -93,9 +93,9 @@ class Command(BaseCommand):
         hidden_count = Restaurant.objects.exclude(slug__in=allowed_active_slugs).update(is_active=False)
         self.stdout.write(self.style.SUCCESS(f"Strictly hid all non-launch brands ({hidden_count} brands deactivated)."))
 
-        # Seed full menu for Blue if missing items
-        if blue and MenuItem.objects.filter(category__restaurant=blue).count() < 10:
-            self.stdout.write("Seeding full Dine At Blue catalog...")
+        # Seed full menu and attach images for Blue
+        if blue:
+            self.stdout.write("Seeding & updating full Dine At Blue catalog and images...")
             from restaurants.management.commands.seed_restaurants import Command as SeedCommand
             # Populate Blue's categories and items
             blue_menu = {
@@ -230,6 +230,34 @@ class Command(BaseCommand):
                     it.save()
 
             self.stdout.write(self.style.SUCCESS(f"Seeded Blue menu: {MenuItem.objects.filter(category__restaurant=blue).count()} items."))
+
+            # Attach images to all Blue items
+            for it in MenuItem.objects.filter(category__restaurant=blue):
+                img_url = blue_images.get(it.name, "https://res.cloudinary.com/depa8gfnk/image/upload/f_auto,q_auto,w_800/v1792315655/foodsphere/dineatblue/logo.png")
+                it.image = img_url
+                it.save()
+            self.stdout.write(self.style.SUCCESS(f"Attached Cloudinary images to {MenuItem.objects.filter(category__restaurant=blue).count()} Blue menu items."))
+
+            # Ensure Flash Deal for Blue
+            try:
+                from promotions.models import FlashDeal
+                import datetime
+                if not FlashDeal.objects.filter(restaurant=blue).exists():
+                    FlashDeal.objects.create(
+                        restaurant=blue,
+                        title="25% OFF Ocean Platter & Seafood",
+                        description="Fresh Atlantic catch, luxury prawns & fish platters with special discount!",
+                        deal_type="percentage",
+                        discount_value=25.00,
+                        order_mode="ALL",
+                        timing_type="ONE_TIME",
+                        start_time=datetime.datetime.now(datetime.timezone.utc),
+                        end_time=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
+                        is_active=True,
+                    )
+                    self.stdout.write(self.style.SUCCESS("Created Flash Deal for Blue!"))
+            except Exception as e:
+                self.stdout.write(f"FlashDeal notice: {e}")
 
         # Print final verification
         active_restaurants = Restaurant.objects.filter(is_active=True)
