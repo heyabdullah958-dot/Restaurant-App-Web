@@ -315,3 +315,19 @@
 
 
 
+
+
+## Google Play Store Production Release Build — 2026-10-29
+- **Tier:** HIGH-RISK — Production Android App Bundle (.aab), Google Play signing keystore generation, permission sanitization, and store graphics packaging.
+- **What Changed & Why:**
+  1. Purged `SYSTEM_ALERT_WINDOW` permission from `app/android/app/src/main/AndroidManifest.xml` to comply with Google Play restricted permissions policy and eliminate submission rejection risks.
+  2. Generated 2048-bit RSA production release keystore `app/android/app/getfood-release.keystore` (valid through 2054, alias `getfood`) with PKCS12 format and SHA-256 certificate fingerprint.
+  3. Configured `app/android/gradle.properties` and `app/android/app/build.gradle` for automated `signingConfigs.release` binding.
+  4. Compiled production Android App Bundle: `app/android/app/build/outputs/bundle/release/app-release.aab` and synced to `D:\GetFood.aab` (68.8 MB). Signature verified via `jarsigner`.
+  5. Created official 512x512 Play Store icon (`D:\GetFood-Icon-512x512.png`) and 1024x500 Feature Graphic banner (`D:\GetFood-Feature-Graphic-1024x500.png`) using the official GetFood logo, crimson/orange brand palette, and partner brand highlights.
+- **Verification Evidence:**
+  - `gradlew bundleRelease` exited with code 0 (`BUILD SUCCESSFUL in 5m 28s`, 913 actionable tasks).
+  - `jarsigner -verify -verbose -certs D:\GetFood.aab` confirmed `jar verified.` with `CN=GetFood, OU=MobileApp, O=GetFoodPK`.
+  - Icon dimensions: 512x512 PNG; Banner dimensions: 1024x500 24-bit RGB PNG.
+- **Deploy Chain Status:** Built & Signed Locally ➔ Ready for Google Play Console Upload.
+- **Confidence:** 100%.

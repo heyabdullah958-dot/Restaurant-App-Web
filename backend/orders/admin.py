@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 import urllib.parse
-from .models import Order, OrderItem
+from .models import Order, OrderItem, CashSettlementLog
 from config.admin_utils import get_managed_restaurant
 from import_export import resources
 from import_export.admin import ExportMixin
@@ -13,7 +13,7 @@ class OrderResource(resources.ModelResource):
         model = Order
         fields = (
             'id', 'restaurant__name', 'guest_name', 'guest_phone',
-            'status', 'payment_method', 'subtotal', 'delivery_fee',
+            'status', 'payment_method', 'cod_settled', 'subtotal', 'delivery_fee',
             'total', 'delivery_address', 'created_at'
         )
         export_order = fields
@@ -56,8 +56,8 @@ class OrderItemInline(admin.StackedInline):
 @admin.register(Order)
 class OrderAdmin(ExportMixin, admin.ModelAdmin):
     resource_classes = [OrderResource]
-    list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'total', 'created_at', 'send_to_rider_whatsapp')
-    list_filter = ('status', 'payment_method', 'restaurant', 'created_at')
+    list_display = ('id', 'restaurant', 'user_or_guest', 'status', 'payment_method', 'cod_settled', 'total', 'created_at', 'send_to_rider_whatsapp')
+    list_filter = ('status', 'payment_method', 'cod_settled', 'restaurant', 'created_at')
     search_fields = ('id', 'guest_name', 'guest_phone', 'user__username')
     list_editable = ('status',)
     readonly_fields = ('subtotal', 'delivery_fee', 'discount', 'total', 'created_at', 'updated_at', 'send_to_rider_whatsapp')
@@ -169,3 +169,12 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
         if db_field.name == "status":
             kwargs["choices"] = [choice for choice in db_field.choices if choice[0] != 'cancelled']
         return super().formfield_for_choice_field(db_field, request, **kwargs)
+
+
+@admin.register(CashSettlementLog)
+class CashSettlementLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'rider', 'branch', 'amount_settled', 'settled_by', 'created_at')
+    list_filter = ('branch', 'created_at')
+    search_fields = ('rider__name', 'notes')
+    readonly_fields = ('created_at',)
+

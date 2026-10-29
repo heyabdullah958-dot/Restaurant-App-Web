@@ -80,6 +80,16 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     special_instructions = models.TextField(blank=True, null=True)
+    cod_settled = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Indicates whether physical COD cash has been settled and turned into branch drawer."
+    )
+    cod_settled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp when COD cash was settled."
+    )
     cancellation_reason = models.TextField(blank=True, null=True, help_text="Reason recorded if order is cancelled.")
     cancelled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -320,3 +330,57 @@ class BranchCashRegister(models.Model):
 
     def __str__(self):
         return f"CashRegister ({self.branch.name} - {self.date}): Collected Rs. {self.total_cod_collected}, Handed Over Rs. {self.total_cod_handed_over}"
+
+
+class CashSettlementLog(models.Model):
+    rider = models.ForeignKey(
+        'restaurants.BranchRider',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='settlement_logs',
+        help_text="Rider who turned in the collected COD cash."
+    )
+    branch = models.ForeignKey(
+        'restaurants.Branch',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='settlement_logs',
+        help_text="Branch drawer where cash was deposited."
+    )
+    settled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='settled_cash_logs',
+        help_text="Admin or Branch Manager who accepted the cash deposit."
+    )
+    order_ids = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of order IDs settled in this transaction."
+    )
+    amount_settled = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Total physical cash deposited."
+    )
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Optional reconciliation or register note."
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Cash Settlement Log'
+        verbose_name_plural = 'Cash Settlement Logs'
+
+    def __str__(self):
+        return f"Settlement #{self.id}: Rs. {self.amount_settled} from {self.rider.name} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"

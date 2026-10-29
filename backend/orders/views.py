@@ -786,3 +786,278 @@ class RestaurantReviewsView(generics.ListAPIView):
         return RestaurantReview.objects.filter(
             restaurant__slug=slug
         ).select_related('order', 'user').order_by('-created_at')
+
+
+class AdminCashRegisterView(APIView):
+    """
+    GET /api/admin/cash-register/
+    Provides drawer balance, per-rider unsettled COD wallets, on-the-road cash,
+    and recent settlement audit logs.
+    Permission: IsAdminUser (Super Admin gets platform/branch view; Branch Manager gets branch view).
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        from .models import CashSettlementLog
+        from restaurants.models import BranchRider
+
+        user = request.user
+        branch_id = request.query_params.get('branch_id')
+        restaurant_id = request.query_params.get('restaurant_id')
+
+        # Base QuerySets
+        orders_qs = Order.objects.filter(payment_method='cod')
+        riders_qs = BranchRider.objects.filter(is_active=True).select_related('branch', 'branch__restaurant')
+        settlements_qs = CashSettlementLog.objects.select_related('rider', 'branch', 'settled_by').all()
+
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_branch, get_managed_restaurant
+            mb = get_managed_branch(user)
+            if mb:
+                orders_qs = orders_qs.filter(branch=mb)
+                riders_qs = riders_qs.filter(branch=mb)
+                settlements_qs = settlements_qs.filter(branch=mb)
+            else:
+                mr = get_managed_restaurant(user)
+                if mr:
+                    orders_qs = orders_qs.filter(restaurant=mr)
+                    riders_qs = riders_qs.filter(branch__restaurant=mr)
+                    settlements_qs = settlements_qs.filter(branch__restaurant=mr)
+                else:
+                    return Response({
+                        'summary': {
+                            'total_drawer_cash': 0.0,
+                            'unsettled_rider_cash': 0.0,
+                            'on_the_road_cash': 0.0,
+                            'settled_orders_count': 0,
+                            'unsettled_orders_count': 0,
+                        },
+                        'riders': [],
+                        'recent_settlements': [],
+                    })
+        else:
+            if branch_id:
+                orders_qs = orders_qs.filter(branch_id=branch_id)
+                riders_qs = riders_qs.filter(branch_id=branch_id)
+                settlements_qs = settlements_qs.filter(branch_id=branch_id)
+            elif restaurant_id:
+                orders_qs = orders_qs.filter(restaurant_id=restaurant_id)
+                riders_qs = riders_qs.filter(branch__restaurant_id=restaurant_id)
+                settlements_qs = settlements_qs.filter(branch__restaurant_id=restaurant_id)
+
+        # 1. Physical Drawer Cash: COD orders that are delivered AND cod_settled = True
+        settled_orders = orders_qs.filter(status='delivered', cod_settled=True)
+        total_drawer_cash = sum([float(o.total) for o in settled_orders])
+
+        # 2. Unsettled Rider Cash: COD orders that are delivered AND cod_settled = False
+        unsettled_orders = orders_qs.filter(status='delivered', cod_settled=False)
+        unsettled_rider_cash = sum([float(o.total) for o in unsettled_orders])
+
+        # 3. On The Road: COD orders currently out_for_delivery
+        road_orders = orders_qs.filter(status='out_for_delivery')
+        on_the_road_cash = sum([float(o.total) for o in road_orders])
+
+        # 4. Per-Rider Cash Breakdown
+        riders_list = []
+        for rider in riders_qs:
+            rider_delivered_unsettled = unsettled_orders.filter(rider=rider)
+            unsettled_amt = sum([float(o.total) for o in rider_delivered_unsettled])
+            unsettled_count = rider_delivered_unsettled.count()
+            unsettled_ids = list(rider_delivered_unsettled.values_list('id', flat=True))
+
+            rider_road = road_orders.filter(rider=rider)
+            road_amt = sum([float(o.total) for o in rider_road])
+
+            last_log = settlements_qs.filter(rider=rider).first()
+
+            riders_list.append({
+                'id': rider.id,
+                'name': rider.name,
+                'phone': rider.phone,
+                'vehicle_type': rider.vehicle_type,
+                'status': rider.status,
+                'branch_id': rider.branch_id,
+                'branch_name': rider.branch.name if rider.branch else 'N/A',
+                'restaurant_name': rider.branch.restaurant.name if rider.branch and rider.branch.restaurant else 'N/A',
+                'unsettled_amount': round(unsettled_amt, 2),
+                'unsettled_orders_count': unsettled_count,
+                'unsettled_order_ids': unsettled_ids,
+                'on_the_road_amount': round(road_amt, 2),
+                'last_settled_at': last_log.created_at.isoformat() if last_log else None,
+            })
+
+        # 4b. Direct Outlet / Walk-In Orders (orders where rider is None)
+        unassigned_delivered_unsettled = unsettled_orders.filter(rider__isnull=True)
+        unassigned_road = road_orders.filter(rider__isnull=True)
+        unassigned_amt = sum([float(o.total) for o in unassigned_delivered_unsettled])
+        unassigned_count = unassigned_delivered_unsettled.count()
+        unassigned_ids = list(unassigned_delivered_unsettled.values_list('id', flat=True))
+        unassigned_road_amt = sum([float(o.total) for o in unassigned_road])
+
+        if unassigned_amt > 0 or unassigned_road_amt > 0:
+            last_unassigned_log = settlements_qs.filter(rider__isnull=True).first()
+            target_branch_name = 'Branch Outlet'
+            if branch_id:
+                try:
+                    from restaurants.models import Branch
+                    b_obj = Branch.objects.filter(id=branch_id).first()
+                    if b_obj:
+                        target_branch_name = b_obj.name
+                except Exception:
+                    pass
+            elif not user.is_superuser:
+                from config.admin_utils import get_managed_branch
+                mb = get_managed_branch(user)
+                if mb:
+                    target_branch_name = mb.name
+
+            riders_list.append({
+                'id': None,
+                'name': 'Direct / Counter Orders',
+                'phone': 'In-Store / Direct',
+                'vehicle_type': 'DIRECT',
+                'status': 'AVAILABLE',
+                'branch_id': int(branch_id) if branch_id else None,
+                'branch_name': target_branch_name,
+                'restaurant_name': 'In-Store Cash',
+                'unsettled_amount': round(unassigned_amt, 2),
+                'unsettled_orders_count': unassigned_count,
+                'unsettled_order_ids': unassigned_ids,
+                'on_the_road_amount': round(unassigned_road_amt, 2),
+                'last_settled_at': last_unassigned_log.created_at.isoformat() if last_unassigned_log else None,
+            })
+
+        # Sort riders: highest unsettled amount first
+        riders_list.sort(key=lambda x: x['unsettled_amount'], reverse=True)
+
+        # 5. Recent Settlement Logs (last 30)
+        recent_logs = []
+        for log in settlements_qs[:30]:
+            recent_logs.append({
+                'id': log.id,
+                'rider_id': log.rider_id,
+                'rider_name': log.rider.name if log.rider else 'In-Store / Direct Outlet',
+                'branch_name': log.branch.name if log.branch else (log.rider.branch.name if log.rider and log.rider.branch else 'Main'),
+                'settled_by_name': log.settled_by.username if log.settled_by else 'Admin',
+                'order_ids': log.order_ids or [],
+                'amount_settled': float(log.amount_settled),
+                'notes': log.notes or '',
+                'created_at': log.created_at.isoformat(),
+            })
+
+        return Response({
+            'summary': {
+                'total_drawer_cash': round(total_drawer_cash, 2),
+                'unsettled_rider_cash': round(unsettled_rider_cash, 2),
+                'on_the_road_cash': round(on_the_road_cash, 2),
+                'settled_orders_count': settled_orders.count(),
+                'unsettled_orders_count': unsettled_orders.count(),
+                'on_the_road_orders_count': road_orders.count(),
+            },
+            'riders': riders_list,
+            'recent_settlements': recent_logs,
+        })
+
+
+class AdminCashRegisterSettleView(APIView):
+    """
+    POST /api/admin/cash-register/settle/
+    Atomically marks delivered COD orders for a rider as cod_settled=True,
+    creates CashSettlementLog, and updates branch drawer balance.
+    Body:
+    {
+        "rider_id": int,
+        "order_ids": [optional list of ints],
+        "notes": "EOD Handover"
+    }
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        from django.db import transaction
+        from django.utils import timezone
+        from .models import CashSettlementLog
+        from restaurants.models import BranchRider
+
+        rider_id = request.data.get('rider_id')
+        order_ids = request.data.get('order_ids')
+        notes = (request.data.get('notes') or '').strip()
+
+        if not rider_id and not order_ids:
+            return Response(
+                {'error': 'Either rider_id or order_ids is required for settlement.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            rider = None
+            if rider_id:
+                try:
+                    rider = BranchRider.objects.select_for_update().get(pk=rider_id)
+                except BranchRider.DoesNotExist:
+                    return Response({'error': f'Rider #{rider_id} not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            orders_to_settle = Order.objects.select_for_update().filter(
+                payment_method='cod',
+                status='delivered',
+                cod_settled=False
+            )
+
+            # Permission check for branch managers
+            if not request.user.is_superuser:
+                from config.admin_utils import get_managed_branch, get_managed_restaurant
+                mb = get_managed_branch(request.user)
+                mr = get_managed_restaurant(request.user)
+                if not mb and not mr:
+                    return Response({'error': 'Unauthorized: no branch or restaurant management rights.'}, status=status.HTTP_403_FORBIDDEN)
+                if mb:
+                    if rider and rider.branch_id != mb.id:
+                        return Response({'error': 'Unauthorized to settle cash for another branch.'}, status=status.HTTP_403_FORBIDDEN)
+                    orders_to_settle = orders_to_settle.filter(branch=mb)
+                elif mr:
+                    if rider and rider.branch and rider.branch.restaurant_id != mr.id:
+                        return Response({'error': 'Unauthorized to settle cash for another restaurant.'}, status=status.HTTP_403_FORBIDDEN)
+                    orders_to_settle = orders_to_settle.filter(restaurant=mr)
+
+            if rider:
+                orders_to_settle = orders_to_settle.filter(rider=rider)
+
+            if order_ids and isinstance(order_ids, list) and len(order_ids) > 0:
+                orders_to_settle = orders_to_settle.filter(id__in=order_ids)
+
+            order_list = list(orders_to_settle)
+            if not order_list:
+                return Response({
+                    'success': False,
+                    'message': 'No unsettled delivered COD orders found for the given criteria.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            settled_amount = sum([o.total for o in order_list])
+            settled_ids = [o.id for o in order_list]
+            now = timezone.now()
+
+            orders_to_settle.update(cod_settled=True, cod_settled_at=now)
+
+            # Resolve rider and branch for logging if not provided directly
+            first_ord = order_list[0]
+            log_rider = rider or first_ord.rider
+            log_branch = (rider.branch if rider else None) or first_ord.branch
+
+            settlement_log = CashSettlementLog.objects.create(
+                rider=log_rider,
+                branch=log_branch,
+                settled_by=request.user,
+                order_ids=settled_ids,
+                amount_settled=settled_amount,
+                notes=notes or f"Cash settlement for {len(settled_ids)} delivered COD orders."
+            )
+
+            return Response({
+                'success': True,
+                'log_id': settlement_log.id,
+                'amount_settled': float(settled_amount),
+                'settled_orders_count': len(settled_ids),
+                'order_ids': settled_ids,
+                'message': f"Successfully settled Rs. {settled_amount:.2f} ({len(settled_ids)} orders)."
+            }, status=status.HTTP_200_OK)
+

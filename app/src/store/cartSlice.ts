@@ -1,14 +1,41 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export interface CartOptionModifier {
+  name: string;
+  price_modifier: number;
+  [key: string]: any;
+}
+
 export interface CartItem {
   id: number;
   name: string;
   price: number;
+  basePrice?: number;
   quantity: number;
-  selectedOptions?: any;
+  selectedOptions?: CartOptionModifier[];
+  selectedVariant?: any;
+  special_notes?: string;
+  cartKey?: string;
   image?: string;
   [key: string]: any; // Allow other optional fields
 }
+
+export const buildCartKey = (
+  itemId: number,
+  selectedOptions?: any[],
+  specialNotes?: string,
+  variant?: string | number
+): string => {
+  const normOpts = Array.isArray(selectedOptions)
+    ? [...selectedOptions]
+        .map((o) => ({ name: String(o.name || '').trim(), price_modifier: Number(o.price_modifier || 0) }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
+  const optsStr = JSON.stringify(normOpts);
+  const notesStr = (specialNotes || '').trim().toLowerCase();
+  const variantStr = (variant != null ? String(variant) : '').trim().toLowerCase();
+  return `${itemId}_${optsStr}_${notesStr}_${variantStr}`;
+};
 
 export interface AppliedPromo {
   code: string;
@@ -109,8 +136,9 @@ const cartSlice = createSlice({
       
       state.restaurantId = restaurantId;
 
+      const itemKey = item.cartKey || buildCartKey(item.id, item.selectedOptions, item.special_notes, item.selectedVariant?.name || item.selectedVariant?.id || item.selectedVariant);
       const existingItem = state.items.find(
-        (i) => i.id === item.id && JSON.stringify(i.selectedOptions) === JSON.stringify(item.selectedOptions)
+        (i) => (i.cartKey || buildCartKey(i.id, i.selectedOptions, i.special_notes, i.selectedVariant?.name || i.selectedVariant?.id || i.selectedVariant)) === itemKey
       );
 
       const addedQty = item.quantity || 1;
@@ -118,6 +146,7 @@ const cartSlice = createSlice({
       if (!existingItem) {
         state.items.push({
           ...item,
+          cartKey: itemKey,
           quantity: addedQty,
         });
       } else {
@@ -128,17 +157,18 @@ const cartSlice = createSlice({
       state.totalAmount += (item.price * addedQty);
       evaluatePromoState(state);
     },
-    removeItemFromCart(state, action: PayloadAction<{ id: number; selectedOptions?: any }>) {
-      const { id, selectedOptions } = action.payload;
+    removeItemFromCart(state, action: PayloadAction<{ id: number; selectedOptions?: any; special_notes?: string; variant?: any; cartKey?: string }>) {
+      const { id, selectedOptions, special_notes, variant, cartKey } = action.payload;
+      const targetKey = cartKey || buildCartKey(id, selectedOptions, special_notes, variant);
       const existingItem = state.items.find(
-        (i) => i.id === id && JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions)
+        (i) => (i.cartKey || buildCartKey(i.id, i.selectedOptions, i.special_notes, i.selectedVariant?.name || i.selectedVariant?.id || i.selectedVariant)) === targetKey
       );
 
       if (existingItem) {
         state.totalQuantity -= existingItem.quantity;
         state.totalAmount -= (existingItem.price * existingItem.quantity);
         state.items = state.items.filter(
-          (i) => !(i.id === id && JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions))
+          (i) => (i.cartKey || buildCartKey(i.id, i.selectedOptions, i.special_notes, i.selectedVariant?.name || i.selectedVariant?.id || i.selectedVariant)) !== targetKey
         );
       }
 
@@ -149,10 +179,11 @@ const cartSlice = createSlice({
       }
       evaluatePromoState(state);
     },
-    updateQuantity(state, action: PayloadAction<{ id: number; selectedOptions?: any; quantity: number }>) {
-      const { id, selectedOptions, quantity } = action.payload;
+    updateQuantity(state, action: PayloadAction<{ id: number; selectedOptions?: any; special_notes?: string; variant?: any; cartKey?: string; quantity: number }>) {
+      const { id, selectedOptions, special_notes, variant, cartKey, quantity } = action.payload;
+      const targetKey = cartKey || buildCartKey(id, selectedOptions, special_notes, variant);
       const existingItem = state.items.find(
-        (i) => i.id === id && JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions)
+        (i) => (i.cartKey || buildCartKey(i.id, i.selectedOptions, i.special_notes, i.selectedVariant?.name || i.selectedVariant?.id || i.selectedVariant)) === targetKey
       );
 
       if (existingItem && quantity > 0) {

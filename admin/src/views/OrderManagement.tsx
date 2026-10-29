@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useAdmin } from '../AdminContext';
 import type { Order, OrderStatus } from '../types';
-import { fetchRiders, assignRiderToOrder } from '../services/api';
+import { fetchRiders, assignRiderToOrder, settleRiderCash } from '../services/api';
+import { generateWhatsAppDispatchLink } from '../utils/whatsapp';
 import { 
   ArrowRight, 
   MapPin, 
@@ -16,7 +17,8 @@ import {
   Store,
   Bike,
   Edit3,
-  Loader2
+  Loader2,
+  Banknote
 } from 'lucide-react';
 
 export const OrderManagement: React.FC = () => {
@@ -151,12 +153,32 @@ export const OrderManagement: React.FC = () => {
   const handlePrintReceipt = (order: Order) => {
     const printWindow = window.open('', '_blank', 'width=400,height=600');
     if (!printWindow) return;
-    const itemsHtml = (order.items || []).map((i: any) => `
-      <tr>
-        <td style="padding: 4px 0;">${i.quantity || 1}x ${i.name || i.menu_item_name || 'Item'}</td>
-        <td style="text-align: right; padding: 4px 0;">Rs. ${i.price || 0}</td>
-      </tr>
-    `).join('');
+    const itemsHtml = (order.items || []).map((i: any) => {
+      const optionsHtml = (i.selected_options && Array.isArray(i.selected_options) && i.selected_options.length > 0)
+        ? `<div style="font-size: 10px; color: #555; padding-left: 8px;">+ ${i.selected_options.map((opt: any) => opt.name || opt.title || opt).join(', ')}</div>`
+        : '';
+      const notesHtml = i.special_notes
+        ? `<div style="font-size: 10px; color: #b45309; padding-left: 8px; font-style: italic;">Note: ${i.special_notes}</div>`
+        : '';
+      return `
+        <tr>
+          <td style="padding: 4px 0; vertical-align: top;">
+            <div>${i.quantity || 1}x ${i.name || i.menu_item_name || 'Item'}</div>
+            ${optionsHtml}
+            ${notesHtml}
+          </td>
+          <td style="text-align: right; padding: 4px 0; vertical-align: top;">Rs. ${i.total_price || i.price || 0}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const generalNotesHtml = order.special_notes
+      ? `<div style="margin: 6px 0; font-size: 11px; color: #b45309;"><strong>Special Instructions:</strong> ${order.special_notes}</div>`
+      : '';
+
+    const codStatus = order.payment_method?.toLowerCase() === 'cod'
+      ? (order.cod_settled ? ' [COD SETTLED]' : ' [COD UNSETTLED]')
+      : '';
 
     printWindow.document.write(`
       <html>
@@ -178,12 +200,13 @@ export const OrderManagement: React.FC = () => {
           <div>Customer: ${order.guest_name}</div>
           <div>Phone: ${order.guest_phone}</div>
           <div>Address: ${order.delivery_address}</div>
+          ${generalNotesHtml}
           <div class="divider"></div>
           <table>${itemsHtml}</table>
           <div class="divider"></div>
           <table>
             <tr class="total">
-              <td>Total</td>
+              <td>Total (${order.payment_method?.toUpperCase()}${codStatus})</td>
               <td style="text-align: right;">Rs. ${order.total}</td>
             </tr>
           </table>
@@ -194,6 +217,21 @@ export const OrderManagement: React.FC = () => {
       </html>
     `);
     printWindow.document.close();
+  };
+
+  const handleQuickSettleOrder = async (order: Order) => {
+    try {
+      const riderId = (order.rider as any)?.id || order.rider_id || (riders.find(r => r.name === (order.rider as any)?.name)?.id);
+      const res = await settleRiderCash({
+        rider_id: riderId || undefined,
+        order_ids: [order.id],
+        notes: `Quick settle for Order ${order.display_order_id || `#${order.id}`}`,
+      });
+      showToast(res.message || `Order #${order.id} COD cash settled.`, 'success');
+      refreshOrders();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to settle order cash.', 'error');
+    }
   };
 
   const isSuper = user?.role === 'super_admin';
@@ -393,39 +431,7 @@ export const OrderManagement: React.FC = () => {
       return;
     }
 
-    let targetPhone = riderObj.phone.replace(/[^0-9]/g, '');
-    if (targetPhone.startsWith('03') && targetPhone.length === 11) {
-      targetPhone = '92' + targetPhone.substring(1);
-    }
-
-    const name = order.guest_name || order.user_or_guest || 'Customer';
-    const phone = order.guest_phone || 'N/A';
-    const address = order.delivery_address || 'N/A';
-
-    // Construct Google Maps link: use GPS coordinates if available, otherwise address search link
-    const hasCoords = order.delivery_lat != null && order.delivery_lng != null;
-    const locationLink = hasCoords
-      ? `https://www.google.com/maps/search/?api=1&query=${order.delivery_lat},${order.delivery_lng}`
-      : `https://maps.google.com/?q=${encodeURIComponent(address)}`;
-
-    const itemsList = (order.items || []).map((i: any) => `• ${i.quantity || 1}x ${i.menu_item_name || i.name || 'Item'}`).join('\n');
-
-    const orderLabel = order.display_order_id || `#${order.id}`;
-    const message = 
-      `🛵 *FOODSPHERE DISPATCH ORDER ${orderLabel}*\n\n` +
-      `*Assigned Rider:* ${riderObj.name} (${riderObj.phone})\n` +
-      `*Restaurant:* ${order.restaurant_name || ''}\n` +
-      `*Branch:* ${order.branch_name || 'Main'} Branch\n\n` +
-      `*Customer Name:* ${name}\n` +
-      `*Customer Phone:* ${phone}\n` +
-      `*Delivery Address:* ${address}\n` +
-      `*Google Maps Location:* ${locationLink}\n\n` +
-      `*Items Ordered:*\n${itemsList}\n\n` +
-      `*Total Collection:* Rs. ${order.total} (${(order.payment_method || 'COD').toUpperCase()})\n\n` +
-      `Please pick up from kitchen and deliver promptly!`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodedMessage}`;
+    const whatsappUrl = generateWhatsAppDispatchLink(order, riderObj);
     window.open(whatsappUrl, '_blank');
   };
 
@@ -798,26 +804,62 @@ export const OrderManagement: React.FC = () => {
                           </div>
 
                           {/* Items summary list */}
-                          <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-1.5">
+                          <div className="border-t border-slate-900 pt-3 mb-3.5 space-y-2">
                             {order.items.map((item, idx) => (
-                              <div key={idx} className="flex justify-between items-start text-[11px] text-slate-300">
-                                <span className="flex-1 pr-2 break-words">
-                                  <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
-                                  {item.menu_item_name}
-                                </span>
-                                <span className="font-semibold text-slate-400 ml-2 whitespace-nowrap">Rs.{item.total_price}</span>
+                              <div key={idx} className="text-[11px] text-slate-300">
+                                <div className="flex justify-between items-start">
+                                  <span className="flex-1 pr-2 break-words">
+                                    <strong className="text-blue-400 mr-1.5">{item.quantity}x</strong>
+                                    {item.menu_item_name}
+                                  </span>
+                                  <span className="font-semibold text-slate-400 ml-2 whitespace-nowrap">Rs.{item.total_price}</span>
+                                </div>
+                                {item.selected_options && Array.isArray(item.selected_options) && item.selected_options.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1 pl-4">
+                                    {item.selected_options.map((opt: any, optIdx: number) => {
+                                      const modPrice = Number(opt.price_modifier ?? opt.price ?? 0);
+                                      return (
+                                        <span key={optIdx} className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-semibold px-1.5 py-0.5 rounded">
+                                          +{opt.name || opt.title || opt} {modPrice > 0 ? `(Rs.${modPrice})` : ''}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                                {item.special_notes && (
+                                  <div className="text-[10px] text-amber-400/90 italic pl-4 mt-0.5 flex items-center gap-1">
+                                    <span>📝</span>
+                                    <span>"{item.special_notes}"</span>
+                                  </div>
+                                )}
                               </div>
                             ))}
+                            {order.special_notes && (
+                              <div className="bg-amber-500/10 border border-amber-500/20 rounded p-1.5 text-[10px] text-amber-300">
+                                <span className="font-bold">📝 Order Note:</span> {order.special_notes}
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {/* Pricing, Payment & Actions */}
                         <div className="border-t border-slate-900 pt-3">
                           <div className="flex justify-between items-center mb-3.5 bg-slate-900/20 px-2 py-1.5 rounded-lg">
-                            <span className="text-[11px] uppercase font-black text-slate-400 flex items-center gap-0.5">
-                              <DollarSign size={10} className="text-slate-500" />
-                              {order.payment_method}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[11px] uppercase font-black text-slate-400 flex items-center gap-0.5">
+                                <DollarSign size={10} className="text-slate-500" />
+                                {order.payment_method}
+                              </span>
+                              {order.payment_method?.toLowerCase() === 'cod' && (
+                                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${
+                                  order.cod_settled
+                                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                                    : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                                }`}>
+                                  {order.cod_settled ? 'COD Settled' : 'COD Unsettled'}
+                                </span>
+                              )}
+                            </div>
                             <span className="font-extrabold text-sm text-emerald-400">Rs. {order.total}</span>
                           </div>
 
@@ -847,6 +889,15 @@ export const OrderManagement: React.FC = () => {
                                 className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black py-2 rounded-lg text-xs transition-all shadow-md active:scale-[0.98]"
                               >
                                 <CheckCircle size={13} /> Mark Delivered ✅
+                              </button>
+                            )}
+
+                            {order.status === 'delivered' && order.payment_method?.toLowerCase() === 'cod' && !order.cod_settled && (
+                              <button
+                                onClick={() => handleQuickSettleOrder(order)}
+                                className="w-full flex items-center justify-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-black py-1.5 rounded-lg text-xs transition-all shadow-sm active:scale-[0.98]"
+                              >
+                                <Banknote size={13} /> Settle COD Cash (Rs. {order.total})
                               </button>
                             )}
 
@@ -918,10 +969,29 @@ export const OrderManagement: React.FC = () => {
                 <div className="text-xs space-y-1 text-slate-300">
                   <p><strong>Customer:</strong> {order.guest_name || order.user_or_guest} ({order.guest_phone || 'N/A'})</p>
                   <p><strong>Address:</strong> {order.delivery_address}</p>
-                  <p><strong>Total:</strong> Rs. {order.total} ({order.payment_method.toUpperCase()})</p>
+                  <div className="flex items-center justify-between">
+                    <p><strong>Total:</strong> Rs. {order.total} ({order.payment_method.toUpperCase()})</p>
+                    {order.payment_method?.toLowerCase() === 'cod' && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                        order.cod_settled
+                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                          : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                      }`}>
+                        {order.cod_settled ? '✓ COD Settled' : '⏳ Cash Unsettled'}
+                      </span>
+                    )}
+                  </div>
                   {order.rider && <p className="text-sky-400"><strong>Rider:</strong> {order.rider.name} ({order.rider.phone})</p>}
                 </div>
                 <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                  {order.payment_method?.toLowerCase() === 'cod' && !order.cod_settled && (
+                    <button
+                      onClick={() => handleQuickSettleOrder(order)}
+                      className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded flex items-center gap-1"
+                    >
+                      <Banknote size={12} /> Settle Cash
+                    </button>
+                  )}
                   {isSuper && (
                     <button
                       onClick={() => handleStatusChange(order, 'cancelled')}

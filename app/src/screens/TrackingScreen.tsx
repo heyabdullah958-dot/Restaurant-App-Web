@@ -837,6 +837,17 @@ export default function TrackingScreen() {
                 <Text style={styles.itemQuantity}>{item.quantity}x</Text>
                 <View style={styles.itemNameContainer}>
                   <Text style={styles.itemName}>{item.menu_item_name || 'Menu Item'}</Text>
+                  {item.selected_options && Array.isArray(item.selected_options) && item.selected_options.length > 0 && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 3, marginBottom: 2 }}>
+                      {item.selected_options.map((opt: any, oIdx: number) => (
+                        <View key={oIdx} style={{ backgroundColor: '#F1F5F9', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, borderWidth: 1, borderColor: '#E2E8F0' }}>
+                          <Text style={{ fontSize: 10, color: '#475569', fontWeight: '600' }}>
+                            +{opt.name} {Number(opt.price_modifier || 0) > 0 ? `(Rs. ${Number(opt.price_modifier).toFixed(0)})` : ''}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                   {item.special_notes ? (
                     <Text style={styles.itemNotes}>{item.special_notes}</Text>
                   ) : null}

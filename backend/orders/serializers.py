@@ -2,7 +2,7 @@ from decimal import Decimal
 from rest_framework import serializers
 from django.db import transaction
 from django.db.models import F
-from .models import Order, OrderItem
+from .models import Order, OrderItem, CashSettlementLog
 from restaurants.models import MenuItem, Restaurant, BranchRider
 from restaurants.serializers import RestaurantSerializer, build_absolute_image_url, BranchRiderSerializer
 from promotions.models import Coupon, CouponUsage
@@ -178,10 +178,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             selected_opts = item.get('selected_options', [])
             
             db_options = menu_item.options or []
+            if isinstance(db_options, dict):
+                db_options = db_options.get('addons') or db_options.get('options') or []
+            if not isinstance(db_options, list):
+                db_options = []
+
             price_modifier_sum = Decimal('0.00')
             for opt in selected_opts:
                 if isinstance(opt, dict) and opt.get('name'):
-                    matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
+                    opt_name_clean = str(opt.get('name', '')).strip().lower()
+                    matched_db_opt = next((o for o in db_options if isinstance(o, dict) and str(o.get('name', '')).strip().lower() == opt_name_clean), None)
                     if matched_db_opt:
                         try:
                             mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
@@ -398,25 +404,38 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
                 selected_opts = item_data.get('selected_options', [])
                 db_options = menu_item.options or []
+                if isinstance(db_options, dict):
+                    db_options = db_options.get('addons') or db_options.get('options') or []
+                if not isinstance(db_options, list):
+                    db_options = []
+
                 price_modifier_sum = Decimal('0.00')
                 sanitized_selected_options = []
 
                 for opt in selected_opts:
                     if isinstance(opt, dict) and opt.get('name'):
-                        matched_db_opt = next((o for o in db_options if isinstance(o, dict) and o.get('name') == opt.get('name')), None)
+                        opt_name_clean = str(opt.get('name', '')).strip().lower()
+                        matched_db_opt = next((o for o in db_options if isinstance(o, dict) and str(o.get('name', '')).strip().lower() == opt_name_clean), None)
                         if matched_db_opt:
                             try:
                                 mod_val = float(matched_db_opt.get('price_modifier', 0) or 0)
                                 mod_dec = Decimal(str(max(0.0, mod_val)))
                                 price_modifier_sum += mod_dec
                                 sanitized_selected_options.append({
-                                    'name': opt.get('name'),
+                                    'name': matched_db_opt.get('name', opt.get('name')),
                                     'price_modifier': float(mod_dec)
                                 })
                             except (ValueError, TypeError):
-                                sanitized_selected_options.append(opt)
+                                sanitized_selected_options.append({
+                                    'name': opt.get('name'),
+                                    'price_modifier': 0.0
+                                })
                         else:
-                            sanitized_selected_options.append(opt)
+                            # Not found in DB options — preserve name if user customized, but strictly zero price_modifier
+                            sanitized_selected_options.append({
+                                'name': opt.get('name'),
+                                'price_modifier': 0.0
+                            })
 
                 unit_price += price_modifier_sum
                 total_price = unit_price * quantity
@@ -607,6 +626,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
             'guest_name', 'guest_phone',
             'order_type', 'table_number',
             'status', 'payment_method',
+            'cod_settled', 'cod_settled_at',
             'delivery_address', 'delivery_lat', 'delivery_lng',
             'subtotal', 'delivery_fee', 'discount', 'total',
             'special_instructions',
@@ -636,6 +656,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 'display_order_id', 'tracking_token', 'restaurant', 'rider', 'rider_id', 'guest_name', 'guest_phone', 'order_type', 'table_number', 'status', 'payment_method',
+            'cod_settled', 'cod_settled_at',
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
@@ -680,3 +701,18 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         if instance.status not in ['out_for_delivery', 'delivered']:
             ret['rider'] = None
         return ret
+
+
+class CashSettlementLogSerializer(serializers.ModelSerializer):
+    rider_name = serializers.CharField(source='rider.name', read_only=True)
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    settled_by_name = serializers.CharField(source='settled_by.username', read_only=True)
+
+    class Meta:
+        model = CashSettlementLog
+        fields = (
+            'id', 'rider', 'rider_name', 'branch', 'branch_name',
+            'settled_by', 'settled_by_name', 'order_ids',
+            'amount_settled', 'notes', 'created_at'
+        )
+

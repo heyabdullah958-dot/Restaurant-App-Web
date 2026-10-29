@@ -573,11 +573,13 @@ export default function CheckoutScreen() {
     // 2. Map cart items to payload
     const orderItems = items.map((item) => {
       const selected_options = [];
-      let notes = '';
+      let notes = item.special_notes ? item.special_notes.trim() : '';
 
       if (item.selectedOptions && Array.isArray(item.selectedOptions)) {
         selected_options.push(...item.selectedOptions);
-        notes = item.selectedOptions.map((opt: any) => `${opt.name || 'Option'} (+Rs. ${opt.price_modifier || 0})`).join(', ');
+        if (!notes) {
+          notes = item.selectedOptions.map((opt: any) => `${opt.name || 'Option'} (+Rs. ${opt.price_modifier || 0})`).join(', ');
+        }
       }
 
       return {
@@ -1143,6 +1145,41 @@ export default function CheckoutScreen() {
           {/* Pricing Summary */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Order Summary</Text>
+
+            {/* Itemized Order Line Items */}
+            <View style={{ marginBottom: 12 }}>
+              {items.map((it: any, idx: number) => {
+                const k = it.cartKey || `${it.id}-${idx}`;
+                return (
+                  <View key={k} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: COLORS.dark, flex: 1, marginRight: 8 }}>
+                        {it.quantity}x {it.name}
+                      </Text>
+                      <Text style={{ fontSize: 13, fontWeight: '700', color: COLORS.dark }}>
+                        Rs. {(it.price * it.quantity).toFixed(0)}
+                      </Text>
+                    </View>
+                    {it.selectedOptions && Array.isArray(it.selectedOptions) && it.selectedOptions.length > 0 && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                        {it.selectedOptions.map((opt: any, oIdx: number) => (
+                          <View key={oIdx} style={{ backgroundColor: '#F8FAFC', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, borderWidth: 1, borderColor: '#E2E8F0' }}>
+                            <Text style={{ fontSize: 10, color: '#475569', fontWeight: '600' }}>
+                              +{opt.name} {Number(opt.price_modifier || 0) > 0 ? `(Rs. ${Number(opt.price_modifier).toFixed(0)})` : ''}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    {it.special_notes ? (
+                      <Text style={{ fontSize: 11, color: '#D97706', fontStyle: 'italic', marginTop: 3 }}>
+                        📝 "{it.special_notes}"
+                      </Text>
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
             
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Subtotal</Text>

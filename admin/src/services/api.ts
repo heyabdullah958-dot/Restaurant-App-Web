@@ -235,6 +235,8 @@ export interface ApiOrder {
   rider_id?: number | null;
   status: string;
   payment_method: string;
+  cod_settled?: boolean;
+  cod_settled_at?: string | null;
   total: string | number;
   subtotal: string | number;
   delivery_fee: string | number;
@@ -246,6 +248,7 @@ export interface ApiOrder {
   delivery_lng?: number | string | null;
   created_at: string;
   updated_at: string;
+  special_notes?: string;
   items?: any[];
 }
 
@@ -666,5 +669,76 @@ export const updateDineInPost = (id: number, data: FormData | Record<string, any
 
 export const deleteDineInPost = (id: number) => 
   apiFetch<any>(`/api/dine-in-posts/${id}/`, { method: 'DELETE' });
+
+// ─── CASH REGISTER & RIDER COD SETTLEMENT ────────────────────────────────────
+
+export interface CashRegisterSummary {
+  total_drawer_cash: number;
+  unsettled_rider_cash: number;
+  on_the_road_cash: number;
+  settled_orders_count: number;
+  unsettled_orders_count: number;
+  on_the_road_orders_count: number;
+}
+
+export interface CashRegisterRider {
+  id: number | null;
+  name: string;
+  phone: string;
+  vehicle_type: string;
+  status: string;
+  branch_id?: number | null;
+  branch_name: string;
+  restaurant_name: string;
+  unsettled_amount: number;
+  unsettled_orders_count: number;
+  unsettled_order_ids: number[];
+  on_the_road_amount: number;
+  last_settled_at?: string | null;
+}
+
+export interface CashSettlementLogEntry {
+  id: number;
+  rider_id: number | null;
+  rider_name: string;
+  branch_name: string;
+  settled_by_name: string;
+  order_ids: number[];
+  amount_settled: number;
+  notes: string;
+  created_at: string;
+}
+
+export interface CashRegisterData {
+  summary: CashRegisterSummary;
+  riders: CashRegisterRider[];
+  recent_settlements: CashSettlementLogEntry[];
+}
+
+export const fetchCashRegister = async (params?: { branch_id?: number | string; restaurant_id?: number | string }): Promise<CashRegisterData> => {
+  let url = '/api/admin/cash-register/';
+  if (params) {
+    const query = new URLSearchParams();
+    if (params.branch_id) query.append('branch_id', String(params.branch_id));
+    if (params.restaurant_id) query.append('restaurant_id', String(params.restaurant_id));
+    const qs = query.toString();
+    if (qs) url += `?${qs}`;
+  }
+  return apiFetch<CashRegisterData>(url);
+};
+
+export const settleRiderCash = async (data: { rider_id?: number; order_ids?: number[]; notes?: string }): Promise<{
+  success: boolean;
+  log_id?: number;
+  amount_settled: number;
+  settled_orders_count: number;
+  order_ids: number[];
+  message: string;
+}> => {
+  return apiFetch<any>('/api/admin/cash-register/settle/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
 
 

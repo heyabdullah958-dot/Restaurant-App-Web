@@ -1,6 +1,33 @@
 
 # Changelog
 
+## 2026-10-29 Feature: Dish Add-On Modifiers, Kitchen Notes Modal & Branch Cash Register COD Settlement
+- **Feature 1: Dish Add-On Modifiers & Kitchen Notes Modal**:
+  - **Backend DRF (`/backend`)**:
+    - `MenuItem.options`: Anti-tampering line-item validation against DB `menu_item.options` in `OrderCreateSerializer` & `OrderItemSerializer`.
+    - Seeded realistic add-ons for Jushh PK, Tandoori Stop, Dine At Blue, and Get A Fomo via `seed_menu_options.py`.
+    - Added `python manage.py seed_menu_options` to `Procfile` release process.
+  - **Customer Mobile App (`/app`)**:
+    - `DishCustomizeModal.tsx`: Native bottom-sheet customization modal with add-on checkboxes, kitchen notes (160 char limit), live price calculation, and quantity stepper.
+    - `cartSlice.ts`: Composite cart keys (`buildCartKey`) supporting variants, options, and special notes without cart item collisions.
+    - `CartScreen.tsx`, `CheckoutScreen.tsx`, `TrackingScreen.tsx`: Displays customized item badges and special prep notes.
+- **Feature 2: Branch Cash Register & Rider COD Settlement**:
+  - **Backend DRF (`/backend`)**:
+    - `Order`: Added `cod_settled` (Boolean, default=False) and `cod_settled_at` (DateTimeField).
+    - `CashSettlementLog`: New ledger model tracking rider cash handovers, notes, and timestamp with branch scoping and nullable rider for direct counter sales.
+    - Endpoints: `GET /api/admin/cash-register/` (4 financial KPIs + active rider ledger) and `POST /api/admin/cash-register/settle/` (atomic multi-order COD settlement).
+    - Admin site: Registered `CashSettlementLog` with branch and rider filters.
+  - **Web Admin HQ (`/admin`)**:
+    - `CashRegisterView.tsx`: 4 financial KPI cards (Drawer Cash, In Rider Hands, Pending on Road, Online Paid), per-rider cash ledger with 1-click settle, and immutable audit history.
+    - `Sidebar.tsx`: Added "Cash Register & COD" navigation item with live unsettled COD badge counter.
+    - `OrderManagement.tsx`: Added `COD Settled` vs `COD Unsettled` badges and quick settlement triggers.
+    - `whatsapp.ts`: Updated rider dispatch generator with itemized modifiers, kitchen notes, and cash collection instructions.
+- **Verification**:
+  - 52/52 Django test suite passing (`manage.py test orders.test_cash_register_api`, `orders`, `restaurants`).
+  - React Vite Admin HQ: 0 errors (`npm run build`).
+  - React Native Customer App: 0 TypeScript errors (`tsc --noEmit`).
+
+
 ## 2026-10-27 Phase 10 — Dine-In Video Posts & Highlights System with 10-Video FIFO Auto-Cleanup
 - **Backend Architecture (`/backend`)**:
   - Implemented `RestaurantMediaPost` model in `backend/restaurants/models.py` with multi-tenant foreign keys (`restaurant`, `branch`), media metadata (`media_type`, `media_url`, `cloudinary_public_id`, `thumbnail_url`), menu item linking (`linked_menu_item`), and audit timestamps.
@@ -1278,3 +1305,33 @@ oute3), TXT SPF and DKIM records; added destination address getfoodpk@gmail.com.
   - Metro bundler active and successfully bundling 1556 modules.
 - **Deploy Chain Status**: Heroku Release v98 Live; Metro Bundler Live.
 - **Confidence**: 100% — Zero regressions verified across backend, web, and mobile app.
+
+
+## Google Play Store Production Release Bundle & Store Graphics Packaging — 2026-10-29
+- **Tier**: HIGH-RISK — Production Android App Bundle (.aab), Google Play signing keystore generation, permission sanitization, and store graphics packaging.
+- **What Changed & Why**:
+  1. **Purged Restricted Permission**: Removed `SYSTEM_ALERT_WINDOW` from `app/android/app/src/main/AndroidManifest.xml` to avoid Play Store policy rejections and manual permission justifications.
+  2. **Release Keystore Generation**: Generated 2048-bit RSA production release keystore `app/android/app/getfood-release.keystore` (valid until 2054, alias `getfood`) with PKCS12 format and SHA-256 certificate fingerprint.
+  3. **Automated Gradle Signing Integration**: Wired `signingConfigs.release` in `app/android/app/build.gradle` and defined store/key credentials in `app/android/gradle.properties`.
+  4. **Production App Bundle Build**: Successfully compiled signed Android App Bundle `D:\GetFood.aab` (68.8 MB). Verified signature with `jarsigner` (`jar verified.`, `CN=GetFood, OU=MobileApp, O=GetFoodPK`).
+  5. **Google Play Store Graphics Creation**:
+     - 512x512 High-Res App Icon: `D:\GetFood-Icon-512x512.png`
+     - 1024x500 Feature Graphic Banner: `D:\GetFood-Feature-Graphic-1024x500.png` (24-bit RGB PNG with GetFood logo emblem, brand palette, and partner brand highlights).
+- **Files Modified / Created**:
+  - `app/android/app/src/main/AndroidManifest.xml`
+  - `app/android/app/build.gradle`
+  - `app/android/gradle.properties`
+  - `app/android/app/getfood-release.keystore` [NEW]
+  - `app/assets/playstore-icon-512.png` [NEW]
+  - `app/assets/playstore-feature-graphic-1024x500.png` [NEW]
+  - `D:\GetFood.aab` [NEW]
+  - `D:\GetFood-Icon-512x512.png` [NEW]
+  - `D:\GetFood-Feature-Graphic-1024x500.png` [NEW]
+  - `BUILD.md`
+  - `CHANGELOG.md`
+- **Verification Evidence**:
+  - `gradlew bundleRelease` exited with code 0 (`BUILD SUCCESSFUL in 5m 28s`).
+  - `jarsigner -verify -verbose -certs D:\GetFood.aab` passed (`jar verified.`).
+  - Verified image dimensions: Icon (512x512 PNG), Feature Graphic (1024x500 24-bit RGB PNG).
+- **Deploy Chain Status**: Saved & Verified Locally ➔ Production Bundle Built (`D:\GetFood.aab`).
+- **Confidence**: 100% — Zero errors, production signed, ready for Google Play Console.

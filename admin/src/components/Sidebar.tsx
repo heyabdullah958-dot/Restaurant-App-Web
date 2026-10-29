@@ -14,7 +14,8 @@ import {
   Tag,
   Zap,
   Bike,
-  Film
+  Film,
+  Banknote
 } from 'lucide-react';
 import { changeOwnPassword, updateUserProfile } from '../services/api';
 
@@ -316,6 +317,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   <Zap size={18} />
                   Flash Deals
                 </button>
+                <button
+                  onClick={() => { setView('cash_register'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                    activeView === 'cash_register' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Banknote size={18} />
+                  Cash Register & COD
+                </button>
               </>
             ) : (
               // BRANCH-MANAGER NAVIGATION LINKS
@@ -346,6 +356,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   <Bike size={18} />
                   Branch Riders
+                </button>
+                <button
+                  onClick={() => { setView('cash_register'); setIsOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all-300 ${
+                    activeView === 'cash_register' ? activeLinkClass : inactiveLinkClass
+                  }`}
+                >
+                  <Banknote size={18} />
+                  Cash Register & COD
                 </button>
                 <button
                   onClick={() => { setView('menu_management'); setIsOpen(false); }}

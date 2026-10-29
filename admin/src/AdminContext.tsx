@@ -156,6 +156,9 @@ function mapApiOrder(o: ApiOrder): Order {
     branch_id: o.branch_id ?? undefined,
     rider: riderObj,
     rider_id: riderId,
+    cod_settled: Boolean((o as any).cod_settled),
+    cod_settled_at: (o as any).cod_settled_at ?? null,
+    special_notes: o.special_notes || '',
     created_at: o.created_at,
     items: o.items || [],
   };

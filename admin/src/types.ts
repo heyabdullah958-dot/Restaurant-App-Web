@@ -101,6 +101,7 @@ export interface OrderItemDetail {
   unit_price: number;
   total_price: number;
   special_notes?: string;
+  selected_options?: Array<{ name: string; price_modifier: number }>;
 }
 
 export interface Order {
@@ -119,6 +120,8 @@ export interface Order {
   table_number?: string;
   status: OrderStatus;
   payment_method: PaymentMethod;
+  cod_settled?: boolean;
+  cod_settled_at?: string | null;
   delivery_address: string;
   delivery_lat?: number | null;
   delivery_lng?: number | null;
@@ -127,6 +130,7 @@ export interface Order {
   discount: number;
   total: number;
   special_instructions?: string;
+  special_notes?: string;
   cancellation_reason?: string;
   created_at: string;
   items: OrderItemDetail[];

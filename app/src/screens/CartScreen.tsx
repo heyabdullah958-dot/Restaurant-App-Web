@@ -196,6 +196,8 @@ export default function CartScreen() {
       updateQuantity({
         id: item.id,
         selectedOptions: item.selectedOptions || [],
+        special_notes: item.special_notes,
+        cartKey: item.cartKey,
         quantity: item.quantity + 1,
       })
     );
@@ -207,6 +209,8 @@ export default function CartScreen() {
         removeItemFromCart({
           id: item.id,
           selectedOptions: item.selectedOptions || [],
+          special_notes: item.special_notes,
+          cartKey: item.cartKey,
         })
       );
     } else {
@@ -214,6 +218,8 @@ export default function CartScreen() {
         updateQuantity({
           id: item.id,
           selectedOptions: item.selectedOptions || [],
+          special_notes: item.special_notes,
+          cartKey: item.cartKey,
           quantity: item.quantity - 1,
         })
       );
@@ -225,6 +231,8 @@ export default function CartScreen() {
       removeItemFromCart({
         id: item.id,
         selectedOptions: item.selectedOptions || [],
+        special_notes: item.special_notes,
+        cartKey: item.cartKey,
       })
     );
   };
@@ -396,12 +404,28 @@ export default function CartScreen() {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>Selected Items</Text>
           {cart.items.map((item: any) => {
-            const itemKey = `${item.id}-${JSON.stringify(item.selectedOptions)}`;
+            const itemKey = item.cartKey || `${item.id}-${JSON.stringify(item.selectedOptions)}-${item.special_notes || ''}`;
             return (
               <SwipeableRow key={itemKey} onSwipeLeft={() => handleRemove(item)}>
                 <View style={styles.cartItemRow}>
                   <View style={styles.itemMeta}>
                     <Text style={styles.itemName}>{item.name}</Text>
+                    {item.selectedOptions && Array.isArray(item.selectedOptions) && item.selectedOptions.length > 0 && (
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4, marginBottom: 2 }}>
+                        {item.selectedOptions.map((opt: any, oIdx: number) => (
+                          <View key={oIdx} style={{ backgroundColor: '#F1F5F9', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, borderWidth: 1, borderColor: '#E2E8F0' }}>
+                            <Text style={{ fontSize: 10, color: '#334155', fontWeight: '700' }}>
+                              +{opt.name} {Number(opt.price_modifier || 0) > 0 ? `(Rs. ${Number(opt.price_modifier).toFixed(0)})` : ''}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                    {item.special_notes ? (
+                      <Text style={{ fontSize: 11, color: '#D97706', fontStyle: 'italic', marginTop: 2, marginBottom: 2 }}>
+                        📝 "{item.special_notes}"
+                      </Text>
+                    ) : null}
                     <Text style={styles.itemUnitPrice}>Rs. {item.price} each</Text>
                   </View>
                   

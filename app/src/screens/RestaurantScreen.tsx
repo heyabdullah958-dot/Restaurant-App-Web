@@ -26,7 +26,8 @@ import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
 import { AppDispatch, RootState } from '../store';
 import { fetchRestaurantDetail, fetchRestaurants, clearCurrentRestaurant } from '../store/restaurantSlice';
 import CustomAlertModal from '../components/CustomAlertModal';
-import { addItemToCart, updateQuantity, removeItemFromCart, clearCart } from '../store/cartSlice';
+import DishCustomizeModal from '../components/DishCustomizeModal';
+import { addItemToCart, updateQuantity, removeItemFromCart, clearCart, buildCartKey } from '../store/cartSlice';
 import { getImageUrl, Restaurant, MenuItem, MenuCategory, FALLBACK_RESTAURANTS } from '../services/fallbackData';
 import { resolveItemImage, resolveItemImageWithLogoFallback } from '../services/mediaAssetService';
 import { MenuItemSkeleton } from '../components/SkeletonLoader';
@@ -117,6 +118,11 @@ const MenuItemCard = React.memo(({
   }
   
   const isUnavailable = isOutOfStock || isClosed;
+  const hasCustomOptions = Boolean(
+    (Array.isArray(item.options) && item.options.length > 0) ||
+    (item.options?.has_variants && Array.isArray(item.options?.variants) && item.options.variants.length > 0) ||
+    (typeof item.options === 'object' && item.options && ((Array.isArray(item.options?.addons) && item.options.addons.length > 0) || (Array.isArray(item.options?.options) && item.options.options.length > 0)))
+  );
 
   return (
     <View style={[styles.menuItemCard, isUnavailable && { opacity: 0.65 }]}>
@@ -218,7 +224,7 @@ const MenuItemCard = React.memo(({
                 <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
                   <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
                 </View>
-              ) : quantity > 0 && !item.options?.has_variants ? (
+              ) : quantity > 0 && !hasCustomOptions ? (
                 <View style={styles.quantityRow}>
                   <TouchableOpacity activeOpacity={0.75}
                     style={styles.quantityBtn}
@@ -236,13 +242,13 @@ const MenuItemCard = React.memo(({
                 </View>
               ) : (
                 <TouchableOpacity
-                  style={styles.addButton}
+                  style={[styles.addButton, hasCustomOptions && { backgroundColor: COLORS.primary }]}
                   activeOpacity={0.8}
                   onPress={() => onAddToCart(item)}
                 >
-                  <Ionicons name="add" size={14} color={COLORS.white} style={{ marginRight: 2 }} />
+                  <Ionicons name={hasCustomOptions ? "sparkles" : "add"} size={13} color={COLORS.white} style={{ marginRight: 2 }} />
                   <Text style={styles.addButtonText}>
-                    {item.options?.has_variants && quantity > 0 ? `ADD MORE (${quantity})` : 'ADD'}
+                    {hasCustomOptions && quantity > 0 ? `CUSTOMIZE (${quantity})` : hasCustomOptions ? 'CUSTOMIZE' : 'ADD'}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -284,6 +290,7 @@ export default function RestaurantScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedItemForOptions, setSelectedItemForOptions] = useState<MenuItem | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [selectedItemForCustomize, setSelectedItemForCustomize] = useState<any | null>(null);
 
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -521,10 +528,18 @@ export default function RestaurantScreen() {
       other_available_branches: item.other_available_branches,
     };
 
-    if (item.options?.has_variants && item.options.variants && item.options.variants.length > 0) {
-      setSelectedItemForOptions(item);
-      setSelectedVariant(item.options.variants[0]);
-    } else if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
+    const hasCustomOptions = Boolean(
+      (Array.isArray(item.options) && item.options.length > 0) ||
+      (item.options?.has_variants && Array.isArray(item.options?.variants) && item.options.variants.length > 0) ||
+      (typeof item.options === 'object' && item.options && ((Array.isArray(item.options?.addons) && item.options.addons.length > 0) || (Array.isArray(item.options?.options) && item.options.options.length > 0)))
+    );
+
+    if (hasCustomOptions) {
+      setSelectedItemForCustomize(item);
+      return;
+    }
+
+    if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
       showAlert(
         'Reset Cart?',
         'You have items from another restaurant in your cart. Adding this item will clear your current cart. Do you want to proceed?',
@@ -553,6 +568,55 @@ export default function RestaurantScreen() {
       );
     }
   }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert, currentBranch, selectedBranchId]);
+
+  const handleConfirmCustomizedItem = useCallback((payload: {
+    item: any;
+    quantity: number;
+    selectedOptions: any[];
+    selectedVariant?: any;
+    specialNotes: string;
+    unitPrice: number;
+    totalPrice: number;
+  }) => {
+    if (!restaurant) return;
+    const { item, quantity, selectedOptions, selectedVariant, specialNotes, unitPrice } = payload;
+    const itemName = selectedVariant?.name ? `${item.name} (${selectedVariant.name})` : item.name;
+    const itemToAdd = {
+      id: item.id,
+      name: itemName,
+      price: unitPrice,
+      basePrice: Number(item.price),
+      quantity: quantity,
+      selectedOptions: selectedOptions,
+      selectedVariant: selectedVariant,
+      special_notes: specialNotes,
+      cartKey: buildCartKey(item.id, selectedOptions, specialNotes, selectedVariant?.name || selectedVariant?.id),
+      branch_availability_map: item.branch_availability_map,
+      other_available_branches: item.other_available_branches,
+    };
+
+    if (cart.restaurantId && cart.restaurantId !== restaurant.id) {
+      showAlert(
+        'Start New Order?',
+        `Your cart contains items from another brand. Do you want to clear your cart and order from ${restaurant.name}?`,
+        [
+          { text: 'Cancel', style: 'cancel', onPress: hideAlert },
+          {
+            text: 'Yes, Start New Order',
+            onPress: () => {
+              hideAlert();
+              dispatch(clearCart());
+              dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+              setSelectedItemForCustomize(null);
+            },
+          },
+        ]
+      );
+    } else {
+      dispatch(addItemToCart({ item: itemToAdd, restaurantId: restaurant.id }));
+      setSelectedItemForCustomize(null);
+    }
+  }, [restaurant, cart.restaurantId, dispatch, showAlert, hideAlert]);
 
   const handleIncrement = useCallback((item: MenuItem, currentQty: number) => {
     const isOutOfStock = (selectedBranchId && item.branch_availability_map && item.branch_availability_map[String(selectedBranchId)] === false) || (!item.branch_availability_map && item.is_available === false);
@@ -1016,6 +1080,16 @@ export default function RestaurantScreen() {
           </View>
         </Modal>
       )}
+
+      {/* Dish Add-On Modifiers & Kitchen Notes Customization Modal */}
+      <DishCustomizeModal
+        visible={Boolean(selectedItemForCustomize)}
+        item={selectedItemForCustomize}
+        restaurantSlug={slug}
+        onClose={() => setSelectedItemForCustomize(null)}
+        onAddToCart={handleConfirmCustomizedItem}
+      />
+
       {/* Branch Selection Modal */}
       {restaurant && restaurant.branches && restaurant.branches.length > 0 && (
         <Modal

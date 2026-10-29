@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     OrderListCreateView, OrderDetailView, OrderTrackView, MyOrdersListView,
     PurgeOrdersView, OrderAssignRiderView, ReorderView, OrderReviewView,
-    RestaurantReviewsView
+    RestaurantReviewsView, AdminCashRegisterView, AdminCashRegisterSettleView
 )
 from .cash_register_views import BranchCashRegisterView, VerifyCashRegisterView
 
@@ -12,6 +12,8 @@ urlpatterns = [
     path('orders/purge-all/', PurgeOrdersView.as_view(), name='purge_all_orders'),
     path('orders/cash-register/', BranchCashRegisterView.as_view(), name='branch_cash_register'),
     path('orders/cash-register/<int:pk>/verify/', VerifyCashRegisterView.as_view(), name='verify_cash_register'),
+    path('admin/cash-register/', AdminCashRegisterView.as_view(), name='admin_cash_register'),
+    path('admin/cash-register/settle/', AdminCashRegisterSettleView.as_view(), name='admin_cash_register_settle'),
     path('orders/<str:pk>/assign-rider/', OrderAssignRiderView.as_view(), name='order_assign_rider'),
     path('orders/<str:pk>/track/', OrderTrackView.as_view(), name='order_track'),
     path('orders/track/', OrderTrackView.as_view(), name='order_guest_track'),
