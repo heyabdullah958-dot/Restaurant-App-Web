@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   Animated,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   TextInput,
@@ -15,6 +14,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';

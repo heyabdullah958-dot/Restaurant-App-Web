@@ -8,7 +8,6 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
-  SafeAreaView,
   RefreshControl,
   Alert,
   TextInput,
@@ -17,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootState, AppDispatch } from '../store';
 import { fetchMyOrders, fetchOrderDetails } from '../store/orderSlice';
 import { addItemToCart } from '../store/cartSlice';

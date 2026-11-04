@@ -1027,7 +1027,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory, error, restaurants, dispatch]);
 
   return (
-    <View style={[styles.container, { paddingTop: Platform.OS === 'android' ? 40 : insets.top }]}>
+    <View style={[styles.container, { paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 24 : 0) }]}>
       <StatusBar style="dark" />
       
       {/* Top Welcome Header */}

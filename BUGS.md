@@ -1060,3 +1060,64 @@
   - `python test_jushhpk_kfc_verification.py` passed 100% (9/9 assertions passed: body bg `#F8F9FA`, cards `#FFFFFF`, 0 login buttons, modal auto-open & toggle, 39/39 images `naturalWidth > 0`, live search, card stepper).
   - `python scratch/test_live_cf.py` passed 100% on live production Cloudflare Pages (`https://jushhpk-foodsphere.pages.dev`).
 
+---
+
+### Bug #38 — Touch Responder Gesture Hijacking on Flash Deals Carousel
+- **Discovered**: 2026-10-30
+- **Status**: Fixed
+- **Severity**: High (Touch Gesture Conflict & Home Screen Navigation)
+- **Component**: `app/src/screens/HomeScreen.tsx`
+- **Symptom**: Horizontal swipe gestures on the Promotional Flash Deals carousel failed or were intermittently captured by the parent vertical scroll, and auto-scroll timer rotated slides while users were attempting to touch/swipe.
+- **Root Cause**: Card-level `TouchableOpacity` wrapped the entire banner card, intercepting pan responder events before `FlatList` could evaluate swipe deltas. Additionally, auto-rotation timer lacked `onTouchStart`/`onTouchEnd` pause/resume listeners.
+- **Fix Applied**: Removed outer card `TouchableOpacity` wrapper. Confined touch handling strictly to the inner `"Claim Deal & Order ->"` CTA button with `delayPressIn={100}`. Wired `onTouchStart` and `onTouchEnd` on the `FlatList` container to immediately pause and resume the auto-scroll timer.
+- **Verification Evidence**: Verified on live Android target (`emulator-5554`) via touch assertions and screen capture `screen_claim_deal_clean.png`. Zero gesture stealing during vertical scrolling.
+
+---
+
+### Bug #39 — Missing Crave & Watch Video Reels Carousel & Dedicated Full-Screen Player
+- **Discovered**: 2026-10-30
+- **Status**: Fixed
+- **Severity**: Medium (Feature Discovery & Media Experience)
+- **Component**: `app/src/screens/HomeScreen.tsx`, `app/src/components/DineInVideoFeed.tsx`
+- **Symptom**: Crave & Watch video reels carousel was absent above "Explore Brands", and video playback previously caused blank flashes or reloaded WebViews on audio toggle.
+- **Root Cause**: Reels component was not rendered in the primary Home screen hierarchy above "Explore Brands", and audio mute toggles relied on re-rendering HTML strings rather than executing direct DOM scripts in WebView.
+- **Fix Applied**: Mounted 9:16 video preview carousel titled `"Crave & Watch 🔥"` directly above "Explore Brands", wired to `/api/dine-in-posts/`. Implemented full-screen vertical swipeable TikTok player modal with DOM JavaScript audio mute/unmute injection, brand badges, captions, and direct storefront navigation CTA.
+- **Verification Evidence**: Verified live on Android target via `screen_reels_modal.png` and `live_screen_reels_modal.png`. Continuous video playback confirmed with 0 reloads or black flashes.
+
+---
+
+### Bug #40 — Dine At Blue Brand Catalog Exclusion in Search & Discovery
+- **Discovered**: 2026-10-30
+- **Status**: Fixed
+- **Severity**: High (Catalog Incompleteness & Brand Availability)
+- **Component**: `app/src/screens/SearchScreen.tsx`, `app/src/services/mediaAssetService.ts`
+- **Symptom**: Dine At Blue was active on the backend but excluded from client-side search and brand matrices, causing searches for "Blue" or seafood items to return empty results.
+- **Root Cause**: Hardcoded active brand filters in `SearchScreen.tsx` omitted `dineatblue` from client-side brand array checks.
+- **Fix Applied**: Added `dineatblue` to the active brands search matrix across all 41 dishes. Standardized brand display naming across the app and upgraded Get A Fomo's cover banner with high-resolution artisanal photography.
+- **Verification Evidence**: Live search queries for "Blue" and seafood items returned all 41 Blue dishes (`screen_search_blue.png`, `screen_search_seafood.png`). Exactly 4 active brands verified live.
+
+---
+
+### Bug #41 — Map Canvas Viewport Offset & Raw Seconds Operating Hours Formatting
+- **Discovered**: 2026-10-30
+- **Status**: Fixed
+- **Severity**: Medium (Map Display & Branch Information Polish)
+- **Component**: `app/src/screens/MapScreen.tsx`
+- **Symptom**: Interactive Leaflet map canvas markers were partially obscured by the bottom sheet, branch operating hours rendered raw seconds (`00:00:00 - 23:59:59`), and unset GPS coordinates rendered misleading `0 m` distance badges.
+- **Root Cause**: Centering coordinates lacked vertical offset compensation for the docked 42% bottom sheet, and raw database time strings were rendered directly without 12h formatting.
+- **Fix Applied**: Enabled hardware acceleration on the Leaflet WebView, applied a 21% vertical projection offset to center markers in the visible viewport, converted operating hours to clean 12-hour AM/PM text (`"Open Now • Open 24 Hours"` / `"12:00 PM - 11:59 PM"`), and suppressed false `"0 m"` badges when coordinates are unset.
+- **Verification Evidence**: Verified on live target via `live_screen_map.png` and `live_screen_map_blue_pin.png`.
+
+---
+
+### Bug #42 — Indefinite Loading Freeze on Orders Tab in Unauthenticated Guest State
+- **Discovered**: 2026-10-30
+- **Status**: Fixed
+- **Severity**: High (Customer UX & Authentication State Guard)
+- **Component**: `app/src/screens/OrdersScreen.tsx`
+- **Symptom**: Tapping the Orders tab while logged out caused an infinite loading spinner hanging for 4+ seconds with `"Fetching your order history..."`.
+- **Root Cause**: `OrdersScreen.tsx` initiated unauthenticated fetch attempts without checking auth state synchronously on mount, relying on a fallback timeout to render the guest view.
+- **Fix Applied**: Implemented synchronous guest session evaluation on mount (`!isAuthenticated -> immediately render Guest Tracking Card`). The Guest Card and Sign-In CTA now render in < 800ms (0ms delay) with zero spinner freeze.
+- **Verification Evidence**: Verified live on Android target via `live_screen_orders_guest.png`. Instant guest prompt confirmed.
+
+

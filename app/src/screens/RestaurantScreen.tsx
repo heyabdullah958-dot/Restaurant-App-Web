@@ -8,7 +8,6 @@ import {
   Platform,
   TouchableOpacity,
   Image,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
   Alert,
@@ -19,7 +18,7 @@ import { useRoute, useNavigation, useFocusEffect, RouteProp } from '@react-navig
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 import { COLORS, SPACING, SHADOWS, FONTS } from '../theme';
@@ -198,31 +197,32 @@ const MenuItemCard = React.memo(({
         const { uri, isLogoFallback } = resolveItemImageWithLogoFallback(item, resKey);
         const itemImgSource = getImageUrl(uri);
         return (
-          <View style={[
-            styles.menuItemImageContainer,
-            { borderRadius: 14, overflow: 'hidden', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0' },
-            isLogoFallback && { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center' }
-          ]}>
-            {itemImgSource ? (
-              <Image 
-                source={itemImgSource} 
-                style={[styles.itemImage, isLogoFallback && { width: '70%', height: '70%', resizeMode: 'contain' }]} 
-                resizeMode={isLogoFallback ? 'contain' : 'cover'}
-              />
-            ) : (
-              <View style={[styles.itemImagePlaceholder, { backgroundColor: '#F1F5F9' }]}>
-                <Ionicons name="fast-food-outline" size={28} color="#94A3B8" />
-              </View>
-            )}
+          <View style={styles.menuItemRightColumn}>
+            <View style={[
+              styles.menuItemImageContainer,
+              isLogoFallback && { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center' }
+            ]}>
+              {itemImgSource ? (
+                <Image 
+                  source={itemImgSource} 
+                  style={[styles.itemImage, isLogoFallback && { width: '70%', height: '70%', resizeMode: 'contain' }]} 
+                  resizeMode={isLogoFallback ? 'contain' : 'cover'}
+                />
+              ) : (
+                <View style={[styles.itemImagePlaceholder, { backgroundColor: '#F1F5F9' }]}>
+                  <Ionicons name="fast-food-outline" size={28} color="#94A3B8" />
+                </View>
+              )}
+            </View>
 
             <View style={styles.quantitySelectorContainer}>
               {isClosed ? (
                 <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-                  <Text style={[styles.addButtonText, { fontSize: 11 }]}>CLOSED</Text>
+                  <Text style={[styles.addButtonText, { fontSize: 10.5 }]}>CLOSED</Text>
                 </View>
               ) : isOutOfStock ? (
                 <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-                  <Text style={[styles.addButtonText, { fontSize: 11 }]}>OUT OF STOCK</Text>
+                  <Text style={[styles.addButtonText, { fontSize: 9.5 }]}>OUT OF STOCK</Text>
                 </View>
               ) : quantity > 0 && !hasCustomOptions ? (
                 <View style={styles.quantityRow}>
@@ -246,8 +246,8 @@ const MenuItemCard = React.memo(({
                   activeOpacity={0.8}
                   onPress={() => onAddToCart(item)}
                 >
-                  <Ionicons name={hasCustomOptions ? "sparkles" : "add"} size={13} color={COLORS.white} style={{ marginRight: 2 }} />
-                  <Text style={styles.addButtonText}>
+                  <Ionicons name={hasCustomOptions ? "sparkles" : "add"} size={12} color={COLORS.white} style={{ marginRight: 2 }} />
+                  <Text style={styles.addButtonText} numberOfLines={1}>
                     {hasCustomOptions && quantity > 0 ? `CUSTOMIZE (${quantity})` : hasCustomOptions ? 'CUSTOMIZE' : 'ADD'}
                   </Text>
                 </TouchableOpacity>
@@ -1391,11 +1391,18 @@ const styles = StyleSheet.create({
   },
   menuItemCard: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: SPACING.md,
     marginBottom: SPACING.md,
     ...SHADOWS.small,
+  },
+  menuItemRightColumn: {
+    width: 96,
+    alignItems: 'center',
+    position: 'relative',
+    paddingBottom: 10,
   },
   menuItemTextContent: {
     flex: 1,
@@ -1431,8 +1438,12 @@ const styles = StyleSheet.create({
   menuItemImageContainer: {
     width: 90,
     height: 90,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     position: 'relative',
-    alignSelf: 'center',
   },
   itemImage: {
     width: '100%',
@@ -1457,10 +1468,12 @@ const styles = StyleSheet.create({
   },
   quantitySelectorContainer: {
     position: 'absolute',
-    bottom: -10,
-    left: 5,
-    right: 5,
+    bottom: 0,
+    width: 86,
     height: 28,
+    alignSelf: 'center',
+    zIndex: 5,
+    elevation: 4,
   },
   addButton: {
     backgroundColor: COLORS.primary,
@@ -1469,12 +1482,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-    ...SHADOWS.small,
+    paddingHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    elevation: 3,
   },
   addButtonText: {
     color: COLORS.white,
-    fontSize: 11,
-    fontWeight: 'bold',
+    fontSize: 10.5,
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   quantityRow: {
     backgroundColor: COLORS.primary,

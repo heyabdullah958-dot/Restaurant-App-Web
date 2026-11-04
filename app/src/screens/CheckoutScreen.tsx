@@ -10,7 +10,6 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
   Linking,
   Modal,
 } from 'react-native';
@@ -19,7 +18,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { fetchRestaurants } from '../store/restaurantSlice';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootState, AppDispatch } from '../store';
 import { placeOrder, confirmCODPayment, createStripeIntent, createPayFastPayment } from '../store/orderSlice';
 import { clearCart, applyPromo, removePromo, clearPromoNotice, setUseLoyaltyPoints, setFulfillmentMode } from '../store/cartSlice';

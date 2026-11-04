@@ -537,7 +537,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Strawberry Mojito",
                     "description": "Chilled sparkling strawberry mocktail with fresh mint and lime.",
                     "price": 350.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/strawberry_mojito.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -547,7 +547,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Blueberry Mojito",
                     "description": "Refreshing ocean blueberry cooler with crushed ice and mint.",
                     "price": 350.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/blueberry_mojito.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -557,7 +557,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Peach Mojito",
                     "description": "Succulent peach nectar blended with sparkling soda and garden mint.",
                     "price": 350.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/peach_mojito.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -567,7 +567,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Green Apple Mojito",
                     "description": "Crisp green apple mocktail with zesty lime splash.",
                     "price": 350.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/green_apple_mojito.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -577,7 +577,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Fresh Lemonade",
                     "description": "Freshly squeezed lemon cooler with mint leaves.",
                     "price": 350.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/lemonade.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -587,7 +587,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Pepsi / 7Up (Tin)",
                     "description": "Chilled 250ml soda can.",
                     "price": 150.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/pepsi_7up.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -597,7 +597,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Mineral Water (Small)",
                     "description": "Chilled pure mineral water.",
                     "price": 100.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/water.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -614,9 +614,9 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                 {
                     "id": 2038,
                     "name": "Butter Mushroom Rice",
-                    "description": "Fragrant buttered rice saut\u00e9ed with button mushrooms.",
+                    "description": "Fragrant buttered rice sautéed with button mushrooms.",
                     "price": 300.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/butter_rice.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/logo.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -636,7 +636,7 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
                     "name": "Steak Fries",
                     "description": "Thick-cut golden salted french fries.",
                     "price": 300.0,
-                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/dineatblue/menu_items/french_fries.png",
+                    "image": "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png",
                     "is_available": true,
                     "is_featured": false,
                     "preparation_time": 15
@@ -873,8 +873,8 @@ export const FALLBACK_RESTAURANTS: Restaurant[] = [
     slug: "getafomo",
     cuisine_type: "Trendy Café & Bakery",
     logo: "https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/logo.png",
-    cover_image: "https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/cover.png",
-    banner_image: "https://res.cloudinary.com/qodsfm34/image/upload/foodsphere/getafomo/cover.png",
+    cover_image: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png",
+    banner_image: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png",
     description: "Indulge in artisanal sourdough toasts, high-grade specialty coffee, and photo-ready waffles.",
     address: "E-Street, Phase 5 DHA, Karachi",
     city: "Karachi",

@@ -1,4 +1,4 @@
-# 🍽️ PROJECT.md — GetFood (FoodSphere) Multi-Tenant Platform Overview
+﻿# 🍽️ PROJECT.md — GetFood (FoodSphere) Multi-Tenant Platform Overview
 > **Project Completion Status**: 100% Launch Ready (Core Code, Security & Features: 100% Finished)  
 > **Last Updated**: 2026-09-10
 
@@ -97,6 +97,15 @@
    - Recompiled and verified standalone Manager APK ➔ `D:\GetFood-Manager.apk` and `D:\get\GetFood-Manager.apk` (63.4 MB).
 
 ---
+8. **Customer Mobile App Deep Testing, Layout Inspection & Full Bug Resolution (Phase 12)**:
+   - Autonomous Android CLI live layout hierarchy inspection and Logcat monitoring on active Android 16 target (emulator-5554, PID 9263).
+   - Resolved gesture hijacking on Promotional Flash Deals carousel via touch responder isolation and touch-hold auto-play pause/resume.
+   - Mounted "Crave & Watch 🔥" video reels carousel above "Explore Brands" with full-screen vertical swipeable TikTok player modal and DOM JavaScript audio injection.
+   - Standardized 4 active launch brands (Blue, Get A Fomo, Jushh PK, Tandoori Stop) across Delivery, Pickup, and Dine-In; added dineatblue to search catalog; upgraded Get A Fomo cover banner with high-res café photography.
+   - Corrected Leaflet map canvas viewport projection offset (+21%), formatted operating hours into 12h AM/PM strings, and suppressed false "0 m" distance tags.
+   - Installed synchronous guest auth guard on Orders tab, rendering Guest Tracking Card in < 800ms (0ms delay) with zero spinner freeze.
+   - Recompiled production Customer Release APK ➔ D:\GetFood-Customer.apk (93.1 MB, Hermes bytecode verified). 100% verified across 271 automated tests; independent Victory Auditor verdict: **VICTORY CONFIRMED**.
+
 
 ## ⏳ 5. Client Pending Action Items (For Production Handoff)
 

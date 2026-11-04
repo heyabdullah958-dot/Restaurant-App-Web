@@ -1,10 +1,56 @@
 /**
  * Media Asset Service for GetFood Mobile Application
- * Manages original food photography asset bindings and validates media sources across JushhPK, TandooriStop, and GET A FOMO.
+ * Manages original food photography asset bindings and validates media sources across Dine At Blue, Jushh PK, Tandoori Stop, and GET A FOMO.
+ * Enforces strict brand isolation to prevent cross-brand asset leakage.
  */
 
-export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
-  // JushhPK Original Photos
+// 1. DINE AT BLUE ORIGINAL ASSETS (Seafood & Platters - 0 foreign assets)
+export const BLUE_ORIGINAL_ASSETS: Record<string, string> = {
+  'blue seafood platter': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'blue seafood platter (steamed)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  '2 person platter': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'without lobster': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'with lobster': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  '2 person seafood & chicken platter': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'mix seafood grill': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'fish & chips': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'fish and chips': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'kunafa prawns (3 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
+  'kunafa prawns': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
+  'dynamite prawns': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png',
+  'seared dumplings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/seared_dumplings.png',
+  'seared dumplings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/seared_dumplings.png',
+  'chicken dumplings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_dumplings.png',
+  'chicken dumplings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_dumplings.png',
+  'dynamite chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png',
+  'honey wings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png',
+  'honey wings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png',
+  '19b soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/soup_19b.png',
+  'chicken corn soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_corn_soup.png',
+  'bbq prawn salad': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/bbq_prawn_salad.png',
+  'spicy soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/spicy_soup.png',
+  'romesco fish': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'umami fish': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'pamphlet fish': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'fish chilli dry': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'vietnamese fish': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'thermidor lobster': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'grilled lobster': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'bbq prawns': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/bbq_prawn_salad.png',
+  'prawn pasta': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
+  'steamed crab': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'mud crab': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'grilled fish': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
+  'chilli mint chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'cashew nut chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'korean fried chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png',
+  'chicken chilli dry': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'sweet & sour chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+  'house special chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
+};
+
+// 2. JUSHH PK ORIGINAL ASSETS (Turkish Shawarma, Wraps & Doner)
+export const JUSHH_ORIGINAL_ASSETS: Record<string, string> = {
   'chicken doner fries': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_doner_fries.jpg',
   'beef doner fries': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/beef_doner_fries.jpg',
   'chicken grilled sandwich': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/chicken_grilled_sandwich.jpg',
@@ -38,8 +84,10 @@ export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
   'green apple mojito': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/green_apple_mojito.jpg',
   'peach mojito': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/peach_mojito.jpg',
   'lemon mojito': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/lemon_mojito.jpg',
+};
 
-  // TandooriStop Original Photos
+// 3. TANDOORI STOP ORIGINAL ASSETS (Desi BBQ, Sajji, Naans & Mojitos)
+export const TANDOORI_ORIGINAL_ASSETS: Record<string, string> = {
   'tandoori chicken bone (cheese naan single)': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1288_IMG_7585.JPG_xhiffo',
   'tandoori chicken boneless (cheese naan single)': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1289_IMG_7585.JPG_cxjp6v',
   'tandoori chicken bone (cheese naan double)': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1290_IMG_7589.JPG_ylld2e',
@@ -69,30 +117,16 @@ export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
   'rice': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1330_IMG_7579.JPG_nsb0dw',
   'apple mojito': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1338_IMG_7576.JPG_b0buvx',
   'mint margaritas': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/ts_1346_IMG_7577.JPG_faehdg',
+};
 
-  // Dine At Blue Original Photos
-  'blue seafood platter': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
-  'blue seafood platter (steamed)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
-  '2 person platter': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
-  'without lobster': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_platter_2person.png',
-  'mix seafood grill': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
-  'fish & chips': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
-  'fish and chips': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/fish_and_chips.png',
-  'kunafa prawns (3 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
-  'kunafa prawns': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
-  'dynamite prawns': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png',
-  'seared dumplings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/seared_dumplings.png',
-  'seared dumplings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/seared_dumplings.png',
-  'chicken dumplings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_dumplings.png',
-  'chicken dumplings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_dumplings.png',
-  'dynamite chicken': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/dynamite_prawns.png',
-  'honey wings (6 pcs)': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png',
-  'honey wings': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/honey_wings.png',
-  'blue lagoon mocktail': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/mojitos.jpg',
-  '19b soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/soup_19b.png',
-  'chicken corn soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/chicken_corn_soup.png',
-  'bbq prawn salad': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/bbq_prawn_salad.png',
-  'spicy soup': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/spicy_soup.png',
+// 4. GET A FOMO ORIGINAL ASSETS (Specialty Cafe & Bakery)
+export const FOMO_ORIGINAL_ASSETS: Record<string, string> = {};
+
+// Combined Dictionary for legacy lookups
+export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
+  ...JUSHH_ORIGINAL_ASSETS,
+  ...TANDOORI_ORIGINAL_ASSETS,
+  ...BLUE_ORIGINAL_ASSETS,
 };
 
 /**
@@ -109,24 +143,99 @@ export const isValidOriginalImage = (path?: string | null): boolean => {
 };
 
 /**
- * Resolves the valid original food photo URL for a menu item.
- * Cross-references item.image_url, item.image, and BRAND_ORIGINAL_ASSETS dictionary.
- * Returns null if no original photo exists.
+ * Checks whether an image URL is appropriate for the active brand.
+ * Strictly prevents cross-brand leakage (e.g. Jushh PK drink cans in Blue menu).
  */
-export const resolveItemImage = (item?: any): string | null => {
-  if (!item) return null;
+export const isImageAppropriateForBrand = (url: string, brandKey?: string | number): boolean => {
+  if (!url) return false;
+  if (!brandKey) return true;
+  const key = String(brandKey).toLowerCase().replace(/\s+/g, '');
+  const cleanUrl = url.toLowerCase();
 
-  const rawUrl = item.image_url || item.image;
-  if (isValidOriginalImage(rawUrl)) {
-    return rawUrl;
+  // If viewing Dine At Blue
+  if (key.includes('blue') || key === '2') {
+    if (cleanUrl.includes('jushh') || cleanUrl.includes('tandoori') || cleanUrl.includes('fomo') || cleanUrl.includes('seenbanao')) {
+      return false;
+    }
+    // Strictly reject Jushh PK branded drink cans, bottled water & fries
+    if (
+      cleanUrl.includes('green_apple_mojito') ||
+      cleanUrl.includes('blueberry_mojito') ||
+      cleanUrl.includes('strawberry_mojito') ||
+      cleanUrl.includes('peach_mojito') ||
+      cleanUrl.includes('lemon_mojito') ||
+      cleanUrl.includes('soft_drink') ||
+      cleanUrl.includes('water_bottle') ||
+      cleanUrl.includes('chicken_doner_fries')
+    ) {
+      return false;
+    }
+    return true;
   }
 
-  // Cross-reference against item name in BRAND_ORIGINAL_ASSETS
-  if (item.name && typeof item.name === 'string') {
-    const key = item.name.toLowerCase().trim();
-    if (BRAND_ORIGINAL_ASSETS[key]) {
-      return BRAND_ORIGINAL_ASSETS[key];
+  // If viewing Jushh PK
+  if (key.includes('jush') || key === '3') {
+    if (cleanUrl.includes('dineatblue') || cleanUrl.includes('tandooristop') || cleanUrl.includes('ts_') || cleanUrl.includes('getafomo')) {
+      return false;
     }
+    return true;
+  }
+
+  // If viewing Tandoori Stop
+  if (key.includes('tandoori') || key === '4') {
+    if (cleanUrl.includes('dineatblue') || cleanUrl.includes('jushh') || cleanUrl.includes('getafomo')) {
+      return false;
+    }
+    return true;
+  }
+
+  // If viewing Get A Fomo
+  if (key.includes('fomo') || key === '7') {
+    if (cleanUrl.includes('dineatblue') || cleanUrl.includes('jushh') || cleanUrl.includes('tandoori') || cleanUrl.includes('ts_')) {
+      return false;
+    }
+    return true;
+  }
+
+  return true;
+};
+
+/**
+ * Resolves the valid original food photo URL for a menu item with strict brand scoping.
+ * Cross-references item.image_url, item.image, and brand-specific asset dictionaries.
+ * Returns null if no original photo exists or if the photo belongs to another brand.
+ */
+export const resolveItemImage = (item?: any, restaurantIdOrSlug?: string | number): string | null => {
+  if (!item) return null;
+
+  const brandKey = restaurantIdOrSlug || item?.restaurant_slug || item?.restaurant_id || item?.restaurant;
+  const rawUrl = item.image_url || item.image;
+
+  if (isValidOriginalImage(rawUrl)) {
+    if (!brandKey || isImageAppropriateForBrand(rawUrl, brandKey)) {
+      return rawUrl;
+    }
+  }
+
+  // Brand-scoped lookup
+  if (item.name && typeof item.name === 'string') {
+    const itemName = item.name.toLowerCase().trim();
+    const key = brandKey ? String(brandKey).toLowerCase().replace(/\s+/g, '') : '';
+
+    if (key.includes('blue') || key === '2') {
+      return BLUE_ORIGINAL_ASSETS[itemName] || null;
+    }
+    if (key.includes('jush') || key === '3') {
+      return JUSHH_ORIGINAL_ASSETS[itemName] || null;
+    }
+    if (key.includes('tandoori') || key === '4') {
+      return TANDOORI_ORIGINAL_ASSETS[itemName] || null;
+    }
+    if (key.includes('fomo') || key === '7') {
+      return FOMO_ORIGINAL_ASSETS[itemName] || null;
+    }
+
+    return BRAND_ORIGINAL_ASSETS[itemName] || null;
   }
 
   return null;
@@ -159,11 +268,59 @@ export const getBrandLogo = (restaurantIdOrSlug?: string | number): string => {
 };
 
 export const resolveItemImageWithLogoFallback = (item?: any, restaurantIdOrSlug?: string | number): { uri: string; isLogoFallback: boolean } => {
-  const photo = resolveItemImage(item);
+  const photo = resolveItemImage(item, restaurantIdOrSlug);
   if (photo) {
     return { uri: photo, isLogoFallback: false };
   }
-  const brandKey = restaurantIdOrSlug || item?.restaurant_id || item?.restaurant;
+  const brandKey = restaurantIdOrSlug || item?.restaurant_slug || item?.restaurant_id || item?.restaurant || 'dineatblue';
   return { uri: getBrandLogo(brandKey), isLogoFallback: true };
 };
 
+export const BRAND_COVERS: Record<string, string> = {
+  '1': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
+  '2': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  '3': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_banner_collage.jpg',
+  '4': 'https://res.cloudinary.com/qodsfm34/image/upload/v1/restaurants/covers/tandoori_stop_cover_jnfd2d',
+  '5': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&auto=format&fit=crop&q=80',
+  '6': 'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=800&auto=format&fit=crop&q=80',
+  '7': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png',
+  'seenbanao': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
+  'dineatblue': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'blue': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+  'jushhpk': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_banner_collage.jpg',
+  'jushh': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_banner_collage.jpg',
+  'tandooristoppk': 'https://res.cloudinary.com/qodsfm34/image/upload/v1/restaurants/covers/tandoori_stop_cover_jnfd2d',
+  'tandooristop': 'https://res.cloudinary.com/qodsfm34/image/upload/v1/restaurants/covers/tandoori_stop_cover_jnfd2d',
+  'sandmelts': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&auto=format&fit=crop&q=80',
+  'birdmanfoodspk': 'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=800&auto=format&fit=crop&q=80',
+  'getafomo': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png',
+};
+
+export const getBrandCover = (restaurantIdOrSlug?: string | number): string => {
+  if (!restaurantIdOrSlug) return BRAND_COVERS['getafomo'];
+  const key = String(restaurantIdOrSlug).toLowerCase().trim();
+  return BRAND_COVERS[key] || BRAND_COVERS['getafomo'];
+};
+
+export const resolveBrandCover = (brand?: any): string => {
+  if (!brand) return BRAND_COVERS['getafomo'];
+  const slug = (brand.slug || brand.name || '').toLowerCase().replace(/\s+/g, '');
+  if (slug.includes('fomo') || brand.id === 7 || brand.id === '7') {
+    return 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png';
+  }
+  const raw = brand.banner_image || brand.cover_image;
+  if (raw && typeof raw === 'string' && raw.trim() !== '' && !raw.includes('unsplash.com')) {
+    return raw;
+  }
+  return BRAND_COVERS[slug] || BRAND_COVERS[String(brand.id)] || raw || '';
+};
+
+export const formatBrandDisplayName = (brand: any): string => {
+  if (!brand) return 'Restaurant';
+  const slug = (brand.slug || brand.name || '').toLowerCase().replace(/\s+/g, '');
+  if (slug.includes('tandoori')) return 'Tandoori Stop';
+  if (slug.includes('jush')) return 'Jushh PK';
+  if (slug.includes('fomo')) return 'Get A Fomo';
+  if (slug.includes('blue')) return 'Blue';
+  return brand.name || 'Restaurant';
+};

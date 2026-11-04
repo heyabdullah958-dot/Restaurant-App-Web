@@ -100,7 +100,7 @@ const RestaurantResultCard = React.memo(({ restaurant, onPress }: { restaurant: 
 ));
 
 const DishResultCard = React.memo(({ dish, onPress }: { dish: MatchingDish, onPress: (slug: string) => void }) => {
-  const imgUrl = resolveItemImage(dish.item);
+  const imgUrl = resolveItemImage(dish.item, dish.restaurantSlug);
   const imgSource = getImageUrl(imgUrl);
   return (
     <TouchableOpacity

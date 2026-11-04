@@ -20,6 +20,7 @@ import { fetchRestaurants } from '../store/restaurantSlice';
 import { COLORS, SHADOWS, SPACING } from '../theme';
 import { Ionicons } from '@expo/vector-icons';
 import { FALLBACK_RESTAURANTS } from '../services/fallbackData';
+import { getBrandLogo } from '../services/mediaAssetService';
 // Leaflet bundled locally — no CDN needed, works 100% offline on Android WebView
 import { LEAFLET_CSS, LEAFLET_JS } from '../assets/LeafletAssets';
 
@@ -39,6 +40,7 @@ export interface BranchLocation {
   opensAt: string;
   closesAt: string;
   isOpen: boolean;
+  logoUrl?: string;
 }
 
 // REAL Verified Branch Locations Database (3 Active Brands, 7 Real Branches)
@@ -284,9 +286,11 @@ export default function MapScreen({ navigation }: { navigation: any }) {
   const hasRealUserLocation = Boolean(userLocation?.coords?.latitude && userLocation?.coords?.longitude);
   const processedBranches = useMemo(() => {
     return liveBranches.map((branch) => {
+      const bLogo = branch.logoUrl || getBrandLogo(branch.brandSlug);
       if (!hasRealUserLocation) {
         return {
           ...branch,
+          logoUrl: bLogo,
           distanceKm: null,
           formattedDistance: null,
         };
@@ -294,6 +298,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       const dist = haversineKm(userLat, userLng, branch.lat, branch.lng);
       return {
         ...branch,
+        logoUrl: bLogo,
         distanceKm: dist,
         formattedDistance: dist < 0.05 ? null : (dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`),
       };
@@ -388,34 +393,59 @@ export default function MapScreen({ navigation }: { navigation: any }) {
           100% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0); }
         }
 
-        /* Custom restaurant pin */
+        /* Custom McDonald's-style restaurant pin */
         .mcd-pin-container {
           position: relative;
           cursor: pointer;
         }
         .mcd-pin-badge {
+          position: relative;
           background: #FFFFFF;
-          border: 2.5px solid #FF5722;
-          border-radius: 20px;
-          padding: 6px 12px;
+          border: 2px solid #E94124;
+          border-radius: 24px;
+          padding: 3px 10px 3px 3px;
           display: flex;
           align-items: center;
           gap: 6px;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           white-space: nowrap;
           transition: transform 0.2s ease;
         }
-        .mcd-pin-badge.brand-jushhpk { border-color: #FF6B00; }
+        .mcd-pin-badge.brand-jushhpk { border-color: #881337; }
         .mcd-pin-badge.brand-getafomo { border-color: #8E44AD; }
-        .mcd-pin-badge.brand-tandooristoppk { border-color: #E74C3C; }
+        .mcd-pin-badge.brand-tandooristoppk { border-color: #C81E1E; }
+        .mcd-pin-badge.brand-dineatblue { border-color: #0055A4; }
         .mcd-pin-badge.brand-sandmelts { border-color: #F59E0B; }
         .mcd-pin-badge.brand-seenbanao { border-color: #10B981; }
-        .mcd-pin-badge.brand-dineatblue { border-color: #3B82F6; }
         
-        .mcd-pin-badge:active { transform: scale(1.1); }
+        .mcd-pin-badge:active { transform: scale(1.08); }
+        .mcd-pin-logo {
+          width: 26px;
+          height: 26px;
+          border-radius: 13px;
+          background: #FFFFFF;
+          object-fit: cover;
+          display: block;
+          border: 1px solid rgba(0,0,0,0.08);
+        }
         .mcd-pin-emoji { font-size: 16px; line-height: 1; }
-        .mcd-pin-title { font-size: 12px; font-weight: 800; color: #0F172A; }
+        .mcd-pin-title { font-size: 11.5px; font-weight: 800; color: #0F172A; }
+        .mcd-pin-pointer {
+          position: absolute;
+          bottom: -6px;
+          left: 50%;
+          transform: translateX(-50%) rotate(45deg);
+          width: 10px;
+          height: 10px;
+          background: #FFFFFF;
+          border-right: 2px solid #E94124;
+          border-bottom: 2px solid #E94124;
+        }
+        .brand-jushhpk .mcd-pin-pointer { border-right-color: #881337; border-bottom-color: #881337; }
+        .brand-getafomo .mcd-pin-pointer { border-right-color: #8E44AD; border-bottom-color: #8E44AD; }
+        .brand-tandooristoppk .mcd-pin-pointer { border-right-color: #C81E1E; border-bottom-color: #C81E1E; }
+        .brand-dineatblue .mcd-pin-pointer { border-right-color: #0055A4; border-bottom-color: #0055A4; }
 
         /* Popup Box Styling */
         .leaflet-popup-content-wrapper {
@@ -506,7 +536,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
             var tileLayer = L.tileLayer(primaryTileUrl, {
               subdomains: 'abcd',
               maxZoom: 19,
-              crossOrigin: true
+              crossOrigin: false
             }).addTo(map);
 
             var fallbackAdded = false;
@@ -516,7 +546,7 @@ export default function MapScreen({ navigation }: { navigation: any }) {
                 if (window.ReactNativeWebView) {
                   window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'LOG', log: 'CartoDB tiles failed, switching to OSM fallback' }));
                 }
-                L.tileLayer(fallbackTileUrl, { maxZoom: 19, crossOrigin: true }).addTo(map);
+                L.tileLayer(fallbackTileUrl, { maxZoom: 19, crossOrigin: false }).addTo(map);
               }
             });
 
@@ -554,13 +584,17 @@ export default function MapScreen({ navigation }: { navigation: any }) {
             // Render branches
             var branches = ${JSON.stringify(processedBranches)};
             branches.forEach(function(b) {
+              var logoHtml = b.logoUrl
+                ? '<img class="mcd-pin-logo" src="' + b.logoUrl + '" alt="' + b.brandName + '" />'
+                : '<span class="mcd-pin-emoji">' + b.emoji + '</span>';
               var pinIcon = L.divIcon({
                 className: 'mcd-pin-container',
                 html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
-                        '<span class="mcd-pin-emoji">' + b.emoji + '</span>' +
+                        logoHtml +
                         '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
+                        '<div class="mcd-pin-pointer"></div>' +
                       '</div>',
-                iconAnchor: [40, 20]
+                iconAnchor: [48, 22]
               });
 
               var marker = L.marker([b.lat, b.lng], { icon: pinIcon }).addTo(map);
@@ -663,19 +697,20 @@ export default function MapScreen({ navigation }: { navigation: any }) {
         javaScriptEnabled={true}
         domStorageEnabled={true}
         androidLayerType="software"
+        allowFileAccess={true}
+        geolocationEnabled={true}
         scalesPageToFit={false}
         scrollEnabled={false}
         bounces={false}
         style={styles.map}
         containerStyle={{ flex: 1, width: '100%', height: '100%' }}
         onMessage={handleMessage}
-        onLoad={() => {
-          // After WebView finishes loading, trigger map invalidation
+        onLoadEnd={() => {
           setTimeout(() => {
             if (webViewRef.current) {
               webViewRef.current.injectJavaScript('if(window.map){window.map.invalidateSize({pan:false});} true;');
             }
-          }, 800);
+          }, 350);
         }}
         startInLoadingState={true}
         renderLoading={() => (

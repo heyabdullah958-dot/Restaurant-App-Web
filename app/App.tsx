@@ -262,7 +262,7 @@ function AppContent() {
         </Stack.Navigator>
       </ErrorBoundary>
       <NotificationToast navigationRef={navRef} />
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </NavigationContainer>
   );
 }
