@@ -1,23 +1,23 @@
-# 🧠 LESSONS.md — FoodSphere Architectural Lessons & Past Patterns
+# ð§  LESSONS.md â FoodSphere Architectural Lessons & Past Patterns
 
 > Generalized engineering takeaways, multi-tenant patterns, and invariants learned from debugging across backend, admin, mobile, and web applications.
 
-## Lesson 23 — Mobile-First Header De-Congestion, Strict 2-Page Storefront Separation & Client-Side Template Syntax Isolation — 2026-10-19
+## Lesson 23 â Mobile-First Header De-Congestion, Strict 2-Page Storefront Separation & Client-Side Template Syntax Isolation â 2026-10-19
 - **Pattern**: Mobile viewport ergonomics, KFC 2-page storefront conversion, header congestion relief, and Python code generation template escaping.
 - **Wrong assumption made**:
   1. Assuming that displaying the entire restaurant menu on the homepage (`index.html`) alongside marketing banners and about sections is acceptable for fast-casual ordering. On mobile, monolithic full-catalog homepages overwhelm users with hundreds of vertical pixels before they understand the brand's key offerings or bestsellers.
   2. Assuming that having the fulfillment toggle (`Delivery` / `Pickup`) and header cart bucket display full price strings (`Rs. 150`, `Rs. 0`, `Rs. 2,450`) works on mobile viewports. On a 375px wide screen, long text labels cause horizontal scrolling, overlapping buttons, or wrap the header into two awkward rows.
   3. Assuming that client-side JavaScript templates with curly braces (`{}`) can be directly written into Python f-strings (`f'''...'''`) in automated page generator scripts. Python's parser treats all single `{}` inside f-strings as Python expression evaluations, resulting in immediate compilation `SyntaxError` crashes.
 - **What actually mattered**:
-  1. **Strict 2-Page Flow**: High-converting QSR storefronts separate discovery from catalog browsing. `index.html` must remain a punchy, visual showcase: Header ➔ Order Mode Modal ➔ Distinct Hero Showcase ➔ Explore Menu category grid with "View All" ➔ Best Sellers (max 6 items) with inline steppers ➔ About Us & Footer. Full vertical catalogs (all 35-46 items) belong strictly on `menu.html` with a sticky category ribbon and live search.
-  2. **De-Congested Header Architecture**: On mobile viewports (375x812), the `<header>` must be the first child of `<body>` (0 announcement strips above it). The 3-lines hamburger menu (`#hamburger-btn` / `☰`) lives on the far left. Fulfillment buttons must contain only compact labels/icons (`[ 🛵 Delivery ]` / `[ 🛍️ Pickup ]`) with 0 fee strings. The header cart bucket button must contain only the SVG shopping bag icon and `#header-cart-count` badge (0 "Rs" price text).
+  1. **Strict 2-Page Flow**: High-converting QSR storefronts separate discovery from catalog browsing. `index.html` must remain a punchy, visual showcase: Header â Order Mode Modal â Distinct Hero Showcase â Explore Menu category grid with "View All" â Best Sellers (max 6 items) with inline steppers â About Us & Footer. Full vertical catalogs (all 35-46 items) belong strictly on `menu.html` with a sticky category ribbon and live search.
+  2. **De-Congested Header Architecture**: On mobile viewports (375x812), the `<header>` must be the first child of `<body>` (0 announcement strips above it). The 3-lines hamburger menu (`#hamburger-btn` / `â°`) lives on the far left. Fulfillment buttons must contain only compact labels/icons (`[ ðµ Delivery ]` / `[ ðï¸ Pickup ]`) with 0 fee strings. The header cart bucket button must contain only the SVG shopping bag icon and `#header-cart-count` badge (0 "Rs" price text).
   3. **Template String Isolation in Code Generators**: When writing Python scripts to programmatically generate HTML/JS storefronts, never embed raw JavaScript blocks containing object literals or `${}` inside Python f-strings without escaping (`{{}}`). The cleanest pattern is defining pure JavaScript code blocks in standard non-f-string variables and interpolating them into the HTML document as a single clean token (`{script_block}`).
   4. **Vector Logo Extraction & Responsive Header Sizing**: Never use crops from brand guidelines color-swatch sheets as logo files. Always extract official vector paths directly from brand PDFs (e.g. `Guideline.pdf` via PyMuPDF at 8x scale) with transparent RGBA channels. On mobile viewports (360px-390px), horizontal header space is strictly bounded; logos must be constrained (`max-w-[125px]` on mobile, `max-w-[190px]` on PC), and circular emblems must pair with responsive brand typography that gracefully collapses on viewports <440px to eliminate any collision with fulfillment toggles.
 - **Applies to**: `websites/dineatblue/`, `websites/tandooristoppk/`, `websites/jushhpk/`, all 7 brand websites.
 
 ---
 
-## Lesson 22 — Strict Missing-Photo Rules, High-Res Circular Logo Upscaling & Commercial QSR Distinct Layout Silhouettes — 2026-10-18
+## Lesson 22 â Strict Missing-Photo Rules, High-Res Circular Logo Upscaling & Commercial QSR Distinct Layout Silhouettes â 2026-10-18
 - **Pattern**: Multi-brand storefront visual isolation, asset integrity for missing dish photography, high-resolution logo upscaling, and distinct card layouts.
 - **Wrong assumption made**:
   1. Assuming that cropping low-resolution rectangles with printed text, prices, or borders from a physical restaurant menu brochure is better than having no food photo. In reality, text-contaminated crops with printed prices (`850`, `3500`) look broken, unprofessional, and confuse customers when the actual digital prices differ.
@@ -31,21 +31,21 @@
 
 ---
 
-## Lesson 21 — Multi-Brand QSR Design Separation, Local Asset Orientation & Clean Light Storefronts — 2026-10-18
+## Lesson 21 â Multi-Brand QSR Design Separation, Local Asset Orientation & Clean Light Storefronts â 2026-10-18
 - **Pattern**: Multi-brand storefront visual isolation, local photo asset orientation, and commercial QSR storefront conversion.
 - **Wrong assumption made**:
   1. Assuming that AI landing page templates with dark gradients (`#0F0806`, `#160004`, serif fonts, blur overlays) look "luxurious" or convert well for fast-casual food delivery. In reality, modern commercial QSR platforms (KFC, McDonald's) rely on crisp, high-contrast light surfaces (`#FFFFFF` cards, warm light canvas `#FAF8F5` or `#F8F9FA`), punchy condensed typography, and instant 1-tap fulfillment toggles.
   2. Assuming that two different brands can share orange or warm tones without confusing customers. Tandoori Stop must have strictly ZERO orange (`#EA580C`) to preserve its unmistakable Clay Tandoor Crimson (`#C81E1E`), Smoky Charcoal (`#1C1917`), and Saffron Gold (`#F59E0B`) identity distinct from Jushh PK.
   3. Assuming that flat-lay marketing collages will render appetizingly at any angle without inspecting image orientation. When packaging in a hero banner appears sideways or upside down, conversion drops. Using single upright food photography with tight food-only bounding boxes is essential.
 - **What actually mattered**:
-  1. Storefront DOM hierarchy must follow proven commercial QSR ergonomics: Top utility strip with real operational branch hotlines ➔ Sticky 76px white header with logo, 1-click Delivery (Rs. 150) vs Pickup (Rs. 0) switcher, branch location trigger, search bar, and cart bucket with 0 login buttons ➔ Auto-opening modal on first visit ➔ Sticky horizontal category ribbon with active IntersectionObserver pill highlighting ➔ 4-column menu grid with pure white cards, local high-res photos, and inline quantity steppers (`- qty +`) ➔ Light QSR sliding cart drawer with active order persistence.
+  1. Storefront DOM hierarchy must follow proven commercial QSR ergonomics: Top utility strip with real operational branch hotlines â Sticky 76px white header with logo, 1-click Delivery (Rs. 150) vs Pickup (Rs. 0) switcher, branch location trigger, search bar, and cart bucket with 0 login buttons â Auto-opening modal on first visit â Sticky horizontal category ribbon with active IntersectionObserver pill highlighting â 4-column menu grid with pure white cards, local high-res photos, and inline quantity steppers (`- qty +`) â Light QSR sliding cart drawer with active order persistence.
   2. Every `img` element must have a local fallback and load with `naturalWidth > 0`.
   3. Cloudflare Pages direct upload via Wrangler CLI (`npx wrangler pages deploy`) requires passing `--commit-dirty=true` or running from a clean git worktree, and custom user agents must be supplied when testing deployed domains over HTTP to avoid Cloudflare automated bot-blocking (HTTP 403).
 - **Applies to**: `websites/tandooristoppk/`, `websites/jushhpk/`, `websites/dineatblue/`, all 7 brand websites.
 
 ---
 
-## Lesson 20 — Strict Stacking Hierarchies, Mobile Viewport Resiliency & Serializer Invariant Bounds — 2026-09-10
+## Lesson 20 â Strict Stacking Hierarchies, Mobile Viewport Resiliency & Serializer Invariant Bounds â 2026-09-10
 - **Pattern**: Web Tailwind z-index discipline, mobile flexbox wrapping tolerances, and REST API serializer data boundary validation.
 - **Wrong assumption made**:
   1. Assuming that arbitrary z-index values (`z-20` on badges, `z-20` on headers, `z-[100]` on modals) work fine as long as things look okay in a desktop test window.
@@ -53,14 +53,14 @@
   3. Assuming that database checks alone or frontend inputs are sufficient to prevent negative coupon values or >100% discounts.
 - **What actually mattered**:
   1. A disciplined global z-index scale is mandatory for full-stack admin interfaces: in-page elements (`z-10`), sticky navigation (`z-30`), sidebar backdrop/drawer (`z-40`/`z-45`), dialog modals (`z-50`), and feedback notifications/toasts (`z-60`). IMPORTANT: Custom z-index numbers like `z-45` and `z-60` MUST be explicitly declared in `tailwind.config.js` (`extend.zIndex`) or written with arbitrary brackets (`z-[45]`, `z-[60]`). Otherwise, Tailwind v3 silently skips generating the CSS rules, causing toasts and sidebar drawers to have no z-index (`auto`) and get trapped behind backdrops!
-  2. Every modal MUST implement outer backdrop click-dismiss and an accessible `✕` close button. On web, use `onClick={() => setOpen(false)}` on the overlay and `onClick={(e) => e.stopPropagation()}` on the dialog. On mobile (React Native), avoid wrapping `<ScrollView>` or modal cards in nested `<TouchableOpacity>` with no-op `e.stopPropagation?.()`; instead, place a `<TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onDismiss} />` behind the card inside a `<View style={styles.modalOverlay}>` flex container.
+  2. Every modal MUST implement outer backdrop click-dismiss and an accessible `â` close button. On web, use `onClick={() => setOpen(false)}` on the overlay and `onClick={(e) => e.stopPropagation()}` on the dialog. On mobile (React Native), avoid wrapping `<ScrollView>` or modal cards in nested `<TouchableOpacity>` with no-op `e.stopPropagation?.()`; instead, place a `<TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onDismiss} />` behind the card inside a `<View style={styles.modalOverlay}>` flex container.
   3. On mobile screens, headers containing titles, status badges, and action buttons must ALWAYS isolate the title container with `flex: 1` and `numberOfLines={1}`, while giving action buttons `flexShrink: 0`. Toggles that have distinct destructive consequences (like Force Close) require interactive confirmation dialogs to prevent accidental outages.
   4. Backend DRF serializers (`ModelSerializer`) MUST validate business boundary rules (`validate()`) directly on payloads: percentage discounts must not exceed 100%, amounts must be positive, end dates must follow start dates, and minimum subtotal thresholds cannot be negative. Be vigilant with model choice values (e.g. `FlashDeal.TIMING_TYPES` uses `ONE_TIME`, not hallucinated `fixed_window`).
 - **Applies to**: `admin/tailwind.config.js`, `admin/src/App.tsx`, `admin/src/components/Sidebar.tsx`, `admin/src/views/`, `admin-app/src/screens/placeholders/`, `backend/promotions/serializers.py`.
 
 ---
 
-## Lesson 19 — Production Network Hard-Locking, Multi-Identifier Authentication & Mobile Keyboard Normalization — 2026-09-10
+## Lesson 19 â Production Network Hard-Locking, Multi-Identifier Authentication & Mobile Keyboard Normalization â 2026-09-10
 - **Pattern**: Production environment hardening, user registration lifecycle, and tolerant authentication resolution.
 - **Wrong assumption made**:
   1. Assuming that exposing a developer server config modal and bottom server indicator in mobile layouts is a harmless diagnostic aid in case of connection failure.
@@ -75,7 +75,7 @@
 
 ---
 
-## Lesson 18 — Strict Foreign Key Isolation vs Heuristic/Substring Auto-Linking in Multi-Tenant REST APIs — 2026-09-01
+## Lesson 18 â Strict Foreign Key Isolation vs Heuristic/Substring Auto-Linking in Multi-Tenant REST APIs â 2026-09-01
 - **Pattern**: Multi-tenant customer identity isolation, order history querysets, and Redux cache lifecycle management.
 - **Wrong assumption made**: Assuming that matching historical unassigned guest orders by username prefix or substring (`guest_name__icontains=base_name`) and running `update(user=user)` during `GET /api/orders/my-orders/` is a helpful customer convenience feature.
 - **What actually mattered**:
@@ -86,7 +86,7 @@
 
 ---
 
-## Lesson 17 — React Navigation Stack vs Nested Tab Routing & Post-Auth Resets — 2026-09-01
+## Lesson 17 â React Navigation Stack vs Nested Tab Routing & Post-Auth Resets â 2026-09-01
 - **Pattern**: React Navigation root stack resets, nested bottom tab state projection, and auth flow transitions.
 - **Wrong assumption made**: Assuming that `navigation.reset({ index: 1, routes: [{ name: 'Main' }, { name: 'Profile' }] })` will reset the root stack to `Main` and focus the `Profile` tab.
 - **What actually mattered**:
@@ -97,18 +97,18 @@
 
 ---
 
-## Lesson 16 — Cross-Platform Vector Icons vs Raw Unicode Emojis in Native Mobile Navigation — 2026-09-01
+## Lesson 16 â Cross-Platform Vector Icons vs Raw Unicode Emojis in Native Mobile Navigation â 2026-09-01
 - **Pattern**: Native mobile bottom navigation bar rendering and OS font metrics stability.
-- **Wrong assumption made**: Assuming that rendering unicode emojis (`🏪`, `📦`, `🍳`, `🛵`) inside React Native `Text` components produces clean, centered, and consistent tab bar icons across all mobile devices.
+- **Wrong assumption made**: Assuming that rendering unicode emojis (`ðª`, `ð¦`, `ð³`, `ðµ`) inside React Native `Text` components produces clean, centered, and consistent tab bar icons across all mobile devices.
 - **What actually mattered**:
   1. On Android OEM distributions (Samsung OneUI, Xiaomi MIUI, Google Pixel), native font line-height calculations clip and distort emoji characters when rendered inside fixed-height tab containers, creating sliced and misaligned UI.
-  2. Production native apps MUST use standardized vector glyph libraries (`@expo/vector-icons` / `Ionicons` / `Feather`) with explicit pixel sizing (22–24pt), active/inactive theme color tokens, and pill highlight containers.
+  2. Production native apps MUST use standardized vector glyph libraries (`@expo/vector-icons` / `Ionicons` / `Feather`) with explicit pixel sizing (22â24pt), active/inactive theme color tokens, and pill highlight containers.
   3. Route names in navigation actions (e.g. `navigation.navigate('RiderManagement')`) must strictly match the registered screen name in the navigator, never informal shorthand like `'Riders'`.
 - **Applies to**: `admin-app/src/navigation/AppNavigator.tsx`, `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`.
 
 ---
 
-## Lesson 15 — Standalone Native Mobile Entry Points & Android APK Initialization Safety — 2026-09-01
+## Lesson 15 â Standalone Native Mobile Entry Points & Android APK Initialization Safety â 2026-09-01
 - **Pattern**: Standalone compiled Android APK stability, native gesture handler lifecycle, and error boundaries.
 - **Wrong assumption made**: Assuming that an Expo app that runs cleanly in Expo Go will automatically launch without issues as a standalone production Android APK.
 - **What actually mattered**:
@@ -119,18 +119,18 @@
 
 ---
 
-## Lesson 14 — Branch-Level Availability Gate, Session Notification Isolation & Mobile Tab Layout Balance — 2026-08-27
+## Lesson 14 â Branch-Level Availability Gate, Session Notification Isolation & Mobile Tab Layout Balance â 2026-08-27
 - **Pattern**: Multi-tenant branch item availability checkout enforcement, session notification isolation, and mobile tab bar layout resilience.
 - **Wrong assumption made**: Assuming that checking master `MenuItem.is_available` is sufficient during order creation without joining branch availability overrides (`BranchMenuItemAvailability`), and assuming local in-app notifications can persist unconditionally across anonymous/guest sessions.
 - **What actually mattered**:
   1. In a multi-branch restaurant system, items may be in stock globally at the brand level but sold out at specific branches. `OrderCreateSerializer.validate()` and `create()` MUST check both `menu_item.is_available` and `BranchMenuItemAvailability` for the target branch, failing with clear out-of-stock messages.
   2. Guest and unauthenticated users must never see order history or unread count badges from previous sessions. Notification bottom sheets must render dedicated auth prompt views with zero order data leaked.
-  3. Mobile tab bars with dynamic counters and alert pills (`Active (15) 🔥 11 NEW`) must use structured column/row badge layouts with minimum heights and explicit gaps rather than raw horizontal flex text strings, preventing text clipping on narrow mobile screens.
+  3. Mobile tab bars with dynamic counters and alert pills (`Active (15) ð¥ 11 NEW`) must use structured column/row badge layouts with minimum heights and explicit gaps rather than raw horizontal flex text strings, preventing text clipping on narrow mobile screens.
 - **Applies to**: `backend/orders/serializers.py`, `backend/restaurants/serializers.py`, `app/src/components/NotificationModal.tsx`, `app/src/screens/HomeScreen.tsx`, `admin-app/src/screens/placeholders/OrderManagementScreen.tsx`, `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`.
 
 ---
 
-## Lesson 13 — Phase 1 Launch Brands Whitelisting & Segmented Filter Control Design — 2026-08-17
+## Lesson 13 â Phase 1 Launch Brands Whitelisting & Segmented Filter Control Design â 2026-08-17
 - **Pattern**: Multi-tenant brand visibility across phases and mobile UI segmented filter bar design.
 - **Wrong assumption made**: Assuming that `GET /api/restaurants/?all=true` can be passed raw to admin UI selectors without distinguishing between Phase 1 live launch brands and Phase 2 hidden draft brands, and rendering filter buttons as separate loose chips with inconsistent margins.
 - **What actually mattered**:
@@ -140,7 +140,7 @@
 
 ---
 
-## Lesson 12 — Dynamic Home Banner Synchronization, Focus Binding & Zero-Deal Collapse — 2026-08-17
+## Lesson 12 â Dynamic Home Banner Synchronization, Focus Binding & Zero-Deal Collapse â 2026-08-17
 - **Pattern**: Promotional home banner carousels and marketing campaign state synchronization between Admin HQ and Mobile Customer Clients.
 - **Wrong assumption made**: Assuming that banner components can maintain their own isolated mount-only `useEffect` fetching queries with hardcoded static fallback slides (`BANNERS` array) for when backend deals are empty or unreturned.
 - **What actually mattered**:
@@ -152,7 +152,7 @@
 
 ---
 
-## Lesson 11 — Super Admin Multi-Tenant Modal Provisioning & Delivered-Only CRM Annotation — 2026-08-16
+## Lesson 11 â Super Admin Multi-Tenant Modal Provisioning & Delivered-Only CRM Annotation â 2026-08-16
 - **Pattern**: Modal entity creation in role-differentiated apps (Super Admin vs Branch Manager) and CRM user metric aggregation.
 - **Wrong assumption made**: Assuming that creation modals designed for branch managers (where branch context is implicitly known from `auth.branchId`) can be rendered unchanged for Super Admin, and assuming customer lists only need raw user model counts.
 - **What actually mattered**: 
@@ -163,7 +163,7 @@
 
 ---
 
-## Lesson 10 — Dual Slug/Numeric ID Resolution & Defensive Promo Error Extraction — 2026-08-16
+## Lesson 10 â Dual Slug/Numeric ID Resolution & Defensive Promo Error Extraction â 2026-08-16
 - **Pattern**: Handling tenant route identifiers in REST endpoints and parsing validation errors across mobile clients.
 - **Wrong assumption made**: Assuming that URLs structured as `/api/restaurants/{slug}/menu/` will only ever receive string slugs, and assuming error responses from coupon validation will always contain an `err.response.data.message` field.
 - **What actually mattered**: 
@@ -174,18 +174,18 @@
 
 ---
 
-## Lesson 9 — Delivered-Only Revenue Accounting & Rider-to-Brand Schema Linkage — 2026-08-16
+## Lesson 9 â Delivered-Only Revenue Accounting & Rider-to-Brand Schema Linkage â 2026-08-16
 - **Pattern**: Calculating revenue aggregates and identifying multi-tenant fleet relationships across administrative dashboards.
 - **Wrong assumption made**: Assuming that summing `Order.total` with `status != 'cancelled'` accurately reflects earned business revenue, and assuming raw branch names are sufficient for Super Admin to identify rider brand affiliation.
 - **What actually mattered**: 
   1. Financial metrics (today, 7d, 30d, all-time, daily trend) MUST filter strictly by `status === 'delivered'`. Counting `placed`, `received`, or `preparing` orders prematurely inflates financial statements with unearned or potentially cancellable funds.
-  2. In multi-tenant systems, `BranchRider` is linked to `Branch`, and `Branch` is linked to `Restaurant`. Serializers (`BranchRiderSerializer`) must explicitly flatten `restaurant_id`, `restaurant_name`, and `restaurant_slug` so Super Admin views can provide brand filters and visual brand tags (`🏪 Brand • 📍 Branch`).
+  2. In multi-tenant systems, `BranchRider` is linked to `Branch`, and `Branch` is linked to `Restaurant`. Serializers (`BranchRiderSerializer`) must explicitly flatten `restaurant_id`, `restaurant_name`, and `restaurant_slug` so Super Admin views can provide brand filters and visual brand tags (`ðª Brand â¢ ð Branch`).
   3. Customer feedback submitted on completed deliveries must have dedicated endpoints (`/api/admin/reviews/`) and dedicated cards in operational dashboards.
 - **Applies to**: `backend/config/analytics_views.py`, `backend/restaurants/serializers.py`, `backend/restaurants/views.py`, `admin/src/views/BranchDashboard.tsx`, `admin/src/views/SuperDashboard.tsx`, `admin-app/src/screens/placeholders/BranchDashboardScreen.tsx`, `admin-app/src/screens/placeholders/RiderManagementScreen.tsx`.
 
 ---
 
-## Lesson 8 — Queryset Fallback Leaks & Multi-Tenant Rider Dispatch Integrity — 2026-08-16
+## Lesson 8 â Queryset Fallback Leaks & Multi-Tenant Rider Dispatch Integrity â 2026-08-16
 - **Pattern**: Scoping filtered API querysets in multi-tenant backends (e.g. `GET /api/admin/riders/?branch_id=X`).
 - **Wrong assumption made**: Assuming that when a branch filter yields 0 records (`t1_qs.exists() == False`), falling back to the base queryset (`qs = base_qs`) provides a "helpful default" list.
 - **What actually mattered**: 
@@ -197,7 +197,7 @@
 
 ---
 
-## Lesson 1 — Multi-Tenant Order Sequence Scoping — 2026-07-25
+## Lesson 1 â Multi-Tenant Order Sequence Scoping â 2026-07-25
 - **Pattern**: Generating branch/tenant scoped display IDs (e.g. `TS-LC-1001`).
 - **Wrong assumption made**: Using global auto-incrementing integer IDs (`Order.id`) for customer receipt display and dispatcher modals.
 - **What actually mattered**: Customers and branch managers expect tenant/branch isolated readable sequences (`display_order_id`). Scoping must be handled atomically in Django backend models on order save.
@@ -205,7 +205,7 @@
 
 ---
 
-## Lesson 2 — Monotonic Order Status Transitions — 2026-07-26
+## Lesson 2 â Monotonic Order Status Transitions â 2026-07-26
 - **Pattern**: Real-time polling/refetching order statuses in mobile app & web trackers.
 - **Wrong assumption made**: Incoming API responses during race conditions or background sync can be blindly written to Redux state.
 - **What actually mattered**: Order state transitions must be strictly monotonic (`getStatusRank`). State should NEVER roll back to a previous stage (e.g. from `DISPATCHED` back to `PREPARING`) due to delayed HTTP responses.
@@ -215,7 +215,7 @@
 
 ---
 
-## Lesson 4 — Deployment Chain Verification & Guest Order State Hydration — 2026-08-10
+## Lesson 4 â Deployment Chain Verification & Guest Order State Hydration â 2026-08-10
 - **Pattern**: Debugging repeat-reported mobile app bugs across Expo builds & guest navigation screens.
 - **Wrong assumption made**: Assuming a git commit alone reaches a test device, and assuming Redux `user.is_guest` state guards are sufficient for guest tracking screens.
 - **What actually mattered**: 
@@ -223,7 +223,7 @@
   2. Guest navigation screens (`OrdersScreen`, `TrackingScreen`) MUST hydrate active guest order credentials from `AsyncStorage` (`@getfood_active_guest_order` / `guest_tracking_token`) rather than blocking guest users with a static login guard.
 ---
 
-## Lesson 5 — Redux State Preservation & DRF Error Sanitization — 2026-08-10
+## Lesson 5 â Redux State Preservation & DRF Error Sanitization â 2026-08-10
 - **Pattern**: Handling state array mutations and error alert formatting across authentication boundaries.
 - **Wrong assumption made**: Assuming `guestLogin.pending` should clear `myOrders`, and assuming raw stringification of DRF error objects is user-friendly.
 - **What actually mattered**: 
@@ -234,16 +234,16 @@
 
 ---
 
-## Lesson 6 — Redux Auth Lifecycle Race Conditions on Re-Login — 2026-08-10
+## Lesson 6 â Redux Auth Lifecycle Race Conditions on Re-Login â 2026-08-10
 - **Pattern**: Any screen that reads Redux state populated by polling (fetchMyOrders, fetchGuestOrderStatus) and also reacts to login/logout lifecycle transitions.
-- **Wrong assumption made**: Clearing `state.myOrders = []` on `loginUser.pending` is safe because "the user isn't logged in yet." In reality, `.pending` fires the moment the network request starts — before authentication is confirmed — creating a window where old orders are gone and new ones haven't arrived yet.
+- **Wrong assumption made**: Clearing `state.myOrders = []` on `loginUser.pending` is safe because "the user isn't logged in yet." In reality, `.pending` fires the moment the network request starts â before authentication is confirmed â creating a window where old orders are gone and new ones haven't arrived yet.
 - **What actually mattered**: State resets tied to auth should fire on `.fulfilled`, not `.pending`. `.pending` = request started, not user confirmed. Moving clears to `.fulfilled` eliminates the race window while keeping the security invariant (old data gone before new user's data loads).
-- **Corollary**: Any `loading = true` guard in a polling loop MUST check whether data already exists before activating the loading state. `if (state.array.length === 0)` alone is insufficient — add `&& !state.loading` to prevent double-firing the spinner on the second poll cycle after a login-induced clear.
+- **Corollary**: Any `loading = true` guard in a polling loop MUST check whether data already exists before activating the loading state. `if (state.array.length === 0)` alone is insufficient â add `&& !state.loading` to prevent double-firing the spinner on the second poll cycle after a login-induced clear.
 - **Applies to**: `app/src/store/orderSlice.ts` (`loginUser.pending/fulfilled`, `registerUser.pending/fulfilled`, `fetchMyOrders.pending`). Generalizes to any Redux slice that polls + clears on auth events.
 
 ---
 
-## Lesson 7 — Guest Order Interception & Multi-Layer Checkout Form Preservation — 2026-08-10
+## Lesson 7 â Guest Order Interception & Multi-Layer Checkout Form Preservation â 2026-08-10
 - **Pattern**: Converting anonymous/guest checkout flows to mandatory authenticated order placement without frustrating users or losing entered form details.
 - **Wrong assumption made**: Relying solely on `route.params` to pass saved checkout form fields back from `AuthScreen` after authentication.
 - **What actually mattered**: `route.params` can be cleared or overwritten during complex navigation stack resets (`navigation.reset`). Form state preservation MUST use a **dual-persistence strategy**: save to `AsyncStorage` (`@getfood_checkout_saved_form`) AND pass via `returnParams`. `CheckoutScreen` hydration reads `AsyncStorage` first, auto-populates all inputs (Name, Phone, Address, Instructions, Branch, Payment Method, Schedule), and purges the key cleanly post-hydration.
@@ -251,7 +251,7 @@
 
 ---
 
-## Lesson 8 — Django Keyword Argument Collisions in Model.objects.create — 2026-08-10
+## Lesson 8 â Django Keyword Argument Collisions in Model.objects.create â 2026-08-10
 - **Pattern**: Unpacking `**validated_data` into Django model creation method (`Model.objects.create(...)`).
 - **Wrong assumption made**: Assuming passing `user=user` explicitly alongside `**validated_data` (which already contains `'user': user`) is harmless or supported by kwargs merging.
 - **What actually mattered**: In Python, passing a keyword argument explicitly while the unpacked `**dict` also contains that key raises a `TypeError: got multiple values for keyword argument`. On Django REST Framework in production, unhandled `TypeError` exceptions trigger HTTP 500 Internal Server Errors (`{"success":false,"message":"An internal server error occurred."}`). Always set model relationship fields directly inside `validated_data` before unpacking `**validated_data` into `objects.create()`.
@@ -259,7 +259,7 @@
 
 ---
 
-## Lesson 9 — Rider Dispatch Server-Side Atomic State Synchronization — 2026-08-13
+## Lesson 9 â Rider Dispatch Server-Side Atomic State Synchronization â 2026-08-13
 - **Pattern**: Assigning riders to orders and updating status transitions in client mobile apps.
 - **Wrong assumption made**: Client app needs to send a secondary PATCH request (`PATCH /api/orders/{id}/` status='out_for_delivery') after calling `POST /api/orders/{id}/assign-rider/`.
 - **What actually mattered**: Backend `OrderAssignRiderView` (`backend/orders/views.py`) ALREADY performs atomic side-effects: assigning a rider to a `preparing` order automatically updates `order.status = 'out_for_delivery'` and `rider.status = 'ON_DELIVERY'` in a single DB transaction. Furthermore, marking an order `delivered` or `cancelled` automatically frees up the rider (`rider.status = 'AVAILABLE'`) in backend signals. Sending redundant client-side status PATCH calls creates race conditions and double network overhead.
@@ -267,7 +267,7 @@
 
 ---
 
-## Lesson 10 — Admin Mobile App Role-Scoped UI & Optimistic Redux Mutators — 2026-08-13
+## Lesson 10 â Admin Mobile App Role-Scoped UI & Optimistic Redux Mutators â 2026-08-13
 - **Pattern**: Shared management screens used by both Super Admins and Branch Managers on mobile devices.
 - **Wrong assumption made**: Shared screens can use a single monolithic UI layout with conditional if-statements scattered throughout rendering code.
 - **What actually mattered**: Role boundaries require completely distinct theme tokens (`COLORS.superAdmin.*` slate dark vs `COLORS.branchManager.*` warm light) and capability scoping. Branch Managers need low-friction, high-speed operational toggles (e.g. per-branch item stock switches via `POST /api/restaurants/branch-item-availability/`, 1-tap rider status switches) backed by **optimistic Redux mutators** (UI state updates immediately, reverts on API failure) so branch managers never experience UI lag on mobile networks. Super Admins receive HQ management controls (brand switcher bars, category creation, item editing with `expo-image-picker` gallery upload).
@@ -275,21 +275,21 @@
 
 ---
 
-## Lesson 11 — Porting Complex Web Admin Systems to Mobile UX Patterns — 2026-08-13
+## Lesson 11 â Porting Complex Web Admin Systems to Mobile UX Patterns â 2026-08-13
 - **Pattern**: Porting complex web admin dashboards (Vite + React) to mobile apps (Expo / React Native).
 - **Wrong assumption made**: Mobile management views can simply copy web admin JSX structures without adjusting touch density, form inputs, modal dialogs, or selector controls.
 - **What actually mattered**: Mobile admin apps demand touch-optimized layouts (choice chip selectors, card rows with status pills, numeric touch inputs, `RefreshControl` pull-to-refresh). Super Admin HQ screens (`SuperDashboardScreen`, `TenantManagementScreen`, `ManagerManagementScreen`, `CustomerManagementScreen`, `PromoManagementScreen`, `FlashDealManagementScreen`, `NotificationCenterScreen`) require:
-  1. Compact 2×2 metric grids and pure Flexbox inline bar charts for performance without heavy web chart dependencies.
+  1. Compact 2Ã2 metric grids and pure Flexbox inline bar charts for performance without heavy web chart dependencies.
   2. One-time copyable credential modals for staff provisioning results.
   3. Mandatory audit reason text inputs for sensitive customer loyalty balance modifications (`PATCH /api/admin/customers/{id}/loyalty/`).
   4. Explicit discount type switchers (`FLAT` vs `PERCENTAGE`) and scope dropdowns (`GLOBAL` vs specific brand ID).
-## Lesson 12 — Environment API Base URL Desync & Metro Cache Resets — 2026-08-13
+## Lesson 12 â Environment API Base URL Desync & Metro Cache Resets â 2026-08-13
 - **Pattern**: Running local development servers (`http://127.0.0.1:8000`) alongside production deployments (`https://getfoodpk-fd9b20442fcf.herokuapp.com`).
 - **Wrong assumption made**: Hardcoding production backend fallback URLs or assuming environment variables automatically resolve across Expo Go / browser runs.
 - **What actually mattered**: 
   1. API service wrappers across all client apps (`app/src/services/api.js`, `admin-app/src/services/api.ts`, `admin/src/services/api.ts`) MUST dynamically inspect `window.location.hostname` (or local environment flags) to route requests to `http://127.0.0.1:8000` when running locally, avoiding split-brain data states where coupons created in local admin HQ fail on local mobile apps hitting Heroku.
   2. Any repeat report of code fixes not taking effect locally requires resetting Metro bundler cache (`npx expo start -c`) to purge cached JS bundles.
-## Lesson 13 — Django CORS Whitelist & Dynamic Browser Host Matching — 2026-08-13
+## Lesson 13 â Django CORS Whitelist & Dynamic Browser Host Matching â 2026-08-13
 - **Pattern**: Running multiple Expo web instances (`http://localhost:8081`, `http://localhost:8082`) and Vite web apps (`http://localhost:5173`) against a local Django REST API server (`http://localhost:8000`).
 - **Wrong assumption made**: Hardcoding `http://127.0.0.1:8000` in API base URLs or leaving new local app dev ports out of Django `CORS_ALLOWED_ORIGINS` will work without issue.
 - **What actually mattered**: 
@@ -299,7 +299,7 @@
 
 ---
 
-## Lesson 14 — Deploy Chain Verification & Production DB Seeding Invariant — 2026-08-13
+## Lesson 14 â Deploy Chain Verification & Production DB Seeding Invariant â 2026-08-13
 - **Pattern**: Debugging repeat reports of backend API validation or data failures where local test suites pass but live production environment fails.
 - **Wrong assumption made**: Assuming that because a bug fix passed in local integration tests (`test_welcome1_null_expiry_suite.py`), the live backend API automatically updated and production DB was seeded.
 - **What actually mattered**: 
@@ -310,18 +310,18 @@
 
 ---
 
-## Lesson 15 — Physical Device Expo Go API Base URL Resolution & Network Error Resilience — 2026-08-15
+## Lesson 15 â Physical Device Expo Go API Base URL Resolution & Network Error Resilience â 2026-08-15
 - **Pattern**: Running mobile applications (React Native / Expo) on physical test devices via Expo Go LAN mode (`exp://192.168.x.x:8081`).
 - **Wrong assumption made**: Assuming that because `Constants.expoConfig.hostUri` contains a LAN IP (`192.168.100.202`), the mobile app should automatically default to sending API traffic to `http://192.168.100.202:8000/api`.
 - **What actually mattered**: 
   1. If local backend servers (Django on port 8000) are not running on the development machine, mobile devices hitting port 8000 fail immediately with `ECONNREFUSED` / "Network Error".
   2. Mobile apps must default to the production cloud backend (`https://getfoodpk-fd9b20442fcf.herokuapp.com/api`) while providing an interactive **Server Configuration & Connection Probe Modal** (`ServerConfigModal.tsx`) so developers and staff can switch to local LAN/emulator servers on-the-fly with 1-tap presets and real-time ping testing.
-  3. Never leak raw Axios error strings (`ERR_NETWORK`, `ECONNABORTED`) to user interface error banners. Always sanitize errors through a centralized error parser (`sanitizeErrorMessage`) that explains the exact reason and offers recovery actions (e.g. "⚙️ Configure API Server").
+  3. Never leak raw Axios error strings (`ERR_NETWORK`, `ECONNABORTED`) to user interface error banners. Always sanitize errors through a centralized error parser (`sanitizeErrorMessage`) that explains the exact reason and offers recovery actions (e.g. "âï¸ Configure API Server").
 - **Applies to**: `admin-app/src/services/api.ts`, `admin-app/src/screens/LoginScreen.tsx`, `admin-app/src/components/ServerConfigModal.tsx`, `app/src/services/api.js`.
 
 ---
 
-## Lesson 16 — Expo Remote OTA Update Fallback & Timeout Invariant — 2026-08-15
+## Lesson 16 â Expo Remote OTA Update Fallback & Timeout Invariant â 2026-08-15
 - **Pattern**: Configuring Expo Updates / OTA remote bundle download policies across mobile apps (`app.json`).
 - **Wrong assumption made**: Leaving `updates.enabled: true` with a remote EAS URL without explicitly configuring `fallbackToCacheTimeout: 0` or `checkAutomatically: "NEVER"`.
 - **What actually mattered**: 
@@ -332,7 +332,7 @@
 
 ---
 
-## Lesson 17 — Reusable Mobile Design Systems & Operational UX Invariants — 2026-08-15
+## Lesson 17 â Reusable Mobile Design Systems & Operational UX Invariants â 2026-08-15
 - **Pattern**: Polishing high-frequency operational mobile screens for branch managers and kitchen staff.
 - **Wrong assumption made**: Implementing per-screen inline styles with raw elapsed minutes, unverified action button colors, unconfirmed header logout triggers, and raw debug indicators.
 - **What actually mattered**: 
@@ -344,7 +344,7 @@
 
 ---
 
-## Lesson 18 — Super Admin Design Cohesion & Semantic Clarity Invariants — 2026-08-15
+## Lesson 18 â Super Admin Design Cohesion & Semantic Clarity Invariants â 2026-08-15
 - **Pattern**: Extending Phase 7's shared design system to Super Admin HQ screens (Tenants, CRM, Managers, Promos, Flash Deals, Notifications, Analytics).
 - **Wrong assumption made**: Relying on raw object field strings without fallbacks, hardcoding red destructive buttons on safe actions (like password reset), showing technical database keys as menu subtext, and leaving sparse charts without an explicit baseline.
 - **What actually mattered**: 
@@ -356,7 +356,7 @@
 
 ---
 
-## Lesson 19 — Network Resilience, Edge Cases & Empty State Design — 2026-08-15
+## Lesson 19 â Network Resilience, Edge Cases & Empty State Design â 2026-08-15
 - **Pattern**: Handling network drops, initial data loading, empty data returns, and auth lifecycle events across all screens in an operations mobile app.
 - **Wrong assumption made**: Assuming that handling the happy path and having type-safe models is sufficient to prevent user confusion during transient network drops or empty data collections.
 - **What actually mattered**: 
@@ -370,7 +370,7 @@
 
 ---
 
-## Lesson 20 — Development Base URL Trapping & Brand Scoping Invariants — 2026-08-16
+## Lesson 20 â Development Base URL Trapping & Brand Scoping Invariants â 2026-08-16
 - **Pattern**: Dual-app deployment where backend runs in the cloud (Heroku) while mobile apps run in local development bundlers (`expo start`).
 - **Wrong assumption made**: Assuming that `if (__DEV__) return 'http://' + ip + ':8000/api'` is a helpful dev convenience. When the local machine is not running a local Django backend, mobile devices automatically fail with fatal "Network Error" on every network call.
 - **What actually mattered**: 
@@ -382,7 +382,7 @@
 
 ---
 
-## Lesson 23 — Basket-Level Loyalty Invariants, Mock Elimination & DateTime Guarding — 2026-08-16
+## Lesson 23 â Basket-Level Loyalty Invariants, Mock Elimination & DateTime Guarding â 2026-08-16
 - **Pattern**: Managing user discounts across multi-step ordering funnels, removing offline mock code in enterprise admin dashboards, and securing promotional deal dates.
 - **Wrong assumption made**: Managing loyalty points toggle state inside checkout screen component state while coupons were applied in the basket, causing total calculation desyncs and requiring duplicate price deduction recalculations.
 - **What actually mattered**: 
@@ -394,7 +394,7 @@
 
 ---
 
-## Lesson 24 — Standalone Release APK Cold Launch Crash Prevention, Multi-ABI Packaging & Splash Navigation Guards — 2026-09-08
+## Lesson 24 â Standalone Release APK Cold Launch Crash Prevention, Multi-ABI Packaging & Splash Navigation Guards â 2026-09-08
 - **Pattern**: Standalone compiled Android APK stability, multi-architecture ABI packaging (`reactNativeArchitectures`), native gesture handler precedence, splash screen navigation race guards, and global error boundaries.
 - **Wrong assumption made**: Assuming that configuring multi-architecture compilation (`arm64-v8a,armeabi-v7a,x86_64`) and manifest permissions in one app (`app/`) is sufficient without applying identical properties to the companion app (`admin-app/`), and assuming `SplashScreen` navigation timers can safely depend on reactive auth states (`isAuthenticated`).
 - **What actually mattered**:
@@ -406,7 +406,7 @@
 
 ---
 
-## Lesson 25 — Commercial QSR Storefront Architecture, Dual-Tone Brand Invariants & Zero-Login Sticky Headers — 2026-10-18
+## Lesson 25 â Commercial QSR Storefront Architecture, Dual-Tone Brand Invariants & Zero-Login Sticky Headers â 2026-10-18
 - **Pattern**: Rebuilding brand websites into high-conversion KFC-style single-page storefronts, strict brand palette adherence, zero-login commercial headers, and 1-click fulfillment synchronization.
 - **Wrong assumption made**: Relying on multi-page sub-routes (`/menu.html`, `/deals.html`, `/about.html`, `/locations.html`) with dark-mode aesthetic templates, leading to fragmented cart state, high cognitive friction, and brand inconsistency with the physical brand logos.
 - **What actually mattered**:
@@ -422,7 +422,7 @@
 
 ---
 
-## Lesson 26 � Cloudflare Multi-Account Switching & Wrangler Cache Isolation � 2026-10-29
+## Lesson 26  Cloudflare Multi-Account Switching & Wrangler Cache Isolation  2026-10-29
 - **Pattern**: Switching Cloudflare accounts using Wrangler CLI or authenticating via API tokens (CLOUDFLARE_API_TOKEN).
 - **Wrong assumption made**: Assuming that running wrangler logout or setting a new API token clears all cached target account identifiers.
 - **What actually mattered**: 
@@ -430,7 +430,7 @@
 ode_modules/.cache/wrangler/pages.json and <dir>/.wrangler/cache/pages.json).
   2. Even when authenticated to a new account, Wrangler's Pages command reads pages.json and makes requests to /accounts/<OLD_ACCOUNT_ID>/pages/projects, resulting in Authentication error [code: 10000] (403 Forbidden).
   3. When switching Cloudflare accounts, all local pages.json and wrangler-account.json cache files must be purged, and CLOUDFLARE_ACCOUNT_ID explicitly bound.
-- **Applies to**: dmin/node_modules/.cache/wrangler, websites/.wrangler/cache, Cloudflare Pages deployments.
+- **Applies to**: dmin/node_modules/.cache/wrangler, websites/.wrangler/cache, Cloudflare Pages deployments.
 
 ---
 
@@ -441,4 +441,4 @@ ode_modules/.cache/wrangler/pages.json and <dir>/.wrangler/cache/pages.json).
   1. **Dual Storage Resolution**: Relative `ImageField` paths (`menu_items/...`, `restaurants/...`) call `MediaCloudinaryStorage.url()`, which dynamically formats the URL with the active cloud name. However, fields saved as full URLs (`https://res.cloudinary.com/...`) bypass storage serialization and remain hardcoded in PostgreSQL.
   2. **Namespace Mirroring**: `django-cloudinary-storage` expects assets either at the root or under the `media/` folder prefix depending on upload method. Syncing relative paths to both root `<public_id>` and `media/<public_id>` ensures zero 404s regardless of storage resolution.
   3. **Version Tag Strip**: Hardcoded version segments (`/v1792315655/`) from the old account must be stripped when migrating URLs to the new account so Cloudinary immediately serves the latest asset revision.
-- **Applies to**: `backend/config/settings.py`, `backend/restaurants/serializers.py`, `backend/restaurants/management/commands/`, `websites/*/live_catalog.js`, `app/src/services/mediaAssetService.ts`.
+- **Applies to**: `backend/config/settings.py`, `backend/restaurants/serializers.py`, `backend/restaurants/management/commands/`, `websites/*/live_catalog.js`, `app/src/services/mediaAssetService.ts`.

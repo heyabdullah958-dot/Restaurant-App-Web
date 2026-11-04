@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -761,6 +762,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   useFocusEffect(
     React.useCallback(() => {
+      RNStatusBar.setBarStyle('dark-content', true);
+      if (Platform.OS === 'android') {
+        RNStatusBar.setBackgroundColor('transparent', true);
+        RNStatusBar.setTranslucent(true);
+      }
       dispatch(fetchRestaurants() as any);
       fetchFlashDeals();
       if (user && !user.is_guest) {

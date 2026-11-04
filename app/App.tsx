@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { View, Text, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, Platform, TouchableOpacity, LogBox } from 'react-native';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -27,6 +27,9 @@ enableFreeze(true);
 
 // Set up response interceptors to catch 401 errors globally
 setupInterceptors(store);
+
+// Suppress safe area deprecation banner from third-party navigation libraries
+LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
 
 // Import Screens
 import SplashScreen from './src/screens/SplashScreen';

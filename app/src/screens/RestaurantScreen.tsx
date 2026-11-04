@@ -126,15 +126,18 @@ const MenuItemCard = React.memo(({
   return (
     <View style={[styles.menuItemCard, isUnavailable && { opacity: 0.65 }]}>
       <View style={styles.menuItemTextContent}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text style={[styles.itemName, isUnavailable && { color: COLORS.gray }]}>{item.name}</Text>
-          {item.active_flash_deal ? (
-            <View style={{ backgroundColor: 'rgba(225, 29, 72, 0.12)', borderColor: '#e11d48', borderWidth: 1, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
-              <Text style={{ color: '#e11d48', fontSize: 10, fontWeight: '800' }}>
+        {item.active_flash_deal ? (
+          <View style={styles.dealBadgeRow}>
+            <View style={styles.dealBadgePill}>
+              <Text style={styles.dealBadgeText}>
                 {item.active_flash_deal.badge || '⚡ FLASH DEAL'}
               </Text>
             </View>
-          ) : null}
+          </View>
+        ) : null}
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <Text style={[styles.itemName, isUnavailable && { color: COLORS.gray }]}>{item.name}</Text>
           {isOutOfStock ? (
             <View style={{ backgroundColor: '#fee2e2', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
               <Text style={{ color: '#dc2626', fontSize: 10, fontWeight: '700' }}>OUT OF STOCK</Text>
@@ -145,6 +148,7 @@ const MenuItemCard = React.memo(({
             </View>
           ) : null}
         </View>
+
         {showCategoryName && item.categoryName && (
           <Text style={styles.itemCategoryName}>{item.categoryName}</Text>
         )}
@@ -154,7 +158,7 @@ const MenuItemCard = React.memo(({
         {item.active_flash_deal ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginVertical: 2 }}>
             <Text style={[styles.itemPrice, { color: '#e11d48', fontWeight: '800' }]}>
-              Rs. {Math.round(item.active_flash_deal.discounted_price)}
+              Rs. {Math.max(50, Math.round(item.active_flash_deal.discounted_price))}
             </Text>
             <Text style={{ fontSize: 13, color: '#94a3b8', textDecorationLine: 'line-through' }}>
               Rs. {Number(item.price)}
@@ -198,60 +202,62 @@ const MenuItemCard = React.memo(({
         const itemImgSource = getImageUrl(uri);
         return (
           <View style={styles.menuItemRightColumn}>
-            <View style={[
-              styles.menuItemImageContainer,
-              isLogoFallback && { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center' }
-            ]}>
-              {itemImgSource ? (
-                <Image 
-                  source={itemImgSource} 
-                  style={[styles.itemImage, isLogoFallback && { width: '70%', height: '70%', resizeMode: 'contain' }]} 
-                  resizeMode={isLogoFallback ? 'contain' : 'cover'}
-                />
-              ) : (
-                <View style={[styles.itemImagePlaceholder, { backgroundColor: '#F1F5F9' }]}>
-                  <Ionicons name="fast-food-outline" size={28} color="#94A3B8" />
-                </View>
-              )}
-            </View>
+            <View style={styles.imageWrapperWithButton}>
+              <View style={[
+                styles.menuItemImageContainer,
+                isLogoFallback && { backgroundColor: '#F1F5F9', justifyContent: 'center', alignItems: 'center' }
+              ]}>
+                {itemImgSource ? (
+                  <Image 
+                    source={itemImgSource} 
+                    style={[styles.itemImage, isLogoFallback && { width: '70%', height: '70%', resizeMode: 'contain' }]} 
+                    resizeMode={isLogoFallback ? 'contain' : 'cover'}
+                  />
+                ) : (
+                  <View style={[styles.itemImagePlaceholder, { backgroundColor: '#F1F5F9' }]}>
+                    <Ionicons name="fast-food-outline" size={28} color="#94A3B8" />
+                  </View>
+                )}
+              </View>
 
-            <View style={styles.quantitySelectorContainer}>
-              {isClosed ? (
-                <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-                  <Text style={[styles.addButtonText, { fontSize: 10.5 }]}>CLOSED</Text>
-                </View>
-              ) : isOutOfStock ? (
-                <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
-                  <Text style={[styles.addButtonText, { fontSize: 9.5 }]}>OUT OF STOCK</Text>
-                </View>
-              ) : quantity > 0 && !hasCustomOptions ? (
-                <View style={styles.quantityRow}>
-                  <TouchableOpacity activeOpacity={0.75}
-                    style={styles.quantityBtn}
-                    onPress={() => onDecrement(item, quantity)}
+              <View style={styles.quantitySelectorContainer}>
+                {isClosed ? (
+                  <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+                    <Text style={[styles.addButtonText, { fontSize: 10.5 }]}>CLOSED</Text>
+                  </View>
+                ) : isOutOfStock ? (
+                  <View style={[styles.addButton, { backgroundColor: '#94a3b8' }]}>
+                    <Text style={[styles.addButtonText, { fontSize: 9.5 }]}>OUT OF STOCK</Text>
+                  </View>
+                ) : quantity > 0 && !hasCustomOptions ? (
+                  <View style={styles.quantityRow}>
+                    <TouchableOpacity activeOpacity={0.75}
+                      style={styles.quantityBtn}
+                      onPress={() => onDecrement(item, quantity)}
+                    >
+                      <Ionicons name="remove" size={16} color={COLORS.white} />
+                    </TouchableOpacity>
+                    <Text style={styles.quantityText}>{quantity}</Text>
+                    <TouchableOpacity activeOpacity={0.75}
+                      style={styles.quantityBtn}
+                      onPress={() => onIncrement(item, quantity)}
+                    >
+                      <Ionicons name="add" size={16} color={COLORS.white} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.addButton, hasCustomOptions && { backgroundColor: COLORS.primary }]}
+                    activeOpacity={0.8}
+                    onPress={() => onAddToCart(item)}
                   >
-                    <Ionicons name="remove" size={16} color={COLORS.white} />
+                    <Ionicons name={hasCustomOptions ? "sparkles" : "add"} size={12} color={COLORS.white} style={{ marginRight: 2 }} />
+                    <Text style={styles.addButtonText} numberOfLines={1}>
+                      {hasCustomOptions && quantity > 0 ? `CUSTOMIZE (${quantity})` : hasCustomOptions ? 'CUSTOMIZE' : 'ADD'}
+                    </Text>
                   </TouchableOpacity>
-                  <Text style={styles.quantityText}>{quantity}</Text>
-                  <TouchableOpacity activeOpacity={0.75}
-                    style={styles.quantityBtn}
-                    onPress={() => onIncrement(item, quantity)}
-                  >
-                    <Ionicons name="add" size={16} color={COLORS.white} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <TouchableOpacity
-                  style={[styles.addButton, hasCustomOptions && { backgroundColor: COLORS.primary }]}
-                  activeOpacity={0.8}
-                  onPress={() => onAddToCart(item)}
-                >
-                  <Ionicons name={hasCustomOptions ? "sparkles" : "add"} size={12} color={COLORS.white} style={{ marginRight: 2 }} />
-                  <Text style={styles.addButtonText} numberOfLines={1}>
-                    {hasCustomOptions && quantity > 0 ? `CUSTOMIZE (${quantity})` : hasCustomOptions ? 'CUSTOMIZE' : 'ADD'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+                )}
+              </View>
             </View>
           </View>
         );
@@ -329,6 +335,16 @@ export default function RestaurantScreen() {
   const [showBranchModal, setShowBranchModal] = useState(false);
 
   const hideAlert = useCallback(() => setAlertConfig(prev => ({ ...prev, visible: false })), []);
+
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('dark-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('transparent', true);
+        StatusBar.setTranslucent(true);
+      }
+    }, [])
+  );
 
   const restaurant: Restaurant | null = useMemo(() => {
     if (cachedRestaurant) {
@@ -664,7 +680,7 @@ export default function RestaurantScreen() {
       quantity={cartQuantityMap[item.id] || 0}
       showCategoryName={selectedCategory === 'All'}
       isClosed={!isOpen}
-      restaurantSlug={restaurant?.slug || restaurant?.id}
+      restaurantSlug={restaurant?.slug || restaurant?.id || slug}
       selectedBranchId={effectiveBranchId}
       onAddToCart={handleAddToCart}
       onIncrement={handleIncrement}
@@ -941,7 +957,7 @@ export default function RestaurantScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
       
       <FlatList
         data={menuItems}
@@ -1401,8 +1417,33 @@ const styles = StyleSheet.create({
   menuItemRightColumn: {
     width: 96,
     alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  imageWrapperWithButton: {
+    width: 90,
+    height: 90,
     position: 'relative',
-    paddingBottom: 10,
+    marginBottom: 14,
+  },
+  dealBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  dealBadgePill: {
+    backgroundColor: 'rgba(225, 29, 72, 0.12)',
+    borderColor: '#e11d48',
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+  },
+  dealBadgeText: {
+    color: '#e11d48',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.2,
   },
   menuItemTextContent: {
     flex: 1,
@@ -1468,12 +1509,12 @@ const styles = StyleSheet.create({
   },
   quantitySelectorContainer: {
     position: 'absolute',
-    bottom: 0,
+    bottom: -10,
     width: 86,
     height: 28,
     alignSelf: 'center',
-    zIndex: 5,
-    elevation: 4,
+    zIndex: 10,
+    elevation: 5,
   },
   addButton: {
     backgroundColor: COLORS.primary,

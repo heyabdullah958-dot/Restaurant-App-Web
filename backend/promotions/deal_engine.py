@@ -124,12 +124,14 @@ def resolve_active_deal_for_item(menu_item, order_mode='ALL', branch_id=None, cu
             if deal.max_discount and deal.max_discount > 0:
                 discount_amount = min(discount_amount, Decimal(str(deal.max_discount)))
         elif deal.deal_type == 'flat':
-            discount_amount = min(orig_price, Decimal(str(deal.discount_value)))
+            # Cap flat discount to ensure minimum Rs. 50 price or max 60% discount
+            max_allowable_discount = max(Decimal('0.00'), orig_price - Decimal('50.00'))
+            discount_amount = min(Decimal(str(deal.discount_value)), max_allowable_discount, orig_price * Decimal('0.60'))
         elif deal.deal_type == 'bogo':
             # Buy 1 Get 1 = effective 50% discount per item or tagged as BOGO
             discount_amount = orig_price / Decimal('2.00')
 
-        discounted_price = max(Decimal('0.00'), orig_price - discount_amount)
+        discounted_price = max(Decimal('50.00') if orig_price >= Decimal('70.00') else orig_price, orig_price - discount_amount)
 
         # Generate Badge Text
         if deal.deal_type == 'percentage':

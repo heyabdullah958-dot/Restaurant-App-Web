@@ -10,7 +10,9 @@ import {
   Platform,
   Linking,
   Dimensions,
+  StatusBar,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
@@ -245,6 +247,16 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       }
     })();
   }, [dispatch]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      StatusBar.setBarStyle('dark-content', true);
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor('transparent', true);
+        StatusBar.setTranslucent(true);
+      }
+    }, [])
+  );
 
   const userLat = userLocation?.coords?.latitude || 31.4690;
   const userLng = userLocation?.coords?.longitude || 74.2917;
@@ -585,13 +597,13 @@ export default function MapScreen({ navigation }: { navigation: any }) {
             var branches = ${JSON.stringify(processedBranches)};
             branches.forEach(function(b) {
               var logoHtml = b.logoUrl
-                ? '<img class="mcd-pin-logo" src="' + b.logoUrl + '" alt="' + b.brandName + '" />'
-                : '<span class="mcd-pin-emoji">' + b.emoji + '</span>';
+                ? '<img class="mcd-pin-logo" src="' + b.logoUrl + '" alt="' + (b.brandName || '') + '" onerror="this.style.display=\'none\'" />'
+                : '<span class="mcd-pin-emoji">' + (b.emoji || '🍽️') + '</span>';
               var pinIcon = L.divIcon({
                 className: 'mcd-pin-container',
-                html: '<div class="mcd-pin-badge brand-' + b.brandSlug + '" id="pin-' + b.id + '">' +
+                html: '<div class="mcd-pin-badge brand-' + (b.brandSlug || '') + '" id="pin-' + b.id + '">' +
                         logoHtml +
-                        '<span class="mcd-pin-title">' + b.branchName.replace(' Branch', '') + '</span>' +
+                        '<span class="mcd-pin-title">' + ((b.branchName || '').replace(' Branch', '') || b.brandName || 'Outlet') + '</span>' +
                         '<div class="mcd-pin-pointer"></div>' +
                       '</div>',
                 iconAnchor: [48, 22]
@@ -692,11 +704,11 @@ export default function MapScreen({ navigation }: { navigation: any }) {
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: mapHtml }}
+        source={{ html: mapHtml, baseUrl: 'https://localhost' }}
         mixedContentMode="always"
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        androidLayerType="software"
+        androidLayerType="hardware"
         allowFileAccess={true}
         geolocationEnabled={true}
         scalesPageToFit={false}

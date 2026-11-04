@@ -22,7 +22,7 @@ import { addItemToCart } from '../store/cartSlice';
 import api from '../services/api';
 import { COLORS, SHADOWS, SPACING } from '../theme';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 // 9:16 card proportions for the home screen carousel
 const PREVIEW_WIDTH = 142;
@@ -256,7 +256,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
         setPosts(activeList);
       }
     } catch (err) {
-      if (__DEV__) console.warn('[DineInVideoFeed] Could not load video posts, using verified seeded reels:', err);
+      if (__DEV__) console.log('[DineInVideoFeed] Notice: Using verified seeded reels payload:', (err as any)?.message || err);
     }
   }, []);
 
@@ -267,10 +267,16 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
   const handleOpenPlayer = (index: number) => {
     setActiveReelIndex(index);
     setIsModalOpen(true);
+    StatusBar.setBarStyle('light-content', true);
   };
 
   const handleClosePlayer = () => {
     setIsModalOpen(false);
+    StatusBar.setBarStyle('dark-content', true);
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor('transparent', true);
+      StatusBar.setTranslucent(true);
+    }
   };
 
   const handleAddToCart = (post: DineInFeedPost) => {
@@ -410,15 +416,46 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
         statusBarTranslucent={true}
         onRequestClose={handleClosePlayer}
       >
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
         <View style={styles.modalBackdrop}>
+          {/* Top Bar: Single Fixed Header Overlay (Zero Duplication) */}
+          <SafeAreaView style={styles.modalTopBarFixed} pointerEvents="box-none">
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleClosePlayer}
+              style={styles.modalIconBtn}
+            >
+              <Ionicons name="close" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <View style={styles.modalBrandBadge}>
+              <Text style={styles.modalBrandBadgeText}>Crave & Watch 🔥</Text>
+            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setIsMuted((prev) => !prev)}
+              style={styles.modalIconBtn}
+            >
+              <Ionicons
+                name={isMuted ? 'volume-mute' : 'volume-high'}
+                size={22}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          </SafeAreaView>
+
           <FlatList
             ref={verticalFlatListRef}
             data={displayedPosts}
             keyExtractor={(item) => String(item.id)}
             pagingEnabled={true}
+            snapToInterval={SCREEN_HEIGHT}
+            snapToAlignment="start"
+            decelerationRate="fast"
             showsVerticalScrollIndicator={false}
             initialScrollIndex={activeReelIndex}
+            onScrollToIndexFailed={() => {}}
             getItemLayout={(_, index) => ({
               length: SCREEN_HEIGHT,
               offset: SCREEN_HEIGHT * index,
@@ -454,19 +491,32 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                             </head>
                             <body>
                               <video
+                                id="vPlayer"
                                 src="${item.media_url}"
                                 autoplay
                                 loop
-                                ${isMuted ? 'muted' : ''}
+                                muted
                                 playsinline
                                 webkit-playsinline
                               ></video>
+                              <script>
+                                var vid = document.getElementById('vPlayer');
+                                vid.muted = ${isMuted ? 'true' : 'false'};
+                                vid.play().catch(function() {
+                                  vid.muted = true;
+                                  vid.play();
+                                });
+                              </script>
                             </body>
                           </html>
                         `,
                       }}
                       allowsInlineMediaPlayback={true}
                       mediaPlaybackRequiresUserAction={false}
+                      javaScriptEnabled={true}
+                      domStorageEnabled={true}
+                      mixedContentMode="always"
+                      originWhitelist={['*']}
                       androidLayerType="hardware"
                       style={StyleSheet.absoluteFill}
                     />
@@ -485,33 +535,6 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                     style={StyleSheet.absoluteFill}
                     pointerEvents="none"
                   />
-
-                  {/* Top Bar: Close, Live Badge & Mute Toggle */}
-                  <SafeAreaView style={styles.modalTopBar} pointerEvents="box-none">
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={handleClosePlayer}
-                      style={styles.modalIconBtn}
-                    >
-                      <Ionicons name="close" size={24} color="#FFFFFF" />
-                    </TouchableOpacity>
-
-                    <View style={styles.modalBrandBadge}>
-                      <Text style={styles.modalBrandBadgeText}>Crave & Watch 🔥</Text>
-                    </View>
-
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => setIsMuted((prev) => !prev)}
-                      style={styles.modalIconBtn}
-                    >
-                      <Ionicons
-                        name={isMuted ? 'volume-mute' : 'volume-high'}
-                        size={22}
-                        color="#FFFFFF"
-                      />
-                    </TouchableOpacity>
-                  </SafeAreaView>
 
                   {/* Bottom Info & Action Sheet */}
                   <SafeAreaView style={styles.modalBottomArea} edges={['bottom']}>
@@ -777,6 +800,19 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT,
     backgroundColor: '#000000',
     justifyContent: 'space-between',
+  },
+  modalTopBarFixed: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 8 : 12,
+    zIndex: 100,
+    elevation: 10,
   },
   modalTopBar: {
     flexDirection: 'row',
