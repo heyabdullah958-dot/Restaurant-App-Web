@@ -83,7 +83,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Full Dubai Shawaya with Fragrant Rice",
     caption: "Slow rotisserie grilled whole chicken basted with authentic Gulf spices over spiced Mandi rice.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80",
     linked_menu_item: 41,
     linked_item_details: {
@@ -108,7 +108,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Loaded Chicken Doner Feast Box",
     caption: "Thinly shaved spiced chicken doner piled high over golden fries and garlic mayo.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=800&q=80",
     linked_menu_item: 37,
     linked_item_details: {
@@ -133,7 +133,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Smoky Charcoal BBQ Platter",
     caption: "Charcoal-kissed Malai Tikka & Seekh Kebabs served sizzling on iron platters.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",
     linked_menu_item: 70,
     linked_item_details: {
@@ -158,7 +158,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Clay Oven Melting Cheese Naan Pull",
     caption: "Direct from our Johar Town live clay ovens! Stuffed with 100% mozzarella and grilled tikka boti.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&q=80",
     linked_menu_item: 70,
     linked_item_details: {
@@ -183,7 +183,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Golden Kunafa Prawns Sizzle",
     caption: "Crispy shredded pastry wrapped around succulent king prawns with house spicy emulsion.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
     linked_menu_item: null,
     linked_item_details: {
@@ -208,7 +208,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     title: "Luxury Coastal Steam Seafood Platter",
     caption: "Fresh Atlantic catch, jumbo prawns & calamari steamed to perfection. Live table-side presentation.",
     media_type: "VIDEO",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4",
     thumbnail_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
     linked_menu_item: null,
     linked_item_details: {
@@ -478,6 +478,7 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                   {isCurrentlyPlaying && item.media_type === 'VIDEO' ? (
                     <WebView
                       source={{
+                        baseUrl: 'https://res.cloudinary.com',
                         html: `
                           <!DOCTYPE html>
                           <html>
@@ -485,27 +486,88 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                               <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                               <style>
                                 * { margin: 0; padding: 0; box-sizing: border-box; }
-                                html, body { width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+                                html, body { width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
                                 video { width: 100%; height: 100%; object-fit: cover; }
+                                #tapArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+                                #iconWrap {
+                                  position: absolute;
+                                  width: 72px;
+                                  height: 72px;
+                                  border-radius: 36px;
+                                  background: rgba(0, 0, 0, 0.65);
+                                  display: none;
+                                  align-items: center;
+                                  justify-content: center;
+                                  z-index: 10;
+                                  pointer-events: none;
+                                  border: 2px solid rgba(255, 255, 255, 0.7);
+                                  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                                }
                               </style>
                             </head>
                             <body>
+                              <div id="tapArea"></div>
                               <video
                                 id="vPlayer"
                                 src="${item.media_url}"
                                 autoplay
                                 loop
-                                muted
                                 playsinline
                                 webkit-playsinline
+                                preload="auto"
                               ></video>
+                              <div id="iconWrap">
+                                <svg id="playSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="pauseSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                              </div>
                               <script>
                                 var vid = document.getElementById('vPlayer');
-                                vid.muted = ${isMuted ? 'true' : 'false'};
-                                vid.play().catch(function() {
-                                  vid.muted = true;
-                                  vid.play();
+                                var icon = document.getElementById('iconWrap');
+                                var playSvg = document.getElementById('playSvg');
+                                var pauseSvg = document.getElementById('pauseSvg');
+                                var tapArea = document.getElementById('tapArea');
+                                var iconTimer = null;
+
+                                function showFeedback(isPaused) {
+                                  if (iconTimer) clearTimeout(iconTimer);
+                                  if (isPaused) {
+                                    playSvg.style.display = 'block';
+                                    pauseSvg.style.display = 'none';
+                                    icon.style.display = 'flex';
+                                  } else {
+                                    playSvg.style.display = 'none';
+                                    pauseSvg.style.display = 'block';
+                                    icon.style.display = 'flex';
+                                    iconTimer = setTimeout(function() {
+                                      if (!vid.paused) icon.style.display = 'none';
+                                    }, 400);
+                                  }
+                                }
+
+                                tapArea.addEventListener('click', function() {
+                                  if (vid.paused) {
+                                    vid.play().then(function() { showFeedback(false); }).catch(function() {});
+                                  } else {
+                                    vid.pause();
+                                    showFeedback(true);
+                                  }
                                 });
+
+                                function startAutoPlayback() {
+                                  vid.muted = ${isMuted ? 'true' : 'false'};
+                                  var p = vid.play();
+                                  if (p !== undefined) {
+                                    p.catch(function(err) {
+                                      vid.muted = true;
+                                      vid.play().catch(function() {});
+                                    });
+                                  }
+                                }
+                                if (document.readyState === 'complete') {
+                                  startAutoPlayback();
+                                } else {
+                                  window.addEventListener('load', startAutoPlayback);
+                                }
                               </script>
                             </body>
                           </html>

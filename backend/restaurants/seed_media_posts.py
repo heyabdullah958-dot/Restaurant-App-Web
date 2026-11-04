@@ -18,31 +18,35 @@ def seed():
         platter_item = MenuItem.objects.filter(category__restaurant=dab, name__icontains='Platter').first()
         prawns_item = MenuItem.objects.filter(category__restaurant=dab, name__icontains='Prawn').first()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post1, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=dab,
             title="Luxury Coastal Steam Seafood Platter",
             defaults={
                 'caption': "Fresh Atlantic catch, jumbo prawns & calamari steamed to perfection. Live table-side presentation.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
                 'linked_menu_item': platter_item,
                 'is_active': True,
             }
         )
+        post1.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4'
+        post1.save()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post2, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=dab,
             title="Golden Kunafa Prawns Sizzle",
             defaults={
                 'caption': "Crispy shredded pastry wrapped around succulent king prawns with house spicy emulsion.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80',
                 'linked_menu_item': prawns_item,
                 'is_active': True,
             }
         )
+        post2.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4'
+        post2.save()
         print("[OK] Dine At Blue posts seeded")
     except Restaurant.DoesNotExist:
         print("[FAIL] Dine At Blue restaurant not found")
@@ -53,31 +57,35 @@ def seed():
         naan_item = MenuItem.objects.filter(category__restaurant=ts, name__icontains='Cheese Naan').first()
         bbq_item = MenuItem.objects.filter(category__restaurant=ts, name__icontains='Chicken').first()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post3, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=ts,
             title="Clay Oven Melting Cheese Naan Pull",
             defaults={
                 'caption': "Direct from our Johar Town live clay ovens! Stuffed with 100% mozzarella and grilled tikka boti.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&q=80',
                 'linked_menu_item': naan_item,
                 'is_active': True,
             }
         )
+        post3.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4'
+        post3.save()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post4, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=ts,
             title="Smoky Charcoal BBQ Platter",
             defaults={
                 'caption': "Charcoal-kissed Malai Tikka & Seekh Kebabs served sizzling on iron platters.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80',
                 'linked_menu_item': bbq_item,
                 'is_active': True,
             }
         )
+        post4.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4'
+        post4.save()
         print("[OK] Tandoori Stop posts seeded")
     except Restaurant.DoesNotExist:
         print("[FAIL] Tandoori Stop restaurant not found")
@@ -88,31 +96,35 @@ def seed():
         doner_item = MenuItem.objects.filter(category__restaurant=jushh, name__icontains='Doner').first()
         shawaya_item = MenuItem.objects.filter(category__restaurant=jushh, name__icontains='Shawaya').first()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post5, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=jushh,
             title="Loaded Chicken Doner Feast Box",
             defaults={
                 'caption': "Thinly shaved spiced chicken doner piled high over golden fries and garlic mayo.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=800&q=80',
                 'linked_menu_item': doner_item,
                 'is_active': True,
             }
         )
+        post5.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4'
+        post5.save()
 
-        RestaurantMediaPost.objects.get_or_create(
+        post6, _ = RestaurantMediaPost.objects.get_or_create(
             restaurant=jushh,
             title="Full Dubai Shawaya with Fragrant Rice",
             defaults={
                 'caption': "Slow rotisserie grilled whole chicken basted with authentic Gulf spices over spiced Mandi rice.",
                 'media_type': 'VIDEO',
-                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4',
+                'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4',
                 'thumbnail_url': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80',
                 'linked_menu_item': shawaya_item,
                 'is_active': True,
             }
         )
+        post6.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4'
+        post6.save()
         print("[OK] Jushh PK posts seeded")
     except Restaurant.DoesNotExist:
         print("[FAIL] Jushh PK restaurant not found")
