@@ -7,6 +7,16 @@
 
 (function () {
   'use strict';
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
 
   const DELIVERY_FEE = 150;
   const ACTIVE_ORDER_KEY = 'foodsphere_active_guest_order_v1';
@@ -539,7 +549,7 @@
         <div class="cd-item-card">
           <img src="${item.image || findProductImage(item.name)}" alt="${item.name}" class="cd-item-img" onerror="this.onerror=null; this.src='./images/tandoori_stop_logo.png';" />
           <div class="cd-item-info">
-            <div class="cd-item-name">${item.name}</div>
+            <div class="cd-item-name">${escapeHtml(item.name)}</div>
             <div class="cd-item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
           </div>
           <div class="cd-qty-controls">
@@ -594,12 +604,12 @@
         <div style="padding-top:14px;">
           <div class="cd-form-group">
             <label class="cd-form-label">Full Name *</label>
-            <input type="text" id="cd-input-name" class="cd-form-input" placeholder="e.g. Tariq Mehmood" value="${cartState.customerName || ''}" required />
+            <input type="text" id="cd-input-name" class="cd-form-input" placeholder="e.g. Tariq Mehmood" value="${escapeHtml(cartState.customerName || '')}" required />
           </div>
 
           <div class="cd-form-group">
             <label class="cd-form-label">Active Mobile Number *</label>
-            <input type="tel" id="cd-input-phone" class="cd-form-input" placeholder="0327-4945947" value="${cartState.customerPhone || ''}" required />
+            <input type="tel" id="cd-input-phone" class="cd-form-input" placeholder="0327-4945947" value="${escapeHtml(cartState.customerPhone || '')}" required />
           </div>
 
           <div class="cd-form-group">
@@ -624,7 +634,7 @@
 
           <div class="cd-form-group">
             <label class="cd-form-label">Special Cooking Instructions (Optional)</label>
-            <input type="text" id="cd-input-instructions" class="cd-form-input" placeholder="Extra spicy, crispier naans, less oil..." value="${cartState.instructions || ''}" />
+            <input type="text" id="cd-input-instructions" class="cd-form-input" placeholder="Extra spicy, crispier naans, less oil..." value="${escapeHtml(cartState.instructions || '')}" />
           </div>
 
           <div class="cd-form-group" style="background:#FFFDF9; border:1px solid #FEF3C7; border-radius:10px; padding:12px;">

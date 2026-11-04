@@ -255,15 +255,42 @@ class ForgotPasswordView(APIView):
         client_type = request.data.get('client_type')
         origin = request.headers.get('Origin') or request.headers.get('Referer')
 
+        ALLOWED_RESET_HOSTS = {
+            'foodsphere-admin.pages.dev',
+            'admin-orpin-psi.vercel.app',
+            'foodsphere-admin.vercel.app',
+            'getfood-app.pages.dev',
+            'admin.getfoodpk.com',
+            'getfoodpk.com',
+            'www.getfoodpk.com',
+            'localhost',
+            '127.0.0.1',
+        }
+
         safe_base_url = None
         if redirect_url:
-            r_lower = str(redirect_url).lower()
-            if r_lower.startswith('foodsphere://') or 'pages.dev' in r_lower or 'vercel.app' in r_lower or 'localhost' in r_lower or '127.0.0.1' in r_lower:
-                safe_base_url = redirect_url
+            from urllib.parse import urlparse
+            try:
+                parsed = urlparse(str(redirect_url).strip())
+                if parsed.scheme == 'foodsphere' and (parsed.netloc == 'reset-password' or parsed.path == '/reset-password'):
+                    safe_base_url = redirect_url
+                elif parsed.scheme in ('http', 'https'):
+                    hostname = (parsed.hostname or '').lower()
+                    if hostname in ALLOWED_RESET_HOSTS or hostname.endswith('.getfoodpk.com'):
+                        safe_base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+            except Exception:
+                safe_base_url = None
         elif client_type == 'mobile':
             safe_base_url = 'foodsphere://reset-password'
         elif origin:
-            safe_base_url = f"{origin.rstrip('/')}/reset-password"
+            from urllib.parse import urlparse
+            try:
+                parsed_orig = urlparse(origin)
+                hostname_orig = (parsed_orig.hostname or '').lower()
+                if hostname_orig in ALLOWED_RESET_HOSTS or hostname_orig.endswith('.getfoodpk.com'):
+                    safe_base_url = f"{origin.rstrip('/')}/reset-password"
+            except Exception:
+                safe_base_url = None
 
         if safe_base_url:
             sep = '&' if '?' in safe_base_url else '?'

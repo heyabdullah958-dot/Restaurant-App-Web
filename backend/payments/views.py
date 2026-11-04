@@ -731,9 +731,11 @@ class CreatePayFastPaymentView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"PayFast URL creation failed: {str(e)}")
+            from django.conf import settings
+            msg = str(e) if settings.DEBUG else "Payment service encountered a temporary issue. Please try again."
             return Response({
                 'success': False,
-                'message': str(e)
+                'message': msg
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

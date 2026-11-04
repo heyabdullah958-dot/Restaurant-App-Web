@@ -37,14 +37,18 @@ class CouponValidateView(views.APIView):
 
 class CouponListCreateView(generics.ListCreateAPIView):
     serializer_class = CouponSerializer
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [permissions.IsAdminUser()]
-        return [permissions.IsAdminUser()]
+    permission_classes = [permissions.IsAdminUser]
 
     def get_queryset(self):
+        user = self.request.user
         qs = Coupon.objects.all().order_by('-created_at')
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                return Coupon.objects.none()
+            qs = qs.filter(restaurant=managed_restaurant)
+
         restaurant_id = self.request.query_params.get('restaurant_id')
         branch_id = self.request.query_params.get('branch_id')
         if restaurant_id:
@@ -53,10 +57,44 @@ class CouponListCreateView(generics.ListCreateAPIView):
             qs = qs.filter(branch_id=branch_id)
         return qs
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            from rest_framework.exceptions import PermissionDenied
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                raise PermissionDenied("You do not manage any restaurant.")
+            serializer.save(restaurant=managed_restaurant)
+        else:
+            serializer.save()
+
 class CouponDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAdminUser]
-    queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                return Coupon.objects.none()
+            return Coupon.objects.filter(restaurant=managed_restaurant)
+        return Coupon.objects.all()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            from rest_framework.exceptions import ValidationError
+            managed_restaurant = get_managed_restaurant(user)
+            restaurant = serializer.validated_data.get('restaurant')
+            if restaurant and restaurant != managed_restaurant:
+                raise ValidationError("You cannot reassign this coupon to another restaurant.")
+            serializer.save(restaurant=managed_restaurant)
+        else:
+            serializer.save()
 
 class ActiveCouponsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
@@ -84,7 +122,15 @@ class FlashDealListCreateView(generics.ListCreateAPIView):
         return [permissions.IsAdminUser()]
 
     def get_queryset(self):
+        user = self.request.user
         qs = FlashDeal.objects.all().prefetch_related('categories', 'menu_items').order_by('-created_at')
+        if user and user.is_authenticated and not user.is_superuser and user.is_staff:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                return FlashDeal.objects.none()
+            qs = qs.filter(restaurant=managed_restaurant)
+
         restaurant_id = self.request.query_params.get('restaurant_id')
         branch_id = self.request.query_params.get('branch_id')
         order_mode = self.request.query_params.get('order_mode')
@@ -96,6 +142,18 @@ class FlashDealListCreateView(generics.ListCreateAPIView):
         if order_mode:
             qs = qs.filter(order_mode__in=[order_mode, 'ALL'])
         return qs
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            from rest_framework.exceptions import PermissionDenied
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                raise PermissionDenied("You do not manage any restaurant.")
+            serializer.save(restaurant=managed_restaurant)
+        else:
+            serializer.save()
 
 
 class ActiveFlashDealsView(generics.ListAPIView):
@@ -131,13 +189,35 @@ class ActiveFlashDealsView(generics.ListAPIView):
 
 
 class FlashDealDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = FlashDeal.objects.all().prefetch_related('categories', 'menu_items')
     serializer_class = FlashDealSerializer
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user and user.is_authenticated and not user.is_superuser and user.is_staff:
+            from config.admin_utils import get_managed_restaurant
+            managed_restaurant = get_managed_restaurant(user)
+            if not managed_restaurant:
+                return FlashDeal.objects.none()
+            return FlashDeal.objects.filter(restaurant=managed_restaurant).prefetch_related('categories', 'menu_items')
+        return FlashDeal.objects.all().prefetch_related('categories', 'menu_items')
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_restaurant
+            from rest_framework.exceptions import ValidationError
+            managed_restaurant = get_managed_restaurant(user)
+            restaurant = serializer.validated_data.get('restaurant')
+            if restaurant and restaurant != managed_restaurant:
+                raise ValidationError("You cannot reassign this deal to another restaurant.")
+            serializer.save(restaurant=managed_restaurant)
+        else:
+            serializer.save()
 
 
 

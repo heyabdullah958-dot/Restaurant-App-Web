@@ -521,6 +521,20 @@ class PurgeOrdersView(APIView):
         return [IsSuperUser()]
 
     def post(self, request):
+        from django.conf import settings
+        if not settings.DEBUG:
+            return Response({
+                'success': False,
+                'message': 'Hard purge is strictly disabled in production environments.'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        confirm = request.data.get('confirm_purge')
+        if confirm != 'YES_PURGE_ALL_ORDERS':
+            return Response({
+                'success': False,
+                'message': 'Confirmation required. Pass {"confirm_purge": "YES_PURGE_ALL_ORDERS"}.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         from payments.models import Payment
         Payment.objects.all().delete()
         count, _ = Order.objects.all().delete()

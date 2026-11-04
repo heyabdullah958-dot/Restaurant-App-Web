@@ -293,10 +293,7 @@ REST_FRAMEWORK = {
 
 # Simple JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),    # FIX 1D: Extended from 60min → 6h to prevent
-                                                    # 3rd-4th launch 401 from token rotation race.
-                                                    # Frequent short-lived tokens + ROTATE_REFRESH_TOKENS=True
-                                                    # caused blacklisted token reuse on rapid relaunches.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Hardened 30-minute token window (FS-SEC-13)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),   # 30 days comfortable UX
     'ROTATE_REFRESH_TOKENS': True,      # Rotate refresh tokens
     'BLACKLIST_AFTER_ROTATION': True,   # Blacklist rotated tokens
@@ -311,8 +308,8 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS Settings — Hardened Multi-Tenant Configuration
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
@@ -328,7 +325,15 @@ CORS_ALLOWED_ORIGINS = [
     'http://10.0.2.2:8082',
     'https://foodsphere-admin.pages.dev',
     'https://admin-orpin-psi.vercel.app',
-    'https://foodsphere-admin.netlify.app',
+    'https://foodsphere-admin.vercel.app',
+    'https://getfood-app.pages.dev',
+    'https://seenbanao-foodsphere.pages.dev',
+    'https://dineatblue-foodsphere.pages.dev',
+    'https://jushhpk-foodsphere.pages.dev',
+    'https://tandooristoppk-foodsphere.pages.dev',
+    'https://sandmelts-foodsphere.pages.dev',
+    'https://birdmanfoodspk-foodsphere.pages.dev',
+    'https://getafomo-foodsphere.pages.dev',
     'https://blue.getfoodpk.com',
     'https://jushh.getfoodpk.com',
     'https://tandooristop.getfoodpk.com',
@@ -344,11 +349,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://192\.168\.\d+\.\d+(:\d+)?$",
     r"^http://10\.\d+\.\d+\.\d+(:\d+)?$",
     r"^http://172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+(:\d+)?$",
-    r"^https://.*\.pages\.dev$",
-    r"^https://.*\.vercel\.app$",
-    r"^https://.*\.netlify\.app$",
-    r"^https://.*\.expo\.dev$",
-    r"^exp://.*$",
+    r"^https://[a-zA-Z0-9_-]+-foodsphere\.pages\.dev$",
     r"^https://.*\.getfoodpk\.com$",
     r"^https://getfoodpk\.com$",
 ]
@@ -357,8 +358,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.getfoodpk.com',
     'https://getfoodpk.com',
     'https://www.getfoodpk.com',
-    'https://*.pages.dev',
-    'https://*.vercel.app',
+    'https://foodsphere-admin.pages.dev',
+    'https://admin-orpin-psi.vercel.app',
+    'https://foodsphere-admin.vercel.app',
+    'https://getfood-app.pages.dev',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

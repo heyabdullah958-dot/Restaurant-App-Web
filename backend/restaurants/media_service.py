@@ -80,6 +80,15 @@ def handle_media_upload_or_url(media_file=None, direct_url='', media_type='VIDEO
         is_video = (media_type == 'VIDEO') or content_type.startswith('video/')
         detected_type = 'VIDEO' if is_video else 'IMAGE'
 
+        ALLOWED_EXTENSIONS = {
+            'VIDEO': {'.mp4', '.mov', '.webm', '.m4v'},
+            'IMAGE': {'.jpg', '.jpeg', '.png', '.webp'}
+        }
+        raw_ext = os.path.splitext(getattr(media_file, 'name', ''))[1].lower()
+        if raw_ext and raw_ext not in ALLOWED_EXTENSIONS.get(detected_type, set()):
+            allowed_str = ', '.join(sorted(ALLOWED_EXTENSIONS[detected_type]))
+            raise ValueError(f"Invalid file extension '{raw_ext}'. Allowed for {detected_type}: {allowed_str}")
+
         # Check if Cloudinary is active
         is_cloudinary_active = getattr(settings, '_CLOUDINARY_ACTIVE', False) or bool(
             getattr(settings, 'CLOUDINARY_CLOUD_NAME', '') and
@@ -125,9 +134,9 @@ def handle_media_upload_or_url(media_file=None, direct_url='', media_type='VIDEO
             except Exception as e:
                 logger.warning(f"Cloudinary upload failed, falling back to local media storage: {e}")
 
-        # Local fallback file storage
+        # Local fallback file storage with extension allowlist
         ext = os.path.splitext(media_file.name)[1].lower()
-        if not ext:
+        if not ext or ext not in ALLOWED_EXTENSIONS.get(detected_type, set()):
             ext = '.mp4' if detected_type == 'VIDEO' else '.jpg'
         subfolder = 'dine_in_videos' if detected_type == 'VIDEO' else 'dine_in_posts'
         filename = f"{uuid.uuid4().hex[:12]}{ext}"

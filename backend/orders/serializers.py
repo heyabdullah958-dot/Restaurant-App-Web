@@ -489,16 +489,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 if updated == 0:
                     raise serializers.ValidationError("Coupon usage limit has been reached.")
 
-            # Loyalty Points Redemption
+            # Loyalty Points Redemption with Row-Level Locking
             loyalty_discount = Decimal('0.00')
             actual_pts_redeemed = 0
             if user and not user.is_guest and (use_loyalty or pts_to_redeem > 0):
-                user.refresh_from_db()
-                avail_pts = user.loyalty_points
-                rem_subtotal = max(Decimal('0.00'), subtotal - coupon_discount)
-                actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(rem_subtotal))
-                if actual_pts_redeemed > 0:
-                    loyalty_discount = Decimal(actual_pts_redeemed)
+                from django.contrib.auth import get_user_model
+                UserModel = get_user_model()
+                locked_user = UserModel.objects.select_for_update().filter(pk=user.pk).first()
+                if locked_user:
+                    avail_pts = locked_user.loyalty_points
+                    rem_subtotal = max(Decimal('0.00'), subtotal - coupon_discount)
+                    actual_pts_redeemed = min(pts_to_redeem if pts_to_redeem > 0 else avail_pts, avail_pts, int(rem_subtotal))
+                    if actual_pts_redeemed > 0:
+                        loyalty_discount = Decimal(actual_pts_redeemed)
 
             total = subtotal + delivery_fee - coupon_discount - loyalty_discount
             total = max(Decimal('0.00'), round(total, 2))
@@ -540,22 +543,24 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             except Exception as e:
                 logger.warning(f"[FLASH DEAL REDEMPTION LOGGING ERROR]: {e}")
 
-            # Deduct loyalty points if redeemed
+            # Deduct loyalty points if redeemed (Strict Concurrency Check)
             if user and not user.is_guest and actual_pts_redeemed > 0:
                 from django.contrib.auth import get_user_model
-                User = get_user_model()
-                updated_count = User.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(
+                UserModel = get_user_model()
+                updated_count = UserModel.objects.filter(pk=user.pk, loyalty_points__gte=actual_pts_redeemed).update(
                     loyalty_points=F('loyalty_points') - actual_pts_redeemed
                 )
-                if updated_count > 0:
-                    from users.models import LoyaltyTransaction
-                    LoyaltyTransaction.objects.create(
-                        user=user,
-                        order=order,
-                        points=-actual_pts_redeemed,
-                        transaction_type='redeemed',
-                        description=f"Redeemed on Order #{order.id}"
-                    )
+                if updated_count == 0:
+                    raise serializers.ValidationError({"loyalty_points": "Insufficient loyalty points available or points already redeemed."})
+
+                from users.models import LoyaltyTransaction
+                LoyaltyTransaction.objects.create(
+                    user=user,
+                    order=order,
+                    points=-actual_pts_redeemed,
+                    transaction_type='redeemed',
+                    description=f"Redeemed on Order #{order.id}"
+                )
 
             # Calculate and award earned loyalty points if configured
             ratio = getattr(restaurant, 'loyalty_points_ratio', 100)
@@ -660,7 +665,12 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'delivery_address', 'delivery_lat', 'delivery_lng', 'subtotal', 'delivery_fee',
             'discount', 'total', 'special_instructions', 'items', 'created_at', 'updated_at'
         )
-        read_only_fields = ('id', 'display_order_id', 'tracking_token')
+        read_only_fields = (
+            'id', 'display_order_id', 'tracking_token', 'restaurant',
+            'subtotal', 'delivery_fee', 'discount', 'total',
+            'cod_settled', 'cod_settled_at', 'payment_method',
+            'created_at', 'updated_at'
+        )
 
     def validate(self, attrs):
         # State transition validation (lock delivered orders / block invalid cancellations)

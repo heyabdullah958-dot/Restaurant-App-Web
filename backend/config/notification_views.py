@@ -167,14 +167,6 @@ class SendNotificationView(APIView):
 
     def post(self, request):
         from firebase_admin import messaging
-        
-        app = get_firebase_app()
-        if not app:
-            return Response({
-                'error': 'FCM_SERVICE_ACCOUNT_JSON not configured.',
-                'hint': 'Add Firebase service account JSON to Render environment variables.',
-                'status': 'not_configured'
-            }, status=501)
 
         title = request.data.get('title', '')
         body = request.data.get('body', '')
@@ -183,14 +175,30 @@ class SendNotificationView(APIView):
         if not title or not body:
             return Response({'error': 'title and body are required'}, status=400)
 
+        # Enforce authorization before checking external service availability
         if target == 'all':
+            if not request.user.is_superuser:
+                return Response({'error': 'Only super administrators can broadcast notifications to all users.'}, status=403)
             topic = 'all_users'
         else:
             try:
                 restaurant_id = int(target)
+                if not request.user.is_superuser:
+                    from config.admin_utils import get_managed_restaurant
+                    managed_restaurant = get_managed_restaurant(request.user)
+                    if not managed_restaurant or managed_restaurant.id != restaurant_id:
+                        return Response({'error': 'You do not have permission to send notifications for this restaurant.'}, status=403)
                 topic = f'restaurant_{restaurant_id}'
             except (ValueError, TypeError):
                 return Response({'error': 'target must be "all" or a restaurant ID integer'}, status=400)
+
+        app = get_firebase_app()
+        if not app:
+            return Response({
+                'error': 'FCM_SERVICE_ACCOUNT_JSON not configured.',
+                'hint': 'Add Firebase service account JSON to Render environment variables.',
+                'status': 'not_configured'
+            }, status=501)
 
         message = messaging.Message(
             notification=messaging.Notification(title=title, body=body),

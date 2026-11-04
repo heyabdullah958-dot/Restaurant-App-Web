@@ -65,7 +65,7 @@
               "armeabi-v7a",
               "x86_64"
             ],
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": false
           }
         }
       ],

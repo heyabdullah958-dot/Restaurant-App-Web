@@ -135,9 +135,12 @@ class RestaurantMenuView(generics.GenericAPIView):
                 'data': serializer.data
             })
         except Exception as e:
+            logger.error(f"Restaurant menu retrieval failed: {e}")
+            from django.conf import settings
+            msg = str(e) if settings.DEBUG else "An unexpected error occurred while loading the menu."
             return Response({
                 'success': False,
-                'message': str(e)
+                'message': msg
             }, status=500)
 
 
@@ -448,6 +451,22 @@ class AdminBranchRiderViewSet(viewsets.ModelViewSet):
                 if not managed_restaurant or branch.restaurant != managed_restaurant:
                     from rest_framework.exceptions import PermissionDenied
                     raise PermissionDenied("You can only add riders for branches of your managed restaurant.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if not user.is_superuser:
+            from config.admin_utils import get_managed_branch, get_managed_restaurant
+            from rest_framework.exceptions import PermissionDenied
+            managed_branch = get_managed_branch(user)
+            branch = serializer.validated_data.get('branch')
+            if branch:
+                if managed_branch and branch != managed_branch:
+                    raise PermissionDenied("You cannot reassign riders to another branch.")
+                elif not managed_branch:
+                    managed_restaurant = get_managed_restaurant(user)
+                    if not managed_restaurant or branch.restaurant != managed_restaurant:
+                        raise PermissionDenied("You cannot reassign riders to another restaurant.")
         serializer.save()
 
 
@@ -770,7 +789,10 @@ class PublicSearchView(APIView):
                 'dishes': dishes_data
             })
         except Exception as e:
-            return Response({'success': False, 'message': str(e)}, status=500)
+            logger.error(f"Public search query failed: {e}")
+            from django.conf import settings
+            msg = str(e) if settings.DEBUG else "An error occurred while processing the search query."
+            return Response({'success': False, 'message': msg}, status=500)
 
 
 class RestaurantMediaPostViewSet(viewsets.ModelViewSet):

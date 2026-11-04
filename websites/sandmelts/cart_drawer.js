@@ -6,6 +6,16 @@
 
 (function () {
   'use strict';
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
 
   const DELIVERY_FEE = 150;
   const ACTIVE_ORDER_KEY = 'foodsphere_active_guest_order_v1';
@@ -668,7 +678,7 @@
           <div class="cd-item-card">
             ${imgHtml}
             <div class="cd-item-info">
-              <div class="cd-item-name">${item.name}</div>
+              <div class="cd-item-name">${escapeHtml(item.name)}</div>
               <div class="cd-item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
             </div>
             <div class="cd-qty-controls">
@@ -747,24 +757,24 @@
 
           <div class="cd-form-group">
             <label class="cd-form-label">Full Name *</label>
-            <input type="text" class="cd-form-input" id="cd-input-name" placeholder="Enter your full name" value="${cartState.customerName || ''}" required />
+            <input type="text" class="cd-form-input" id="cd-input-name" placeholder="Enter your full name" value="${escapeHtml(cartState.customerName || '')}" required />
           </div>
 
           <div class="cd-form-group">
             <label class="cd-form-label">Mobile Phone Number *</label>
-            <input type="tel" class="cd-form-input" id="cd-input-phone" placeholder="03XX-XXXXXXX" value="${cartState.customerPhone || ''}" required />
+            <input type="tel" class="cd-form-input" id="cd-input-phone" placeholder="03XX-XXXXXXX" value="${escapeHtml(cartState.customerPhone || '')}" required />
           </div>
 
           ${isDelivery ? `
             <div class="cd-form-group">
               <label class="cd-form-label">Delivery Address *</label>
-              <input type="text" class="cd-form-input" id="cd-input-address" placeholder="House/Flat #, Street, Area, Landmark" value="${cartState.customerAddress || ''}" required />
+              <input type="text" class="cd-form-input" id="cd-input-address" placeholder="House/Flat #, Street, Area, Landmark" value="${escapeHtml(cartState.customerAddress || '')}" required />
             </div>
           ` : ''}
 
           <div class="cd-form-group">
             <label class="cd-form-label">Special Instructions (Optional)</label>
-            <input type="text" class="cd-form-input" id="cd-input-instructions" placeholder="e.g. Less spicy, call on arrival..." value="${cartState.instructions || ''}" />
+            <input type="text" class="cd-form-input" id="cd-input-instructions" placeholder="e.g. Less spicy, call on arrival..." value="${escapeHtml(cartState.instructions || '')}" />
           </div>
 
           <!-- Order Summary Breakdown -->
@@ -823,12 +833,12 @@
             <h3 style="font-size:20px; font-weight:900; margin-bottom:4px;">Active Order Tracking</h3>
             <p style="font-size:13px; color:var(--cd-muted);">Your order is active and saved in this browser.</p>
             
-            <div class="cd-success-order-id">${displayId}</div>
+            <div class="cd-success-order-id">${escapeHtml(displayId)}</div>
 
             <div class="cd-summary-box" style="text-align:left; margin-bottom:24px;">
               <div class="cd-summary-row">
                 <span>Branch:</span>
-                <span style="color:#ffffff; font-weight:700;">${cartState.selectedBranch || activeStored?.selectedBranch || 'Main Branch'}</span>
+                <span style="color:#ffffff; font-weight:700;">${escapeHtml(cartState.selectedBranch || activeStored?.selectedBranch || 'Main Branch')}</span>
               </div>
               <div class="cd-summary-row">
                 <span>Payment:</span>
@@ -836,7 +846,7 @@
               </div>
               <div class="cd-summary-row">
                 <span>Current Status:</span>
-                <span style="color:#10B981; font-weight:900;">${statusLabel}</span>
+                <span style="color:#10B981; font-weight:900;">${escapeHtml(statusLabel)}</span>
               </div>
             </div>
 
