@@ -171,7 +171,12 @@ class RestaurantAnalyticsView(APIView):
             })
 
         brand_revenue_30d = float(orders_30d.filter(status='delivered').aggregate(Sum('total'))['total__sum'] or 0)
-        branches = Branch.objects.filter(restaurant=restaurant)
+        from config.admin_utils import get_managed_branch
+        managed_branch = get_managed_branch(request.user) if not request.user.is_superuser else None
+        if managed_branch and managed_branch.restaurant_id == restaurant.id:
+            branches = Branch.objects.filter(id=managed_branch.id)
+        else:
+            branches = Branch.objects.filter(restaurant=restaurant)
         branch_stats = []
 
         for b in branches:

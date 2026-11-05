@@ -428,8 +428,8 @@ class RestaurantReviewSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        order = attrs.get('order')
-        restaurant = attrs.get('restaurant')
+        order = attrs.get('order') or (self.instance.order if self.instance else None)
+        restaurant = attrs.get('restaurant') or (self.instance.restaurant if self.instance else None)
 
         if not restaurant and order and hasattr(order, 'restaurant'):
             attrs['restaurant'] = order.restaurant

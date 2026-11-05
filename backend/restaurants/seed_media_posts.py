@@ -25,12 +25,13 @@ def seed():
                 'caption': "Fresh Atlantic catch, jumbo prawns & calamari steamed to perfection. Live table-side presentation.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
                 'linked_menu_item': platter_item,
                 'is_active': True,
             }
         )
         post1.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4'
+        post1.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png'
         post1.save()
 
         post2, _ = RestaurantMediaPost.objects.get_or_create(
@@ -40,12 +41,13 @@ def seed():
                 'caption': "Crispy shredded pastry wrapped around succulent king prawns with house spicy emulsion.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png',
                 'linked_menu_item': prawns_item,
                 'is_active': True,
             }
         )
         post2.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4'
+        post2.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png'
         post2.save()
         print("[OK] Dine At Blue posts seeded")
     except Restaurant.DoesNotExist:
@@ -64,12 +66,13 @@ def seed():
                 'caption': "Direct from our Johar Town live clay ovens! Stuffed with 100% mozzarella and grilled tikka boti.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/cheese_naan.jpg',
                 'linked_menu_item': naan_item,
                 'is_active': True,
             }
         )
         post3.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4'
+        post3.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/cheese_naan.jpg'
         post3.save()
 
         post4, _ = RestaurantMediaPost.objects.get_or_create(
@@ -79,12 +82,13 @@ def seed():
                 'caption': "Charcoal-kissed Malai Tikka & Seekh Kebabs served sizzling on iron platters.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/tandoori_chicken_single.jpg',
                 'linked_menu_item': bbq_item,
                 'is_active': True,
             }
         )
         post4.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4'
+        post4.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/tandoori_chicken_single.jpg'
         post4.save()
         print("[OK] Tandoori Stop posts seeded")
     except Restaurant.DoesNotExist:
@@ -103,12 +107,13 @@ def seed():
                 'caption': "Thinly shaved spiced chicken doner piled high over golden fries and garlic mayo.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/jushhpk/chicken_doner_fries.jpg',
                 'linked_menu_item': doner_item,
                 'is_active': True,
             }
         )
         post5.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4'
+        post5.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/jushhpk/chicken_doner_fries.jpg'
         post5.save()
 
         post6, _ = RestaurantMediaPost.objects.get_or_create(
@@ -118,12 +123,13 @@ def seed():
                 'caption': "Slow rotisserie grilled whole chicken basted with authentic Gulf spices over spiced Mandi rice.",
                 'media_type': 'VIDEO',
                 'media_url': 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4',
-                'thumbnail_url': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80',
+                'thumbnail_url': 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg',
                 'linked_menu_item': shawaya_item,
                 'is_active': True,
             }
         )
         post6.media_url = 'https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4'
+        post6.thumbnail_url = 'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg'
         post6.save()
         print("[OK] Jushh PK posts seeded")
     except Restaurant.DoesNotExist:

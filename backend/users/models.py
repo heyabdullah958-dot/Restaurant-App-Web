@@ -9,6 +9,14 @@ class User(AbstractUser):
     must_change_password = models.BooleanField(default=False)
     password_changed_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(loyalty_points__gte=0),
+                name='non_negative_loyalty_points'
+            )
+        ]
+
     def __str__(self):
         if self.is_guest:
             return f"Guest_{self.id or self.pk or 'new'}"

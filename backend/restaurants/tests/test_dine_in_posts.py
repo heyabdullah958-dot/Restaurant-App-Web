@@ -172,3 +172,41 @@ class DineInPostsTestSuite(TestCase):
         self.assertNotIn(post_ids[1], remaining_ids)
         self.assertIn(post_ids[10], remaining_ids)
         self.assertIn(post_ids[11], remaining_ids)
+
+    def test_06_inactive_post_status_toggle_and_delete(self):
+        """
+        Verify that inactive posts can be toggled to active, back to inactive,
+        and deleted by the brand manager without 404 Not Found errors.
+        """
+        from restaurants.models import RestaurantMediaPost
+        self.client.force_authenticate(user=self.dab_manager)
+
+        # 1. Create an inactive post
+        inactive_post = RestaurantMediaPost.objects.create(
+            restaurant=self.dab,
+            title="Draft Inactive Reel",
+            media_url="https://example.com/draft_reel.mp4",
+            media_type="VIDEO",
+            is_active=False
+        )
+
+        # 2. Toggle status to active -> HTTP 200
+        patch_res = self.client.patch(f'/api/dine-in-posts/{inactive_post.id}/', {
+            'is_active': True
+        })
+        self.assertEqual(patch_res.status_code, status.HTTP_200_OK)
+        inactive_post.refresh_from_db()
+        self.assertTrue(inactive_post.is_active)
+
+        # 3. Toggle status back to inactive -> HTTP 200
+        patch_res2 = self.client.patch(f'/api/dine-in-posts/{inactive_post.id}/', {
+            'is_active': False
+        })
+        self.assertEqual(patch_res2.status_code, status.HTTP_200_OK)
+        inactive_post.refresh_from_db()
+        self.assertFalse(inactive_post.is_active)
+
+        # 4. Delete the inactive post -> HTTP 204 No Content
+        del_res = self.client.delete(f'/api/dine-in-posts/{inactive_post.id}/')
+        self.assertEqual(del_res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(RestaurantMediaPost.objects.filter(id=inactive_post.id).exists())

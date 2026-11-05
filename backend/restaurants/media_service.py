@@ -85,6 +85,21 @@ def handle_media_upload_or_url(media_file=None, direct_url='', media_type='VIDEO
             'IMAGE': {'.jpg', '.jpeg', '.png', '.webp'}
         }
         raw_ext = os.path.splitext(getattr(media_file, 'name', ''))[1].lower()
+        if not raw_ext:
+            if 'mp4' in content_type:
+                raw_ext = '.mp4'
+            elif 'quicktime' in content_type or 'mov' in content_type:
+                raw_ext = '.mov'
+            elif 'webm' in content_type:
+                raw_ext = '.webm'
+            elif 'png' in content_type:
+                raw_ext = '.png'
+            elif 'jpeg' in content_type or 'jpg' in content_type:
+                raw_ext = '.jpg'
+            else:
+                raw_ext = '.mp4' if is_video else '.jpg'
+            if hasattr(media_file, 'name') and media_file.name:
+                media_file.name = f"{media_file.name}{raw_ext}"
         if raw_ext and raw_ext not in ALLOWED_EXTENSIONS.get(detected_type, set()):
             allowed_str = ', '.join(sorted(ALLOWED_EXTENSIONS[detected_type]))
             raise ValueError(f"Invalid file extension '{raw_ext}'. Allowed for {detected_type}: {allowed_str}")

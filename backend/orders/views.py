@@ -285,7 +285,8 @@ class OrderTrackView(APIView):
     """
     authentication_classes = [OptionalJWTAuthentication]
     permission_classes = [permissions.AllowAny]
-    throttle_classes = []
+    from config.throttles import OrderTrackingThrottle
+    throttle_classes = [OrderTrackingThrottle]
 
     def get(self, request, pk=None):
         token = request.query_params.get('token') or request.query_params.get('tracking_token')
@@ -319,6 +320,12 @@ class OrderTrackView(APIView):
         has_valid_token = bool(order.tracking_token and token and str(order.tracking_token).strip() == str(token).strip())
 
         if not (is_owner_or_staff or has_valid_token):
+            raw_name = data.get('guest_name')
+            if raw_name:
+                parts = str(raw_name).strip().split()
+                data['guest_name'] = ' '.join([p[0] + '***' if len(p) > 1 else p + '*' for p in parts])
+            else:
+                data['guest_name'] = "Valued Customer"
             data['guest_phone'] = None
             data['delivery_address'] = "[Protected]"
             data['delivery_lat'] = None
@@ -448,7 +455,8 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
                         )
                     elif tx.transaction_type == 'earned':
                         pts_revert = abs(tx.points)
-                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=F('loyalty_points') - pts_revert)
+                        from django.db.models.functions import Greatest
+                        User.objects.filter(pk=instance.user.pk).update(loyalty_points=Greatest(F('loyalty_points') - pts_revert, 0))
                         LoyaltyTransaction.objects.create(
                             user=instance.user,
                             order=instance,
