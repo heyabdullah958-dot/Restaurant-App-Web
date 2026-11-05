@@ -760,6 +760,26 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     }
   }, []);
 
+  // Phase 15: Background Asset Prefetching for 0ms Instant Cover & Logo Renders
+  React.useEffect(() => {
+    const assetsToPrefetch = [
+      // 4 Active Brand Covers
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/menu_items/jushh_banner_collage.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/v1/restaurants/covers/tandoori_stop_cover_jnfd2d',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/getafomo/cover.png',
+      // 4 Active Brand Logos
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/dineatblue/logo.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/jushhpk/logo.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/tandooristop/logo.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/getafomo/logo.png',
+    ];
+
+    assetsToPrefetch.forEach((url) => {
+      Image.prefetch(url).catch(() => {});
+    });
+  }, []);
+
   useFocusEffect(
     React.useCallback(() => {
       RNStatusBar.setBarStyle('dark-content', true);
@@ -821,8 +841,22 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [navigation]);
 
   const handlePressBrand = React.useCallback((slug: string) => {
-    navigation.navigate('Restaurant', { slug });
-  }, [navigation]);
+    const matched = restaurants?.find((r: any) => r.slug === slug) || FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
+    navigation.navigate('Restaurant', {
+      slug,
+      initialRestaurant: matched ? {
+        id: matched.id,
+        name: matched.name,
+        slug: matched.slug,
+        logo: matched.logo,
+        banner_image: matched.banner_image || (matched as any).cover_image,
+        cuisine_type: matched.cuisine_type,
+        rating: matched.rating,
+        delivery_time: matched.delivery_time,
+        branches: matched.branches,
+      } : undefined,
+    });
+  }, [navigation, restaurants]);
 
   const handlePressBanner = React.useCallback((deal?: any) => {
     if (deal) {
@@ -839,8 +873,20 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       dispatch(applyPromo(promoPayload));
 
       if (brand?.slug) {
+        const matched = restaurants?.find((r: any) => r.slug === brand.slug) || FALLBACK_RESTAURANTS.find((r) => r.slug === brand.slug);
         navigation.navigate('Restaurant', {
           slug: brand.slug,
+          initialRestaurant: matched ? {
+            id: matched.id,
+            name: matched.name,
+            slug: matched.slug,
+            logo: matched.logo,
+            banner_image: matched.banner_image || (matched as any).cover_image,
+            cuisine_type: matched.cuisine_type,
+            rating: matched.rating,
+            delivery_time: matched.delivery_time,
+            branches: matched.branches,
+          } : undefined,
           flashDealClaimed: {
             id: deal.id,
             title: deal.title,
@@ -975,7 +1021,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
       <DineInVideoFeed
         fulfillmentMode={fulfillmentMode}
-        onSelectRestaurant={(slug) => navigation.navigate('Restaurant', { slug })}
+        onSelectRestaurant={handlePressBrand}
       />
 
       <View style={styles.sectionHeader}>
