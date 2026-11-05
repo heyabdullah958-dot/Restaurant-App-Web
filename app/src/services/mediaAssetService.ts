@@ -144,6 +144,27 @@ export const BRAND_ORIGINAL_ASSETS: Record<string, string> = {
  * Automatically injects Cloudinary transformations (f_auto,q_auto,w_400) to shrink menu
  * thumbnails from raw 2MB uploads down to ultra-fast ~30KB assets with <50ms load time.
  */
+export const optimizeCloudinaryVideoUrl = (
+  url: string | null | undefined,
+  width = 540,
+  height = 960
+): string => {
+  if (!url || typeof url !== 'string') return url || '';
+  if (!url.includes('cloudinary.com')) return url;
+
+  if (url.includes('/video/upload/')) {
+    const transform = 'f_mp4,q_auto,w_' + width + ',h_' + height + ',c_fill';
+    if (url.includes('/video/upload/' + transform + '/')) {
+      return url;
+    }
+    if (url.includes('/video/upload/f_') || url.includes('/video/upload/w_') || url.includes('/video/upload/c_')) {
+      return url.replace(/\/video\/upload\/[^\/]+\//, '/video/upload/' + transform + '/');
+    }
+    return url.replace('/video/upload/', '/video/upload/' + transform + '/');
+  }
+  return url;
+};
+
 export const optimizeCloudinaryUrl = (url: string | null | undefined, width = 400): string => {
   if (!url || typeof url !== 'string') return url || '';
   if (!url.includes('cloudinary.com')) return url;
@@ -241,7 +262,7 @@ export const isImageAppropriateForBrand = (url: string, brandKey?: string | numb
  * Cross-references item.image_url, item.image, and brand-specific asset dictionaries.
  * Returns null if no original photo exists or if the photo belongs to another brand.
  */
-export const resolveItemImage = (item?: any, restaurantIdOrSlug?: string | number): string | null => {
+export const resolveItemImage = (item?: any, restaurantIdOrSlug?: string | number, targetWidth: number = 240): string | null => {
   if (!item) return null;
 
   const brandKey = restaurantIdOrSlug || item?.restaurant_slug || item?.restaurant_id || item?.restaurant;
@@ -249,7 +270,7 @@ export const resolveItemImage = (item?: any, restaurantIdOrSlug?: string | numbe
 
   if (isValidOriginalImage(rawUrl)) {
     if (!brandKey || isImageAppropriateForBrand(rawUrl, brandKey)) {
-      return optimizeCloudinaryUrl(rawUrl, 400);
+      return optimizeCloudinaryUrl(rawUrl, targetWidth);
     }
   }
 
@@ -260,19 +281,19 @@ export const resolveItemImage = (item?: any, restaurantIdOrSlug?: string | numbe
 
     if (key.includes('blue') || key === '2') {
       const match = BLUE_ORIGINAL_ASSETS[itemName];
-      return match ? optimizeCloudinaryUrl(match, 400) : null;
+      return match ? optimizeCloudinaryUrl(match, targetWidth) : null;
     }
     if (key.includes('jush') || key === '3') {
       const match = JUSHH_ORIGINAL_ASSETS[itemName];
-      return match ? optimizeCloudinaryUrl(match, 400) : null;
+      return match ? optimizeCloudinaryUrl(match, targetWidth) : null;
     }
     if (key.includes('tandoori') || key === '4') {
       const match = TANDOORI_ORIGINAL_ASSETS[itemName];
-      return match ? optimizeCloudinaryUrl(match, 400) : null;
+      return match ? optimizeCloudinaryUrl(match, targetWidth) : null;
     }
     if (key.includes('fomo') || key === '7') {
       const match = FOMO_ORIGINAL_ASSETS[itemName];
-      return match ? optimizeCloudinaryUrl(match, 400) : null;
+      return match ? optimizeCloudinaryUrl(match, targetWidth) : null;
     }
 
     // If brand is unknown, return null instead of leaking other brands
@@ -309,12 +330,12 @@ export const getBrandLogo = (restaurantIdOrSlug?: string | number): string => {
 };
 
 export const resolveItemImageWithLogoFallback = (item?: any, restaurantIdOrSlug?: string | number): { uri: string; isLogoFallback: boolean } => {
-  const photo = resolveItemImage(item, restaurantIdOrSlug);
+  const photo = resolveItemImage(item, restaurantIdOrSlug, 240);
   if (photo) {
-    return { uri: optimizeCloudinaryUrl(photo, 400), isLogoFallback: false };
+    return { uri: optimizeCloudinaryUrl(photo, 240), isLogoFallback: false };
   }
   const brandKey = restaurantIdOrSlug || item?.restaurant_slug || item?.restaurant_id || item?.restaurant || 'dineatblue';
-  return { uri: optimizeCloudinaryUrl(getBrandLogo(brandKey), 400), isLogoFallback: true };
+  return { uri: optimizeCloudinaryUrl(getBrandLogo(brandKey), 200), isLogoFallback: true };
 };
 
 export const BRAND_COVERS: Record<string, string> = {
