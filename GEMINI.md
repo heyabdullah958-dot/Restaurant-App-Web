@@ -230,6 +230,8 @@ FoodSphere/
 | Phase 16 Admin Dine-In Post Management Fixes | ✅ Completed (Expo-av video preview modal with native controls, status toggle/delete 404 bypass in DRF detail scoping, image picker array migration, multipart/form-data boundary fix, 6/6 tests pass) | Done |
 | Phase 17 Customer App Reels Lag Elimination, Menu Image Pre-Warming & Fabric Modal Crash Resolution | ✅ Completed (Zero-reload static video template via injectJavaScript, native Image poster backdrop, React.memo ReelSlide, background Image.prefetch on restaurant/home, #F5EBE1 warm culinary placeholders, unconditional hook refactor in DishCustomizeModal, 0 errors) | Done |
 | Phase 18 Metro Bundler Crash on Admin App (expo-av Subpath Isolation) | ✅ Completed (Subpath import isolation to expo-av/build/Video & Video.types, Windows sibling collision bypassed, 0 TypeScript errors, 1232 modules bundled, HTTP 200 on Android & iOS, 0 errors) | Done |
+| Phase 19 Reels Scroll Physics & Audio Decoupling to Native TikTok/Instagram Fluidity | ✅ Completed (Strict 1-slide deceleration & momentum arrest, dynamic onLayout modal height eliminating card bleed, 0ms hardware audio muting on pause, mid-gesture 60% viewability switching, 0 errors) | Done |
+| Phase 20 Manager App ExponentAV Startup Crash Fix & Safe Video Preview | ✅ Completed (Purged uncompiled expo-av native dependency, safe native preview card with Linking.openURL hardware playback, ExponentAV 0 occurrences in bundle, 0 TypeScript errors, HTTP 200) | Done |
 | Firebase Push Notifications | ⏳ Pending (Awaiting client Firebase JSON key) | Client Handoff |
 | App store submission | ⏳ Pending (Awaiting client developer accounts) | TBD |
 
