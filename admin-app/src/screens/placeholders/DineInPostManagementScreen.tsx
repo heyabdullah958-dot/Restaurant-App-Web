@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,12 @@ import {
   RefreshControl,
   Switch,
   ImageStyle,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import Video from 'expo-av/build/Video';
+import { ResizeMode } from 'expo-av/build/Video.types';
 import { useAppSelector } from '../../store';
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import {
@@ -31,6 +34,8 @@ import {
   fetchRestaurants,
   api
 } from '../../services/api';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const DineInPostManagementScreen = () => {
   const { user, role } = useAppSelector((state) => state.auth);
@@ -61,6 +66,12 @@ export const DineInPostManagementScreen = () => {
   const [pickedAsset, setPickedAsset] = useState<any>(null);
   const [linkedItemId, setLinkedItemId] = useState<number | null>(null);
   const [isPostActive, setIsPostActive] = useState<boolean>(true);
+
+  // Video / Photo Preview Modal State
+  const [previewVisible, setPreviewVisible] = useState<boolean>(false);
+  const [previewPost, setPreviewPost] = useState<DineInMediaPost | null>(null);
+  const [isVideoBuffering, setIsVideoBuffering] = useState<boolean>(false);
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
 
   // Initial load
   useEffect(() => {
@@ -140,7 +151,7 @@ export const DineInPostManagementScreen = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ['images', 'videos'],
         quality: 0.8,
         allowsEditing: false,
       });
@@ -148,11 +159,12 @@ export const DineInPostManagementScreen = () => {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         setPickedAsset(asset);
-        if (asset.type === 'video' || asset.uri.toLowerCase().endsWith('.mp4')) {
-          setMediaType('VIDEO');
-        } else {
-          setMediaType('IMAGE');
-        }
+        const isVid =
+          asset.type === 'video' ||
+          Boolean(asset.mimeType && asset.mimeType.startsWith('video/')) ||
+          (asset.fileName && /\.(mp4|mov|webm|m4v|3gp)$/i.test(asset.fileName)) ||
+          (asset.uri && /\.(mp4|mov|webm|m4v|3gp)$/i.test(asset.uri));
+        setMediaType(isVid ? 'VIDEO' : 'IMAGE');
       }
     } catch (err) {
       Alert.alert('Media Picker Error', 'Could not open media library.');
@@ -191,14 +203,40 @@ export const DineInPostManagementScreen = () => {
 
       if (pickedAsset) {
         const uri = pickedAsset.uri;
-        const uriParts = uri.split('.');
-        const fileType = uriParts[uriParts.length - 1];
         const isVid = mediaType === 'VIDEO';
+
+        // Extract a clean file extension
+        let ext = isVid ? 'mp4' : 'jpg';
+        if (pickedAsset.fileName && pickedAsset.fileName.includes('.')) {
+          const raw = pickedAsset.fileName.split('.').pop()?.toLowerCase();
+          if (raw && raw.length <= 4) ext = raw;
+        } else if (pickedAsset.mimeType) {
+          if (pickedAsset.mimeType.includes('quicktime')) ext = 'mov';
+          else if (pickedAsset.mimeType.includes('mp4')) ext = 'mp4';
+          else if (pickedAsset.mimeType.includes('png')) ext = 'png';
+          else if (pickedAsset.mimeType.includes('webp')) ext = 'webp';
+          else if (pickedAsset.mimeType.includes('jpeg') || pickedAsset.mimeType.includes('jpg')) ext = 'jpg';
+        } else if (uri && uri.includes('.')) {
+          const raw = uri.split('.').pop()?.split('?')[0]?.toLowerCase();
+          if (raw && raw.length <= 4 && !raw.includes('/')) ext = raw;
+        }
+
+        const mimeType =
+          pickedAsset.mimeType ||
+          (isVid
+            ? ext === 'mov'
+              ? 'video/quicktime'
+              : 'video/mp4'
+            : ext === 'png'
+            ? 'image/png'
+            : 'image/jpeg');
+
+        const fileName = pickedAsset.fileName || `reel_${Date.now()}.${ext}`;
 
         (formData as any).append('media_file', {
           uri,
-          name: `upload_${Date.now()}.${fileType || (isVid ? 'mp4' : 'jpg')}`,
-          type: isVid ? `video/${fileType || 'mp4'}` : `image/${fileType || 'jpeg'}`,
+          name: fileName,
+          type: mimeType,
         });
       } else {
         formData.append('media_url', mediaUrl.trim());
@@ -215,7 +253,13 @@ export const DineInPostManagementScreen = () => {
       resetModal();
       loadPosts();
     } catch (err: any) {
-      Alert.alert('Upload Failed', err?.response?.data?.error || err?.message || 'Could not upload post.');
+      const errorMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
+        err?.message ||
+        'Could not upload post.';
+      Alert.alert('Upload Failed', errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -231,14 +275,32 @@ export const DineInPostManagementScreen = () => {
     setIsPostActive(true);
   };
 
+  const handleOpenPreview = (post: DineInMediaPost) => {
+    setPreviewPost(post);
+    setIsVideoBuffering(false);
+    setPreviewVisible(true);
+  };
+
   const handleToggleStatus = async (post: DineInMediaPost) => {
+    setActionLoadingId(post.id);
     try {
-      await updateDineInPost(post.id, { is_active: !post.is_active });
+      const nextStatus = !post.is_active;
+      const updated = await updateDineInPost(post.id, { is_active: nextStatus });
       setPosts((prev) =>
-        prev.map((p) => (p.id === post.id ? { ...p, is_active: !p.is_active } : p))
+        prev.map((p) => (p.id === post.id ? { ...p, is_active: updated.is_active } : p))
       );
+      if (previewPost && previewPost.id === post.id) {
+        setPreviewPost((prev) => (prev ? { ...prev, is_active: updated.is_active } : null));
+      }
     } catch (err: any) {
-      Alert.alert('Error', 'Failed to update post status.');
+      const errorMsg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Failed to update post status.';
+      Alert.alert('Status Error', errorMsg);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -252,11 +314,23 @@ export const DineInPostManagementScreen = () => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            setActionLoadingId(post.id);
             try {
               await deleteDineInPost(post.id);
               setPosts((prev) => prev.filter((p) => p.id !== post.id));
+              if (previewPost && previewPost.id === post.id) {
+                setPreviewVisible(false);
+                setPreviewPost(null);
+              }
             } catch (err: any) {
-              Alert.alert('Error', 'Failed to delete post.');
+              const errorMsg =
+                err?.response?.data?.detail ||
+                err?.response?.data?.error ||
+                err?.message ||
+                'Failed to delete post.';
+              Alert.alert('Delete Error', errorMsg);
+            } finally {
+              setActionLoadingId(null);
             }
           },
         },
@@ -266,13 +340,35 @@ export const DineInPostManagementScreen = () => {
 
   const renderPostItem = ({ item }: { item: DineInMediaPost }) => (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      {/* Media Image / Thumbnail */}
-      <View style={styles.mediaContainer}>
+      {/* Media Image / Thumbnail & Tap-to-Watch */}
+      <TouchableOpacity
+        style={styles.mediaContainer}
+        activeOpacity={0.88}
+        onPress={() => handleOpenPreview(item)}
+      >
         <Image
           source={{ uri: item.thumbnail_url || item.media_url }}
           style={styles.mediaImage}
           resizeMode="cover"
         />
+
+        {/* Central Play Overlay Hint */}
+        <View style={styles.playOverlay}>
+          <View style={styles.playCircle}>
+            <Ionicons
+              name={item.media_type === 'VIDEO' ? 'play' : 'expand'}
+              size={24}
+              color="#FFF"
+              style={{ marginLeft: item.media_type === 'VIDEO' ? 2 : 0 }}
+            />
+          </View>
+          <View style={styles.playTag}>
+            <Text style={styles.playTagText}>
+              {item.media_type === 'VIDEO' ? 'Tap to Watch Reel' : 'Tap to View Photo'}
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.mediaBadges}>
           <View style={[styles.typeBadge, { backgroundColor: item.media_type === 'VIDEO' ? '#EF4444' : '#3B82F6' }]}>
             <Ionicons name={item.media_type === 'VIDEO' ? 'videocam' : 'image'} size={12} color="#FFF" />
@@ -282,7 +378,7 @@ export const DineInPostManagementScreen = () => {
             <Text style={styles.statusBadgeText}>{item.is_active ? 'LIVE' : 'HIDDEN'}</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Info Body */}
       <View style={styles.cardContent}>
@@ -318,28 +414,49 @@ export const DineInPostManagementScreen = () => {
           </Text>
 
           <View style={styles.actionRow}>
+            {/* Quick Watch Button */}
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: 'rgba(239, 68, 68, 0.15)', marginRight: 6 }]}
+              onPress={() => handleOpenPreview(item)}
+            >
+              <Ionicons name="play" size={14} color="#EF4444" />
+              <Text style={[styles.actionBtnText, { color: '#EF4444' }]}>Watch</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.actionBtn,
                 { backgroundColor: item.is_active ? 'rgba(16, 185, 129, 0.15)' : 'rgba(107, 114, 128, 0.15)' }
               ]}
               onPress={() => handleToggleStatus(item)}
+              disabled={actionLoadingId === item.id}
             >
-              <Ionicons
-                name={item.is_active ? 'eye-outline' : 'eye-off-outline'}
-                size={16}
-                color={item.is_active ? '#10B981' : '#6B7280'}
-              />
-              <Text style={[styles.actionBtnText, { color: item.is_active ? '#10B981' : '#6B7280' }]}>
-                {item.is_active ? 'Active' : 'Hidden'}
-              </Text>
+              {actionLoadingId === item.id ? (
+                <ActivityIndicator size="small" color={item.is_active ? '#10B981' : '#6B7280'} />
+              ) : (
+                <>
+                  <Ionicons
+                    name={item.is_active ? 'eye-outline' : 'eye-off-outline'}
+                    size={16}
+                    color={item.is_active ? '#10B981' : '#6B7280'}
+                  />
+                  <Text style={[styles.actionBtnText, { color: item.is_active ? '#10B981' : '#6B7280' }]}>
+                    {item.is_active ? 'Active' : 'Hidden'}
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: 'rgba(239, 68, 68, 0.15)', marginLeft: 8 }]}
+              style={[styles.actionBtn, { backgroundColor: 'rgba(239, 68, 68, 0.15)', marginLeft: 6 }]}
               onPress={() => handleDelete(item)}
+              disabled={actionLoadingId === item.id}
             >
-              <Ionicons name="trash-outline" size={16} color="#EF4444" />
+              {actionLoadingId === item.id ? (
+                <ActivityIndicator size="small" color="#EF4444" />
+              ) : (
+                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -586,6 +703,153 @@ export const DineInPostManagementScreen = () => {
               </View>
             </ScrollView>
           </View>
+        </View>
+      </Modal>
+
+      {/* Video & Media Preview Modal */}
+      <Modal
+        visible={previewVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setPreviewVisible(false)}
+      >
+        <View style={styles.previewBackdrop}>
+          <SafeAreaView style={styles.previewContainer}>
+            {/* Top Bar with Title, Status & Close */}
+            <View style={styles.previewHeader}>
+              <View style={{ flex: 1, marginRight: 12 }}>
+                <Text style={styles.previewHeaderTitle} numberOfLines={1}>
+                  {previewPost?.title}
+                </Text>
+                <View style={styles.previewHeaderBadges}>
+                  <View
+                    style={[
+                      styles.typeBadge,
+                      {
+                        backgroundColor:
+                          previewPost?.media_type === 'VIDEO' ? '#EF4444' : '#3B82F6',
+                        marginRight: 8,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={previewPost?.media_type === 'VIDEO' ? 'videocam' : 'image'}
+                      size={12}
+                      color="#FFF"
+                    />
+                    <Text style={styles.typeBadgeText}>{previewPost?.media_type}</Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor: previewPost?.is_active ? '#10B981' : '#6B7280',
+                      },
+                    ]}
+                  >
+                    <Text style={styles.statusBadgeText}>
+                      {previewPost?.is_active ? 'LIVE' : 'HIDDEN'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.previewCloseBtn}
+                onPress={() => setPreviewVisible(false)}
+              >
+                <Ionicons name="close" size={24} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Video / Photo Screen Area */}
+            <View style={styles.previewMediaWrapper}>
+              {previewPost?.media_type === 'VIDEO' ? (
+                <>
+                  <Video
+                    source={{ uri: previewPost.media_url }}
+                    style={styles.previewVideo}
+                    useNativeControls
+                    resizeMode={ResizeMode.CONTAIN}
+                    isLooping
+                    shouldPlay
+                    onPlaybackStatusUpdate={(status) => {
+                      if (status.isLoaded) {
+                        setIsVideoBuffering(status.isBuffering);
+                      }
+                    }}
+                  />
+                  {isVideoBuffering && (
+                    <View style={styles.bufferingOverlay}>
+                      <ActivityIndicator size="large" color="#EF4444" />
+                      <Text style={styles.bufferingText}>Buffering reel...</Text>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <Image
+                  source={{ uri: previewPost?.media_url }}
+                  style={styles.previewImage}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+
+            {/* Bottom Details & Controls */}
+            <View style={styles.previewFooter}>
+              {previewPost?.caption ? (
+                <Text style={styles.previewCaption} numberOfLines={3}>
+                  {previewPost.caption}
+                </Text>
+              ) : null}
+
+              {previewPost?.linked_item_details && (
+                <View style={styles.previewDishPill}>
+                  <Ionicons name="restaurant-outline" size={14} color="#10B981" style={{ marginRight: 6 }} />
+                  <Text style={styles.previewDishText} numberOfLines={1}>
+                    Linked: {previewPost.linked_item_details.name} · Rs. {Math.round(previewPost.linked_item_details.price)}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.previewActionsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.previewStatusBtn,
+                    { backgroundColor: previewPost?.is_active ? '#10B981' : '#6B7280' },
+                  ]}
+                  onPress={() => previewPost && handleToggleStatus(previewPost)}
+                  disabled={actionLoadingId === previewPost?.id}
+                >
+                  {actionLoadingId === previewPost?.id ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name={previewPost?.is_active ? 'eye-outline' : 'eye-off-outline'}
+                        size={16}
+                        color="#FFF"
+                      />
+                      <Text style={styles.previewBtnText}>
+                        {previewPost?.is_active ? 'Active (Tap to Hide)' : 'Hidden (Tap to Make Live)'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.previewDeleteBtn}
+                  onPress={() => previewPost && handleDelete(previewPost)}
+                  disabled={actionLoadingId === previewPost?.id}
+                >
+                  {actionLoadingId === previewPost?.id ? (
+                    <ActivityIndicator size="small" color="#EF4444" />
+                  ) : (
+                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
         </View>
       </Modal>
     </SafeAreaView>
@@ -964,5 +1228,170 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  playOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  playCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  playTag: {
+    marginTop: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  playTagText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  // Preview Modal Styles
+  previewBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.94)',
+  },
+  previewContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 16 : 8,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  previewHeaderTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  previewHeaderBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  previewHeaderSub: {
+    color: '#94A3B8',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  previewCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewMediaWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    marginVertical: 10,
+  },
+  previewVideo: {
+    width: SCREEN_WIDTH,
+    height: '100%',
+  },
+  previewImage: {
+    width: SCREEN_WIDTH,
+    height: '100%',
+  } as ImageStyle,
+  bufferingOverlay: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 16,
+    borderRadius: 12,
+  },
+  bufferingText: {
+    color: '#FFF',
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  previewFooter: {
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'android' ? 24 : 16,
+    paddingTop: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  previewCaption: {
+    color: '#E2E8F0',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  previewDishPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  previewDishText: {
+    color: '#10B981',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  previewActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  previewStatusBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  previewBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  previewDeleteBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
