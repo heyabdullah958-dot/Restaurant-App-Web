@@ -35,7 +35,11 @@ import api from '../services/api';
 type RootStackParamList = {
   Home: undefined;
   Search: undefined;
-  Restaurant: { slug: string };
+  Restaurant: {
+    slug: string;
+    initialRestaurant?: Partial<Restaurant>;
+    flashDealClaimed?: any;
+  };
   Cart: undefined; // Add Cart route mapping
 };
 
@@ -350,9 +354,14 @@ export default function RestaurantScreen() {
     if (cachedRestaurant) {
       return cachedRestaurant;
     }
+    const fromParams = (route.params as any)?.initialRestaurant;
+    if (fromParams && fromParams.name) {
+      const fallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
+      return { ...(fallback || {}), ...fromParams } as Restaurant;
+    }
     const localFallback = FALLBACK_RESTAURANTS.find((r) => r.slug === slug);
     return localFallback || null;
-  }, [cachedRestaurant, slug]);
+  }, [cachedRestaurant, slug, route.params]);
 
   const currentBranch = useMemo(() => {
     if (!restaurant || !restaurant.branches || restaurant.branches.length === 0) return null;
@@ -1246,6 +1255,7 @@ const styles = StyleSheet.create({
     height: 260,
     width: '100%',
     position: 'relative',
+    backgroundColor: '#F5EBE1',
   },
   coverImage: {
     width: '100%',
@@ -1294,7 +1304,7 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: COLORS.white,
     marginTop: -38,
-    backgroundColor: COLORS.white,
+    backgroundColor: '#F5EBE1',
     overflow: 'hidden',
     ...SHADOWS.medium,
   },
@@ -1481,7 +1491,7 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     position: 'relative',
