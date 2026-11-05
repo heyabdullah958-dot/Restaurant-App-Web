@@ -18,11 +18,10 @@ import {
   Switch,
   ImageStyle,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Video from 'expo-av/build/Video';
-import { ResizeMode } from 'expo-av/build/Video.types';
 import { useAppSelector } from '../../store';
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import {
@@ -279,6 +278,23 @@ export const DineInPostManagementScreen = () => {
     setPreviewPost(post);
     setIsVideoBuffering(false);
     setPreviewVisible(true);
+  };
+
+  const handleOpenVideoReel = async (url?: string) => {
+    if (!url) {
+      Alert.alert('Video Unavailable', 'No video stream URL is associated with this post.');
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Unable to Play', 'Your device cannot open this video link directly.');
+      }
+    } catch (err: any) {
+      Alert.alert('Playback Error', err?.message || 'Failed to open video reel.');
+    }
   };
 
   const handleToggleStatus = async (post: DineInMediaPost) => {
@@ -764,27 +780,31 @@ export const DineInPostManagementScreen = () => {
             {/* Video / Photo Screen Area */}
             <View style={styles.previewMediaWrapper}>
               {previewPost?.media_type === 'VIDEO' ? (
-                <>
-                  <Video
-                    source={{ uri: previewPost.media_url }}
-                    style={styles.previewVideo}
-                    useNativeControls
-                    resizeMode={ResizeMode.CONTAIN}
-                    isLooping
-                    shouldPlay
-                    onPlaybackStatusUpdate={(status) => {
-                      if (status.isLoaded) {
-                        setIsVideoBuffering(status.isBuffering);
-                      }
+                <View style={styles.previewVideoContainer}>
+                  <Image
+                    source={{
+                      uri:
+                        previewPost?.thumbnail_url ||
+                        previewPost?.media_url ||
+                        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
                     }}
+                    style={styles.previewImage}
+                    resizeMode="cover"
                   />
-                  {isVideoBuffering && (
-                    <View style={styles.bufferingOverlay}>
-                      <ActivityIndicator size="large" color="#EF4444" />
-                      <Text style={styles.bufferingText}>Buffering reel...</Text>
+                  <TouchableOpacity
+                    style={styles.previewPlayOverlay}
+                    activeOpacity={0.85}
+                    onPress={() => handleOpenVideoReel(previewPost?.media_url)}
+                  >
+                    <View style={styles.previewPlayCircle}>
+                      <Ionicons name="play" size={40} color="#FFF" style={{ marginLeft: 4 }} />
                     </View>
-                  )}
-                </>
+                    <View style={styles.previewPlayTag}>
+                      <Text style={styles.previewPlayTitle}>Tap to Watch Reel</Text>
+                      <Text style={styles.previewPlaySub}>Streams in full HD on device player</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
               ) : (
                 <Image
                   source={{ uri: previewPost?.media_url }}
@@ -1313,27 +1333,59 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginVertical: 10,
   },
-  previewVideo: {
+  previewVideoContainer: {
     width: SCREEN_WIDTH,
     height: '100%',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   previewImage: {
     width: SCREEN_WIDTH,
     height: '100%',
   } as ImageStyle,
-  bufferingOverlay: {
+  previewPlayOverlay: {
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
   },
-  bufferingText: {
+  previewPlayCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.45,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  previewPlayTag: {
+    marginTop: 16,
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  previewPlayTitle: {
     color: '#FFF',
-    fontSize: 12,
-    marginTop: 8,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  previewPlaySub: {
+    color: '#94A3B8',
+    fontSize: 11,
+    marginTop: 2,
   },
   previewFooter: {
     paddingHorizontal: 16,
