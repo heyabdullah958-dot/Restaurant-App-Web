@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -59,6 +59,7 @@ export interface DineInFeedPost {
 interface DineInVideoFeedProps {
   fulfillmentMode: string;
   onSelectRestaurant?: (slug: string) => void;
+  refreshTrigger?: number;
 }
 
 const BRAND_SLUG_MAP: Record<string, string> = {
@@ -85,13 +86,13 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Slow rotisserie grilled whole chicken basted with authentic Gulf spices over spiced Mandi rice.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799324/foodsphere/reels/reel_6.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg",
     linked_menu_item: 41,
     linked_item_details: {
       id: 41,
       name: "Half Dubai Shawaya",
       price: 1400.0,
-      image: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/jushhpk/half_dubai_shawaya.jpg",
+      image: "https://res.cloudinary.com/qodsfm34/image/upload/menu_items/full_dubai_shawaya.jpg",
       is_available: true,
       category_name: "TURKISH SPECIALS",
     },
@@ -110,7 +111,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Thinly shaved spiced chicken doner piled high over golden fries and garlic mayo.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799321/foodsphere/reels/reel_5.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/jushhpk/chicken_doner_fries.jpg",
     linked_menu_item: 37,
     linked_item_details: {
       id: 37,
@@ -135,7 +136,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Charcoal-kissed Malai Tikka & Seekh Kebabs served sizzling on iron platters.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799319/foodsphere/reels/reel_4.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/tandoori_chicken_single.jpg",
     linked_menu_item: 70,
     linked_item_details: {
       id: 70,
@@ -160,7 +161,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Direct from our Johar Town live clay ovens! Stuffed with 100% mozzarella and grilled tikka boti.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799317/foodsphere/reels/reel_3.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/tandooristop/cheese_naan.jpg",
     linked_menu_item: 70,
     linked_item_details: {
       id: 70,
@@ -185,7 +186,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Crispy shredded pastry wrapped around succulent king prawns with house spicy emulsion.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799316/foodsphere/reels/reel_2.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/kunafa_prawns.png",
     linked_menu_item: null,
     linked_item_details: {
       id: 201,
@@ -210,7 +211,7 @@ export const FALLBACK_DINE_IN_POSTS: DineInFeedPost[] = [
     caption: "Fresh Atlantic catch, jumbo prawns & calamari steamed to perfection. Live table-side presentation.",
     media_type: "VIDEO",
     media_url: "https://res.cloudinary.com/qodsfm34/video/upload/v1793799315/foodsphere/reels/reel_1.mp4",
-    thumbnail_url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
+    thumbnail_url: "https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_800/foodsphere/dineatblue/blue_seafood_platter.png",
     linked_menu_item: null,
     linked_item_details: {
       id: 200,
@@ -234,36 +235,330 @@ const resolveBrandSlug = (post: DineInFeedPost): string => {
   return 'jushhpk';
 };
 
+const buildReelHtml = (videoStreamUrl: string, posterUrl?: string) => `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; background: transparent; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+      video { width: 100%; height: 100%; object-fit: cover; }
+      #tapArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+      #iconWrap {
+        position: absolute;
+        width: 72px;
+        height: 72px;
+        border-radius: 36px;
+        background: rgba(0, 0, 0, 0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        pointer-events: none;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tapArea"></div>
+    <video
+      id="vPlayer"
+      src="${videoStreamUrl}"
+      poster="${posterUrl || ''}"
+      loop
+      playsinline
+      webkit-playsinline
+      preload="auto"
+    ></video>
+    <div id="iconWrap">
+      <svg id="playSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="pauseSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </div>
+    <script>
+      var vid = document.getElementById('vPlayer');
+      var icon = document.getElementById('iconWrap');
+      var playSvg = document.getElementById('playSvg');
+      var pauseSvg = document.getElementById('pauseSvg');
+      var tapArea = document.getElementById('tapArea');
+      var iconTimer = null;
+
+      function showFeedback(isPaused) {
+        if (iconTimer) clearTimeout(iconTimer);
+        if (isPaused) {
+          playSvg.style.display = 'block';
+          pauseSvg.style.display = 'none';
+          icon.style.display = 'flex';
+        } else {
+          playSvg.style.display = 'none';
+          pauseSvg.style.display = 'block';
+          icon.style.display = 'flex';
+          iconTimer = setTimeout(function() {
+            if (!vid.paused) icon.style.display = 'none';
+          }, 400);
+        }
+      }
+
+      tapArea.addEventListener('click', function() {
+        if (vid.paused) {
+          vid.play().then(function() { showFeedback(false); }).catch(function() {});
+        } else {
+          vid.pause();
+          showFeedback(true);
+        }
+      });
+
+      window.setPlayback = function(play, muted) {
+        if (!vid) return;
+        if (play) {
+          vid.muted = Boolean(muted);
+          var p = vid.play();
+          if (p !== undefined) {
+            p.catch(function(err) {
+              vid.muted = true;
+              vid.play().catch(function() {});
+            });
+          }
+        } else {
+          vid.muted = true; // Instantly silence hardware audio mixer with 0ms buffer leak
+          vid.pause();
+        }
+      };
+    </script>
+  </body>
+</html>
+`;
+
+interface ReelSlideProps {
+  item: DineInFeedPost;
+  index: number;
+  isActive: boolean;
+  isWithinWindow: boolean;
+  isMuted: boolean;
+  isItemAdded: boolean;
+  containerHeight: number;
+  onAddToCart: (post: DineInFeedPost) => void;
+  onExploreStorefront: (post: DineInFeedPost) => void;
+}
+
+const ReelSlide: React.FC<ReelSlideProps> = React.memo(({
+  item,
+  index,
+  isActive,
+  isWithinWindow,
+  isMuted,
+  isItemAdded,
+  containerHeight,
+  onAddToCart,
+  onExploreStorefront,
+}) => {
+  const webViewRef = useRef<WebView>(null);
+  const hasLinkedItem = Boolean(item.linked_item_details);
+  const videoStreamUrl = optimizeCloudinaryVideoUrl(item.media_url, 540, 960);
+  const staticHtml = useMemo(
+    () => buildReelHtml(videoStreamUrl, item.thumbnail_url),
+    [videoStreamUrl, item.thumbnail_url]
+  );
+
+  // Synchronize playback state seamlessly via injectJavaScript without page reloads
+  useEffect(() => {
+    if (isWithinWindow && webViewRef.current) {
+      const script = `if (window.setPlayback) { window.setPlayback(${isActive ? 'true' : 'false'}, ${isMuted ? 'true' : 'false'}); }; true;`;
+      webViewRef.current.injectJavaScript(script);
+    }
+  }, [isActive, isMuted, isWithinWindow]);
+
+  const handleWebViewLoaded = useCallback(() => {
+    if (isWithinWindow && webViewRef.current) {
+      const script = `if (window.setPlayback) { window.setPlayback(${isActive ? 'true' : 'false'}, ${isMuted ? 'true' : 'false'}); }; true;`;
+      webViewRef.current.injectJavaScript(script);
+    }
+  }, [isActive, isMuted, isWithinWindow]);
+
+  return (
+    <View style={[styles.fullScreenReelPage, { height: containerHeight }]}>
+      {/* 1. Underlying Food Poster / Media Image (Guarantees Frame-1 visual continuity & zero black flash) */}
+      {item.thumbnail_url ? (
+        <Image
+          source={{ uri: item.thumbnail_url }}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+      ) : (
+        <LinearGradient
+          colors={['#1F2937', '#111827', '#0F172A']}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
+      {/* 2. Hardware-accelerated HTML5 Video Player (Mounted within active 3-slide window only) */}
+      {isWithinWindow && item.media_type === 'VIDEO' ? (
+        <WebView
+          ref={webViewRef}
+          source={{
+            baseUrl: 'https://res.cloudinary.com',
+            html: staticHtml,
+          }}
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          mixedContentMode="always"
+          originWhitelist={['*']}
+          androidLayerType="hardware"
+          containerStyle={{ backgroundColor: 'transparent' }}
+          style={[StyleSheet.absoluteFill, { backgroundColor: 'transparent' }]}
+          onLoadEnd={handleWebViewLoaded}
+        />
+      ) : null}
+
+      {/* 3. Vignette Overlays for Crisp Legibility */}
+      <LinearGradient
+        colors={['rgba(0,0,0,0.65)', 'transparent', 'rgba(0,0,0,0.85)']}
+        locations={[0, 0.35, 0.85]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      {/* 4. Bottom Info & 1-Tap Cart Actions */}
+      <SafeAreaView style={styles.modalBottomArea} edges={['bottom']}>
+        {/* Brand Pill */}
+        <View style={styles.modalBrandRow}>
+          {item.restaurant_logo ? (
+            <Image source={{ uri: item.restaurant_logo }} style={styles.modalBrandLogo} />
+          ) : (
+            <View style={styles.modalBrandLogoFallback}>
+              <Text style={{ fontSize: 14 }}>🍽️</Text>
+            </View>
+          )}
+          <View style={{ marginLeft: 8 }}>
+            <Text style={styles.modalBrandName}>{item.restaurant_name}</Text>
+            <Text style={styles.modalBranchName}>
+              {item.branch_name || 'Signature Experience'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Reel Title & Caption */}
+        <Text style={styles.modalReelTitle}>{item.title}</Text>
+        {item.caption ? (
+          <Text style={styles.modalReelCaption} numberOfLines={2}>
+            {item.caption}
+          </Text>
+        ) : null}
+
+        {/* Linked Dish 1-Tap Cart Card */}
+        {hasLinkedItem && item.linked_item_details && (
+          <View style={styles.modalDishCard}>
+            {item.linked_item_details.image && (
+              <Image
+                source={{ uri: item.linked_item_details.image }}
+                style={styles.modalDishImg}
+              />
+            )}
+            <View style={{ flex: 1, paddingHorizontal: 10 }}>
+              <Text style={styles.modalDishName} numberOfLines={1}>
+                {item.linked_item_details.name}
+              </Text>
+              <Text style={styles.modalDishPrice}>
+                Rs. {Number(item.linked_item_details.price).toLocaleString()}
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={[
+                styles.modalAddToCartBtn,
+                isItemAdded && { backgroundColor: '#10B981' },
+              ]}
+              onPress={() => onAddToCart(item)}
+            >
+              <Ionicons
+                name={isItemAdded ? 'checkmark-circle' : 'cart-outline'}
+                size={16}
+                color="#FFFFFF"
+              />
+              <Text style={styles.modalAddToCartText}>
+                {isItemAdded ? 'Added' : 'Add +'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Full-Width "Explore Menu / Order Now" CTA */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.modalOrderNowCTA}
+          onPress={() => onExploreStorefront(item)}
+        >
+          <LinearGradient
+            colors={['#E11D48', '#BE123C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.modalOrderNowGradient}
+          >
+            <Text style={styles.modalOrderNowText}>
+              Explore Menu / Order Now
+            </Text>
+            <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+          </LinearGradient>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </View>
+  );
+});
+
 export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
   fulfillmentMode,
   onSelectRestaurant,
+  refreshTrigger,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [posts, setPosts] = useState<DineInFeedPost[]>(FALLBACK_DINE_IN_POSTS);
+  const [posts, setPosts] = useState<DineInFeedPost[]>([]);
+  const [isFetched, setIsFetched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeReelIndex, setActiveReelIndex] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [addedItemMap, setAddedItemMap] = useState<Record<number, boolean>>({});
+  const [containerHeight, setContainerHeight] = useState<number>(() => Dimensions.get('window').height);
 
   const verticalFlatListRef = useRef<FlatList>(null);
 
+  // TikTok-grade real-time viewability configuration (triggers mid-gesture at 60% viewport coverage)
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 60,
+    waitForInteraction: false,
+  }).current;
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems && viewableItems.length > 0) {
+      const primaryItem = viewableItems[0];
+      if (primaryItem.isViewable && primaryItem.index !== null && primaryItem.index !== undefined) {
+        setActiveReelIndex(primaryItem.index);
+      }
+    }
+  }).current;
+
   const fetchPosts = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await api.get('/dine-in-posts/');
       const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
       const activeList = data.filter((p: any) => p.is_active);
-      if (activeList.length > 0) {
-        setPosts(activeList);
-      }
+      setPosts(activeList);
+      setIsFetched(true);
     } catch (err) {
-      if (__DEV__) console.log('[DineInVideoFeed] Notice: Using verified seeded reels payload:', (err as any)?.message || err);
+      if (__DEV__) console.log('[DineInVideoFeed] Error fetching reels:', (err as any)?.message || err);
+      setIsFetched(true);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchPosts, refreshTrigger]);
 
   const handleOpenPlayer = (index: number) => {
     setActiveReelIndex(index);
@@ -275,12 +570,12 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
     setIsModalOpen(false);
     StatusBar.setBarStyle('dark-content', true);
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('transparent', true);
-      StatusBar.setTranslucent(true);
+      StatusBar.setBackgroundColor(COLORS.light, true);
+      StatusBar.setTranslucent(false);
     }
   };
 
-  const handleAddToCart = (post: DineInFeedPost) => {
+  const handleAddToCart = useCallback((post: DineInFeedPost) => {
     const item = post.linked_item_details;
     if (!item || !item.is_available) return;
 
@@ -301,17 +596,42 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
     setTimeout(() => {
       setAddedItemMap((prev) => ({ ...prev, [post.id]: false }));
     }, 2200);
-  };
+  }, [dispatch]);
 
-  const handleExploreStorefront = (post: DineInFeedPost) => {
+  const handleExploreStorefront = useCallback((post: DineInFeedPost) => {
     const slug = resolveBrandSlug(post);
     setIsModalOpen(false);
     if (onSelectRestaurant) {
       onSelectRestaurant(slug);
     }
-  };
+  }, [onSelectRestaurant]);
 
-  const displayedPosts = posts.length > 0 ? posts : FALLBACK_DINE_IN_POSTS;
+  const renderReelItem = useCallback(
+    ({ item, index }: { item: DineInFeedPost; index: number }) => {
+      const isWithinWindow = Math.abs(index - activeReelIndex) <= 1 && isModalOpen;
+      const isCurrentlyPlaying = index === activeReelIndex && isModalOpen;
+      return (
+        <ReelSlide
+          item={item}
+          index={index}
+          isActive={isCurrentlyPlaying}
+          isWithinWindow={isWithinWindow}
+          isMuted={isMuted}
+          isItemAdded={Boolean(addedItemMap[item.id])}
+          containerHeight={containerHeight}
+          onAddToCart={handleAddToCart}
+          onExploreStorefront={handleExploreStorefront}
+        />
+      );
+    },
+    [activeReelIndex, isModalOpen, isMuted, addedItemMap, containerHeight, handleAddToCart, handleExploreStorefront]
+  );
+
+  if (posts.length === 0) {
+    return null;
+  }
+
+  const displayedPosts = posts;
 
   return (
     <View style={styles.container}>
@@ -418,7 +738,15 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
         onRequestClose={handleClosePlayer}
       >
         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
-        <View style={styles.modalBackdrop}>
+        <View
+          style={styles.modalBackdrop}
+          onLayout={(e) => {
+            const h = e.nativeEvent.layout.height;
+            if (h > 0 && Math.abs(h - containerHeight) > 1) {
+              setContainerHeight(h);
+            }
+          }}
+        >
           {/* Top Bar: Single Fixed Header Overlay (Zero Duplication) */}
           <SafeAreaView style={styles.modalTopBarFixed} pointerEvents="box-none">
             <TouchableOpacity
@@ -450,251 +778,29 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
             ref={verticalFlatListRef}
             data={displayedPosts}
             keyExtractor={(item) => String(item.id)}
-            pagingEnabled={true}
-            snapToInterval={SCREEN_HEIGHT}
+            pagingEnabled={Platform.OS === 'android'}
+            snapToInterval={containerHeight}
             snapToAlignment="start"
             decelerationRate="fast"
+            disableIntervalMomentum={true}
+            bounces={false}
+            overScrollMode="never"
             showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             initialScrollIndex={activeReelIndex}
             onScrollToIndexFailed={() => {}}
             windowSize={3}
             initialNumToRender={2}
             maxToRenderPerBatch={2}
-            removeClippedSubviews={false}
+            removeClippedSubviews={Platform.OS === 'android'}
+            viewabilityConfig={viewabilityConfig}
+            onViewableItemsChanged={onViewableItemsChanged}
             getItemLayout={(_, index) => ({
-              length: SCREEN_HEIGHT,
-              offset: SCREEN_HEIGHT * index,
+              length: containerHeight,
+              offset: containerHeight * index,
               index,
             })}
-            onMomentumScrollEnd={(e) => {
-              const newIdx = Math.round(e.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
-              if (newIdx >= 0 && newIdx < displayedPosts.length) {
-                setActiveReelIndex(newIdx);
-              }
-            }}
-            renderItem={({ item, index }) => {
-              const isWithinWindow = Math.abs(index - activeReelIndex) <= 1 && isModalOpen;
-              const isCurrentlyPlaying = index === activeReelIndex && isModalOpen;
-              const hasLinkedItem = Boolean(item.linked_item_details);
-              const isItemAdded = addedItemMap[item.id];
-              const videoStreamUrl = optimizeCloudinaryVideoUrl(item.media_url, 540, 960);
-
-              return (
-                <View style={styles.fullScreenReelPage}>
-                  {/* Full-bleed HTML5 Pre-Buffered Video Player (Zero Static Poster Flash) */}
-                  {isWithinWindow && item.media_type === 'VIDEO' ? (
-                    <WebView
-                      source={{
-                        baseUrl: 'https://res.cloudinary.com',
-                        html: `
-                          <!DOCTYPE html>
-                          <html>
-                            <head>
-                              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                              <style>
-                                * { margin: 0; padding: 0; box-sizing: border-box; }
-                                html, body { width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
-                                video { width: 100%; height: 100%; object-fit: cover; }
-                                #tapArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
-                                #iconWrap {
-                                  position: absolute;
-                                  width: 72px;
-                                  height: 72px;
-                                  border-radius: 36px;
-                                  background: rgba(0, 0, 0, 0.65);
-                                  display: none;
-                                  align-items: center;
-                                  justify-content: center;
-                                  z-index: 10;
-                                  pointer-events: none;
-                                  border: 2px solid rgba(255, 255, 255, 0.7);
-                                  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-                                }
-                              </style>
-                            </head>
-                            <body>
-                              <div id="tapArea"></div>
-                              <video
-                                id="vPlayer"
-                                src="${videoStreamUrl}"
-                                ${isCurrentlyPlaying ? 'autoplay' : ''}
-                                loop
-                                playsinline
-                                webkit-playsinline
-                                preload="auto"
-                              ></video>
-                              <div id="iconWrap">
-                                <svg id="playSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M8 5v14l11-7z"/></svg>
-                                <svg id="pauseSvg" width="34" height="34" viewBox="0 0 24 24" fill="#FFFFFF" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                              </div>
-                              <script>
-                                var vid = document.getElementById('vPlayer');
-                                var icon = document.getElementById('iconWrap');
-                                var playSvg = document.getElementById('playSvg');
-                                var pauseSvg = document.getElementById('pauseSvg');
-                                var tapArea = document.getElementById('tapArea');
-                                var iconTimer = null;
-
-                                function showFeedback(isPaused) {
-                                  if (iconTimer) clearTimeout(iconTimer);
-                                  if (isPaused) {
-                                    playSvg.style.display = 'block';
-                                    pauseSvg.style.display = 'none';
-                                    icon.style.display = 'flex';
-                                  } else {
-                                    playSvg.style.display = 'none';
-                                    pauseSvg.style.display = 'block';
-                                    icon.style.display = 'flex';
-                                    iconTimer = setTimeout(function() {
-                                      if (!vid.paused) icon.style.display = 'none';
-                                    }, 400);
-                                  }
-                                }
-
-                                tapArea.addEventListener('click', function() {
-                                  if (vid.paused) {
-                                    vid.play().then(function() { showFeedback(false); }).catch(function() {});
-                                  } else {
-                                    vid.pause();
-                                    showFeedback(true);
-                                  }
-                                });
-
-                                function startAutoPlayback() {
-                                  vid.muted = ${isMuted ? 'true' : 'false'};
-                                  if (${isCurrentlyPlaying ? 'true' : 'false'}) {
-                                    var p = vid.play();
-                                    if (p !== undefined) {
-                                      p.catch(function(err) {
-                                        vid.muted = true;
-                                        vid.play().catch(function() {});
-                                      });
-                                    }
-                                  } else {
-                                    vid.pause();
-                                    vid.currentTime = 0;
-                                  }
-                                }
-                                if (document.readyState === 'complete') {
-                                  startAutoPlayback();
-                                } else {
-                                  window.addEventListener('load', startAutoPlayback);
-                                }
-                              </script>
-                            </body>
-                          </html>
-                        `,
-                      }}
-                      allowsInlineMediaPlayback={true}
-                      mediaPlaybackRequiresUserAction={false}
-                      javaScriptEnabled={true}
-                      domStorageEnabled={true}
-                      mixedContentMode="always"
-                      originWhitelist={['*']}
-                      androidLayerType="hardware"
-                      style={StyleSheet.absoluteFill}
-                    />
-                  ) : (
-                    <LinearGradient
-                      colors={['#1F2937', '#111827', '#0F172A']}
-                      style={StyleSheet.absoluteFill}
-                    />
-                  )}
-
-                  {/* Gradient vignettes for top controls and bottom overlays */}
-                  <LinearGradient
-                    colors={['rgba(0,0,0,0.65)', 'transparent', 'rgba(0,0,0,0.85)']}
-                    locations={[0, 0.35, 0.85]}
-                    style={StyleSheet.absoluteFill}
-                    pointerEvents="none"
-                  />
-
-                  {/* Bottom Info & Action Sheet */}
-                  <SafeAreaView style={styles.modalBottomArea} edges={['bottom']}>
-                    {/* Brand Pill */}
-                    <View style={styles.modalBrandRow}>
-                      {item.restaurant_logo ? (
-                        <Image source={{ uri: item.restaurant_logo }} style={styles.modalBrandLogo} />
-                      ) : (
-                        <View style={styles.modalBrandLogoFallback}>
-                          <Text style={{ fontSize: 14 }}>🍽️</Text>
-                        </View>
-                      )}
-                      <View style={{ marginLeft: 8 }}>
-                        <Text style={styles.modalBrandName}>{item.restaurant_name}</Text>
-                        <Text style={styles.modalBranchName}>
-                          {item.branch_name || 'Signature Experience'}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Reel Title & Caption */}
-                    <Text style={styles.modalReelTitle}>{item.title}</Text>
-                    {item.caption ? (
-                      <Text style={styles.modalReelCaption} numberOfLines={2}>
-                        {item.caption}
-                      </Text>
-                    ) : null}
-
-                    {/* Linked Dish 1-Tap Cart Card (if attached to item) */}
-                    {hasLinkedItem && item.linked_item_details && (
-                      <View style={styles.modalDishCard}>
-                        {item.linked_item_details.image && (
-                          <Image
-                            source={{ uri: item.linked_item_details.image }}
-                            style={styles.modalDishImg}
-                          />
-                        )}
-                        <View style={{ flex: 1, paddingHorizontal: 10 }}>
-                          <Text style={styles.modalDishName} numberOfLines={1}>
-                            {item.linked_item_details.name}
-                          </Text>
-                          <Text style={styles.modalDishPrice}>
-                            Rs. {Number(item.linked_item_details.price).toLocaleString()}
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          activeOpacity={0.85}
-                          style={[
-                            styles.modalAddToCartBtn,
-                            isItemAdded && { backgroundColor: '#10B981' },
-                          ]}
-                          onPress={() => handleAddToCart(item)}
-                        >
-                          <Ionicons
-                            name={isItemAdded ? 'checkmark-circle' : 'cart-outline'}
-                            size={16}
-                            color="#FFFFFF"
-                          />
-                          <Text style={styles.modalAddToCartText}>
-                            {isItemAdded ? 'Added' : 'Add +'}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-
-                    {/* Full-Width "Explore Menu / Order Now" CTA Button */}
-                    <TouchableOpacity
-                      activeOpacity={0.9}
-                      style={styles.modalOrderNowCTA}
-                      onPress={() => handleExploreStorefront(item)}
-                    >
-                      <LinearGradient
-                        colors={['#E11D48', '#BE123C']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.modalOrderNowGradient}
-                      >
-                        <Text style={styles.modalOrderNowText}>
-                          Explore Menu / Order Now
-                        </Text>
-                        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  </SafeAreaView>
-                </View>
-              );
-            }}
+            renderItem={renderReelItem}
           />
         </View>
       </Modal>

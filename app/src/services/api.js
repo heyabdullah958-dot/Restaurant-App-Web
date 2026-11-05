@@ -213,7 +213,7 @@ export const isPublicUrl = (url, method = 'get') => {
   ];
 
   if (lowerMethod === 'get') {
-    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu', '/track', '/promotions', '/flash-deals', '/deals');
+    publicPatterns.push('/restaurants', '/branches', '/categories', '/menu', '/track', '/promotions', '/flash-deals', '/deals', '/dine-in-posts');
   }
 
   return publicPatterns.some((pattern) => lowerUrl.includes(pattern));

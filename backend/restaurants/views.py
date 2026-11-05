@@ -3,6 +3,7 @@ import logging
 from rest_framework import generics, permissions, viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from config.permissions import IsReviewAuthorOrReadOnly
 from .models import Restaurant, RestaurantReview, RestaurantMediaPost
 from .serializers import (
     RestaurantSerializer, RestaurantDetailSerializer, MenuCategorySerializer,
@@ -528,7 +529,7 @@ class BranchItemAvailabilityView(generics.GenericAPIView):
 
 class RestaurantReviewViewSet(viewsets.ModelViewSet):
     serializer_class = RestaurantReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsReviewAuthorOrReadOnly]
 
     def get_queryset(self):
         qs = RestaurantReview.objects.all().select_related('restaurant', 'user', 'order')
@@ -612,6 +613,21 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
         serializer.save(user=user_obj, restaurant=restaurant_obj, order=order_obj)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        user = self.request.user
+        if not (user.is_superuser or instance.user == user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only edit your own reviews.")
+        serializer.save(user=instance.user, restaurant=instance.restaurant, order=instance.order)
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if not (user.is_superuser or instance.user == user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only delete your own reviews.")
+        instance.delete()
 
 
 class PlatformSettingsView(APIView):
@@ -831,6 +847,10 @@ class RestaurantMediaPostViewSet(viewsets.ModelViewSet):
 
         include_inactive = self.request.query_params.get('include_inactive', '').lower() == 'true'
 
+        # For staff/superadmin performing detail actions (update, delete, retrieve), do NOT filter by is_active so managers can update/delete inactive posts!
+        if getattr(self, 'action', None) in ['retrieve', 'update', 'partial_update', 'destroy'] and is_staff_or_super:
+            return queryset
+
         if not (is_staff_or_super and include_inactive):
             queryset = queryset.filter(is_active=True, restaurant__is_active=True)
         elif not user.is_superuser and managed_restaurant:
@@ -839,6 +859,10 @@ class RestaurantMediaPostViewSet(viewsets.ModelViewSet):
         restaurant_id = self.request.query_params.get('restaurant_id')
         if restaurant_id:
             queryset = queryset.filter(restaurant_id=restaurant_id)
+
+        restaurant_slug = self.request.query_params.get('restaurant_slug')
+        if restaurant_slug:
+            queryset = queryset.filter(restaurant__slug=restaurant_slug)
 
         branch_id = self.request.query_params.get('branch_id')
         if branch_id:
@@ -849,6 +873,12 @@ class RestaurantMediaPostViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(media_type=media_type.upper())
 
         return queryset.order_by('-created_at')
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        return response
 
     def create(self, request, *args, **kwargs):
         user = request.user

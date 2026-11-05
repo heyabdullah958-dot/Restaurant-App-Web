@@ -581,6 +581,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const [selectedCategory, setSelectedCategory] = React.useState<string>('All');
   const [refreshing, setRefreshing] = React.useState(false);
+  const [reelsRefreshTrigger, setReelsRefreshTrigger] = React.useState<number>(0);
   const [showLocationPrompt, setShowLocationPrompt] = React.useState(false);
   const [currentAddress, setCurrentAddress] = React.useState<string | null>(null);
   const [unratedOrder, setUnratedOrder] = React.useState<any | null>(null);
@@ -760,7 +761,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     }
   }, []);
 
-  // Phase 15: Background Asset Prefetching for 0ms Instant Cover & Logo Renders
+  // Phase 15 & 17: Background Asset Prefetching for 0ms Instant Cover, Logo & Dish Thumbnail Renders
   React.useEffect(() => {
     const assetsToPrefetch = [
       // 4 Active Brand Covers
@@ -773,6 +774,19 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/jushhpk/logo.jpg',
       'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/tandooristop/logo.png',
       'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_200/foodsphere/getafomo/logo.png',
+      // Top Signature Dishes for Instant Storefront Render (Phase 17)
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/dineatblue/blue_seafood_platter.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/dineatblue/chicken_platter_2person.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/dineatblue/fish_and_chips.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/dineatblue/kunafa_prawns.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/dineatblue/dynamite_prawns.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/menu_items/chicken_doner_fries.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/menu_items/half_dubai_shawaya.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/menu_items/chicken_turkish_wrap.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/menu_items/chicken_turkish_doner.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/menu_items/chicken_shawarma_platter.jpg',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/tandooristop/tandoori_chicken_cheese_naan.png',
+      'https://res.cloudinary.com/qodsfm34/image/upload/f_auto,q_auto,w_240/foodsphere/tandooristop/special_chatpata_sajji.png',
     ];
 
     assetsToPrefetch.forEach((url) => {
@@ -784,11 +798,12 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     React.useCallback(() => {
       RNStatusBar.setBarStyle('dark-content', true);
       if (Platform.OS === 'android') {
-        RNStatusBar.setBackgroundColor('transparent', true);
-        RNStatusBar.setTranslucent(true);
+        RNStatusBar.setBackgroundColor(COLORS.light, true);
+        RNStatusBar.setTranslucent(false);
       }
       dispatch(fetchRestaurants() as any);
       fetchFlashDeals();
+      setReelsRefreshTrigger((prev) => prev + 1);
       if (user && !user.is_guest) {
         dispatch(fetchUserProfile() as any);
       }
@@ -825,6 +840,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
+    setReelsRefreshTrigger((prev) => prev + 1);
     await Promise.all([
       dispatch(fetchRestaurants()),
       fetchFlashDeals(),
@@ -1022,6 +1038,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       <DineInVideoFeed
         fulfillmentMode={fulfillmentMode}
         onSelectRestaurant={handlePressBrand}
+        refreshTrigger={reelsRefreshTrigger}
       />
 
       <View style={styles.sectionHeader}>
@@ -1030,7 +1047,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         </Text>
       </View>
     </View>
-  ), [fulfillmentMode, flashDeals, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
+  ), [fulfillmentMode, flashDeals, reelsRefreshTrigger, handlePressBanner, unratedOrder, activeGuestOrder, navigation, renderCategoryChipItem]);
 
 
   const ListEmpty = React.useMemo(() => {
@@ -1079,7 +1096,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   }, [loading, isTabSwitching, filteredRestaurants.length, selectedCategory, error, restaurants, dispatch]);
 
   return (
-    <View style={[styles.container, { paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 24 : 0) }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="dark" />
       
       {/* Top Welcome Header */}
