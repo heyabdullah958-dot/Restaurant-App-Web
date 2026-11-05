@@ -20,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AppDispatch } from '../store';
 import { addItemToCart } from '../store/cartSlice';
 import api from '../services/api';
+import { optimizeCloudinaryVideoUrl } from '../services/mediaAssetService';
 import { COLORS, SHADOWS, SPACING } from '../theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
@@ -456,6 +457,10 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
             showsVerticalScrollIndicator={false}
             initialScrollIndex={activeReelIndex}
             onScrollToIndexFailed={() => {}}
+            windowSize={3}
+            initialNumToRender={2}
+            maxToRenderPerBatch={2}
+            removeClippedSubviews={false}
             getItemLayout={(_, index) => ({
               length: SCREEN_HEIGHT,
               offset: SCREEN_HEIGHT * index,
@@ -468,14 +473,16 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
               }
             }}
             renderItem={({ item, index }) => {
+              const isWithinWindow = Math.abs(index - activeReelIndex) <= 1 && isModalOpen;
               const isCurrentlyPlaying = index === activeReelIndex && isModalOpen;
               const hasLinkedItem = Boolean(item.linked_item_details);
               const isItemAdded = addedItemMap[item.id];
+              const videoStreamUrl = optimizeCloudinaryVideoUrl(item.media_url, 540, 960);
 
               return (
                 <View style={styles.fullScreenReelPage}>
-                  {/* Full-bleed HTML5 Video Player */}
-                  {isCurrentlyPlaying && item.media_type === 'VIDEO' ? (
+                  {/* Full-bleed HTML5 Pre-Buffered Video Player (Zero Static Poster Flash) */}
+                  {isWithinWindow && item.media_type === 'VIDEO' ? (
                     <WebView
                       source={{
                         baseUrl: 'https://res.cloudinary.com',
@@ -509,8 +516,8 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                               <div id="tapArea"></div>
                               <video
                                 id="vPlayer"
-                                src="${item.media_url}"
-                                autoplay
+                                src="${videoStreamUrl}"
+                                ${isCurrentlyPlaying ? 'autoplay' : ''}
                                 loop
                                 playsinline
                                 webkit-playsinline
@@ -555,12 +562,17 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
 
                                 function startAutoPlayback() {
                                   vid.muted = ${isMuted ? 'true' : 'false'};
-                                  var p = vid.play();
-                                  if (p !== undefined) {
-                                    p.catch(function(err) {
-                                      vid.muted = true;
-                                      vid.play().catch(function() {});
-                                    });
+                                  if (${isCurrentlyPlaying ? 'true' : 'false'}) {
+                                    var p = vid.play();
+                                    if (p !== undefined) {
+                                      p.catch(function(err) {
+                                        vid.muted = true;
+                                        vid.play().catch(function() {});
+                                      });
+                                    }
+                                  } else {
+                                    vid.pause();
+                                    vid.currentTime = 0;
                                   }
                                 }
                                 if (document.readyState === 'complete') {
@@ -583,10 +595,9 @@ export const DineInVideoFeed: React.FC<DineInVideoFeedProps> = ({
                       style={StyleSheet.absoluteFill}
                     />
                   ) : (
-                    <Image
-                      source={{ uri: item.thumbnail_url || item.media_url }}
+                    <LinearGradient
+                      colors={['#1F2937', '#111827', '#0F172A']}
                       style={StyleSheet.absoluteFill}
-                      resizeMode="cover"
                     />
                   )}
 
@@ -861,7 +872,8 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     backgroundColor: '#000000',
-    justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
   },
   modalTopBarFixed: {
     position: 'absolute',
@@ -909,9 +921,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   modalBottomArea: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
     paddingBottom: Platform.OS === 'ios' ? 24 : 16,
-    zIndex: 20,
+    zIndex: 30,
   },
   modalBrandRow: {
     flexDirection: 'row',
